@@ -1,0 +1,33 @@
+.details {
+    float: left;
+    width: calc(69% - 0px);
+    margin: 0;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialogdetails-wrapper{
+    height: 80%;
+    box-sizing: border-box;
+    flex: 1 1 0;
+
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.dialogdetails-list-top{
+    flex: 1 1 auto;
+}
+
+.dialogdetails-list{
+    flex: 0 0 auto;
+}
+
+.dialogdetails-input-wrapper{
+    max-height: 100px;
+    box-sizing: border-box;
+}

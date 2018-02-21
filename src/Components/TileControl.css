@@ -1,0 +1,27 @@
+.user_bgcolor_1{background:#cc90e2}
+.user_bgcolor_2{background:#80d066}
+.user_bgcolor_3{background:#ecd074}
+.user_bgcolor_4{background:#6fb1e4}
+.user_bgcolor_5{background:#e57979}
+.user_bgcolor_6{background:#f98bae}
+.user_bgcolor_7{background:#73cdd0}
+.user_bgcolor_8{background:#fba76f}
+
+.tile-text{
+    line-height: 48px;
+    font-size: 18px;
+    display: block;
+    color: #fff;
+    text-align: center;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.tile-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    float: left;
+    margin-right: 10px;
+}

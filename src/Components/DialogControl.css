@@ -1,0 +1,41 @@
+.dialog:hover{
+    background: #f2f6fa;
+}
+
+.dialog{
+    cursor: pointer;
+}
+
+.dialog-active {
+    background-color: #6490b1;
+    color: #fff;
+    cursor: pointer;
+}
+
+.dialog-title{
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dialog-date{
+    font-size: 9px;
+}
+
+.dialog-content{
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dialog-content-wrap{
+    height: 48px;
+    overflow: hidden;
+    user-select: none;
+}
+
+.dialog-wrapper{
+    padding: 10px;
+}

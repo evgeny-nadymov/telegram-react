@@ -1,0 +1,39 @@
+html {
+  font-family: 'Roboto Mono', monospace;
+  background-color: rgb(231, 235, 240);
+}
+body {
+  width: 600px;
+  background-color: rgb(255, 255, 255);
+  margin: 0 auto;
+  padding: 0 20px 20px 20px;
+}
+ul {
+  color: red;
+}
+.td_list {
+  color: green;
+  overflow-y: auto;
+  height: 600px;
+}
+.td_input {
+  padding-top: 10px;
+  resize: none;
+  width: 600px;
+  border: none;
+  font-size: 16px;
+}
+.td_input:focus {
+  outline: none;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.td_square_image {
+  max-width: 500px;
+  max-height: 500px;
+}

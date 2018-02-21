@@ -1,0 +1,8 @@
+.sending {
+    color: salmon; /*#5682a3;*/
+}
+
+.message{
+    margin: 20px;
+    word-wrap: break-word;
+}

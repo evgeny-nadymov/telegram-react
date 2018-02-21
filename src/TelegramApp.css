@@ -1,0 +1,37 @@
+html {
+    background: #e7ebf0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    color: #000;
+    background: 0 0;
+    font: 12px/18px 'Open Sans',"Lucida Grande","Lucida Sans Unicode",Arial,Helvetica,Verdana,sans-serif;
+    overflow: hidden;
+}
+
+#root, #app{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.im-page-wrap {
+    height: calc(100% - 48px - 23px);
+    background: #fff;
+    max-width: 1010px;
+    min-width: 300px;
+    margin: 0 auto;
+    -webkit-box-shadow: 0px 1px 0 #dfe5ec;
+    -moz-box-shadow: 0px 1px 0 #dfe5ec;
+    box-shadow: 0px 1px 0 #dfe5ec;
+    border-radius: 0 0 3px 3px;
+    border-left: 1px solid #dfe5ec;
+    border-right: 1px solid #dfe5ec;
+    border-bottom: 1px solid #d2dbe3;
+    overflow: hidden;
+}

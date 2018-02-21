@@ -1,0 +1,16 @@
+.master {
+    float: left;
+    width: calc(31% - 0px);
+    margin: 0;
+    box-sizing: border-box;
+    border-right: 2px solid #E9EBED;
+    padding-bottom: 10px;
+    height: 100%;
+}
+
+.dialogs-list {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    margin: 0;
+}
