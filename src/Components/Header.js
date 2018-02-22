@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './Header.css';
 import TdLibController from "../Controllers/TdLibController";
+import packageJson from '../../package.json';
 
 class Header extends Component{
 
@@ -50,6 +51,7 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
+                            <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
                         <div>
@@ -64,6 +66,7 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
+                            <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
                         <div>
@@ -78,6 +81,7 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
+                            <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
                         <div>
@@ -92,6 +96,7 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
+                            <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
                         <div>
@@ -105,6 +110,7 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
+                            <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
                     </div>

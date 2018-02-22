@@ -14,3 +14,9 @@
     font-size: 13px;
     padding: 15px 19px;
 }
+
+.header-version{
+    font-weight: lighter;
+    font-size: 10px;
+    margin-right: 10px;
+}

@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "td_react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "0.2.2",
@@ -23,6 +23,7 @@
   "scripts": {
     "precommit": "lint-staged",
     "start": "react-scripts start",
+    "stop": "node server.stop.js",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
