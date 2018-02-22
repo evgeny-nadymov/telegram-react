@@ -80,7 +80,7 @@ class DialogDetails extends Component{
 
     render(){
         const messages = this.props.history.map(x => {
-            return (<MessageControl key={x.id} sendingState={x.sending_state} message={JSON.stringify(x)}></MessageControl>);
+            return (<MessageControl key={x.id} sendingState={x.sending_state} message={x}></MessageControl>);
         });
 
         /*const inputBox = this.props.history.length === 0 ?

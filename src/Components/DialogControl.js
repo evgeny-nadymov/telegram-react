@@ -49,7 +49,7 @@ class DialogControl extends Component{
                     <div className='dialog-content-wrap'>
                         <div className='dialog-title'>{chat.title}</div>
                         <div className='dialog-content'><span>{content}</span></div>
-                        <div className='dialog-date'>{this.props.chat.order}:{this.props.chat.last_message.date}</div>
+                        {/*<div className='dialog-date'>{this.props.chat.order}:{this.props.chat.last_message.date}</div>*/}
                     </div>
                 </div>
             </div>

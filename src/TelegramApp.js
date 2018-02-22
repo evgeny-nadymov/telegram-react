@@ -118,9 +118,6 @@ class TelegramApp extends Component{
 
     onGetChats(result){
         let chats = [];
-        /*for (let i = 0; i < result.chat_ids.length; i++){
-            chats.push(ChatStore.get(result.chat_ids[i]));
-        }*/
         for (let i = 0; i < result.chat_ids.length; i++){
             chats.push(ChatStore.get(result.chat_ids[i]));
         }

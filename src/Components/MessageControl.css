@@ -3,6 +3,40 @@
 }
 
 .message{
-    margin: 20px;
-    word-wrap: break-word;
+    /*margin: 20px;
+    word-wrap: break-word;*/
+}
+
+.message-wrapper{
+    max-width: 560px;
+    padding: 0 15px;
+    margin: 0 auto;
+}
+
+.message-wrapper:before, .message-wrapper:after{
+    content: ' ';
+    display: table;
+}
+
+.message-content{
+    margin: 8px 10px 8px 16px;
+}
+
+.message-author{
+    margin: 1px 0 4px;
+    color: #3a6d99;
+    font-weight: 700;
+}
+
+.message-text{
+    white-space: pre-wrap;
+}
+
+.message-meta{
+    float: right!important;
+}
+.message-date {
+    color: #adadad;
+    font-size: .85em;
+    padding: 0 0 20px 10px;
 }

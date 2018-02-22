@@ -21,8 +21,8 @@ class SupergroupStore extends EventEmitter{
         }
     }
 
-    get(userId){
-        return this.items.get(userId);
+    get(chatId){
+        return this.items.get(chatId);
     }
 }
 
