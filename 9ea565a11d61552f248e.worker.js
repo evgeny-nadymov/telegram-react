@@ -2216,7 +2216,7 @@ var TdClient = function () {
 
                 this.receiveInterval = setInterval(function () {
                   return _this.receive();
-                }, 100);
+                }, 10);
 
               case 23:
               case 'end':
