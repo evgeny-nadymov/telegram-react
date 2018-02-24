@@ -1,2 +1,2 @@
 # telegram-react
-Telegram + React + WebAssembly
+Telegram + TDLib + React + WebAssembly
