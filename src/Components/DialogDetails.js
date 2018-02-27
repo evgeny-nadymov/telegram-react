@@ -24,7 +24,10 @@ class DialogDetails extends Component{
     }
 
     handleScroll(){
-        const x = ReactDOM.findDOMNode(this.refs.list);
+        if (!this.x)
+        {
+            this.x = ReactDOM.findDOMNode(this.refs.list);
+        }
         //console.log('::DialogDetails.handleScroll suppress=' + this.suppressHandleScroll + ' scrollTop=' + x.scrollTop + ' scrollHeight=' + x.scrollHeight + ' offsetHeight=' + x.offsetHeight);
 
         //const debug = ReactDOM.findDOMNode(this.refs.debug);
@@ -35,8 +38,8 @@ class DialogDetails extends Component{
             return;
         }
 
-        if (x && x.scrollTop <= 0){
-            this.props.onLoadNext(x.scrollHeight);
+        if (this.x && this.x.scrollTop <= 0){
+            this.props.onLoadNext(this.x.scrollHeight);
         }
         /*if (x && (x.scrollTop + x.offsetHeight) >= x.scrollHeight){
             this.props.onLoadNext();

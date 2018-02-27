@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './MessageControl.css';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
+import PhotoControl from './Media/PhotoControl'
 
 class MessageControl extends Component{
 
@@ -41,40 +42,42 @@ class MessageControl extends Component{
 
             let entityText = this.substring(text.text, text.entities[i].offset, text.entities[i].offset + text.entities[i].length);
             switch (text.entities[i].type['@type']){
-                case 'textEntityTypeUrl':
-                    result.push((<a href={entityText} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
-                    break;
-                case 'textEntityTypeTextUrl':
-                    result.push((<a href={text.entities[i].type.url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
-                    break;
+                case 'textEntityTypeUrl': {
+                    let url = entityText.startsWith('http') ? entityText.url : 'http://' + entityText;
+                    result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                    break; }
+                case 'textEntityTypeTextUrl': {
+                    let url = text.entities[i].type.url.startsWith('http') ? text.entities[i].type.url : 'http://' + text.entities[i].type.url;
+                    result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                    break; }
                 case 'textEntityTypeBold':
-                    result.push((<strong>{entityText}</strong>));
+                    result.push((<strong key={text.entities[i].offset}>{entityText}</strong>));
                     break;
                 case 'textEntityTypeItalic':
-                    result.push((<em>{entityText}</em>));
+                    result.push((<em key={text.entities[i].offset}>{entityText}</em>));
                     break;
                 case 'textEntityTypeCode':
-                    result.push((<code>{entityText}</code>));
+                    result.push((<code key={text.entities[i].offset}>{entityText}</code>));
                     break;
                 case 'textEntityTypePre':
-                    result.push((<pre><code>{entityText}</code></pre>));
+                    result.push((<pre key={text.entities[i].offset}><code>{entityText}</code></pre>));
                     break;
                 case 'textEntityTypeMention':
-                    result.push((<a href={`#/im?p=${entityText}`}>{entityText}</a>));
+                    result.push((<a key={text.entities[i].offset} href={`#/im?p=${entityText}`}>{entityText}</a>));
                     break;
                 case 'textEntityTypeMentionName':
-                    result.push((<a href={`#/im?p=u${text.entities[i].type.user_id}`}>{entityText}</a>));
+                    result.push((<a key={text.entities[i].offset} href={`#/im?p=u${text.entities[i].type.user_id}`}>{entityText}</a>));
                     break;
                 case 'textEntityTypeHashtag':
                     let hashtag = entityText.length > 0 && entityText[0] === '#' ? this.substring(entityText, 1) : entityText;
-                    result.push((<a href={`tg://search_hashtag?hashtag=${hashtag}`}>{entityText}</a>));
+                    result.push((<a key={text.entities[i].offset} href={`tg://search_hashtag?hashtag=${hashtag}`}>{entityText}</a>));
                     break;
                 case 'textEntityTypeEmailAddress':
-                    result.push((<a href={`mailto:${entityText}`} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                    result.push((<a key={text.entities[i].offset} href={`mailto:${entityText}`} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
                     break;
                 case 'textEntityTypeBotCommand':
                     let command = entityText.length > 0 && entityText[0] === '/' ? this.substring(entityText, 1) : entityText;
-                    result.push((<a href={`tg://bot_command?command=${command}&bot=`}>{entityText}</a>));
+                    result.push((<a key={text.entities[i].offset} href={`tg://bot_command?command=${command}&bot=`}>{entityText}</a>));
                     break;
                 default :
                     result.push(entityText);
@@ -132,7 +135,7 @@ class MessageControl extends Component{
             text = this.getFormattedText(message.content.text);
         }
         else {
-            text.push('[' + message.content['@type'] + ']');//JSON.stringify(x);
+            //text.push('[' + message.content['@type'] + ']');//JSON.stringify(x);
             if (message.content && message.content.caption
                 && message.content.caption['@type'] === 'formattedText'
                 && message.content.caption.text){
@@ -156,6 +159,19 @@ class MessageControl extends Component{
         return dateFormatted;
     }
 
+    getMedia(message){
+        if (!message.content) return null;
+
+        switch (message.content['@type']){
+            case 'messageText':
+                return null;
+            case 'messagePhoto':
+                return (<PhotoControl message={message}/>);
+            default :
+                return '[' + message.content['@type'] + ']';
+        }
+    }
+
     render(){
         let message = this.props.message;
         if (!message) return (<div>[empty message]</div>);
@@ -165,6 +181,7 @@ class MessageControl extends Component{
         let title = this.getTitle(message);
         let text = this.getText(message);
         let date = this.getDate(message);
+        let media = this.getMedia(message);
         return (
             <div className={messageClassName}>
                 <div className='message-wrapper'>
@@ -174,6 +191,7 @@ class MessageControl extends Component{
                         </div>
                         <div className='message-body'>
                             <div className='message-author'>{title}</div>
+                            {media}
                             <div className='message-text'>{text}</div>
                         </div>
                     </div>

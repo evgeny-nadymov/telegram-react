@@ -35,7 +35,7 @@ class TdLibController extends EventEmitter{
     sendTdParameters() {
         this.client.send({
             '@type': 'setVerbosity',
-            verbosity: 2
+            verbosity: 4
         });
 
         this.client.send({
@@ -66,6 +66,9 @@ class TdLibController extends EventEmitter{
         switch (update['@type']) {
             case 'updateAuthorizationState':
                 this.onUpdateAuthState(update.authorization_state);
+                break;
+            //case 'updateConnectionState':
+            //    this.onUpdateAuthState(update.state);
                 break;
             default:
                 break;

@@ -17,6 +17,7 @@ class TelegramApp extends Component{
             history: [],
             scrollBottom: false,
         };
+        this.downloads = new Map();
         this.store = localForage.createInstance({
             name: '/tdlib'
         });
@@ -134,9 +135,9 @@ class TelegramApp extends Component{
                 chat.pid = pid;
                 if (idb_key) {
                     chat.idb_key = idb_key;
-                    this.getLocalFile(chat, idb_key);
+                    this.getLocalFile(chat, idb_key, (id) => ChatStore.updatePhoto(id));
                 } else {
-                    TdLibController.send({ '@type': 'downloadFile', file_id: id, priority: 1 });
+                    this.getRemoteFile(id, 1, chat);
                 }
             }
         }
@@ -155,34 +156,74 @@ class TelegramApp extends Component{
         return [0, '', ''];
     }
 
+    getMessagePhoto(message) {
+        if (message['@type'] !== 'message') {
+            return [0, '', ''];
+        }
+        if (!message.content || message.content['@type'] !== 'messagePhoto'){
+            return [0, '', ''];
+        }
+
+        if (message.content.photo) {
+            let photoSize = message.content.photo.sizes[0];
+            if (photoSize && photoSize['@type'] === 'photoSize'){
+                let file = photoSize.photo;
+                if (file && file.remote.id) {
+                    return [file.id, file.remote.id, file.idb_key];
+                }
+            }
+        }
+        return [0, '', ''];
+    }
+
     onUpdateFile(file) {
         if (!file.idb_key || !file.remote.id) {
             return;
         }
         let pid = file.remote.id;
         let idb_key = file.idb_key;
-        for (let obj of this.state.chats) {
-            if (obj.pid === pid && obj.idb_key !== idb_key) {
-                obj.idb_key = idb_key;
-                this.getLocalFile(obj, idb_key)
+
+        if (this.downloads.has(file.id)){
+            let obj = this.downloads.get(file.id);
+            if (obj){
+                switch (obj['@type']){
+                    case 'chat':
+                        obj.idb_key = idb_key;
+                        this.getLocalFile(obj, idb_key, (id) => ChatStore.updatePhoto(id));
+                        break;
+                    case 'message':
+                        obj.content.photo.sizes[0].idb_key = idb_key;
+                        //obj.idb_key = idb_key;
+                        this.getLocalFile(obj.content.photo.sizes[0], idb_key, () => ChatStore.updateMessagePhoto(obj.id));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
+
+        /*for (let obj of this.state.chats) {
+            if (obj.pid === pid && obj.idb_key !== idb_key) {
+                obj.idb_key = idb_key;
+                this.getLocalFile(obj, idb_key, (id) => ChatStore.updatePhoto(id));
+            }
+        }*/
     }
 
-    getLocalFile(obj, idb_key) {
+    getLocalFile(obj, idb_key, callback) {
         this.store.getItem(idb_key).then(blob => {
             console.log('Got blob: ' + idb_key + ' => ' + blob);
 
             if (blob){
                 obj.blob = blob;
-                ChatStore.updatePhoto(obj.id);
-
-                /*let updatedChats = this.state.chats.map(x =>{
-                    return x === obj ? Object.assign({}, x, { blob : blob}) : x;
-                });
-                this.setState({ chats: updatedChats });*/
+                callback(obj.id);
             }
         });
+    }
+
+    getRemoteFile(fileId, priority, obj){
+        this.downloads.set(fileId, obj);
+        TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
     }
 
     selectChat(chat){
@@ -205,6 +246,9 @@ class TelegramApp extends Component{
                 result.messages.reverse();
                 this.setHistory(result.messages);
 
+                // load photos
+                this.loadMessagePhotos(result.messages);
+
                 if (result.messages.length < limit) {
                     this.onLoadNext()
                 }
@@ -223,6 +267,23 @@ class TelegramApp extends Component{
                 '@type': 'openChat',
                 chat_id: chat.id,
             });
+    }
+
+    loadMessagePhotos(messages){
+        //return;
+        for (let i = 0; i < messages.length; i++){
+            let message = messages[i];
+            let [id, pid, idb_key] = this.getMessagePhoto(message);
+            if (pid) {
+                message.pid = pid;
+                //if (idb_key) {
+                //    message.idb_key = idb_key;
+                //    this.getLocalFile(message.content.photo.sizes[0], idb_key, () => ChatStore.updateMessagePhoto(message.id));
+                //} else {
+                    this.getRemoteFile(id, 1, message);
+                //}
+            }
+        }
     }
 
     setHistory(history) {
@@ -297,28 +358,60 @@ class TelegramApp extends Component{
 
         //this.previousScrollHeight = scrollHeight;
         this.loading = true;
+
+        let chatId = this.state.selectedChat.id;
         TdLibController
             .send({
                 '@type': 'getChatHistory',
-                chat_id: this.state.selectedChat.id,
+                chat_id: chatId,
                 from_message_id: fromMessageId,
                 offset: 0,
                 limit: 20
             })
             .then(result => {
                     this.loading = false;
+
+                    /*if (this.state.selectedChat.id !== chatId){
+                        return;
+                    }*/
+
                     result.messages.reverse();
                     this.appendHistory(result.messages);
+
+                    this.loadMessagePhotos(result.messages);
                 })
             .catch(() =>{
                     this.loading = false;
                 });
     }
 
+    clearCache(){
+
+        TdLibController
+            .send({
+                '@type': 'optimizeStorage',
+                size: 0,
+                ttl: 0,
+                count: 0,
+                immunity_delay : 0,
+                file_types : [{'@type' : 'fileTypeThumbnail'}],
+                chat_ids: [],
+                exclude_chat_ids: [],
+                chat_limit: 0,
+            })
+            .then(result => {
+            })
+            .catch(error =>{
+                alert('Cache error');
+            });
+        
+        //this.store.clear();
+    }
+
     render(){
         return (
             <div id='app'>
-                <Header/>
+                <Header onClearCache={() => this.clearCache()}/>
                 <div className='im-page-wrap'>
                     <Dialogs
                         className='master'

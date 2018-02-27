@@ -43,6 +43,12 @@ class Header extends Component{
         TdLibController.onInput(text);
     }
 
+    handleClearCache(args){
+        args.preventDefault();
+
+        this.props.onClearCache();
+    }
+
     render(){
         const status = this.state.status;
 
@@ -99,11 +105,12 @@ class Header extends Component{
                             <span className='header-version'>{packageJson.version}</span>
                             <span>{status}</span>
                         </div>
-                        <div>
-                            <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
-                                <input id='log-out' type='submit' value='log out'/>
-                            </form>
-                        </div>
+                        <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
+                            <input id='log-out' type='submit' value='log out'/>
+                        </form>
+                        <form id='clear-form' onSubmit={args => this.handleClearCache(args)}>
+                            <input id='clear' type='submit' value='clear cache'/>
+                        </form>
                     </div>
                 );
             default:
