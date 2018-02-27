@@ -135,7 +135,9 @@ class TelegramApp extends Component{
                 chat.pid = pid;
                 if (idb_key) {
                     chat.idb_key = idb_key;
-                    this.getLocalFile(chat, idb_key, (id) => ChatStore.updatePhoto(id));
+                    this.getLocalFile(chat, idb_key,
+                        () => ChatStore.updatePhoto(chat.id),
+                        () => this.getRemoteFile(id, 1, chat));
                 } else {
                     this.getRemoteFile(id, 1, chat);
                 }
@@ -189,34 +191,34 @@ class TelegramApp extends Component{
                 switch (obj['@type']){
                     case 'chat':
                         obj.idb_key = idb_key;
-                        this.getLocalFile(obj, idb_key, (id) => ChatStore.updatePhoto(id));
+                        this.getLocalFile(obj, idb_key,
+                            () => ChatStore.updatePhoto(obj.id),
+                            () => this.getRemoteFile(file.id, 1, obj));
                         break;
                     case 'message':
                         obj.content.photo.sizes[0].idb_key = idb_key;
                         //obj.idb_key = idb_key;
-                        this.getLocalFile(obj.content.photo.sizes[0], idb_key, () => ChatStore.updateMessagePhoto(obj.id));
+                        this.getLocalFile(obj.content.photo.sizes[0], idb_key,
+                            () => ChatStore.updateMessagePhoto(obj.id),
+                            () => this.getRemoteFile(file.id, 1, obj));
                         break;
                     default:
                         break;
                 }
             }
         }
-
-        /*for (let obj of this.state.chats) {
-            if (obj.pid === pid && obj.idb_key !== idb_key) {
-                obj.idb_key = idb_key;
-                this.getLocalFile(obj, idb_key, (id) => ChatStore.updatePhoto(id));
-            }
-        }*/
     }
 
-    getLocalFile(obj, idb_key, callback) {
+    getLocalFile(obj, idb_key, callback, faultCallback) {
         this.store.getItem(idb_key).then(blob => {
             console.log('Got blob: ' + idb_key + ' => ' + blob);
 
             if (blob){
                 obj.blob = blob;
-                callback(obj.id);
+                callback();
+            }
+            else{
+                faultCallback();
             }
         });
     }
@@ -276,12 +278,14 @@ class TelegramApp extends Component{
             let [id, pid, idb_key] = this.getMessagePhoto(message);
             if (pid) {
                 message.pid = pid;
-                //if (idb_key) {
-                //    message.idb_key = idb_key;
-                //    this.getLocalFile(message.content.photo.sizes[0], idb_key, () => ChatStore.updateMessagePhoto(message.id));
-                //} else {
+                if (idb_key) {
+                    //message.idb_key = idb_key;
+                    this.getLocalFile(message.content.photo.sizes[0], idb_key,
+                        () => ChatStore.updateMessagePhoto(message.id),
+                        () => this.getRemoteFile(id, 1, message));
+                } else {
                     this.getRemoteFile(id, 1, message);
-                //}
+                }
             }
         }
     }
@@ -387,7 +391,7 @@ class TelegramApp extends Component{
 
     clearCache(){
 
-        TdLibController
+        /*TdLibController
             .send({
                 '@type': 'optimizeStorage',
                 size: 0,
@@ -403,9 +407,11 @@ class TelegramApp extends Component{
             })
             .catch(error =>{
                 alert('Cache error');
-            });
-        
-        //this.store.clear();
+            });*/
+
+        this.store.clear(result =>{
+            alert('cache cleared');
+        });
     }
 
     render(){
