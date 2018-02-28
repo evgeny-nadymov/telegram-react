@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import './MessageControl.css';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
-import PhotoControl from './Media/PhotoControl'
+import PhotoControl from './Media/PhotoControl';
+import StickerControl from './Media/StickerControl';
 
 class MessageControl extends Component{
 
@@ -168,6 +169,8 @@ class MessageControl extends Component{
                 return null;
             case 'messagePhoto':
                 return (<PhotoControl message={message}/>);
+            case 'messageSticker':
+                return (<StickerControl message={message}/>);
             default :
                 return '[' + message.content['@type'] + ']';
         }

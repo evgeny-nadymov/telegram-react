@@ -154,10 +154,30 @@ class TelegramApp extends Component{
         return [0, '', ''];
     }
 
+    getMessageSticker(message) {
+        if (message['@type'] !== 'message') {
+            return [0, '', ''];
+        }
+
+        if (!message.content || message.content['@type'] !== 'messageSticker'){
+            return [0, '', ''];
+        }
+
+        if (message.content.sticker) {
+            let file = message.content.sticker.sticker;
+            if (file && file.remote.id) {
+                return [file.id, file.remote.id, file.idb_key];
+            }
+        }
+
+        return [0, '', ''];
+    }
+
     getMessagePhoto(message) {
         if (message['@type'] !== 'message') {
             return [0, '', ''];
         }
+
         if (!message.content || message.content['@type'] !== 'messagePhoto'){
             return [0, '', ''];
         }
@@ -171,6 +191,7 @@ class TelegramApp extends Component{
                 }
             }
         }
+
         return [0, '', ''];
     }
 
@@ -196,9 +217,20 @@ class TelegramApp extends Component{
                                 () => this.getRemoteFile(file.id, 1, obj));
                             break;
                         case 'message':
-                            this.getLocalFile(this.getPhotoSize(obj.content.photo.sizes), idb_key,
-                                () => ChatStore.updateMessagePhoto(obj.id),
-                                () => this.getRemoteFile(file.id, 1, obj));
+                            switch (obj.content['@type']){
+                                case 'messagePhoto':
+                                    this.getLocalFile(this.getPhotoSize(obj.content.photo.sizes), idb_key,
+                                        () => ChatStore.updateMessagePhoto(obj.id),
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
+                                case 'messageSticker':
+                                    this.getLocalFile(obj.content.sticker.sticker, idb_key,
+                                        () => ChatStore.updateMessageSticker(obj.id),
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
+                                default:
+                                    break;
+                            }
                             break;
                         default:
                             break;
@@ -261,7 +293,7 @@ class TelegramApp extends Component{
                 this.setHistory(result.messages);
 
                 // load photos
-                this.loadMessagePhotos(result.messages);
+                this.loadMessageContents(result.messages);
 
                 if (result.messages.length < limit) {
                     this.onLoadNext()
@@ -283,19 +315,38 @@ class TelegramApp extends Component{
             });
     }
 
-    loadMessagePhotos(messages){
+    loadMessageContents(messages){
         //return;
         for (let i = messages.length - 1; i >= 0 ; i--){
             let message = messages[i];
-            let [id, pid, idb_key] = this.getMessagePhoto(message);
-            if (pid) {
-                message.pid = pid;
-
-                let obj = this.getPhotoSize(message.content.photo.sizes);
-                if (!obj.blob){
-                    this.getLocalFile(obj, idb_key,
-                        () => ChatStore.updateMessagePhoto(message.id),
-                        () => this.getRemoteFile(id, 1, message));
+            if (message && message.content){
+                switch (message.content['@type']){
+                    case 'messagePhoto': {
+                        let [id, pid, idb_key] = this.getMessagePhoto(message);
+                        if (pid) {
+                            let obj = this.getPhotoSize(message.content.photo.sizes);
+                            if (!obj.blob){
+                                this.getLocalFile(obj, idb_key,
+                                    () => ChatStore.updateMessagePhoto(message.id),
+                                    () => this.getRemoteFile(id, 1, message));
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageSticker': {
+                        let [id, pid, idb_key] = this.getMessageSticker(message);
+                        if (pid) {
+                            let obj = message.content.sticker.sticker;
+                            if (!obj.blob){
+                                this.getLocalFile(obj, idb_key,
+                                    () => ChatStore.updateMessageSticker(message.id),
+                                    () => this.getRemoteFile(id, 1, message));
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                            break;
                 }
             }
         }
@@ -393,7 +444,7 @@ class TelegramApp extends Component{
                     result.messages.reverse();
                     this.appendHistory(result.messages);
 
-                    this.loadMessagePhotos(result.messages);
+                    this.loadMessageContents(result.messages);
                 })
             .catch(() =>{
                     this.loading = false;

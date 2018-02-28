@@ -45,6 +45,10 @@ class ChatStore extends EventEmitter{
     updateMessagePhoto(messageId){
         this.emit("message_photo_changed", {messageId: messageId});
     }
+
+    updateMessageSticker(messageId){
+        this.emit("message_sticker_changed", {messageId: messageId});
+    }
 }
 
 const store = new ChatStore();
