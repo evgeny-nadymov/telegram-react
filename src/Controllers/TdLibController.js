@@ -35,7 +35,7 @@ class TdLibController extends EventEmitter{
     sendTdParameters() {
         this.client.send({
             '@type': 'setVerbosity',
-            verbosity: 2
+            verbosity: 1
         });
 
         this.client.send({

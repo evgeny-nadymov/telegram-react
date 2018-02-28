@@ -87,6 +87,7 @@ pre code {
 
 .message-meta{
     float: right!important;
+    user-select: none;
 }
 .message-date {
     color: #adadad;

@@ -3,6 +3,7 @@ import './TelegramApp.css';
 import Header from "./Components/Header";
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
+import {getSize} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import TdLibController from './Controllers/TdLibController'
 import localForage from "localforage";
@@ -162,7 +163,7 @@ class TelegramApp extends Component{
         }
 
         if (message.content.photo) {
-            let photoSize = message.content.photo.sizes[1];
+            let photoSize = this.getPhotoSize(message.content.photo.sizes);
             if (photoSize && photoSize['@type'] === 'photoSize'){
                 let file = photoSize.photo;
                 if (file && file.remote.id) {
@@ -173,11 +174,14 @@ class TelegramApp extends Component{
         return [0, '', ''];
     }
 
+    getPhotoSize(sizes){
+        return getSize(sizes, 260);
+    }
+
     onUpdateFile(file) {
         if (!file.idb_key || !file.remote.id) {
             return;
         }
-        let pid = file.remote.id;
         let idb_key = file.idb_key;
 
         if (this.downloads.has(file.id)){
@@ -192,7 +196,7 @@ class TelegramApp extends Component{
                                 () => this.getRemoteFile(file.id, 1, obj));
                             break;
                         case 'message':
-                            this.getLocalFile(obj.content.photo.sizes[1], idb_key,
+                            this.getLocalFile(this.getPhotoSize(obj.content.photo.sizes), idb_key,
                                 () => ChatStore.updateMessagePhoto(obj.id),
                                 () => this.getRemoteFile(file.id, 1, obj));
                             break;
@@ -287,7 +291,7 @@ class TelegramApp extends Component{
             if (pid) {
                 message.pid = pid;
 
-                let obj = message.content.photo.sizes[1];
+                let obj = this.getPhotoSize(message.content.photo.sizes);
                 if (!obj.blob){
                     this.getLocalFile(obj, idb_key,
                         () => ChatStore.updateMessagePhoto(message.id),
