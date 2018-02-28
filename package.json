@@ -1,10 +1,10 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "private": true,
   "dependencies": {
-    "@arseny30/tdweb": "0.2.2",
+    "@arseny30/tdweb": "0.2.4",
     "events": "^2.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^4.2.3",

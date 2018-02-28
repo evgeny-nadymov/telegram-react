@@ -1,3 +1,6 @@
 .photo-img{
     background: aliceblue;
+    display: block;
+    border-radius: 8px;
+    /*transform: translateZ(0);*/
 }

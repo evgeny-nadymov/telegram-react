@@ -126,7 +126,8 @@ class MessageControl extends Component{
 
     getText(message){
 
-        let text = [];//JSON.stringify(message);
+        let text = [];
+
         if (message.content
             && message.content['@type'] === 'messageText'
             && message.content.text
@@ -179,7 +180,7 @@ class MessageControl extends Component{
         const messageClassName = this.props.sendingState ? 'message sending' : 'message';
 
         let title = this.getTitle(message);
-        let text = this.getText(message);
+        let text = this.getText(message);//JSON.stringify(message);
         let date = this.getDate(message);
         let media = this.getMedia(message);
         return (

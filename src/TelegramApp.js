@@ -133,14 +133,9 @@ class TelegramApp extends Component{
             let [id, pid, idb_key] = this.getChatPhoto(chat);
             if (pid) {
                 chat.pid = pid;
-                if (idb_key) {
-                    chat.idb_key = idb_key;
-                    this.getLocalFile(chat, idb_key,
-                        () => ChatStore.updatePhoto(chat.id),
-                        () => this.getRemoteFile(id, 1, chat));
-                } else {
-                    this.getRemoteFile(id, 1, chat);
-                }
+                this.getLocalFile(chat, idb_key,
+                    () => ChatStore.updatePhoto(chat.id),
+                    () => this.getRemoteFile(id, 1, chat));
             }
         }
     }
@@ -167,7 +162,7 @@ class TelegramApp extends Component{
         }
 
         if (message.content.photo) {
-            let photoSize = message.content.photo.sizes[0];
+            let photoSize = message.content.photo.sizes[1];
             if (photoSize && photoSize['@type'] === 'photoSize'){
                 let file = photoSize.photo;
                 if (file && file.remote.id) {
@@ -186,30 +181,36 @@ class TelegramApp extends Component{
         let idb_key = file.idb_key;
 
         if (this.downloads.has(file.id)){
-            let obj = this.downloads.get(file.id);
-            if (obj){
-                switch (obj['@type']){
-                    case 'chat':
-                        obj.idb_key = idb_key;
-                        this.getLocalFile(obj, idb_key,
-                            () => ChatStore.updatePhoto(obj.id),
-                            () => this.getRemoteFile(file.id, 1, obj));
-                        break;
-                    case 'message':
-                        obj.content.photo.sizes[0].idb_key = idb_key;
-                        //obj.idb_key = idb_key;
-                        this.getLocalFile(obj.content.photo.sizes[0], idb_key,
-                            () => ChatStore.updateMessagePhoto(obj.id),
-                            () => this.getRemoteFile(file.id, 1, obj));
-                        break;
-                    default:
-                        break;
+            let items = this.downloads.get(file.id);
+            if (items){
+                for (let i = 0; i < items.length; i++){
+                    let obj = items[i];
+                    switch (obj['@type']){
+                        case 'chat':
+                            this.getLocalFile(obj, idb_key,
+                                () => ChatStore.updatePhoto(obj.id),
+                                () => this.getRemoteFile(file.id, 1, obj));
+                            break;
+                        case 'message':
+                            this.getLocalFile(obj.content.photo.sizes[1], idb_key,
+                                () => ChatStore.updateMessagePhoto(obj.id),
+                                () => this.getRemoteFile(file.id, 1, obj));
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
     }
 
     getLocalFile(obj, idb_key, callback, faultCallback) {
+        if (!idb_key){
+            faultCallback();
+            return;
+        }
+
+        obj.idb_key = idb_key;
         this.store.getItem(idb_key).then(blob => {
             console.log('Got blob: ' + idb_key + ' => ' + blob);
 
@@ -224,7 +225,14 @@ class TelegramApp extends Component{
     }
 
     getRemoteFile(fileId, priority, obj){
-        this.downloads.set(fileId, obj);
+        if (this.downloads.has(fileId)){
+            let items = this.downloads.get(fileId);
+            items.push(obj);
+        }
+        else
+        {
+            this.downloads.set(fileId, [obj]);
+        }
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
     }
 
@@ -273,18 +281,17 @@ class TelegramApp extends Component{
 
     loadMessagePhotos(messages){
         //return;
-        for (let i = 0; i < messages.length; i++){
+        for (let i = messages.length - 1; i >= 0 ; i--){
             let message = messages[i];
             let [id, pid, idb_key] = this.getMessagePhoto(message);
             if (pid) {
                 message.pid = pid;
-                if (idb_key) {
-                    //message.idb_key = idb_key;
-                    this.getLocalFile(message.content.photo.sizes[0], idb_key,
+
+                let obj = message.content.photo.sizes[1];
+                if (!obj.blob){
+                    this.getLocalFile(obj, idb_key,
                         () => ChatStore.updateMessagePhoto(message.id),
                         () => this.getRemoteFile(id, 1, message));
-                } else {
-                    this.getRemoteFile(id, 1, message);
                 }
             }
         }

@@ -35,18 +35,20 @@ class PhotoControl extends React.Component {
         if (!sizes) return null;
         if (sizes.length === 0) return null;
 
-        return sizes[0];
+        return sizes[1];
     }
 
     render() {
         let size = this.getSize(this.props.message.content.photo.sizes, 90);
         if (!size) return null;
-        let width = size.width;
-        let height = size.height;
+        let width = this.props.message.content.photo.sizes[1].width;//size.width;
+        let height = this.props.message.content.photo.sizes[1].height;//size.height;
+
+        //let style = { height: height + 'px', width: width + 'px' };
 
         return size.blob !== undefined ?
-            (<img className='photo-img' width={width} height={height} src={URL.createObjectURL(size.blob)} alt="" />) :
-            (<img className='photo-img' width={width} height={height} alt="" />) ;
+            (<img className='photo-img' width={width} height={height} src={URL.createObjectURL(size.blob)} alt=""></img>) :
+            (<img className='photo-img' width={width} height={height} src="" alt=""></img>);
     }
 }
 

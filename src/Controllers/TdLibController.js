@@ -35,7 +35,7 @@ class TdLibController extends EventEmitter{
     sendTdParameters() {
         this.client.send({
             '@type': 'setVerbosity',
-            verbosity: 4
+            verbosity: 2
         });
 
         this.client.send({
@@ -48,7 +48,7 @@ class TdLibController extends EventEmitter{
                 system_language_code: 'en',
                 device_model: 'Desktop',
                 system_version: 'Unknown',
-                app_version: 'tdclient-emscripten',
+                application_version: 'tdclient-emscripten',
                 use_secret_chats: false,
                 use_message_database: true,
                 use_file_database: false,
