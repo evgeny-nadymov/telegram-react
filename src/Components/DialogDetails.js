@@ -3,8 +3,15 @@ import ReactDOM from 'react-dom';
 import './DialogDetails.css';
 import InputBoxControl from "./InputBoxControl";
 import MessageControl from "./MessageControl";
+import {itemsInView, throttle} from "../Utils/Common";
 
 class DialogDetails extends Component{
+
+    constructor(props){
+        super(props);
+
+        this.updateItemsInView = throttle(this.updateItemsInView.bind(this), 500);
+    }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.history !== this.props.history){
@@ -28,10 +35,6 @@ class DialogDetails extends Component{
         {
             this.x = ReactDOM.findDOMNode(this.refs.list);
         }
-        //console.log('::DialogDetails.handleScroll suppress=' + this.suppressHandleScroll + ' scrollTop=' + x.scrollTop + ' scrollHeight=' + x.scrollHeight + ' offsetHeight=' + x.offsetHeight);
-
-        //const debug = ReactDOM.findDOMNode(this.refs.debug);
-        //debug.innerHTML = 'scrollTop=' + x.scrollTop + ' scrollHeight=' + x.scrollHeight;
 
         if (this.suppressHandleScroll){
             this.suppressHandleScroll = false;
@@ -41,9 +44,24 @@ class DialogDetails extends Component{
         if (this.x && this.x.scrollTop <= 0){
             this.props.onLoadNext(this.x.scrollHeight);
         }
+        else{
+            this.updateItemsInView();
+        }
         /*if (x && (x.scrollTop + x.offsetHeight) >= x.scrollHeight){
             this.props.onLoadNext();
         }*/
+    }
+
+    updateItemsInView(){
+        if (!this.messages) return;
+
+        let messages = [];
+        let items = itemsInView(this.refs.list, this.refs.items);
+        for (let i = 0; i < items.length; i++){
+            messages.push(this.messages[items[i]].props.message);
+        }
+
+        this.props.onUpdateItemsInView(messages);
     }
 
     componentDidMount() {
@@ -82,7 +100,7 @@ class DialogDetails extends Component{
     };
 
     render(){
-        const messages = this.props.history.map(x => {
+        this.messages = this.props.history.map(x => {
             return (<MessageControl key={x.id} sendingState={x.sending_state} message={x}></MessageControl>);
         });
 
@@ -94,8 +112,8 @@ class DialogDetails extends Component{
             <div className='details'>
                 <div ref='list' className='dialogdetails-wrapper' onScroll={() => this.handleScroll()}>
                     <div className='dialogdetails-list-top'></div>
-                    <div className='dialogdetails-list'>
-                        {messages}
+                    <div ref='items' className='dialogdetails-list'>
+                        {this.messages}
                     </div>
                 </div>
                 <div className='dialogdetails-input-wrapper'>

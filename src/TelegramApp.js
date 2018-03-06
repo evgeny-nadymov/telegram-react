@@ -6,7 +6,9 @@ import DialogDetails from './Components/DialogDetails';
 import {getSize} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import TdLibController from './Controllers/TdLibController'
-import localForage from "localforage";
+import localForage from 'localforage';
+import LocalForageWithGetItems from 'localforage-getitems';
+import {PHOTO_SIZE} from "./Constants";
 
 class TelegramApp extends Component{
     constructor(){
@@ -19,10 +21,19 @@ class TelegramApp extends Component{
             scrollBottom: false,
         };
         this.downloads = new Map();
+
         this.store = localForage.createInstance({
             name: '/tdlib'
         });
-        //this.store.clear();
+
+        let request = window.indexedDB.open("/tdlib", 2);
+        request.onerror = function(event) {
+            console.log("error: ");
+        };
+        request.onsuccess = function(event) {
+            this.db = request.result;
+            console.log("success: " + this.db);
+        }.bind(this);
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
@@ -41,6 +52,10 @@ class TelegramApp extends Component{
     onUpdateState(state){
         switch (state.status) {
             case 'ready':
+
+                //window.location.reload(false);
+                //return;
+
                 TdLibController
                     .send({
                         '@type': 'getChats',
@@ -64,6 +79,10 @@ class TelegramApp extends Component{
 
     onUpdate(update) {
         switch (update['@type']) {
+            case 'updateFatalError':
+                alert('Oops! Something went wrong. We need to refresh this page.');
+                window.location.reload();
+                break;
             case 'updateNewChat':
                 //this.onUpdateChatTitle(update.chat.id, update.chat.title);
                 break;
@@ -129,12 +148,14 @@ class TelegramApp extends Component{
     onGetChatsContinue(result){
         this.setState({ chats: result });
 
+        let store = this.db.transaction(['keyvaluepairs'], IDBTransaction.READ_ONLY).objectStore('keyvaluepairs');
+
         for (let i = 0; i < result.length; i++){
             let chat = result[i];
             let [id, pid, idb_key] = this.getChatPhoto(chat);
             if (pid) {
                 chat.pid = pid;
-                this.getLocalFile(chat, idb_key,
+                this.getLocalFile(store, chat, idb_key,
                     () => ChatStore.updatePhoto(chat.id),
                     () => this.getRemoteFile(id, 1, chat));
             }
@@ -196,7 +217,7 @@ class TelegramApp extends Component{
     }
 
     getPhotoSize(sizes){
-        return getSize(sizes, 260);
+        return getSize(sizes, PHOTO_SIZE);
     }
 
     onUpdateFile(file) {
@@ -205,28 +226,37 @@ class TelegramApp extends Component{
         }
         let idb_key = file.idb_key;
 
-        if (this.downloads.has(file.id)){
+        if (file.local.is_downloading_completed
+            && this.downloads.has(file.id)){
             let items = this.downloads.get(file.id);
             if (items){
+                this.downloads.delete(file.id);
+
+                let store = this.db.transaction(['keyvaluepairs'], IDBTransaction.READ_ONLY).objectStore('keyvaluepairs');
+
                 for (let i = 0; i < items.length; i++){
                     let obj = items[i];
                     switch (obj['@type']){
                         case 'chat':
-                            this.getLocalFile(obj, idb_key,
+                            this.getLocalFile(store, obj, idb_key,
                                 () => ChatStore.updatePhoto(obj.id),
-                                () => this.getRemoteFile(file.id, 1, obj));
+                                () => this.getRemoteFile(file.id, 1, obj, 'update_'));
                             break;
                         case 'message':
                             switch (obj.content['@type']){
                                 case 'messagePhoto':
-                                    this.getLocalFile(this.getPhotoSize(obj.content.photo.sizes), idb_key,
+                                    this.getLocalFile(store, this.getPhotoSize(obj.content.photo.sizes), idb_key,
                                         () => ChatStore.updateMessagePhoto(obj.id),
-                                        () => this.getRemoteFile(file.id, 1, obj));
+                                        () => this.getRemoteFile(file.id, 1, obj, 'update_'),
+                                        'update_',
+                                        obj.id);
                                     break;
                                 case 'messageSticker':
-                                    this.getLocalFile(obj.content.sticker.sticker, idb_key,
+                                    this.getLocalFile(store, obj.content.sticker.sticker, idb_key,
                                         () => ChatStore.updateMessageSticker(obj.id),
-                                        () => this.getRemoteFile(file.id, 1, obj));
+                                        () => this.getRemoteFile(file.id, 1, obj, 'update_'),
+                                        'update_',
+                                        obj.id);
                                     break;
                                 default:
                                     break;
@@ -240,15 +270,38 @@ class TelegramApp extends Component{
         }
     }
 
-    getLocalFile(obj, idb_key, callback, faultCallback) {
+    getLocalFile(store, obj, idb_key, callback, faultCallback, from, messageId) {
         if (!idb_key){
             faultCallback();
             return;
         }
 
         obj.idb_key = idb_key;
+        let objectStore = store;
+
+        console.log((from? from : '') + 'download_message start getLocal id=' + messageId);
+        let getItem = objectStore.get(idb_key);
+        getItem.onsuccess = function (event) {
+            let blob = event.target.result;
+
+            console.log((from? from : '') + 'download_message stop getLocal id=' + messageId + ' blob=' + blob);
+            //console.log('Got blob: ' + idb_key + ' => ' + blob);
+
+            if (blob){
+                obj.blob = blob;
+                callback();
+            }
+            else{
+                faultCallback();
+            }
+        };
+
+        return;
+        console.log((from? from : '') + 'download_message start getLocal id=' + messageId);
+
         this.store.getItem(idb_key).then(blob => {
-            console.log('Got blob: ' + idb_key + ' => ' + blob);
+            console.log((from? from : '') + 'download_message stop getLocal id=' + messageId + ' blob=' + blob);
+            //console.log('Got blob: ' + idb_key + ' => ' + blob);
 
             if (blob){
                 obj.blob = blob;
@@ -260,7 +313,7 @@ class TelegramApp extends Component{
         });
     }
 
-    getRemoteFile(fileId, priority, obj){
+    getRemoteFile(fileId, priority, obj, from){
         if (this.downloads.has(fileId)){
             let items = this.downloads.get(fileId);
             items.push(obj);
@@ -269,7 +322,17 @@ class TelegramApp extends Component{
         {
             this.downloads.set(fileId, [obj]);
         }
+
+        console.log(`${from ? from : ''}download_message id=${obj.id}`);
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
+    }
+
+    cancelGetRemoteFile(fileId, obj){
+        if (this.downloads.has(fileId)){
+            this.downloads.delete(fileId);
+            console.log('cancel_download_message id=' + obj.id);
+            TdLibController.send({ '@type': 'cancelDownloadFile', file_id: fileId, only_if_pending: false });
+        }
     }
 
     selectChat(chat){
@@ -296,7 +359,7 @@ class TelegramApp extends Component{
                 this.loadMessageContents(result.messages);
 
                 if (result.messages.length < limit) {
-                    this.onLoadNext()
+                    this.onLoadNext(0, true);
                 }
             });
 
@@ -315,8 +378,10 @@ class TelegramApp extends Component{
             });
     }
 
-    loadMessageContents(messages){
-        //return;
+    loadMessageContents(messages, loadRemote = true){
+
+        let store = this.db.transaction(['keyvaluepairs'], IDBTransaction.READ_ONLY).objectStore('keyvaluepairs');
+
         for (let i = messages.length - 1; i >= 0 ; i--){
             let message = messages[i];
             if (message && message.content){
@@ -326,9 +391,12 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = this.getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
-                                this.getLocalFile(obj, idb_key,
+                                this.getLocalFile(store, obj, idb_key,
                                     () => ChatStore.updateMessagePhoto(message.id),
-                                    () => this.getRemoteFile(id, 1, message));
+                                    () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
+                                    'load_contents',
+                                    message.id);
+
                             }
                         }
                         break;
@@ -338,15 +406,50 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
-                                this.getLocalFile(obj, idb_key,
+                                this.getLocalFile(store, obj, idb_key,
                                     () => ChatStore.updateMessageSticker(message.id),
-                                    () => this.getRemoteFile(id, 1, message));
+                                    () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
+                                    'load_contents',
+                                    message.id);
                             }
                         }
                         break;
                     }
                     default:
                             break;
+                }
+            }
+        }
+    }
+
+    cancelLoadMessageContents(messages) {
+        //return;
+        for (let i = messages.length - 1; i >= 0 ; i--){
+            let message = messages[i];
+            if (message && message.content){
+                switch (message.content['@type']){
+                    case 'messagePhoto': {
+                        let [id, pid] = this.getMessagePhoto(message);
+                        if (pid) {
+                            let obj = this.getPhotoSize(message.content.photo.sizes);
+                            if (!obj.blob){
+                                this.cancelGetRemoteFile(id, message);
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageSticker': {
+                        let [id, pid] = this.getMessageSticker(message);
+                        if (pid) {
+                            let obj = message.content.sticker.sticker;
+                            if (!obj.blob){
+                                this.cancelGetRemoteFile(id, message);
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
         }
@@ -412,7 +515,7 @@ class TelegramApp extends Component{
             });
     }
 
-    onLoadNext(scrollHeight){
+    onLoadNext(scrollHeight, loadRemote = false){
         if (!this.state.selectedChat) return;
         if (this.loading) return;
         //if (this.previousScrollHeight === scrollHeight) return;
@@ -444,7 +547,7 @@ class TelegramApp extends Component{
                     result.messages.reverse();
                     this.appendHistory(result.messages);
 
-                    this.loadMessageContents(result.messages);
+                    this.loadMessageContents(result.messages, loadRemote);
                 })
             .catch(() =>{
                     this.loading = false;
@@ -452,7 +555,18 @@ class TelegramApp extends Component{
     }
 
     clearCache(){
+        this.store.clear()
+            .then(() => alert('cache cleared'));
 
+        /*let keys = [];
+        for (var i = 0; i < 20; i++){
+            keys.push('key' + i);
+        }
+
+        console.log('store.getItems start');
+        this.store.getItems(keys).then(results =>{
+            console.log('store.getItems end');
+        });*/
         /*TdLibController
             .send({
                 '@type': 'optimizeStorage',
@@ -470,10 +584,67 @@ class TelegramApp extends Component{
             .catch(error =>{
                 alert('Cache error');
             });*/
+/*
+        //prefixes of implementation that we want to test
+        window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
 
-        this.store.clear(result =>{
-            alert('cache cleared');
-        });
+        //prefixes of window.IDB objects
+        window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+        window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange
+/*
+        if (!window.indexedDB) {
+            window.alert("Your browser doesn't support a stable version of IndexedDB.")
+        }*/
+
+        /*
+        var db;
+        var request = window.indexedDB.open("/tdlib", 2);
+
+        request.onerror = function(event) {
+            console.log("error: ");
+        };
+
+        request.onsuccess = function(event) {
+            db = request.result;
+            console.log("success: "+ db);
+
+            var objectStore = db.transaction(['keyvaluepairs'], IDBTransaction.READ_ONLY).objectStore('keyvaluepairs');
+
+            for (var i = 0; i < 20; i++){
+
+                var key = 'key' + i;
+                var getItem = objectStore.get(key);
+                getItem.key = key;
+                getItem.onsuccess = function (event) {
+                    var result = event.target.result;
+                    console.log("Value for id " + this.key + " is " + result);
+                }.bind(getItem);
+            }
+        };*/
+    }
+
+    onUpdateItemsInView(messages){
+        if (!messages) return;
+
+        let ids = messages.map(x => x.id);
+        console.log('check_download_message ids=' + ids);
+
+        let messagesMap = new Map(messages.map((i) => [i.id, i]));
+
+        if (this.previousMessages){
+            let cancelMessages = [];
+            for (let i = 0; i < this.previousMessages.length; i++){
+                if (!messagesMap.has(this.previousMessages[i].id)){
+                    cancelMessages.push(this.previousMessages[i]);
+                }
+            }
+            if (cancelMessages.length > 0) {
+                this.cancelLoadMessageContents(cancelMessages);
+            }
+        }
+
+        this.previousMessages = messages;
+        this.loadMessageContents(messages, true);
     }
 
     render(){
@@ -492,7 +663,9 @@ class TelegramApp extends Component{
                         history={this.state.history}
                         onSendText={text => this.onSendText(text)}
                         onSendFile={file => this.onSendFile(file)}
-                        onLoadNext={x => this.onLoadNext(x)}/>
+                        onLoadNext={x => this.onLoadNext(x, false)}
+                        onUpdateItemsInView={items => this.onUpdateItemsInView(items)}
+                    />
                 </div>
             </div>
         );

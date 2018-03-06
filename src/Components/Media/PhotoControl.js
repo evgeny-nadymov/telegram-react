@@ -2,6 +2,7 @@ import React from 'react';
 import './PhotoControl.css';
 import ChatStore from "../../Stores/ChatStore";
 import {getSize, getFitSize} from '../../Utils/Common';
+import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from "../../Constants";
 
 class PhotoControl extends React.Component {
     constructor(props){
@@ -33,17 +34,22 @@ class PhotoControl extends React.Component {
     }
 
     render() {
-        const max = 260;
-
-        let size = getSize(this.props.message.content.photo.sizes, max);
+        let size = getSize(this.props.message.content.photo.sizes, PHOTO_SIZE);
         if (!size) return null;
 
-        let fitSize = getFitSize(size, max);
+        let fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
         if (!fitSize) return null;
 
-        return size.blob !== undefined ?
-            (<img className='photo-img' width={fitSize.width} height={fitSize.height} src={URL.createObjectURL(size.blob)} alt=""></img>) :
-            (<img className='photo-img' width={fitSize.width} height={fitSize.height} src="" alt=""></img>);
+        let useBlur = false;//size.blob !== undefined;
+        let className = useBlur ? 'photo-img-blur photo-img' : 'photo-img';
+
+        let src = size.blob ? URL.createObjectURL(size.blob) : '';
+
+        return (
+                <div className='photo-img-wrapper' style={{width: fitSize.width, height: fitSize.height}}>
+                    <img className={className} width={fitSize.width} height={fitSize.height} src={src} alt=""></img>
+                </div>
+            );
     }
 }
 

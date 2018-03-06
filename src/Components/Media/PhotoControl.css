@@ -1,6 +1,25 @@
 .photo-img{
     background: aliceblue;
     display: block;
-    border-radius: 8px;
-    /*transform: translateZ(0);*/
+    border-radius: 6px;
 }
+
+.photo-img-wrapper{
+    border-radius: 6px;
+    transform: translateZ(0);
+    overflow: hidden;
+}
+
+.photo-img-blur{
+    filter: blur(10px);
+}
+
+/*.photo-img-wrapper:before, .photo-img-wrapper:after{
+    content: ' ';
+    display: table;
+}*/
+
+/*.photo-div{
+    overflow: hidden;
+    transform: translateZ(0);
+}*/

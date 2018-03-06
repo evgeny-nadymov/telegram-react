@@ -17,11 +17,13 @@
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
+    position: relative;
 }
 
 .dialogdetails-list-top{
     flex: 1 1 auto;
     min-height: 12px;
+    position: relative;
 }
 
 .dialogdetails-list{

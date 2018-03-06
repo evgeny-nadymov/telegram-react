@@ -8,8 +8,12 @@ class Header extends Component{
     constructor(props){
         super(props);
 
-        this.state = TdLibController.getState();
+        this.state = {
+            authState: TdLibController.getState(),
+            connectionState : ''
+        };
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
+        this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -21,14 +25,20 @@ class Header extends Component{
     }
 
     componentDidMount(){
-        TdLibController.on("tdlib_status", this.onStatusUpdated)
+        TdLibController.on("tdlib_status", this.onStatusUpdated);
+        TdLibController.on("tdlib_connection_state", this.onConnectionStateUpdated);
+    }
+
+    onConnectionStateUpdated(payload) {
+        this.setState({ connectionState: payload});
     }
 
     onStatusUpdated(payload) {
-        this.setState(payload);
+        this.setState({ authState: payload});
     }
 
     componentWillUnmount(){
+        TdLibController.removeListener("tdlib_connection_state", this.onConnectionStateUpdated);
         TdLibController.removeListener("tdlib_status", this.onStatusUpdated);
     }
 
@@ -50,7 +60,8 @@ class Header extends Component{
     }
 
     render(){
-        const status = this.state.status;
+        const status = this.state.authState.status;
+        const connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
 
         switch (status){
             case 'waitPhoneNumber':
@@ -111,6 +122,9 @@ class Header extends Component{
                         <form id='clear-form' onSubmit={args => this.handleClearCache(args)}>
                             <input id='clear' type='submit' value='clear cache'/>
                         </form>
+                        <div className='header-status'>
+                            <span>{connectionState}</span>
+                        </div>
                     </div>
                 );
             default:

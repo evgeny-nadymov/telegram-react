@@ -1,8 +1,15 @@
 import React, {Component} from 'react';
 import './Dialogs.css';
 import DialogControl from './DialogControl'
+import ReactDOM from "react-dom";
+import {itemsInView, throttle} from "../Utils/Common";
 
 class Dialogs extends Component{
+    constructor(props){
+        super(props);
+
+        //this.throttledScroll = throttle(this.handleScrollInternal.bind(this), 1000);
+    }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.chats !== this.props.chats){
@@ -14,6 +21,24 @@ class Dialogs extends Component{
         }
 
         return false;
+    }
+
+    componentDidUpdate(){
+        //let list = ReactDOM.findDOMNode(this.refs.list);
+        //let items = itemsInView(list);
+
+        //console.log(items);
+    }
+
+    handleScroll(){
+        //this.throttledScroll();
+    }
+
+    handleScrollInternal(){
+        //let list = ReactDOM.findDOMNode(this.refs.list);
+        //let items = itemsInView(list);
+
+        //console.log(items);
     }
 
     render(){
@@ -28,7 +53,7 @@ class Dialogs extends Component{
 
         return (
             <div className='master'>
-                <div className='dialogs-list'>
+                <div className='dialogs-list' ref='list' onScroll={() => this.handleScroll()}>
                     {chats}
                 </div>
             </div>

@@ -29,13 +29,13 @@ class TdLibController extends EventEmitter{
 
     setState(state){
         this.state = state;
-        this.emit('tdlib_status', state)
+        this.emit('tdlib_status', state);
     }
 
     sendTdParameters() {
         this.client.send({
             '@type': 'setVerbosity',
-            verbosity: 1
+            verbosity: 2
         });
 
         this.client.send({
@@ -67,8 +67,8 @@ class TdLibController extends EventEmitter{
             case 'updateAuthorizationState':
                 this.onUpdateAuthState(update.authorization_state);
                 break;
-            //case 'updateConnectionState':
-            //    this.onUpdateAuthState(update.state);
+            case 'updateConnectionState':
+                this.emit('tdlib_connection_state', update.state);
                 break;
             default:
                 break;

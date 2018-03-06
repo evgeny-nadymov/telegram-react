@@ -13,4 +13,5 @@
     overflow-x: hidden;
     height: 100%;
     margin: 0;
+    position: relative;
 }
