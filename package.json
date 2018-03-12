@@ -4,7 +4,7 @@
   "version": "0.0.11",
   "private": true,
   "dependencies": {
-    "@arseny30/tdweb": "0.2.5",
+    "@arseny30/tdweb": "0.2.6",
     "events": "^2.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^4.2.3",

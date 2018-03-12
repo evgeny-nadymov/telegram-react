@@ -158,7 +158,7 @@ class TelegramApp extends Component{
             let [id, pid, idb_key] = this.getChatPhoto(chat);
             if (pid) {
                 chat.pid = pid;
-                this.getLocalFile(store, chat, idb_key,
+                this.getLocalFile(store, chat, idb_key, null,
                     () => ChatStore.updatePhoto(chat.id),
                     () => this.getRemoteFile(id, 1, chat));
             }
@@ -268,7 +268,7 @@ class TelegramApp extends Component{
                     let obj = items[i];
                     switch (obj['@type']){
                         case 'chat':
-                            this.getLocalFile(store, obj, idb_key,
+                            this.getLocalFile(store, obj, idb_key, file.arr,
                                 () => ChatStore.updatePhoto(obj.id),
                                 () => this.getRemoteFile(file.id, 1));
                             break;
@@ -290,7 +290,7 @@ class TelegramApp extends Component{
                                     let photo = this.getPhotoSize(obj.content.photo.sizes);
                                     if (photo && photo.photo.id === file.id)
                                     {
-                                        this.getLocalFile(store, photo, idb_key,
+                                        this.getLocalFile(store, photo, idb_key, file.arr,
                                             () => ChatStore.updateMessagePhoto(obj.id),
                                             () => { },
                                             'update',
@@ -298,7 +298,7 @@ class TelegramApp extends Component{
                                     }
                                     break;
                                 case 'messageSticker':
-                                    this.getLocalFile(store, obj.content.sticker.sticker, idb_key,
+                                    this.getLocalFile(store, obj.content.sticker.sticker, idb_key, file.arr,
                                         () => ChatStore.updateMessageSticker(obj.id),
                                         () => this.getRemoteFile(file.id, 1, obj),
                                         'update',
@@ -316,13 +316,23 @@ class TelegramApp extends Component{
         }
     }
 
-    getLocalFile(store, obj, idb_key, callback, faultCallback, from, messageId) {
+    getLocalFile(store, obj, idb_key, arr, callback, faultCallback, from, messageId) {
         if (!idb_key){
             faultCallback();
             return;
         }
 
         obj.idb_key = idb_key;
+        if (arr){
+            let t0 = performance.now();
+            obj.blob = new Blob([arr]);
+            let t1 = performance.now();
+            console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + obj.blob + ' new_time=' + (t1 - t0));
+
+            callback();
+            return;
+        }
+
         let objectStore = store;
 
         let t0 = performance.now();
@@ -436,7 +446,7 @@ class TelegramApp extends Component{
                         if (previewPid) {
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
-                                this.getLocalFile(store, preview, previewIdbKey,
+                                this.getLocalFile(store, preview, previewIdbKey, null,
                                     () => ChatStore.updateMessagePhoto(message.id),
                                     () => { if (loadRemote)  this.getRemoteFile(previewId, 2, message); },
                                     'load_contents_preview_',
@@ -450,7 +460,7 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = this.getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
-                                this.getLocalFile(store, obj, idb_key,
+                                this.getLocalFile(store, obj, idb_key, null,
                                     () => ChatStore.updateMessagePhoto(message.id),
                                     () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
                                     'load_contents',
@@ -464,7 +474,7 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
-                                this.getLocalFile(store, obj, idb_key,
+                                this.getLocalFile(store, obj, idb_key, null,
                                     () => ChatStore.updateMessageSticker(message.id),
                                     () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
                                     'load_contents',
