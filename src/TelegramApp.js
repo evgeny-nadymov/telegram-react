@@ -250,7 +250,6 @@ class TelegramApp extends Component{
     }
 
     onUpdateFile(file) {
-        console.log('[perf] onUpdateFile');
         if (!file.idb_key || !file.remote.id) {
             return;
         }
@@ -326,14 +325,12 @@ class TelegramApp extends Component{
         obj.idb_key = idb_key;
         let objectStore = store;
 
-        //console.log((from? from : '') + 'download_message start getLocal id=' + messageId);
         let t0 = performance.now();
         let getItem = objectStore.get(idb_key);
         getItem.onsuccess = function (event) {
             let blob = event.target.result;
             let t1 = performance.now();
             console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + blob + ' time=' + (t1 - t0));
-            //console.log('Got blob: ' + idb_key + ' => ' + blob);
 
             if (blob){
                 obj.blob = blob;
