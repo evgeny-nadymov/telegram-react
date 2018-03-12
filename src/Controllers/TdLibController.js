@@ -84,6 +84,9 @@ class TdLibController extends EventEmitter{
 
     authStateLoop() {
         switch (this.auth_state['@type']) {
+            case 'authorizationStateLoggingOut':
+                this.setState({ status: 'loggingOut' });
+                break;
             case 'authorizationStateWaitTdlibParameters':
                 this.setState({ status: 'waitTdLibParameters' });
                 this.sendTdParameters();
@@ -104,7 +107,11 @@ class TdLibController extends EventEmitter{
             case 'authorizationStateReady':
                 this.setState({ status: 'ready' });
                 break;
+            case 'authorizationStateClosing':
+                this.setState({ status: 'closing' });
+                break;
             case 'authorizationStateClosed':
+                this.setState({ status: 'closed' });
                 this.init();
                 break;
             default:

@@ -31,6 +31,17 @@ class TileControl extends Component{
         ChatStore.removeListener("chat_photo_changed", this.onPhotoUpdated);
     }
 
+    getFirstLetter(str){
+        if (!str) return '';
+        for (let i = 0; i < str.length; i++){
+            if (str[i].toUpperCase() !== str[i].toLowerCase()) {
+                return str[i];
+            }
+        }
+
+        return '';
+    }
+
     getChatLetters(chat){
         if (!chat) return null;
         if (!chat.title) return null;
@@ -38,7 +49,7 @@ class TileControl extends Component{
 
         let split = chat.title.split(' ');
         if (split.length > 1){
-            return split[0].charAt(0) + split[1].charAt(0);
+            return this.getFirstLetter(split[0]) + this.getFirstLetter(split[1])
         }
 
         return chat.title.charAt(0);
@@ -48,7 +59,7 @@ class TileControl extends Component{
         const chat = this.props.chat;
         const letters = this.getChatLetters(chat);
 
-        const backgroundColor = chat.blob !== undefined ? null : 'user_bgcolor_' + (Math.abs(chat.id) % 8 + 1);
+        const backgroundColor = chat.blob !== undefined ? '' : 'user_bgcolor_' + (Math.abs(chat.id) % 8 + 1);
         const photoClasses = `${backgroundColor} tile-photo`;
 
         return chat.blob !== undefined ?

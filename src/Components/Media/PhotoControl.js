@@ -40,10 +40,17 @@ class PhotoControl extends React.Component {
         let fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
         if (!fitSize) return null;
 
-        let useBlur = false;//size.blob !== undefined;
-        let className = useBlur ? 'photo-img-blur photo-img' : 'photo-img';
-
+        let className = 'photo-img';
         let src = size.blob ? URL.createObjectURL(size.blob) : '';
+
+        if (!size.blob && this.props.message.content.photo.sizes.length > 0)
+        {
+            let previewSize = this.props.message.content.photo.sizes[0];
+            if (previewSize && previewSize.blob){
+                className += ' photo-img-blur';
+                src = URL.createObjectURL(previewSize.blob);
+            }
+        }
 
         return (
                 <div className='photo-img-wrapper' style={{width: fitSize.width, height: fitSize.height}}>

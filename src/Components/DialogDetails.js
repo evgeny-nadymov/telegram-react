@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import './DialogDetails.css';
 import InputBoxControl from "./InputBoxControl";
 import MessageControl from "./MessageControl";
-import {itemsInView, throttle} from "../Utils/Common";
+import {debounce, itemsInView, throttle} from "../Utils/Common";
 
 class DialogDetails extends Component{
 
     constructor(props){
         super(props);
 
-        this.updateItemsInView = throttle(this.updateItemsInView.bind(this), 500);
+        this.updateItemsInView = debounce(this.updateItemsInView.bind(this), 250);
     }
 
     shouldComponentUpdate(nextProps, nextState){
