@@ -53,6 +53,10 @@ class Header extends Component{
         TdLibController.onInput(text);
     }
 
+    handleDestroy(){
+        TdLibController.destroy();
+    }
+
     handleClearCache(args){
         args.preventDefault();
 
@@ -61,79 +65,46 @@ class Header extends Component{
 
     render(){
         const status = this.state.authState.status;
-        const connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
+        let connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
+
+        switch (connectionState){
+            case 'connectionStateReady':
+                connectionState = '';
+                break;
+            case 'connectionStateUpdating':
+                connectionState = 'Updating...';
+                break;
+            case 'connectionStateConnecting':
+                connectionState = 'Connecting...';
+                break;
+        }
 
         switch (status){
-            case 'waitPhoneNumber':
-                return (
-                    <div className='header-wrapper'>
-                        <div className='header-status'>
-                            <span className='header-version'>{packageJson.version}</span>
-                            <span>{status}</span>
-                        </div>
-                        <div>
-                            <form id='send-form' onSubmit={args => this.handleSubmit(args)}>
-                                <input id='phone-number' type='text' ref='inputControl'/>
-                                <input id='send-phone-number' type='submit' value='send phone'/>
-                            </form>
-                        </div>
-                    </div>
-                );
-            case 'waitCode':
-                return (
-                    <div className='header-wrapper'>
-                        <div className='header-status'>
-                            <span className='header-version'>{packageJson.version}</span>
-                            <span>{status}</span>
-                        </div>
-                        <div>
-                            <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
-                                <input id='phone-code' type='text' ref='inputControl'/>
-                                <input id='send-phone-code' type='submit' value='send code'/>
-                            </form>
-                        </div>
-                    </div>
-                );
-            case 'waitPassword':
-                return (
-                    <div className='header-wrapper'>
-                        <div className='header-status'>
-                            <span className='header-version'>{packageJson.version}</span>
-                            <span>{status}</span>
-                        </div>
-                        <div>
-                            <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
-                                <input id='phone-code' type='text' ref='inputControl'/>
-                                <input id='send-phone-code' type='submit' value='send password'/>
-                            </form>
-                        </div>
-                    </div>
-                );
             case 'ready':
                 return (
                     <div className='header-wrapper'>
-                        <div className='header-status'>
-                            <span className='header-version'>{packageJson.version}</span>
-                            <span>{status}</span>
-                        </div>
                         <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
                             <input id='log-out' type='submit' value='log out'/>
                         </form>
-                        <form id='clear-form' onSubmit={args => this.handleClearCache(args)}>
+                        {/*<form id='clear-form' onSubmit={args => this.handleClearCache(args)}>
                             <input id='clear' type='submit' value='clear cache'/>
-                        </form>
+                        </form>*/}
                         <div className='header-status'>
                             <span>{connectionState}</span>
                         </div>
+
+
                     </div>
                 );
             default:
                 return (
                     <div className='header-wrapper'>
                         <div className='header-status'>
-                            <span className='header-version'>{packageJson.version}</span>
-                            <span>{status}</span>
+                            <span>{connectionState}</span>
                         </div>
+                        {/*<form id='auth-form' onSubmit={args => this.handleDestroy(args)}>
+                            <input id='log-out' type='submit' value='destroy'/>
+                        </form>*/}
                     </div>
                 );
         }

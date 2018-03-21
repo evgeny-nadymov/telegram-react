@@ -1,6 +1,93 @@
-#send-form{
-    margin: 10px;
+.inputbox-wrapper{
+    max-width: 382px;/*554px;*/
+    margin: 0 auto;
+    padding: 10px 15px 21px;
 }
-#new-message{
-    margin: 0 10px;
+
+#inputbox-message{
+    box-shadow: 0 1px 0 0 #e8e8e8;
+    max-height: 150px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    margin-bottom: 13px;
+    min-height: 52px;
+    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    padding: 0 1px 0 1px;
 }
+
+#inputbox-message:empty::before {
+    content: attr(placeholder);
+    color: #9aa2ab;
+    pointer-events: none
+}
+
+#inputbox-message:empty:active::before,#inputbox-message:empty:focus::before {
+    opacity: .75
+}
+
+/*#inputbox-message:empty:not(:focus):before {
+    content: attr(placeholder);
+    color: #9aa2ab;
+}*/
+
+/*[contentEditable=true]:empty:not(:focus):before{
+    content:attr(placeholder)
+}*/
+
+#inputbox-message:focus {
+    border: 0;
+    outline: none;
+    box-shadow: 0 2px 0 0 #77b7e4;
+}
+
+.inputbox-buttons{
+    display: flex;
+}
+
+.inputbox-attach-wrapper{
+    flex-grow: 1;
+}
+
+.inputbox-attach-button{
+    display: none;
+}
+
+.inputbox-attach-icon{
+    background-image: url(../Assets/Icons/General_2x.png);
+    background-size: 40px 948px;
+    display: inline-block;
+    width: 18px;
+    height: 17px;
+    vertical-align: top;
+    opacity: 0.8;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-position: -11px -455px;
+    cursor: pointer;
+}
+
+.inputbox-attach-icon:hover {
+    opacity: 1;
+}
+.inputbox-attach-icon:active {
+    background-position: -11px -482px;
+    opacity: 1;
+}
+
+.inputbox-send-button{
+
+}
+
+.inputbox-send-text{
+    color: #499dd9;
+    font-size: 13px;
+    line-height: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.inputbox-send-text:hover {
+    color: #3589c5;
+}
+
+

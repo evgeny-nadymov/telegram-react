@@ -3,12 +3,14 @@ import './TelegramApp.css';
 import Header from "./Components/Header";
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
+import AuthFormControl from './Components/Auth/AuthFormControl';
 import {throttle, getSize} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import TdLibController from './Controllers/TdLibController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from "./Constants";
+import Footer from "./Components/Footer";
 
 class TelegramApp extends Component{
     constructor(){
@@ -19,6 +21,7 @@ class TelegramApp extends Component{
             chats: [],
             history: [],
             scrollBottom: false,
+            authState: 'init'
         };
         this.downloads = new Map();
 
@@ -52,11 +55,12 @@ class TelegramApp extends Component{
     onUpdateState(state){
         switch (state.status) {
             case 'ready':
+                this.setState({authState : state.status});
                 TdLibController
                     .send({
                         '@type': 'setOption',
                         name: 'online',
-                        value: true
+                        value: { '@type': 'optionValueBoolean', value: true }
                     });
 
                 TdLibController
@@ -67,12 +71,22 @@ class TelegramApp extends Component{
                     })
                     .then(result => this.onGetChats(result));
                 break;
+            case 'waitPhoneNumber':
+                this.setState({authState: state.status});
+                break;
+            case 'waitCode':
+                this.setState({authState: state.status});
+                break;
+            case 'waitPassword':
+                this.setState({authState: state.status});
+                break;
             case 'init':
                 this.setState({
                     selectedChat: null,
                     chats: [],
                     history: [],
                     scrollBottom: false,
+                    authState: state.status
                 });
                 break;
             default:
@@ -378,6 +392,7 @@ class TelegramApp extends Component{
             this.downloads.set(fileId, [obj]);
         }
 
+        console.log('[perf] downloadFile file_id=' + fileId);
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
     }
 
@@ -630,9 +645,9 @@ class TelegramApp extends Component{
     onUpdateItemsInView(messages){
         if (!messages) return;
 
-        /*let ids = messages.map(x => x.id);
-        console.log('check_download_message ids=' + ids);
-
+        let ids = messages.map(x => x.id);
+        console.log('[perf] load_messages_contents ids=[' + ids + ']');
+/*
         let messagesMap = new Map(messages.map((i) => [i.id, i]));
 
         if (this.previousMessages){
@@ -652,36 +667,57 @@ class TelegramApp extends Component{
     }
 
     render(){
+        let page = null;
+        switch (this.state.authState){
+            case 'waitPhoneNumber':
+            case 'waitCode':
+            case 'waitPassword':
+                page = (
+                    <div id='app-inner'>
+                        <AuthFormControl authState={this.state.authState}/>
+                    </div>
+                );
+                break;
+            case 'init':
+            case 'ready':
+            default:
+                page = (
+                    <div id='app-inner'>
+                        <Header onClearCache={() => this.clearCache()}/>
+                        <div className='im-page-wrap'>
+                            <Dialogs
+                                chats={this.state.chats}
+                                selectedChat={this.state.selectedChat}
+                                onSelectChat={chat => this.selectChat(chat)}/>
+                            <DialogDetails
+                                scrollBottom={this.state.scrollBottom}
+                                history={this.state.history}
+                                onSendText={text => this.onSendText(text)}
+                                onSendFile={file => this.onSendFile(file)}
+                                onLoadNext={x => this.onLoadNext(x, true)}
+                                onUpdateItemsInView={items => this.onUpdateItemsInView(items)}
+                            />
+                        </div>
+                        <Footer/>
+                    </div>
+                );
+                break;
+        }
+
         return (
             <div id='app'>
-                <Header onClearCache={() => this.clearCache()}/>
-                <div className='im-page-wrap'>
-                    <Dialogs
-                        className='master'
-                        chats={this.state.chats}
-                        selectedChat={this.state.selectedChat}
-                        onSelectChat={chat => this.selectChat(chat)}/>
-                    <DialogDetails
-                        className='details'
-                        scrollBottom={this.state.scrollBottom}
-                        history={this.state.history}
-                        onSendText={text => this.onSendText(text)}
-                        onSendFile={file => this.onSendFile(file)}
-                        onLoadNext={x => this.onLoadNext(x, true)}
-                        onUpdateItemsInView={items => this.onUpdateItemsInView(items)}
-                    />
-                </div>
+                {page}
             </div>
         );
     }
 }
 
-window.onblur = function(){
+/*window.onblur = function(){
     TdLibController
         .send({
             '@type': 'setOption',
             name: 'online',
-            value: false
+            value: { '@type': 'optionValueBoolean', value: false }
         });
 };
 
@@ -690,8 +726,8 @@ window.onfocus = function(){
         .send({
             '@type': 'setOption',
             name: 'online',
-            value: true
+            value: { '@type': 'optionValueBoolean', value: true }
         });
-};
+};*/
 
 export default TelegramApp;

@@ -6,6 +6,7 @@ class TdLibController extends EventEmitter{
         super();
 
         this.onUpdate = this.onUpdate.bind(this);
+        this.onAuthError = this.onAuthError.bind(this);
 
         this.init()
     }
@@ -15,7 +16,7 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
-        this.client = new TdClient();
+        this.client = new TdClient({ verbosity: 2 });
         this.client.onUpdate = update => this.onUpdate(update);
 
         this.setState({
@@ -33,11 +34,10 @@ class TdLibController extends EventEmitter{
     }
 
     sendTdParameters() {
-        this.client.send({
+        /*this.client.send({
             '@type': 'setVerbosity',
-            verbosity: 0
-        });
-
+            verbosity: 2
+        });*/
         this.client.send({
             '@type': 'setTdlibParameters',
             parameters: {
@@ -63,6 +63,7 @@ class TdLibController extends EventEmitter{
     }
 
     onUpdate(update) {
+        //console.log('receive from worker: ' + update['@type']);
         switch (update['@type']) {
             case 'updateAuthorizationState':
                 this.onUpdateAuthState(update.authorization_state);
@@ -80,6 +81,10 @@ class TdLibController extends EventEmitter{
     onUpdateAuthState(auth_state) {
         this.auth_state = auth_state;
         this.authStateLoop();
+    }
+
+    onAuthError(error){
+        this.emit('tdlib_auth_error', error);
     }
 
     authStateLoop() {
@@ -116,6 +121,49 @@ class TdLibController extends EventEmitter{
                 break;
             default:
                 this.setState({ status: '???' });
+        }
+    }
+
+    onInputExternal(status, line) {
+        switch (status) {
+            case 'wait':
+                return;
+            case 'waitPhoneNumber':
+                this.client
+                    .send({ '@type': 'setAuthenticationPhoneNumber', phone_number: line })
+                    .catch(this.onAuthError);
+                this.setState({ status: 'sendPhoneNumber' });
+                break;
+            case 'waitCode':
+                this.client
+                    .send({
+                        '@type': 'checkAuthenticationCode',
+                        code: line,
+                        first_name: 'A',
+                        last_name: 'B'
+                    })
+                    .catch(this.onAuthError);
+                this.setState({ status: 'sendCode' });
+                break;
+            case 'waitPassword':
+                this.client
+                    .send({
+                        '@type': 'checkAuthenticationPassword',
+                        password: line,
+                    })
+                    .catch(this.onAuthError);
+                this.setState({ status: 'sendPassword' });
+                break;
+            case 'ready':
+                this.client
+                    .send({
+                        '@type': 'logOut',
+                    })
+                    .catch(this.onAuthError);
+                this.setState({ status: 'sendLogOut' });
+                break;
+            default:
+                break;
         }
     }
 
@@ -160,6 +208,13 @@ class TdLibController extends EventEmitter{
             default:
                 break;
         }
+    }
+
+    destroy(){
+        this.client
+            .send({
+                '@type': 'destroy',
+            });
     }
 }
 

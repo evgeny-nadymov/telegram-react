@@ -31,6 +31,9 @@
 }
 
 .dialogdetails-input-wrapper{
-    max-height: 100px;
     box-sizing: border-box;
+}
+
+.dialogdetails-input{
+    width: 100px;
 }

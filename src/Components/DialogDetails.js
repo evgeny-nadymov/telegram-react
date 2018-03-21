@@ -117,7 +117,7 @@ class DialogDetails extends Component{
                     </div>
                 </div>
                 <div className='dialogdetails-input-wrapper'>
-                    <InputBoxControl onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
+                    <InputBoxControl className='dialogdetails-input' onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
                 </div>
             </div>
         );
