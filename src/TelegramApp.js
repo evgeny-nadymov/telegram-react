@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import './TelegramApp.css';
 import Header from "./Components/Header";
 import Dialogs from './Components/Dialogs';
@@ -11,6 +12,12 @@ import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from "./Constants";
 import Footer from "./Components/Footer";
+
+const theme = createMuiTheme({
+    palette: {
+        primary: { main: '#6bace1'},
+    },
+});
 
 class TelegramApp extends Component{
     constructor(){
@@ -683,13 +690,14 @@ class TelegramApp extends Component{
             default:
                 page = (
                     <div id='app-inner'>
-                        <Header onClearCache={() => this.clearCache()}/>
+                        <Header selectedChat={this.state.selectedChat} onClearCache={() => this.clearCache()}/>
                         <div className='im-page-wrap'>
                             <Dialogs
                                 chats={this.state.chats}
                                 selectedChat={this.state.selectedChat}
                                 onSelectChat={chat => this.selectChat(chat)}/>
                             <DialogDetails
+                                selectedChat={this.state.selectedChat}
                                 scrollBottom={this.state.scrollBottom}
                                 history={this.state.history}
                                 onSendText={text => this.onSendText(text)}
@@ -705,9 +713,11 @@ class TelegramApp extends Component{
         }
 
         return (
-            <div id='app'>
-                {page}
-            </div>
+            <MuiThemeProvider theme={theme}>
+                <div id='app'>
+                    {page}
+                </div>
+            </MuiThemeProvider>
         );
     }
 }

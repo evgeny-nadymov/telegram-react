@@ -182,7 +182,7 @@ class MessageControl extends Component{
 
         const messageClassName = this.props.sendingState ? 'message sending' : 'message';
 
-        let title = message.id;//this.getTitle(message);
+        let title = this.getTitle(message);
         let text = this.getText(message);//JSON.stringify(message);
         let date = this.getDate(message);
         let media = this.getMedia(message);

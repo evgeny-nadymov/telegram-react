@@ -1,5 +1,4 @@
 import React from 'react';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import { withStyles } from 'material-ui/styles';
 import SignInControl from './SignInControl'
 import ConfirmCodeControl from './ConfirmCodeControl'
@@ -8,12 +7,6 @@ import SignUpControl from './SignUpControl'
 import './AuthFormControl.css';
 import TdLibController from "../../Controllers/TdLibController";
 import AuthErrorDialog from "./AuthErrorDialog";
-
-const theme = createMuiTheme({
-    palette: {
-        primary: { main: '#6bace1'},
-    },
-});
 
 const styles = {
     button: {
@@ -72,28 +65,25 @@ class AuthFormControl extends React.Component {
         }
         
         return (
-            <MuiThemeProvider theme={theme}>
-                <div className='sign-in-wrap'>
-                    <div className='sign-in-head-background'></div>
+            <div className='sign-in-wrap'>
+                <div className='sign-in-head-background'></div>
+                <div className='sign-in-page'>
                     <div className='sign-in-page'>
-                        <div className='sign-in-page'>
-                            <div className='sign-in-head-wrap'>
-                                <a className='sign-in-head-logo-link' href='https://telegram.org' target='_blank'>
-                                    <i className='icon icon-tg-logo'></i>
-                                    <i className='icon icon-tg-title'></i>
-                                </a>
-                                <div className='sign-in-middle-column'></div>
-                            </div>
-                            <div className='sign-in-form-wrap'>
-                                {control}
-                            </div>
+                        <div className='sign-in-head-wrap'>
+                            <a className='sign-in-head-logo-link' href='https://telegram.org' target='_blank'>
+                                <i className='icon icon-tg-logo'></i>
+                                <i className='icon icon-tg-title'></i>
+                            </a>
+                            <div className='sign-in-middle-column'></div>
+                        </div>
+                        <div className='sign-in-form-wrap'>
+                            {control}
                         </div>
                     </div>
-                    <AuthErrorDialog/>
                 </div>
-            </MuiThemeProvider>
+                <AuthErrorDialog/>
+            </div>
         );
     }
 }
-
 export default withStyles(styles)(AuthFormControl);

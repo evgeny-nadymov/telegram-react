@@ -1,7 +1,13 @@
 import React, {Component} from 'react';
 import './Header.css';
 import TdLibController from "../Controllers/TdLibController";
-import packageJson from '../../package.json';
+import Dialog, {
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from 'material-ui/Dialog';
+import Button from 'material-ui/Button';
 
 class Header extends Component{
 
@@ -10,14 +16,20 @@ class Header extends Component{
 
         this.state = {
             authState: TdLibController.getState(),
-            connectionState : ''
+            connectionState : '',
+            open: false
         };
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handleDone = this.handleDone.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextState !== this.state){
+            return true;
+        }
+        if (nextProps.selectedChat !== this.props.selectedChat){
             return true;
         }
 
@@ -42,15 +54,8 @@ class Header extends Component{
         TdLibController.removeListener("tdlib_status", this.onStatusUpdated);
     }
 
-    handleSubmit(args){
-        args.preventDefault();
-        let text = null;
-        if (this.refs.inputControl){
-            text = this.refs.inputControl.value;
-            this.refs.inputControl.value = null;
-        }
-
-        TdLibController.onInput(text);
+    handleSubmit(){
+        this.setState({open: true});
     }
 
     handleDestroy(){
@@ -63,19 +68,29 @@ class Header extends Component{
         this.props.onClearCache();
     }
 
+    handleClose(){
+        this.setState({ open: false });
+    }
+
+    handleDone(){
+        this.setState({ open: false });
+        TdLibController.logOut();
+    }
+
     render(){
         const status = this.state.authState.status;
         let connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
 
         switch (connectionState){
-            case 'connectionStateReady':
-                connectionState = '';
-                break;
             case 'connectionStateUpdating':
                 connectionState = 'Updating...';
                 break;
             case 'connectionStateConnecting':
                 connectionState = 'Connecting...';
+                break;
+            case 'connectionStateReady':
+            case '':
+                connectionState = this.props.selectedChat ? this.props.selectedChat.title : '';
                 break;
         }
 
@@ -83,28 +98,52 @@ class Header extends Component{
             case 'ready':
                 return (
                     <div className='header-wrapper'>
-                        <form id='auth-form' onSubmit={args => this.handleSubmit(args)}>
-                            <input id='log-out' type='submit' value='log out'/>
-                        </form>
-                        {/*<form id='clear-form' onSubmit={args => this.handleClearCache(args)}>
-                            <input id='clear' type='submit' value='clear cache'/>
-                        </form>*/}
-                        <div className='header-status'>
-                            <span>{connectionState}</span>
+                        <div className='header-master'>
+                            <div className='header-title'>
+                                <i className='header-title-icon'></i>
+                            </div>
+                        </div>
+                        <div className='header-details'>
+                            <div className='header-status grow'>
+                                <span className='header-status-content'>{connectionState}</span>
+                            </div>
+                            <div className='header-button pointer' onClick={args => this.handleSubmit(args)}>
+                                <span className='header-button-content'>LOG OUT</span>
+                            </div>
                         </div>
 
-
+                        { this.state.open &&
+                            <Dialog
+                                open={this.state.open}
+                                onClose={this.handleClose}
+                                aria-labelledby="form-dialog-title">
+                                <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Are you sure you want to log out?
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={this.handleClose} color="primary">
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={this.handleDone} color="primary">
+                                        Ok
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        }
                     </div>
                 );
             default:
                 return (
                     <div className='header-wrapper'>
-                        <div className='header-status'>
-                            <span>{connectionState}</span>
+                        <div className='header-title'>
+                            <i className='header-title-icon'></i>
                         </div>
-                        {/*<form id='auth-form' onSubmit={args => this.handleDestroy(args)}>
-                            <input id='log-out' type='submit' value='destroy'/>
-                        </form>*/}
+                        <div className='header-status'>
+                            <span className='header-status-content'>{connectionState}</span>
+                        </div>
                     </div>
                 );
         }

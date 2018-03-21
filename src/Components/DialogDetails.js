@@ -104,10 +104,6 @@ class DialogDetails extends Component{
             return (<MessageControl key={x.id} sendingState={x.sending_state} message={x}></MessageControl>);
         });
 
-        /*const inputBox = this.props.history.length === 0 ?
-            null :
-            ();*/
-
         return (
             <div className='details'>
                 <div ref='list' className='dialogdetails-wrapper' onScroll={() => this.handleScroll()}>
@@ -116,9 +112,11 @@ class DialogDetails extends Component{
                         {this.messages}
                     </div>
                 </div>
-                <div className='dialogdetails-input-wrapper'>
-                    <InputBoxControl className='dialogdetails-input' onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
-                </div>
+                {   this.props.selectedChat &&
+                    <div className='dialogdetails-input-wrapper'>
+                        <InputBoxControl className='dialogdetails-input' selectedChat={this.props.selectedChat} onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
+                    </div>
+                }
             </div>
         );
     }

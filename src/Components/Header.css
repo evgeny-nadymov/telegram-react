@@ -8,23 +8,64 @@
     align-items: center;
 }
 
-.header-status{
-    color: #ffffff;
+.header-master{
+    float: left;
+    width: calc(31% - 0px);
+    height: 100%;
+    display: flex;
+}
+
+.header-details{
+    float: left;
+    width: calc(69% - 0px);
+    height: 100%;
+    display: flex;
+}
+
+.header-title{
+    padding: 15px 19px 15px;
+}
+
+.header-title-icon{
+    width: 62px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    background-image: url(../Assets/Telegram.svg);
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    margin-top: 1px;
+}
+
+.header-button, .header-status{
+    padding: 15px 19px 15px;
+    line-height: 18px;
+    display: block;
     font-weight: bold;
+    color: #fff;
     font-size: 13px;
-    padding: 15px 19px;
 }
 
-.header-version{
-    font-weight: lighter;
-    font-size: 10px;
-    margin-right: 10px;
+.header-button:hover {
+    color: #fff;
+    text-decoration: none;
+    background: #497799;
 }
 
-#clear-form{
-    margin-left: 10px;
+.header-button-content, .header-status-content{
+    display: inline-block;
+    color: #fff;
+    margin-right: 3px;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    overflow: hidden;
+    vertical-align: top;
 }
 
-#auth-form{
-    margin-left: 10px;
+.pointer{
+    cursor: pointer;
+}
+
+.grow{
+    flex-grow: 1;
 }

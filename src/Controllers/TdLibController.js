@@ -16,7 +16,7 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
-        this.client = new TdClient({ verbosity: 2 });
+        this.client = new TdClient({ /*mode: 'webasm',*/ verbosity: 2 });
         this.client.onUpdate = update => this.onUpdate(update);
 
         this.setState({
@@ -208,6 +208,15 @@ class TdLibController extends EventEmitter{
             default:
                 break;
         }
+    }
+
+    logOut(){
+        this.client
+            .send({
+                '@type': 'logOut',
+            })
+            .catch(this.onAuthError);
+        this.setState({ status: 'sendLogOut' });
     }
 
     destroy(){

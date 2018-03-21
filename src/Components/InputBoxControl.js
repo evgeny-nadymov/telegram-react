@@ -13,11 +13,18 @@ class InputBoxControl extends Component{
         this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (nextProps.selectedChat !== this.props.selectedChat){
+            return true;
+        }
+
+        return false;
+    }
+
     handleSubmit(){
         let text = this.refs.newMessage.innerText || this.refs.newMessage.textContent;
         this.refs.newMessage.innerText = null;
         this.refs.newMessage.textContent = null;
-        //this.refs.newMessage.value = null;
 
         this.props.onSendText(text);
     }
