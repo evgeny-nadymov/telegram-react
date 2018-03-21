@@ -58,7 +58,10 @@ class DialogDetails extends Component{
         let messages = [];
         let items = itemsInView(this.refs.list, this.refs.items);
         for (let i = 0; i < items.length; i++){
-            messages.push(this.messages[items[i]].props.message);
+            let messageControl = this.messages[items[i]];
+            if (messageControl) {
+                messages.push(messageControl.props.message);
+            }
         }
 
         this.props.onUpdateItemsInView(messages);

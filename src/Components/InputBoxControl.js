@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import './InputBoxControl.css';
+import TileControl from "./TileControl";
 
 class InputBoxControl extends Component{
 
@@ -73,6 +74,7 @@ class InputBoxControl extends Component{
                         <span className='inputbox-send-text'>SEND</span>
                     </div>
                 </div>
+                {/*<TileControl chat={this.props.selectedChat}/>*/}
             </div>
         );
     }

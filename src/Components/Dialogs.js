@@ -8,6 +8,7 @@ class Dialogs extends Component{
     constructor(props){
         super(props);
 
+        this.handleScroll = this.handleScroll.bind(this);
         //this.throttledScroll = throttle(this.handleScrollInternal.bind(this), 1000);
     }
 
@@ -31,7 +32,14 @@ class Dialogs extends Component{
     }
 
     handleScroll(){
-        //this.throttledScroll();
+        if (!this.x)
+        {
+            this.x = ReactDOM.findDOMNode(this.refs.list);
+        }
+
+        if (this.x && (this.x.scrollTop + this.x.offsetHeight) >= this.x.scrollHeight){
+            this.props.onLoadNext();
+        }
     }
 
     handleScrollInternal(){
@@ -53,7 +61,7 @@ class Dialogs extends Component{
 
         return (
             <div className='master'>
-                <div className='dialogs-list' ref='list' onScroll={() => this.handleScroll()}>
+                <div className='dialogs-list' ref='list' onScroll={this.handleScroll}>
                     {chats}
                 </div>
             </div>

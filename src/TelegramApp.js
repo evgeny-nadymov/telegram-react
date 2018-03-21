@@ -47,6 +47,10 @@ class TelegramApp extends Component{
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.handleSelectChat = this.handleSelectChat.bind(this);
+        this.handleSendText = this.handleSendText.bind(this);
+        this.handleSendFile = this.handleSendFile.bind(this);
+        this.handleLoadDialogs = this.handleLoadDialogs.bind(this);
     }
 
     componentDidMount(){
@@ -70,13 +74,7 @@ class TelegramApp extends Component{
                         value: { '@type': 'optionValueBoolean', value: true }
                     });
 
-                TdLibController
-                    .send({
-                        '@type': 'getChats',
-                        offset_order: 8000000000000000000,
-                        limit: CHAT_SLICE_LIMIT
-                    })
-                    .then(result => this.onGetChats(result));
+                this.handleLoadDialogs();
                 break;
             case 'waitPhoneNumber':
                 this.setState({authState: state.status});
@@ -170,7 +168,8 @@ class TelegramApp extends Component{
     }
 
     onGetChatsContinue(result){
-        this.setState({ chats: result });
+        this.appendChats(result);
+        //this.setState({ chats: result });
 
         let store = this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
 
@@ -411,7 +410,7 @@ class TelegramApp extends Component{
         }
     }
 
-    selectChat(chat){
+    handleSelectChat(chat){
         this.previousScrollHeight = 0;
 
         let previousChat = this.state.selectedChat;
@@ -556,8 +555,18 @@ class TelegramApp extends Component{
         this.setState({ history: history.concat(this.getHistory()), scrollBottom: false }, callback);
     }
 
+    appendChats(chats, callback){
+        if (chats.length === 0) return;
+
+        this.setState({ chats: this.getChats().concat(chats) }, callback);
+    }
+
     getHistory() {
         return this.state.history;
+    }
+
+    getChats() {
+        return this.state.chats;
     }
 
     historyPushFront(entry) {
@@ -568,7 +577,7 @@ class TelegramApp extends Component{
         this.setHistory(this.getHistory().concat([entry]));
     }
 
-    onSendText(text){
+    handleSendText(text){
         if (!text) return;
 
         const content = {
@@ -579,7 +588,7 @@ class TelegramApp extends Component{
         this.onSendInternal(content);
     }
 
-    onSendFile(file){
+    handleSendFile(file){
         if (!file) return;
 
         const content = {
@@ -602,6 +611,31 @@ class TelegramApp extends Component{
             })
             .catch(error =>{
                 alert('sendMessage error ' + error);
+            });
+    }
+
+    handleLoadDialogs(){
+        if (this.loading) return;
+        if (this.lastSliceLoaded) return;
+
+        let offsetOrder = 8000000000000000000;
+        if (this.state.chats && this.state.chats.length > 0){
+            offsetOrder = this.state.chats[this.state.chats.length - 1].order;
+        }
+
+        TdLibController
+            .send({
+                '@type': 'getChats',
+                offset_order: offsetOrder,
+                limit: CHAT_SLICE_LIMIT
+            })
+            .then(result => {
+                this.loading = false;
+                this.lastSliceLoaded = result.chat_ids.length < CHAT_SLICE_LIMIT;
+                this.onGetChats(result);
+            })
+            .catch(() => {
+                this.loading = false;
             });
     }
 
@@ -695,13 +729,14 @@ class TelegramApp extends Component{
                             <Dialogs
                                 chats={this.state.chats}
                                 selectedChat={this.state.selectedChat}
-                                onSelectChat={chat => this.selectChat(chat)}/>
+                                onSelectChat={this.handleSelectChat}
+                                onLoadNext={this.handleLoadDialogs}/>
                             <DialogDetails
                                 selectedChat={this.state.selectedChat}
                                 scrollBottom={this.state.scrollBottom}
                                 history={this.state.history}
-                                onSendText={text => this.onSendText(text)}
-                                onSendFile={file => this.onSendFile(file)}
+                                onSendText={this.handleSendText}
+                                onSendFile={this.handleSendFile}
                                 onLoadNext={x => this.onLoadNext(x, true)}
                                 onUpdateItemsInView={items => this.onUpdateItemsInView(items)}
                             />
