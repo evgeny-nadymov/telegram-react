@@ -38,6 +38,7 @@ class SignInControl extends React.Component {
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
     handleSignIn(){
@@ -82,6 +83,12 @@ class SignInControl extends React.Component {
 
         this.props.onPhoneEnter(this.phoneNumber);
     }
+    
+    handleKeyDown(e){
+        if (e.key === 'Enter'){
+            this.handleDone();
+        }
+    }
 
     render() {
         return (
@@ -102,6 +109,7 @@ class SignInControl extends React.Component {
                 <Dialog
                     open={this.state.openConfirmation}
                     onClose={this.handleClose}
+                    onKeyDown={this.handleKeyDown}
                     aria-labelledby="form-dialog-title">
                     <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
                     <DialogContent>

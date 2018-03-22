@@ -1,5 +1,13 @@
 import ReactDOM from "react-dom";
 
+function orderCompare(order1, order2){
+    let diff = order1.length - order2.length;
+    if (diff !== 0) return diff < 0 ? -1 : 1;
+    if (order1 === order2) return 0;
+
+    return order1 > order2 ? 1 : -1;
+}
+
 function getSize(sizes, dimension) {
     if (!sizes) return null;
     if (sizes.length === 0) return null;
@@ -104,4 +112,4 @@ function debounce(func, wait, immediate) {
     };
 }
 
-export {getSize, getFitSize, itemsInView, throttle, debounce};
+export {orderCompare, getSize, getFitSize, itemsInView, throttle, debounce};

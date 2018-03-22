@@ -5,7 +5,7 @@ import Header from "./Components/Header";
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
-import {throttle, getSize} from './Utils/Common';
+import {throttle, getSize, orderCompare} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import TdLibController from './Controllers/TdLibController'
 import localForage from 'localforage';
@@ -32,18 +32,11 @@ class TelegramApp extends Component{
         };
         this.downloads = new Map();
 
-        this.store = localForage.createInstance({
+        /*this.store = localForage.createInstance({
             name: '/tdlib'
-        });
+        });*/
 
-        let request = window.indexedDB.open('/tdlib');
-        request.onerror = function(event) {
-            console.log("error: ");
-        };
-        request.onsuccess = function(event) {
-            this.db = request.result;
-            console.log("success: " + this.db);
-        }.bind(this);
+        //this.initDB();
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
@@ -51,6 +44,28 @@ class TelegramApp extends Component{
         this.handleSendText = this.handleSendText.bind(this);
         this.handleSendFile = this.handleSendFile.bind(this);
         this.handleLoadDialogs = this.handleLoadDialogs.bind(this);
+        this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
+    }
+
+    initDB(){
+        if (this.db) return;
+        if (this.initiatingDB) return;
+
+        console.log('initDB');
+
+        this.initiatingDB = true;
+
+        let request = window.indexedDB.open('/tdlib');
+        request.onerror = function(event) {
+            this.initiatingDB = false;
+            console.log("error initDB");
+        }.bind(this);
+        request.onsuccess = function(event) {
+            this.db = request.result;
+
+            this.initiatingDB = false;
+            console.log("success initDB");
+        }.bind(this);
     }
 
     componentDidMount(){
@@ -100,6 +115,10 @@ class TelegramApp extends Component{
     }
 
     onUpdate(update) {
+
+        // NOTE: important to start init DB after receiving first update
+        this.initDB();
+
         switch (update['@type']) {
             case 'updateFatalError':
                 alert('Oops! Something went wrong. We need to refresh this page.');
@@ -136,7 +155,7 @@ class TelegramApp extends Component{
             return x.id !== chat_id ? x : Object.assign({}, x, {'last_message' : last_message, 'order' : order });
         });
 
-        const orderedChats = updatedChats.sort((a, b) => { return b.order - a.order; });
+        const orderedChats = updatedChats.sort((a, b) => { return orderCompare(b.order, a.order); });
 
         this.setState({ chats: orderedChats });
     }
@@ -445,10 +464,24 @@ class TelegramApp extends Component{
                 });
         }
 
+        let messageIds = [];
+        if (chat.last_message
+            && chat.last_message.id){
+            messageIds.push(chat.last_message.id);
+        }
+
         TdLibController
             .send({
                 '@type': 'openChat',
                 chat_id: chat.id,
+            })
+            .then(() => {
+                return TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: chat.id,
+                        message_ids: messageIds
+                    });
             });
     }
 
@@ -616,22 +649,33 @@ class TelegramApp extends Component{
 
     handleLoadDialogs(){
         if (this.loading) return;
-        if (this.lastSliceLoaded) return;
 
-        let offsetOrder = 8000000000000000000;
+        //let test1 = '9221294784512000001';
+        //let test2 = '9221294784512000002';
+        //let test3 = test2 > test1;
+
+        let offsetOrder = '9223372036854775807'; // 2^63
+        let offsetChatId = 0;
         if (this.state.chats && this.state.chats.length > 0){
             offsetOrder = this.state.chats[this.state.chats.length - 1].order;
+            offsetChatId = this.state.chats[this.state.chats.length - 1].id;
         }
 
         TdLibController
             .send({
                 '@type': 'getChats',
+                offset_chat_id: offsetChatId,
                 offset_order: offsetOrder,
                 limit: CHAT_SLICE_LIMIT
             })
             .then(result => {
                 this.loading = false;
-                this.lastSliceLoaded = result.chat_ids.length < CHAT_SLICE_LIMIT;
+
+                if (result.chat_ids.length > 0
+                    && result.chat_ids[0] === offsetChatId) {
+                    result.chat_ids.shift();
+                }
+
                 this.onGetChats(result);
             })
             .catch(() => {
@@ -683,7 +727,7 @@ class TelegramApp extends Component{
             .then(() => alert('cache cleared'));
     }
 
-    onUpdateItemsInView(messages){
+    handleUpdateItemsInView(messages){
         if (!messages) return;
 
         let ids = messages.map(x => x.id);
@@ -738,7 +782,7 @@ class TelegramApp extends Component{
                                 onSendText={this.handleSendText}
                                 onSendFile={this.handleSendFile}
                                 onLoadNext={x => this.onLoadNext(x, true)}
-                                onUpdateItemsInView={items => this.onUpdateItemsInView(items)}
+                                onUpdateItemsInView={this.handleUpdateItemsInView}
                             />
                         </div>
                         <Footer/>
