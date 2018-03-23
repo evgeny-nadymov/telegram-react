@@ -1083,7 +1083,12 @@ var TdClient = function () {
     var self = this;
     this.worker.onmessage = function (e) {
       var response = e.data;
-      console.log('receive from worker: ' + (0, _stringify2.default)(response));
+      console.log('receive from worker: ' + (0, _stringify2.default)(response, function (key, value) {
+        if (key == 'arr') {
+          return undefined;
+        }
+        return value;
+      }));
       if ('@extra' in response) {
         var query_id = response['@extra'].query_id;
 
@@ -2574,7 +2579,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-	return new Worker(__webpack_require__.p + "653c309b6c18404f76e6.worker.js");
+	return new Worker(__webpack_require__.p + "e30f8885d52270072dca.worker.js");
 };
 
 /***/ })
