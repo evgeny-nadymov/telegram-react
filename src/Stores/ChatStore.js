@@ -23,6 +23,13 @@ class ChatStore extends EventEmitter{
                     chat.last_message = update.last_message;
                 }
                 break; }
+            case 'updateChatIsPinned': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.order = update.order === '0' ? chat.order : update.order;
+                    chat.is_pinned = update.is_pinned;
+                }
+                break; }
             case 'updateChatOrder': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){

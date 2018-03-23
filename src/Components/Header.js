@@ -104,10 +104,10 @@ class Header extends Component{
                             </div>
                         </div>
                         <div className='header-details'>
-                            <div className='header-status grow'>
+                            <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>{connectionState}</span>
                             </div>
-                            <div className='header-button pointer' onClick={args => this.handleSubmit(args)}>
+                            <div className='header-button cursor-pointer' onClick={args => this.handleSubmit(args)}>
                                 <span className='header-button-content'>LOG OUT</span>
                             </div>
                         </div>

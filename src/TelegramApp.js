@@ -139,6 +139,9 @@ class TelegramApp extends Component{
             case 'updateChatLastMessage':
                 this.onUpdateChatLastMessage(update.chat_id, update.order, update.last_message);
                 break;
+            case 'updateChatIsPinned':
+                this.onUpdateChatIsPinned(update.chat_id, update.order, update.is_pinned);
+                break;
             case 'updateFile':
                 this.onUpdateFile(update.file);
                 break;
@@ -155,7 +158,27 @@ class TelegramApp extends Component{
             return x.id !== chat_id ? x : Object.assign({}, x, {'last_message' : last_message, 'order' : order });
         });
 
-        const orderedChats = updatedChats.sort((a, b) => { return orderCompare(b.order, a.order); });
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
+    onUpdateChatIsPinned(chat_id, order, is_pinned){
+        if (order === '0') return;
+
+        let updatedChats = this.state.chats.map(x =>{
+            return x.id !== chat_id ? x : Object.assign({}, x, {'is_pinned' : is_pinned, 'order' : order });
+        });
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
 
         this.setState({ chats: orderedChats });
     }
