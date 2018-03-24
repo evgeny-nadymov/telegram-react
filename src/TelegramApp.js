@@ -48,17 +48,27 @@ class TelegramApp extends Component{
     }
 
     initDB(){
+        /*if (this.store) return;
+        if (this.initiatingDB) return;
+
+        this.initiatingDB = true;
+        this.store = localForage.createInstance({
+            name: '/tdlib'
+        });
+        this.initiatingDB = false;
+
+        return;*/
         if (this.db) return;
         if (this.initiatingDB) return;
 
         console.log('initDB');
 
         this.initiatingDB = true;
-
         let request = window.indexedDB.open('/tdlib');
         request.onerror = function(event) {
             this.initiatingDB = false;
             console.log("error initDB");
+            alert(JSON.stringify(event));
         }.bind(this);
         request.onsuccess = function(event) {
             this.db = request.result;
@@ -136,11 +146,17 @@ class TelegramApp extends Component{
             case 'updateMessageSendSucceeded':
                 this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
                 break;
+            case 'updateChatDraftMessage':
+                this.onUpdateChatDraftMessage(update.chat_id, update.order, update.draft_message);
+                break;
             case 'updateChatLastMessage':
                 this.onUpdateChatLastMessage(update.chat_id, update.order, update.last_message);
                 break;
             case 'updateChatIsPinned':
                 this.onUpdateChatIsPinned(update.chat_id, update.order, update.is_pinned);
+                break;
+            case 'updateChatOrder':
+                this.onUpdateChatOrder(update.chat_id, update.order);
                 break;
             case 'updateFile':
                 this.onUpdateFile(update.file);
@@ -150,13 +166,75 @@ class TelegramApp extends Component{
         }
     }
 
+    onUpdateChatDraftMessage(chat_id, order, draft_message){
+        if (order === '0') return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'order' : order, 'draft_message' : draft_message });
+        });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
     onUpdateChatLastMessage(chat_id, order, last_message){
         if (!last_message) return;
         if (order === '0') return;
 
+        let chatExists = false;
         let updatedChats = this.state.chats.map(x =>{
-            return x.id !== chat_id ? x : Object.assign({}, x, {'last_message' : last_message, 'order' : order });
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'order' : order, 'last_message' : last_message });
         });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
+    onUpdateChatOrder(chat_id, order){
+        if (order === '0') return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'order' : order });
+        });
+
+        if (!chatExists) {
+            return;
+        }
 
         const orderedChats = updatedChats.sort((a, b) => {
             let result = orderCompare(b.order, a.order);
@@ -170,9 +248,19 @@ class TelegramApp extends Component{
     onUpdateChatIsPinned(chat_id, order, is_pinned){
         if (order === '0') return;
 
+        let chatExists = false;
         let updatedChats = this.state.chats.map(x =>{
-            return x.id !== chat_id ? x : Object.assign({}, x, {'is_pinned' : is_pinned, 'order' : order });
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'order' : order, 'is_pinned' : is_pinned });
         });
+
+        if (!chatExists) {
+            return;
+        }
 
         const orderedChats = updatedChats.sort((a, b) => {
             let result = orderCompare(b.order, a.order);

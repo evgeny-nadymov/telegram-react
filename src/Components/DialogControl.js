@@ -39,6 +39,7 @@ class DialogControl extends Component{
     render(){
         const chat = this.props.chat;
         const content = this.getChatContent(chat);
+        const title = chat.title || 'Deleted account';
 
         const dialogClassName = this.props.isSelected ? 'dialog-active' : 'dialog';
 
@@ -47,7 +48,7 @@ class DialogControl extends Component{
                 <div className='dialog-wrapper' onMouseDown={() => this.handleClick()}>
                     <TileControl chat={this.props.chat}/>
                     <div className='dialog-content-wrap'>
-                        <div className='dialog-title'>{chat.title}</div>
+                        <div className='dialog-title'>{title}</div>
                         <div className='dialog-content'><span>{content}</span></div>
                         {/*<div className='dialog-date'>{this.props.chat.order}:{this.props.chat.last_message.date}</div>*/}
                     </div>

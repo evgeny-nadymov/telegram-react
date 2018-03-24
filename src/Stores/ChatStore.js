@@ -16,6 +16,13 @@ class ChatStore extends EventEmitter{
             case 'updateNewChat':
                 this.items.set(update.chat.id, update.chat);
                 break;
+            case 'updateChatDraftMessage': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.order = update.order === '0' ? chat.order : update.order;
+                    chat.draft_message = update.draft_message;
+                }
+                break; }
             case 'updateChatLastMessage': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){
