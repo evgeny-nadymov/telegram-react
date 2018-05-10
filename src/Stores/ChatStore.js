@@ -13,6 +13,22 @@ class ChatStore extends EventEmitter{
 
     onUpdate(update){
         switch (update['@type']) {
+            case 'updateChatReadInbox': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.last_read_inbox_message_id = update.last_read_inbox_message_id;
+                    chat.unread_count = update.unread_count;
+                }
+                break; }
+            case 'updateNotificationSettings':
+                if (update.scope['@type'] === 'notificationSettingsScopeChat'
+                    && update.notification_settings){
+                    let chat = this.items.get(update.chat_id);
+                    if (chat){
+                        chat.notification_settings = update.notification_settings;
+                    }
+                }
+                break;
             case 'updateNewChat':
                 this.items.set(update.chat.id, update.chat);
                 break;

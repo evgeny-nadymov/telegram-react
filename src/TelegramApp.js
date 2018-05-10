@@ -152,11 +152,17 @@ class TelegramApp extends Component{
             case 'updateChatLastMessage':
                 this.onUpdateChatLastMessage(update.chat_id, update.order, update.last_message);
                 break;
+            case 'updateNotificationSettings':
+                this.onUpdateNotificationSettings(update.scope, update.notification_settings);
+                break;
             case 'updateChatIsPinned':
                 this.onUpdateChatIsPinned(update.chat_id, update.order, update.is_pinned);
                 break;
             case 'updateChatOrder':
                 this.onUpdateChatOrder(update.chat_id, update.order);
+                break;
+            case 'updateChatReadInbox':
+                this.onUpdateChatReadInbox(update.chat_id, update.last_read_inbox_message_id, update.unread_count);
                 break;
             case 'updateFile':
                 this.onUpdateFile(update.file);
@@ -192,6 +198,34 @@ class TelegramApp extends Component{
         this.setState({ chats: orderedChats });
     }
 
+    onUpdateNotificationSettings(scope, notification_settings){
+        if (!scope) return;
+        if (!notification_settings) return;
+        if (scope['@type'] !== 'notificationSettingsScopeChat') return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== scope.chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'notification_settings' : notification_settings });
+        });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
     onUpdateChatLastMessage(chat_id, order, last_message){
         if (!last_message) return;
         if (order === '0') return;
@@ -204,6 +238,32 @@ class TelegramApp extends Component{
 
             chatExists = true;
             return Object.assign({}, x, {'order' : order, 'last_message' : last_message });
+        });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
+    onUpdateChatReadInbox(chat_id, last_read_inbox_message_id, unread_count){
+        if (!chat_id) return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'last_read_inbox_message_id' : last_read_inbox_message_id, 'unread_count' : unread_count });
         });
 
         if (!chatExists) {

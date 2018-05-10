@@ -17,6 +17,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 700;
+    margin: 3px 0;
 }
 
 .dialog-date{
@@ -31,11 +33,56 @@
 }
 
 .dialog-content-wrap{
-    height: 48px;
+    width: 48px;
     overflow: hidden;
     user-select: none;
+    flex-grow: 1;
 }
 
 .dialog-wrapper{
     padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.dialog-badge-wrapper{
+    display: flex;
+    flex-direction: column;
+    margin-left: 6px;
+    height: 48px;
+}
+
+.dialog-badge{
+    background: #64c270;
+    font-size: 11px;
+    padding: 5px;
+    border-radius: 11px;
+    min-width: 11px;
+    text-align: center;
+    margin-bottom: 2px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.dialog-badge-muted{
+    background: #bfbfbf;
+}
+
+.dialog-badge-header{
+    flex-grow: 1;
+}
+
+.dialog-pinned{
+    display: inline-block;
+    float: right;
+    width: 14px;
+    height: 14px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    background-image: url(../Assets/Icons/General.png);
+    background-repeat: no-repeat;
+    background-position: -13px -916px;
 }

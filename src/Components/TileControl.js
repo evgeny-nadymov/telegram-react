@@ -44,10 +44,11 @@ class TileControl extends Component{
 
     getChatLetters(chat){
         if (!chat) return null;
-        if (!chat.title) return null;
-        if (chat.title.length === 0) return null;
 
-        let split = chat.title.split(' ');
+        let title = chat.title || 'Deleted account';
+        if (title.length === 0) return null;
+
+        let split = title.split(' ');
         if (split.length > 1){
             return this.getFirstLetter(split[0]) + this.getFirstLetter(split[1])
         }
@@ -58,13 +59,22 @@ class TileControl extends Component{
     render(){
         const chat = this.props.chat;
         const letters = this.getChatLetters(chat);
+        let src;
+        try{
+            src = chat.blob ? URL.createObjectURL(chat.blob) : null;
+        }
+        catch(error){
+            console.log(`TileControl.render chat_id=${chat.id} with error ${error}`);
+        }
 
-        const backgroundColor = chat.blob !== undefined ? '' : 'user_bgcolor_' + (Math.abs(chat.id) % 8 + 1);
-        const photoClasses = `${backgroundColor} tile-photo`;
+        let photoClasses = 'tile-photo';
+        if (!chat.blob){
+            photoClasses += ` user_bgcolor_${(Math.abs(chat.id) % 8 + 1)}`;
+        }
 
-        return chat.blob !== undefined ?
-            (<img className={photoClasses} src={URL.createObjectURL(chat.blob)} alt="" />) :
-            (<div className={photoClasses}><span className='tile-text'>{ letters }</span></div>);
+        return src ?
+            (<img className={photoClasses} src={src} alt='' />) :
+            (<div className={photoClasses}><span className='tile-text'>{letters}</span></div>);
     }
 }
 

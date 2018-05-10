@@ -41,20 +41,31 @@ class PhotoControl extends React.Component {
         if (!fitSize) return null;
 
         let className = 'photo-img';
-        let src = size.blob ? URL.createObjectURL(size.blob) : '';
+        let src = '';
+        try{
+            src = size.blob ? URL.createObjectURL(size.blob) : '';
+        }
+        catch(error){
+            console.log(`PhotoControl.render photo with error ${error}`);
+        }
 
         if (!size.blob && this.props.message.content.photo.sizes.length > 0)
         {
             let previewSize = this.props.message.content.photo.sizes[0];
             if (previewSize && previewSize.blob){
                 className += ' photo-img-blur';
-                src = URL.createObjectURL(previewSize.blob);
+                try{
+                    src = previewSize.blob ? URL.createObjectURL(previewSize.blob) : '';
+                }
+                catch(error){
+                    console.log(`PhotoControl.render photo with error ${error}`);
+                }
             }
         }
 
         return (
                 <div className='photo-img-wrapper' style={{width: fitSize.width, height: fitSize.height}}>
-                    <img className={className} width={fitSize.width} height={fitSize.height} src={src} alt=""></img>
+                    <img className={className} width={fitSize.width} height={fitSize.height} src={src} alt=''/>
                 </div>
             );
     }

@@ -176,6 +176,12 @@ class MessageControl extends Component{
         }
     }
 
+    getReply(message){
+        if (!message.reply_to_message_id) return null;
+
+        return null;
+    }
+
     render(){
         let message = this.props.message;
         if (!message) return (<div>[empty message]</div>);
@@ -186,6 +192,7 @@ class MessageControl extends Component{
         let text = this.getText(message);//JSON.stringify(message);
         let date = this.getDate(message);
         let media = this.getMedia(message);
+        let reply = this.getReply(message);
         return (
             <div className={messageClassName}>
                 <div className='message-wrapper'>

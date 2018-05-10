@@ -42,10 +42,17 @@ class StickerControl extends React.Component {
         };
 
         let fitSize = getFitSize(size, 192);
+        let src = '';
+        try{
+            src = file.blob ? URL.createObjectURL(file.blob) : '';
+        }
+        catch(error){
+            console.log(`StickerControl.render sticker with error ${error}`);
+        }
 
-        return file.blob !== undefined ?
-            (<img className='sticker-img' width={fitSize.width} height={fitSize.height} src={URL.createObjectURL(file.blob)} alt=""></img>) :
-            (<img className='sticker-img' width={fitSize.width} height={fitSize.height} src="" alt=""></img>);
+        return (
+            <img className='sticker-img' width={fitSize.width} height={fitSize.height} src={src} alt=''/>
+        );
     }
 }
 
