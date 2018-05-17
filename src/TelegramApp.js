@@ -134,6 +134,9 @@ class TelegramApp extends Component{
                 alert('Oops! Something went wrong. We need to refresh this page.');
                 window.location.reload();
                 break;
+            case 'updateUserChatAction':
+                this.onUpdateUserChatAction(update.chat_id, update.user_id, update.action);
+                break;
             case 'updateNewChat':
                 //this.onUpdateChatTitle(update.chat.id, update.chat.title);
                 break;
@@ -164,12 +167,26 @@ class TelegramApp extends Component{
             case 'updateChatReadInbox':
                 this.onUpdateChatReadInbox(update.chat_id, update.last_read_inbox_message_id, update.unread_count);
                 break;
+            case 'updateChatUnreadMentionCount':
+                this.onUpdateChatUnreadMentionCount(update.chat_id, update.unread_mention_count);
+                break;
+            case 'updateMessageMentionRead':
+                this.onUpdateChatUnreadMentionCount(update.chat_id, update.unread_mention_count);
+                break;
             case 'updateFile':
                 this.onUpdateFile(update.file);
                 break;
             default:
                 break;
         }
+    }
+
+    onUpdateUserChatAction(chat_id, user_id, action){
+        if (!chat_id) return;
+        if (!user_id) return;
+        if (!action) return;
+
+
     }
 
     onUpdateChatDraftMessage(chat_id, order, draft_message){
@@ -238,6 +255,32 @@ class TelegramApp extends Component{
 
             chatExists = true;
             return Object.assign({}, x, {'order' : order, 'last_message' : last_message });
+        });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
+    onUpdateChatUnreadMentionCount(chat_id, unread_mention_count){
+        if (!chat_id) return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'unread_mention_count' : unread_mention_count});
         });
 
         if (!chatExists) {
@@ -652,6 +695,13 @@ class TelegramApp extends Component{
                         '@type': 'viewMessages',
                         chat_id: chat.id,
                         message_ids: messageIds
+                    });
+            })
+            .then(() => {
+                return TdLibController
+                    .send({
+                        '@type': 'readAllChatMentions',
+                        chat_id: chat.id
                     });
             });
     }

@@ -6,6 +6,7 @@
   "dependencies": {
     "@arseny30/tdweb": "0.2.7",
     "classnames": "^2.2.5",
+    "dateformat": "^3.0.3",
     "events": "^2.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^4.2.3",

@@ -12,17 +12,33 @@
     cursor: pointer;
 }
 
+.dialog-title-wrapper{
+    margin: 3px 0;
+    display: flex;
+}
+
 .dialog-title{
     word-wrap: break-word;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 700;
-    margin: 3px 0;
+    flex-grow: 1;
 }
 
 .dialog-date{
-    font-size: 9px;
+    font-size: .85em;
+    color: #b3b3b3;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+
+.dialog-date-active{
+    color: #fff;
+}
+
+.dialog-content-wrapper{
+    display: flex;
 }
 
 .dialog-content{
@@ -30,6 +46,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex-grow: 1;
 }
 
 .dialog-content-wrap{
@@ -40,7 +57,7 @@
 }
 
 .dialog-wrapper{
-    padding: 10px;
+    padding: 7px 16px;
     display: flex;
     align-items: center;
 }
@@ -57,9 +74,9 @@
     font-size: 11px;
     padding: 5px;
     border-radius: 11px;
-    min-width: 11px;
     text-align: center;
-    margin-bottom: 2px;
+    margin-top: -2px;
+    margin-left: 6px;
     font-weight: 700;
     color: #fff;
     line-height: 1;
@@ -67,22 +84,26 @@
     white-space: nowrap;
 }
 
-.dialog-badge-muted{
-    background: #bfbfbf;
+.dialog-badge-text{
+    min-width: 11px;
 }
 
-.dialog-badge-header{
-    flex-grow: 1;
+.dialog-badge-mention{
+    min-width: 11px;
+    transform: translateY(-1px);
+}
+
+.dialog-badge-muted{
+    background: #bfbfbf;
 }
 
 .dialog-pinned{
     display: inline-block;
     float: right;
-    width: 14px;
+    min-width: 14px;
     height: 14px;
     overflow: hidden;
     margin-bottom: 4px;
-    background-image: url(../Assets/Icons/General.png);
-    background-repeat: no-repeat;
-    background-position: -13px -916px;
+    margin-left: 6px;
+    background: url(../Assets/Icons/General.png) no-repeat -13px -916px;
 }

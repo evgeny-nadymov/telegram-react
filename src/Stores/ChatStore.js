@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import TdLibController from "../Controllers/TdLibController";
+import InputTypingManager from "../Components/InputTypingManager";
 
 class ChatStore extends EventEmitter{
     constructor(){
@@ -13,13 +14,47 @@ class ChatStore extends EventEmitter{
 
     onUpdate(update){
         switch (update['@type']) {
+            case 'updateUserChatAction':{
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    if (!chat.inputTypingManager){
+                        chat.inputTypingManager = new InputTypingManager(update.chat_id);
+                    }
+
+                    let key = update.user_id;
+                    if (update.action['@type'] === 'chatActionCancel'){
+                        chat.inputTypingManager.clearAction(key);
+                    }
+                    else{
+                        chat.inputTypingManager.addAction(key, update.action);
+                    }
+
+                    //this.updateChatTyping(update.chat_id);
+                }
+                break;
+            }
             case 'updateChatReadInbox': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){
                     chat.last_read_inbox_message_id = update.last_read_inbox_message_id;
                     chat.unread_count = update.unread_count;
                 }
-                break; }
+                break;
+            }
+            case 'updateChatUnreadMentionCount': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.unread_mention_count = update.unread_mention_count;
+                }
+                break;
+            }
+            case 'updateMessageMentionRead': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.unread_mention_count = update.unread_mention_count;
+                }
+                break;
+            }
             case 'updateNotificationSettings':
                 if (update.scope['@type'] === 'notificationSettingsScopeChat'
                     && update.notification_settings){
@@ -38,27 +73,31 @@ class ChatStore extends EventEmitter{
                     chat.order = update.order === '0' ? chat.order : update.order;
                     chat.draft_message = update.draft_message;
                 }
-                break; }
+                break;
+            }
             case 'updateChatLastMessage': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){
                     chat.order = update.order === '0' ? chat.order : update.order;
                     chat.last_message = update.last_message;
                 }
-                break; }
+                break;
+            }
             case 'updateChatIsPinned': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){
                     chat.order = update.order === '0' ? chat.order : update.order;
                     chat.is_pinned = update.is_pinned;
                 }
-                break; }
+                break;
+            }
             case 'updateChatOrder': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){
                     chat.order = update.order === '0' ? chat.order : update.order;
                 }
-                break; }
+                break;
+            }
             default:
                 break;
         }
@@ -69,15 +108,19 @@ class ChatStore extends EventEmitter{
     }
 
     updatePhoto(chatId){
-        this.emit("chat_photo_changed", {chatId: chatId});
+        this.emit('chat_photo_changed', {chatId: chatId});
     }
 
     updateMessagePhoto(messageId){
-        this.emit("message_photo_changed", {messageId: messageId});
+        this.emit('message_photo_changed', {messageId: messageId});
     }
 
     updateMessageSticker(messageId){
-        this.emit("message_sticker_changed", {messageId: messageId});
+        this.emit('message_sticker_changed', {messageId: messageId});
+    }
+
+    updateChatTyping(chatId){
+        this.emit("chat_typing_changed", {chatId: chatId});
     }
 }
 
