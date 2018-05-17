@@ -103,7 +103,6 @@ class DialogControl extends Component{
         const muteFor = this.getChatMuteFor(chat);
         const muteForClassName = muteFor > 0 ? 'dialog-badge-muted' : '';
 
-
         return (
             <div className={dialogClassName}>
                 <div className='dialog-wrapper' onMouseDown={() => this.handleClick()}>

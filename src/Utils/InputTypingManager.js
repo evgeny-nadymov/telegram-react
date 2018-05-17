@@ -1,4 +1,5 @@
 import ChatStore from '../Stores/ChatStore';
+import {INPUT_TYPING_INTERVAL} from '../Constants';
 
 class InputTypingManager {
     constructor(chatId){
@@ -31,7 +32,7 @@ class InputTypingManager {
 
     addAction(userId, action){
         let expire = new Date();
-        expire.setSeconds(expire.getSeconds() + 8);
+        expire.setSeconds(expire.getSeconds() + INPUT_TYPING_INTERVAL);
 
         this.actions.set(userId, {expire: expire, action: action});
 

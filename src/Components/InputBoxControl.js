@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './InputBoxControl.css';
 import TileControl from "./TileControl";
+import OutputTypingManager from "../Utils/OutputTypingManager";
 
 class InputBoxControl extends Component{
 
@@ -51,6 +52,14 @@ class InputBoxControl extends Component{
             && innerHTML
             && (innerHTML === '<br>' || innerHTML === '<div><br></div>')){
             this.refs.newMessage.innerHTML = '';
+        }
+
+        if (innerText){
+            if (!this.props.selectedChat.OutputTypingManager){
+                this.props.selectedChat.OutputTypingManager = new OutputTypingManager(this.props.selectedChat.id);
+            }
+
+            this.props.selectedChat.OutputTypingManager.setTyping({'@type' : 'chatActionTyping'});
         }
     }
 

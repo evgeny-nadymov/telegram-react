@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import TdLibController from "../Controllers/TdLibController";
-import InputTypingManager from "../Components/InputTypingManager";
+import InputTypingManager from "../Utils/InputTypingManager";
 
 class ChatStore extends EventEmitter{
     constructor(){
