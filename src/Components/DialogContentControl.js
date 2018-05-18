@@ -1,6 +1,8 @@
 import React from 'react';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import classNames from 'classnames';
+import './DialogContentControl.css';
 
 class DialogContentControl extends React.Component {
     constructor(props){
@@ -164,10 +166,39 @@ class DialogContentControl extends React.Component {
 
     render() {
         let typingString = this.getTypingString(this.props.chat);
-        let content = typingString ? typingString : this.props.content;
+        if (typingString){
+            return (
+                <div className='dialog-content'>
+                    <span className='dialog-content-accent'>{typingString}...</span>
+                </div>
+            );
+        }
+
+        if (this.props.chat
+            && this.props.chat.draft_message
+            && this.props.chat.draft_message.input_message_text
+            && this.props.chat.draft_message.input_message_text.text){
+            return (
+                <div className='dialog-content'>
+                    <span className='dialog-content-draft'>Draft: </span>
+                    <span>{this.props.chat.draft_message.input_message_text.text.text}</span>
+                </div>
+            );
+        }
+
+        let content = this.props.content;
+        let sender = null;
+        if (this.props.sender
+        && (this.props.sender.first_name || this.props.sender.last_name)
+        && (this.props.chat.type['@type'] === 'chatTypeBasicGroup' || this.props.chat.type['@type'] === 'chatTypeSupergroup')){
+            sender = this.props.sender.first_name ? this.props.sender.first_name : this.props.sender.last_name;
+        }
 
         return (
-            <div className='dialog-content'><span>{content}</span></div>
+            <div className='dialog-content'>
+                {sender && <span className='dialog-content-accent'>{sender}: </span>}
+                <span>{content}</span>
+            </div>
         );
     }
 }

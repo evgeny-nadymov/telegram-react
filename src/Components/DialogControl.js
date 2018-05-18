@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './DialogControl.css';
 import TileControl from './TileControl';
 import ChatStore from '../Stores/ChatStore';
+import UserStore from '../Stores/UserStore';
 import classNames from 'classnames';
 import dateFormat from 'dateformat';
 import DialogContentControl from "./DialogContentControl";
@@ -21,6 +22,14 @@ class DialogControl extends Component{
 
     handleClick(){
         this.props.onClick(this.props.chat);
+    }
+
+    getChatSender(chat){
+        if (!chat) return null;
+        if (!chat.last_message) return null;
+        if (!chat.last_message.sender_user_id) return null;
+
+        return UserStore.get(chat.last_message.sender_user_id);
     }
 
     getChatContent(chat){
@@ -66,6 +75,7 @@ class DialogControl extends Component{
         if (!chat) return null;
         if (!chat.last_message) return null;
         if (!chat.last_message.date) return null;
+        if (chat.draft_message) return null;
 
         let date = new Date(chat.last_message.date * 1000);
 
@@ -91,11 +101,11 @@ class DialogControl extends Component{
     render(){
         const chat = this.props.chat;
         const content = this.getChatContent(chat);
+        const sender = this.getChatSender(chat);
         const title = chat.title || 'Deleted account';
         const date = this.getDate(chat);
 
         const dialogClassName = this.props.isSelected ? 'dialog-active' : 'dialog';
-        const dialogDateClassName =  classNames(this.props.isSelected ? 'dialog-date-active' : null, 'dialog-date');
 
         const unreadCount = this.getChatUnreadCount(chat);
         const unreadMentionCount = this.getChatUnreadMentionCount(chat);
@@ -110,10 +120,10 @@ class DialogControl extends Component{
                     <div className='dialog-content-wrap'>
                         <div className='dialog-title-wrapper'>
                             <div className='dialog-title'>{title}</div>
-                            <div className={dialogDateClassName}>{date}</div>
+                            {date && <div className='dialog-date'>{date}</div>}
                         </div>
                         <div className='dialog-content-wrapper'>
-                            <DialogContentControl chat={this.props.chat} content={content}/>
+                            <DialogContentControl chat={this.props.chat} sender={sender} content={content}/>
                             {/*<div className='dialog-content'><span>{content}</span></div>*/}
                             {unreadMentionCount && <div className='dialog-badge'><div className='dialog-badge-mention'>@</div></div> }
                             {showUnreadCount ? <div className={classNames(muteForClassName, 'dialog-badge')}><div className='dialog-badge-text'>{unreadCount}</div></div> : (chat.is_pinned ? <i className='dialog-pinned'/> : null) }

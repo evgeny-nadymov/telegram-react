@@ -12,6 +12,10 @@
     cursor: pointer;
 }
 
+.dialog-active .dialog-date{
+    color: #fff;
+}
+
 .dialog-title-wrapper{
     margin: 3px 0;
     display: flex;

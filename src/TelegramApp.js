@@ -676,7 +676,43 @@ class TelegramApp extends Component{
                     '@type': 'closeChat',
                     chat_id: previousChat.id,
                 });
+
+            let newDraft = this.refs.dialogDetails.refs.inputBox.getInputText();
+            let previousDraft = '';
+            if (previousChat.draft_message
+                && previousChat.draft_message.input_message_text
+                && previousChat.draft_message.input_message_text.text){
+                previousDraft = previousChat.draft_message.input_message_text.text.text;
+            }
+
+            if (newDraft !== previousDraft){
+                let newDraftMessage = null;
+                if (newDraft){
+                    newDraftMessage = {
+                        '@type': 'draftMessage',
+                        reply_to_message_id: 0,
+                        input_message_text: {
+                            '@type': 'inputMessageText',
+                            text: {
+                                '@type': 'formattedText',
+                                text: newDraft,
+                                entities: null
+                            },
+                            disable_web_page_preview: true,
+                            clear_draft: false
+                        }
+                    };
+                }
+
+                TdLibController
+                    .send({
+                        '@type': 'setChatDraftMessage',
+                        chat_id: previousChat.id,
+                        draft_message: newDraftMessage
+                    });
+            }
         }
+
 
         let messageIds = [];
         if (chat.last_message
@@ -836,7 +872,13 @@ class TelegramApp extends Component{
 
         const content = {
             '@type': 'inputMessageText',
-            text: { '@type': 'formattedText', text: text }
+            text: {
+                '@type': 'formattedText',
+                text: text,
+                entities: null
+            },
+            disable_web_page_preview: false,
+            clear_draft: true
         };
 
         this.onSendInternal(content);
@@ -861,11 +903,21 @@ class TelegramApp extends Component{
             .send({
                 '@type': 'sendMessage',
                 chat_id: this.state.selectedChat.id,
+                reply_to_message_id: 0,
                 input_message_content: content
             })
             .catch(error =>{
                 alert('sendMessage error ' + error);
             });
+
+        /*if (this.state.selectedChat.draft_message){
+            TdLibController
+                .send({
+                    '@type': 'setChatDraftMessage',
+                    chat_id: this.state.selectedChat.id,
+                    draft_message: null
+                });
+        }*/
     }
 
     handleLoadDialogs(){
@@ -997,6 +1049,7 @@ class TelegramApp extends Component{
                                 onSelectChat={this.handleSelectChat}
                                 onLoadNext={this.handleLoadDialogs}/>
                             <DialogDetails
+                                ref='dialogDetails'
                                 selectedChat={this.state.selectedChat}
                                 scrollBottom={this.state.scrollBottom}
                                 history={this.state.history}

@@ -117,7 +117,7 @@ class DialogDetails extends Component{
                 </div>
                 {   this.props.selectedChat &&
                     <div className='dialogdetails-input-wrapper'>
-                        <InputBoxControl className='dialogdetails-input' selectedChat={this.props.selectedChat} onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
+                        <InputBoxControl ref='inputBox' className='dialogdetails-input' selectedChat={this.props.selectedChat} onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
                     </div>
                 }
             </div>

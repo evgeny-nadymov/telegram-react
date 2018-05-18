@@ -5,3 +5,16 @@
     text-overflow: ellipsis;
     flex-grow: 1;
 }
+
+.dialog-content-accent{
+    color: #3a6d99;
+}
+
+.dialog-active .dialog-content-accent,
+.dialog-active .dialog-content-draft{
+    color: #fff;
+}
+
+.dialog-content-draft{
+    color: #c05f5a;
+}

@@ -43,6 +43,20 @@ class InputBoxControl extends Component{
         this.refs.attachFile.value = '';
     }
 
+    getInputText(){
+        let innerText = this.refs.newMessage.innerText;
+        let innerHTML = this.refs.newMessage.innerHTML;
+
+        if (innerText
+            && innerText === '\n'
+            && innerHTML
+            && (innerHTML === '<br>' || innerHTML === '<div><br></div>')){
+            this.refs.newMessage.innerHTML = '';
+        }
+
+        return innerText;
+    }
+
     handleInputChange(){
         let innerText = this.refs.newMessage.innerText;
         let innerHTML = this.refs.newMessage.innerHTML;
@@ -71,9 +85,19 @@ class InputBoxControl extends Component{
     }
 
     render(){
+        let text = '';
+        if (this.props.selectedChat
+            && this.props.selectedChat.draft_message
+            && this.props.selectedChat.draft_message.input_message_text
+            && this.props.selectedChat.draft_message.input_message_text.text){
+            text = this.props.selectedChat.draft_message.input_message_text.text.text;
+        }
+
         return (
             <div className='inputbox-wrapper'>
-                <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' contentEditable={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}/>
+                <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
+                    {text}
+                </div>
                 <div className='inputbox-buttons'>
                     <div className='inputbox-attach-wrapper'>
                         <input className='inputbox-attach-button' type='file' ref='attachFile' onChange={this.handleAttachComplete}/>
