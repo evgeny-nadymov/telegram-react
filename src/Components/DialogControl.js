@@ -48,6 +48,13 @@ class DialogControl extends Component{
         }
     }
 
+    getChatUnreadMessageIcon(chat){
+        if (!chat) return false;
+        if (!chat.last_message) return false;
+
+        return chat.last_message.is_outgoing && chat.last_message.id > chat.last_read_outbox_message_id;
+    }
+
     getChatUnreadCount(chat){
         if (!chat) return null;
         if (!chat.unread_count) return null;
@@ -107,6 +114,7 @@ class DialogControl extends Component{
 
         const dialogClassName = this.props.isSelected ? 'dialog-active' : 'dialog';
 
+        const unreadMessageIcon = this.getChatUnreadMessageIcon(chat);
         const unreadCount = this.getChatUnreadCount(chat);
         const unreadMentionCount = this.getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
@@ -125,8 +133,9 @@ class DialogControl extends Component{
                         <div className='dialog-content-wrapper'>
                             <DialogContentControl chat={this.props.chat} sender={sender} content={content}/>
                             {/*<div className='dialog-content'><span>{content}</span></div>*/}
+                            {unreadMessageIcon && <i className='dialog-unread'/>}
                             {unreadMentionCount && <div className='dialog-badge'><div className='dialog-badge-mention'>@</div></div> }
-                            {showUnreadCount ? <div className={classNames(muteForClassName, 'dialog-badge')}><div className='dialog-badge-text'>{unreadCount}</div></div> : (chat.is_pinned ? <i className='dialog-pinned'/> : null) }
+                            {showUnreadCount ? <div className={classNames(muteForClassName, 'dialog-badge')}><div className='dialog-badge-text'>{unreadCount}</div></div> : (chat.is_pinned && !unreadMessageIcon ? <i className='dialog-pinned'/> : null) }
                         </div>
                     </div>
                 </div>

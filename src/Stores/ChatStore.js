@@ -41,6 +41,13 @@ class ChatStore extends EventEmitter{
                 }
                 break;
             }
+            case 'updateChatReadOutbox': {
+                let chat = this.items.get(update.chat_id);
+                if (chat){
+                    chat.last_read_outbox_message_id = update.last_read_outbox_message_id;
+                }
+                break;
+            }
             case 'updateChatUnreadMentionCount': {
                 let chat = this.items.get(update.chat_id);
                 if (chat){

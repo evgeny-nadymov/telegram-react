@@ -111,3 +111,15 @@
     margin-left: 6px;
     background: url(../Assets/Icons/General.png) no-repeat -13px -916px;
 }
+
+.dialog-unread{
+    background: #c1d6e5;
+    display: inline-block;
+    float: right;
+    width: 8px;
+    height: 8px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 3px 0 0;
+    min-width: 8px;
+}

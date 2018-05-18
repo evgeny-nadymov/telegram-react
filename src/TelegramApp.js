@@ -167,6 +167,9 @@ class TelegramApp extends Component{
             case 'updateChatReadInbox':
                 this.onUpdateChatReadInbox(update.chat_id, update.last_read_inbox_message_id, update.unread_count);
                 break;
+            case 'updateChatReadOutbox':
+                this.onUpdateChatReadOutbox(update.chat_id, update.last_read_outbox_message_id);
+                break;
             case 'updateChatUnreadMentionCount':
                 this.onUpdateChatUnreadMentionCount(update.chat_id, update.unread_mention_count);
                 break;
@@ -281,6 +284,32 @@ class TelegramApp extends Component{
 
             chatExists = true;
             return Object.assign({}, x, {'unread_mention_count' : unread_mention_count});
+        });
+
+        if (!chatExists) {
+            return;
+        }
+
+        const orderedChats = updatedChats.sort((a, b) => {
+            let result = orderCompare(b.order, a.order);
+            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
+            return  result;
+        });
+
+        this.setState({ chats: orderedChats });
+    }
+
+    onUpdateChatReadOutbox(chat_id, last_read_outbox_message_id){
+        if (!chat_id) return;
+
+        let chatExists = false;
+        let updatedChats = this.state.chats.map(x =>{
+            if (x.id !== chat_id){
+                return x;
+            }
+
+            chatExists = true;
+            return Object.assign({}, x, {'last_read_outbox_message_id' : last_read_outbox_message_id });
         });
 
         if (!chatExists) {
@@ -712,7 +741,6 @@ class TelegramApp extends Component{
                     });
             }
         }
-
 
         let messageIds = [];
         if (chat.last_message
