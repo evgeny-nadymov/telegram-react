@@ -44,7 +44,7 @@ class MessageControl extends Component{
             let entityText = this.substring(text.text, text.entities[i].offset, text.entities[i].offset + text.entities[i].length);
             switch (text.entities[i].type['@type']){
                 case 'textEntityTypeUrl': {
-                    let url = entityText.startsWith('http') ? entityText.url : 'http://' + entityText;
+                    let url = entityText.startsWith('http') ? entityText : 'http://' + entityText;
                     result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
                     break; }
                 case 'textEntityTypeTextUrl': {
@@ -182,6 +182,29 @@ class MessageControl extends Component{
         return null;
     }
 
+    getForward(message){
+        if (!message.forward_info) return null;
+
+        switch (message.forward_info['@type']) {
+            case 'messageForwardedFromUser': {
+                let user = UserStore.get(message.forward_info.sender_user_id);
+                if (user) {
+                    if (user.first_name && user.last_name) return user.first_name + ' ' + user.last_name;
+                    if (user.first_name) return user.first_name;
+                    if (user.last_name) return user.last_name;
+                }
+                break;
+            }
+            case 'messageForwardedPost': {
+                let chat = ChatStore.get(message.forward_info.chat_id);
+                if (chat) return chat.title;
+                break;
+            }
+        }
+
+        return null;
+    }
+
     render(){
         let message = this.props.message;
         if (!message) return (<div>[empty message]</div>);
@@ -193,6 +216,7 @@ class MessageControl extends Component{
         let date = this.getDate(message);
         let media = this.getMedia(message);
         let reply = this.getReply(message);
+        let forward = this.getForward(message);
         return (
             <div className={messageClassName}>
                 <div className='message-wrapper'>
@@ -201,7 +225,8 @@ class MessageControl extends Component{
                             <span className='message-date'>{date}</span>
                         </div>
                         <div className='message-body'>
-                            <div className='message-author'>{title}</div>
+                            {!forward && <div className='message-author'>{title}</div>}
+                            {forward && <div className='message-author'>Forwarded from {forward}</div>}
                             {media}
                             <div className='message-text'>{text}</div>
                         </div>
