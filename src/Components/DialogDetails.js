@@ -104,7 +104,7 @@ class DialogDetails extends Component{
 
     render(){
         this.messages = this.props.history.map(x => {
-            return (<MessageControl key={x.id} sendingState={x.sending_state} message={x}></MessageControl>);
+            return (<MessageControl key={x.id} sendingState={x.sending_state} message={x} onSelectChat={this.props.onSelectChat}/>);
         });
 
         return (

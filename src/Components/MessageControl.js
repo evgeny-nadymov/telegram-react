@@ -4,8 +4,15 @@ import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import PhotoControl from './Media/PhotoControl';
 import StickerControl from './Media/StickerControl';
+import TdLibController from "../Controllers/TdLibController";
 
 class MessageControl extends Component{
+    constructor(props){
+        super(props);
+
+        this.openForward = this.openForward.bind(this);
+    }
+
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.message !== this.props.message){
@@ -179,10 +186,11 @@ class MessageControl extends Component{
     getReply(message){
         if (!message.reply_to_message_id) return null;
 
-        return null;
+        return message.reply_to_message_id;
     }
 
     getForward(message){
+        if (!message) return null;
         if (!message.forward_info) return null;
 
         switch (message.forward_info['@type']) {
@@ -203,6 +211,37 @@ class MessageControl extends Component{
         }
 
         return null;
+    }
+
+    openForward(){
+        let message = this.props.message;
+
+        if (!message) return;
+        if (!message.forward_info) return null;
+
+        switch (message.forward_info['@type']) {
+            case 'messageForwardedFromUser': {
+                let user = UserStore.get(message.forward_info.sender_user_id);
+                if (user) {
+                    TdLibController
+                        .send({
+                            '@type': 'createPrivateChat',
+                            user_id: message.forward_info.sender_user_id,
+                            force: true
+                        })
+                        .then(chat => {
+                            this.props.onSelectChat(chat);
+                        });
+                }
+                break;
+            }
+            case 'messageForwardedPost': {
+                let chat = ChatStore.get(message.forward_info.chat_id);
+
+                this.props.onSelectChat(chat);
+                break;
+            }
+        }
     }
 
     render(){
@@ -226,7 +265,7 @@ class MessageControl extends Component{
                         </div>
                         <div className='message-body'>
                             {!forward && <div className='message-author'>{title}</div>}
-                            {forward && <div className='message-author'>Forwarded from {forward}</div>}
+                            {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
                             {media}
                             <div className='message-text'>{text}</div>
                         </div>

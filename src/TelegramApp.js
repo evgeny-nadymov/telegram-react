@@ -1081,6 +1081,7 @@ class TelegramApp extends Component{
                                 selectedChat={this.state.selectedChat}
                                 scrollBottom={this.state.scrollBottom}
                                 history={this.state.history}
+                                onSelectChat={this.handleSelectChat}
                                 onSendText={this.handleSendText}
                                 onSendFile={this.handleSendFile}
                                 onLoadNext={x => this.onLoadNext(x, true)}
