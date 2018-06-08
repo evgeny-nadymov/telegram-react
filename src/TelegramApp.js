@@ -7,6 +7,7 @@ import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import {throttle, getSize, orderCompare} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
+import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
@@ -688,6 +689,9 @@ class TelegramApp extends Component{
                 limit: MESSAGE_SLICE_LIMIT
             })
             .then(result => {
+
+                MessageStore.setItems(result.messages);
+
                 result.messages.reverse();
                 this.setHistory(result.messages);
 
@@ -697,6 +701,23 @@ class TelegramApp extends Component{
                 if (result.messages.length < MESSAGE_SLICE_LIMIT) {
                     this.onLoadNext(0, true);
                 }
+
+                return result;
+            })
+            .then(result => {
+                let messageIds = [];
+                if (result.messages){
+                    for (let i = 0; i < result.messages.length; i++){
+                        messageIds.push(result.messages[i].id);
+                    }
+                }
+
+                TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: chat.id,
+                        message_ids: messageIds
+                    });
             });
 
         if (previousChat){
@@ -742,24 +763,10 @@ class TelegramApp extends Component{
             }
         }
 
-        let messageIds = [];
-        if (chat.last_message
-            && chat.last_message.id){
-            messageIds.push(chat.last_message.id);
-        }
-
         TdLibController
             .send({
                 '@type': 'openChat',
                 chat_id: chat.id,
-            })
-            .then(() => {
-                return TdLibController
-                    .send({
-                        '@type': 'viewMessages',
-                        chat_id: chat.id,
-                        message_ids: messageIds
-                    });
             })
             .then(() => {
                 return TdLibController
@@ -934,6 +941,20 @@ class TelegramApp extends Component{
                 reply_to_message_id: 0,
                 input_message_content: content
             })
+            .then(result => {
+
+                MessageStore.set(result);
+
+                let messageIds = [];
+                messageIds.push(result.id);
+
+                TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: this.state.selectedChat.id,
+                        message_ids: messageIds
+                    });
+            })
             .catch(error =>{
                 alert('sendMessage error ' + error);
             });
@@ -1007,20 +1028,35 @@ class TelegramApp extends Component{
                 limit: MESSAGE_SLICE_LIMIT
             })
             .then(result => {
-                    this.loading = false;
+                this.loading = false;
 
-                    /*if (this.state.selectedChat.id !== chatId){
-                        return;
-                    }*/
+                MessageStore.setItems(result.messages);
 
-                    result.messages.reverse();
-                    this.appendHistory(result.messages);
+                result.messages.reverse();
+                this.appendHistory(result.messages);
 
-                    this.loadMessageContents(result.messages, loadRemote);
-                })
-            .catch(() =>{
-                    this.loading = false;
-                });
+                this.loadMessageContents(result.messages, loadRemote);
+
+                return result;
+            })
+            .then(result => {
+                let messageIds = [];
+                if (result.messages){
+                    for (let i = 0; i < result.messages.length; i++){
+                        messageIds.push(result.messages[i].id);
+                    }
+                }
+
+                TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: chatId,
+                        message_ids: messageIds
+                    });
+            })
+            .catch(() => {
+                this.loading = false;
+            });
     }
 
     clearCache(){

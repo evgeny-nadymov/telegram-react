@@ -1,0 +1,34 @@
+.reply-wrapper{
+    margin-bottom: 5px;
+    margin-top: 2px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.reply-border{
+    background: #7eaad1;
+    height: 36px;
+    min-width: 2px;
+}
+
+.reply-content-wrapper{
+    margin-left: 12px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.reply-content-title{
+    font-weight: 700;
+    color: #3a6d99;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.reply-content-subtitle{
+    color: #999;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
