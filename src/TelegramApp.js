@@ -870,7 +870,6 @@ class TelegramApp extends Component{
     }
 
     setHistory(history) {
-
         this.setState({ history: history, scrollBottom: true });
     }
 
@@ -895,7 +894,8 @@ class TelegramApp extends Component{
     }
 
     historyPushFront(entry) {
-        this.setHistory([entry].concat(this.getHistory()));
+        this.setState({ history: [entry].concat(this.getHistory()), scrollBottom: false });
+        //this.setHistory([entry].concat(this.getHistory()));
     }
 
     historyPushBack(entry) {

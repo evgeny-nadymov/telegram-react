@@ -16,7 +16,7 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
-        this.client = new TdClient({ verbosity: 2/*, mode: 'webasm'*/ });
+        this.client = new TdClient({ verbosity: 2, mode: 'webasm' });
         this.client.onUpdate = update => this.onUpdate(update);
 
         this.setState({

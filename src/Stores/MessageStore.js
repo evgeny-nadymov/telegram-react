@@ -62,6 +62,10 @@ class MessageStore extends EventEmitter {
             .then(message => {
                 this.set(message);
                 this.emit('messageLoaded', message);
+                /*for (let i = 0; message.length; i++){
+                    this.set(message[i]);
+                    this.emit('messageLoaded', message[i]);
+                }*/
             });
     }
 

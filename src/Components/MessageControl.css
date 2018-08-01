@@ -61,9 +61,9 @@ pre code {
 }
 
 .message-wrapper{
-    max-width: 560px;
-    padding: 0 15px;
-    margin: 0 auto;
+    max-width: 500px;
+    /*padding: 0 15px;
+    margin: 0 auto;*/
 }
 
 .message-wrapper:before, .message-wrapper:after{
@@ -90,7 +90,6 @@ pre code {
     user-select: none;
     color: #adadad;
     font-size: .85em;
-    padding: 0 0 20px 10px;
 }
 
 .message-date {

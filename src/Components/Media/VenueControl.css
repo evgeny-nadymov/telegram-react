@@ -1,0 +1,24 @@
+.venue{
+    display: flex;
+    flex-direction: row;
+}
+
+.venue-content{
+    margin-left: 12px;
+}
+
+.venue-title{
+
+    color: #3a6d99;
+    display: inline-block;
+    font-weight: 700;
+    max-width: 170px;
+    overflow: hidden;
+    vertical-align: text-top;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.venue-subtitle{
+
+}

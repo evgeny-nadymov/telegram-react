@@ -5,7 +5,7 @@ import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import ReplyControl from './ReplyControl';
-import {getTitle, getDate, getText, getMedia, getReply, getForward} from '../Utils/Message';
+import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward} from '../Utils/Message';
 
 class MessageControl extends Component{
     constructor(props){
@@ -100,9 +100,10 @@ class MessageControl extends Component{
 
         const messageClassName = this.props.sendingState ? 'message sending' : 'message';
 
-        let title = getTitle(message);
+        let title = this.props.showTitle? getTitle(message) : null;
         let text = getText(message);//JSON.stringify(message);
         let date = getDate(message);
+        let dateHint = getDateHint(message);
         let media = getMedia(message);
         let reply = getReply(message);
         let forward = getForward(message);
@@ -114,7 +115,7 @@ class MessageControl extends Component{
                             {message.views > 0 && <i className='message-views-icon'/>}
                             {message.views > 0 && <span className='message-views'> {message.views}&nbsp;&nbsp;</span>}
                             {message.edit_date > 0 && <span>edited </span>}
-                            <span className='message-date'>{date}</span>
+                            <span className='message-date' title={dateHint}>{date}</span>
                         </div>
                         <div className='message-body'>
                             {!forward && <div className='message-author'>{title}</div>}

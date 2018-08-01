@@ -1,8 +1,11 @@
 import React from 'react';
 import PhotoControl from '../Components/Media/PhotoControl';
 import StickerControl from '../Components/Media/StickerControl';
+import LocationControl from '../Components/Media/LocationControl';
+import VenueControl from '../Components/Media/VenueControl';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
+import dateFormat from "dateformat";
 
 function getTitle(message){
     if (!message) return null;
@@ -59,11 +62,11 @@ function getFormattedText(text){
         switch (text.entities[i].type['@type']){
             case 'textEntityTypeUrl': {
                 let url = entityText.startsWith('http') ? entityText : 'http://' + entityText;
-                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{decodeURI(entityText)}</a>));
                 break; }
             case 'textEntityTypeTextUrl': {
                 let url = text.entities[i].type.url.startsWith('http') ? text.entities[i].type.url : 'http://' + text.entities[i].type.url;
-                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{decodeURI(entityText)}</a>));
                 break; }
             case 'textEntityTypeBold':
                 result.push((<strong key={text.entities[i].offset}>{entityText}</strong>));
@@ -145,7 +148,17 @@ function getDate(message){
     if (!message.date) return null;
 
     let date = new Date(message.date * 1000);
-    let dateFormatted = date.toDateString();
+    let dateFormatted = dateFormat(date, 'H:MM');//date.toDateString();
+
+    return dateFormatted;
+}
+
+function getDateHint(message){
+    if (!message) return null;
+    if (!message.date) return null;
+
+    let date = new Date(message.date * 1000);
+    let dateFormatted = dateFormat(date, 'H:MM:ss d.mm.yyyy');//date.toDateString();
 
     return dateFormatted;
 }
@@ -161,6 +174,10 @@ function getMedia(message){
             return (<PhotoControl message={message}/>);
         case 'messageSticker':
             return (<StickerControl message={message}/>);
+        case 'messageLocation':
+            return (<LocationControl message={message}/>);
+        case 'messageVenue':
+            return (<VenueControl message={message}/>);
         default :
             return '[' + message.content['@type'] + ']';
     }
@@ -197,4 +214,4 @@ function getForward(message){
     return null;
 }
 
-export {getTitle, getText, getDate, getMedia, getReply, getForward};
+export {getTitle, getText, getDate, getDateHint, getMedia, getReply, getForward};

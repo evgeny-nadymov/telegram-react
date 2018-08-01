@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './DialogDetails.css';
 import InputBoxControl from "./InputBoxControl";
 import MessageControl from "./MessageControl";
+import MessageGroupControl from "./MessageGroupControl";
 import {debounce, itemsInView, throttle} from "../Utils/Common";
 
 class DialogDetails extends Component{
@@ -104,8 +105,41 @@ class DialogDetails extends Component{
 
     render(){
         this.messages = this.props.history.map(x => {
-            return (<MessageControl key={x.id} sendingState={x.sending_state} message={x} onSelectChat={this.props.onSelectChat}/>);
+            return (<MessageControl key={x.id} showTitle={true} sendingState={x.sending_state} message={x} onSelectChat={this.props.onSelectChat}/>);
         });
+
+        /*let groups = [];
+        if (this.props.history.length > 0){
+            let currentGroup = {
+                key: this.props.history[0].id,
+                date: this.props.history[0].date,
+                senderUserId: this.props.history[0].sender_user_id,
+                messages: [this.props.history[0]]
+            };
+
+            for (let i = 1; i < this.props.history.length; i++){
+                if (this.props.history[i].sender_user_id === currentGroup.senderUserId
+                    && Math.abs(this.props.history[i].date - currentGroup.date) <= 10 * 60
+                    && i % 20 !== 0){
+                    currentGroup.key += '_' + this.props.history[i].id;
+                    currentGroup.messages.push(this.props.history[i]);
+                }
+                else {
+                    groups.push(currentGroup);
+                    currentGroup = {
+                        key: this.props.history[i].id,
+                        date: this.props.history[i].date,
+                        senderUserId: this.props.history[i].sender_user_id,
+                        messages: [this.props.history[i]]
+                    };
+                }
+            }
+            groups.push(currentGroup);
+        }
+
+        this.groups = groups.map(x => {
+            return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
+        });*/
 
         return (
             <div className='details'>
