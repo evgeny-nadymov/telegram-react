@@ -7,6 +7,7 @@ import TdLibController from '../Controllers/TdLibController';
 import {CHAT_SLICE_LIMIT} from '../Constants';
 import ChatStore from "../Stores/ChatStore";
 import FileContrller from '../Controllers/FileController';
+import { Scrollbars } from 'react-custom-scrollbars';
 
 class Dialogs extends Component{
     constructor(props){

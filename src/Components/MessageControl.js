@@ -5,22 +5,27 @@ import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import ReplyControl from './ReplyControl';
-import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward} from '../Utils/Message';
+import classNames from 'classnames';
+import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
 
 class MessageControl extends Component{
     constructor(props){
         super(props);
 
         this.openForward = this.openForward.bind(this);
+        this.openMedia = this.openMedia.bind(this);
         this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
         this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
         this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
+        this.handleUpdateChatReadOutbox = this.handleUpdateChatReadOutbox.bind(this);
     }
 
     componentWillMount(){
         MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
         MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
+
+        ChatStore.on('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
     }
 
     handleUpdateMessageEdited(payload) {
@@ -44,10 +49,21 @@ class MessageControl extends Component{
         }
     }
 
+    handleUpdateChatReadOutbox(payload) {
+        if (this.props.message.chat_id === payload.chat_id
+            && this.props.message.is_outgoing
+            && this.unread
+            && this.props.message.id <= payload.last_read_outbox_message_id){
+            this.forceUpdate();
+        }
+    }
+
     componentWillUnmount(){
         MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
         MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
+
+        ChatStore.removeListener('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
     }
 
 
@@ -94,22 +110,52 @@ class MessageControl extends Component{
         }
     }
 
+    openMedia(){
+        let message = this.props.message;
+
+        if (!message) return;
+        if (!message.content) return null;
+
+        switch (message.content['@type']) {
+            case 'messageContact': {
+                let user = UserStore.get(message.content.contact.user_id);
+                if (user) {
+                    TdLibController
+                        .send({
+                            '@type': 'createPrivateChat',
+                            user_id: message.content.contact.user_id,
+                            force: true
+                        })
+                        .then(chat => {
+                            this.props.onSelectChat(chat);
+                        });
+                }
+                break;
+            }
+        }
+    }
+
     render(){
         let message = this.props.message;
         if (!message) return (<div>[empty message]</div>);
 
-        const messageClassName = this.props.sendingState ? 'message sending' : 'message';
+        //const messageClassName = this.props.sendingState ? 'message sending' : 'message';
+
+        const messageStatusClassName = this.props.sendingState ? 'sending' : '';
 
         let title = this.props.showTitle? getTitle(message) : null;
-        let text = getText(message);//JSON.stringify(message);
+        let text = getText(message);
         let date = getDate(message);
         let dateHint = getDateHint(message);
-        let media = getMedia(message);
+        let media = getMedia(message, this.openMedia);
         let reply = getReply(message);
         let forward = getForward(message);
+        this.unread = getUnread(message);
+
         return (
-            <div className={messageClassName}>
+            <div className='message'>
                 <div className='message-wrapper'>
+                    {this.unread && <i className={classNames('message-status-icon', messageStatusClassName)}/>}
                     <div className='message-content'>
                         <div className='message-meta'>
                             {message.views > 0 && <i className='message-views-icon'/>}

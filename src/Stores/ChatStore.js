@@ -48,6 +48,7 @@ class ChatStore extends EventEmitter{
                 if (chat){
                     chat.last_read_outbox_message_id = update.last_read_outbox_message_id;
                 }
+                this.emit('updateChatReadOutbox', update);
                 break;
             }
             case 'updateChatUnreadMentionCount': {

@@ -3,6 +3,7 @@ import PhotoControl from '../Components/Media/PhotoControl';
 import StickerControl from '../Components/Media/StickerControl';
 import LocationControl from '../Components/Media/LocationControl';
 import VenueControl from '../Components/Media/VenueControl';
+import ContactControl from '../Components/Media/ContactControl';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import dateFormat from "dateformat";
@@ -163,7 +164,7 @@ function getDateHint(message){
     return dateFormatted;
 }
 
-function getMedia(message){
+function getMedia(message, openMedia){
     if (!message) return null;
     if (!message.content) return null;
 
@@ -178,6 +179,8 @@ function getMedia(message){
             return (<LocationControl message={message}/>);
         case 'messageVenue':
             return (<VenueControl message={message}/>);
+        case 'messageContact':
+            return (<ContactControl message={message} openMedia={openMedia}/>);
         default :
             return '[' + message.content['@type'] + ']';
     }
@@ -214,4 +217,41 @@ function getForward(message){
     return null;
 }
 
-export {getTitle, getText, getDate, getDateHint, getMedia, getReply, getForward};
+function getUnread(message) {
+    if (!message) return false;
+    if (!message.chat_id) return false;
+    if (!message.is_outgoing) return false;
+
+    let chat = ChatStore.get(message.chat_id);
+    if (!chat) return false;
+
+    return chat.last_read_outbox_message_id && chat.last_read_outbox_message_id < message.id;
+}
+
+let serviceMap = new Map();
+serviceMap.set('messageBasicGroupChatCreate', 'messageBasicGroupChatCreate');
+serviceMap.set('messageChatAddMembers', 'messageChatAddMembers');
+serviceMap.set('messageChatChangePhoto', 'messageChatChangePhoto');
+serviceMap.set('messageChatChangeTitle', 'messageChatChangeTitle');
+serviceMap.set('messageChatDeleteMember', 'messageChatDeleteMember');
+serviceMap.set('messageChatDeletePhoto', 'messageChatDeletePhoto');
+serviceMap.set('messageChatJoinByLink', 'messageChatJoinByLink');
+serviceMap.set('messageChatUpgradeFrom', 'messageChatUpgradeFrom');
+serviceMap.set('messageChatUpgradeTo', 'messageChatUpgradeTo');
+serviceMap.set('messageContactRegistered', 'messageContactRegistered');
+serviceMap.set('messageCustomServiceAction', 'messageCustomServiceAction');
+serviceMap.set('messagePaymentSuccessful', 'messagePaymentSuccessful');
+serviceMap.set('messagePinMessage', 'messagePinMessage');
+serviceMap.set('messageScreenshotTaken', 'messageScreenshotTaken');
+serviceMap.set('messageSupergroupChatCreate', 'messageSupergroupChatCreate');
+serviceMap.set('messageUnsupported', 'messageUnsupported');
+serviceMap.set('messageWebsiteConnected', 'messageWebsiteConnected');
+
+function isServiceMessage(message) {
+    if (!message) return false;
+    if (!message.content) return false;
+
+    return serviceMap.has(message.content['@type']);
+}
+
+export {getTitle, getText, getDate, getDateHint, getMedia, getReply, getForward, getUnread, isServiceMessage};

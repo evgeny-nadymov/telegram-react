@@ -6,12 +6,14 @@
     border-right: 2px solid #E9EBED;
     padding-bottom: 10px;
     height: 100%;
+    /*overflow: hidden;*/
 }
 
 .dialogs-list {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-    margin: 0;
+    /*margin-right: -15px;*/
     position: relative;
+
 }
