@@ -1,4 +1,5 @@
-import ReactDOM from "react-dom";
+import ReactDOM from 'react-dom';
+import {PHOTO_SIZE} from '../Constants';
 
 function orderCompare(order1, order2){
     let diff = order1.length - order2.length;
@@ -6,6 +7,10 @@ function orderCompare(order1, order2){
     if (order1 === order2) return 0;
 
     return order1 > order2 ? 1 : -1;
+}
+
+function getPhotoSize(sizes){
+    return getSize(sizes, PHOTO_SIZE);
 }
 
 function getSize(sizes, dimension) {
@@ -112,4 +117,4 @@ function debounce(func, wait, immediate) {
     };
 }
 
-export {orderCompare, getSize, getFitSize, itemsInView, throttle, debounce};
+export {orderCompare, getSize, getPhotoSize, getFitSize, itemsInView, throttle, debounce};

@@ -5,10 +5,11 @@ import Header from "./Components/Header";
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
-import {throttle, getSize, orderCompare} from './Utils/Common';
+import {throttle, getSize, getPhotoSize, orderCompare} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController'
+import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from "./Constants";
@@ -26,12 +27,10 @@ class TelegramApp extends Component{
 
         this.state = {
             selectedChat: null,
-            chats: [],
             history: [],
             scrollBottom: false,
             authState: 'init'
         };
-        this.downloads = new Map();
 
         /*this.store = localForage.createInstance({
             name: '/tdlib'
@@ -44,39 +43,7 @@ class TelegramApp extends Component{
         this.handleSelectChat = this.handleSelectChat.bind(this);
         this.handleSendText = this.handleSendText.bind(this);
         this.handleSendFile = this.handleSendFile.bind(this);
-        this.handleLoadDialogs = this.handleLoadDialogs.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
-    }
-
-    initDB(){
-        /*if (this.store) return;
-        if (this.initiatingDB) return;
-
-        this.initiatingDB = true;
-        this.store = localForage.createInstance({
-            name: '/tdlib'
-        });
-        this.initiatingDB = false;
-
-        return;*/
-        if (this.db) return;
-        if (this.initiatingDB) return;
-
-        console.log('initDB');
-
-        this.initiatingDB = true;
-        let request = window.indexedDB.open('/tdlib');
-        request.onerror = function(event) {
-            this.initiatingDB = false;
-            console.log("error initDB");
-            alert(JSON.stringify(event));
-        }.bind(this);
-        request.onsuccess = function(event) {
-            this.db = request.result;
-
-            this.initiatingDB = false;
-            console.log("success initDB");
-        }.bind(this);
     }
 
     componentDidMount(){
@@ -99,8 +66,6 @@ class TelegramApp extends Component{
                         name: 'online',
                         value: { '@type': 'optionValueBoolean', value: true }
                     });
-
-                this.handleLoadDialogs();
                 break;
             case 'waitPhoneNumber':
                 this.setState({authState: state.status});
@@ -114,7 +79,6 @@ class TelegramApp extends Component{
             case 'init':
                 this.setState({
                     selectedChat: null,
-                    chats: [],
                     history: [],
                     scrollBottom: false,
                     authState: state.status
@@ -128,7 +92,7 @@ class TelegramApp extends Component{
     onUpdate(update) {
 
         // NOTE: important to start init DB after receiving first update
-        this.initDB();
+        FileController.initDB();
 
         switch (update['@type']) {
             case 'updateFatalError':
@@ -150,36 +114,6 @@ class TelegramApp extends Component{
             case 'updateMessageSendSucceeded':
                 this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
                 break;
-            case 'updateChatDraftMessage':
-                this.onUpdateChatDraftMessage(update.chat_id, update.order, update.draft_message);
-                break;
-            case 'updateChatLastMessage':
-                this.onUpdateChatLastMessage(update.chat_id, update.order, update.last_message);
-                break;
-            case 'updateNotificationSettings':
-                this.onUpdateNotificationSettings(update.scope, update.notification_settings);
-                break;
-            case 'updateChatIsPinned':
-                this.onUpdateChatIsPinned(update.chat_id, update.order, update.is_pinned);
-                break;
-            case 'updateChatOrder':
-                this.onUpdateChatOrder(update.chat_id, update.order);
-                break;
-            case 'updateChatReadInbox':
-                this.onUpdateChatReadInbox(update.chat_id, update.last_read_inbox_message_id, update.unread_count);
-                break;
-            case 'updateChatReadOutbox':
-                this.onUpdateChatReadOutbox(update.chat_id, update.last_read_outbox_message_id);
-                break;
-            case 'updateChatUnreadMentionCount':
-                this.onUpdateChatUnreadMentionCount(update.chat_id, update.unread_mention_count);
-                break;
-            case 'updateMessageMentionRead':
-                this.onUpdateChatUnreadMentionCount(update.chat_id, update.unread_mention_count);
-                break;
-            case 'updateFile':
-                this.onUpdateFile(update.file);
-                break;
             default:
                 break;
         }
@@ -191,217 +125,6 @@ class TelegramApp extends Component{
         if (!action) return;
 
 
-    }
-
-    onUpdateChatDraftMessage(chat_id, order, draft_message){
-        if (order === '0') return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'order' : order, 'draft_message' : draft_message });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateNotificationSettings(scope, notification_settings){
-        if (!scope) return;
-        if (!notification_settings) return;
-        if (scope['@type'] !== 'notificationSettingsScopeChat') return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== scope.chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'notification_settings' : notification_settings });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatLastMessage(chat_id, order, last_message){
-        if (!last_message) return;
-        if (order === '0') return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'order' : order, 'last_message' : last_message });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatUnreadMentionCount(chat_id, unread_mention_count){
-        if (!chat_id) return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'unread_mention_count' : unread_mention_count});
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatReadOutbox(chat_id, last_read_outbox_message_id){
-        if (!chat_id) return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'last_read_outbox_message_id' : last_read_outbox_message_id });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatReadInbox(chat_id, last_read_inbox_message_id, unread_count){
-        if (!chat_id) return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'last_read_inbox_message_id' : last_read_inbox_message_id, 'unread_count' : unread_count });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatOrder(chat_id, order){
-        if (order === '0') return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'order' : order });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
-    }
-
-    onUpdateChatIsPinned(chat_id, order, is_pinned){
-        if (order === '0') return;
-
-        let chatExists = false;
-        let updatedChats = this.state.chats.map(x =>{
-            if (x.id !== chat_id){
-                return x;
-            }
-
-            chatExists = true;
-            return Object.assign({}, x, {'order' : order, 'is_pinned' : is_pinned });
-        });
-
-        if (!chatExists) {
-            return;
-        }
-
-        const orderedChats = updatedChats.sort((a, b) => {
-            let result = orderCompare(b.order, a.order);
-            //console.log('orderCompare\no1=' + b.order + '\no2=' + a.order + '\nresult=' + result);
-            return  result;
-        });
-
-        this.setState({ chats: orderedChats });
     }
 
     onUpdateNewMessage(message){
@@ -420,45 +143,6 @@ class TelegramApp extends Component{
         });
 
         this.setHistory(updatedHistory);
-    }
-
-    onGetChats(result){
-        let chats = [];
-        for (let i = 0; i < result.chat_ids.length; i++){
-            chats.push(ChatStore.get(result.chat_ids[i]));
-        }
-        this.onGetChatsContinue(chats);
-    }
-
-    onGetChatsContinue(result){
-        this.appendChats(result);
-        //this.setState({ chats: result });
-
-        let store = this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
-
-        for (let i = 0; i < result.length; i++){
-            let chat = result[i];
-            let [id, pid, idb_key] = this.getChatPhoto(chat);
-            if (pid) {
-                chat.pid = pid;
-                this.getLocalFile(store, chat, idb_key, null,
-                    () => ChatStore.updatePhoto(chat.id),
-                    () => this.getRemoteFile(id, 1, chat));
-            }
-        }
-    }
-
-    getChatPhoto(chat) {
-        if (chat['@type'] !== 'chat') {
-            return [0, '', ''];
-        }
-        if (chat.photo) {
-            let file = chat.photo.small;
-            if (file.remote.id) {
-                return [file.id, file.remote.id, file.idb_key];
-            }
-        }
-        return [0, '', ''];
     }
 
     getMessageSticker(message) {
@@ -512,7 +196,7 @@ class TelegramApp extends Component{
         }
 
         if (message.content.photo) {
-            let photoSize = this.getPhotoSize(message.content.photo.sizes);
+            let photoSize = getPhotoSize(message.content.photo.sizes);
             if (photoSize && photoSize['@type'] === 'photoSize'){
                 let file = photoSize.photo;
                 if (file && file.remote.id) {
@@ -524,153 +208,8 @@ class TelegramApp extends Component{
         return [0, '', ''];
     }
 
-    getPhotoSize(sizes){
-        return getSize(sizes, PHOTO_SIZE);
-    }
-
     getPreviewPhotoSize(sizes){
         return sizes.length > 0 ? sizes[0] : null;
-    }
-
-    onUpdateFile(file) {
-        if (!file.idb_key || !file.remote.id) {
-            return;
-        }
-        let idb_key = file.idb_key;
-
-        if (file.local.is_downloading_completed
-            && this.downloads.has(file.id)){
-
-            let items = this.downloads.get(file.id);
-            if (items){
-                this.downloads.delete(file.id);
-
-                let store = this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
-
-                for (let i = 0; i < items.length; i++){
-                    let obj = items[i];
-                    switch (obj['@type']){
-                        case 'chat':
-                            this.getLocalFile(store, obj, idb_key, file.arr,
-                                () => ChatStore.updatePhoto(obj.id),
-                                () => this.getRemoteFile(file.id, 1));
-                            break;
-                        case 'message':
-                            switch (obj.content['@type']){
-                                case 'messagePhoto':
-                                    // preview
-                                    /*let preview = this.getPreviewPhotoSize(obj.content.photo.sizes);
-                                    if (preview && preview.photo.id === file.id)
-                                    {
-                                        this.getLocalFile(store, preview, idb_key,
-                                            () => ChatStore.updateMessagePhoto(obj.id),
-                                            () => { },
-                                            'update_',
-                                            obj.id);
-                                    }*/
-
-                                    // regular
-                                    let photo = this.getPhotoSize(obj.content.photo.sizes);
-                                    if (photo && photo.photo.id === file.id)
-                                    {
-                                        this.getLocalFile(store, photo, idb_key, file.arr,
-                                            () => ChatStore.updateMessagePhoto(obj.id),
-                                            () => { },
-                                            'update',
-                                            obj.id);
-                                    }
-                                    break;
-                                case 'messageSticker':
-                                    this.getLocalFile(store, obj.content.sticker.sticker, idb_key, file.arr,
-                                        () => ChatStore.updateMessageSticker(obj.id),
-                                        () => this.getRemoteFile(file.id, 1, obj),
-                                        'update',
-                                        obj.id);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
-    getLocalFile(store, obj, idb_key, arr, callback, faultCallback, from, messageId) {
-        if (!idb_key){
-            faultCallback();
-            return;
-        }
-
-        obj.idb_key = idb_key;
-        if (arr){
-            let t0 = performance.now();
-            obj.blob = new Blob([arr]);
-            let t1 = performance.now();
-            console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + obj.blob + ' new_time=' + (t1 - t0));
-
-            callback();
-            return;
-        }
-
-        let objectStore = store;
-
-        let t0 = performance.now();
-        let getItem = objectStore.get(idb_key);
-        getItem.onsuccess = function (event) {
-            let blob = event.target.result;
-            let t1 = performance.now();
-            console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + blob + ' time=' + (t1 - t0));
-
-            if (blob){
-                obj.blob = blob;
-                callback();
-            }
-            else{
-                faultCallback();
-            }
-        };
-
-        return;
-        console.log((from? from : '') + 'download_message start getLocal id=' + messageId);
-
-        this.store.getItem(idb_key).then(blob => {
-            console.log((from? from : '') + 'download_message stop getLocal id=' + messageId + ' blob=' + blob);
-            //console.log('Got blob: ' + idb_key + ' => ' + blob);
-
-            if (blob){
-                obj.blob = blob;
-                callback();
-            }
-            else{
-                faultCallback();
-            }
-        });
-    }
-
-    getRemoteFile(fileId, priority, obj){
-        if (this.downloads.has(fileId)){
-            let items = this.downloads.get(fileId);
-            items.push(obj);
-        }
-        else
-        {
-            this.downloads.set(fileId, [obj]);
-        }
-
-        console.log('[perf] downloadFile file_id=' + fileId);
-        TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
-    }
-
-    cancelGetRemoteFile(fileId, obj){
-        if (this.downloads.has(fileId)){
-            this.downloads.delete(fileId);
-            console.log('cancel_download_message id=' + obj.id);
-            TdLibController.send({ '@type': 'cancelDownloadFile', file_id: fileId, only_if_pending: false });
-        }
     }
 
     handleSelectChat(chat){
@@ -779,7 +318,7 @@ class TelegramApp extends Component{
 
     loadMessageContents(messages, loadRemote = true){
 
-        let store = this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
+        let store = FileController.getStore();
 
         for (let i = messages.length - 1; i >= 0 ; i--){
             let message = messages[i];
@@ -792,9 +331,9 @@ class TelegramApp extends Component{
                         if (previewPid) {
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
-                                this.getLocalFile(store, preview, previewIdbKey, null,
+                                FileController.getLocalFile(store, preview, previewIdbKey, null,
                                     () => ChatStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  this.getRemoteFile(previewId, 2, message); },
+                                    () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
                                     'load_contents_preview_',
                                     message.id);
 
@@ -804,11 +343,11 @@ class TelegramApp extends Component{
                         // regular
                         let [id, pid, idb_key] = this.getMessagePhoto(message);
                         if (pid) {
-                            let obj = this.getPhotoSize(message.content.photo.sizes);
+                            let obj = getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
-                                this.getLocalFile(store, obj, idb_key, null,
+                                FileController.getLocalFile(store, obj, idb_key, null,
                                     () => ChatStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
+                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
                                     'load_contents',
                                     message.id);
                             }
@@ -820,9 +359,9 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
-                                this.getLocalFile(store, obj, idb_key, null,
+                                FileController.getLocalFile(store, obj, idb_key, null,
                                     () => ChatStore.updateMessageSticker(message.id),
-                                    () => { if (loadRemote)  this.getRemoteFile(id, 1, message); },
+                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
                                     'load_contents',
                                     message.id);
                             }
@@ -845,9 +384,9 @@ class TelegramApp extends Component{
                     case 'messagePhoto': {
                         let [id, pid] = this.getMessagePhoto(message);
                         if (pid) {
-                            let obj = this.getPhotoSize(message.content.photo.sizes);
+                            let obj = getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
-                                this.cancelGetRemoteFile(id, message);
+                                FileController.cancelGetRemoteFile(id, message);
                             }
                         }
                         break;
@@ -857,7 +396,7 @@ class TelegramApp extends Component{
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
-                                this.cancelGetRemoteFile(id, message);
+                                FileController.cancelGetRemoteFile(id, message);
                             }
                         }
                         break;
@@ -879,18 +418,8 @@ class TelegramApp extends Component{
         this.setState({ history: history.concat(this.getHistory()), scrollBottom: false }, callback);
     }
 
-    appendChats(chats, callback){
-        if (chats.length === 0) return;
-
-        this.setState({ chats: this.getChats().concat(chats) }, callback);
-    }
-
     getHistory() {
         return this.state.history;
-    }
-
-    getChats() {
-        return this.state.chats;
     }
 
     historyPushFront(entry) {
@@ -967,42 +496,6 @@ class TelegramApp extends Component{
                     draft_message: null
                 });
         }*/
-    }
-
-    handleLoadDialogs(){
-        if (this.loading) return;
-
-        //let test1 = '9221294784512000001';
-        //let test2 = '9221294784512000002';
-        //let test3 = test2 > test1;
-
-        let offsetOrder = '9223372036854775807'; // 2^63
-        let offsetChatId = 0;
-        if (this.state.chats && this.state.chats.length > 0){
-            offsetOrder = this.state.chats[this.state.chats.length - 1].order;
-            offsetChatId = this.state.chats[this.state.chats.length - 1].id;
-        }
-
-        TdLibController
-            .send({
-                '@type': 'getChats',
-                offset_chat_id: offsetChatId,
-                offset_order: offsetOrder,
-                limit: CHAT_SLICE_LIMIT
-            })
-            .then(result => {
-                this.loading = false;
-
-                if (result.chat_ids.length > 0
-                    && result.chat_ids[0] === offsetChatId) {
-                    result.chat_ids.shift();
-                }
-
-                this.onGetChats(result);
-            })
-            .catch(() => {
-                this.loading = false;
-            });
     }
 
     onLoadNext(scrollHeight, loadRemote = false){
@@ -1108,10 +601,8 @@ class TelegramApp extends Component{
                         <Header selectedChat={this.state.selectedChat} onClearCache={() => this.clearCache()}/>
                         <div className='im-page-wrap'>
                             <Dialogs
-                                chats={this.state.chats}
                                 selectedChat={this.state.selectedChat}
-                                onSelectChat={this.handleSelectChat}
-                                onLoadNext={this.handleLoadDialogs}/>
+                                onSelectChat={this.handleSelectChat}/>
                             <DialogDetails
                                 ref='dialogDetails'
                                 selectedChat={this.state.selectedChat}

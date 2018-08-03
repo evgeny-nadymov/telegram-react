@@ -6,8 +6,27 @@ import UserStore from '../Stores/UserStore';
 import classNames from 'classnames';
 import dateFormat from 'dateformat';
 import DialogContentControl from "./DialogContentControl";
+import TdLibController from "../Controllers/TdLibController";
 
 class DialogControl extends Component{
+
+    constructor(props){
+        super(props);
+
+        this.state={
+            'notificationSettings': this.props.chat.notification_settings
+        };
+
+        this.onUpdate = this.onUpdate.bind(this);
+    }
+
+    componentDidMount(){
+        TdLibController.on('tdlib_update', this.onUpdate);
+    }
+
+    componentWillUnmount(){
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.chat !== this.props.chat){
@@ -16,8 +35,34 @@ class DialogControl extends Component{
         if (nextProps.isSelected !== this.props.isSelected){
             return true;
         }
+        if (nextState.notificationSettings !== this.state.notificationSettings){
+            return true;
+        }
 
         return false;
+    }
+
+    onUpdate(update) {
+
+        switch (update['@type']) {
+            case 'updateNotificationSettings':
+                this.onUpdateNotificationSettings(update.scope, update.notification_settings);
+                break;
+            default:
+                break;
+        }
+    }
+
+    onUpdateNotificationSettings(scope, notification_settings){
+        if (!scope) return;
+        if (!notification_settings) return;
+        if (scope['@type'] !== 'notificationSettingsScopeChat') return;
+        if (!this.props.chat) return;
+        if (this.props.chat.id !== scope.chat_id) return;
+
+        this.props.chat['notification_settings'] = notification_settings;
+
+        this.setState({'notificationSettings' : this.props.chat.notification_settings});
     }
 
     handleClick(){

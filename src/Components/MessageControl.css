@@ -83,6 +83,7 @@ pre code {
 
 .message-text{
     white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .message-meta{
@@ -90,6 +91,10 @@ pre code {
     user-select: none;
     color: #adadad;
     font-size: .85em;
+}
+
+.message-body{
+    overflow: hidden;
 }
 
 .message-date {

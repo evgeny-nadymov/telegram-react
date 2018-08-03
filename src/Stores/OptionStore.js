@@ -9,6 +9,8 @@ class OptionStore extends EventEmitter{
 
         this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
+
+        this.setMaxListeners(Infinity);
     }
 
     onUpdate(update){

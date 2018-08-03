@@ -8,7 +8,9 @@ class TdLibController extends EventEmitter{
         this.onUpdate = this.onUpdate.bind(this);
         this.onAuthError = this.onAuthError.bind(this);
 
-        this.init()
+        this.init();
+
+        this.setMaxListeners(Infinity);
     }
 
     send(request){

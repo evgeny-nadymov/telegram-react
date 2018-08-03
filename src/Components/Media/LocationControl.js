@@ -18,7 +18,11 @@ class LocationControl extends React.Component {
         let latitude = location.latitude;
 
         let source = `https://maps.google.com/?q=${latitude},${longitude}`;
-        let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=300x150&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
+
+        //let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=300x150&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
+        let staticSource = `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&size=600,300&z=16&l=map&scale=2.0&lang=en_US&pt=${longitude},${latitude},pm2rdm`;
+
+
         let alt = `Location ${source}`;
 
         return (
