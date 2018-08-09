@@ -43,12 +43,12 @@ class FileController{
                     let obj = items[i];
                     switch (obj['@type']){
                         case 'chat':
-                            this.getLocalFile(store, obj, idb_key, file.arr,
+                            this.getLocalFile(store, obj.photo.small, idb_key, file.arr,
                                 () => ChatStore.updatePhoto(obj.id),
                                 () => this.getRemoteFile(file.id, 1));
                             break;
                         case 'user':
-                            this.getLocalFile(store, obj, idb_key, file.arr,
+                            this.getLocalFile(store, obj.profile_photo.small, idb_key, file.arr,
                                 () => UserStore.updatePhoto(obj.id),
                                 () => this.getRemoteFile(file.id, 1));
                             break;

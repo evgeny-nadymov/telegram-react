@@ -335,7 +335,7 @@ class Dialogs extends Component{
             let chat = chats[i];
             let [id, pid, idb_key] = getChatPhoto(chat);
             if (pid) {
-                FileContrller.getLocalFile(store, chat, idb_key, null,
+                FileContrller.getLocalFile(store, chat.photo.small, idb_key, null,
                     () => ChatStore.updatePhoto(chat.id),
                     () => FileContrller.getRemoteFile(id, 1, chat));
             }

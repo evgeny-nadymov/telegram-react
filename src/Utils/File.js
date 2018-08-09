@@ -17,10 +17,10 @@ function getUserPhoto(user) {
     return getSmallPhoto(user.profile_photo);
 }
 
-function getSmallPhoto(file){
+function getSmallPhoto(photo){
 
-    if (file && file.small && file.small.remote){
-        return [file.small.id, file.small.remote.id, file.small.idb_key];
+    if (photo && photo.small && photo.small.remote){
+        return [photo.small.id, photo.small.remote.id, photo.small.idb_key];
     }
 
     return [0, '', ''];

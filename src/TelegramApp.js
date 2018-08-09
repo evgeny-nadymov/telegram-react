@@ -323,7 +323,7 @@ class TelegramApp extends Component{
                                 if (pid) {
                                     let obj = user;
                                     if (!obj.blob){
-                                        FileController.getLocalFile(store, obj, idb_key, null,
+                                        FileController.getLocalFile(store, obj.profile_photo.small, idb_key, null,
                                             () => UserStore.updatePhoto(user.id),
                                             () => { if (loadRemote)  FileController.getRemoteFile(id, 1, user); },
                                             'load_contents',

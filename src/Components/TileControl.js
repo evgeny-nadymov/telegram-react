@@ -19,7 +19,7 @@ class TileControl extends Component{
     }
 
     componentWillMount(){
-        ChatStore.on("chat_photo_changed", this.onPhotoUpdated)
+        ChatStore.on('chat_photo_changed', this.onPhotoUpdated);
     }
 
     onPhotoUpdated(payload) {
@@ -29,7 +29,7 @@ class TileControl extends Component{
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener("chat_photo_changed", this.onPhotoUpdated);
+        ChatStore.removeListener('chat_photo_changed', this.onPhotoUpdated);
     }
 
     getChatLetters(chat){
@@ -48,10 +48,11 @@ class TileControl extends Component{
 
     render(){
         const chat = this.props.chat;
-        const letters = this.getChatLetters(chat);
+        let letters = this.getChatLetters(chat);
+        let blob = chat.photo && chat.photo.small? chat.photo.small.blob : null;
         let src;
         try{
-            src = chat.blob ? URL.createObjectURL(chat.blob) : null;
+            src = blob ? URL.createObjectURL(blob) : null;
         }
         catch(error){
             console.log(`TileControl.render chat_id=${chat.id} with error ${error}`);
@@ -59,7 +60,7 @@ class TileControl extends Component{
 
         let chatId = chat.id || 1;
         let photoClasses = 'tile-photo';
-        if (!chat.blob){
+        if (!blob){
             photoClasses += ` user_bgcolor_${(Math.abs(chatId) % 8 + 1)}`;
         }
 

@@ -50,17 +50,19 @@ class UserTileControl extends Component{
         const user = this.props.user;
         if (!user) return null;
 
-        const letters = this.getUserLetters(user);
+        let letters = this.getUserLetters(user);
+        let blob = user.profile_photo && user.profile_photo.small? user.profile_photo.small.blob : null;
+
         let src;
         try{
-            src = user.blob ? URL.createObjectURL(user.blob) : null;
+            src = blob ? URL.createObjectURL(blob) : null;
         }
         catch(error){
             console.log(`UserTileControl.render user_id=${user.id} with error ${error}`);
         }
 
         let photoClasses = 'tile-photo';
-        if (!user.blob){
+        if (!blob){
             photoClasses += ` user_bgcolor_${(Math.abs(user.id) % 8 + 1)}`;
         }
 
