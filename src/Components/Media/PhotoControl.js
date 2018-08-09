@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './PhotoControl.css';
-import ChatStore from "../../Stores/ChatStore";
+import MessageStore from '../../Stores/MessageStore';
 import {getSize, getFitSize} from '../../Utils/Common';
-import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from "../../Constants";
+import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../Constants';
 
 class PhotoControl extends React.Component {
     constructor(props){
@@ -21,7 +21,7 @@ class PhotoControl extends React.Component {
     }*/
 
     componentWillMount(){
-        ChatStore.on("message_photo_changed", this.onPhotoUpdated)
+        MessageStore.on('message_photo_changed', this.onPhotoUpdated)
     }
 
     onPhotoUpdated(payload) {
@@ -31,7 +31,7 @@ class PhotoControl extends React.Component {
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener("message_photo_changed", this.onPhotoUpdated);
+        MessageStore.removeListener('message_photo_changed', this.onPhotoUpdated);
     }
 
     render() {

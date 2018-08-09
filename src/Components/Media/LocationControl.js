@@ -7,7 +7,6 @@ class LocationControl extends React.Component {
         super(props);
     }
 
-
     render() {
         let message = this.props.message;
         if (!message) return null;

@@ -121,16 +121,8 @@ class ChatStore extends EventEmitter{
         this.emit('chat_photo_changed', {chatId: chatId});
     }
 
-    updateMessagePhoto(messageId){
-        this.emit('message_photo_changed', {messageId: messageId});
-    }
-
-    updateMessageSticker(messageId){
-        this.emit('message_sticker_changed', {messageId: messageId});
-    }
-
     updateChatTyping(chatId){
-        this.emit("chat_typing_changed", {chatId: chatId});
+        this.emit('chat_typing_changed', {chatId: chatId});
     }
 }
 

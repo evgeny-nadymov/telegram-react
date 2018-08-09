@@ -278,7 +278,7 @@ class TelegramApp extends Component{
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
                                 FileController.getLocalFile(store, preview, previewIdbKey, null,
-                                    () => ChatStore.updateMessagePhoto(message.id),
+                                    () => MessageStore.updateMessagePhoto(message.id),
                                     () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
                                     'load_contents_preview_',
                                     message.id);
@@ -292,7 +292,7 @@ class TelegramApp extends Component{
                             let obj = getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
                                 FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => ChatStore.updateMessagePhoto(message.id),
+                                    () => MessageStore.updateMessagePhoto(message.id),
                                     () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
                                     'load_contents',
                                     message.id);
@@ -306,7 +306,7 @@ class TelegramApp extends Component{
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
                                 FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => ChatStore.updateMessageSticker(message.id),
+                                    () => MessageStore.updateMessageSticker(message.id),
                                     () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
                                     'load_contents',
                                     message.id);

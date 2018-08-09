@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './StickerControl.css';
-import ChatStore from "../../Stores/ChatStore";
+import MessageStore from "../../Stores/MessageStore";
 import {getFitSize} from "../../Utils/Common";
 
 class StickerControl extends React.Component {
@@ -20,7 +20,7 @@ class StickerControl extends React.Component {
     }*/
 
     componentWillMount(){
-        ChatStore.on("message_sticker_changed", this.onStickerUpdated)
+        MessageStore.on('message_sticker_changed', this.onStickerUpdated);
     }
 
     onStickerUpdated(payload) {
@@ -30,7 +30,7 @@ class StickerControl extends React.Component {
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener("message_sticker_changed", this.onStickerUpdated);
+        MessageStore.removeListener('message_sticker_changed', this.onStickerUpdated);
     }
 
     render() {

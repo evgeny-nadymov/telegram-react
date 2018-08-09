@@ -1,6 +1,7 @@
 import TdLibController from './TdLibController';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import MessageStore from '../Stores/MessageStore';
 import {getPhotoSize} from '../Utils/Common';
 
 class FileController{
@@ -59,7 +60,7 @@ class FileController{
                                     if (preview && preview.photo.id === file.id)
                                     {
                                         FileController.getLocalFile(store, preview, idb_key,
-                                            () => ChatStore.updateMessagePhoto(obj.id),
+                                            () => MessageStore.updateMessagePhoto(obj.id),
                                             () => { },
                                             'update_',
                                             obj.id);
@@ -70,7 +71,7 @@ class FileController{
                                     if (photo && photo.photo.id === file.id)
                                     {
                                         this.getLocalFile(store, photo, idb_key, file.arr,
-                                            () => ChatStore.updateMessagePhoto(obj.id),
+                                            () => MessageStore.updateMessagePhoto(obj.id),
                                             () => { },
                                             'update',
                                             obj.id);
@@ -78,7 +79,7 @@ class FileController{
                                     break;
                                 case 'messageSticker':
                                     this.getLocalFile(store, obj.content.sticker.sticker, idb_key, file.arr,
-                                        () => ChatStore.updateMessageSticker(obj.id),
+                                        () => MessageStore.updateMessageSticker(obj.id),
                                         () => this.getRemoteFile(file.id, 1, obj),
                                         'update',
                                         obj.id);
@@ -136,7 +137,7 @@ class FileController{
             return;
         }
 
-        obj.idb_key = idb_key;
+        //obj.idb_key = idb_key;
         if (arr){
             let t0 = performance.now();
             obj.blob = new Blob([arr]);
