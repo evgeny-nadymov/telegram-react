@@ -1,19 +1,22 @@
 import React, {Component} from 'react';
 import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import './TelegramApp.css';
-import Header from "./Components/Header";
+import Header from './Components/Header';
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
+import Footer from './Components/Footer';
 import {throttle, getSize, getPhotoSize, orderCompare} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
+import UserStore from './Stores/UserStore';
 import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController'
 import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from "./Constants";
-import Footer from "./Components/Footer";
+import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from './Constants';
+import {getUserPhoto} from './Utils/File';
+import {getPhotoFile, getPhotoPreviewFile, getStickerFile, getContactFile} from './Utils/File';
 
 const theme = createMuiTheme({
     palette: {
@@ -145,73 +148,6 @@ class TelegramApp extends Component{
         this.setHistory(updatedHistory);
     }
 
-    getMessageSticker(message) {
-        if (message['@type'] !== 'message') {
-            return [0, '', ''];
-        }
-
-        if (!message.content || message.content['@type'] !== 'messageSticker'){
-            return [0, '', ''];
-        }
-
-        if (message.content.sticker) {
-            let file = message.content.sticker.sticker;
-            if (file && file.remote.id) {
-                return [file.id, file.remote.id, file.idb_key];
-            }
-        }
-
-        return [0, '', ''];
-    }
-
-    getMessagePhotoPreview(message) {
-        if (message['@type'] !== 'message') {
-            return [0, '', ''];
-        }
-
-        if (!message.content || message.content['@type'] !== 'messagePhoto'){
-            return [0, '', ''];
-        }
-
-        if (message.content.photo) {
-            let photoSize = TelegramApp.getPreviewPhotoSize(message.content.photo.sizes);
-            if (photoSize && photoSize['@type'] === 'photoSize'){
-                let file = photoSize.photo;
-                if (file && file.remote.id) {
-                    return [file.id, file.remote.id, file.idb_key];
-                }
-            }
-        }
-
-        return [0, '', ''];
-    }
-
-    getMessagePhoto(message) {
-        if (message['@type'] !== 'message') {
-            return [0, '', ''];
-        }
-
-        if (!message.content || message.content['@type'] !== 'messagePhoto'){
-            return [0, '', ''];
-        }
-
-        if (message.content.photo) {
-            let photoSize = getPhotoSize(message.content.photo.sizes);
-            if (photoSize && photoSize['@type'] === 'photoSize'){
-                let file = photoSize.photo;
-                if (file && file.remote.id) {
-                    return [file.id, file.remote.id, file.idb_key];
-                }
-            }
-        }
-
-        return [0, '', ''];
-    }
-
-    getPreviewPhotoSize(sizes){
-        return sizes.length > 0 ? sizes[0] : null;
-    }
-
     handleSelectChat(chat){
         this.previousScrollHeight = 0;
 
@@ -327,7 +263,7 @@ class TelegramApp extends Component{
                     case 'messagePhoto': {
 
                         // preview
-                        /*let [previewId, previewPid, previewIdbKey] = this.getMessagePhotoPreview(message);
+                        /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
                         if (previewPid) {
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
@@ -341,7 +277,7 @@ class TelegramApp extends Component{
                         }*/
 
                         // regular
-                        let [id, pid, idb_key] = this.getMessagePhoto(message);
+                        let [id, pid, idb_key] = getPhotoFile(message);
                         if (pid) {
                             let obj = getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
@@ -355,7 +291,7 @@ class TelegramApp extends Component{
                         break;
                     }
                     case 'messageSticker': {
-                        let [id, pid, idb_key] = this.getMessageSticker(message);
+                        let [id, pid, idb_key] = getStickerFile(message);
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
@@ -367,6 +303,25 @@ class TelegramApp extends Component{
                             }
                         }
                         break;
+                    }
+                    case 'messageContact':{
+                        let contact = message.content.contact;
+                        if (contact && contact.user_id > 0){
+                            let user = UserStore.get(contact.user_id);
+                            if (user){
+                                let [id, pid, idb_key] = getContactFile(message);
+                                if (pid) {
+                                    let obj = user;
+                                    if (!obj.blob){
+                                        FileController.getLocalFile(store, obj, idb_key, null,
+                                            () => UserStore.updatePhoto(user.id),
+                                            () => { if (loadRemote)  FileController.getRemoteFile(id, 1, user); },
+                                            'load_contents',
+                                            message.id);
+                                    }
+                                }
+                            }
+                        }
                     }
                     default:
                             break;

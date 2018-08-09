@@ -7,6 +7,7 @@ import TdLibController from '../Controllers/TdLibController';
 import {CHAT_SLICE_LIMIT} from '../Constants';
 import ChatStore from "../Stores/ChatStore";
 import FileContrller from '../Controllers/FileController';
+import {getChatPhoto} from '../Utils/File';
 import { Scrollbars } from 'react-custom-scrollbars';
 
 class Dialogs extends Component{
@@ -325,21 +326,15 @@ class Dialogs extends Component{
         for (let i = 0; i < result.chat_ids.length; i++){
             chats.push(ChatStore.get(result.chat_ids[i]));
         }
-        this.onGetChatsContinue(chats);
-    }
 
-    onGetChatsContinue(result){
-        this.appendChats(result);
-        //this.setState({ chats: result });
+        this.appendChats(chats);
 
         let store = FileContrller.getStore();
 
-        for (let i = 0; i < result.length; i++){
-            let chat = result[i];
-            let [id, pid, idb_key] = this.getChatPhoto(chat);
+        for (let i = 0; i < chats.length; i++){
+            let chat = chats[i];
+            let [id, pid, idb_key] = getChatPhoto(chat);
             if (pid) {
-                chat.pid = pid;
-
                 FileContrller.getLocalFile(store, chat, idb_key, null,
                     () => ChatStore.updatePhoto(chat.id),
                     () => FileContrller.getRemoteFile(id, 1, chat));
@@ -351,20 +346,6 @@ class Dialogs extends Component{
         if (chats.length === 0) return;
 
         this.setState({ chats: this.state.chats.concat(chats) }, callback);
-    }
-
-
-    getChatPhoto(chat) {
-        if (chat['@type'] !== 'chat') {
-            return [0, '', ''];
-        }
-        if (chat.photo) {
-            let file = chat.photo.small;
-            if (file.remote.id) {
-                return [file.id, file.remote.id, file.idb_key];
-            }
-        }
-        return [0, '', ''];
     }
 
     render(){

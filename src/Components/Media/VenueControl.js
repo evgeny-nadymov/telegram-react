@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import './VenueControl.css';
 
 class VenueControl extends React.Component {
@@ -42,5 +43,10 @@ class VenueControl extends React.Component {
         );
     }
 }
+
+VenueControl.propTypes = {
+    message : PropTypes.object.isRequired,
+    openMedia : PropTypes.func.isRequired
+};
 
 export default VenueControl;

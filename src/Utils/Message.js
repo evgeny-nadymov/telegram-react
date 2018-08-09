@@ -172,13 +172,13 @@ function getMedia(message, openMedia){
         case 'messageText':
             return null;
         case 'messagePhoto':
-            return (<PhotoControl message={message}/>);
+            return (<PhotoControl message={message} openMedia={openMedia}/>);
         case 'messageSticker':
-            return (<StickerControl message={message}/>);
+            return (<StickerControl message={message} openMedia={openMedia}/>);
         case 'messageLocation':
-            return (<LocationControl message={message}/>);
+            return (<LocationControl message={message} openMedia={openMedia}/>);
         case 'messageVenue':
-            return (<VenueControl message={message}/>);
+            return (<VenueControl message={message} openMedia={openMedia}/>);
         case 'messageContact':
             return (<ContactControl message={message} openMedia={openMedia}/>);
         default :

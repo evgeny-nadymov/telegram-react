@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './UserTileControl.css';
-import ChatStore from "../Stores/ChatStore";
+import UserStore from '../Stores/UserStore';
 
 class UserTileControl extends Component{
     constructor(props){
@@ -10,7 +10,7 @@ class UserTileControl extends Component{
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chat !== this.props.chat){
+        if (nextProps.user !== this.props.user){
             return true;
         }
 
@@ -18,23 +18,26 @@ class UserTileControl extends Component{
     }
 
     componentWillMount(){
-        ChatStore.on("user_photo_changed", this.onPhotoUpdated)
+        UserStore.on('user_photo_changed', this.onPhotoUpdated)
     }
 
     onPhotoUpdated(payload) {
-        if (this.props.chat && this.props.chat.id === payload.chatId){
+        if (this.props.user && this.props.user.id === payload.userId){
             this.forceUpdate();
         }
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener("user_photo_changed", this.onPhotoUpdated);
+        UserStore.removeListener('user_photo_changed', this.onPhotoUpdated);
     }
 
     getFirstLetter(str){
         if (!str) return '';
         for (let i = 0; i < str.length; i++){
             if (str[i].toUpperCase() !== str[i].toLowerCase()) {
+                return str[i];
+            }
+            else if (str[i] >= '0' && str[i] <= '9'){
                 return str[i];
             }
         }
@@ -53,7 +56,7 @@ class UserTileControl extends Component{
             return this.getFirstLetter(split[0]) + this.getFirstLetter(split[1])
         }
 
-        return user.first_name.charAt(0);
+        return user.first_name ? user.first_name.charAt(0) : (user.last_name ? user.last_name.charAt(0) : '');
     }
 
     render(){

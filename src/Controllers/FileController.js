@@ -1,5 +1,6 @@
 import TdLibController from './TdLibController';
 import ChatStore from '../Stores/ChatStore';
+import UserStore from '../Stores/UserStore';
 import {getPhotoSize} from '../Utils/Common';
 
 class FileController{
@@ -43,6 +44,11 @@ class FileController{
                         case 'chat':
                             this.getLocalFile(store, obj, idb_key, file.arr,
                                 () => ChatStore.updatePhoto(obj.id),
+                                () => this.getRemoteFile(file.id, 1));
+                            break;
+                        case 'user':
+                            this.getLocalFile(store, obj, idb_key, file.arr,
+                                () => UserStore.updatePhoto(obj.id),
                                 () => this.getRemoteFile(file.id, 1));
                             break;
                         case 'message':
@@ -141,10 +147,8 @@ class FileController{
             return;
         }
 
-        let objectStore = store;
-
         let t0 = performance.now();
-        let getItem = objectStore.get(idb_key);
+        let getItem = store.get(idb_key);
         getItem.onsuccess = function (event) {
             let blob = event.target.result;
             let t1 = performance.now();
@@ -158,22 +162,6 @@ class FileController{
                 faultCallback();
             }
         };
-
-        return;
-        console.log((from? from : '') + 'download_message start getLocal id=' + messageId);
-
-        this.store.getItem(idb_key).then(blob => {
-            console.log((from? from : '') + 'download_message stop getLocal id=' + messageId + ' blob=' + blob);
-            //console.log('Got blob: ' + idb_key + ' => ' + blob);
-
-            if (blob){
-                obj.blob = blob;
-                callback();
-            }
-            else{
-                faultCallback();
-            }
-        });
     }
 
     getRemoteFile(fileId, priority, obj){

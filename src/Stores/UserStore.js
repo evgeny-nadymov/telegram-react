@@ -26,6 +26,10 @@ class UserStore extends EventEmitter{
     get(userId){
         return this.items.get(userId);
     }
+
+    updatePhoto(userId){
+        this.emit('user_photo_changed', { userId: userId });
+    }
 }
 
 const store = new UserStore();

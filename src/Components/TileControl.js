@@ -67,9 +67,10 @@ class TileControl extends Component{
             console.log(`TileControl.render chat_id=${chat.id} with error ${error}`);
         }
 
+        let chatId = chat.id || 1;
         let photoClasses = 'tile-photo';
         if (!chat.blob){
-            photoClasses += ` user_bgcolor_${(Math.abs(chat.id) % 8 + 1)}`;
+            photoClasses += ` user_bgcolor_${(Math.abs(chatId) % 8 + 1)}`;
         }
 
         return src ?

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './StickerControl.css';
 import ChatStore from "../../Stores/ChatStore";
 import {getFitSize} from "../../Utils/Common";
@@ -55,5 +56,10 @@ class StickerControl extends React.Component {
         );
     }
 }
+
+StickerControl.propTypes = {
+    message : PropTypes.object.isRequired,
+    openMedia : PropTypes.func.isRequired
+};
 
 export default StickerControl;

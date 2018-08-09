@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './PhotoControl.css';
 import ChatStore from "../../Stores/ChatStore";
 import {getSize, getFitSize} from '../../Utils/Common';
@@ -70,5 +71,10 @@ class PhotoControl extends React.Component {
             );
     }
 }
+
+PhotoControl.propTypes = {
+    message : PropTypes.object.isRequired,
+    openMedia : PropTypes.func.isRequired
+};
 
 export default PhotoControl;

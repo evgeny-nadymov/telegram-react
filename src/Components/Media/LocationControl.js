@@ -1,4 +1,5 @@
-import React, {PropTypes} from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import './LocationControl.css';
 
 class LocationControl extends React.Component {
@@ -32,5 +33,10 @@ class LocationControl extends React.Component {
         );
     }
 }
+
+LocationControl.propTypes = {
+    message : PropTypes.object.isRequired,
+    openMedia : PropTypes.func.isRequired
+};
 
 export default LocationControl;
