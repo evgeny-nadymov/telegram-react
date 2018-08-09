@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './UserTileControl.css';
 import UserStore from '../Stores/UserStore';
+import {getLetters} from '../Utils/Common';
 
 class UserTileControl extends Component{
     constructor(props){
@@ -31,29 +32,15 @@ class UserTileControl extends Component{
         UserStore.removeListener('user_photo_changed', this.onPhotoUpdated);
     }
 
-    getFirstLetter(str){
-        if (!str) return '';
-        for (let i = 0; i < str.length; i++){
-            if (str[i].toUpperCase() !== str[i].toLowerCase()) {
-                return str[i];
-            }
-            else if (str[i] >= '0' && str[i] <= '9'){
-                return str[i];
-            }
-        }
-
-        return '';
-    }
-
-    getLetters(user){
+    getUserLetters(user){
         if (!user) return null;
 
         let title = user.first_name + ' ' + user.last_name || 'Deleted account';
         if (title.length === 0) return null;
 
-        let split = title.split(' ');
-        if (split.length > 1){
-            return this.getFirstLetter(split[0]) + this.getFirstLetter(split[1])
+        let letters = getLetters(title);
+        if (letters && letters.length > 0){
+            return letters;
         }
 
         return user.first_name ? user.first_name.charAt(0) : (user.last_name ? user.last_name.charAt(0) : '');
@@ -63,7 +50,7 @@ class UserTileControl extends Component{
         const user = this.props.user;
         if (!user) return null;
 
-        const letters = this.getLetters(user);
+        const letters = this.getUserLetters(user);
         let src;
         try{
             src = user.blob ? URL.createObjectURL(user.blob) : null;

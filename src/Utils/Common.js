@@ -117,4 +117,30 @@ function debounce(func, wait, immediate) {
     };
 }
 
-export {orderCompare, getSize, getPhotoSize, getFitSize, itemsInView, throttle, debounce};
+function getFirstLetter(str){
+    if (!str) return '';
+    for (let i = 0; i < str.length; i++){
+        if (str[i].toUpperCase() !== str[i].toLowerCase()) {
+            return str[i];
+        }
+        else if (str[i] >= '0' && str[i] <= '9'){
+            return str[i];
+        }
+    }
+
+    return '';
+}
+
+function getLetters(title){
+    if (!title) return null;
+    if (title.length === 0) return null;
+
+    let split = title.split(' ');
+    if (split.length > 1){
+        return getFirstLetter(split[0]) + getFirstLetter(split[1])
+    }
+
+    return null;
+}
+
+export {orderCompare, getSize, getPhotoSize, getFitSize, itemsInView, throttle, debounce, getLetters};

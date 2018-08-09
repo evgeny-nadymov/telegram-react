@@ -135,6 +135,16 @@ class TelegramApp extends Component{
         if (this.state.selectedChat.id !== message.chat_id) return;
 
         this.historyPushBack(message);
+
+        MessageStore.set(message);
+        this.loadMessageContents([message])
+
+        TdLibController
+            .send({
+                '@type': 'viewMessages',
+                chat_id: this.state.selectedChat.id,
+                message_ids: [message.id]
+            });
     }
 
     onUpdateMessageSendSucceeded(old_message_id, message){

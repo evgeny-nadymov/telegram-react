@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './TileControl.css';
 import ChatStore from "../Stores/ChatStore";
+import {getLetters} from '../Utils/Common';
 
 class TileControl extends Component{
     constructor(props){
@@ -31,26 +32,15 @@ class TileControl extends Component{
         ChatStore.removeListener("chat_photo_changed", this.onPhotoUpdated);
     }
 
-    getFirstLetter(str){
-        if (!str) return '';
-        for (let i = 0; i < str.length; i++){
-            if (str[i].toUpperCase() !== str[i].toLowerCase()) {
-                return str[i];
-            }
-        }
-
-        return '';
-    }
-
     getChatLetters(chat){
         if (!chat) return null;
 
         let title = chat.title || 'Deleted account';
         if (title.length === 0) return null;
 
-        let split = title.split(' ');
-        if (split.length > 1){
-            return this.getFirstLetter(split[0]) + this.getFirstLetter(split[1])
+        let letters = getLetters(title);
+        if (letters && letters.length > 0){
+            return letters;
         }
 
         return chat.title.charAt(0);
