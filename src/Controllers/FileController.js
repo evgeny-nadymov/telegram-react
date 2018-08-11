@@ -3,10 +3,14 @@ import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import MessageStore from '../Stores/MessageStore';
 import {getPhotoSize} from '../Utils/Common';
+import {getDocumentThumbnailFile} from '../Utils/File';
+import {EventEmitter} from 'events';
 
-class FileController{
+class FileController extends EventEmitter{
     constructor(){
+        super();
         this.downloads = new Map();
+        this.uploads = new Map();
 
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateFile = this.onUpdateFile.bind(this);
@@ -25,73 +29,126 @@ class FileController{
     }
 
     onUpdateFile(file) {
-        if (!file.idb_key || !file.remote.id) {
-            return;
-        }
-        let idb_key = file.idb_key;
+        if (this.downloads.has(file.id)){
 
-        if (file.local.is_downloading_completed
-            && this.downloads.has(file.id)){
+            if (file.local.is_downloading_completed){
 
-            let items = this.downloads.get(file.id);
-            if (items){
-                this.downloads.delete(file.id);
+                if (!file.idb_key || !file.remote.id) {
+                    return;
+                }
+                let idb_key = file.idb_key;
 
-                let store = this.getStore();
+                let items = this.downloads.get(file.id);
+                if (items){
+                    this.downloads.delete(file.id);
 
-                for (let i = 0; i < items.length; i++){
-                    let obj = items[i];
-                    switch (obj['@type']){
-                        case 'chat':
-                            this.getLocalFile(store, obj.photo.small, idb_key, file.arr,
-                                () => ChatStore.updatePhoto(obj.id),
-                                () => this.getRemoteFile(file.id, 1));
-                            break;
-                        case 'user':
-                            this.getLocalFile(store, obj.profile_photo.small, idb_key, file.arr,
-                                () => UserStore.updatePhoto(obj.id),
-                                () => this.getRemoteFile(file.id, 1));
-                            break;
-                        case 'message':
-                            switch (obj.content['@type']){
-                                case 'messagePhoto':
-                                    // preview
-                                    /*let preview = this.getPreviewPhotoSize(obj.content.photo.sizes);
-                                    if (preview && preview.photo.id === file.id)
-                                    {
-                                        FileController.getLocalFile(store, preview, idb_key,
-                                            () => MessageStore.updateMessagePhoto(obj.id),
-                                            () => { },
-                                            'update_',
-                                            obj.id);
-                                    }*/
+                    let store = this.getStore();
 
-                                    // regular
-                                    let photo = getPhotoSize(obj.content.photo.sizes);
-                                    if (photo && photo.photo.id === file.id)
-                                    {
-                                        this.getLocalFile(store, photo, idb_key, file.arr,
-                                            () => MessageStore.updateMessagePhoto(obj.id),
-                                            () => { },
-                                            'update',
-                                            obj.id);
-                                    }
-                                    break;
-                                case 'messageSticker':
-                                    this.getLocalFile(store, obj.content.sticker.sticker, idb_key, file.arr,
-                                        () => MessageStore.updateMessageSticker(obj.id),
-                                        () => this.getRemoteFile(file.id, 1, obj),
-                                        'update',
-                                        obj.id);
-                                    break;
-                                default:
-                                    break;
+                    for (let i = 0; i < items.length; i++){
+                        let obj = items[i];
+                        switch (obj['@type']){
+                            case 'chat':{
+                                let source = obj.photo.small;
+                                if (source && source.id === file.id){
+                                    this.getLocalFile(store, source, idb_key, file.arr,
+                                        () => ChatStore.updatePhoto(obj.id),
+                                        () => this.getRemoteFile(file.id, 1));
+                                }
+                                break;
                             }
-                            break;
-                        default:
-                            break;
+                            case 'user':{
+                                let source = obj.profile_photo.small;
+                                if (source && source.id === file.id){
+                                    this.getLocalFile(store, source, idb_key, file.arr,
+                                        () => UserStore.updatePhoto(obj.id),
+                                        () => this.getRemoteFile(file.id, 1));
+                                }
+
+                                break;
+                            }
+                            case 'message':
+                                switch (obj.content['@type']){
+                                    case 'messagePhoto':
+                                        // preview
+                                        /*let preview = this.getPreviewPhotoSize(obj.content.photo.sizes);
+                                        if (preview && preview.photo.id === file.id)
+                                        {
+                                            FileController.getLocalFile(store, preview, idb_key,
+                                                () => MessageStore.updateMessagePhoto(obj.id),
+                                                () => { },
+                                                'update_',
+                                                obj.id);
+                                        }*/
+
+                                        // regular
+                                        let photoSize = getPhotoSize(obj.content.photo.sizes);
+                                        if (photoSize)
+                                        {
+                                            let source = photoSize.photo;
+                                            if (source && source.id === file.id){
+                                                this.getLocalFile(store, source, idb_key, file.arr,
+                                                    () => MessageStore.updateMessagePhoto(obj.id),
+                                                    () => { },
+                                                    'update',
+                                                    obj.id);
+                                            }
+                                        }
+                                        break;
+                                    case 'messageSticker':{
+
+                                        let source = obj.content.sticker.sticker;
+                                        if (source && source.id === file.id){
+                                            this.getLocalFile(store, source, idb_key, file.arr,
+                                                () => MessageStore.updateMessageSticker(obj.id),
+                                                () => this.getRemoteFile(file.id, 1, obj),
+                                                'update',
+                                                obj.id);
+                                        }
+                                        break;
+                                    }
+                                    case 'messageDocument': {
+                                        if (obj.content.document.thumbnail){
+                                            let source = obj.content.document.thumbnail.photo;
+                                            if (source && source.id === file.id){
+                                                this.getLocalFile(store, source, idb_key, file.arr,
+                                                    () => MessageStore.updateMessageDocumentThumbnail(source.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj),
+                                                    'update',
+                                                    obj.id);
+                                            }
+                                        }
+                                        if (obj.content.document.document){
+                                            let source = obj.content.document.document;
+                                            if (source && source.id === file.id){
+                                                this.emit('file_update', file);
+                                                // this.getLocalFile(store, source, idb_key, file.arr,
+                                                //     () => this.emit('file_update', file),
+                                                //     () => this.getRemoteFile(file.id, 1, obj));
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
+            }
+            else{
+                this.emit('file_update', file);
+            }
+        }
+        else if (this.uploads.has(file.id)){
+            if (file.remote.is_uploading_completed){
+                this.uploads.delete(file.id);
+                this.emit('file_upload_update', file);
+            }
+            else{
+                this.emit('file_upload_update', file);
             }
         }
     }
@@ -177,6 +234,19 @@ class FileController{
 
         console.log('[perf] downloadFile file_id=' + fileId);
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
+    }
+
+    uploadFile(fileId, obj){
+        if (this.uploads.has(fileId)){
+            let items = this.uploads.get(fileId);
+            items.push(obj);
+        }
+        else
+        {
+            this.uploads.set(fileId, [obj]);
+        }
+
+        console.log('[perf] uploadFile file_id=' + fileId);
     }
 
     cancelGetRemoteFile(fileId, obj){

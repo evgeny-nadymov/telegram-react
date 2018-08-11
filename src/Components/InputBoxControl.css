@@ -1,7 +1,9 @@
 .inputbox-wrapper{
-    max-width: 382px;/*554px;*/
+    max-width: 518px;
     margin: 0 auto;
     padding: 10px 15px 21px;
+    display: flex;
+    flex-direction: row;
 }
 
 #inputbox-message{
@@ -90,4 +92,15 @@
     color: #3589c5;
 }
 
+.inputbox-middle-column{
+    flex-grow: 1;
+}
+
+.inputbox-left-column{
+    margin-right: 20px;
+}
+
+.inputbox-right-column{
+    margin-left: 20px;
+}
 

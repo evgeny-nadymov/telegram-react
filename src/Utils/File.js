@@ -45,6 +45,35 @@ function getStickerFile(message) {
     return [0, '', ''];
 }
 
+function getDocumentThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    if (!message.content || message.content['@type'] !== 'messageDocument'){
+        return [0, '', ''];
+    }
+
+    let document = message.content.document;
+    if (!document){
+        return [0, '', ''];
+    }
+
+    let thumbnail = document.thumbnail;
+    if (!thumbnail){
+        return [0, '', ''];
+    }
+
+    if (thumbnail.photo) {
+        let file = thumbnail.photo;
+        if (file && file.remote.id) {
+            return [file.id, file.remote.id, file.idb_key];
+        }
+    }
+
+    return [0, '', ''];
+}
+
 function getPhotoPreviewFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -112,4 +141,4 @@ function getPreviewPhotoSize(sizes){
     return sizes.length > 0 ? sizes[0] : null;
 }
 
-export { getUserPhoto, getChatPhoto, getContactFile, getStickerFile, getPhotoFile, getPhotoPreviewFile };
+export { getUserPhoto, getChatPhoto, getContactFile, getStickerFile, getPhotoFile, getPhotoPreviewFile, getDocumentThumbnailFile };

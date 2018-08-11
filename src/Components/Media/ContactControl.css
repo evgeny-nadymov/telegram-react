@@ -1,5 +1,6 @@
 .contact{
-
+    display: flex;
+    flex-direction: row;
 }
 
 .contact-name{
@@ -13,5 +14,6 @@
 }
 
 .contact-content{
-
+    flex-grow: 1;
+    margin-left: 10px;
 }

@@ -1,0 +1,34 @@
+.document{
+    display: flex;
+    flex-direction: row;
+}
+
+.document-tile{
+
+}
+
+.document-content{
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.document-title{
+    padding-top: 6px;
+}
+
+.document-name{
+    color: #3a6d99;
+    font-weight: 700;
+    max-width: 110px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.document-size{
+    color: #999;
+}
+
+.document-action{
+
+}

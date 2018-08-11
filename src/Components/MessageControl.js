@@ -4,8 +4,10 @@ import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
+import FileController from '../Controllers/FileController';
 import ReplyControl from './ReplyControl';
 import classNames from 'classnames';
+import fileDownload from 'react-file-download';
 import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
 
 class MessageControl extends Component{
@@ -130,6 +132,32 @@ class MessageControl extends Component{
                             this.props.onSelectChat(chat);
                         });
                 }
+                break;
+            }
+            case 'messageDocument': {
+                if (message.content){
+
+                    let document = message.content.document;
+                    if (document){
+
+                        let file = document.document;
+                        if (file
+                            && file.local
+                            && file.local.can_be_downloaded
+                            && !file.local.is_downloading_active) {
+
+                            if (file.local.is_downloading_completed){
+                                if (file.arr && document.file_name){
+                                    fileDownload(file.arr, document.file_name);
+                                }
+                            }
+                            else{
+                                FileController.getRemoteFile(file.id, 1, message);
+                            }
+                        }
+                    }
+                }
+
                 break;
             }
         }

@@ -1,0 +1,21 @@
+.document-tile-background{
+    background: rgba(218,228,234,.5);
+}
+
+.document-tile-download-icon{
+    display: inline-block;
+    line-height: 0;
+    width: 12px;
+    height: 18px;
+    margin: 15px 18px;
+    background: url(../Assets/Icons/General.png) no-repeat -14px -509px;
+}
+
+.document-tile-save-icon{
+    display: inline-block;
+    line-height: 0;
+    width: 16px;
+    height: 18px;
+    margin: 15px 16px;
+    background: url(../Assets/Icons/General.png) no-repeat -12px -561px;
+}

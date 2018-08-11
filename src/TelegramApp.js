@@ -15,8 +15,8 @@ import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from './Constants';
-import {getUserPhoto} from './Utils/File';
-import {getPhotoFile, getPhotoPreviewFile, getStickerFile, getContactFile} from './Utils/File';
+import {getChatPhoto, getUserPhoto} from './Utils/File';
+import {getPhotoFile, getPhotoPreviewFile, getStickerFile, getContactFile, getDocumentThumbnailFile} from './Utils/File';
 
 const theme = createMuiTheme({
     palette: {
@@ -69,6 +69,14 @@ class TelegramApp extends Component{
                         name: 'online',
                         value: { '@type': 'optionValueBoolean', value: true }
                     });
+                TdLibController
+                    .send({
+                        '@type': 'getMe'
+                    })
+                    .then(result =>{
+                        this.setState({ currentUser: result });
+                    });
+
                 break;
             case 'waitPhoneNumber':
                 this.setState({authState: state.status});
@@ -187,21 +195,11 @@ class TelegramApp extends Component{
                     this.onLoadNext(0, true);
                 }
 
-                return result;
-            })
-            .then(result => {
-                let messageIds = [];
-                if (result.messages){
-                    for (let i = 0; i < result.messages.length; i++){
-                        messageIds.push(result.messages[i].id);
-                    }
-                }
-
                 TdLibController
                     .send({
                         '@type': 'viewMessages',
                         chat_id: chat.id,
-                        message_ids: messageIds
+                        message_ids: result.messages.map(x => x.id)
                     });
             });
 
@@ -252,14 +250,32 @@ class TelegramApp extends Component{
             .send({
                 '@type': 'openChat',
                 chat_id: chat.id,
-            })
-            .then(() => {
-                return TdLibController
-                    .send({
-                        '@type': 'readAllChatMentions',
-                        chat_id: chat.id
-                    });
             });
+
+        TdLibController
+            .send({
+                '@type': 'readAllChatMentions',
+                chat_id: chat.id
+            });
+
+        // load chat photo
+        if (chat.photo){
+            let store = FileController.getStore();
+
+            let file = chat.photo.small;
+            if (file){
+                let [id, pid, idb_key] = getChatPhoto(chat);
+                if (pid) {
+                    if (!file.blob){
+                        FileController.getLocalFile(store, file, idb_key, null,
+                            () => ChatStore.updatePhoto(chat.id),
+                            () => FileController.getRemoteFile(id, 1, chat),
+                            'load_chat',
+                            null);
+                    }
+                }
+            }
+        }
     }
 
     loadMessageContents(messages, loadRemote = true){
@@ -289,13 +305,16 @@ class TelegramApp extends Component{
                         // regular
                         let [id, pid, idb_key] = getPhotoFile(message);
                         if (pid) {
-                            let obj = getPhotoSize(message.content.photo.sizes);
-                            if (!obj.blob){
-                                FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => MessageStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
-                                    'load_contents',
-                                    message.id);
+                            let photoSize = getPhotoSize(message.content.photo.sizes);
+                            if (photoSize){
+                                let obj = photoSize.photo;
+                                if (!obj.blob){
+                                    FileController.getLocalFile(store, obj, idb_key, null,
+                                        () => MessageStore.updateMessagePhoto(message.id),
+                                        () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
+                                        'load_contents',
+                                        message.id);
+                                }
                             }
                         }
                         break;
@@ -321,9 +340,9 @@ class TelegramApp extends Component{
                             if (user){
                                 let [id, pid, idb_key] = getContactFile(message);
                                 if (pid) {
-                                    let obj = user;
+                                    let obj = user.profile_photo.small;
                                     if (!obj.blob){
-                                        FileController.getLocalFile(store, obj.profile_photo.small, idb_key, null,
+                                        FileController.getLocalFile(store, obj, idb_key, null,
                                             () => UserStore.updatePhoto(user.id),
                                             () => { if (loadRemote)  FileController.getRemoteFile(id, 1, user); },
                                             'load_contents',
@@ -332,6 +351,20 @@ class TelegramApp extends Component{
                                 }
                             }
                         }
+                    }
+                    case 'messageDocument': {
+                        let [id, pid, idb_key] = getDocumentThumbnailFile(message);
+                        if (pid) {
+                            let obj = message.content.document.thumbnail.photo;
+                            if (!obj.blob){
+                                FileController.getLocalFile(store, obj, idb_key, null,
+                                    () => MessageStore.updateMessageDocumentThumbnail(obj.id),
+                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
+                                    'load_contents',
+                                    message.id);
+                            }
+                        }
+                        break;
                     }
                     default:
                             break;
@@ -410,7 +443,9 @@ class TelegramApp extends Component{
             clear_draft: true
         };
 
-        this.onSendInternal(content);
+        this.onSendInternal(
+            content,
+            result => { });
     }
 
     handleSendFile(file){
@@ -421,10 +456,12 @@ class TelegramApp extends Component{
             document: { '@type': 'inputFileBlob', name: file.name, blob: file }
         };
 
-        this.onSendInternal(content);
+        this.onSendInternal(
+            content,
+            result => { FileController.uploadFile(result.content.document.document.id, result); });
     }
 
-    onSendInternal(content){
+    onSendInternal(content, callback){
         if (!this.state.selectedChat) return;
         if (!content) return;
 
@@ -448,6 +485,8 @@ class TelegramApp extends Component{
                         chat_id: this.state.selectedChat.id,
                         message_ids: messageIds
                     });
+
+                callback(result);
             })
             .catch(error =>{
                 alert('sendMessage error ' + error);
@@ -498,18 +537,11 @@ class TelegramApp extends Component{
                 return result;
             })
             .then(result => {
-                let messageIds = [];
-                if (result.messages){
-                    for (let i = 0; i < result.messages.length; i++){
-                        messageIds.push(result.messages[i].id);
-                    }
-                }
-
                 TdLibController
                     .send({
                         '@type': 'viewMessages',
                         chat_id: chatId,
-                        message_ids: messageIds
+                        message_ids: result.messages.map(x => x.id)
                     });
             })
             .catch(() => {
@@ -570,6 +602,7 @@ class TelegramApp extends Component{
                                 onSelectChat={this.handleSelectChat}/>
                             <DialogDetails
                                 ref='dialogDetails'
+                                currentUser={this.state.currentUser}
                                 selectedChat={this.state.selectedChat}
                                 scrollBottom={this.state.scrollBottom}
                                 history={this.state.history}

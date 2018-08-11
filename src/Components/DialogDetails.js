@@ -5,6 +5,8 @@ import InputBoxControl from "./InputBoxControl";
 import MessageControl from "./MessageControl";
 import MessageGroupControl from "./MessageGroupControl";
 import {debounce, itemsInView, throttle} from "../Utils/Common";
+import TileControl from './TileControl';
+import UserTileControl from './UserTileControl';
 
 class DialogDetails extends Component{
 
@@ -151,7 +153,13 @@ class DialogDetails extends Component{
                 </div>
                 {   this.props.selectedChat &&
                     <div className='dialogdetails-input-wrapper'>
-                        <InputBoxControl ref='inputBox' className='dialogdetails-input' selectedChat={this.props.selectedChat} onSendText={this.props.onSendText} onSendFile={this.props.onSendFile}/>
+                        <InputBoxControl
+                            ref='inputBox'
+                            className='dialogdetails-input'
+                            currentUser={this.props.currentUser}
+                            selectedChat={this.props.selectedChat}
+                            onSendText={this.props.onSendText}
+                            onSendFile={this.props.onSendFile}/>
                     </div>
                 }
             </div>

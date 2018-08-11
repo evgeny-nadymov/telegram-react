@@ -4,6 +4,7 @@ import StickerControl from '../Components/Media/StickerControl';
 import LocationControl from '../Components/Media/LocationControl';
 import VenueControl from '../Components/Media/VenueControl';
 import ContactControl from '../Components/Media/ContactControl';
+import DocumentControl from '../Components/Media/DocumentControl';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import dateFormat from "dateformat";
@@ -181,6 +182,8 @@ function getMedia(message, openMedia){
             return (<VenueControl message={message} openMedia={openMedia}/>);
         case 'messageContact':
             return (<ContactControl message={message} openMedia={openMedia}/>);
+        case 'messageDocument':
+            return (<DocumentControl message={message} openMedia={openMedia}/>);
         default :
             return '[' + message.content['@type'] + ']';
     }

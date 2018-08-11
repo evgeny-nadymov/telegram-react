@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './TileControl.css';
-import ChatStore from "../Stores/ChatStore";
+import ChatStore from '../Stores/ChatStore';
 import {getLetters} from '../Utils/Common';
 
 class TileControl extends Component{

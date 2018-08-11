@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './InputBoxControl.css';
 import TileControl from "./TileControl";
 import OutputTypingManager from "../Utils/OutputTypingManager";
+import UserTileControl from './UserTileControl';
 
 class InputBoxControl extends Component{
 
@@ -95,19 +96,26 @@ class InputBoxControl extends Component{
 
         return (
             <div className='inputbox-wrapper'>
-                <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
-                    {text}
+                <div className='inputbox-left-column'>
+                    <UserTileControl user={this.props.currentUser}/>
                 </div>
-                <div className='inputbox-buttons'>
-                    <div className='inputbox-attach-wrapper'>
-                        <input className='inputbox-attach-button' type='file' ref='attachFile' onChange={this.handleAttachComplete}/>
-                        <i className='inputbox-attach-icon' onClick={this.handleAttach}/>
+                <div className='inputbox-middle-column'>
+                    <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
+                        {text}
                     </div>
-                    <div className='inputbox-send-button' onClick={this.handleSubmit}>
-                        <span className='inputbox-send-text'>SEND</span>
+                    <div className='inputbox-buttons'>
+                        <div className='inputbox-attach-wrapper'>
+                            <input className='inputbox-attach-button' type='file' ref='attachFile' onChange={this.handleAttachComplete}/>
+                            <i className='inputbox-attach-icon' onClick={this.handleAttach}/>
+                        </div>
+                        <div className='inputbox-send-button' onClick={this.handleSubmit}>
+                            <span className='inputbox-send-text'>SEND</span>
+                        </div>
                     </div>
                 </div>
-                {/*<TileControl chat={this.props.selectedChat}/>*/}
+                <div className='inputbox-right-column'>
+                    <TileControl chat={this.props.selectedChat}/>
+                </div>
             </div>
         );
     }

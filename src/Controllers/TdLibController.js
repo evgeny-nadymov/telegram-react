@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import TdClient from "@arseny30/tdweb/dist/tdweb";
+import { EventEmitter } from 'events';
+import TdClient from '@arseny30/tdweb/dist/tdweb';
 
 class TdLibController extends EventEmitter{
     constructor(){

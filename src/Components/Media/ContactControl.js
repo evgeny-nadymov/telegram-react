@@ -29,7 +29,9 @@ class ContactControl extends React.Component {
 
         return (
             <div className='contact'>
-                <UserTileControl user={user} className='contact-tile'/>
+                <div className='contact-tile'>
+                    <UserTileControl user={user}/>
+                </div>
                 <div className='contact-content'>
                     <div className='contact-name'>
                         {

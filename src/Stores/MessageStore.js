@@ -110,6 +110,10 @@ class MessageStore extends EventEmitter {
     updateMessageSticker(messageId){
         this.emit('message_sticker_changed', {messageId: messageId});
     }
+
+    updateMessageDocumentThumbnail(fileId){
+        this.emit('message_document_thumbnail_changed', {fileId: fileId});
+    }
 }
 
 const store = new MessageStore();
