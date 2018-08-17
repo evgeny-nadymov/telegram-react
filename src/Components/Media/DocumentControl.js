@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import './DocumentControl.css';
 import DocumentTileControl from '../DocumentTileControl';
 import FileController from '../../Controllers/FileController';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Footer from '../Footer';
+
+const circleStyle = { circle: 'document-progress-circle' };
 
 class DocumentControl extends React.Component {
 
@@ -12,6 +16,7 @@ class DocumentControl extends React.Component {
     }
 
     componentWillMount(){
+        this.mount = true;
         FileController.on('file_update', this.onProgressUpdated);
         FileController.on('file_upload_update', this.onProgressUpdated);
     }
@@ -23,6 +28,7 @@ class DocumentControl extends React.Component {
             && this.props.message.content.document.document
             && this.props.message.content.document.document.id === payload.id){
             this.props.message.content.document.document = payload;
+            this.payload = payload;
             this.forceUpdate();
         }
     }
@@ -30,6 +36,7 @@ class DocumentControl extends React.Component {
     componentWillUnmount(){
         FileController.removeListener('file_upload_update', this.onProgressUpdated);
         FileController.removeListener('file_update', this.onProgressUpdated);
+        this.mount = false;
     }
 
     getSizeString(size){
@@ -88,6 +95,7 @@ class DocumentControl extends React.Component {
         let isDownloadingActive = file.local && file.local.is_downloading_active;
         let isUploadingActive = file.remote && file.remote.is_uploading_active;
         let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
+        let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
         let size = this.getSize(file);
         let progressSize = null;
@@ -98,21 +106,65 @@ class DocumentControl extends React.Component {
             progressSize = this.getUploadedSize(file);
         }
 
-        let sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
+        let progress = 0;
+        if (isDownloadingActive){
+            progress = file.local.downloaded_size && file.size && this.isDownloadingActive
+                ? 100 - (file.size - file.local.downloaded_size) / file.size * 100
+                : 0;
+        }
+        else if (isUploadingActive){
+            progress = file.remote.uploaded_size && file.size && this.isUploadingActive
+                ? 100 - (file.size - file.remote.uploaded_size) / file.size * 100
+                : 0;
+        }
 
+        let showProgress = isDownloadingActive || isUploadingActive;
+
+        let timeToCompleteAnimation = 350;
+        if (this.isDownloadingActive && !isDownloadingActive){
+            progress = isDownloadingCompleted ? 100 : 0;
+            showProgress = true;
+            setTimeout(() =>{
+                if (!this.mount) return;
+
+                this.forceUpdate();
+            }, timeToCompleteAnimation);
+        }
+        else if (this.isUploadingActive && !isUploadingActive){
+            progress = isUploadingCompleted ? 100 : 0;
+            showProgress = true;
+            setTimeout(() =>{
+                if (!this.mount) return;
+
+                this.forceUpdate();
+            }, timeToCompleteAnimation);
+        }
+
+        console.log('updateFile progress=' + progress + ' show_progress=' + showProgress + ' payload=' + this.payload);
+
+        this.isDownloadingActive = isDownloadingActive;
+        this.isUploadingActive = isUploadingActive;
+
+        let sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
+        let action = isDownloadingActive || isUploadingActive ? 'Cancel' : isDownloadingCompleted || file.idb_key ? 'Open' : '';
         return (
             <div className='document'>
                 <div className='document-tile'>
-                    <DocumentTileControl document={document}/>
+                    <DocumentTileControl document={document} showProgress={showProgress}/>
+                    {showProgress &&
+                        <div className='document-progress'>
+                            <CircularProgress classes={circleStyle} variant='static' value={progress} size={42} thickness={3} />
+                        </div>
+                    }
                 </div>
+
                 <div className='document-content'>
                     <div className='document-title'>
-                        <a className='document-name' onClick={this.props.openMedia} title={document.file_name}>{document.file_name}</a>
-
+                        <a className='document-name' onClick={this.props.openMedia} title={document.file_name} data-name={document.file_name} data-ext=".dat">{document.file_name}</a>
                     </div>
                     <div className='document-action'>
                         <span className='document-size'>{`${sizeString} `}</span>
-                        {isDownloadingCompleted && <a onClick={this.props.openMedia}>Open</a>}
+                        {action && <a onClick={this.props.openMedia}>{action}</a>}
                     </div>
                 </div>
             </div>

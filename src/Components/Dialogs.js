@@ -15,8 +15,11 @@ class Dialogs extends Component{
         super(props);
 
         this.state = {
-            chats: []
+            chats: [],
+
         };
+
+        this.once = false;
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
@@ -26,16 +29,25 @@ class Dialogs extends Component{
     }
 
     componentDidMount(){
+        console.log('Dialogs componentDidMount once=' + this.once + ' state=' + this.props.authState);
         TdLibController.on('tdlib_status', this.onUpdateState);
         TdLibController.on('tdlib_update', this.onUpdate);
+
+        if (!this.once
+            && this.props.authState === 'ready'){
+            this.once = true;
+            this.handleLoadDialogs();
+        }
     }
 
     componentWillUnmount(){
+        console.log('Dialogs componentWillUnmount');
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
         TdLibController.removeListener('tdlib_update', this.onUpdate);
     }
 
     onUpdateState(state){
+        console.log('Dialogs onUpdateState status=' + state.status);
         switch (state.status) {
             case 'ready':
                 this.handleLoadDialogs();

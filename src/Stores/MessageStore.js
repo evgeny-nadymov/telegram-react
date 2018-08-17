@@ -49,6 +49,43 @@ class MessageStore extends EventEmitter {
                 this.emit('updateMessageContent', update);
                 break;
             }
+            case 'updateMessageSendSucceeded':{
+                let chat = this.items.get(update.message.chat_id);
+                if (chat){
+                    let message = chat.get(update.old_message_id);
+                    if (message){
+                        message.sending_state = update.message.sending_state;
+                    }
+                    if (update.old_message_id !== update.message.id){
+                        this.set(update.message);
+                    }
+                }
+                this.emit('updateMessageSendSucceeded', update);
+                break;
+            }
+            case 'updateMessageSendFailed':{
+                if (update.message.sending_state){
+                    update.message.sending_state.error_code = update.error_code;
+                    update.message.sending_state.error_message = update.error_message;
+                }
+
+                let chat = this.items.get(update.message.chat_id);
+                if (chat){
+                    let message = chat.get(update.old_message_id);
+                    if (message){
+                        message.sending_state = update.message.sending_state;
+                        if (message.sending_state){
+                            message.sending_state.error_code = update.error_code;
+                            message.sending_state.error_message = update.error_message;
+                        }
+                    }
+                    if (update.old_message_id !== update.message.id){
+                        this.set(update.message);
+                    }
+                }
+                this.emit('updateMessageSendFailed', update);
+                break;
+            }
             default:
                 break;
         }

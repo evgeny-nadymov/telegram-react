@@ -9,12 +9,14 @@ class DocumentTileControl extends React.Component {
         this.onPhotoUpdated = this.onPhotoUpdated.bind(this);
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chat !== this.props.chat){
-            return true;
-        }
+     shouldComponentUpdate(nextProps, nextState){
+    //     if (nextProps.document !== this.props.document
+    //         || nextProps.document.document !== this.props.document.document
+    //         ){
+    //         return true;
+    //     }
 
-        return false;
+        return true;
     }
 
     componentWillMount(){
@@ -44,6 +46,14 @@ class DocumentTileControl extends React.Component {
             && document.thumbnail.photo
             && document.thumbnail.photo.blob? document.thumbnail.photo.blob : null;
 
+        let iconClassName =
+            document.document && document.document.idb_key
+            || document.document.local && document.document.local.is_downloading_completed
+            ? 'document-tile-save-icon'
+            : 'document-tile-download-icon';
+
+        //console.log('%c updateFile documentTileControl idb_key=' + document.document.idb_key, 'background: #222; color: #bada55');
+
         let src;
         try{
             src = blob ? URL.createObjectURL(blob) : null;
@@ -59,7 +69,13 @@ class DocumentTileControl extends React.Component {
 
         return src ?
             (<div><img className={photoClasses} src={src} alt=''/></div>) :
-            (<div className={photoClasses}><i className='document-tile-save-icon'/></div>);
+            (<div className={photoClasses}>
+                {!this.props.showProgress && <i className={iconClassName}/>}
+                {this.props.showProgress && <svg className='document-tile-cancel'>
+                    <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
+                    <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>
+                </svg>}
+            </div>);
     }
 }
 

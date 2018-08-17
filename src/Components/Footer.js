@@ -35,7 +35,7 @@ class Footer extends React.Component {
     }
 
     render() {
-        const status = this.state.authState.status;
+        const status = this.state.authState? this.state.authState.status : 'null';
 
         return (
             <div className='footer-wrapper'>

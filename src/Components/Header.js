@@ -1,13 +1,10 @@
 import React, {Component} from 'react';
 import './Header.css';
-import TdLibController from "../Controllers/TdLibController";
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-} from 'material-ui/Dialog';
-import Button from 'material-ui/Button';
+import TdLibController from '../Controllers/TdLibController';
+import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 class Header extends Component{
 
@@ -17,7 +14,8 @@ class Header extends Component{
         this.state = {
             authState: TdLibController.getState(),
             connectionState : '',
-            open: false
+            open: false,
+            completed: 10
         };
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);

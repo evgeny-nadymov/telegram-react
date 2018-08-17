@@ -19,3 +19,19 @@
     margin: 15px 16px;
     background: url(../Assets/Icons/General.png) no-repeat -12px -561px;
 }
+
+.document-tile-cancel{
+    height: 18px;
+    width: 18px;
+    stroke: #90a8bc;
+    /*stroke: red;*/
+    stroke-width: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 15px;
+}
+
+.document-tile-cancel-line{
+    stroke-linecap: round;
+}

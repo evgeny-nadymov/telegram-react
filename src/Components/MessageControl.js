@@ -6,9 +6,9 @@ import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import FileController from '../Controllers/FileController';
 import ReplyControl from './ReplyControl';
-import classNames from 'classnames';
 import fileDownload from 'react-file-download';
 import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
+import MessageStatusControl from './MessageStatusControl';
 
 class MessageControl extends Component{
     constructor(props){
@@ -19,15 +19,12 @@ class MessageControl extends Component{
         this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
         this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
         this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
-        this.handleUpdateChatReadOutbox = this.handleUpdateChatReadOutbox.bind(this);
     }
 
     componentWillMount(){
         MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
-        MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
-
-        ChatStore.on('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
+        //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     handleUpdateMessageEdited(payload) {
@@ -51,21 +48,10 @@ class MessageControl extends Component{
         }
     }
 
-    handleUpdateChatReadOutbox(payload) {
-        if (this.props.message.chat_id === payload.chat_id
-            && this.props.message.is_outgoing
-            && this.unread
-            && this.props.message.id <= payload.last_read_outbox_message_id){
-            this.forceUpdate();
-        }
-    }
-
     componentWillUnmount(){
         MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
-        MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
-
-        ChatStore.removeListener('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
+        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
     }
 
 
@@ -141,17 +127,34 @@ class MessageControl extends Component{
                     if (document){
 
                         let file = document.document;
-                        if (file
-                            && file.local
-                            && file.local.can_be_downloaded
-                            && !file.local.is_downloading_active) {
+                        if (file) {
 
-                            if (file.local.is_downloading_completed){
+                            if (file.local.is_downloading_active){
+                                FileController.cancelGetRemoteFile(file.id, message);
+                            }
+                            else if (file.remote.is_uploading_active){
+                                FileController.cancelUploadFile(file.id, message);
+                            }
+                            else if (file.local.is_downloading_completed){
                                 if (file.arr && document.file_name){
                                     fileDownload(file.arr, document.file_name);
                                 }
                             }
-                            else{
+                            else if (file.idb_key){
+                                let store = FileController.getStore();
+
+                                FileController.getLocalFile(store, file, file.idb_key, null,
+                                    result => {
+                                        alert('download file with name=' + document.file_name);
+                                    //fileDownload()
+                                    },
+                                    error => {
+                                        if (file.local.can_be_downloaded){
+                                            FileController.getRemoteFile(file.id, 1, message);
+                                        }
+                                    });
+                            }
+                            else if (file.local.can_be_downloaded){
                                 FileController.getRemoteFile(file.id, 1, message);
                             }
                         }
@@ -167,10 +170,6 @@ class MessageControl extends Component{
         let message = this.props.message;
         if (!message) return (<div>[empty message]</div>);
 
-        //const messageClassName = this.props.sendingState ? 'message sending' : 'message';
-
-        const messageStatusClassName = this.props.sendingState ? 'sending' : '';
-
         let title = this.props.showTitle? getTitle(message) : null;
         let text = getText(message);
         let date = getDate(message);
@@ -183,7 +182,7 @@ class MessageControl extends Component{
         return (
             <div className='message'>
                 <div className='message-wrapper'>
-                    {this.unread && <i className={classNames('message-status-icon', messageStatusClassName)}/>}
+                    {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-content'>
                         <div className='message-meta'>
                             {message.views > 0 && <i className='message-views-icon'/>}

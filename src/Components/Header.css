@@ -31,9 +31,7 @@
     height: 14px;
     display: inline-block;
     vertical-align: middle;
-    background-image: url(../Assets/Telegram.svg);
-    background-repeat: no-repeat;
-    background-position: 0 0;
+    background: url(../Assets/Telegram.svg) no-repeat 0 0;
     margin-top: 1px;
 }
 

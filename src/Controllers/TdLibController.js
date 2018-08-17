@@ -8,7 +8,8 @@ class TdLibController extends EventEmitter{
         this.onUpdate = this.onUpdate.bind(this);
         this.onAuthError = this.onAuthError.bind(this);
 
-        this.init();
+        this.useTestDC = false;
+        //this.init();
 
         this.setMaxListeners(Infinity);
     }
@@ -44,7 +45,7 @@ class TdLibController extends EventEmitter{
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
-                use_test_dc: false,
+                use_test_dc: this.useTestDC,
                 api_id: 12183,
                 api_hash: '41c3080d9028cf002792a512d4e20089',
                 system_language_code: 'en',

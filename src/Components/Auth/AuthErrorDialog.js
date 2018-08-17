@@ -1,12 +1,8 @@
 import React from 'react';
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-} from 'material-ui/Dialog';
-import Button from 'material-ui/Button';
-import TdLibController from "../../Controllers/TdLibController";
+import { DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import Button from '@material-ui/core/Button';
+import TdLibController from '../../Controllers/TdLibController';
 
 class AuthErrorDialog extends React.Component {
     constructor(props){

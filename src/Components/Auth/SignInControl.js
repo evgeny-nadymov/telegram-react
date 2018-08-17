@@ -1,14 +1,12 @@
 import React from 'react';
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField';
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-} from 'material-ui/Dialog';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
 import './SignInControl.css';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel';
 
 const styles = {
     button: {
@@ -30,7 +28,8 @@ class SignInControl extends React.Component {
 
         this.state = {
             hasError : false,
-            openConfirmation : false
+            openConfirmation : false,
+            testServer : false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -39,6 +38,7 @@ class SignInControl extends React.Component {
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleChangeServer = this.handleChangeServer.bind(this);
     }
 
     handleSignIn(){
@@ -67,6 +67,10 @@ class SignInControl extends React.Component {
         this.phoneNumber = e.target.value;
     }
 
+    handleChangeServer(e){
+        this.setState({ testServer: e.target.checked })
+    }
+
     handleKeyPress(e){
         if (e.key === 'Enter'){
             e.preventDefault();
@@ -81,7 +85,7 @@ class SignInControl extends React.Component {
     handleDone(){
         this.setState({ openConfirmation: false });
 
-        this.props.onPhoneEnter(this.phoneNumber);
+        this.props.onPhoneEnter(this.phoneNumber, this.state.testServer);
     }
     
     handleKeyDown(e){
@@ -103,6 +107,12 @@ class SignInControl extends React.Component {
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
                 />
+                {/*<FormControlLabel*/}
+                    {/*control={*/}
+                        {/*<Switch color='primary' checked={this.state.testServer} onChange={this.handleChangeServer}/>*/}
+                    {/*}*/}
+                    {/*label='test server'*/}
+                {/*/>*/}
                 <Button color='primary' className={this.props.classes.button} onClick={this.handleSignIn}>
                     Next
                 </Button>

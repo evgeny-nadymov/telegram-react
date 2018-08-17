@@ -4,7 +4,22 @@
 }
 
 .document-tile{
+    position: relative;
+}
 
+.document-progress{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 42px;
+    height: 42px;
+    margin: 3px;
+    animation: spin 4s linear infinite;
+}
+
+.document-progress-circle {
+    stroke-linecap: round;
+    color: #90a8bc;
 }
 
 .document-content{
@@ -31,4 +46,8 @@
 
 .document-action{
 
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
 }

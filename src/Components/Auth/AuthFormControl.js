@@ -1,12 +1,12 @@
 import React from 'react';
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from '@material-ui/core/styles';
 import SignInControl from './SignInControl'
 import ConfirmCodeControl from './ConfirmCodeControl'
 import PasswordControl from './PasswordControl'
 import SignUpControl from './SignUpControl'
 import './AuthFormControl.css';
-import TdLibController from "../../Controllers/TdLibController";
-import AuthErrorDialog from "./AuthErrorDialog";
+import TdLibController from '../../Controllers/TdLibController';
+import AuthErrorDialog from './AuthErrorDialog';
 
 const styles = {
     button: {
@@ -29,7 +29,8 @@ class AuthFormControl extends React.Component {
         TdLibController.onInputExternal(status, text);
     }
     
-    handlePhoneEnter(phone){
+    handlePhoneEnter(phone, testServer){
+        //alert('phone=' + phone + ' test_server=' + testServer);
         this.handleSubmit('waitPhoneNumber', phone);
     }
 

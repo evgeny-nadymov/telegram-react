@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import './TelegramApp.css';
 import Header from './Components/Header';
 import Dialogs from './Components/Dialogs';
@@ -47,6 +47,17 @@ class TelegramApp extends Component{
         this.handleSendText = this.handleSendText.bind(this);
         this.handleSendFile = this.handleSendFile.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
+    }
+
+    componentWillMount(){
+
+        if (this.props.location
+            && this.props.location.search){
+            TdLibController.useTestDC = this.props.location.search.includes('test=1');
+        }
+
+        alert('TdLibController.init use_test_dc=' + TdLibController.useTestDC);
+        TdLibController.init();
     }
 
     componentDidMount(){
@@ -122,8 +133,11 @@ class TelegramApp extends Component{
             case 'updateNewMessage':
                 this.onUpdateNewMessage(update.message);
                 break;
+            case 'updateDeleteMessages':
+                this.onUpdateDeleteMessages(update);
+                break;
             case 'updateMessageSendSucceeded':
-                this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
+                //this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
                 break;
             default:
                 break;
@@ -153,6 +167,27 @@ class TelegramApp extends Component{
                 chat_id: this.state.selectedChat.id,
                 message_ids: [message.id]
             });
+    }
+
+    onUpdateDeleteMessages(update){
+        if (!update.is_permanent) return;
+
+        if (!this.state.selectedChat) return;
+        if (this.state.selectedChat.id !== update.chat_id) return;
+
+        this.deleteHistory(update.message_ids)
+
+        // this.historyPushBack(message);
+
+        // MessageStore.set(message);
+        // this.loadMessageContents([message])
+
+        // TdLibController
+        //     .send({
+        //         '@type': 'viewMessages',
+        //         chat_id: this.state.selectedChat.id,
+        //         message_ids: [message.id]
+        //     });
     }
 
     onUpdateMessageSendSucceeded(old_message_id, message){
@@ -416,6 +451,17 @@ class TelegramApp extends Component{
         this.setState({ history: history.concat(this.getHistory()), scrollBottom: false }, callback);
     }
 
+    deleteHistory(message_ids, callback) {
+        let history = this.getHistory();
+        if (history.length === 0) return;
+
+        let map = new Map(message_ids.map(x => [x, x]));
+
+        history = history.filter(x => !map.has(x.id));
+
+        this.setState({ history: history, scrollBottom: true }, callback);
+    }
+
     getHistory() {
         return this.state.history;
     }
@@ -458,7 +504,8 @@ class TelegramApp extends Component{
 
         this.onSendInternal(
             content,
-            result => { FileController.uploadFile(result.content.document.document.id, result); });
+            result => { FileController.uploadFile(result.content.document.document.id, result); }
+            );
     }
 
     onSendInternal(content, callback){
@@ -599,7 +646,8 @@ class TelegramApp extends Component{
                         <div className='im-page-wrap'>
                             <Dialogs
                                 selectedChat={this.state.selectedChat}
-                                onSelectChat={this.handleSelectChat}/>
+                                onSelectChat={this.handleSelectChat}
+                                authState={this.state.authState}/>
                             <DialogDetails
                                 ref='dialogDetails'
                                 currentUser={this.state.currentUser}

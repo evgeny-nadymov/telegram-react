@@ -12,6 +12,8 @@ class FileController extends EventEmitter{
         this.downloads = new Map();
         this.uploads = new Map();
 
+        this.setMaxListeners(Infinity);
+
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateFile = this.onUpdateFile.bind(this);
 
@@ -236,6 +238,14 @@ class FileController extends EventEmitter{
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
     }
 
+    cancelGetRemoteFile(fileId, obj){
+        if (this.downloads.has(fileId)){
+            //this.downloads.delete(fileId);
+            console.log('cancel_download_message id=' + obj.id);
+            TdLibController.send({ '@type': 'cancelDownloadFile', file_id: fileId, only_if_pending: false });
+        }
+    }
+
     uploadFile(fileId, obj){
         if (this.uploads.has(fileId)){
             let items = this.uploads.get(fileId);
@@ -249,11 +259,11 @@ class FileController extends EventEmitter{
         console.log('[perf] uploadFile file_id=' + fileId);
     }
 
-    cancelGetRemoteFile(fileId, obj){
-        if (this.downloads.has(fileId)){
-            this.downloads.delete(fileId);
-            console.log('cancel_download_message id=' + obj.id);
-            TdLibController.send({ '@type': 'cancelDownloadFile', file_id: fileId, only_if_pending: false });
+    cancelUploadFile(fileId, obj){
+        if (this.uploads.has(fileId)){
+            this.uploads.delete(fileId);
+            console.log('cancel_upload_message id=' + obj.id);
+            TdLibController.send({ '@type': 'deleteMessages', chat_id: obj.chat_id, message_ids: [obj.id], revoke: true });
         }
     }
 }
