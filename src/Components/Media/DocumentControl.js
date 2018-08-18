@@ -120,7 +120,7 @@ class DocumentControl extends React.Component {
 
         let showProgress = isDownloadingActive || isUploadingActive;
 
-        let timeToCompleteAnimation = 350;
+        let timeToCompleteAnimation = 300;
         if (this.isDownloadingActive && !isDownloadingActive){
             progress = isDownloadingCompleted ? 100 : 0;
             showProgress = true;
@@ -156,6 +156,7 @@ class DocumentControl extends React.Component {
                             <CircularProgress classes={circleStyle} variant='static' value={progress} size={42} thickness={3} />
                         </div>
                     }
+                    {/*<CircularProgress classes={circleStyle} variant='static' value={10} size={42} thickness={3} />*/}
                 </div>
 
                 <div className='document-content'>

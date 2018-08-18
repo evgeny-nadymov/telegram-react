@@ -56,7 +56,7 @@ class TelegramApp extends Component{
             TdLibController.useTestDC = this.props.location.search.includes('test=1');
         }
 
-        alert('TdLibController.init use_test_dc=' + TdLibController.useTestDC);
+        //alert('TdLibController.init use_test_dc=' + TdLibController.useTestDC);
         TdLibController.init();
     }
 

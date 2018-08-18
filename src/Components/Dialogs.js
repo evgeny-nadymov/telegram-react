@@ -29,7 +29,7 @@ class Dialogs extends Component{
     }
 
     componentDidMount(){
-        console.log('Dialogs componentDidMount once=' + this.once + ' state=' + this.props.authState);
+        //console.log('Dialogs componentDidMount once=' + this.once + ' state=' + this.props.authState);
         TdLibController.on('tdlib_status', this.onUpdateState);
         TdLibController.on('tdlib_update', this.onUpdate);
 
@@ -41,13 +41,13 @@ class Dialogs extends Component{
     }
 
     componentWillUnmount(){
-        console.log('Dialogs componentWillUnmount');
+        //console.log('Dialogs componentWillUnmount');
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
         TdLibController.removeListener('tdlib_update', this.onUpdate);
     }
 
     onUpdateState(state){
-        console.log('Dialogs onUpdateState status=' + state.status);
+        //console.log('Dialogs onUpdateState status=' + state.status);
         switch (state.status) {
             case 'ready':
                 this.handleLoadDialogs();

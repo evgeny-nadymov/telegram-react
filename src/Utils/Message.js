@@ -228,7 +228,7 @@ function getUnread(message) {
     let chat = ChatStore.get(message.chat_id);
     if (!chat) return false;
 
-    return chat.last_read_outbox_message_id && chat.last_read_outbox_message_id < message.id;
+    return chat.last_read_outbox_message_id < message.id;
 }
 
 let serviceMap = new Map();
