@@ -6,7 +6,7 @@ import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
-import {throttle, getSize, getPhotoSize, orderCompare} from './Utils/Common';
+import {getPhotoSize} from './Utils/Common';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import MessageStore from './Stores/MessageStore';
@@ -14,9 +14,10 @@ import TdLibController from './Controllers/TdLibController'
 import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {CHAT_SLICE_LIMIT, MESSAGE_SLICE_LIMIT, PHOTO_SIZE} from './Constants';
-import {getChatPhoto, getUserPhoto} from './Utils/File';
-import {getPhotoFile, getPhotoPreviewFile, getStickerFile, getContactFile, getDocumentThumbnailFile} from './Utils/File';
+import {MESSAGE_SLICE_LIMIT, VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
+import {getChatPhoto} from './Utils/File';
+import {getPhotoFile, getStickerFile, getContactFile, getDocumentThumbnailFile} from './Utils/File';
+import packageJson from '../package.json';
 
 const theme = createMuiTheme({
     palette: {
@@ -27,6 +28,8 @@ const theme = createMuiTheme({
 class TelegramApp extends Component{
     constructor(){
         super();
+
+        console.log(`Start Telegram Web ${packageJson.version}`);
 
         this.state = {
             selectedChat: null,
@@ -56,7 +59,7 @@ class TelegramApp extends Component{
         TdLibController.init();
     }
 
-    setQueryParams(search){
+    setQueryParams(){
         if (this.props.location
             && this.props.location.search){
             const params = new URLSearchParams(this.props.location.search);
@@ -65,21 +68,21 @@ class TelegramApp extends Component{
                 let useTestDC = parseInt(params.get('test'), 10);
                 if (useTestDC === 0 || useTestDC === 1){
                     TdLibController.parameters.useTestDC = useTestDC === 1;
-                    console.log('setQueryParams use_test_dc=' + TdLibController.parameters.useTestDC);
+                    console.log(`setQueryParams use_test_dc=${TdLibController.parameters.useTestDC}`);
                 }
                 else{
-                    console.log('setQueryParams skip use_test_dc=' + params.get('test') + ' valid values=[0,1]');
+                    console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
                 }
             }
 
             if (params.has('verbosity')){
                 let verbosity = parseInt(params.get('verbosity'), 10);
-                if (verbosity >= 1 && verbosity <= 10){
+                if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX){
                     TdLibController.parameters.verbosity = verbosity;
-                    console.log('setQueryParams verbosity=' + TdLibController.parameters.verbosity);
+                    console.log(`setQueryParams verbosity=${TdLibController.parameters.verbosity}`);
                 }
                 else{
-                    console.log('setQueryParams skip verbosity=' + params.get('verbosity') + ' valid values=[1..10]');
+                    console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
                 }
             }
         }
@@ -652,6 +655,7 @@ class TelegramApp extends Component{
 
     render(){
         let page = null;
+        //console.log('TelegramApp.render authState=' + this.state.authState);
         switch (this.state.authState){
             case 'waitPhoneNumber':
             case 'waitCode':

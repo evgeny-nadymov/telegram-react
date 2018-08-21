@@ -6,7 +6,7 @@ import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import FileController from '../Controllers/FileController';
 import ReplyControl from './ReplyControl';
-import fileDownload from 'react-file-download';
+import {saveData, saveBlob} from '../Utils/File';
 import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
 import MessageStatusControl from './MessageStatusControl';
 
@@ -135,27 +135,8 @@ class MessageControl extends Component{
                             else if (file.remote.is_uploading_active){
                                 FileController.cancelUploadFile(file.id, message);
                             }
-                            else if (file.local.is_downloading_completed){
-                                if (file.arr && document.file_name){
-                                    fileDownload(file.arr, document.file_name);
-                                }
-                            }
-                            else if (file.idb_key){
-                                let store = FileController.getStore();
-
-                                FileController.getLocalFile(store, file, file.idb_key, null,
-                                    result => {
-                                        alert('download file with name=' + document.file_name);
-                                    //fileDownload()
-                                    },
-                                    error => {
-                                        if (file.local.can_be_downloaded){
-                                            FileController.getRemoteFile(file.id, 1, message);
-                                        }
-                                    });
-                            }
-                            else if (file.local.can_be_downloaded){
-                                FileController.getRemoteFile(file.id, 1, message);
+                            else {
+                                this.saveOrDownload(file, document.file_name, message);
                             }
                         }
                     }
@@ -163,6 +144,37 @@ class MessageControl extends Component{
 
                 break;
             }
+        }
+    }
+
+    saveOrDownload(file, fileName, message){
+        if (!file) return;
+        if (!fileName) return;
+
+        if (file.arr) {
+            saveData(file.arr, fileName);
+            return;
+        }
+
+        if (file.idb_key){
+            let store = FileController.getStore();
+
+            FileController.getLocalFile(store, file, file.idb_key, null,
+                () => {
+                    if (file.blob){
+                        saveBlob(file.blob, fileName);
+                    }
+                },
+                () => {
+                    if (file.local.can_be_downloaded){
+                        FileController.getRemoteFile(file.id, 1, message);
+                    }
+                });
+            return;
+        }
+
+        if (file.local.can_be_downloaded){
+            FileController.getRemoteFile(file.id, 1, message);
         }
     }
 

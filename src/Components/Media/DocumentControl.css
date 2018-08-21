@@ -5,6 +5,7 @@
 
 .document-tile{
     position: relative;
+    cursor: pointer;
 }
 
 .document-progress{

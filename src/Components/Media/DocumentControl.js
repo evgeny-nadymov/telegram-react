@@ -149,7 +149,7 @@ class DocumentControl extends React.Component {
         let action = isDownloadingActive || isUploadingActive ? 'Cancel' : isDownloadingCompleted || file.idb_key ? 'Open' : '';
         return (
             <div className='document'>
-                <div className='document-tile'>
+                <div className='document-tile' onClick={this.props.openMedia}>
                     <DocumentTileControl document={document} showProgress={showProgress}/>
                     {showProgress &&
                         <div className='document-progress'>
