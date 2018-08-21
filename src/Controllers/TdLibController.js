@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
+import packageJson from '../../package.json';
 
 class TdLibController extends EventEmitter{
     constructor(){
@@ -8,8 +9,10 @@ class TdLibController extends EventEmitter{
         this.onUpdate = this.onUpdate.bind(this);
         this.onAuthError = this.onAuthError.bind(this);
 
-        this.useTestDC = false;
-        //this.init();
+        this.parameters = {
+            useTestDC : false,
+            verbosity : 1
+        }
 
         this.setMaxListeners(Infinity);
     }
@@ -19,7 +22,7 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
-        this.client = new TdClient({ verbosity: 2, mode: 'webasm' });
+        this.client = new TdClient({ verbosity: this.parameters.verbosity, mode: 'webasm' });
         this.client.onUpdate = update => this.onUpdate(update);
 
         this.setState({
@@ -37,21 +40,17 @@ class TdLibController extends EventEmitter{
     }
 
     sendTdParameters() {
-        /*this.client.send({
-            '@type': 'setVerbosity',
-            verbosity: 2
-        });*/
         this.client.send({
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
-                use_test_dc: this.useTestDC,
+                use_test_dc: this.parameters.useTestDC,
                 api_id: 12183,
                 api_hash: '41c3080d9028cf002792a512d4e20089',
                 system_language_code: 'en',
-                device_model: 'Desktop',
+                device_model: 'Web',
                 system_version: 'Unknown',
-                application_version: 'tdclient-emscripten',
+                application_version: packageJson.version,
                 use_secret_chats: false,
                 use_message_database: true,
                 use_file_database: false,

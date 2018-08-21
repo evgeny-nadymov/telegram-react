@@ -47,17 +47,42 @@ class TelegramApp extends Component{
         this.handleSendText = this.handleSendText.bind(this);
         this.handleSendFile = this.handleSendFile.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
+        this.setQueryParams = this.setQueryParams.bind(this);
     }
 
     componentWillMount(){
-
-        if (this.props.location
-            && this.props.location.search){
-            TdLibController.useTestDC = this.props.location.search.includes('test=1');
-        }
-
+        this.setQueryParams();
         //alert('TdLibController.init use_test_dc=' + TdLibController.useTestDC);
         TdLibController.init();
+    }
+
+    setQueryParams(search){
+        if (this.props.location
+            && this.props.location.search){
+            const params = new URLSearchParams(this.props.location.search);
+
+            if (params.has('test')){
+                let useTestDC = parseInt(params.get('test'), 10);
+                if (useTestDC === 0 || useTestDC === 1){
+                    TdLibController.parameters.useTestDC = useTestDC === 1;
+                    console.log('setQueryParams use_test_dc=' + TdLibController.parameters.useTestDC);
+                }
+                else{
+                    console.log('setQueryParams skip use_test_dc=' + params.get('test') + ' valid values=[0,1]');
+                }
+            }
+
+            if (params.has('verbosity')){
+                let verbosity = parseInt(params.get('verbosity'), 10);
+                if (verbosity >= 1 && verbosity <= 10){
+                    TdLibController.parameters.verbosity = verbosity;
+                    console.log('setQueryParams verbosity=' + TdLibController.parameters.verbosity);
+                }
+                else{
+                    console.log('setQueryParams skip verbosity=' + params.get('verbosity') + ' valid values=[1..10]');
+                }
+            }
+        }
     }
 
     componentDidMount(){
