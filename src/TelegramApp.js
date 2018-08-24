@@ -51,6 +51,7 @@ class TelegramApp extends Component{
         this.handleSendFile = this.handleSendFile.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
         this.setQueryParams = this.setQueryParams.bind(this);
+        this.loadHistory = this.loadHistory.bind(this);
     }
 
     componentWillMount(){
@@ -228,6 +229,15 @@ class TelegramApp extends Component{
 
         this.setHistory(updatedHistory);
     }
+    
+    loadHistory(callStack, result){
+        //console.log('loadHistory result=' + result.messages.length);
+        if (callStack < 5
+            && result.messages.length > 0
+            && result.messages.length < MESSAGE_SLICE_LIMIT){
+            this.onLoadNext(0, true, result2 => this.loadHistory(callStack + 1, result2));
+        }
+    }
 
     handleSelectChat(chat){
         this.previousScrollHeight = 0;
@@ -254,9 +264,7 @@ class TelegramApp extends Component{
                 // load photos
                 this.loadMessageContents(result.messages);
 
-                if (result.messages.length < MESSAGE_SLICE_LIMIT) {
-                    this.onLoadNext(0, true);
-                }
+                this.loadHistory(0, result);
 
                 TdLibController
                     .send({
@@ -577,7 +585,7 @@ class TelegramApp extends Component{
         }*/
     }
 
-    onLoadNext(scrollHeight, loadRemote = false){
+    onLoadNext(scrollHeight, loadRemote = false, callback){
         if (!this.state.selectedChat) return;
         if (this.loading) return;
         //if (this.previousScrollHeight === scrollHeight) return;
@@ -618,6 +626,10 @@ class TelegramApp extends Component{
                         chat_id: chatId,
                         message_ids: result.messages.map(x => x.id)
                     });
+                
+                if (callback){
+                    callback(result);
+                }
             })
             .catch(() => {
                 this.loading = false;
