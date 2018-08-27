@@ -266,12 +266,17 @@ class TelegramApp extends Component{
 
                 this.loadHistory(0, result);
 
-                TdLibController
-                    .send({
-                        '@type': 'viewMessages',
-                        chat_id: chat.id,
-                        message_ids: result.messages.map(x => x.id)
-                    });
+                return result;
+            })
+            .then(result => {
+                if (result.messages.length > 0){
+                    TdLibController
+                        .send({
+                            '@type': 'viewMessages',
+                            chat_id: chat.id,
+                            message_ids: result.messages.map(x => x.id)
+                        });
+                }
             });
 
         if (previousChat){
@@ -323,11 +328,11 @@ class TelegramApp extends Component{
                 chat_id: chat.id,
             });
 
-        TdLibController
-            .send({
-                '@type': 'readAllChatMentions',
-                chat_id: chat.id
-            });
+        // TdLibController
+        //     .send({
+        //         '@type': 'readAllChatMentions',
+        //         chat_id: chat.id
+        //     });
 
         // load chat photo
         if (chat.photo){
@@ -620,12 +625,15 @@ class TelegramApp extends Component{
                 return result;
             })
             .then(result => {
-                TdLibController
-                    .send({
-                        '@type': 'viewMessages',
-                        chat_id: chatId,
-                        message_ids: result.messages.map(x => x.id)
-                    });
+
+                if (result.messages.length > 0){
+                    TdLibController
+                        .send({
+                            '@type': 'viewMessages',
+                            chat_id: chatId,
+                            message_ids: result.messages.map(x => x.id)
+                        });
+                }
                 
                 if (callback){
                     callback(result);
