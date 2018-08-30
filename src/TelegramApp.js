@@ -168,6 +168,26 @@ class TelegramApp extends Component{
             case 'updateMessageSendSucceeded':
                 //this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
                 break;
+            case 'updateServiceNotification':
+                if (update.content
+                    && update.content['@type'] === 'messageText'
+                    && update.content.text
+                    && update.content.text['@type'] === 'formattedText'
+                    && update.content.text.text){
+                    switch (update.type) {
+                        case 'AUTH_KEY_DROP_DUPLICATE':
+                            let result = window.confirm(update.content.text.text);
+                            if (result){
+                                TdLibController.logOut();
+                            }
+                            break;
+                        default:
+                            alert(update.content.text.text);
+                            break;
+                    }
+                }
+
+                break;
             default:
                 break;
         }
