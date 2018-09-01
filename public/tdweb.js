@@ -2579,7 +2579,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-	return new Worker(__webpack_require__.p + "ce78c5403aa2e3501bfb.worker.js");
+	return new Worker(__webpack_require__.p + "2e59b7e3adaa299b5102.worker.js");
 };
 
 /***/ })
