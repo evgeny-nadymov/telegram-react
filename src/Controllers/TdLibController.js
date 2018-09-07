@@ -12,7 +12,7 @@ class TdLibController extends EventEmitter{
         this.parameters = {
             useTestDC : false,
             verbosity : 1
-        }
+        };
 
         this.setMaxListeners(Infinity);
     }

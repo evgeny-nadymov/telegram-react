@@ -159,7 +159,8 @@ class DialogDetails extends Component{
                             currentUser={this.props.currentUser}
                             selectedChat={this.props.selectedChat}
                             onSendText={this.props.onSendText}
-                            onSendFile={this.props.onSendFile}/>
+                            onSendPhoto={this.props.onSendPhoto}
+                            onSendDocument={this.props.onSendDocument}/>
                     </div>
                 }
             </div>

@@ -6,7 +6,8 @@ import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
-import {getPhotoSize} from './Utils/Common';
+import {getPhotoSize, getSize} from './Utils/Common';
+import FileStore from './Stores/FileStore';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import MessageStore from './Stores/MessageStore';
@@ -14,7 +15,7 @@ import TdLibController from './Controllers/TdLibController'
 import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {MESSAGE_SLICE_LIMIT, VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
+import {MESSAGE_SLICE_LIMIT, PHOTO_SIZE, VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
 import {getChatPhoto} from './Utils/File';
 import {getPhotoFile, getStickerFile, getContactFile, getDocumentThumbnailFile} from './Utils/File';
 import packageJson from '../package.json';
@@ -48,8 +49,10 @@ class TelegramApp extends Component{
         this.onUpdate = this.onUpdate.bind(this);
         this.handleSelectChat = this.handleSelectChat.bind(this);
         this.handleSendText = this.handleSendText.bind(this);
-        this.handleSendFile = this.handleSendFile.bind(this);
+        this.handleSendPhoto = this.handleSendPhoto.bind(this);
+        this.handleSendDocument = this.handleSendDocument.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
+        this.handleSendingMessage = this.handleSendingMessage.bind(this);
         this.setQueryParams = this.setQueryParams.bind(this);
         this.loadHistory = this.loadHistory.bind(this);
     }
@@ -199,6 +202,32 @@ class TelegramApp extends Component{
         if (!action) return;
 
 
+    }
+
+    handleSendingMessage(message, blob){
+        if (message
+            && message.sending_state
+            && message.sending_state['@type'] === 'messageSendingStatePending'){
+
+            if (message.content
+                && message.content['@type'] === 'messagePhoto'
+                && message.content.photo){
+
+                let size = getSize(message.content.photo.sizes, PHOTO_SIZE);
+                if (!size) return;
+
+                let file = size.photo;
+                if (file
+                    && file.local
+                    && file.local.is_downloading_completed
+                    && !file.idb_key
+                    && !file.blob){
+
+                    file.blob = blob;
+                    MessageStore.updateMessagePhoto(message.id);
+                }
+            }
+        }
     }
 
     onUpdateNewMessage(message){
@@ -555,18 +584,44 @@ class TelegramApp extends Component{
             result => { });
     }
 
-    handleSendFile(file){
+    handleSendDocument(files){
+        if (!files) return;
+
+        for (let i = 0; i < files.length; i++){
+            let file = files[i];
+            const content = {
+                '@type': 'inputMessageDocument',
+                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            };
+
+            this.onSendInternal(
+                content,
+                result => {
+                    FileController.uploadFile(result.content.document.document.id, result);
+                });
+        }
+    }
+
+    handleSendPhoto(file){
         if (!file) return;
 
         const content = {
-            '@type': 'inputMessageDocument',
-            document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            '@type': 'inputMessagePhoto',
+            photo: { '@type': 'inputFileBlob', name: file.name, blob: file },
+            width: file.photoWidth,
+            height: file.photoHeight
         };
 
         this.onSendInternal(
             content,
-            result => { FileController.uploadFile(result.content.document.document.id, result); }
-            );
+            result => {
+                let cachedMessage = MessageStore.get(result.chat_id, result.id);
+                if (cachedMessage != null){
+                    this.handleSendingMessage(cachedMessage, file);
+                }
+
+                FileController.uploadFile(result.content.photo.sizes[0].photo.id, result);
+            });
     }
 
     onSendInternal(content, callback){
@@ -582,7 +637,7 @@ class TelegramApp extends Component{
             })
             .then(result => {
 
-                MessageStore.set(result);
+                //MessageStore.set(result);
 
                 let messageIds = [];
                 messageIds.push(result.id);
@@ -725,7 +780,8 @@ class TelegramApp extends Component{
                                 history={this.state.history}
                                 onSelectChat={this.handleSelectChat}
                                 onSendText={this.handleSendText}
-                                onSendFile={this.handleSendFile}
+                                onSendPhoto={this.handleSendPhoto}
+                                onSendDocument={this.handleSendDocument}
                                 onLoadNext={x => this.onLoadNext(x, true)}
                                 onUpdateItemsInView={this.handleUpdateItemsInView}
                             />

@@ -1,5 +1,6 @@
 .photo-img{
     background: aliceblue;
+    /*background: black;*/
     display: block;
     border-radius: 6px;
 }
@@ -12,6 +13,53 @@
 
 .photo-img-blur{
     filter: blur(10px);
+}
+
+.photo-progress{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 42px;
+    height: 42px;
+    margin-left: -21px;
+    margin-top: -21px;
+    animation: spin 4s linear infinite;
+    cursor: pointer;
+}
+
+.photo-progress-circle {
+    stroke-linecap: round;
+    color: #ffffff;
+}
+
+.photo-progress-circle-background {
+    stroke-linecap: round;
+    color: #ffffff;
+    opacity: 0.3;
+}
+
+.photo-tile-cancel{
+    height: 18px;
+    width: 18px;
+    stroke: #ffffff;
+    /*stroke: red;*/
+    stroke-width: 3px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -9px;
+    margin-top: -9px;
+}
+
+.photo-tile-circle{
+    height: 44px;
+    width: 44px;
+    opacity: 0.5;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -22px;
+    margin-top: -22px;
 }
 
 /*.photo-img-wrapper:before, .photo-img-wrapper:after{

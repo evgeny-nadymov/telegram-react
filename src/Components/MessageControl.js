@@ -9,6 +9,8 @@ import ReplyControl from './ReplyControl';
 import {saveData, saveBlob} from '../Utils/File';
 import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
 import MessageStatusControl from './MessageStatusControl';
+import {getPhotoSize} from '../Utils/Common';
+import {PHOTO_SIZE} from '../Constants';
 
 class MessageControl extends Component{
     constructor(props){
@@ -137,6 +139,33 @@ class MessageControl extends Component{
                             }
                             else {
                                 this.saveOrDownload(file, document.file_name, message);
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
+            case 'messagePhoto': {
+                if (message.content){
+
+                    let photo = message.content.photo;
+                    if (photo){
+
+                        let photoSize = getPhotoSize(this.props.message.content.photo.sizes);
+                        if (photoSize){
+                            let file = photoSize.photo;
+                            if (file) {
+
+                                if (file.local.is_downloading_active){
+                                    FileController.cancelGetRemoteFile(file.id, message);
+                                }
+                                else if (file.remote.is_uploading_active){
+                                    FileController.cancelUploadFile(file.id, message);
+                                }
+                                else {
+                                    this.saveOrDownload(file, document.file_name, message);
+                                }
                             }
                         }
                     }
