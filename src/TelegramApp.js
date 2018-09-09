@@ -476,6 +476,7 @@ class TelegramApp extends Component{
                                 }
                             }
                         }
+                        break;
                     }
                     case 'messageDocument': {
                         let [id, pid, idb_key] = getDocumentThumbnailFile(message);

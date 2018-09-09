@@ -54,12 +54,17 @@ class InputBoxControl extends Component{
         let files = this.refs.attachPhoto.files;
         if (files.length === 0) return;
 
-        this.readImage(
-            files[0],
-            result => {
-                this.props.onSendPhoto(result);
-                this.refs.attachPhoto.value = '';
-        });
+        for (let i = 0; i < files.length; i++){
+            let file = files[i];
+
+            this.readImage(
+                file,
+                result => {
+                    this.props.onSendPhoto(result);
+                });
+        }
+
+        this.refs.attachPhoto.value = '';
     }
 
     readImage (file, callback) {
@@ -180,7 +185,7 @@ class InputBoxControl extends Component{
                         <div className='inputbox-attach-wrapper'>
                             <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
                             <i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>
-                            <input className='inputbox-attach-button' type='file' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
+                            <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
                             <i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>
                         </div>
                         <div className='inputbox-send-button' onClick={this.handleSubmit}>
