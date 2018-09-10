@@ -228,7 +228,7 @@ class MessageControl extends Component{
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-content'>
                         <div className='message-meta'>
-                            {message.id}&nbsp;
+                            {/*{message.id}&nbsp;*/}
                             {message.views > 0 && <i className='message-views-icon'/>}
                             {message.views > 0 && <span className='message-views'> {message.views}&nbsp;&nbsp;</span>}
                             {message.edit_date > 0 && <span>edited </span>}

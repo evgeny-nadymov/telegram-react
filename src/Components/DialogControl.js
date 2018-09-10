@@ -172,8 +172,8 @@ class DialogControl extends Component{
                     <TileControl chat={this.props.chat}/>
                     <div className='dialog-content-wrap'>
                         <div className='dialog-title-wrapper'>
-                            {/*<div className='dialog-title'>{title}</div>*/}
-                            <div className='dialog-title'>{chat.id}</div>
+                            <div className='dialog-title'>{title}</div>
+                            {/*<div className='dialog-title'>{chat.id}</div>*/}
                             {date && <div className='dialog-date'>{date}</div>}
                         </div>
                         <div className='dialog-content-wrapper'>

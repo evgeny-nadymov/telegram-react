@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import ReactDOM from 'react-dom';
 import './DialogDetails.css';
 import InputBoxControl from "./InputBoxControl";
 import MessageControl from "./MessageControl";
@@ -25,6 +24,9 @@ class DialogDetails extends Component{
             scrollBottom : false
         };
 
+        this.listRef = React.createRef();
+        this.itemsRef = React.createRef();
+
         this.updateItemsInView = debounce(this.updateItemsInView.bind(this), 250);
         this.loadHistory = this.loadHistory.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
@@ -38,6 +40,11 @@ class DialogDetails extends Component{
             || nextProps.selectedChat !== this.props.selectedChat){
             return true;
         }
+
+        // const list = this.listRef.current;
+        // if (list && list.scrollTop !== 0){
+        //     return true;
+        // }
 
         return false;
     }
@@ -60,15 +67,11 @@ class DialogDetails extends Component{
         if (!this.props.selectedChat) return;
         if (this.props.selectedChat.id !== message.chat_id) return;
 
-        this.historyPushBack(message);
-        this.loadMessageContents([message]);
+        let history = [message];
 
-        TdLibController
-            .send({
-                '@type': 'viewMessages',
-                chat_id: message.chat_id,
-                message_ids: [message.id]
-            });
+        this.prependHistory(history);
+        this.loadMessageContents(history);
+        this.viewMessages(history);
     }
 
     onUpdateDeleteMessages(update){
@@ -81,17 +84,14 @@ class DialogDetails extends Component{
     }
 
     handleScroll(){
-        if (!this.x)
-        {
-            this.x = ReactDOM.findDOMNode(this.refs.list);
-        }
+        const list = this.listRef.current;
 
         if (this.suppressHandleScroll){
             this.suppressHandleScroll = false;
             return;
         }
 
-        if (this.x && this.x.scrollTop <= 0){
+        if (list && list.scrollTop <= 0){
             this.onLoadNext(true);
         }
         else{
@@ -106,7 +106,7 @@ class DialogDetails extends Component{
         if (!this.messages) return;
 
         let messages = [];
-        let items = itemsInView(this.refs.list, this.refs.items);
+        let items = itemsInView(this.listRef, this.itemsRef);
         for (let i = 0; i < items.length; i++){
             let messageControl = this.messages[items[i]];
             if (messageControl) {
@@ -117,32 +117,36 @@ class DialogDetails extends Component{
         this.handleUpdateItemsInView(messages);
     }
 
-    componentWillUpdate(nextProps, nextState, nextContext) {
-        const x = ReactDOM.findDOMNode(this.refs.list);
-        if (x)
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        const list = this.listRef.current;
+
+        if (list)
         {
-            this.previousScrollHeight = x.scrollHeight;
+            this.previousScrollHeight = list.scrollHeight;
         }
+
+        return null;
     }
 
-    componentDidUpdate(prevProps, prevState, prevContext) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
 
         if (prevProps.selectedChat !== this.props.selectedChat){
             this.handleSelectChat(this.props.selectedChat, prevProps.selectedChat);
         }
 
-        const x = ReactDOM.findDOMNode(this.refs.list);
+        const list = this.listRef.current;
+
         if (this.state.scrollBottom)
         {
             this.scrollToBottom();
         }
         else{
             /// keep scrolling position
-            x.scrollTop = x.scrollHeight - this.previousScrollHeight;
+            list.scrollTop = list.scrollHeight - this.previousScrollHeight;
         }
     }
 
-    handleSelectChat(chat, previousChat){
+    async handleSelectChat(chat, previousChat){
         this.previousScrollHeight = 0;
 
         if (chat){
@@ -152,38 +156,21 @@ class DialogDetails extends Component{
                     chat_id: chat.id,
                 });
 
-            TdLibController
+            let result = await TdLibController
                 .send({
                     '@type': 'getChatHistory',
                     chat_id: chat.id,
                     from_message_id: 0,
                     offset: 0,
                     limit: MESSAGE_SLICE_LIMIT
-                })
-                .then(result => {
-
-                    MessageStore.setItems(result.messages);
-
-                    result.messages.reverse();
-                    this.setHistory(result.messages, () => {
-
-                        this.loadMessageContents(result.messages);
-                        this.loadHistory(0, result);
-                    });
-
-                    return result;
-                })
-                .then(result => {
-                    if (result.messages.length > 0){
-                        TdLibController
-                            .send({
-                                '@type': 'viewMessages',
-                                chat_id: chat.id,
-                                message_ids: result.messages.map(x => x.id)
-                            });
-                    }
-                    return result;
                 });
+
+            MessageStore.setItems(result.messages);
+            result.messages.reverse();
+            this.setHistory(result.messages);
+            this.loadMessageContents(result.messages);
+            this.loadHistory(0, result);
+            this.viewMessages(result.messages);
 
             // load photo
             if (chat.photo){
@@ -211,9 +198,20 @@ class DialogDetails extends Component{
                     '@type': 'closeChat',
                     chat_id: previousChat.id,
                 });
-
-
         }
+    }
+
+    viewMessages(messages){
+        if (!messages) return;
+        if (messages.length === 0) return;
+        if (!messages[0].chat_id) return;
+
+        TdLibController
+            .send({
+                '@type': 'viewMessages',
+                chat_id: messages[0].chat_id,
+                message_ids: messages.map(x => x.id)
+            });
     }
 
     loadMessageContents(messages, loadRemote = true){
@@ -354,7 +352,7 @@ class DialogDetails extends Component{
         }
     }
 
-    onLoadNext(loadRemote = false, callback){
+    async onLoadNext(loadRemote = false, callback){
 
         if (!this.props.selectedChat) return;
         if (this.loading) return;
@@ -364,11 +362,10 @@ class DialogDetails extends Component{
             fromMessageId = this.state.history[0].id;
         }
 
-        this.loading = true;
-
         let chatId = this.props.selectedChat.id;
 
-        TdLibController
+        this.loading = true;
+        let result = await TdLibController
             .send({
                 '@type': 'getChatHistory',
                 chat_id: chatId,
@@ -376,32 +373,19 @@ class DialogDetails extends Component{
                 offset: 0,
                 limit: MESSAGE_SLICE_LIMIT
             })
-            .then(result => {
-                this.loading = false;
-
-                MessageStore.setItems(result.messages);
-
-                result.messages.reverse();
-                this.appendHistory(result.messages);
-
-                this.loadMessageContents(result.messages, loadRemote);
-
-                if (result.messages.length > 0){
-                    TdLibController
-                        .send({
-                            '@type': 'viewMessages',
-                            chat_id: chatId,
-                            message_ids: result.messages.map(x => x.id)
-                        });
-                }
-
-                if (callback){
-                    callback(result);
-                }
-            })
-            .catch(() => {
+            .finally(() => {
                 this.loading = false;
             });
+
+        MessageStore.setItems(result.messages);
+        result.messages.reverse();
+        this.appendHistory(result.messages);
+        this.loadMessageContents(result.messages, loadRemote);
+        this.viewMessages(result.messages);
+
+        if (callback){
+            callback(result);
+        }
     }
 
     handleUpdateItemsInView(messages){
@@ -439,12 +423,12 @@ class DialogDetails extends Component{
         this.setState({ history: history.concat(this.state.history), scrollBottom: false }, callback);
     }
 
-    historyPushFront(entry) {
-        this.setState({ history: [entry].concat(this.state.history), scrollBottom: false });
-    }
+    prependHistory(history, callback){
+        if (history.length === 0) return;
 
-    historyPushBack(entry) {
-        this.setHistory(this.state.history.concat([entry]));
+        let scrollBottom = history[0].is_outgoing;
+
+        this.setState({ history: this.state.history.concat(history), scrollBottom: scrollBottom }, callback);
     }
 
     deleteHistory(message_ids, callback) {
@@ -460,8 +444,10 @@ class DialogDetails extends Component{
 
     scrollToBottom() {
         this.suppressHandleScroll = true;
-        const messagesContainer = ReactDOM.findDOMNode(this.refs.list);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight - messagesContainer.offsetHeight;
+
+        const list = this.listRef.current;
+
+        list.scrollTop = list.scrollHeight - list.offsetHeight;
     };
 
     render(){
@@ -504,9 +490,9 @@ class DialogDetails extends Component{
 
         return (
             <div className='details'>
-                <div ref='list' className='dialogdetails-wrapper' onScroll={this.handleScroll}>
+                <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
                     <div className='dialogdetails-list-top'></div>
-                    <div ref='items' className='dialogdetails-list'>
+                    <div ref={this.itemsRef} className='dialogdetails-list'>
                         {this.messages}
                     </div>
                 </div>
