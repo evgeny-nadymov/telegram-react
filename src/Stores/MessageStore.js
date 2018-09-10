@@ -15,6 +15,13 @@ class MessageStore extends EventEmitter {
 
     onUpdate(update){
         switch (update['@type']) {
+            case 'updateNewMessage':
+                this.set(update.message);
+                this.emit('updateNewMessage', update.message);
+                break;
+            case 'updateDeleteMessages':
+                this.emit('updateDeleteMessages', update);
+                break;
             case 'updateMessageEdited':{
                 let chat = this.items.get(update.chat_id);
                 if (chat){

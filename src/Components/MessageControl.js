@@ -16,6 +16,8 @@ class MessageControl extends Component{
     constructor(props){
         super(props);
 
+        this.random = Math.random() % 1024;
+
         this.openForward = this.openForward.bind(this);
         this.openMedia = this.openMedia.bind(this);
         this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
@@ -226,6 +228,7 @@ class MessageControl extends Component{
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-content'>
                         <div className='message-meta'>
+                            {message.id}&nbsp;
                             {message.views > 0 && <i className='message-views-icon'/>}
                             {message.views > 0 && <span className='message-views'> {message.views}&nbsp;&nbsp;</span>}
                             {message.edit_date > 0 && <span>edited </span>}

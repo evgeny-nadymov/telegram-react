@@ -3,6 +3,11 @@ import './InputBoxControl.css';
 import TileControl from "./TileControl";
 import OutputTypingManager from "../Utils/OutputTypingManager";
 import UserTileControl from './UserTileControl';
+import FileController from '../Controllers/FileController';
+import MessageStore from '../Stores/MessageStore';
+import TdLibController from '../Controllers/TdLibController';
+import {getSize} from '../Utils/Common';
+import {PHOTO_SIZE} from '../Constants';
 
 class InputBoxControl extends Component{
 
@@ -16,6 +21,9 @@ class InputBoxControl extends Component{
         this.handleAttachPhotoComplete = this.handleAttachPhotoComplete.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
+
+        this.handleSendPhoto = this.handleSendPhoto.bind(this);
+        this.handleSendingMessage = this.handleSendingMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -26,12 +34,74 @@ class InputBoxControl extends Component{
         return false;
     }
 
+    componentDidUpdate(prevProps, prevState){
+
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState){
+        let previousChat = prevProps.selectedChat;
+        if (!previousChat) return;
+        if (previousChat === this.props.selectedChat) return;
+
+        let newDraft = this.getInputText();
+        let previousDraft = '';
+        if (previousChat.draft_message
+            && previousChat.draft_message.input_message_text
+            && previousChat.draft_message.input_message_text.text){
+            previousDraft = previousChat.draft_message.input_message_text.text.text;
+        }
+
+        if (newDraft !== previousDraft){
+            let newDraftMessage = null;
+            if (newDraft){
+                newDraftMessage = {
+                    '@type': 'draftMessage',
+                    reply_to_message_id: 0,
+                    input_message_text: {
+                        '@type': 'inputMessageText',
+                        text: {
+                            '@type': 'formattedText',
+                            text: newDraft,
+                            entities: null
+                        },
+                        disable_web_page_preview: true,
+                        clear_draft: false
+                    }
+                };
+            }
+
+            TdLibController
+                .send({
+                    '@type': 'setChatDraftMessage',
+                    chat_id: previousChat.id,
+                    draft_message: newDraftMessage
+                });
+        }
+
+        return null;
+    }
+
     handleSubmit(){
         let text = this.refs.newMessage.innerText || this.refs.newMessage.textContent;
         this.refs.newMessage.innerText = null;
         this.refs.newMessage.textContent = null;
 
-        this.props.onSendText(text);
+        if (!text) return;
+
+        const content = {
+            '@type': 'inputMessageText',
+            text: {
+                '@type': 'formattedText',
+                text: text,
+                entities: null
+            },
+            disable_web_page_preview: false,
+            clear_draft: true
+        };
+
+        this.onSendInternal(
+            content,
+            result => { });
     }
 
     handleAttachDocument(){
@@ -46,7 +116,20 @@ class InputBoxControl extends Component{
         let files = this.refs.attachDocument.files;
         if (files.length === 0) return;
 
-        this.props.onSendDocument(files);
+        for (let i = 0; i < files.length; i++){
+            let file = files[i];
+            const content = {
+                '@type': 'inputMessageDocument',
+                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            };
+
+            this.onSendInternal(
+                content,
+                result => {
+                    FileController.uploadFile(result.content.document.document.id, result);
+                });
+        }
+
         this.refs.attachDocument.value = '';
     }
 
@@ -60,7 +143,7 @@ class InputBoxControl extends Component{
             this.readImage(
                 file,
                 result => {
-                    this.props.onSendPhoto(result);
+                    this.handleSendPhoto(result);
                 });
         }
 
@@ -161,6 +244,95 @@ class InputBoxControl extends Component{
             e.preventDefault();
             this.handleSubmit();
         }
+    }
+
+    handleSendPhoto(file){
+        if (!file) return;
+
+        const content = {
+            '@type': 'inputMessagePhoto',
+            photo: { '@type': 'inputFileBlob', name: file.name, blob: file },
+            width: file.photoWidth,
+            height: file.photoHeight
+        };
+
+        this.onSendInternal(
+            content,
+            result => {
+                let cachedMessage = MessageStore.get(result.chat_id, result.id);
+                if (cachedMessage != null){
+                    this.handleSendingMessage(cachedMessage, file);
+                }
+
+                FileController.uploadFile(result.content.photo.sizes[0].photo.id, result);
+            });
+    }
+
+    handleSendingMessage(message, blob){
+        if (message
+            && message.sending_state
+            && message.sending_state['@type'] === 'messageSendingStatePending'){
+
+            if (message.content
+                && message.content['@type'] === 'messagePhoto'
+                && message.content.photo){
+
+                let size = getSize(message.content.photo.sizes, PHOTO_SIZE);
+                if (!size) return;
+
+                let file = size.photo;
+                if (file
+                    && file.local
+                    && file.local.is_downloading_completed
+                    && !file.idb_key
+                    && !file.blob){
+
+                    file.blob = blob;
+                    MessageStore.updateMessagePhoto(message.id);
+                }
+            }
+        }
+    }
+
+    onSendInternal(content, callback){
+        if (!this.props.selectedChat) return;
+        if (!content) return;
+
+        TdLibController
+            .send({
+                '@type': 'sendMessage',
+                chat_id: this.props.selectedChat.id,
+                reply_to_message_id: 0,
+                input_message_content: content
+            })
+            .then(result => {
+
+                //MessageStore.set(result);
+
+                let messageIds = [];
+                messageIds.push(result.id);
+
+                TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: this.props.selectedChat.id,
+                        message_ids: messageIds
+                    });
+
+                callback(result);
+            })
+            .catch(error =>{
+                alert('sendMessage error ' + error);
+            });
+
+        /*if (this.state.selectedChat.draft_message){
+            TdLibController
+                .send({
+                    '@type': 'setChatDraftMessage',
+                    chat_id: this.state.selectedChat.id,
+                    draft_message: null
+                });
+        }*/
     }
 
     render(){
