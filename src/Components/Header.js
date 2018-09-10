@@ -136,11 +136,15 @@ class Header extends Component{
             default:
                 return (
                     <div className='header-wrapper'>
-                        <div className='header-title'>
-                            <i className='header-title-icon'></i>
+                        <div className='header-master'>
+                            <div className='header-title'>
+                                <i className='header-title-icon'></i>
+                            </div>
                         </div>
-                        <div className='header-status'>
-                            <span className='header-status-content'>{connectionState}</span>
+                        <div className='header-details'>
+                            <div className='header-status'>
+                                <span className='header-status-content'>{connectionState}</span>
+                            </div>
                         </div>
                     </div>
                 );

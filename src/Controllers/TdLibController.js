@@ -56,19 +56,19 @@ class TdLibController extends EventEmitter{
                 use_file_database: false,
                 database_directory: '/db',
                 files_directory: '/'
-            },
-            extra: {
-                a: ['a', 'b'],
-                b: 123
             }
+            // ,
+            // extra: {
+            //     a: ['a', 'b'],
+            //     b: 123
+            // }
         });
     }
 
     onUpdate(update) {
-        //console.log('receive from worker: ' + update['@type']);
         switch (update['@type']) {
             case 'updateAuthorizationState':
-                this.onUpdateAuthState(update.authorization_state);
+                this.onUpdateAuthorizationState(update);
                 break;
             case 'updateConnectionState':
                 this.emit('tdlib_connection_state', update.state);
@@ -80,19 +80,13 @@ class TdLibController extends EventEmitter{
         this.emit('tdlib_update', update);
     }
 
-    onUpdateAuthState(auth_state) {
-        this.auth_state = auth_state;
-        this.authStateLoop();
-    }
+    onUpdateAuthorizationState(update) {
+        if (!update) return;
 
-    onAuthError(error){
-        this.emit('tdlib_auth_error', error);
-    }
-
-    authStateLoop() {
-        switch (this.auth_state['@type']) {
+        switch (update.authorization_state['@type']) {
             case 'authorizationStateLoggingOut':
                 this.setState({ status: 'loggingOut' });
+                this.loggingOut = true;
                 break;
             case 'authorizationStateWaitTdlibParameters':
                 this.setState({ status: 'waitTdLibParameters' });
@@ -113,17 +107,29 @@ class TdLibController extends EventEmitter{
                 break;
             case 'authorizationStateReady':
                 this.setState({ status: 'ready' });
+                this.loggingOut = false;
                 break;
             case 'authorizationStateClosing':
                 this.setState({ status: 'closing' });
                 break;
             case 'authorizationStateClosed':
                 this.setState({ status: 'closed' });
-                this.init();
+                if (!this.loggingOut) {
+                    document.title += ': Zzz…';
+                    this.emit('tdlib_updateAppInactive');
+                    //alert('Telegram supports only one active tab with the app.\n' + 'Please reload this page to continue using this tab or close it.');
+                }
+                else{
+                    this.init();
+                }
                 break;
             default:
                 this.setState({ status: '???' });
         }
+    }
+
+    onAuthError(error){
+        this.emit('tdlib_auth_error', error);
     }
 
     onInputExternal(status, line) {

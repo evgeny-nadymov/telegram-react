@@ -6,14 +6,13 @@ import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
-import {getSize} from './Utils/Common';
-import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController'
 import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {PHOTO_SIZE, VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
+import {VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
 import packageJson from '../package.json';
+import AppInactiveControl from './Components/AppInactiveControl';
 
 const theme = createMuiTheme({
     palette: {
@@ -29,7 +28,8 @@ class TelegramApp extends Component{
 
         this.state = {
             selectedChat: null,
-            authState: 'init'
+            authState: 'init',
+            inactive: false,
         };
 
         /*this.store = localForage.createInstance({
@@ -40,6 +40,7 @@ class TelegramApp extends Component{
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateAppInactive = this.onUpdateAppInactive.bind(this);
         this.handleSelectChat = this.handleSelectChat.bind(this);
         this.setQueryParams = this.setQueryParams.bind(this);
     }
@@ -80,13 +81,19 @@ class TelegramApp extends Component{
     }
 
     componentDidMount(){
+        TdLibController.on('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.on('tdlib_status', this.onUpdateState);
         TdLibController.on('tdlib_update', this.onUpdate);
     }
 
     componentWillUnmount(){
+        TdLibController.removeListener('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
         TdLibController.removeListener('tdlib_update', this.onUpdate);
+    }
+
+    onUpdateAppInactive(){
+        this.setState({ inactive : true });
     }
 
     onUpdateState(state){
@@ -143,21 +150,6 @@ class TelegramApp extends Component{
             case 'updateUserChatAction':
                 this.onUpdateUserChatAction(update.chat_id, update.user_id, update.action);
                 break;
-            case 'updateNewChat':
-                //this.onUpdateChatTitle(update.chat.id, update.chat.title);
-                break;
-            case 'updateChatTitle':
-                //this.onUpdateChatTitle(update.chat_id, update.title);
-                break;
-            case 'updateNewMessage':
-                //this.onUpdateNewMessage(update.message);
-                break;
-            case 'updateDeleteMessages':
-                //this.onUpdateDeleteMessages(update);
-                break;
-            case 'updateMessageSendSucceeded':
-                //this.onUpdateMessageSendSucceeded(update.old_message_id, update.message);
-                break;
             case 'updateServiceNotification':
                 if (update.content
                     && update.content['@type'] === 'messageText'
@@ -213,42 +205,55 @@ class TelegramApp extends Component{
 
     render(){
         let page = null;
-        //console.log('TelegramApp.render authState=' + this.state.authState);
-        switch (this.state.authState){
-            case 'waitPhoneNumber':
-            case 'waitCode':
-            case 'waitPassword':
-                page = (
-                    <div id='app-inner'>
-                        <AuthFormControl authState={this.state.authState}/>
+
+        if (this.state.inactive){
+            page = (
+                <div id='app-inner'>
+                    <div className='header-wrapper'/>
+                    <div className='im-page-wrap'>
+                        <AppInactiveControl/>
                     </div>
-                );
-                break;
-            case 'init':
-            case 'ready':
-            default:
-                page = (
-                    <div id='app-inner'>
-                        <Header selectedChat={this.state.selectedChat} onClearCache={() => this.clearCache()}/>
-                        <div className='im-page-wrap'>
-                            <Dialogs
-                                selectedChat={this.state.selectedChat}
-                                onSelectChat={this.handleSelectChat}
-                                authState={this.state.authState}/>
-                            <DialogDetails
-                                ref='dialogDetails'
-                                currentUser={this.state.currentUser}
-                                selectedChat={this.state.selectedChat}
-                                onSelectChat={this.handleSelectChat}
-                                onSendText={this.handleSendText}
-                                onSendPhoto={this.handleSendPhoto}
-                                onSendDocument={this.handleSendDocument}
-                            />
+                    <Footer/>
+                </div>
+            );
+        }
+        else{
+            switch (this.state.authState){
+                case 'waitPhoneNumber':
+                case 'waitCode':
+                case 'waitPassword':
+                    page = (
+                        <div id='app-inner'>
+                            <AuthFormControl authState={this.state.authState}/>
                         </div>
-                        <Footer/>
-                    </div>
-                );
-                break;
+                    );
+                    break;
+                case 'init':
+                case 'ready':
+                default:
+                    page = (
+                        <div id='app-inner'>
+                            <Header selectedChat={this.state.selectedChat} onClearCache={() => this.clearCache()}/>
+                            <div className='im-page-wrap'>
+                                <Dialogs
+                                    selectedChat={this.state.selectedChat}
+                                    onSelectChat={this.handleSelectChat}
+                                    authState={this.state.authState}/>
+                                <DialogDetails
+                                    ref='dialogDetails'
+                                    currentUser={this.state.currentUser}
+                                    selectedChat={this.state.selectedChat}
+                                    onSelectChat={this.handleSelectChat}
+                                    onSendText={this.handleSendText}
+                                    onSendPhoto={this.handleSendPhoto}
+                                    onSendDocument={this.handleSendDocument}
+                                />
+                            </div>
+                            <Footer/>
+                        </div>
+                    );
+                    break;
+            }
         }
 
         return (
