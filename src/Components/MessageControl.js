@@ -228,14 +228,23 @@ class MessageControl extends Component{
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-content'>
                         <div className='message-meta'>
-                            {/*{message.id}&nbsp;*/}
-                            {message.views > 0 && <i className='message-views-icon'/>}
-                            {message.views > 0 && <span className='message-views'> {message.views}&nbsp;&nbsp;</span>}
+                            {/*{message.views > 0 && <i className='message-views-icon'/>}*/}
+                            {/*{message.views > 0 && <span className='message-views'> {message.views}&nbsp;&nbsp;</span>}*/}
                             {message.edit_date > 0 && <span>edited </span>}
                             <span className='message-date' title={dateHint}>{date}</span>
                         </div>
                         <div className='message-body'>
-                            {!forward && <div className='message-author'>{title}</div>}
+                            {!forward &&
+                                <div className='message-author'>
+                                    {title}
+                                    {message.views > 0 &&
+                                        <div className='message-meta'>
+                                            <i className='message-views-icon'/>
+                                            <span className='message-views'> {message.views}&nbsp;&nbsp;</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
                             {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
                             {reply && <ReplyControl chatId={message.chat_id} messageId={reply}/>}
                             {media}

@@ -28,7 +28,7 @@ class DialogDetails extends Component{
         this.itemsRef = React.createRef();
 
         this.updateItemsInView = debounce(this.updateItemsInView.bind(this), 250);
-        this.loadHistory = this.loadHistory.bind(this);
+        this.loadIncompleteHistory = this.loadIncompleteHistory.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.onLoadNext = this.onLoadNext.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
@@ -71,7 +71,7 @@ class DialogDetails extends Component{
 
         this.prependHistory(history);
         this.loadMessageContents(history);
-        this.viewMessages(history);
+        DialogDetails.viewMessages(history);
     }
 
     onUpdateDeleteMessages(update){
@@ -92,7 +92,7 @@ class DialogDetails extends Component{
         }
 
         if (list && list.scrollTop <= 0){
-            this.onLoadNext(true);
+            this.onLoadNext();
         }
         else{
             this.updateItemsInView();
@@ -169,8 +169,9 @@ class DialogDetails extends Component{
             result.messages.reverse();
             this.setHistory(result.messages);
             this.loadMessageContents(result.messages);
-            this.loadHistory(0, result);
-            this.viewMessages(result.messages);
+            DialogDetails.viewMessages(result.messages);
+
+            this.loadIncompleteHistory(result);
 
             // load photo
             if (chat.photo){
@@ -201,7 +202,7 @@ class DialogDetails extends Component{
         }
     }
 
-    viewMessages(messages){
+    static viewMessages(messages){
         if (!messages) return;
         if (messages.length === 0) return;
         if (!messages[0].chat_id) return;
@@ -343,17 +344,17 @@ class DialogDetails extends Component{
         }
     }
 
-    loadHistory(callStack, result){
-        //console.log('loadHistory result=' + result.messages.length);
-        if (callStack < 5
-            && result.messages.length > 0
-            && result.messages.length < MESSAGE_SLICE_LIMIT){
-            this.onLoadNext(true, result2 => this.loadHistory(callStack + 1, result2));
+    async loadIncompleteHistory(result){
+        const MAX_ITERATIONS = 5;
+        let incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
+
+        for (let i = 0; i < MAX_ITERATIONS && incomplete; i++){
+            result = await this.onLoadNext();
+            incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
         }
     }
 
-    async onLoadNext(loadRemote = false, callback){
-
+    async onLoadNext(){
         if (!this.props.selectedChat) return;
         if (this.loading) return;
 
@@ -380,12 +381,10 @@ class DialogDetails extends Component{
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.appendHistory(result.messages);
-        this.loadMessageContents(result.messages, loadRemote);
-        this.viewMessages(result.messages);
+        this.loadMessageContents(result.messages, true);
+        DialogDetails.viewMessages(result.messages);
 
-        if (callback){
-            callback(result);
-        }
+        return result;
     }
 
     handleUpdateItemsInView(messages){
@@ -413,7 +412,6 @@ class DialogDetails extends Component{
     }
 
     setHistory(history, callback) {
-
         this.setState({ history: history, scrollBottom: true }, callback);
     }
 
@@ -491,7 +489,7 @@ class DialogDetails extends Component{
         return (
             <div className='details'>
                 <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
-                    <div className='dialogdetails-list-top'></div>
+                    <div className='dialogdetails-list-top'/>
                     <div ref={this.itemsRef} className='dialogdetails-list'>
                         {this.messages}
                     </div>
