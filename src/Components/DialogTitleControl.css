@@ -1,0 +1,8 @@
+.dialog-title{
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    flex-grow: 1;
+}

@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import './Header.css';
+import ChatStore from '../Stores/ChatStore';
 import TdLibController from '../Controllers/TdLibController';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 class Header extends Component{
 
@@ -14,11 +14,11 @@ class Header extends Component{
         this.state = {
             authState: TdLibController.getState(),
             connectionState : '',
-            open: false,
-            completed: 10
+            open: false
         };
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
+        this.onUpdate = this.onUpdate.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
     }
@@ -35,8 +35,17 @@ class Header extends Component{
     }
 
     componentDidMount(){
-        TdLibController.on("tdlib_status", this.onStatusUpdated);
-        TdLibController.on("tdlib_connection_state", this.onConnectionStateUpdated);
+        TdLibController.on('tdlib_status', this.onStatusUpdated);
+        TdLibController.on('tdlib_connection_state', this.onConnectionStateUpdated);
+
+        ChatStore.on('updateChatTitle', this.onUpdate);
+    }
+
+    componentWillUnmount(){
+        TdLibController.removeListener('tdlib_connection_state', this.onConnectionStateUpdated);
+        TdLibController.removeListener('tdlib_status', this.onStatusUpdated);
+
+        ChatStore.removeListener('updateChatTitle', this.onUpdate);
     }
 
     onConnectionStateUpdated(payload) {
@@ -47,9 +56,10 @@ class Header extends Component{
         this.setState({ authState: payload});
     }
 
-    componentWillUnmount(){
-        TdLibController.removeListener("tdlib_connection_state", this.onConnectionStateUpdated);
-        TdLibController.removeListener("tdlib_status", this.onStatusUpdated);
+    onUpdate(update){
+        if (update.chat_id !== this.props.selectedChat.id) return;
+
+        this.forceUpdate();
     }
 
     handleSubmit(){

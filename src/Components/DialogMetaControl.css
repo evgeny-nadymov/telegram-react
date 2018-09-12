@@ -1,0 +1,14 @@
+.dialog-meta-date{
+    font-size: .85em;
+    color: #b3b3b3;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+
+.dialog-meta-date-active{
+    color: #fff;
+}
+
+.dialog-active .dialog-meta-date{
+    color: #fff;
+}

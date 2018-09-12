@@ -27,8 +27,10 @@ class ChatStore extends EventEmitter{
             case 'updateChatDraftMessage': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.order = update.order === '0' ? chat.order : update.order;
-                    chat.draft_message = update.draft_message;
+                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order, draft_message : update.draft_message });
+
+                    //chat.order = update.order === '0' ? chat.order : update.order;
+                    //chat.draft_message = update.draft_message;
                 }
 
                 this.emit(update['@type'], update);
@@ -37,7 +39,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatIsMarkedAsUnread': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.is_marked_as_unread = update.is_marked_as_unread;
+                    this.assign(chat, { is_marked_as_unread : update.is_marked_as_unread });
+
+                    //chat.is_marked_as_unread = update.is_marked_as_unread;
                 }
 
                 this.emit(update['@type'], update);
@@ -46,16 +50,23 @@ class ChatStore extends EventEmitter{
             case 'updateChatIsPinned': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.order = update.order === '0' ? chat.order : update.order;
-                    chat.is_pinned = update.is_pinned;
+                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order, is_pinned : update.is_pinned });
+
+                    // chat.order = update.order === '0' ? chat.order : update.order;
+                    // chat.is_pinned = update.is_pinned;
                 }
 
                 this.emit(update['@type'], update);
                 break;
             }
             case 'updateChatIsSponsored': {
+                let chat = this.get(update.chat_id);
+                if (chat){
+                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order, is_sponsored : update.is_sponsored });
 
-                //TODO: handle updateChatIsSponsored
+                    // chat.order = update.order === '0' ? chat.order : update.order;
+                    // chat.is_sponsored = update.is_sponsored;
+                }
 
                 this.emit('updateChatIsSponsored', update);
                 break;
@@ -63,8 +74,10 @@ class ChatStore extends EventEmitter{
             case 'updateChatLastMessage': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.order = update.order === '0' ? chat.order : update.order;
-                    chat.last_message = update.last_message;
+                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order, last_message : update.last_message });
+
+                    //chat.order = update.order === '0' ? chat.order : update.order;
+                    //chat.last_message = update.last_message;
                 }
 
                 this.emit(update['@type'], update);
@@ -73,7 +86,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatNotificationSettings': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.notification_settings = update.notification_settings;
+                    this.assign(chat, { notification_settings : update.notification_settings });
+
+                    //chat.notification_settings = update.notification_settings;
                 }
 
                 this.emit(update['@type'], update);
@@ -82,7 +97,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatOrder': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.order = update.order === '0' ? chat.order : update.order;
+                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order });
+
+                    //chat.order = update.order === '0' ? chat.order : update.order;
                 }
 
                 this.emit(update['@type'], update);
@@ -91,7 +108,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatPhoto': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.photo = update.photo;
+                    this.assign(chat, { photo : update.photo });
+
+                    //chat.photo = update.photo;
                 }
 
                 this.emit(update['@type'], update);
@@ -100,8 +119,10 @@ class ChatStore extends EventEmitter{
             case 'updateChatReadInbox': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.last_read_inbox_message_id = update.last_read_inbox_message_id;
-                    chat.unread_count = update.unread_count;
+                    this.assign(chat, { last_read_inbox_message_id : update.last_read_inbox_message_id, unread_count : update.unread_count });
+
+                    //chat.last_read_inbox_message_id = update.last_read_inbox_message_id;
+                    //chat.unread_count = update.unread_count;
                 }
 
                 this.emit(update['@type'], update);
@@ -110,7 +131,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatReadOutbox': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.last_read_outbox_message_id = update.last_read_outbox_message_id;
+                    this.assign(chat, { last_read_outbox_message_id : update.last_read_outbox_message_id });
+
+                    //chat.last_read_outbox_message_id = update.last_read_outbox_message_id;
                 }
 
                 this.emit(update['@type'], update);
@@ -119,7 +142,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatReplyMarkup': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.reply_markup_message_id = update.reply_markup_message_id;
+                    this.assign(chat, { reply_markup_message_id : update.reply_markup_message_id });
+
+                    //chat.reply_markup_message_id = update.reply_markup_message_id;
                 }
 
                 this.emit(update['@type'], update);
@@ -128,7 +153,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatTitle': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.title = update.title;
+                    this.assign(chat, { title : update.title });
+
+                    //chat.title = update.title;
                 }
 
                 this.emit(update['@type'], update);
@@ -137,7 +164,9 @@ class ChatStore extends EventEmitter{
             case 'updateChatUnreadMentionCount': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.unread_mention_count = update.unread_mention_count;
+                    this.assign(chat, { unread_mention_count : update.unread_mention_count });
+
+                    //chat.unread_mention_count = update.unread_mention_count;
                 }
 
                 this.emit(update['@type'], update);
@@ -167,7 +196,7 @@ class ChatStore extends EventEmitter{
                 let typingManager = this.getTypingManager(update.chat_id);
                 if (!typingManager){
                     typingManager = new InputTypingManager(update.chat_id);
-                    this.setTypingManager(typingManager);
+                    this.setTypingManager(update.chat_id, typingManager);
                 }
 
                 let key = update.user_id;
@@ -184,7 +213,9 @@ class ChatStore extends EventEmitter{
             case 'updateMessageMentionRead': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    chat.unread_mention_count = update.unread_mention_count;
+                    this.assign(chat, { unread_mention_count : update.unread_mention_count });
+
+                    //chat.unread_mention_count = update.unread_mention_count;
                 }
 
                 this.emit(update['@type'], update);
@@ -193,6 +224,11 @@ class ChatStore extends EventEmitter{
             default:
                 break;
         }
+    }
+
+    assign(source1, source2){
+        Object.assign(source1, source2);
+        //this.set(Object.assign({}, source1, source2));
     }
 
     get(chatId){

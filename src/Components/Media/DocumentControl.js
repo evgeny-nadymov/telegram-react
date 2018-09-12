@@ -110,12 +110,12 @@ class DocumentControl extends React.Component {
         if (isDownloadingActive){
             progress = file.local.downloaded_size && file.size && this.isDownloadingActive
                 ? 100 - (file.size - file.local.downloaded_size) / file.size * 100
-                : 0;
+                : 1;
         }
         else if (isUploadingActive){
             progress = file.remote.uploaded_size && file.size && this.isUploadingActive
                 ? 100 - (file.size - file.remote.uploaded_size) / file.size * 100
-                : 0;
+                : 1;
         }
 
         let showProgress = isDownloadingActive || isUploadingActive;

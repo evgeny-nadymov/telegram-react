@@ -33,6 +33,7 @@ class DialogDetails extends Component{
         this.onLoadNext = this.onLoadNext.bind(this);
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
         this.onUpdateNewMessage = this.onUpdateNewMessage.bind(this);
+        this.onUpdateDeleteMessages = this.onUpdateDeleteMessages.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){

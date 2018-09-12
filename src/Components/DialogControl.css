@@ -12,48 +12,16 @@
     cursor: pointer;
 }
 
-.dialog-active .dialog-date{
-    color: #fff;
-}
-
-.dialog-title-wrapper{
+.dialog-row1-wrapper{
     margin: 3px 0;
     display: flex;
 }
 
-.dialog-title{
-    word-wrap: break-word;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: 700;
-    flex-grow: 1;
-}
-
-.dialog-date{
-    font-size: .85em;
-    color: #b3b3b3;
-    white-space: nowrap;
-    margin-left: 6px;
-}
-
-.dialog-date-active{
-    color: #fff;
-}
-
-.dialog-content-wrapper{
+.dialog-row2-wrapper{
     display: flex;
 }
 
-.dialog-content{
-    word-wrap: break-word;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-}
-
-.dialog-content-wrap{
+.dialog-inner-wrapper{
     width: 48px;
     overflow: hidden;
     user-select: none;
@@ -65,64 +33,4 @@
     padding: 7px 16px;
     display: flex;
     align-items: center;
-}
-
-.dialog-badge-wrapper{
-    display: flex;
-    flex-direction: column;
-    margin-left: 6px;
-    height: 48px;
-}
-
-.dialog-badge{
-    background: #64c270;
-    font-size: 11px;
-    padding: 5px;
-    border-radius: 11px;
-    text-align: center;
-    margin-top: -2px;
-    margin-left: 6px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-    vertical-align: baseline;
-    white-space: nowrap;
-}
-
-.dialog-badge-text{
-    min-width: 11px;
-}
-
-.dialog-badge-mention{
-    min-width: 11px;
-    transform: translateY(-1px);
-}
-
-.dialog-badge-muted{
-    background: #bfbfbf;
-}
-
-.dialog-pinned{
-    display: inline-block;
-    float: right;
-    min-width: 14px;
-    height: 14px;
-    overflow: hidden;
-    margin-bottom: 4px;
-    margin-left: 6px;
-    background: url(../Assets/Icons/General_2x.png);
-    background-position: -13px -916px;
-    background-size: 40px 948px;
-}
-
-.dialog-unread{
-    background: #c1d6e5;
-    display: inline-block;
-    float: right;
-    width: 8px;
-    height: 8px;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 3px 0 0;
-    min-width: 8px;
 }

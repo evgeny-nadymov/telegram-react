@@ -17,13 +17,13 @@ class DialogContentControl extends React.Component {
 
     componentWillMount(){
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
-        ChatStore.on('onUpdateChatLastMessage', this.onUpdate);
+        ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateUserChatAction', this.onUpdate);
     }
 
     componentWillUnmount(){
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('onUpdateChatLastMessage', this.onUpdate);
+        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateUserChatAction', this.onUpdate);
     }
 

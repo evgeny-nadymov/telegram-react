@@ -135,10 +135,10 @@ function getChatTypingString(chat){
     switch (chat.type['@type']){
         case 'chatTypePrivate':
         case 'chatTypeSecret':
-            return this.getPrivateChatTypingString(typingManager);
+            return getPrivateChatTypingString(typingManager);
         case 'chatTypeBasicGroup':
         case 'chatTypeSupergroup':
-            return this.getGroupChatTypingString(typingManager);
+            return getGroupChatTypingString(typingManager);
     }
 
     return null;
