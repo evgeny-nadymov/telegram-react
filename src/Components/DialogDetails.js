@@ -165,6 +165,8 @@ class DialogDetails extends Component{
                     limit: MESSAGE_SLICE_LIMIT
                 });
 
+            //TODO: replace result with one-way data flow
+
             MessageStore.setItems(result.messages);
             result.messages.reverse();
             this.setHistory(result.messages);
@@ -378,6 +380,8 @@ class DialogDetails extends Component{
                 this.loading = false;
             });
 
+        //TODO: replace result with one-way data flow
+
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.appendHistory(result.messages);
@@ -450,7 +454,7 @@ class DialogDetails extends Component{
 
     render(){
         this.messages = this.state.history.map(x => {
-            return (<MessageControl key={x.id} showTitle={true} sendingState={x.sending_state} message={x} onSelectChat={this.props.onSelectChat}/>);
+            return (<MessageControl key={x.id} showTitle={true} sendingState={x.sending_state} chatId={x.chat_id} messageId={x.id} onSelectChat={this.props.onSelectChat}/>);
         });
 
         /*let groups = [];

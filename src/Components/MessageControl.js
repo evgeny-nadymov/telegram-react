@@ -10,7 +10,6 @@ import {saveData, saveBlob} from '../Utils/File';
 import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
 import MessageStatusControl from './MessageStatusControl';
 import {getPhotoSize} from '../Utils/Common';
-import {PHOTO_SIZE} from '../Constants';
 
 class MessageControl extends Component{
     constructor(props){
@@ -32,22 +31,22 @@ class MessageControl extends Component{
     }
 
     handleUpdateMessageEdited(payload) {
-        if (this.props.message.chat_id === payload.chat_id
-            && this.props.message.id === payload.message_id){
+        if (this.props.chatId === payload.chat_id
+            && this.props.messageId === payload.message_id){
             this.forceUpdate();
         }
     }
 
     handleUpdateMessageViews(payload) {
-        if (this.props.message.chat_id === payload.chat_id
-            && this.props.message.id === payload.message_id){
+        if (this.props.chatId === payload.chat_id
+            && this.props.messageId === payload.message_id){
             this.forceUpdate();
         }
     }
 
     handleUpdateMessageContent(payload) {
-        if (this.props.message.chat_id === payload.chat_id
-            && this.props.message.id === payload.message_id){
+        if (this.props.chatId === payload.chat_id
+            && this.props.messageId === payload.message_id){
             this.forceUpdate();
         }
     }
@@ -60,7 +59,8 @@ class MessageControl extends Component{
 
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.message !== this.props.message){
+        if (nextProps.chatId !== this.props.chatId
+            || nextProps.messageId !== this.props.messageId){
             return true;
         }
 
@@ -72,7 +72,7 @@ class MessageControl extends Component{
     }
 
     openForward(){
-        let message = this.props.message;
+        let message = MessageStore.get(this.props.chatId, this.props.messageId);
 
         if (!message) return;
         if (!message.forward_info) return null;
@@ -103,7 +103,7 @@ class MessageControl extends Component{
     }
 
     openMedia(){
-        let message = this.props.message;
+        let message = MessageStore.get(this.props.chatId, this.props.messageId);
 
         if (!message) return;
         if (!message.content) return null;
@@ -154,7 +154,7 @@ class MessageControl extends Component{
                     let photo = message.content.photo;
                     if (photo){
 
-                        let photoSize = getPhotoSize(this.props.message.content.photo.sizes);
+                        let photoSize = getPhotoSize(message.content.photo.sizes);
                         if (photoSize){
                             let file = photoSize.photo;
                             if (file) {
@@ -210,7 +210,7 @@ class MessageControl extends Component{
     }
 
     render(){
-        let message = this.props.message;
+        let message = MessageStore.get(this.props.chatId, this.props.messageId);
         if (!message) return (<div>[empty message]</div>);
 
         let title = this.props.showTitle? getTitle(message) : null;

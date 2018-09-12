@@ -17,6 +17,11 @@ function getSize(sizes, dimension) {
     if (!sizes) return null;
     if (sizes.length === 0) return null;
 
+    // let iSize = sizes[2];//.find(x => x.type === 'i');
+    // if (iSize){
+    //     return iSize;
+    // }
+
     let useWidth = sizes[0].width >= sizes[0].height;
     let diff = Math.abs(dimension - (useWidth ? sizes[0].width : sizes[0].height));
     let index = 0;

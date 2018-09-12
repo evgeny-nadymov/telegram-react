@@ -25,7 +25,13 @@ class InputTypingManager {
             this.actions.delete(key);
         }
 
-        ChatStore.updateChatTyping(this.chatId);
+        let update = {
+            '@type' : 'updateUserChatAction',
+            chat_id: this.chatId,
+            action: { '@type': 'chatActionTimerUpdate' }
+        };
+
+        ChatStore.updateChatTyping(update);
 
         this.setActionsTimeout();
     }
@@ -39,8 +45,6 @@ class InputTypingManager {
         if (this.timerId){
             clearTimeout(this.timerId);
         }
-
-        ChatStore.updateChatTyping(this.chatId);
 
         this.setActionsTimeout();
     }

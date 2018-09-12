@@ -15,17 +15,17 @@ class Dialogs extends Component{
         super(props);
 
         this.state = {
-            chats: [],
-
+            chats: []
         };
+
+        this.listRef = React.createRef();
 
         this.once = false;
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
-        this.handleLoadDialogs = this.handleLoadDialogs.bind(this);
-        //this.throttledScroll = throttle(this.handleScrollInternal.bind(this), 1000);
+        this.onLoadNext = this.onLoadNext.bind(this);
     }
 
     componentDidMount(){
@@ -36,7 +36,7 @@ class Dialogs extends Component{
         if (!this.once
             && this.props.authState === 'ready'){
             this.once = true;
-            this.handleLoadDialogs();
+            this.onLoadNext();
         }
     }
 
@@ -50,7 +50,7 @@ class Dialogs extends Component{
         //console.log('Dialogs onUpdateState status=' + state.status);
         switch (state.status) {
             case 'ready':
-                this.handleLoadDialogs();
+                this.onLoadNext();
                 break;
             default:
                 break;
@@ -284,24 +284,14 @@ class Dialogs extends Component{
     }
 
     handleScroll(){
-        if (!this.x)
-        {
-            this.x = ReactDOM.findDOMNode(this.refs.list);
-        }
+        const list = this.listRef.current;
 
-        if (this.x && (this.x.scrollTop + this.x.offsetHeight) >= this.x.scrollHeight){
-            this.handleLoadDialogs();
+        if (list && (list.scrollTop + list.offsetHeight) >= list.scrollHeight){
+            this.onLoadNext();
         }
     }
 
-    handleScrollInternal(){
-        //let list = ReactDOM.findDOMNode(this.refs.list);
-        //let items = itemsInView(list);
-
-        //console.log(items);
-    }
-
-    handleLoadDialogs(){
+    async onLoadNext(){
         if (this.loading) return;
 
         let offsetOrder = '9223372036854775807'; // 2^63
@@ -311,36 +301,36 @@ class Dialogs extends Component{
             offsetChatId = this.state.chats[this.state.chats.length - 1].id;
         }
 
-        TdLibController
+        this.loading = true;
+        let result = await TdLibController
             .send({
                 '@type': 'getChats',
                 offset_chat_id: offsetChatId,
                 offset_order: offsetOrder,
                 limit: CHAT_SLICE_LIMIT
             })
-            .then(result => {
-                this.loading = false;
-
-                if (result.chat_ids.length > 0
-                    && result.chat_ids[0] === offsetChatId) {
-                    result.chat_ids.shift();
-                }
-
-                this.onGetChats(result);
-            })
-            .catch(() => {
+            .finally(() => {
                 this.loading = false;
             });
-    }
 
-    onGetChats(result){
+        //TODO: replace result with one-way data flow
+
+        if (result.chat_ids.length > 0
+            && result.chat_ids[0] === offsetChatId) {
+            result.chat_ids.shift();
+        }
         let chats = [];
         for (let i = 0; i < result.chat_ids.length; i++){
             chats.push(ChatStore.get(result.chat_ids[i]));
         }
 
-        this.appendChats(chats);
+        this.appendChats(chats,
+            () => {
+                this.loadChatContents(chats);
+            });
+    }
 
+    loadChatContents(chats){
         let store = FileContrller.getStore();
 
         for (let i = 0; i < chats.length; i++){
@@ -364,13 +354,13 @@ class Dialogs extends Component{
         const chats = this.state.chats.map(x =>
             (<DialogControl
                 key={x.id}
-                chat={x}
+                chatId={x.id}
                 isSelected={this.props.selectedChat && this.props.selectedChat.id === x.id}
-                onClick={this.props.onSelectChat}/>));
+                onSelect={this.props.onSelectChat}/>));
 
         return (
             <div className='master'>
-                <div className='dialogs-list' ref='list' onScroll={this.handleScroll}>
+                <div className='dialogs-list' ref={this.listRef} onScroll={this.handleScroll}>
                     {chats}
                 </div>
             </div>
