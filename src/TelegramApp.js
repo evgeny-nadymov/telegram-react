@@ -26,6 +26,8 @@ class TelegramApp extends Component{
 
         console.log(`Start Telegram Web ${packageJson.version}`);
 
+        this.dialogDetails = React.createRef();
+
         this.state = {
             selectedChat: null,
             authState: 'init',
@@ -195,7 +197,13 @@ class TelegramApp extends Component{
     }
 
     handleSelectChat(chat){
-        this.setState({ selectedChat : chat });
+        if (this.state.selectedChat
+            && this.state.selectedChat.id === chat.id){
+            this.dialogDetails.current.scrollToBottom();
+        }
+        else{
+            this.setState({ selectedChat : chat });
+        }
     }
 
     clearCache(){
@@ -240,7 +248,7 @@ class TelegramApp extends Component{
                                     onSelectChat={this.handleSelectChat}
                                     authState={this.state.authState}/>
                                 <DialogDetails
-                                    ref='dialogDetails'
+                                    ref={this.dialogDetails}
                                     currentUser={this.state.currentUser}
                                     selectedChat={this.state.selectedChat}
                                     onSelectChat={this.handleSelectChat}
