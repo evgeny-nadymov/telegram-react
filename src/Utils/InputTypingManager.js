@@ -31,7 +31,8 @@ class InputTypingManager {
             action: { '@type': 'chatActionTimerUpdate' }
         };
 
-        ChatStore.updateChatTyping(update);
+        ChatStore.emit('updateUserChatAction', update);
+        //ChatStore.updateChatTyping(update);
 
         this.setActionsTimeout();
     }

@@ -214,7 +214,7 @@ function getChatUnreadMentionCount(chat){
 function getChatMuteFor(chat){
     if (!chat) return 0;
     if (!chat.notification_settings) return 0;
-    if (chat.notification_settings['@type'] !== 'notificationSettings') return 0;
+    if (chat.notification_settings['@type'] !== 'chatNotificationSettings') return 0;
     if (!chat.notification_settings.mute_for) return 0;
 
     return chat.notification_settings.mute_for;
