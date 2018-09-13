@@ -3,6 +3,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 700;
+    font-weight: 500;
     flex-grow: 1;
 }

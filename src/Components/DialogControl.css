@@ -14,12 +14,8 @@
     cursor: pointer;
 }
 
-.dialog-row1-wrapper{
-    margin: 3px 0;
-    display: flex;
-}
-
-.dialog-row2-wrapper{
+.dialog-row-wrapper{
+    margin: 3px 0 0 0;
     display: flex;
 }
 

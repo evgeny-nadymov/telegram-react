@@ -9,7 +9,7 @@ a:hover{
 }
 
 b, strong {
-    font-weight: 700;
+    font-weight: 500;
 }
 
 em {
@@ -74,7 +74,7 @@ pre code {
 .message-author{
     margin: 0 0 4px;
     color: #3a6d99;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .message-text{
@@ -109,5 +109,5 @@ pre code {
 }
 
 .message-views{
-    font-weight: 700;
+    font-weight: 500;
 }

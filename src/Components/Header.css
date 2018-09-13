@@ -10,17 +10,18 @@
 
 .header-master{
     float: left;
-    width: calc(31% - 0px);
+    width: calc(36% - 0px);
     height: 100%;
     display: flex;
     align-items: center;
     box-sizing: border-box;
     border-right: 1px solid #E9EBED;
+    min-width: 150px;
 }
 
 .header-details{
     float: left;
-    width: calc(69% - 0px);
+    width: calc(64% - 0px);
     height: 100%;
     display: flex;
     align-items: center;
@@ -43,6 +44,7 @@
 
 .header-button, .header-status{
     font-size: 22px;
+    font-family: 'Product Sans', sans-serif;
     padding: 0 24px;
 }
 

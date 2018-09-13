@@ -1,8 +1,8 @@
 .dialog-meta-date{
-    font-size: .85em;
-    color: #b3b3b3;
+    font-size: 12px;
+    color: #70777B;
     white-space: nowrap;
-    margin-left: 6px;
+    margin: 1px 0 -1px 6px;
 }
 
 .dialog-meta-date-active{

@@ -14,8 +14,11 @@ const styles = {
     button: {
         margin: '14px',
     },
-    iconButton:{
-        margin: '8px 12px',
+    menuIconButton:{
+        margin: '8px -2px 8px 12px',
+    },
+    searchIconButton:{
+        margin: '8px 12px 8px 0',
     }
 };
 
@@ -122,13 +125,13 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-master'>
-                            <IconButton className={classes.iconButton} aria-label="Menu">
+                            <IconButton className={classes.menuIconButton} aria-label="Menu">
                                 <MenuIcon />
                             </IconButton>
                             <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>Chats</span>
                             </div>
-                            <IconButton className={classes.iconButton} aria-label="Search">
+                            <IconButton className={classes.searchIconButton} aria-label="Search">
                                 <SearchIcon />
                             </IconButton>
                         </div>
@@ -169,13 +172,13 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-master'>
-                            <IconButton className={classes.iconButton} aria-label="Menu">
+                            <IconButton className={classes.menuIconButton} aria-label="Menu">
                                 <MenuIcon />
                             </IconButton>
                             <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>Chats</span>
                             </div>
-                            <IconButton className={classes.iconButton} aria-label="Search">
+                            <IconButton className={classes.searchIconButton} aria-label="Search">
                                 <SearchIcon />
                             </IconButton>
                         </div>
