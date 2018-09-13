@@ -5,6 +5,19 @@ import TdLibController from '../Controllers/TdLibController';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
+import SearchIcon from '@material-ui/icons/Search';
+import {withStyles} from '@material-ui/core';
+
+const styles = {
+    button: {
+        margin: '14px',
+    },
+    iconButton:{
+        margin: '8px 12px',
+    }
+};
 
 class Header extends Component{
 
@@ -21,6 +34,7 @@ class Header extends Component{
         this.onUpdate = this.onUpdate.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
+        this.handleLogOut = this.handleLogOut.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -62,7 +76,7 @@ class Header extends Component{
         this.forceUpdate();
     }
 
-    handleSubmit(){
+    handleLogOut(){
         this.setState({open: true});
     }
 
@@ -86,6 +100,7 @@ class Header extends Component{
     }
 
     render(){
+        const {classes} = this.props;
         const status = this.state.authState.status;
         let connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
 
@@ -107,17 +122,24 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-master'>
-                            <div className='header-title'>
-                                <i className='header-title-icon'></i>
+                            <IconButton className={classes.iconButton} aria-label="Menu">
+                                <MenuIcon />
+                            </IconButton>
+                            <div className='header-status grow cursor-default'>
+                                <span className='header-status-content'>Chats</span>
                             </div>
+                            <IconButton className={classes.iconButton} aria-label="Search">
+                                <SearchIcon />
+                            </IconButton>
                         </div>
                         <div className='header-details'>
                             <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>{connectionState}</span>
                             </div>
-                            <div className='header-button cursor-pointer' onClick={args => this.handleSubmit(args)}>
-                                <span className='header-button-content'>LOG OUT</span>
-                            </div>
+
+                            <Button color='primary' className={this.props.classes.button} onClick={this.handleLogOut}>
+                                Log out
+                            </Button>
                         </div>
 
                         { this.state.open &&
@@ -147,9 +169,15 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-master'>
-                            <div className='header-title'>
-                                <i className='header-title-icon'></i>
+                            <IconButton className={classes.iconButton} aria-label="Menu">
+                                <MenuIcon />
+                            </IconButton>
+                            <div className='header-status grow cursor-default'>
+                                <span className='header-status-content'>Chats</span>
                             </div>
+                            <IconButton className={classes.iconButton} aria-label="Search">
+                                <SearchIcon />
+                            </IconButton>
                         </div>
                         <div className='header-details'>
                             <div className='header-status'>
@@ -162,4 +190,4 @@ class Header extends Component{
     }
 }
 
-export default Header;
+export default withStyles(styles)(Header);

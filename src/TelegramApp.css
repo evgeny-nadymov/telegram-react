@@ -1,7 +1,3 @@
-.accent{
-    color: #3B9EDB;
-}
-
 html {
     background: #e7ebf0;
     height: 100%;
@@ -25,7 +21,7 @@ body {
 }
 
 .im-page-wrap {
-    height: calc(100% - 48px - 23px);
+    height: calc(100% - 68px - 23px);
     background: #fff;
     max-width: 1010px;
     min-width: 300px;

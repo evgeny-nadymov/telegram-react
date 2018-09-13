@@ -3,16 +3,15 @@
     width: calc(31% - 0px);
     margin: 0;
     box-sizing: border-box;
-    border-right: 2px solid #E9EBED;
-    padding-bottom: 10px;
+    border-right: 1px solid #E9EBED;
     height: 100%;
-    /*overflow: hidden;*/
+    min-width: 150px;
 }
 
 .dialogs-list {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-    /*margin-right: -15px;*/
     position: relative;
+    padding: 0 12px;
 }

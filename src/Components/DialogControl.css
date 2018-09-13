@@ -3,11 +3,13 @@
 }
 
 .dialog{
+    border-radius: 8px;
     cursor: pointer;
 }
 
 .dialog-active {
-    background-color: #6490b1;
+    border-radius: 8px;
+    background-color: #3B9EDB;
     color: #fff;
     cursor: pointer;
 }
@@ -26,11 +28,11 @@
     overflow: hidden;
     user-select: none;
     flex-grow: 1;
-    margin-left: 10px;
+    margin-left: 12px;
 }
 
 .dialog-wrapper{
-    padding: 7px 16px;
+    padding: 10px 12px 10px 10px;
     display: flex;
     align-items: center;
 }
