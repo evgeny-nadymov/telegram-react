@@ -29,11 +29,3 @@
 .dialogdetails-list{
     flex: 0 0 auto;
 }
-
-.dialogdetails-input-wrapper{
-    box-sizing: border-box;
-}
-
-.dialogdetails-input{
-    width: 100px;
-}

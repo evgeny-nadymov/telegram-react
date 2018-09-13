@@ -126,3 +126,7 @@
     margin-left: 20px;
 }
 
+.dialogdetails-input-wrapper{
+    box-sizing: border-box;
+}
+

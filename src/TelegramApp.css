@@ -1,3 +1,7 @@
+.accent{
+    color: #3B9EDB;
+}
+
 html {
     background: #e7ebf0;
     height: 100%;
@@ -35,3 +39,4 @@ body {
     border-bottom: 1px solid #d2dbe3;
     overflow: hidden;
 }
+

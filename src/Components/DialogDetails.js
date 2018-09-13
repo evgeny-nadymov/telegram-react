@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import './DialogDetails.css';
-import InputBoxControl from "./InputBoxControl";
-import MessageControl from "./MessageControl";
+import InputBoxControl from './InputBoxControl';
+import MessageControl from './MessageControl';
 import MessageGroupControl from "./MessageGroupControl";
 import {debounce, getPhotoSize, itemsInView, throttle} from '../Utils/Common';
 import TileControl from './TileControl';
@@ -13,6 +13,7 @@ import FileController from '../Controllers/FileController';
 import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, getStickerFile} from '../Utils/File';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import DialogFooterControl from './DialogFooterControl';
 
 class DialogDetails extends Component{
 
@@ -34,6 +35,7 @@ class DialogDetails extends Component{
         this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
         this.onUpdateNewMessage = this.onUpdateNewMessage.bind(this);
         this.onUpdateDeleteMessages = this.onUpdateDeleteMessages.bind(this);
+        this.showDialogFooter = this.showDialogFooter.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -453,6 +455,22 @@ class DialogDetails extends Component{
         list.scrollTop = list.scrollHeight - list.offsetHeight;
     };
 
+    showDialogFooter(){
+        return false;
+
+        if (!this.props.selectedChat) return false;
+
+        const {type} = this.props.selectedChat;
+
+        if (type && type['@type'] === 'chatTypeSupergroup'){
+            if (type.is_channel){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     render(){
         this.messages = this.state.history.map(x => {
             return (<MessageControl key={x.id} showTitle={true} sendingState={x.sending_state} chatId={x.chat_id} messageId={x.id} onSelectChat={this.props.onSelectChat}/>);
@@ -491,6 +509,8 @@ class DialogDetails extends Component{
             return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
 
+        const showDialogFooter = this.showDialogFooter();
+
         return (
             <div className='details'>
                 <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
@@ -500,12 +520,12 @@ class DialogDetails extends Component{
                     </div>
                 </div>
                 {   this.props.selectedChat &&
-                    <div className='dialogdetails-input-wrapper'>
-                        <InputBoxControl
-                            className='dialogdetails-input'
-                            currentUser={this.props.currentUser}
-                            selectedChat={this.props.selectedChat}/>
-                    </div>
+                    <React.Fragment>
+                        {showDialogFooter
+                            ? <DialogFooterControl/>
+                            : <InputBoxControl currentUser={this.props.currentUser} selectedChat={this.props.selectedChat}/>
+                        }
+                    </React.Fragment>
                 }
             </div>
         );

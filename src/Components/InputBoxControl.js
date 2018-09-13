@@ -345,28 +345,30 @@ class InputBoxControl extends Component{
         }
 
         return (
-            <div className='inputbox-wrapper'>
-                <div className='inputbox-left-column'>
-                    <UserTileControl user={this.props.currentUser}/>
-                </div>
-                <div className='inputbox-middle-column'>
-                    <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
-                        {text}
+            <div className='dialogdetails-input-wrapper'>
+                <div className='inputbox-wrapper'>
+                    <div className='inputbox-left-column'>
+                        <UserTileControl user={this.props.currentUser}/>
                     </div>
-                    <div className='inputbox-buttons'>
-                        <div className='inputbox-attach-wrapper'>
-                            <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
-                            <i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>
-                            <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
-                            <i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>
+                    <div className='inputbox-middle-column'>
+                        <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
+                            {text}
                         </div>
-                        <div className='inputbox-send-button' onClick={this.handleSubmit}>
-                            <span className='inputbox-send-text'>SEND</span>
+                        <div className='inputbox-buttons'>
+                            <div className='inputbox-attach-wrapper'>
+                                <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
+                                <i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>
+                                <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
+                                <i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>
+                            </div>
+                            <div className='inputbox-send-button' onClick={this.handleSubmit}>
+                                <span className='inputbox-send-text'>SEND</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className='inputbox-right-column'>
-                    <TileControl chat={this.props.selectedChat}/>
+                    <div className='inputbox-right-column'>
+                        <TileControl chat={this.props.selectedChat}/>
+                    </div>
                 </div>
             </div>
         );

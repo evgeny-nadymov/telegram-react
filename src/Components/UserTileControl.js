@@ -67,7 +67,7 @@ class UserTileControl extends Component{
         }
 
         return src ?
-            (<img className={photoClasses} src={src} alt='' />) :
+            (<img className={photoClasses} src={src} draggable={false} alt='' />) :
             (<div className={photoClasses}><span className='tile-text'>{letters}</span></div>);
     }
 }

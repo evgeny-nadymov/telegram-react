@@ -24,9 +24,7 @@ class AppInactiveControl extends React.Component {
         return (
             <div className='app-inactive'>
                 <div className='app-inactive-wrapper'>
-                    <a className='app-inactive-image' onClick={AppInactiveControl.handleReload}>
-
-                    </a>
+                    <a className='app-inactive-image' onClick={AppInactiveControl.handleReload}/>
                     <h3 className='app-inactive-title'>Such error, many tabs</h3>
                     <div className='app-inactive-description'>
                         Telegram supports only one active tab with the app.

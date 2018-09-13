@@ -68,7 +68,7 @@ class DocumentTileControl extends React.Component {
         }
 
         return src ?
-            (<div><img className={photoClasses} src={src} alt=''/></div>) :
+            (<div><img className={photoClasses} src={src} draggable={false} alt=''/></div>) :
             (<div className={photoClasses}>
                 {!this.props.showProgress && <i className={iconClassName}/>}
                 {this.props.showProgress && <svg className='document-tile-cancel'>
