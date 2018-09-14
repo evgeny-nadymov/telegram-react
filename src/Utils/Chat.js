@@ -1,6 +1,11 @@
 import UserStore from '../Stores/UserStore';
-import dateFormat from 'dateformat';
 import ChatStore from '../Stores/ChatStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
+import SupergroupStore from '../Stores/SupergroupStore';
+import dateFormat from 'dateformat';
+import {getUserStatus} from './User';
+import {getSupergroupStatus} from './Supergroup';
+import {getBasicGroupStatus} from './BasicGroup';
 
 function getGroupChatTypingString(inputTypingManager){
     if (!inputTypingManager) return null;
@@ -134,11 +139,15 @@ function getChatTypingString(chat){
 
     switch (chat.type['@type']){
         case 'chatTypePrivate':
-        case 'chatTypeSecret':
-            return getPrivateChatTypingString(typingManager);
+        case 'chatTypeSecret':{
+            const typingString = getPrivateChatTypingString(typingManager);
+            return typingString ? typingString + '...' : null;
+        }
         case 'chatTypeBasicGroup':
-        case 'chatTypeSupergroup':
-            return getGroupChatTypingString(typingManager);
+        case 'chatTypeSupergroup':{
+            const typingString = getGroupChatTypingString(typingManager);
+            return typingString ? typingString + '...' : null;
+        }
     }
 
     return null;
@@ -244,6 +253,44 @@ function getLastMessageDate(chat){
     return dateFormat(date, 'd.mm.yyyy');
 }
 
+function getChatSubtitle(chat){
+    if (!chat) return null;
+
+    const chatTypingString = getChatTypingString(chat);
+    if (chatTypingString){
+        return chatTypingString;
+    }
+
+    if (!chat.type) return null;
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+            if (basicGroup){
+                return getBasicGroupStatus(basicGroup);
+            }
+            break;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            const user = UserStore.get(chat.type.user_id);
+            if (user){
+                return getUserStatus(user);
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup){
+                return getSupergroupStatus(supergroup);
+            }
+            break;
+        }
+    }
+
+    return null;
+}
+
 export {
     getChatDraft,
     getChatTypingString,
@@ -251,6 +298,7 @@ export {
     getChatUnreadCount,
     getChatUnreadMentionCount,
     getChatMuteFor,
+    getChatSubtitle,
     getLastMessageSenderName,
     getLastMessageContent,
     getLastMessageDate

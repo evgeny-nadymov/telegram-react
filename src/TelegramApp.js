@@ -45,6 +45,7 @@ class TelegramApp extends Component{
         this.onUpdateAppInactive = this.onUpdateAppInactive.bind(this);
         this.handleSelectChat = this.handleSelectChat.bind(this);
         this.setQueryParams = this.setQueryParams.bind(this);
+        this.clearCache = this.clearCache.bind(this);
     }
 
     componentWillMount(){
@@ -149,9 +150,6 @@ class TelegramApp extends Component{
                 alert('Oops! Something went wrong. We need to refresh this page.');
                 window.location.reload();
                 break;
-            case 'updateUserChatAction':
-                this.onUpdateUserChatAction(update.chat_id, update.user_id, update.action);
-                break;
             case 'updateServiceNotification':
                 if (update.content
                     && update.content['@type'] === 'messageText'
@@ -175,14 +173,6 @@ class TelegramApp extends Component{
             default:
                 break;
         }
-    }
-
-    onUpdateUserChatAction(chat_id, user_id, action){
-        if (!chat_id) return;
-        if (!user_id) return;
-        if (!action) return;
-
-
     }
 
     onUpdateMessageSendSucceeded(old_message_id, message){
@@ -241,7 +231,7 @@ class TelegramApp extends Component{
                 default:
                     page = (
                         <div id='app-inner'>
-                            <Header selectedChat={this.state.selectedChat} onClearCache={() => this.clearCache()}/>
+                            <Header selectedChat={this.state.selectedChat} onClearCache={this.clearCache}/>
                             <div className='im-page-wrap'>
                                 <Dialogs
                                     selectedChat={this.state.selectedChat}
@@ -252,9 +242,6 @@ class TelegramApp extends Component{
                                     currentUser={this.state.currentUser}
                                     selectedChat={this.state.selectedChat}
                                     onSelectChat={this.handleSelectChat}
-                                    onSendText={this.handleSendText}
-                                    onSendPhoto={this.handleSendPhoto}
-                                    onSendDocument={this.handleSendDocument}
                                 />
                             </div>
                             <Footer/>

@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import TdLibController from "../Controllers/TdLibController";
+import { EventEmitter } from 'events';
+import TdLibController from '../Controllers/TdLibController';
 
 class UserStore extends EventEmitter{
     constructor(){
@@ -15,16 +15,37 @@ class UserStore extends EventEmitter{
 
     onUpdate(update){
         switch (update['@type']) {
-            case 'updateUser':
-                this.items.set(update.user.id, update.user);
+            case 'updateUserStatus':{
+                let user = this.get(update.user_id);
+                if (user){
+                    this.assign(user, { status : update.status });
+                }
+
+                this.emit(update['@type'], update);
                 break;
+            }
+            case 'updateUser':{
+                this.set(update.user);
+
+                this.emit(update['@type'], update);
+                break;
+            }
             default:
                 break;
         }
     }
 
+    assign(source1, source2){
+        Object.assign(source1, source2);
+        //this.set(Object.assign({}, source1, source2));
+    }
+
     get(userId){
         return this.items.get(userId);
+    }
+
+    set(user){
+        this.items.set(user.id, user);
     }
 
     updatePhoto(userId){

@@ -40,7 +40,7 @@ class DialogContentControl extends React.Component {
         let contentControl = null;
         const typingString = getChatTypingString(chat);
         if (typingString){
-            contentControl = (<span className='dialog-content-accent'>{typingString}...</span>);
+            contentControl = (<span className='dialog-content-accent'>{typingString}</span>);
         }
 
         if (!contentControl){

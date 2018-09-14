@@ -22,7 +22,6 @@
 .dialog-inner-wrapper{
     width: 48px;
     overflow: hidden;
-    user-select: none;
     flex-grow: 1;
     margin-left: 12px;
 }
@@ -31,4 +30,5 @@
     padding: 10px 12px 10px 10px;
     display: flex;
     align-items: center;
+    user-select: none;
 }

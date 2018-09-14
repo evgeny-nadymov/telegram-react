@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './Header.css';
 import ChatStore from '../Stores/ChatStore';
+import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
@@ -8,16 +9,26 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
-import {withStyles} from '@material-ui/core';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import {withStyles} from '@material-ui/core/styles';
+import {getChatSubtitle} from '../Utils/Chat';
 
 const styles = {
-    button: {
+    button : {
         margin: '14px',
     },
-    menuIconButton:{
+    menuIconButton : {
         margin: '8px -2px 8px 12px',
     },
-    searchIconButton:{
+    searchIconButton : {
+        margin: '8px 12px 8px 0',
+    },
+    messageSearchIconButton : {
+        margin: '8px 0 8px 12px',
+    },
+    moreIconButton : {
         margin: '8px 12px 8px 0',
     }
 };
@@ -30,14 +41,21 @@ class Header extends Component{
         this.state = {
             authState: TdLibController.getState(),
             connectionState : '',
-            open: false
+            open: false,
+            anchorEl: null
         };
+
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
+        this.onUpdateUserChatAction = this.onUpdateUserChatAction.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
         this.handleLogOut = this.handleLogOut.bind(this);
+        this.handleMenuClick = this.handleMenuClick.bind(this);
+        this.handleMenuClose = this.handleMenuClose.bind(this);
+        this.handleClearCache = this.handleClearCache.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -56,13 +74,17 @@ class Header extends Component{
         TdLibController.on('tdlib_connection_state', this.onConnectionStateUpdated);
 
         ChatStore.on('updateChatTitle', this.onUpdate);
+        UserStore.on('updateUserStatus', this.onUpdateUserStatus);
+        ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
     }
 
     componentWillUnmount(){
-        TdLibController.removeListener('tdlib_connection_state', this.onConnectionStateUpdated);
         TdLibController.removeListener('tdlib_status', this.onStatusUpdated);
+        TdLibController.removeListener('tdlib_connection_state', this.onConnectionStateUpdated);
 
         ChatStore.removeListener('updateChatTitle', this.onUpdate);
+        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
+        ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
     }
 
     onConnectionStateUpdated(payload) {
@@ -79,18 +101,45 @@ class Header extends Component{
         this.forceUpdate();
     }
 
+    onUpdateUserStatus(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypePrivate'
+            && chat.type.user_id === update.user_id){
+
+            this.forceUpdate();
+        }
+    }
+
+    onUpdateUserChatAction(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.id === update.chat_id){
+            this.forceUpdate();
+        }
+    }
+
+    handleMenuClick(event){
+        this.setState({ anchorEl : event.currentTarget });
+    }
+
+    handleMenuClose(){
+        this.setState({ anchorEl : null });
+    }
+
     handleLogOut(){
-        this.setState({open: true});
+        this.setState({ open: true });
+
+        this.handleMenuClose();
     }
 
-    handleDestroy(){
-        TdLibController.destroy();
-    }
-
-    handleClearCache(args){
-        args.preventDefault();
-
+    handleClearCache(){
         this.props.onClearCache();
+
+        this.handleMenuClose();
     }
 
     handleClose(){
@@ -103,21 +152,26 @@ class Header extends Component{
     }
 
     render(){
+        const {anchorEl} = this.state;
         const {classes} = this.props;
-        const status = this.state.authState.status;
-        let connectionState = this.state.connectionState? this.state.connectionState['@type'] : '';
+        const {status} = this.state.authState;
+        const subtitle = getChatSubtitle(this.props.selectedChat);
 
-        switch (connectionState){
-            case 'connectionStateUpdating':
-                connectionState = 'Updating...';
-                break;
-            case 'connectionStateConnecting':
-                connectionState = 'Connecting...';
-                break;
-            case 'connectionStateReady':
-            case '':
-                connectionState = this.props.selectedChat ? this.props.selectedChat.title : '';
-                break;
+        let title = '';
+        if (this.state.connectionState){
+            switch (this.state.connectionState['@type'] ){
+                case 'connectionStateUpdating':
+                    title = 'Updating...';
+                    break;
+                case 'connectionStateConnecting':
+                    title = 'Connecting...';
+                    break;
+                case 'connectionStateReady':
+                    break;
+            }
+        }
+        if (title === '' && this.props.selectedChat){
+            title = this.props.selectedChat.title;
         }
 
         switch (status){
@@ -125,11 +179,24 @@ class Header extends Component{
                 return (
                     <div className='header-wrapper'>
                         <div className='header-master'>
-                            <IconButton className={classes.menuIconButton} aria-label="Menu">
+                            <IconButton
+                                aria-owns={anchorEl ? 'simple-menu' : null}
+                                aria-haspopup='true'
+                                className={classes.menuIconButton}
+                                aria-label='Menu'
+                                onClick={this.handleMenuClick}>
                                 <MenuIcon />
                             </IconButton>
+                            <Menu
+                                id='simple-menu'
+                                anchorEl={anchorEl}
+                                open={Boolean(anchorEl)}
+                                onClose={this.handleMenuClose}>
+                                <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
+                                <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
+                            </Menu>
                             <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>Chats</span>
+                                <span className='header-status-content'>Telegram</span>
                             </div>
                             <IconButton className={classes.searchIconButton} aria-label="Search">
                                 <SearchIcon />
@@ -137,12 +204,15 @@ class Header extends Component{
                         </div>
                         <div className='header-details'>
                             <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>{connectionState}</span>
+                                <span className='header-status-content'>{title}</span>
+                                <span className='header-status-content2'>{subtitle}</span>
                             </div>
-
-                            <Button color='primary' className={this.props.classes.button} onClick={this.handleLogOut}>
-                                Log out
-                            </Button>
+                            <IconButton className={classes.messageSearchIconButton} aria-label="Search">
+                                <SearchIcon />
+                            </IconButton>
+                            <IconButton className={classes.moreIconButton} aria-label="More">
+                                <MoreVertIcon />
+                            </IconButton>
                         </div>
 
                         { this.state.open &&
@@ -176,16 +246,23 @@ class Header extends Component{
                                 <MenuIcon />
                             </IconButton>
                             <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>Chats</span>
+                                <span className='header-status-content'>Telegram</span>
                             </div>
                             <IconButton className={classes.searchIconButton} aria-label="Search">
                                 <SearchIcon />
                             </IconButton>
                         </div>
                         <div className='header-details'>
-                            <div className='header-status'>
-                                <span className='header-status-content'>{connectionState}</span>
+                            <div className='header-status grow cursor-default'>
+                                <span className='header-status-content'>{title}</span>
+                                <span className='header-status-content2'>{subtitle}</span>
                             </div>
+                            <IconButton className={classes.messageSearchIconButton} aria-label="Search">
+                                <SearchIcon />
+                            </IconButton>
+                            <IconButton className={classes.moreIconButton} aria-label="More">
+                                <MoreVertIcon />
+                            </IconButton>
                         </div>
                     </div>
                 );

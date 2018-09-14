@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import TdLibController from "../Controllers/TdLibController";
+import { EventEmitter } from 'events';
+import TdLibController from '../Controllers/TdLibController';
 
 class BasicGroupStore extends EventEmitter{
     constructor(){
@@ -16,7 +16,7 @@ class BasicGroupStore extends EventEmitter{
     onUpdate(update){
         switch (update['@type']) {
             case 'updateBasicGroup':
-                this.items.set(update.basic_group.id, update.basic_group);
+                this.set(update.basic_group);
                 break;
             default:
                 break;
@@ -25,6 +25,10 @@ class BasicGroupStore extends EventEmitter{
 
     get(groupId){
         return this.items.get(groupId);
+    }
+
+    set(group){
+        this.items.set(group.id, group);
     }
 }
 
