@@ -1,3 +1,5 @@
+import dateFormat from 'dateformat';
+
 function getUserStatus(user){
     if (!user) return null;
     if (!user.status) return null;
@@ -18,7 +20,53 @@ function getUserStatus(user){
             return 'within a week';
         }
         case 'userStatusOffline':{
-            return 'offline';
+            let {was_online} = user.status;
+            if (!was_online) return 'offline';
+
+            const now = new Date();
+            const wasOnline = new Date(was_online * 1000);
+            if (wasOnline > now){
+                return 'offline';
+            }
+
+            let diff = new Date(now - wasOnline);
+
+            // within minute
+            if (diff.getTime() / 1000 < 60){
+                return 'last seen just now';
+            }
+
+            // within hour
+            if (diff.getTime() / 1000 < 60 * 60){
+                const minutes = Math.floor(diff.getTime() / 1000 / 60);
+                return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
+            }
+
+            // today
+            const today = now.getDate();
+            if (diff > today){
+                if (diff.getTime() / 1000 < 6 * 60 * 60){
+                    const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
+                    return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
+                }
+
+                return `last seen today at ${dateFormat(wasOnline, 'H:MM')}`;
+            }
+
+            // yesterday
+            let yesterday = new Date();
+            yesterday.setDate(now.getDate() - 1);
+            if (diff > yesterday){
+                return `last seen yesterday at ${dateFormat(wasOnline, 'H:MM')}`;
+            }
+
+            // this year
+            let thisYear = new Date(now.getFullYear(), 0, 1);
+            if (diff > thisYear){
+                return `last seen at ${dateFormat(wasOnline, 'd MMM')}`;
+            }
+
+            return `last seen at ${dateFormat(wasOnline, 'd MMM yyyy')}`;
         }
         case 'userStatusOnline':{
             return 'online';

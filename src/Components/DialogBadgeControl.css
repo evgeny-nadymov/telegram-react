@@ -1,16 +1,18 @@
 .dialog-badge{
-    background: #64c270;
-    font-size: 11px;
-    padding: 5px;
+    background: #3B9EDB;
+    font-size: 13px;
+    padding: 0 5px;
     border-radius: 11px;
     text-align: center;
     margin-top: -2px;
     margin-left: 6px;
-    font-weight: 700;
+    font-weight: 500;
     color: #fff;
     line-height: 1;
     vertical-align: baseline;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
 }
 
 .dialog-badge-text{
