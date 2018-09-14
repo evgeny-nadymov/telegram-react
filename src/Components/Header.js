@@ -155,9 +155,9 @@ class Header extends Component{
         const {anchorEl} = this.state;
         const {classes} = this.props;
         const {status} = this.state.authState;
-        const subtitle = getChatSubtitle(this.props.selectedChat);
 
         let title = '';
+        let subtitle = '';
         if (this.state.connectionState){
             switch (this.state.connectionState['@type'] ){
                 case 'connectionStateUpdating':
@@ -170,8 +170,10 @@ class Header extends Component{
                     break;
             }
         }
+
         if (title === '' && this.props.selectedChat){
             title = this.props.selectedChat.title;
+            subtitle = getChatSubtitle(this.props.selectedChat);
         }
 
         switch (status){
