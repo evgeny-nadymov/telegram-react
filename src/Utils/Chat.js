@@ -3,7 +3,7 @@ import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import dateFormat from 'dateformat';
-import {getUserStatus} from './User';
+import {getUserStatus, isAccentSubtitle, isAccentUserSubtitle} from './User';
 import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
 
@@ -291,6 +291,31 @@ function getChatSubtitle(chat){
     return null;
 }
 
+function isAccentChatSubtitle(chat){
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            return false;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            const user = UserStore.get(chat.type.user_id);
+            if (user){
+                return isAccentUserSubtitle(user);
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            return false;
+        }
+    }
+
+    return false;
+}
+
 export {
     getChatDraft,
     getChatTypingString,
@@ -301,5 +326,6 @@ export {
     getChatSubtitle,
     getLastMessageSenderName,
     getLastMessageContent,
-    getLastMessageDate
+    getLastMessageDate,
+    isAccentChatSubtitle
 };

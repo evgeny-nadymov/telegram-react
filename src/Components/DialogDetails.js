@@ -13,6 +13,7 @@ import FileController from '../Controllers/FileController';
 import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, getStickerFile} from '../Utils/File';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import SupergroupStore from '../Stores/SupergroupStore';
 import DialogFooterControl from './DialogFooterControl';
 
 class DialogDetails extends Component{
@@ -36,6 +37,7 @@ class DialogDetails extends Component{
         this.onUpdateNewMessage = this.onUpdateNewMessage.bind(this);
         this.onUpdateDeleteMessages = this.onUpdateDeleteMessages.bind(this);
         this.showDialogFooter = this.showDialogFooter.bind(this);
+        this.getFullInfo = this.getFullInfo.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -178,6 +180,9 @@ class DialogDetails extends Component{
 
             this.loadIncompleteHistory(result);
 
+            // load full info
+            this.getFullInfo(chat);
+
             // load photo
             if (chat.photo){
                 let store = FileController.getStore();
@@ -204,6 +209,31 @@ class DialogDetails extends Component{
                     '@type': 'closeChat',
                     chat_id: previousChat.id,
                 });
+        }
+    }
+
+    getFullInfo(chat){
+        if (!chat) return;
+        if (!chat.type) return;
+
+        switch (chat.type['@type']){
+            case 'chatTypePrivate' : {
+                break;
+            }
+            case 'chatTypeSecret' : {
+                break;
+            }
+            case 'chatTypeBasicGroup' : {
+                break;
+            }
+            case 'chatTypeSupergroup' : {
+                TdLibController.send(
+                    {
+                        '@type': 'getSupergroupFullInfo',
+                        supergroup_id: chat.type.supergroup_id,
+                    });
+                break;
+            }
         }
     }
 

@@ -4,6 +4,10 @@ function getUserStatus(user){
     if (!user) return null;
     if (!user.status) return null;
 
+    if (user.id === 777000){
+        return 'service notifications';
+    }
+
     if (user.type
         && user.type['@type'] === 'userTypeBot'){
         return 'bot';
@@ -11,7 +15,7 @@ function getUserStatus(user){
 
     switch (user.status['@type']) {
         case 'userStatusEmpty':{
-            return null;
+            return 'last seen a long time ago';
         }
         case 'userStatusLastMonth':{
             return 'within a month';
@@ -43,30 +47,28 @@ function getUserStatus(user){
             }
 
             // today
-            const today = now.getDate();
-            if (diff > today){
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (wasOnline > today){
+                // up to 6 hours ago
                 if (diff.getTime() / 1000 < 6 * 60 * 60){
                     const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
                     return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
                 }
 
+                // other
                 return `last seen today at ${dateFormat(wasOnline, 'H:MM')}`;
             }
 
             // yesterday
             let yesterday = new Date();
             yesterday.setDate(now.getDate() - 1);
-            if (diff > yesterday){
+            today.setHours(0, 0, 0, 0);
+            if (wasOnline > yesterday){
                 return `last seen yesterday at ${dateFormat(wasOnline, 'H:MM')}`;
             }
 
-            // this year
-            let thisYear = new Date(now.getFullYear(), 0, 1);
-            if (diff > thisYear){
-                return `last seen at ${dateFormat(wasOnline, 'd MMM')}`;
-            }
-
-            return `last seen at ${dateFormat(wasOnline, 'd MMM yyyy')}`;
+            return `last seen ${dateFormat(wasOnline, 'dd.mm.yyyy')}`;
         }
         case 'userStatusOnline':{
             return 'online';
@@ -77,29 +79,21 @@ function getUserStatus(user){
     }
 
     return null;
-    // let date = new Date(chat.last_message.date * 1000);
-    //
-    // let yesterday = new Date();
-    // yesterday.setDate(yesterday.getDate() - 1);
-    // if (date > yesterday){
-    //     return dateFormat(date, 'H:MM');
-    // }
-    //
-    // let now = new Date();
-    // let weekStart = now.getDate() - now.getDay() + 1;
-    // let monday = new Date(now.setDate(weekStart));
-    // if (date > monday){
-    //     return dateFormat(date, 'ddd');
-    // }
-    //
-    // return dateFormat(date, 'd.mm.yyyy');
 }
 
-function isOnline(user) {
+function isAccentUserSubtitle(user) {
+    if (user
+        && user.status
+        && user.status['@type'] === 'userStatusOnline'
+        && user.type
+        && user.type['@type'] !== 'userTypeBot'){
+        return true;
+    }
+
     return false;
 }
 
 export {
     getUserStatus,
-    isOnline
+    isAccentUserSubtitle
 }

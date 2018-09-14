@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './Header.css';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import SupergroupStore from '../Stores/SupergroupStore';
 import TdLibController from '../Controllers/TdLibController';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
@@ -13,7 +14,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import {withStyles} from '@material-ui/core/styles';
-import {getChatSubtitle} from '../Utils/Chat';
+import {getChatSubtitle, isAccentChatSubtitle} from '../Utils/Chat';
 
 const styles = {
     button : {
@@ -50,6 +51,7 @@ class Header extends Component{
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
         this.onUpdateUserChatAction = this.onUpdateUserChatAction.bind(this);
+        this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
         this.handleLogOut = this.handleLogOut.bind(this);
@@ -76,6 +78,7 @@ class Header extends Component{
         ChatStore.on('updateChatTitle', this.onUpdate);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
+        SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
     componentWillUnmount(){
@@ -85,6 +88,7 @@ class Header extends Component{
         ChatStore.removeListener('updateChatTitle', this.onUpdate);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
+        SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
     onConnectionStateUpdated(payload) {
@@ -122,6 +126,17 @@ class Header extends Component{
         }
     }
 
+    onUpdateSupergroupFullInfo(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeSupergroup'
+            && chat.type.supergroup_id === update.supergroup_id){
+            this.forceUpdate();
+        }
+    }
+
     handleMenuClick(event){
         this.setState({ anchorEl : event.currentTarget });
     }
@@ -155,9 +170,11 @@ class Header extends Component{
         const {anchorEl} = this.state;
         const {classes} = this.props;
         const {status} = this.state.authState;
+        const chat = this.props.selectedChat;
 
         let title = '';
         let subtitle = '';
+        let isAccentSubtitle = isAccentChatSubtitle(chat);
         if (this.state.connectionState){
             switch (this.state.connectionState['@type'] ){
                 case 'connectionStateUpdating':
@@ -171,9 +188,9 @@ class Header extends Component{
             }
         }
 
-        if (title === '' && this.props.selectedChat){
-            title = this.props.selectedChat.title;
-            subtitle = getChatSubtitle(this.props.selectedChat);
+        if (title === '' && chat){
+            title = chat.title || 'Deleted account';
+            subtitle = getChatSubtitle(chat);
         }
 
         switch (status){
@@ -207,7 +224,7 @@ class Header extends Component{
                         <div className='header-details'>
                             <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>{title}</span>
-                                <span className='header-status-content2'>{subtitle}</span>
+                                <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                             </div>
                             <IconButton className={classes.messageSearchIconButton} aria-label="Search">
                                 <SearchIcon />
@@ -257,7 +274,7 @@ class Header extends Component{
                         <div className='header-details'>
                             <div className='header-status grow cursor-default'>
                                 <span className='header-status-content'>{title}</span>
-                                <span className='header-status-content2'>{subtitle}</span>
+                                <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                             </div>
                             <IconButton className={classes.messageSearchIconButton} aria-label="Search">
                                 <SearchIcon />
