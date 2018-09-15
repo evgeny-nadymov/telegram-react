@@ -9,7 +9,9 @@
 
 .tile-text{
     line-height: 48px;
-    font-size: 18px;
+    font-size: 19px;
+    font-family: 'Nunito', serif;
+    font-weight: 600;
     display: block;
     color: #fff;
     text-align: center;
