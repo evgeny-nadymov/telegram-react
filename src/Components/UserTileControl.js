@@ -63,7 +63,7 @@ class UserTileControl extends Component{
 
         let photoClasses = 'tile-photo';
         if (!blob){
-            photoClasses += ` user_bgcolor_${(Math.abs(user.id) % 8 + 1)}`;
+            photoClasses += ` tile_color_${(Math.abs(user.id) % 8 + 1)}`;
         }
 
         return src ?

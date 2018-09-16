@@ -40,13 +40,13 @@ class Header extends Component{
         super(props);
 
         this.state = {
-            authState: TdLibController.getState(),
+            authorizationState: TdLibController.getState(),
             connectionState : '',
             open: false,
             anchorEl: null
         };
 
-        this.onStatusUpdated = this.onStatusUpdated.bind(this);
+        this.onAuthorizationStatusUpdated = this.onAuthorizationStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
@@ -72,7 +72,7 @@ class Header extends Component{
     }
 
     componentDidMount(){
-        TdLibController.on('tdlib_status', this.onStatusUpdated);
+        TdLibController.on('tdlib_status', this.onAuthorizationStatusUpdated);
         TdLibController.on('tdlib_connection_state', this.onConnectionStateUpdated);
 
         ChatStore.on('updateChatTitle', this.onUpdate);
@@ -82,7 +82,7 @@ class Header extends Component{
     }
 
     componentWillUnmount(){
-        TdLibController.removeListener('tdlib_status', this.onStatusUpdated);
+        TdLibController.removeListener('tdlib_status', this.onAuthorizationStatusUpdated);
         TdLibController.removeListener('tdlib_connection_state', this.onConnectionStateUpdated);
 
         ChatStore.removeListener('updateChatTitle', this.onUpdate);
@@ -95,8 +95,8 @@ class Header extends Component{
         this.setState({ connectionState: payload});
     }
 
-    onStatusUpdated(payload) {
-        this.setState({ authState: payload});
+    onAuthorizationStatusUpdated(payload) {
+        this.setState({ authorizationState: payload});
     }
 
     onUpdate(update){
@@ -167,16 +167,18 @@ class Header extends Component{
     }
 
     render(){
-        const {anchorEl} = this.state;
         const {classes} = this.props;
-        const {status} = this.state.authState;
+        const {anchorEl, authorizationState, connectionState} = this.state;
         const chat = this.props.selectedChat;
 
         let title = '';
         let subtitle = '';
         let isAccentSubtitle = isAccentChatSubtitle(chat);
-        if (this.state.connectionState){
-            switch (this.state.connectionState['@type'] ){
+        if (authorizationState && authorizationState.status !== 'ready'){
+            title = 'Loading...';
+        }
+        else if (connectionState){
+            switch (connectionState['@type'] ){
                 case 'connectionStateUpdating':
                     title = 'Updating...';
                     break;
@@ -193,99 +195,74 @@ class Header extends Component{
             subtitle = getChatSubtitle(chat);
         }
 
-        switch (status){
-            case 'ready':
-                return (
-                    <div className='header-wrapper'>
-                        <div className='header-master'>
-                            <IconButton
-                                aria-owns={anchorEl ? 'simple-menu' : null}
-                                aria-haspopup='true'
-                                className={classes.menuIconButton}
-                                aria-label='Menu'
-                                onClick={this.handleMenuClick}>
-                                <MenuIcon />
-                            </IconButton>
-                            <Menu
-                                id='simple-menu'
-                                anchorEl={anchorEl}
-                                open={Boolean(anchorEl)}
-                                onClose={this.handleMenuClose}>
-                                <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
-                                <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
-                            </Menu>
-                            <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>Telegram</span>
-                            </div>
-                            <IconButton className={classes.searchIconButton} aria-label="Search">
-                                <SearchIcon />
-                            </IconButton>
-                        </div>
-                        <div className='header-details'>
-                            <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>{title}</span>
-                                <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
-                            </div>
-                            <IconButton className={classes.messageSearchIconButton} aria-label="Search">
-                                <SearchIcon />
-                            </IconButton>
-                            <IconButton className={classes.moreIconButton} aria-label="More">
-                                <MoreVertIcon />
-                            </IconButton>
-                        </div>
+        const mainMenuControl = authorizationState && authorizationState.status === 'ready'
+            ? (<Menu
+                id='simple-menu'
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={this.handleMenuClose}>
+                <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
+                <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
+            </Menu>)
+            : null;
 
-                        { this.state.open &&
-                            <Dialog
-                                open={this.state.open}
-                                onClose={this.handleClose}
-                                aria-labelledby="form-dialog-title">
-                                <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
-                                <DialogContent>
-                                    <DialogContentText>
-                                        Are you sure you want to log out?
-                                    </DialogContentText>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={this.handleClose} color="primary">
-                                        Cancel
-                                    </Button>
-                                    <Button onClick={this.handleDone} color="primary">
-                                        Ok
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                        }
+        const confirmLogoutDialog = this.state.open?
+            (<Dialog
+                open={this.state.open}
+                onClose={this.handleClose}
+                aria-labelledby="form-dialog-title">
+                <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to log out?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={this.handleDone} color="primary">
+                        Ok
+                    </Button>
+                </DialogActions>
+            </Dialog>)
+            : null;
+
+
+        return (
+            <div className='header-wrapper'>
+                <div className='header-master'>
+                    <IconButton
+                        aria-owns={anchorEl ? 'simple-menu' : null}
+                        aria-haspopup='true'
+                        className={classes.menuIconButton}
+                        aria-label='Menu'
+                        onClick={this.handleMenuClick}>
+                        <MenuIcon />
+                    </IconButton>
+                    { mainMenuControl }
+                    { confirmLogoutDialog }
+                    <div className='header-status grow cursor-default'>
+                        <span className='header-status-content'>Telegram</span>
                     </div>
-                );
-            default:
-                return (
-                    <div className='header-wrapper'>
-                        <div className='header-master'>
-                            <IconButton className={classes.menuIconButton} aria-label="Menu">
-                                <MenuIcon />
-                            </IconButton>
-                            <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>Telegram</span>
-                            </div>
-                            <IconButton className={classes.searchIconButton} aria-label="Search">
-                                <SearchIcon />
-                            </IconButton>
-                        </div>
-                        <div className='header-details'>
-                            <div className='header-status grow cursor-default'>
-                                <span className='header-status-content'>{title}</span>
-                                <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
-                            </div>
-                            <IconButton className={classes.messageSearchIconButton} aria-label="Search">
-                                <SearchIcon />
-                            </IconButton>
-                            <IconButton className={classes.moreIconButton} aria-label="More">
-                                <MoreVertIcon />
-                            </IconButton>
-                        </div>
+                    <IconButton className={classes.searchIconButton} aria-label="Search">
+                        <SearchIcon />
+                    </IconButton>
+                </div>
+                <div className='header-details'>
+                    <div className='header-status grow cursor-default'>
+                        <span className='header-status-content'>{title}</span>
+                        <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                     </div>
-                );
-        }
+                    <IconButton className={classes.messageSearchIconButton} aria-label="Search">
+                        <SearchIcon />
+                    </IconButton>
+                    <IconButton className={classes.moreIconButton} aria-label="More">
+                        <MoreVertIcon />
+                    </IconButton>
+                </div>
+            </div>
+        );
     }
 }
 
