@@ -7,7 +7,7 @@ import {CHAT_SLICE_LIMIT} from '../Constants';
 import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
-import FileContrller from '../Controllers/FileController';
+import FileController from '../Controllers/FileController';
 import {getChatPhoto} from '../Utils/File';
 import { Scrollbars } from 'react-custom-scrollbars';
 
@@ -178,8 +178,6 @@ class Dialogs extends Component{
     }
 
     async onLoadNext(){
-
-        //return;
         if (this.loading) return;
 
         let offsetOrder = '9223372036854775807'; // 2^63
@@ -190,8 +188,6 @@ class Dialogs extends Component{
         }
 
         this.loading = true;
-        console.log('REORDER_CHAT loading=true');
-        console.log(`REORDER_CHAT getChats offset_chat_id=${offsetChatId} offset_order=${offsetOrder} limit=${CHAT_SLICE_LIMIT}`);
         let result = await TdLibController
             .send({
                 '@type': 'getChats',
@@ -201,10 +197,7 @@ class Dialogs extends Component{
             })
             .finally(() => {
                 this.loading = false;
-                console.log('REORDER_CHAT loading=false');
             });
-
-        console.log('REORDER_CHAT result=' + result.chat_ids);
 
         //TODO: replace result with one-way data flow
 
@@ -224,15 +217,15 @@ class Dialogs extends Component{
     }
 
     loadChatContents(chats){
-        let store = FileContrller.getStore();
+        let store = FileController.getStore();
 
         for (let i = 0; i < chats.length; i++){
             let chat = chats[i];
             let [id, pid, idb_key] = getChatPhoto(chat);
             if (pid) {
-                FileContrller.getLocalFile(store, chat.photo.small, idb_key, null,
+                FileController.getLocalFile(store, chat.photo.small, idb_key, null,
                     () => ChatStore.updatePhoto(chat.id),
-                    () => FileContrller.getRemoteFile(id, 1, chat));
+                    () => FileController.getRemoteFile(id, 1, chat));
             }
         }
     }
