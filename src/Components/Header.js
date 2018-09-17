@@ -52,6 +52,8 @@ class Header extends Component{
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
         this.onUpdateUserChatAction = this.onUpdateUserChatAction.bind(this);
+        this.onUpdateBasicGroup = this.onUpdateBasicGroup.bind(this);
+        this.onUpdateSupergroup = this.onUpdateSupergroup.bind(this);
         this.onUpdateBasicGroupFullInfo = this.onUpdateBasicGroupFullInfo.bind(this);
         this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
         this.onUpdateUserFullInfo = this.onUpdateUserFullInfo.bind(this);
@@ -82,6 +84,8 @@ class Header extends Component{
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
+        BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
+        BasicGroupStore.on('updateSupergroup', this.onUpdateSupergroup);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
@@ -94,6 +98,8 @@ class Header extends Component{
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
+        SupergroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
         SupergroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
@@ -151,6 +157,28 @@ class Header extends Component{
         if (!chat) return;
 
         if (chat.id === update.chat_id){
+            this.forceUpdate();
+        }
+    }
+
+    onUpdateBasicGroup(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeBasicGroup'
+            && chat.type.basic_group_id === update.basic_group.id){
+            this.forceUpdate();
+        }
+    }
+
+    onUpdateSupergroup(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeSupergroup'
+            && chat.type.supergroup_id === update.supergroup.id){
             this.forceUpdate();
         }
     }

@@ -3,6 +3,11 @@ import SupergroupStore from '../Stores/SupergroupStore';
 function getSupergroupStatus(supergroup){
     if (!supergroup) return null;
 
+    if (supergroup.status
+        && supergroup.status['@type'] === 'chatMemberStatusBanned'){
+        return supergroup.is_channel ? 'channel is inaccessible' : 'group is inaccessible';
+    }
+
     let count = supergroup.member_count;
 
     if (!count) {

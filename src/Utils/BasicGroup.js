@@ -4,6 +4,11 @@ import BasicGroupStore from '../Stores/BasicGroupStore';
 function getBasicGroupStatus(basicGroup){
     if (!basicGroup) return null;
 
+    if (basicGroup.status
+        && basicGroup.status['@type'] === 'chatMemberStatusBanned'){
+        return 'group is inaccessible';
+    }
+
     const count = basicGroup.member_count;
 
     if (!count) return '0 members';

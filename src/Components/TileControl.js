@@ -18,7 +18,7 @@ class TileControl extends Component{
         return false;
     }
 
-    componentWillMount(){
+    componentDidMount(){
         ChatStore.on('chat_photo_changed', this.onPhotoUpdated);
     }
 
