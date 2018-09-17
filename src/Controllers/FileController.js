@@ -201,7 +201,7 @@ class FileController extends EventEmitter{
             let t0 = performance.now();
             obj.blob = new Blob([arr]);
             let t1 = performance.now();
-            console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + obj.blob + ' new_time=' + (t1 - t0));
+            //console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + obj.blob + ' new_time=' + (t1 - t0));
 
             callback();
             return;
@@ -212,7 +212,7 @@ class FileController extends EventEmitter{
         getItem.onsuccess = function (event) {
             let blob = event.target.result;
             let t1 = performance.now();
-            console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + blob + ' time=' + (t1 - t0));
+            //console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + blob + ' time=' + (t1 - t0));
 
             if (blob){
                 obj.blob = blob;

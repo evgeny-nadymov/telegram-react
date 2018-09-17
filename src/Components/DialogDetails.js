@@ -218,12 +218,27 @@ class DialogDetails extends Component{
 
         switch (chat.type['@type']){
             case 'chatTypePrivate' : {
+                TdLibController.send(
+                    {
+                        '@type': 'getUserFullInfo',
+                        user_id: chat.type.user_id,
+                    });
                 break;
             }
             case 'chatTypeSecret' : {
+                TdLibController.send(
+                    {
+                        '@type': 'getUserFullInfo',
+                        user_id: chat.type.user_id,
+                    });
                 break;
             }
             case 'chatTypeBasicGroup' : {
+                TdLibController.send(
+                    {
+                        '@type': 'getBasicGroupFullInfo',
+                        basic_group_id: chat.type.basic_group_id,
+                    });
                 break;
             }
             case 'chatTypeSupergroup' : {

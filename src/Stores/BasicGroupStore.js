@@ -6,6 +6,7 @@ class BasicGroupStore extends EventEmitter{
         super();
 
         this.items = new Map();
+        this.fullInfoItems = new Map();
 
         this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
@@ -15,8 +16,16 @@ class BasicGroupStore extends EventEmitter{
 
     onUpdate(update){
         switch (update['@type']) {
-            case 'updateBasicGroup':
+            case 'updateBasicGroup':{
                 this.set(update.basic_group);
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'updateBasicGroupFullInfo':
+                this.setFullInfo(update.basic_group_id, update.basic_group_full_info);
+
+                this.emit(update['@type'], update);
                 break;
             default:
                 break;
@@ -29,6 +38,14 @@ class BasicGroupStore extends EventEmitter{
 
     set(group){
         this.items.set(group.id, group);
+    }
+
+    getFullInfo(id){
+        return this.fullInfoItems.get(id);
+    }
+
+    setFullInfo(id, fullInfo){
+        this.fullInfoItems.set(id, fullInfo);
     }
 }
 

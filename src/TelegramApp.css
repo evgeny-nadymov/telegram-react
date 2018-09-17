@@ -27,8 +27,6 @@ body {
     max-width: 1010px;
     min-width: 300px;
     margin: 0 auto;
-    -webkit-box-shadow: 0px 1px 0 #dfe5ec;
-    -moz-box-shadow: 0px 1px 0 #dfe5ec;
     box-shadow: 0px 1px 0 #dfe5ec;
     border-radius: 0 0 3px 3px;
     border-left: 1px solid #dfe5ec;

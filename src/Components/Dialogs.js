@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import './Dialogs.css';
 import DialogControl from './DialogControl'
-import ReactDOM from 'react-dom';
 import {itemsInView, orderCompare, throttle} from '../Utils/Common';
 import TdLibController from '../Controllers/TdLibController';
 import {CHAT_SLICE_LIMIT} from '../Constants';
-import ChatStore from "../Stores/ChatStore";
+import ChatStore from '../Stores/ChatStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
+import SupergroupStore from '../Stores/SupergroupStore';
 import FileContrller from '../Controllers/FileController';
 import {getChatPhoto} from '../Utils/File';
 import { Scrollbars } from 'react-custom-scrollbars';
@@ -24,6 +25,7 @@ class Dialogs extends Component{
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateNewChat = this.onUpdateNewChat.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.onLoadNext = this.onLoadNext.bind(this);
     }
@@ -35,6 +37,7 @@ class Dialogs extends Component{
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatOrder', this.onUpdate);
+        ChatStore.on('updateNewChat', this.onUpdateNewChat);
 
         if (!this.once
             && this.props.authState === 'ready'){
@@ -50,6 +53,7 @@ class Dialogs extends Component{
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatOrder', this.onUpdate);
+        ChatStore.removeListener('updateNewChat', this.onUpdateNewChat);
     }
 
     onUpdateState(state){
@@ -64,13 +68,57 @@ class Dialogs extends Component{
     }
 
     onUpdate(update) {
-        if (update.order === '0') return;
+        //if (update.order === '0') return;
         let chat = this.state.chats.find(x => x.id === update.chat_id);
         if (!chat) {
             return;
         }
 
-        this.reorderChats(this.state.chats);
+        // get last chat.order values
+        let chats = [];//this.state.chats.map(x => { return ChatStore.get(x.id); });
+        for (let i = 0; i < this.state.chats.length; i++){
+            let chat = ChatStore.get(this.state.chats[i].id);
+            if (chat && chat.order !== '0'){
+                switch (chat.type['@type']) {
+                    case 'chatTypeBasicGroup' : {
+                        const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+                        if (basicGroup.status['@type'] !== 'chatMemberStatusLeft'){
+                            chats.push(chat);
+                        }
+                        break;
+                    }
+                    case 'chatTypePrivate' : {
+                        chats.push(chat);
+                        break;
+                    }
+                    case 'chatTypeSecret' : {
+                        chats.push(chat);
+                        break;
+                    }
+                    case 'chatTypeSupergroup' : {
+                        const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+                        if (supergroup.status['@type'] !== 'chatMemberStatusLeft'){
+                            chats.push(chat);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.reorderChats(chats);
+    }
+
+    onUpdateNewChat(update){
+        if (this.loading) return;
+        let chat = this.state.chats.find(x => x.id === update.chat.id);
+        if (chat) {
+            return;
+        }
+
+        this.reorderChats(this.state.chats, [update.chat], () =>{
+            this.loadChatContents([update.chat])
+        });
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -92,7 +140,7 @@ class Dialogs extends Component{
         //console.log(items);
     }
 
-    reorderChats(chats, newChats = []) {
+    reorderChats(chats, newChats = [], callback) {
         const orderedChats = chats.concat(newChats).sort((a, b) => {
             return orderCompare(b.order, a.order);
         });
@@ -101,7 +149,7 @@ class Dialogs extends Component{
             return;
         }
 
-        this.setState({ chats: orderedChats });
+        this.setState({ chats: orderedChats }, callback);
     }
 
     static isDifferentOrder(oldChats, newChats){

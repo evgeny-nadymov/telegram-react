@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import TdLibController from "../Controllers/TdLibController";
+import { EventEmitter } from 'events';
+import TdLibController from '../Controllers/TdLibController';
 
 class MessageStore extends EventEmitter {
     constructor() {

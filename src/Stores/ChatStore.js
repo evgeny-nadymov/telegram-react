@@ -1,6 +1,6 @@
-import { EventEmitter } from "events";
-import TdLibController from "../Controllers/TdLibController";
-import InputTypingManager from "../Utils/InputTypingManager";
+import { EventEmitter } from 'events';
+import TdLibController from '../Controllers/TdLibController';
+import InputTypingManager from '../Utils/InputTypingManager';
 
 class ChatStore extends EventEmitter{
     constructor(){
@@ -28,9 +28,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { order : update.order === '0' ? chat.order : update.order, draft_message : update.draft_message });
-
-                    //chat.order = update.order === '0' ? chat.order : update.order;
-                    //chat.draft_message = update.draft_message;
                 }
 
                 this.emit(update['@type'], update);
@@ -40,8 +37,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { is_marked_as_unread : update.is_marked_as_unread });
-
-                    //chat.is_marked_as_unread = update.is_marked_as_unread;
                 }
 
                 this.emit(update['@type'], update);
@@ -51,9 +46,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { order : update.order === '0' ? chat.order : update.order, is_pinned : update.is_pinned });
-
-                    // chat.order = update.order === '0' ? chat.order : update.order;
-                    // chat.is_pinned = update.is_pinned;
                 }
 
                 this.emit(update['@type'], update);
@@ -63,9 +55,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { order : update.order === '0' ? chat.order : update.order, is_sponsored : update.is_sponsored });
-
-                    // chat.order = update.order === '0' ? chat.order : update.order;
-                    // chat.is_sponsored = update.is_sponsored;
                 }
 
                 this.emit('updateChatIsSponsored', update);
@@ -75,9 +64,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { order : update.order === '0' ? chat.order : update.order, last_message : update.last_message });
-
-                    //chat.order = update.order === '0' ? chat.order : update.order;
-                    //chat.last_message = update.last_message;
                 }
 
                 this.emit(update['@type'], update);
@@ -87,8 +73,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { notification_settings : update.notification_settings });
-
-                    //chat.notification_settings = update.notification_settings;
                 }
 
                 this.emit(update['@type'], update);
@@ -98,8 +82,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { order : update.order === '0' ? chat.order : update.order });
-
-                    //chat.order = update.order === '0' ? chat.order : update.order;
                 }
 
                 this.emit(update['@type'], update);
@@ -109,8 +91,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { photo : update.photo });
-
-                    //chat.photo = update.photo;
                 }
 
                 this.emit(update['@type'], update);
@@ -120,9 +100,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { last_read_inbox_message_id : update.last_read_inbox_message_id, unread_count : update.unread_count });
-
-                    //chat.last_read_inbox_message_id = update.last_read_inbox_message_id;
-                    //chat.unread_count = update.unread_count;
                 }
 
                 this.emit(update['@type'], update);
@@ -132,8 +109,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { last_read_outbox_message_id : update.last_read_outbox_message_id });
-
-                    //chat.last_read_outbox_message_id = update.last_read_outbox_message_id;
                 }
 
                 this.emit(update['@type'], update);
@@ -143,8 +118,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { reply_markup_message_id : update.reply_markup_message_id });
-
-                    //chat.reply_markup_message_id = update.reply_markup_message_id;
                 }
 
                 this.emit(update['@type'], update);
@@ -154,8 +127,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { title : update.title });
-
-                    //chat.title = update.title;
                 }
 
                 this.emit(update['@type'], update);
@@ -165,8 +136,6 @@ class ChatStore extends EventEmitter{
                 let chat = this.get(update.chat_id);
                 if (chat){
                     this.assign(chat, { unread_mention_count : update.unread_mention_count });
-
-                    //chat.unread_mention_count = update.unread_mention_count;
                 }
 
                 this.emit(update['@type'], update);
@@ -186,7 +155,6 @@ class ChatStore extends EventEmitter{
                 break;
             }
             case 'updateUnreadChatCount': {
-
                 //TODO: handle updateUnreadChatCount
 
                 this.emit(update['@type'], update);

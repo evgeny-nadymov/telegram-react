@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import './Header.css';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import TdLibController from '../Controllers/TdLibController';
 import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
@@ -51,7 +52,9 @@ class Header extends Component{
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
         this.onUpdateUserChatAction = this.onUpdateUserChatAction.bind(this);
+        this.onUpdateBasicGroupFullInfo = this.onUpdateBasicGroupFullInfo.bind(this);
         this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
+        this.onUpdateUserFullInfo = this.onUpdateUserFullInfo.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
         this.handleLogOut = this.handleLogOut.bind(this);
@@ -78,6 +81,8 @@ class Header extends Component{
         ChatStore.on('updateChatTitle', this.onUpdate);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
+        UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
+        BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
@@ -88,6 +93,8 @@ class Header extends Component{
         ChatStore.removeListener('updateChatTitle', this.onUpdate);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
+        UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
+        SupergroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
@@ -126,6 +133,17 @@ class Header extends Component{
         }
     }
 
+    onUpdateBasicGroupFullInfo(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeBasicGroup'
+            && chat.type.basic_group_id === update.basic_group_id){
+            this.forceUpdate();
+        }
+    }
+
     onUpdateSupergroupFullInfo(update){
         const chat = this.props.selectedChat;
         if (!chat) return;
@@ -133,6 +151,17 @@ class Header extends Component{
         if (chat.type
             && chat.type['@type'] === 'chatTypeSupergroup'
             && chat.type.supergroup_id === update.supergroup_id){
+            this.forceUpdate();
+        }
+    }
+
+    onUpdateUserFullInfo(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+
+        if (chat.type
+            && (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret')
+            && chat.type.user_id === update.user_id){
             this.forceUpdate();
         }
     }
@@ -172,18 +201,24 @@ class Header extends Component{
         const chat = this.props.selectedChat;
 
         let title = '';
+        let titleAnimationTail = (
+            <React.Fragment>
+                <span className='header-progress'>.</span>
+                <span className='header-progress'>.</span>
+                <span className='header-progress'>.</span>
+            </React.Fragment>);
         let subtitle = '';
         let isAccentSubtitle = isAccentChatSubtitle(chat);
         if (authorizationState && authorizationState.status !== 'ready'){
-            title = 'Loading...';
+            title = 'Loading';
         }
         else if (connectionState){
             switch (connectionState['@type'] ){
                 case 'connectionStateUpdating':
-                    title = 'Updating...';
+                    title = 'Updating';
                     break;
                 case 'connectionStateConnecting':
-                    title = 'Connecting...';
+                    title = 'Connecting';
                     break;
                 case 'connectionStateReady':
                     break;
@@ -192,6 +227,7 @@ class Header extends Component{
 
         if (title === '' && chat){
             title = chat.title || 'Deleted account';
+            titleAnimationTail = null;
             subtitle = getChatSubtitle(chat);
         }
 
@@ -252,6 +288,7 @@ class Header extends Component{
                 <div className='header-details'>
                     <div className='header-status grow cursor-default'>
                         <span className='header-status-content'>{title}</span>
+                        {titleAnimationTail}
                         <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                     </div>
                     <IconButton className={classes.messageSearchIconButton} aria-label="Search">
