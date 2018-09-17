@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import './InputBoxControl.css';
-import TileControl from "./TileControl";
-import OutputTypingManager from "../Utils/OutputTypingManager";
+import ChatTileControl from './ChatTileControl';
+import OutputTypingManager from '../Utils/OutputTypingManager';
 import UserTileControl from './UserTileControl';
 import FileController from '../Controllers/FileController';
 import MessageStore from '../Stores/MessageStore';
@@ -336,12 +336,16 @@ class InputBoxControl extends Component{
     }
 
     render(){
+        const {selectedChat} = this.props;
+
         let text = '';
-        if (this.props.selectedChat
-            && this.props.selectedChat.draft_message
-            && this.props.selectedChat.draft_message.input_message_text
-            && this.props.selectedChat.draft_message.input_message_text.text){
-            text = this.props.selectedChat.draft_message.input_message_text.text.text;
+        if (selectedChat){
+            const {draft_message} = selectedChat;
+            if (draft_message
+                && draft_message.input_message_text
+                && draft_message.input_message_text.text){
+                text = draft_message.input_message_text.text.text;
+            }
         }
 
         return (
@@ -367,7 +371,7 @@ class InputBoxControl extends Component{
                         </div>
                     </div>
                     <div className='inputbox-right-column'>
-                        <TileControl chat={this.props.selectedChat}/>
+                        <ChatTileControl chatId={selectedChat.id}/>
                     </div>
                 </div>
             </div>

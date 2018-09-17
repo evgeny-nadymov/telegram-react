@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './DialogControl.css';
-import TileControl from './TileControl';
+import ChatTileControl from './ChatTileControl';
 import ChatStore from '../Stores/ChatStore';
 import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
@@ -17,16 +17,7 @@ class DialogControl extends Component{
             chat : chat
         };
 
-        this.onUpdate = this.onUpdate.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
-    }
-
-    componentDidMount(){
-        ChatStore.on('updateChatPhoto', this.onUpdate);
-    }
-
-    componentWillUnmount(){
-        ChatStore.removeListener('updateChatPhoto', this.onUpdate);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -40,15 +31,6 @@ class DialogControl extends Component{
         return false;
     }
 
-    onUpdate(update) {
-        if (!update.chat_id) return;
-        if (update.chat_id !== this.props.chatId) return;
-
-        this.forceUpdate();
-        //const chat = ChatStore.get(update.chat_id);
-        //this.setState({ chat: chat });
-    }
-
     handleSelect(){
         const chat = ChatStore.get(this.props.chatId);
         if (!chat) return;
@@ -58,12 +40,11 @@ class DialogControl extends Component{
 
     render(){
         const {chatId} = this.props;
-        const chat = ChatStore.get(chatId);
 
         return (
             <div className={this.props.isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>
                 <div className='dialog-wrapper'>
-                    <TileControl chat={chat}/>
+                    <ChatTileControl chatId={chatId}/>
                     <div className='dialog-inner-wrapper'>
                         <div className='dialog-row-wrapper'>
                             <DialogTitleControl chatId={chatId}/>

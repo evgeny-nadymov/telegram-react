@@ -4,7 +4,7 @@ import InputBoxControl from './InputBoxControl';
 import MessageControl from './MessageControl';
 import MessageGroupControl from "./MessageGroupControl";
 import {debounce, getPhotoSize, itemsInView, throttle} from '../Utils/Common';
-import TileControl from './TileControl';
+import ChatTileControl from './ChatTileControl';
 import UserTileControl from './UserTileControl';
 import TdLibController from '../Controllers/TdLibController';
 import {MESSAGE_SLICE_LIMIT} from '../Constants';

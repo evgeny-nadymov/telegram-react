@@ -2,6 +2,7 @@ import TdLibController from './TdLibController';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import MessageStore from '../Stores/MessageStore';
+import FileStore from '../Stores/FileStore';
 import {getPhotoSize} from '../Utils/Common';
 import {getDocumentThumbnailFile} from '../Utils/File';
 import {EventEmitter} from 'events';
@@ -9,28 +10,23 @@ import {EventEmitter} from 'events';
 class FileController extends EventEmitter{
     constructor(){
         super();
+
         this.downloads = new Map();
         this.uploads = new Map();
 
         this.setMaxListeners(Infinity);
 
-        this.onUpdate = this.onUpdate.bind(this);
+        FileStore.on('updateFile', this.onUpdateFile);
+
         this.onUpdateFile = this.onUpdateFile.bind(this);
-
-        TdLibController.on('tdlib_update', this.onUpdate);
     }
 
-    onUpdate(update) {
-        switch (update['@type']) {
-            case 'updateFile':
-                this.onUpdateFile(update.file);
-                break;
-            default:
-                break;
-        }
-    }
+    onUpdateFile(update) {
+        if (!update) return;
 
-    onUpdateFile(file) {
+        const {file} = update;
+        if (!file) return;
+
         if (this.downloads.has(file.id)){
 
             if (file.local.is_downloading_completed){

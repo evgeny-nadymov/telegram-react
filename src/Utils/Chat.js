@@ -3,9 +3,10 @@ import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import dateFormat from 'dateformat';
-import {getUserStatus, isAccentSubtitle, isAccentUserSubtitle} from './User';
+import {getUserStatus, isAccentUserSubtitle} from './User';
 import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
+import {getLetters} from './Common';
 
 function getGroupChatTypingString(inputTypingManager){
     if (!inputTypingManager) return null;
@@ -291,6 +292,20 @@ function getChatSubtitle(chat){
     return null;
 }
 
+function getChatLetters(chat){
+    if (!chat) return null;
+
+    let title = chat.title || 'Deleted account';
+    if (title.length === 0) return null;
+
+    let letters = getLetters(title);
+    if (letters && letters.length > 0){
+        return letters;
+    }
+
+    return chat.title.charAt(0);
+}
+
 function isAccentChatSubtitle(chat){
     if (!chat) return false;
     if (!chat.type) return false;
@@ -327,5 +342,6 @@ export {
     getLastMessageSenderName,
     getLastMessageContent,
     getLastMessageDate,
+    getChatLetters,
     isAccentChatSubtitle
 };
