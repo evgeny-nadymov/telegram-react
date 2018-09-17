@@ -21,11 +21,13 @@ class Dialogs extends Component{
 
         this.listRef = React.createRef();
 
+        this.updateChatOrderCount = 0;
+        this.updateChatLastMessageCount = 0;
+
         this.once = false;
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
-        this.onUpdateNewChat = this.onUpdateNewChat.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.onLoadNext = this.onLoadNext.bind(this);
     }
@@ -36,8 +38,6 @@ class Dialogs extends Component{
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
-        ChatStore.on('updateChatOrder', this.onUpdate);
-        ChatStore.on('updateNewChat', this.onUpdateNewChat);
 
         if (!this.once
             && this.props.authState === 'ready'){
@@ -52,8 +52,6 @@ class Dialogs extends Component{
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatOrder', this.onUpdate);
-        ChatStore.removeListener('updateNewChat', this.onUpdateNewChat);
     }
 
     onUpdateState(state){
@@ -68,10 +66,19 @@ class Dialogs extends Component{
     }
 
     onUpdate(update) {
-        //if (update.order === '0') return;
-        let chat = this.state.chats.find(x => x.id === update.chat_id);
-        if (!chat) {
+        if (update.order === '0') return;
+
+        const chat = ChatStore.get(update.chat_id);
+        if (!chat || chat.order === '0') {
             return;
+        }
+
+        const existingChat = this.state.chats.find(x => x.id === update.chat_id);
+        if (!existingChat){
+            const minChatOrder = Math.min(...this.state.chats.map(x => x.id));
+            if (chat.order < minChatOrder) {
+                return;
+            }
         }
 
         // get last chat.order values
@@ -106,19 +113,17 @@ class Dialogs extends Component{
             }
         }
 
-        this.reorderChats(chats);
-    }
+        if (update['@type'] === 'updateChatOrder'){
 
-    onUpdateNewChat(update){
-        if (this.loading) return;
-        let chat = this.state.chats.find(x => x.id === update.chat.id);
-        if (chat) {
-            return;
+            console.log('REORDER_CHAT updateChatOrder=' + this.updateChatOrderCount++);
+        }
+        else if (update['@type'] === 'updateChatLastMessage'){
+
+            console.log('REORDER_CHAT updateChatLastMessage=' + this.updateChatLastMessageCount++);
         }
 
-        this.reorderChats(this.state.chats, [update.chat], () =>{
-            this.loadChatContents([update.chat])
-        });
+        console.log(`REORDER_CHAT from update=${update['@type']} chat_id=${update.chat_id} order=${chat ? chat.order : 'null'} title=${chat ? chat.title : 'null'}`);
+        this.reorderChats(chats);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -173,6 +178,8 @@ class Dialogs extends Component{
     }
 
     async onLoadNext(){
+
+        //return;
         if (this.loading) return;
 
         let offsetOrder = '9223372036854775807'; // 2^63
@@ -183,6 +190,8 @@ class Dialogs extends Component{
         }
 
         this.loading = true;
+        console.log('REORDER_CHAT loading=true');
+        console.log(`REORDER_CHAT getChats offset_chat_id=${offsetChatId} offset_order=${offsetOrder} limit=${CHAT_SLICE_LIMIT}`);
         let result = await TdLibController
             .send({
                 '@type': 'getChats',
@@ -192,7 +201,10 @@ class Dialogs extends Component{
             })
             .finally(() => {
                 this.loading = false;
+                console.log('REORDER_CHAT loading=false');
             });
+
+        console.log('REORDER_CHAT result=' + result.chat_ids);
 
         //TODO: replace result with one-way data flow
 

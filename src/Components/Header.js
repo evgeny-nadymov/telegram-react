@@ -115,12 +115,34 @@ class Header extends Component{
     onUpdateUserStatus(update){
         const chat = this.props.selectedChat;
         if (!chat) return;
+        if (!chat.type) return;
 
-        if (chat.type
-            && chat.type['@type'] === 'chatTypePrivate'
-            && chat.type.user_id === update.user_id){
-
-            this.forceUpdate();
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup' : {
+                const fullInfo = BasicGroupStore.getFullInfo(chat.type.basic_group_id);
+                if (fullInfo && fullInfo.members) {
+                    const member = fullInfo.members.find(x => x.user_id === update.user_id);
+                    if (member) {
+                        this.forceUpdate();
+                    }
+                }
+                break;
+            }
+            case 'chatTypePrivate' : {
+                if (chat.type.user_id === update.user_id) {
+                    this.forceUpdate();
+                }
+                break;
+            }
+            case 'chatTypeSecret' : {
+                if (chat.type.user_id === update.user_id) {
+                    this.forceUpdate();
+                }
+                break;
+            }
+            case 'chatTypeSupergroup' : {
+                break;
+            }
         }
     }
 
@@ -201,7 +223,7 @@ class Header extends Component{
         const chat = this.props.selectedChat;
 
         let title = '';
-        let titleAnimationTail = (
+        let titleProgressAnimation = (
             <React.Fragment>
                 <span className='header-progress'>.</span>
                 <span className='header-progress'>.</span>
@@ -225,10 +247,13 @@ class Header extends Component{
             }
         }
 
-        if (title === '' && chat){
-            title = chat.title || 'Deleted account';
-            titleAnimationTail = null;
-            subtitle = getChatSubtitle(chat);
+        if (title === ''){
+            titleProgressAnimation = null;
+
+            if (chat){
+                title = chat.title || 'Deleted account';
+                subtitle = getChatSubtitle(chat);
+            }
         }
 
         const mainMenuControl = authorizationState && authorizationState.status === 'ready'
@@ -288,7 +313,7 @@ class Header extends Component{
                 <div className='header-details'>
                     <div className='header-status grow cursor-default'>
                         <span className='header-status-content'>{title}</span>
-                        {titleAnimationTail}
+                        {titleProgressAnimation}
                         <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                     </div>
                     <IconButton className={classes.messageSearchIconButton} aria-label="Search">
