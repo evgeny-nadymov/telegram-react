@@ -211,7 +211,8 @@ class Dialogs extends Component{
         }
 
         this.appendChats(chats,
-            () => {
+            async () => {
+                await FileController.initDB();
                 this.loadChatContents(chats);
             });
     }

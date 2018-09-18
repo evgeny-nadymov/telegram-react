@@ -49,7 +49,7 @@ class Header extends Component{
 
         this.onAuthorizationStatusUpdated = this.onAuthorizationStatusUpdated.bind(this);
         this.onConnectionStateUpdated = this.onConnectionStateUpdated.bind(this);
-        this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateChatTitle = this.onUpdateChatTitle.bind(this);
         this.onUpdateUserStatus = this.onUpdateUserStatus.bind(this);
         this.onUpdateUserChatAction = this.onUpdateUserChatAction.bind(this);
         this.onUpdateBasicGroup = this.onUpdateBasicGroup.bind(this);
@@ -80,7 +80,7 @@ class Header extends Component{
         TdLibController.on('tdlib_status', this.onAuthorizationStatusUpdated);
         TdLibController.on('tdlib_connection_state', this.onConnectionStateUpdated);
 
-        ChatStore.on('updateChatTitle', this.onUpdate);
+        ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
@@ -94,7 +94,7 @@ class Header extends Component{
         TdLibController.removeListener('tdlib_status', this.onAuthorizationStatusUpdated);
         TdLibController.removeListener('tdlib_connection_state', this.onConnectionStateUpdated);
 
-        ChatStore.removeListener('updateChatTitle', this.onUpdate);
+        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
@@ -112,8 +112,10 @@ class Header extends Component{
         this.setState({ authorizationState: payload});
     }
 
-    onUpdate(update){
-        if (update.chat_id !== this.props.selectedChat.id) return;
+    onUpdateChatTitle(update){
+        const chat = this.props.selectedChat;
+        if (!chat) return;
+        if (chat.id !== update.chat_id) return;
 
         this.forceUpdate();
     }
@@ -248,7 +250,7 @@ class Header extends Component{
     render(){
         const {classes} = this.props;
         const {anchorEl, authorizationState, connectionState} = this.state;
-        const chat = this.props.selectedChat;
+        const chat = this.props.selectedChat ? ChatStore.get(this.props.selectedChat.id) : null;
 
         let title = '';
         let titleProgressAnimation = (

@@ -143,7 +143,7 @@ class TelegramApp extends Component{
     onUpdate(update) {
 
         // NOTE: important to start init DB after receiving first update
-        FileController.initDB();
+        //FileController.initDB();
 
         switch (update['@type']) {
             case 'updateFatalError':

@@ -42,7 +42,6 @@ class ChatTileControl extends Component{
         if (!update.chat_id) return;
         if (update.chat_id !== this.props.chatId) return;
 
-        // download chat photo
         const chat = ChatStore.get(this.props.chatId);
         if (!update.photo){
             this.forceUpdate();

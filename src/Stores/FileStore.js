@@ -1,4 +1,5 @@
 import {EventEmitter} from 'events';
+import TdLibController from '../Controllers/TdLibController';
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -8,6 +9,7 @@ class FileStore extends EventEmitter {
         this.blobItems = new Map();
 
         this.onUpdate = this.onUpdate.bind(this);
+        TdLibController.on('tdlib_update', this.onUpdate);
 
         this.setMaxListeners(Infinity);
     }
@@ -16,7 +18,9 @@ class FileStore extends EventEmitter {
         switch (update['@type']) {
             case 'updateFile':{
                 this.set(update.file);
-
+                if (update.file.arr){
+                    //console.log(`updateFile id=${update.file.id} arr`);
+                }
                 this.emit(update['@type'], update);
                 break;
             }

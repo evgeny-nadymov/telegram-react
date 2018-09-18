@@ -16,9 +16,8 @@ class FileController extends EventEmitter{
 
         this.setMaxListeners(Infinity);
 
-        FileStore.on('updateFile', this.onUpdateFile);
-
         this.onUpdateFile = this.onUpdateFile.bind(this);
+        FileStore.on('updateFile', this.onUpdateFile);
     }
 
     onUpdateFile(update) {
@@ -151,7 +150,7 @@ class FileController extends EventEmitter{
         }
     }
 
-    initDB(){
+    async initDB(){
         /*if (this.store) return;
         if (this.initiatingDB) return;
 
@@ -168,18 +167,16 @@ class FileController extends EventEmitter{
         console.log('initDB');
 
         this.initiatingDB = true;
-        let request = window.indexedDB.open('/tdlib');
-        request.onerror = function(event) {
-            this.initiatingDB = false;
-            console.log("error initDB");
-            alert(JSON.stringify(event));
-        }.bind(this);
-        request.onsuccess = function(event) {
-            this.db = request.result;
+        this.db = await this.openDB();
+        this.initiatingDB = false;
+    }
 
-            this.initiatingDB = false;
-            console.log("success initDB");
-        }.bind(this);
+    openDB(){
+        return new Promise((resolve, reject) =>{
+            let request = window.indexedDB.open('/tdlib');
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
     }
 
     getStore(){
