@@ -197,8 +197,8 @@ class TelegramApp extends Component{
     }
 
     clearCache(){
-        this.store.clear()
-            .then(() => alert('cache cleared'));
+        // this.store.clear()
+        //     .then(() => alert('cache cleared'));
     }
 
     render(){
@@ -231,12 +231,12 @@ class TelegramApp extends Component{
                 default:
                     page = (
                         <div id='app-inner'>
-                            <Header selectedChat={this.state.selectedChat} onClearCache={this.clearCache}/>
                             <div className='im-page-wrap'>
                                 <Dialogs
                                     selectedChat={this.state.selectedChat}
                                     onSelectChat={this.handleSelectChat}
-                                    authState={this.state.authState}/>
+                                    authState={this.state.authState}
+                                    onClearCache={this.clearCache}/>
                                 <DialogDetails
                                     ref={this.dialogDetails}
                                     currentUser={this.state.currentUser}

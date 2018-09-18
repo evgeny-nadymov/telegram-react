@@ -15,6 +15,7 @@ import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import DialogFooterControl from './DialogFooterControl';
+import Header from './Header';
 
 class DialogDetails extends Component{
 
@@ -558,6 +559,7 @@ class DialogDetails extends Component{
 
         return (
             <div className='details'>
+                <Header selectedChat={this.props.selectedChat}/>
                 <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
                     <div className='dialogdetails-list-top'/>
                     <div ref={this.itemsRef} className='dialogdetails-list'>

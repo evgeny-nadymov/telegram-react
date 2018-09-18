@@ -6,6 +6,8 @@
     border-right: 1px solid #E9EBED;
     height: 100%;
     min-width: 150px;
+    display: flex;
+    flex-direction: column;
 }
 
 .dialogs-list {

@@ -85,9 +85,7 @@ class FileController extends EventEmitter{
                                             if (source && source.id === file.id){
                                                 this.getLocalFile(store, source, idb_key, file.arr,
                                                     () => MessageStore.updateMessagePhoto(obj.id),
-                                                    () => { },
-                                                    'update',
-                                                    obj.id);
+                                                    () => { });
                                             }
                                         }
                                         break;
@@ -97,9 +95,7 @@ class FileController extends EventEmitter{
                                         if (source && source.id === file.id){
                                             this.getLocalFile(store, source, idb_key, file.arr,
                                                 () => MessageStore.updateMessageSticker(obj.id),
-                                                () => this.getRemoteFile(file.id, 1, obj),
-                                                'update',
-                                                obj.id);
+                                                () => this.getRemoteFile(file.id, 1, obj));
                                         }
                                         break;
                                     }
@@ -109,9 +105,7 @@ class FileController extends EventEmitter{
                                             if (source && source.id === file.id){
                                                 this.getLocalFile(store, source, idb_key, file.arr,
                                                     () => MessageStore.updateMessageDocumentThumbnail(source.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj),
-                                                    'update',
-                                                    obj.id);
+                                                    () => this.getRemoteFile(file.id, 1, obj));
                                             }
                                         }
                                         if (obj.content.document.document){
@@ -183,29 +177,22 @@ class FileController extends EventEmitter{
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
-    getLocalFile(store, obj, idb_key, arr, callback, faultCallback, from, messageId) {
+    getLocalFile(store, obj, idb_key, arr, callback, faultCallback) {
         if (!idb_key){
             faultCallback();
             return;
         }
 
-        //obj.idb_key = idb_key;
         if (arr){
-            let t0 = performance.now();
             obj.blob = new Blob([arr]);
-            let t1 = performance.now();
-            //console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + obj.blob + ' new_time=' + (t1 - t0));
 
             callback();
             return;
         }
 
-        let t0 = performance.now();
         let getItem = store.get(idb_key);
         getItem.onsuccess = function (event) {
             let blob = event.target.result;
-            let t1 = performance.now();
-            //console.log('[perf]' + (from? ' ' + from : '') + ' id=' + messageId + ' blob=' + blob + ' time=' + (t1 - t0));
 
             if (blob){
                 obj.blob = blob;
@@ -227,7 +214,7 @@ class FileController extends EventEmitter{
             this.downloads.set(fileId, [obj]);
         }
 
-        console.log('[perf] downloadFile file_id=' + fileId);
+        //console.log('[perf] downloadFile file_id=' + fileId);
         TdLibController.send({ '@type': 'downloadFile', file_id: fileId, priority: priority });
     }
 

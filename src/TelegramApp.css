@@ -22,7 +22,7 @@ body {
 }
 
 .im-page-wrap {
-    height: calc(100% - 68px - 23px);
+    height: calc(100% - 23px);
     background: #fff;
     max-width: 1010px;
     min-width: 300px;

@@ -1,6 +1,6 @@
 import React from 'react';
 import packageJson from '../../package.json';
-import TdLibController from "../Controllers/TdLibController";
+import TdLibController from '../Controllers/TdLibController';
 import './Footer.css'
 
 class Footer extends React.Component {
@@ -11,6 +11,7 @@ class Footer extends React.Component {
         this.state = {
             authState: TdLibController.getState()
         };
+
         this.onStatusUpdated = this.onStatusUpdated.bind(this);
     }
 
@@ -26,12 +27,12 @@ class Footer extends React.Component {
         TdLibController.on("tdlib_status", this.onStatusUpdated);
     }
 
-    onStatusUpdated(payload) {
-        this.setState({ authState: payload});
-    }
-
     componentWillUnmount(){
         TdLibController.removeListener("tdlib_status", this.onStatusUpdated);
+    }
+
+    onStatusUpdated(payload) {
+        this.setState({ authState: payload});
     }
 
     render() {
@@ -40,7 +41,7 @@ class Footer extends React.Component {
         return (
             <div className='footer-wrapper'>
                 <span>
-                    Telegram v{packageJson.version} - {status}
+                    {packageJson.version} - {status}
                 </span>
             </div>
         );

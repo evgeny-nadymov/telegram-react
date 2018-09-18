@@ -1,30 +1,15 @@
-.header-wrapper{
-    max-width: 1010px;
-    margin: 0 auto;
-    height: 64px;
-    background: #ffffff;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
 .header-master{
-    float: left;
-    width: calc(36% - 0px);
-    height: 100%;
+    height: 64px;
     display: flex;
     align-items: center;
-    box-sizing: border-box;
-    border-right: 1px solid #E9EBED;
-    min-width: 150px;
+    overflow: hidden;
 }
 
 .header-details{
-    float: left;
-    width: calc(64% - 0px);
-    height: 100%;
+    height: 64px;
     display: flex;
     align-items: center;
+    overflow: hidden;
     box-sizing: border-box;
     border-bottom: 1px solid #E9EBED;
 }
@@ -89,23 +74,9 @@
 }
 
 @keyframes blink {
-    0% {
-        opacity: .0;
-    }
-    /**
-     * At 20% the dot is fully visible and
-     * then fades out slowly
-     */
-    20% {
-        opacity: 1;
-    }
-    /**
-     * Until it reaches an opacity of .2 and
-     * the animation can start again
-     */
-    100% {
-        opacity: .0;
-    }
+    0% { opacity: .0; }
+    20% { opacity: 1; }
+    100% { opacity: .0; }
 }
 
 .header-status .header-progress {

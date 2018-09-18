@@ -10,6 +10,7 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import FileController from '../Controllers/FileController';
 import {getChatPhoto} from '../Utils/File';
 import { Scrollbars } from 'react-custom-scrollbars';
+import DialogsHeader from './DialogsHeader';
 
 class Dialogs extends Component{
     constructor(props){
@@ -247,6 +248,7 @@ class Dialogs extends Component{
 
         return (
             <div className='master'>
+                <DialogsHeader onClearCache={this.props.onClearCache}/>
                 <div className='dialogs-list' ref={this.listRef} onScroll={this.handleScroll}>
                     {chats}
                 </div>
