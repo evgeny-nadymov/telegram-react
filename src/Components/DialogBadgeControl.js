@@ -21,6 +21,14 @@ class DialogBadgeControl extends React.Component {
         this.onUpdate = this.onUpdate.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (nextProps.chatId !== this.props.chatId){
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount(){
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);

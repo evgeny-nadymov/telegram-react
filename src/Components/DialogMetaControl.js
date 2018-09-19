@@ -10,6 +10,14 @@ class DialogMetaControl extends React.Component {
         this.onUpdate = this.onUpdate.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (nextProps.chatId !== this.props.chatId){
+            return true;
+        }
+
+        return false;
+    }
+
     componentWillMount(){
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);

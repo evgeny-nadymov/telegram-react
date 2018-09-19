@@ -4,8 +4,6 @@ import InputBoxControl from './InputBoxControl';
 import MessageControl from './MessageControl';
 import MessageGroupControl from "./MessageGroupControl";
 import {debounce, getPhotoSize, itemsInView, throttle} from '../Utils/Common';
-import ChatTileControl from './ChatTileControl';
-import UserTileControl from './UserTileControl';
 import TdLibController from '../Controllers/TdLibController';
 import {MESSAGE_SLICE_LIMIT} from '../Constants';
 import MessageStore from '../Stores/MessageStore';
@@ -13,7 +11,6 @@ import FileController from '../Controllers/FileController';
 import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, getStickerFile} from '../Utils/File';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
-import SupergroupStore from '../Stores/SupergroupStore';
 import DialogFooterControl from './DialogFooterControl';
 import Header from './Header';
 
@@ -573,14 +570,14 @@ class DialogDetails extends Component{
         return (
             <div className='details'>
                 <Header />
-                <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
-                    <div className='dialogdetails-list-top'/>
-                    <div ref={this.itemsRef} className='dialogdetails-list'>
-                        {this.messages}
-                    </div>
-                </div>
                 {   this.state.selectedChatId !== 0 &&
                     <React.Fragment>
+                        <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
+                            <div className='dialogdetails-list-top'/>
+                            <div ref={this.itemsRef} className='dialogdetails-list'>
+                                {this.messages}
+                            </div>
+                        </div>
                         {showDialogFooter
                             ? <DialogFooterControl/>
                             : <InputBoxControl currentUser={this.props.currentUser} />
