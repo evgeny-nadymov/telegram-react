@@ -579,7 +579,7 @@ class DialogDetails extends Component{
                         {this.messages}
                     </div>
                 </div>
-                {   this.state.selectedChatId &&
+                {   this.state.selectedChatId !== 0 &&
                     <React.Fragment>
                         {showDialogFooter
                             ? <DialogFooterControl/>
