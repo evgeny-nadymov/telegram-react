@@ -52,13 +52,12 @@ class Header extends Component{
         this.onUpdateBasicGroupFullInfo = this.onUpdateBasicGroupFullInfo.bind(this);
         this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
         this.onUpdateUserFullInfo = this.onUpdateUserFullInfo.bind(this);
+
+        this.onClientUpdateSelectedChatId = this.onClientUpdateSelectedChatId.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextState !== this.state){
-            return true;
-        }
-        if (nextProps.selectedChat !== this.props.selectedChat){
             return true;
         }
 
@@ -77,6 +76,8 @@ class Header extends Component{
         BasicGroupStore.on('updateSupergroup', this.onUpdateSupergroup);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+
+        ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
     componentWillUnmount(){
@@ -91,6 +92,12 @@ class Header extends Component{
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
         SupergroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+
+        ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
+    }
+
+    onClientUpdateSelectedChatId(update){
+        this.forceUpdate();
     }
 
     onUpdateConnectionState(state) {
@@ -102,7 +109,7 @@ class Header extends Component{
     }
 
     onUpdateChatTitle(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
         if (chat.id !== update.chat_id) return;
 
@@ -110,7 +117,7 @@ class Header extends Component{
     }
 
     onUpdateUserStatus(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
         if (!chat.type) return;
 
@@ -144,16 +151,15 @@ class Header extends Component{
     }
 
     onUpdateUserChatAction(update){
-        const chat = this.props.selectedChat;
-        if (!chat) return;
+        const selectedChatId = ChatStore.getSelectedChatId();
 
-        if (chat.id === update.chat_id){
+        if (selectedChatId === update.chat_id){
             this.forceUpdate();
         }
     }
 
     onUpdateBasicGroup(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
 
         if (chat.type
@@ -164,7 +170,7 @@ class Header extends Component{
     }
 
     onUpdateSupergroup(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
 
         if (chat.type
@@ -175,7 +181,7 @@ class Header extends Component{
     }
 
     onUpdateBasicGroupFullInfo(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
 
         if (chat.type
@@ -186,7 +192,7 @@ class Header extends Component{
     }
 
     onUpdateSupergroupFullInfo(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
 
         if (chat.type
@@ -197,7 +203,7 @@ class Header extends Component{
     }
 
     onUpdateUserFullInfo(update){
-        const chat = this.props.selectedChat;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
         if (!chat) return;
 
         if (chat.type
@@ -210,7 +216,7 @@ class Header extends Component{
     render(){
         const {classes} = this.props;
         const {authorizationState, connectionState} = this.state;
-        const chat = this.props.selectedChat ? ChatStore.get(this.props.selectedChat.id) : null;
+        const chat = ChatStore.get(ChatStore.getSelectedChatId());
 
         let title = '';
         let titleProgressAnimation = (
@@ -226,13 +232,19 @@ class Header extends Component{
         }
         else if (connectionState){
             switch (connectionState['@type'] ){
-                case 'connectionStateUpdating':
-                    title = 'Updating';
-                    break;
                 case 'connectionStateConnecting':
                     title = 'Connecting';
                     break;
+                case 'connectionStateConnectingToProxy':
+                    title = 'Connecting to proxy';
+                    break;
                 case 'connectionStateReady':
+                    break;
+                case 'connectionStateUpdating':
+                    title = 'Updating';
+                    break;
+                case 'connectionStateWaitingForNetwork':
+                    title = 'Waiting for network';
                     break;
             }
         }

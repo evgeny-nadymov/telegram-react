@@ -18,17 +18,30 @@ class DialogControl extends Component{
         };
 
         this.handleSelect = this.handleSelect.bind(this);
+        this.onUpdateSelectedChatId = this.onUpdateSelectedChatId.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextProps.chatId !== this.props.chatId){
             return true;
         }
-        if (nextProps.isSelected !== this.props.isSelected){
-            return true;
-        }
 
         return false;
+    }
+
+    componentDidMount(){
+        ChatStore.on('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+    }
+
+    componentWillUnmount(){
+        ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+    }
+
+    onUpdateSelectedChatId(update){
+        if (this.props.chatId === update.previousChatId
+            || this.props.chatId === update.nextChatId){
+            this.forceUpdate();
+        }
     }
 
     handleSelect(){
@@ -41,8 +54,11 @@ class DialogControl extends Component{
     render(){
         const {chatId} = this.props;
 
+        const selectedChatId = ChatStore.getSelectedChatId();
+        const isSelected = selectedChatId === chatId;
+
         return (
-            <div className={this.props.isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>
+            <div className={isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>
                 <div className='dialog-wrapper'>
                     <ChatTileControl chatId={chatId}/>
                     <div className='dialog-inner-wrapper'>

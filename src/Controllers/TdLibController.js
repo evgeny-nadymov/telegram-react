@@ -9,7 +9,7 @@ class TdLibController extends EventEmitter{
         this.onUpdate = this.onUpdate.bind(this);
         this.onAuthError = this.onAuthError.bind(this);
 
-        this.parameters = {
+        this.clientpParameters = {
             useTestDC : false,
             verbosity : 1
         };
@@ -22,13 +22,13 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
-        let parameters = {
-            verbosity: this.parameters.verbosity,
+        let clientParameters = {
+            verbosity: this.clientpParameters.verbosity,
             mode: 'webasm',
-            prefix: this.parameters.useTestDC ? 'tdlib_test' : 'tdlib'
+            prefix: this.clientpParameters.useTestDC ? 'tdlib_test' : 'tdlib'
         };
 
-        this.client = new TdClient(parameters);
+        this.client = new TdClient(clientParameters);
         this.client.onUpdate = this.onUpdate;
 
         this.setState({
@@ -50,7 +50,7 @@ class TdLibController extends EventEmitter{
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
-                use_test_dc: this.parameters.useTestDC,
+                use_test_dc: this.clientpParameters.useTestDC,
                 api_id: 12183,
                 api_hash: '41c3080d9028cf002792a512d4e20089',
                 system_language_code: 'en',

@@ -1473,11 +1473,13 @@ var TdClient = function () {
   }, {
     key: 'postState',
     value: function postState() {
-      this.channel.postMessage({
+      var state = {
         id: this.uid,
         state: this.state,
         timestamp: this.timestamp
-      });
+      };
+      console.log("Post state: " + (0, _stringify2.default)(state));
+      this.channel.postMessage(state);
     }
   }, {
     key: 'onWaitSetEmpty',
@@ -3654,7 +3656,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-	return new Worker(__webpack_require__.p + "9a91fc4fc9fd1fc6a4b8.worker.js");
+	return new Worker(__webpack_require__.p + "e91022ce67314258c48d.worker.js");
 };
 
 /***/ }),

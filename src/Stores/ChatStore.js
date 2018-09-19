@@ -3,16 +3,33 @@ import TdLibController from '../Controllers/TdLibController';
 import InputTypingManager from '../Utils/InputTypingManager';
 
 class ChatStore extends EventEmitter{
+
     constructor(){
         super();
 
         this.items = new Map();
         this.typingManagers = new Map();
+        this.selectedChatId = 0;
 
         this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
 
         this.setMaxListeners(Infinity);
+    }
+
+    setSelectedChatId(chatId){
+        const update = {
+            '@type' : 'clientUpdateSelectedChatId',
+            nextChatId : chatId,
+            previousChatId : this.selectedChatId
+        };
+
+        this.selectedChatId = chatId;
+        this.emit(update['@type'], update);
+    }
+
+    getSelectedChatId(){
+        return this.selectedChatId;
     }
 
     onUpdate(update){

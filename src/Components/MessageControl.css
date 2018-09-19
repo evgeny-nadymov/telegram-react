@@ -101,7 +101,7 @@ pre code {
     display: inline-block;
     width: 16px;
     height: 11px;
-    vertical-align: text-bottom;
+    vertical-align: baseline;
     background-image: url(../Assets/Icons/General_2x.png);
     background-size: 40px 948px;
     background-repeat: no-repeat;

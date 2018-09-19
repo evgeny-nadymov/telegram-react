@@ -24,7 +24,8 @@ class DialogDetails extends Component{
 
         this.state = {
             history : [],
-            scrollBottom : false
+            scrollBottom : false,
+            selectedChatId : ChatStore.getSelectedChatId()
         };
 
         this.listRef = React.createRef();
@@ -39,11 +40,13 @@ class DialogDetails extends Component{
         this.onUpdateDeleteMessages = this.onUpdateDeleteMessages.bind(this);
         this.showDialogFooter = this.showDialogFooter.bind(this);
         this.getFullInfo = this.getFullInfo.bind(this);
+
+        this.onClientUpdateSelectedChatId = this.onClientUpdateSelectedChatId.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
         if (nextState.history !== this.state.history
-            || nextProps.selectedChat !== this.props.selectedChat){
+            || nextState.selectedChatId !== this.state.selectedChatId){
             return true;
         }
 
@@ -62,16 +65,23 @@ class DialogDetails extends Component{
 
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
+
+        ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
     componentWillUnmount(){
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
+
+        MessageStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
+    }
+
+    onClientUpdateSelectedChatId(update){
+        this.setState({ selectedChatId : update.nextChatId });
     }
 
     onUpdateNewMessage(message){
-        if (!this.props.selectedChat) return;
-        if (this.props.selectedChat.id !== message.chat_id) return;
+        if (this.state.selectedChatId !== message.chat_id) return;
 
         let history = [message];
 
@@ -83,8 +93,7 @@ class DialogDetails extends Component{
     onUpdateDeleteMessages(update){
         if (!update.is_permanent) return;
 
-        if (!this.props.selectedChat) return;
-        if (this.props.selectedChat.id !== update.chat_id) return;
+        if (this.state.selectedChatId !== update.chat_id) return;
 
         this.deleteHistory(update.message_ids);
     }
@@ -136,8 +145,8 @@ class DialogDetails extends Component{
 
     componentDidUpdate(prevProps, prevState, snapshot) {
 
-        if (prevProps.selectedChat !== this.props.selectedChat){
-            this.handleSelectChat(this.props.selectedChat, prevProps.selectedChat);
+        if (prevState.selectedChatId !== this.state.selectedChatId){
+            this.handleSelectChat(this.state.selectedChatId, prevState.selectedChatId);
         }
 
         const list = this.listRef.current;
@@ -152,7 +161,10 @@ class DialogDetails extends Component{
         }
     }
 
-    async handleSelectChat(chat, previousChat){
+    async handleSelectChat(chatId, previousChatId){
+        const chat = ChatStore.get(chatId);
+        const previousChat = ChatStore.get(previousChatId);
+
         this.previousScrollHeight = 0;
 
         if (chat){
@@ -406,7 +418,7 @@ class DialogDetails extends Component{
     }
 
     async onLoadNext(){
-        if (!this.props.selectedChat) return;
+        if (!this.state.selectedChatId) return;
         if (this.loading) return;
 
         let fromMessageId = 0;
@@ -414,7 +426,7 @@ class DialogDetails extends Component{
             fromMessageId = this.state.history[0].id;
         }
 
-        let chatId = this.props.selectedChat.id;
+        let chatId = this.state.selectedChatId;
 
         this.loading = true;
         let result = await TdLibController
@@ -504,9 +516,10 @@ class DialogDetails extends Component{
     showDialogFooter(){
         return false;
 
-        if (!this.props.selectedChat) return false;
+        const chat = ChatStore.get(this.state.selectedChatId);
+        if (!chat) return false;
 
-        const {type} = this.props.selectedChat;
+        const {type} = chat;
 
         if (type && type['@type'] === 'chatTypeSupergroup'){
             if (type.is_channel){
@@ -559,18 +572,18 @@ class DialogDetails extends Component{
 
         return (
             <div className='details'>
-                <Header selectedChat={this.props.selectedChat}/>
+                <Header />
                 <div ref={this.listRef} className='dialogdetails-wrapper' onScroll={this.handleScroll}>
                     <div className='dialogdetails-list-top'/>
                     <div ref={this.itemsRef} className='dialogdetails-list'>
                         {this.messages}
                     </div>
                 </div>
-                {   this.props.selectedChat &&
+                {   this.state.selectedChatId &&
                     <React.Fragment>
                         {showDialogFooter
                             ? <DialogFooterControl/>
-                            : <InputBoxControl currentUser={this.props.currentUser} selectedChat={this.props.selectedChat}/>
+                            : <InputBoxControl currentUser={this.props.currentUser} />
                         }
                     </React.Fragment>
                 }

@@ -132,10 +132,6 @@ class Dialogs extends Component{
             return true;
         }
 
-        if (nextProps.selectedChat !== this.props.selectedChat){
-            return true;
-        }
-
         return false;
     }
 
@@ -243,7 +239,6 @@ class Dialogs extends Component{
             (<DialogControl
                 key={x.id}
                 chatId={x.id}
-                isSelected={this.props.selectedChat && this.props.selectedChat.id === x.id}
                 onSelect={this.props.onSelectChat}/>));
 
         return (

@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import './TelegramApp.css';
-import Header from './Components/Header';
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
@@ -13,6 +12,7 @@ import LocalForageWithGetItems from 'localforage-getitems';
 import {VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
 import packageJson from '../package.json';
 import AppInactiveControl from './Components/AppInactiveControl';
+import ChatStore from './Stores/ChatStore';
 
 const theme = createMuiTheme({
     palette: {
@@ -29,7 +29,6 @@ class TelegramApp extends Component{
         this.dialogDetails = React.createRef();
 
         this.state = {
-            selectedChat: null,
             authState: 'init',
             inactive: false,
         };
@@ -55,15 +54,17 @@ class TelegramApp extends Component{
     }
 
     setQueryParams(){
-        if (this.props.location
-            && this.props.location.search){
-            const params = new URLSearchParams(this.props.location.search);
+        const {location} = this.props;
+
+        if (location
+            && location.search){
+            const params = new URLSearchParams(location.search);
 
             if (params.has('test')){
                 let useTestDC = parseInt(params.get('test'), 10);
                 if (useTestDC === 0 || useTestDC === 1){
-                    TdLibController.parameters.useTestDC = useTestDC === 1;
-                    console.log(`setQueryParams use_test_dc=${TdLibController.parameters.useTestDC}`);
+                    TdLibController.clientParameters.useTestDC = useTestDC === 1;
+                    console.log(`setQueryParams use_test_dc=${TdLibController.clientParameters.useTestDC}`);
                 }
                 else{
                     console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
@@ -73,8 +74,8 @@ class TelegramApp extends Component{
             if (params.has('verbosity')){
                 let verbosity = parseInt(params.get('verbosity'), 10);
                 if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX){
-                    TdLibController.parameters.verbosity = verbosity;
-                    console.log(`setQueryParams verbosity=${TdLibController.parameters.verbosity}`);
+                    TdLibController.clientParameters.verbosity = verbosity;
+                    console.log(`setQueryParams verbosity=${TdLibController.clientParameters.verbosity}`);
                 }
                 else{
                     console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
@@ -129,7 +130,6 @@ class TelegramApp extends Component{
                 break;
             case 'init':
                 this.setState({
-                    selectedChat: null,
                     history: [],
                     scrollBottom: false,
                     authState: state.status
@@ -176,8 +176,8 @@ class TelegramApp extends Component{
     }
 
     onUpdateMessageSendSucceeded(old_message_id, message){
-        if (!this.state.selectedChat) return;
-        if (this.state.selectedChat.id !== message.chat_id) return;
+        const selectedChatId = ChatStore.getSelectedChatId();
+        if (selectedChatId !== message.chat_id) return;
 
         let updatedHistory = this.state.history.map((obj) =>{
             return obj.id === old_message_id ? message : obj;
@@ -187,12 +187,13 @@ class TelegramApp extends Component{
     }
 
     handleSelectChat(chat){
-        if (this.state.selectedChat
-            && this.state.selectedChat.id === chat.id){
+        const selectedChatId = ChatStore.getSelectedChatId();
+        const chatId = chat ? chat.id : 0;
+        if (selectedChatId === chatId){
             this.dialogDetails.current.scrollToBottom();
         }
         else{
-            this.setState({ selectedChat : chat });
+            ChatStore.setSelectedChatId(chatId);
         }
     }
 
@@ -233,14 +234,12 @@ class TelegramApp extends Component{
                         <div id='app-inner'>
                             <div className='im-page-wrap'>
                                 <Dialogs
-                                    selectedChat={this.state.selectedChat}
                                     onSelectChat={this.handleSelectChat}
                                     authState={this.state.authState}
                                     onClearCache={this.clearCache}/>
                                 <DialogDetails
                                     ref={this.dialogDetails}
                                     currentUser={this.state.currentUser}
-                                    selectedChat={this.state.selectedChat}
                                     onSelectChat={this.handleSelectChat}
                                 />
                             </div>
