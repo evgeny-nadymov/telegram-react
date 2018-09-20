@@ -1,14 +1,30 @@
 import React, {Component} from 'react';
 import './InputBoxControl.css';
-import ChatTileControl from './ChatTileControl';
 import OutputTypingManager from '../Utils/OutputTypingManager';
-import UserTileControl from './UserTileControl';
 import FileController from '../Controllers/FileController';
 import MessageStore from '../Stores/MessageStore';
 import ChatStore from '../Stores/ChatStore';
 import TdLibController from '../Controllers/TdLibController';
 import {getSize, readImageSize} from '../Utils/Common';
 import {PHOTO_SIZE} from '../Constants';
+import {withStyles} from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import AttachFileIcon from '@material-ui/icons/AttachFile';
+import PhotoIcon from '@material-ui/icons/Photo';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
+import SendIcon from '@material-ui/icons/Send';
+import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
+import MenuItem from '@material-ui/core/MenuItem/MenuItem';
+import Menu from '@material-ui/core/Menu/Menu';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+
+const styles = {
+    iconButton : {
+        margin: '8px 0px',
+    }
+};
 
 class InputBoxControl extends Component{
 
@@ -16,9 +32,12 @@ class InputBoxControl extends Component{
         super(props);
 
         this.state = {
-            selectedChatId : ChatStore.getSelectedChatId()
+            selectedChatId : ChatStore.getSelectedChatId(),
+            anchorEl : null
         };
 
+        this.handleMenuClick = this.handleMenuClick.bind(this);
+        this.handleMenuClose = this.handleMenuClose.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleAttachDocument = this.handleAttachDocument.bind(this);
         this.handleAttachPhoto = this.handleAttachPhoto.bind(this);
@@ -37,6 +56,10 @@ class InputBoxControl extends Component{
             return true;
         }
 
+        if (nextState.anchorEl !== this.state.anchorEl){
+            return true;
+        }
+
         return false;
     }
 
@@ -52,8 +75,33 @@ class InputBoxControl extends Component{
         this.setState({ selectedChatId : update.nextChatId });
     }
 
-    componentDidUpdate(prevProps, prevState){
+    componentDidUpdate(prevProps, prevState, snapshot){
+        if (!snapshot) return;
 
+        const { chatId, newDraft } = snapshot;
+        if (!chatId) return;
+
+        const newDraftMessage = {
+            '@type': 'draftMessage',
+            reply_to_message_id: 0,
+            input_message_text: {
+                '@type': 'inputMessageText',
+                text: {
+                    '@type': 'formattedText',
+                    text: newDraft,
+                    entities: null
+                },
+                disable_web_page_preview: true,
+                clear_draft: false
+            }
+        };
+
+        TdLibController
+            .send({
+                '@type': 'setChatDraftMessage',
+                chat_id: chatId,
+                draft_message: newDraftMessage
+            });
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState){
@@ -61,42 +109,29 @@ class InputBoxControl extends Component{
         if (!previousChat) return;
         if (previousChat.id === this.state.selectedChatId) return;
 
+        const {draft_message} = previousChat;
+
         let newDraft = this.getInputText();
         let previousDraft = '';
-        if (previousChat.draft_message
-            && previousChat.draft_message.input_message_text
-            && previousChat.draft_message.input_message_text.text){
-            previousDraft = previousChat.draft_message.input_message_text.text.text;
+        if (draft_message
+            && draft_message.input_message_text
+            && draft_message.input_message_text.text){
+            previousDraft = draft_message.input_message_text.text.text;
         }
 
         if (newDraft !== previousDraft){
-            let newDraftMessage = null;
-            if (newDraft){
-                newDraftMessage = {
-                    '@type': 'draftMessage',
-                    reply_to_message_id: 0,
-                    input_message_text: {
-                        '@type': 'inputMessageText',
-                        text: {
-                            '@type': 'formattedText',
-                            text: newDraft,
-                            entities: null
-                        },
-                        disable_web_page_preview: true,
-                        clear_draft: false
-                    }
-                };
-            }
-
-            TdLibController
-                .send({
-                    '@type': 'setChatDraftMessage',
-                    chat_id: previousChat.id,
-                    draft_message: newDraftMessage
-                });
+            return { chatId : previousChat.id, newDraft : newDraft } ;
         }
 
         return null;
+    }
+
+    handleMenuClick(event){
+        this.setState({ anchorEl : event.currentTarget });
+    }
+
+    handleMenuClose(){
+        this.setState({ anchorEl : null });
     }
 
     handleSubmit(){
@@ -123,10 +158,12 @@ class InputBoxControl extends Component{
     }
 
     handleAttachDocument(){
+        this.handleMenuClose();
         this.refs.attachDocument.click();
     }
 
     handleAttachPhoto(){
+        this.handleMenuClose();
         this.refs.attachPhoto.click();
     }
 
@@ -300,7 +337,9 @@ class InputBoxControl extends Component{
     }
 
     render(){
-        const {selectedChatId} = this.state;
+        const {classes} = this.props;
+
+        const {selectedChatId, anchorEl} = this.state;
         const selectedChat = ChatStore.get(selectedChatId);
 
         let text = '';
@@ -314,34 +353,78 @@ class InputBoxControl extends Component{
         }
 
         return (
-            <div className='dialogdetails-input-wrapper'>
-                <div className='inputbox-wrapper'>
-                    <div className='inputbox-left-column'>
-                        <UserTileControl user={this.props.currentUser}/>
+            <div className='inputbox-wrapper'>
+                <div className='inputbox-left-column'>
+                    <IconButton
+                        className={classes.iconButton} 
+                        aria-label='Attach'
+                        open={Boolean(anchorEl)}
+                        onClick={this.handleMenuClick}>
+                        <AttachFileIcon />
+                    </IconButton>
+                    <Menu
+                        id='attach-menu'
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={this.handleMenuClose}>
+                        <MenuItem onClick={this.handleAttachPhoto}>
+                            <ListItemIcon>
+                                <PhotoIcon />
+                            </ListItemIcon>
+                            <ListItemText inset primary='Photo' />
+                        </MenuItem>
+                        <MenuItem onClick={this.handleAttachDocument}>
+                            <ListItemIcon>
+                                <InsertDriveFileIcon />
+                            </ListItemIcon>
+                            <ListItemText inset primary='Document' />
+                        </MenuItem>
+                    </Menu>
+                    {/*<IconButton className={classes.attachIconButton} aria-label='Photo'>*/}
+                        {/*<PhotoIcon />*/}
+                    {/*</IconButton>*/}
+                    {/*<IconButton className={classes.attachIconButton} aria-label='Document'>*/}
+                        {/*<InsertDriveFileIcon />*/}
+                    {/*</IconButton>*/}
+                </div>
+                <div className='inputbox-middle-column'>
+                    <div
+                        id='inputbox-message'
+                        ref='newMessage'
+                        placeholder='Write a message...'
+                        key={Date()}
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        onKeyDown={this.handleKeyDown}
+                        onKeyUp={this.handleInputChange}>
+                        {text}
                     </div>
-                    <div className='inputbox-middle-column'>
-                        <div id='inputbox-message' ref='newMessage' placeholder='Write a message...' key={Date()} contentEditable={true} suppressContentEditableWarning={true} onKeyDown={this.handleKeyDown} onKeyUp={this.handleInputChange}>
-                            {text}
-                        </div>
-                        <div className='inputbox-buttons'>
-                            <div className='inputbox-attach-wrapper'>
-                                <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
-                                <i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>
-                                <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
-                                <i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>
-                            </div>
-                            <div className='inputbox-send-button' onClick={this.handleSubmit}>
-                                <span className='inputbox-send-text'>SEND</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='inputbox-right-column'>
-                        <ChatTileControl chatId={selectedChatId}/>
-                    </div>
+                    {/*<div className='inputbox-buttons'>*/}
+                    {/*<div className='inputbox-attach-wrapper'>*/}
+                    <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
+                    {/*<i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>*/}
+                    <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
+                    {/*<i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>*/}
+                    {/*</div>*/}
+                    {/*<div className='inputbox-send-button' onClick={this.handleSubmit}>*/}
+                    {/*<span className='inputbox-send-text'>SEND</span>*/}
+                    {/*</div>*/}
+                    {/*</div>*/}
+                </div>
+                <div className='inputbox-right-column'>
+                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
+                        <InsertEmoticonIcon />
+                    </IconButton>
+                    {/*<IconButton>*/}
+                        {/*<KeyboardVoiceIcon />*/}
+                    {/*</IconButton>*/}
+                    <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
+                        <SendIcon />
+                    </IconButton>
                 </div>
             </div>
         );
     }
 }
 
-export default InputBoxControl;
+export default withStyles(styles)(InputBoxControl);

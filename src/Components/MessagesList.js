@@ -132,7 +132,7 @@ class MessagesList extends React.Component {
     }
 
     handleScroll(){
-        console.log('SCROLL HANDLESCROLL suppressHandleScroll=' + this.suppressHandleScroll);
+        //console.log('SCROLL HANDLESCROLL suppressHandleScroll=' + this.suppressHandleScroll);
 
         const list = this.listRef.current;
 
@@ -142,17 +142,15 @@ class MessagesList extends React.Component {
         }
 
         if (list && list.scrollTop <= 0){
-            console.log('SCROLL HANDLESCROLL onLoadNext');
+            //console.log('SCROLL HANDLESCROLL onLoadNext');
 
             this.onLoadNext();
         }
         else{
-            console.log('SCROLL HANDLESCROLL updateItemsInView');
+            //console.log('SCROLL HANDLESCROLL updateItemsInView');
+
             this.updateItemsInView();
         }
-        /*if (x && (x.scrollTop + x.offsetHeight) >= x.scrollHeight){
-            this.props.onLoadNext();
-        }*/
     }
 
     updateItemsInView(){
@@ -191,6 +189,9 @@ class MessagesList extends React.Component {
                 });
 
             //TODO: replace result with one-way data flow
+            if (this.props.selectedChatId !== chatId){
+                return;
+            }
 
             MessageStore.setItems(result.messages);
             result.messages.reverse();
@@ -425,15 +426,15 @@ class MessagesList extends React.Component {
     }
 
     async onLoadNext(){
-        if (!this.props.selectedChatId) return;
+        const chatId = this.props.selectedChatId;
+
+        if (!chatId) return;
         if (this.loading) return;
 
         let fromMessageId = 0;
         if (this.state.history && this.state.history.length > 0){
             fromMessageId = this.state.history[0].id;
         }
-
-        let chatId = this.props.selectedChatId;
 
         this.loading = true;
         let result = await TdLibController
@@ -448,6 +449,9 @@ class MessagesList extends React.Component {
                 this.loading = false;
             });
 
+        if (this.props.selectedChatId !== chatId){
+            return;
+        }
         //TODO: replace result with one-way data flow
 
         MessageStore.setItems(result.messages);
