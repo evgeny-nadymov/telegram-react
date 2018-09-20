@@ -26,5 +26,5 @@ function getSupergroupStatus(supergroup){
 }
 
 export {
-    getSupergroupStatus,
+    getSupergroupStatus
 }

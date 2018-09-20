@@ -4,7 +4,7 @@
   "version": "0.0.41",
   "private": true,
   "dependencies": {
-    "@arseny30/tdweb": "0.2.13",
+    "@arseny30/tdweb": "0.2.14",
     "@material-ui/core": "^3.0.3",
     "@material-ui/icons": "^3.0.1",
     "classnames": "^2.2.5",

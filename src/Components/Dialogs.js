@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './Dialogs.css';
 import DialogsHeader from './DialogsHeader';
+import Header from './Header';
 import DialogsList from './DialogsList';
 
 class Dialogs extends Component{

@@ -9,7 +9,7 @@ import TdLibController from './Controllers/TdLibController'
 import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {VERBOSITY_MAX, VERBOSITY_MIN} from './Constants';
+import {VERBOSITY_MAX, VERBOSITY_MIN, JS_VERBOSITY_MAX, JS_VERBOSITY_MIN} from './Constants';
 import packageJson from '../package.json';
 import AppInactiveControl from './Components/AppInactiveControl';
 import ChatStore from './Stores/ChatStore';
@@ -58,7 +58,7 @@ class TelegramApp extends Component{
 
         if (location
             && location.search){
-            const params = new URLSearchParams(location.search);
+            const params = new URLSearchParams(location.search.toLowerCase());
 
             if (params.has('test')){
                 let useTestDC = parseInt(params.get('test'), 10);
@@ -79,6 +79,17 @@ class TelegramApp extends Component{
                 }
                 else{
                     console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
+                }
+            }
+
+            if (params.has('jsverbosity')){
+                let jsVerbosity = parseInt(params.get('jsverbosity'), 10);
+                if (jsVerbosity >= JS_VERBOSITY_MIN && jsVerbosity <= JS_VERBOSITY_MAX){
+                    TdLibController.clientParameters.jsVerbosity = jsVerbosity;
+                    console.log(`setQueryParams jsVerbosity=${TdLibController.clientParameters.jsVerbosity}`);
+                }
+                else{
+                    console.log(`setQueryParams skip jsVerbosity=${params.get('jsVerbosity')} valid values=[${JS_VERBOSITY_MIN}..${JS_VERBOSITY_MAX}]`);
                 }
             }
         }

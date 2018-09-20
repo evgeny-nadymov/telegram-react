@@ -43,5 +43,5 @@ function getBasicGroupOnlineCount(basicGroupFullInfo) {
 }
 
 export {
-    getBasicGroupStatus,
+    getBasicGroupStatus
 }

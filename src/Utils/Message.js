@@ -257,4 +257,14 @@ function isServiceMessage(message) {
     return serviceMap.has(message.content['@type']);
 }
 
-export {getTitle, getText, getDate, getDateHint, getMedia, getReply, getForward, getUnread, isServiceMessage};
+export {
+    getTitle,
+    getText,
+    getDate,
+    getDateHint,
+    getMedia,
+    getReply,
+    getForward,
+    getUnread,
+    isServiceMessage
+};

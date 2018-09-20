@@ -186,18 +186,179 @@ function getLastMessageSenderName(chat){
 
 function getLastMessageContent(chat){
     if (!chat) return '[chat undefined]';
-    if (!chat.last_message) return '[last_message undefined]';
+    if (!chat.last_message) return '';
     const content = chat.last_message.content;
-    if (!content) return '[content undefined]';
+    if (!content) return '';
 
-    switch (content['@type']) {
-        case 'messageText':
-            return content.text.text;
-        case 'messageDocument':
-            return 'document';
-        default:
-            return '[' + content['@type'] + ']';
+    let caption = '';
+    if (content.caption && content.caption.text){
+        caption = `, ${content.caption.text}`;
     }
+
+    let text = '';
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            text = 'GIF';
+            break;
+        }
+        case 'messageAudio': {
+            text = 'Audio';
+            break;
+        }
+        case 'messageBasicGroupChatCreate': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageCall': {
+            text = 'Call';
+            break;
+        }
+        case 'messageChatAddMembers': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatChangePhoto': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatChangeTitle': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatDeleteMember': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatDeletePhoto': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatJoinByLink': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatSetTtl': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatUpgradeFrom': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageChatUpgradeTo': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageContact': {
+            text = 'Contact';
+            break;
+        }
+        case 'messageContactRegistered': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageCustomServiceAction': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageDocument':{
+            text = 'Document';
+            break;
+        }
+        case 'messageExpiredPhoto':{
+            text = 'Photo';
+            break;
+        }
+        case 'messageExpiredVideo':{
+            text = 'Video';
+            break;
+        }
+        case 'messageGame': {
+            text = 'Game';
+            break;
+        }
+        case 'messageGameScore': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageInvoice': {
+            text = 'Invoice';
+            break;
+        }
+        case 'messageLocation': {
+            text = 'Location';
+            break;
+        }
+        case 'messagePassportDataReceived': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messagePassportDataSent': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messagePaymentSuccessful': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messagePaymentSuccessfulBot': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messagePhoto': {
+            text = 'Photo';
+            break;
+        }
+        case 'messagePinMessage': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageScreenshotTaken': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageSticker': {
+            text = 'Sticker';
+            break;
+        }
+        case 'messageSupergroupChatCreate': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        case 'messageText': {
+            text = content.text.text;
+            break;
+        }
+        case 'messageUnsupported': {
+            text = 'Unsupported';
+            break;
+        }
+        case 'messageVenue': {
+            text = 'Venue';
+            break;
+        }
+        case 'messageVideo': {
+            text = 'Video';
+            break;
+        }
+        case 'messageVideoNote': {
+            text = 'Video message';
+            break;
+        }
+        case 'messageVoiceNote': {
+            text = 'Voice message';
+            break;
+        }
+        case 'messageWebsiteConnected': {
+            text = `[${content['@type']}]`;
+            break;
+        }
+        default: {
+            text = `[${content['@type']}]`;
+        }
+    }
+
+    return text + caption;
 }
 
 function getChatUnreadMessageIcon(chat){
