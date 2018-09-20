@@ -75,6 +75,8 @@ class TdLibController extends EventEmitter{
     }
 
     onUpdate(update) {
+        console.log('receive from worker', update);
+
         switch (update['@type']) {
             case 'updateAuthorizationState':
                 this.onUpdateAuthorizationState(update);

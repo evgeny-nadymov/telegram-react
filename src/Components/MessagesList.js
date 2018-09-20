@@ -16,7 +16,8 @@ class MessagesList extends React.Component {
 
         this.state = {
             history : [],
-            scrollBottom : false
+            scrollBottom : false,
+            keepScrollPosition : false
         };
 
         this.listRef = React.createRef();
@@ -125,13 +126,7 @@ class MessagesList extends React.Component {
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
         const list = this.listRef.current;
-
-        if (list)
-        {
-            this.previousScrollHeight = list.scrollHeight;
-        }
-
-        return null;
+        return list.scrollHeight;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -141,22 +136,19 @@ class MessagesList extends React.Component {
         }
 
         const list = this.listRef.current;
-
         if (this.state.scrollBottom)
         {
             this.scrollToBottom();
         }
-        else{
+        else if (this.state.keepScrollPosition){
             /// keep scrolling position
-            list.scrollTop = list.scrollHeight - this.previousScrollHeight;
+            list.scrollTop = list.scrollHeight - snapshot;
         }
     }
 
     async handleSelectChat(chatId, previousChatId){
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
-
-        this.previousScrollHeight = 0;
 
         if (chat){
             TdLibController
@@ -468,13 +460,13 @@ class MessagesList extends React.Component {
     }
 
     setHistory(history, callback) {
-        this.setState({ history: history, scrollBottom: true }, callback);
+        this.setState({ history: history, scrollBottom : true, keepScrollPosition : false }, callback);
     }
 
     appendHistory(history, callback) {
         if (history.length === 0) return;
 
-        this.setState({ history: history.concat(this.state.history), scrollBottom: false }, callback);
+        this.setState({ history: history.concat(this.state.history), scrollBottom : false, keepScrollPosition : true }, callback);
     }
 
     prependHistory(history, callback){
@@ -482,7 +474,7 @@ class MessagesList extends React.Component {
 
         let scrollBottom = history[0].is_outgoing;
 
-        this.setState({ history: this.state.history.concat(history), scrollBottom: scrollBottom }, callback);
+        this.setState({ history: this.state.history.concat(history), scrollBottom : scrollBottom, keepScrollPosition : false }, callback);
     }
 
     deleteHistory(message_ids, callback) {
