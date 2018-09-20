@@ -31,6 +31,10 @@ class InputBoxControl extends Component{
     constructor(props){
         super(props);
 
+        this.attachDocument = React.createRef();
+        this.attachPhoto = React.createRef();
+        this.newMessage = React.createRef();
+
         this.state = {
             selectedChatId : ChatStore.getSelectedChatId(),
             anchorEl : null
@@ -135,9 +139,9 @@ class InputBoxControl extends Component{
     }
 
     handleSubmit(){
-        let text = this.refs.newMessage.innerText || this.refs.newMessage.textContent;
-        this.refs.newMessage.innerText = null;
-        this.refs.newMessage.textContent = null;
+        let text = this.newMessage.current.innerText || this.newMessage.current.textContent;
+        this.newMessage.current.innerText = null;
+        this.newMessage.current.textContent = null;
 
         if (!text) return;
 
@@ -159,16 +163,18 @@ class InputBoxControl extends Component{
 
     handleAttachDocument(){
         this.handleMenuClose();
-        this.refs.attachDocument.click();
+
+        setTimeout(that => { that.attachDocument.current.click(); }, 300, this);
     }
 
     handleAttachPhoto(){
         this.handleMenuClose();
-        this.refs.attachPhoto.click();
+
+        setTimeout(that => { that.attachPhoto.current.click(); }, 300, this);
     }
 
     handleAttachDocumentComplete(){
-        let files = this.refs.attachDocument.files;
+        let files = this.attachDocument.current.files;
         if (files.length === 0) return;
 
         for (let i = 0; i < files.length; i++){
@@ -185,11 +191,11 @@ class InputBoxControl extends Component{
                 });
         }
 
-        this.refs.attachDocument.value = '';
+        this.attachDocument.current.value = '';
     }
 
     handleAttachPhotoComplete(){
-        let files = this.refs.attachPhoto.files;
+        let files = this.attachPhoto.current.files;
         if (files.length === 0) return;
 
         for (let i = 0; i < files.length; i++){
@@ -202,32 +208,32 @@ class InputBoxControl extends Component{
                 });
         }
 
-        this.refs.attachPhoto.value = '';
+        this.attachPhoto.current.value = '';
     }
 
     getInputText(){
-        let innerText = this.refs.newMessage.innerText;
-        let innerHTML = this.refs.newMessage.innerHTML;
+        let innerText = this.newMessage.current.innerText;
+        let innerHTML = this.newMessage.current.innerHTML;
 
         if (innerText
             && innerText === '\n'
             && innerHTML
             && (innerHTML === '<br>' || innerHTML === '<div><br></div>')){
-            this.refs.newMessage.innerHTML = '';
+            this.newMessage.current.innerHTML = '';
         }
 
         return innerText;
     }
 
     handleInputChange(){
-        let innerText = this.refs.newMessage.innerText;
-        let innerHTML = this.refs.newMessage.innerHTML;
+        let innerText = this.newMessage.current.innerText;
+        let innerHTML = this.newMessage.current.innerHTML;
 
         if (innerText
             && innerText === '\n'
             && innerHTML
             && (innerHTML === '<br>' || innerHTML === '<div><br></div>')){
-            this.refs.newMessage.innerHTML = '';
+            this.newMessage.current.innerHTML = '';
         }
 
         if (innerText){
@@ -366,6 +372,11 @@ class InputBoxControl extends Component{
                         id='attach-menu'
                         anchorEl={anchorEl}
                         open={Boolean(anchorEl)}
+                        getContentAnchorEl={null}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right'
+                        }}
                         onClose={this.handleMenuClose}>
                         <MenuItem onClick={this.handleAttachPhoto}>
                             <ListItemIcon>
@@ -380,17 +391,11 @@ class InputBoxControl extends Component{
                             <ListItemText inset primary='Document' />
                         </MenuItem>
                     </Menu>
-                    {/*<IconButton className={classes.attachIconButton} aria-label='Photo'>*/}
-                        {/*<PhotoIcon />*/}
-                    {/*</IconButton>*/}
-                    {/*<IconButton className={classes.attachIconButton} aria-label='Document'>*/}
-                        {/*<InsertDriveFileIcon />*/}
-                    {/*</IconButton>*/}
                 </div>
                 <div className='inputbox-middle-column'>
                     <div
                         id='inputbox-message'
-                        ref='newMessage'
+                        ref={this.newMessage}
                         placeholder='Write a message...'
                         key={Date()}
                         contentEditable={true}
@@ -399,17 +404,8 @@ class InputBoxControl extends Component{
                         onKeyUp={this.handleInputChange}>
                         {text}
                     </div>
-                    {/*<div className='inputbox-buttons'>*/}
-                    {/*<div className='inputbox-attach-wrapper'>*/}
-                    <input className='inputbox-attach-button' type='file' multiple='multiple' ref='attachDocument' onChange={this.handleAttachDocumentComplete}/>
-                    {/*<i className='inputbox-attach-document-icon' onClick={this.handleAttachDocument}/>*/}
-                    <input className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' ref='attachPhoto' onChange={this.handleAttachPhotoComplete}/>
-                    {/*<i className='inputbox-attach-photo-icon' onClick={this.handleAttachPhoto}/>*/}
-                    {/*</div>*/}
-                    {/*<div className='inputbox-send-button' onClick={this.handleSubmit}>*/}
-                    {/*<span className='inputbox-send-text'>SEND</span>*/}
-                    {/*</div>*/}
-                    {/*</div>*/}
+                    <input ref={this.attachDocument} className='inputbox-attach-button' type='file' multiple='multiple' onChange={this.handleAttachDocumentComplete}/>
+                    <input ref={this.attachPhoto} className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' onChange={this.handleAttachPhotoComplete}/>
                 </div>
                 <div className='inputbox-right-column'>
                     <IconButton className={classes.iconButton} aria-label='Emoticon'>

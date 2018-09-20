@@ -17,6 +17,10 @@ const styles = {
     },
     searchIconButton : {
         margin: '8px 12px 8px 0',
+    },
+    menuAnchorOrigin : {
+        vertical: 'bottom',
+        horizontal: 'left'
     }
 };
 
@@ -87,10 +91,15 @@ class DialogsHeader extends React.Component {
 
         const mainMenuControl = authorizationState && authorizationState.status === 'ready'
             ? (<Menu
-                id='simple-menu'
+                id='main-menu'
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
-                onClose={this.handleMenuClose}>
+                onClose={this.handleMenuClose}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+                getContentAnchorEl={null}>
                 <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
                 <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
             </Menu>)

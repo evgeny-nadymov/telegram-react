@@ -31,76 +31,8 @@
     box-shadow: 0 0 0 0;
 }
 
-.inputbox-buttons{
-    display: flex;
-}
-
-.inputbox-attach-wrapper{
-    flex-grow: 1;
-}
-
 .inputbox-attach-button{
     display: none;
-}
-
-.inputbox-attach-document-icon{
-    background-image: url(../Assets/Icons/General_2x.png);
-    background-size: 40px 948px;
-    display: inline-block;
-    width: 18px;
-    height: 17px;
-    vertical-align: top;
-    opacity: 0.8;
-    margin-right: 25px;
-    background-repeat: no-repeat;
-    background-position: -11px -455px;
-    cursor: pointer;
-}
-
-.inputbox-attach-photo-icon{
-    background-image: url(../Assets/Icons/General_2x.png);
-    background-size: 40px 948px;
-    display: inline-block;
-    width: 20px;
-    height: 18px;
-    vertical-align: top;
-    opacity: 0.8;
-    margin-right: 25px;
-    background-repeat: no-repeat;
-    background-position: -10px -399px;
-    cursor: pointer;
-}
-
-.inputbox-attach-photo-icon:hover {
-    opacity: 1;
-}
-.inputbox-attach-photo-icon:active {
-    background-position: -10px -427px;
-    opacity: 1;
-}
-
-.inputbox-attach-document-icon:hover {
-    opacity: 1;
-}
-.inputbox-attach-document-icon:active {
-    background-position: -11px -482px;
-    opacity: 1;
-}
-
-.inputbox-send-button{
-
-}
-
-.inputbox-send-text{
-    color: #499dd9;
-    font-size: 13px;
-    line-height: 18px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.inputbox-send-text:hover {
-    color: #3589c5;
 }
 
 .inputbox-middle-column{
@@ -109,6 +41,10 @@
 
 .inputbox-left-column{
     margin-right: 20px;
+}
+
+.inputbox-middle-column{
+    flex-grow: 1;
 }
 
 .inputbox-right-column{
