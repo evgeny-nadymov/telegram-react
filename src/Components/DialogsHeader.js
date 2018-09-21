@@ -98,7 +98,7 @@ class DialogsHeader extends React.Component {
                 onClose={this.handleMenuClose}
                 getContentAnchorEl={null}
                 anchorOrigin={menuAnchorOrigin}>
-                <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
+                {/*<MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>*/}
                 <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
             </Menu>)
             : null;

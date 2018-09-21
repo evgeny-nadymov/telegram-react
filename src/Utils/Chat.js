@@ -382,6 +382,10 @@ function getChatUnreadMentionCount(chat){
     return chat.unread_mention_count;
 }
 
+function isChatMuted(chat){
+    return getChatMuteFor(chat) > 0;
+}
+
 function getChatMuteFor(chat){
     if (!chat) return 0;
     if (!chat.notification_settings) return 0;
@@ -504,5 +508,6 @@ export {
     getLastMessageContent,
     getLastMessageDate,
     getChatLetters,
-    isAccentChatSubtitle
+    isAccentChatSubtitle,
+    isChatMuted
 };

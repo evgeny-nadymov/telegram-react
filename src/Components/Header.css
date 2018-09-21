@@ -1,13 +1,13 @@
 
 .header-master{
-    height: 64px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     overflow: hidden;
 }
 
 .header-details{
-    height: 64px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     overflow: hidden;

@@ -1,0 +1,10 @@
+.dialog-command-wrapper{
+    text-align: center;
+    height: 65px;
+    box-sizing: border-box;
+    border-top: 1px solid #E9EBED;
+}
+
+.dialog-command-actions{
+    margin: 0 auto;
+}

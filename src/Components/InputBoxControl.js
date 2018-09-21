@@ -53,6 +53,7 @@ class InputBoxControl extends Component{
         this.handleSendPhoto = this.handleSendPhoto.bind(this);
         this.handleSendingMessage = this.handleSendingMessage.bind(this);
         this.onUpdateSelectedChatId = this.onUpdateSelectedChatId.bind(this);
+        this.getNewChatDraftMessage = this.getNewChatDraftMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -72,6 +73,10 @@ class InputBoxControl extends Component{
     }
 
     componentWillUnmount(){
+        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.selectedChatId);
+
+        this.setChatDraftMessage(newChatDraftMessage);
+
         ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
     }
 
@@ -80,40 +85,35 @@ class InputBoxControl extends Component{
     }
 
     componentDidUpdate(prevProps, prevState, snapshot){
-        if (!snapshot) return;
 
-        const { chatId, newDraft } = snapshot;
+        this.setChatDraftMessage(snapshot);
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState){
+        if (prevState.selectedChatId === this.state.selectedChatId) return;
+
+        return this.getNewChatDraftMessage(prevState.selectedChatId);
+    }
+
+    setChatDraftMessage(chatDraftMessage){
+        if (!chatDraftMessage) return;
+
+        const { chatId, draftMessage } = chatDraftMessage;
         if (!chatId) return;
-
-        const newDraftMessage = {
-            '@type': 'draftMessage',
-            reply_to_message_id: 0,
-            input_message_text: {
-                '@type': 'inputMessageText',
-                text: {
-                    '@type': 'formattedText',
-                    text: newDraft,
-                    entities: null
-                },
-                disable_web_page_preview: true,
-                clear_draft: false
-            }
-        };
 
         TdLibController
             .send({
                 '@type': 'setChatDraftMessage',
                 chat_id: chatId,
-                draft_message: newDraftMessage
+                draft_message: draftMessage
             });
     }
 
-    getSnapshotBeforeUpdate(prevProps, prevState){
-        let previousChat = ChatStore.get(prevState.selectedChatId);
-        if (!previousChat) return;
-        if (previousChat.id === this.state.selectedChatId) return;
+    getNewChatDraftMessage(selectedChatId){
+        let chat = ChatStore.get(selectedChatId);
+        if (!chat) return;
 
-        const {draft_message} = previousChat;
+        const {draft_message} = chat;
 
         let newDraft = this.getInputText();
         let previousDraft = '';
@@ -124,7 +124,22 @@ class InputBoxControl extends Component{
         }
 
         if (newDraft !== previousDraft){
-            return { chatId : previousChat.id, newDraft : newDraft } ;
+            const draftMessage = {
+                '@type': 'draftMessage',
+                reply_to_message_id: 0,
+                input_message_text: {
+                    '@type': 'inputMessageText',
+                    text: {
+                        '@type': 'formattedText',
+                        text: newDraft,
+                        entities: null
+                    },
+                    disable_web_page_preview: true,
+                    clear_draft: false
+                }
+            };
+
+            return { chatId : selectedChatId, draftMessage : draftMessage } ;
         }
 
         return null;

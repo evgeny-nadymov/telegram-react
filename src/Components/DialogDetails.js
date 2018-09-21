@@ -46,8 +46,6 @@ class DialogDetails extends Component{
     };
 
     showDialogFooter(){
-        return false;
-
         const chat = ChatStore.get(this.state.selectedChatId);
         if (!chat) return false;
 
@@ -104,7 +102,7 @@ class DialogDetails extends Component{
             <div className='details'>
                 <Header />
                 <MessagesList ref={this.messagesList} selectedChatId={this.state.selectedChatId} onSelectChat={this.props.onSelectChat}/>
-                { selectedChat && dialogFooter }
+                <DialogFooterControl selectedChatId={this.state.selectedChatId}/>
             </div>
         );
     }

@@ -1,7 +1,13 @@
 import React from 'react';
 import ChatStore from '../Stores/ChatStore';
 import classNames from 'classnames';
-import {getChatMuteFor, getChatUnreadCount, getChatUnreadMentionCount, getChatUnreadMessageIcon} from '../Utils/Chat';
+import {
+    getChatMuteFor,
+    getChatUnreadCount,
+    getChatUnreadMentionCount,
+    getChatUnreadMessageIcon,
+    isChatMuted
+} from "../Utils/Chat";
 import './DialogBadgeControl.css';
 
 class DialogBadgeControl extends React.Component {
@@ -61,15 +67,14 @@ class DialogBadgeControl extends React.Component {
         const unreadCount = getChatUnreadCount(chat);
         const unreadMentionCount = getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
-        const muteFor = getChatMuteFor(chat);
-        const muteForClassName = muteFor > 0 ? 'dialog-badge-muted' : '';
+        const muteClassName = isChatMuted(chat) ? 'dialog-badge-muted' : '';
 
         return (
             <React.Fragment>
                 {unreadMessageIcon && <i className='dialog-badge-unread'/>}
                 {unreadMentionCount && <div className='dialog-badge'><div className='dialog-badge-mention'>@</div></div> }
                 {showUnreadCount
-                    ? <div className={classNames(muteForClassName, 'dialog-badge')}><span className='dialog-badge-text'>{unreadCount}</span></div>
+                    ? <div className={classNames(muteClassName, 'dialog-badge')}><span className='dialog-badge-text'>{unreadCount}</span></div>
                     : (chat.is_pinned && !unreadMessageIcon ? <i className='dialog-badge-pinned'/> : null) }
             </React.Fragment>
         );
