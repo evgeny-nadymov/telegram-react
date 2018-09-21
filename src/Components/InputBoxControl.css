@@ -1,3 +1,7 @@
+.inputbox-attach-icon{
+    transform: rotateZ(45deg);
+}
+
 .inputbox-wrapper{
     padding: 0 12px;
     display: flex;

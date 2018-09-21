@@ -17,11 +17,12 @@ const styles = {
     },
     searchIconButton : {
         margin: '8px 12px 8px 0',
-    },
-    menuAnchorOrigin : {
-        vertical: 'bottom',
-        horizontal: 'left'
     }
+};
+
+const menuAnchorOrigin = {
+    vertical: 'bottom',
+    horizontal: 'left'
 };
 
 class DialogsHeader extends React.Component {
@@ -95,11 +96,8 @@ class DialogsHeader extends React.Component {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={this.handleMenuClose}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                }}
-                getContentAnchorEl={null}>
+                getContentAnchorEl={null}
+                anchorOrigin={menuAnchorOrigin}>
                 <MenuItem onClick={this.handleClearCache}>Clear cache</MenuItem>
                 <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
             </Menu>)

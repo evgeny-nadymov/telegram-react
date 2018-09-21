@@ -328,8 +328,8 @@ class InputBoxControl extends Component{
 
                 callback(result);
             })
-            .catch(error =>{
-                alert('sendMessage error ' + error);
+            .catch(error => {
+                alert('sendMessage error ' + JSON.stringify(error));
             });
 
         /*if (this.state.selectedChat.draft_message){
@@ -362,11 +362,11 @@ class InputBoxControl extends Component{
             <div className='inputbox-wrapper'>
                 <div className='inputbox-left-column'>
                     <IconButton
-                        className={classes.iconButton} 
+                        className={classes.iconButton}
                         aria-label='Attach'
                         open={Boolean(anchorEl)}
                         onClick={this.handleMenuClick}>
-                        <AttachFileIcon />
+                        <AttachFileIcon className='inputbox-attach-icon'/>
                     </IconButton>
                     <Menu
                         id='attach-menu'
@@ -374,8 +374,12 @@ class InputBoxControl extends Component{
                         open={Boolean(anchorEl)}
                         getContentAnchorEl={null}
                         anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left',
+                        }}
+                        transformOrigin={{
                             vertical: 'bottom',
-                            horizontal: 'right'
+                            horizontal: 'left',
                         }}
                         onClose={this.handleMenuClose}>
                         <MenuItem onClick={this.handleAttachPhoto}>
