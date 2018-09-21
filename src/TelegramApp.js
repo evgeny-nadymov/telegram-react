@@ -16,7 +16,7 @@ import ChatStore from './Stores/ChatStore';
 
 const theme = createMuiTheme({
     palette: {
-        primary: { main: '#6bace1'},
+        primary: { main: '#3B9EDB'},
     },
 });
 
