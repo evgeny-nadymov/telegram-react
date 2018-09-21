@@ -376,6 +376,26 @@ class InputBoxControl extends Component{
         return (
             <div className='inputbox-wrapper'>
                 <div className='inputbox-left-column'>
+                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
+                        <InsertEmoticonIcon />
+                    </IconButton>
+                </div>
+                <div className='inputbox-middle-column'>
+                    <div
+                        id='inputbox-message'
+                        ref={this.newMessage}
+                        placeholder='Type a message'
+                        key={Date()}
+                        contentEditable={true}
+                        suppressContentEditableWarning={true}
+                        onKeyDown={this.handleKeyDown}
+                        onKeyUp={this.handleInputChange}>
+                        {text}
+                    </div>
+                    <input ref={this.attachDocument} className='inputbox-attach-button' type='file' multiple='multiple' onChange={this.handleAttachDocumentComplete}/>
+                    <input ref={this.attachPhoto} className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' onChange={this.handleAttachPhotoComplete}/>
+                </div>
+                <div className='inputbox-right-column'>
                     <IconButton
                         className={classes.iconButton}
                         aria-label='Attach'
@@ -390,11 +410,11 @@ class InputBoxControl extends Component{
                         getContentAnchorEl={null}
                         anchorOrigin={{
                             vertical: 'top',
-                            horizontal: 'left',
+                            horizontal: 'right',
                         }}
                         transformOrigin={{
                             vertical: 'bottom',
-                            horizontal: 'left',
+                            horizontal: 'right',
                         }}
                         onClose={this.handleMenuClose}>
                         <MenuItem onClick={this.handleAttachPhoto}>
@@ -410,26 +430,7 @@ class InputBoxControl extends Component{
                             <ListItemText inset primary='Document' />
                         </MenuItem>
                     </Menu>
-                </div>
-                <div className='inputbox-middle-column'>
-                    <div
-                        id='inputbox-message'
-                        ref={this.newMessage}
-                        placeholder='Write a message...'
-                        key={Date()}
-                        contentEditable={true}
-                        suppressContentEditableWarning={true}
-                        onKeyDown={this.handleKeyDown}
-                        onKeyUp={this.handleInputChange}>
-                        {text}
-                    </div>
-                    <input ref={this.attachDocument} className='inputbox-attach-button' type='file' multiple='multiple' onChange={this.handleAttachDocumentComplete}/>
-                    <input ref={this.attachPhoto} className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' onChange={this.handleAttachPhotoComplete}/>
-                </div>
-                <div className='inputbox-right-column'>
-                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
-                        <InsertEmoticonIcon />
-                    </IconButton>
+
                     {/*<IconButton>*/}
                         {/*<KeyboardVoiceIcon />*/}
                     {/*</IconButton>*/}
