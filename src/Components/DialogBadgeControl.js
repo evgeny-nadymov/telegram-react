@@ -7,8 +7,9 @@ import {
     getChatUnreadMentionCount,
     getChatUnreadMessageIcon,
     isChatMuted
-} from "../Utils/Chat";
+} from '../Utils/Chat';
 import './DialogBadgeControl.css';
+import ApplicationStore from '../Stores/ApplicationStore';
 
 class DialogBadgeControl extends React.Component {
     constructor(props){
@@ -25,6 +26,7 @@ class DialogBadgeControl extends React.Component {
         // };
 
         this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateScopeNotificationSettings = this.onUpdateScopeNotificationSettings.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -42,6 +44,7 @@ class DialogBadgeControl extends React.Component {
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateChatReadOutbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
+        ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     componentWillUnmount(){
@@ -51,6 +54,7 @@ class DialogBadgeControl extends React.Component {
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
+        ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     onUpdate(update){
@@ -58,6 +62,28 @@ class DialogBadgeControl extends React.Component {
         if (update.chat_id !== this.props.chatId) return;
 
         this.forceUpdate();
+    }
+
+    onUpdateScopeNotificationSettings(update){
+        const chat = ChatStore.get(this.props.chatId);
+        if (!chat) return;
+
+        switch (update.scope['@type']) {
+            case 'notificationSettingsScopeGroupChats': {
+                if (chat.type['@type'] === 'chatTypeBasicGroup'
+                    || chat.type['@type'] === 'chatTypeSupergroup'){
+                    this.forceUpdate();
+                }
+                break;
+            }
+            case 'notificationSettingsScopePrivateChats':{
+                if (chat.type['@type'] === 'chatTypePrivate'
+                    || chat.type['@type'] === 'chatTypeSecret'){
+                    this.forceUpdate();
+                }
+                break;
+            }
+        }
     }
 
     render() {

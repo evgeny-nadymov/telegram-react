@@ -2,6 +2,7 @@ import React from 'react';
 import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
+import ApplicationStore from '../Stores/ApplicationStore';
 import {withStyles} from '@material-ui/core/styles';
 import InputBoxControl from './InputBoxControl';
 import DialogCommandControl from './DialogCommandControl';
@@ -18,7 +19,10 @@ class DialogFooterControl extends React.Component {
         this.handleMute = this.handleMute.bind(this);
         this.handleUnmute = this.handleUnmute.bind(this);
 
-        this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateBasicGroup = this.onUpdateBasicGroup.bind(this);
+        this.onUpdateSupergroup = this.onUpdateSupergroup.bind(this);
+        this.onUpdateChatNotificationSettings = this.onUpdateChatNotificationSettings.bind(this);
+        this.onUpdateScopeNotificationSettings = this.onUpdateScopeNotificationSettings.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -30,18 +34,68 @@ class DialogFooterControl extends React.Component {
     }
 
     componentDidMount(){
-        ChatStore.on('updateChatNotificationSettings', this.onUpdate);
+        ChatStore.on('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
+        ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
+        ChatStore.removeListener('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
+        ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
 
-    onUpdate(update){
+    onUpdateChatNotificationSettings(update){
         if (!update.chat_id) return;
         if (update.chat_id !== this.props.selectedChatId) return;
 
         this.forceUpdate();
+    }
+
+    onUpdateScopeNotificationSettings(update){
+        const chat = ChatStore.get(this.props.selectedChatId);
+        if (!chat) return;
+
+        switch (update.scope['@type']) {
+            case 'notificationSettingsScopeGroupChats': {
+                if (chat.type['@type'] === 'chatTypeBasicGroup'
+                    || chat.type['@type'] === 'chatTypeSupergroup'){
+                    this.forceUpdate();
+                }
+                break;
+            }
+            case 'notificationSettingsScopePrivateChats':{
+                if (chat.type['@type'] === 'chatTypePrivate'
+                    || chat.type['@type'] === 'chatTypeSecret'){
+                    this.forceUpdate();
+                }
+                break;
+            }
+        }
+    }
+
+    onUpdateBasicGroup(update){
+        const chat = ChatStore.get(this.props.selectedChatId);
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeBasicGroup'
+            && chat.type.basic_group_id === update.basic_group.id){
+            this.forceUpdate();
+        }
+    }
+
+    onUpdateSupergroup(update){
+        const chat = ChatStore.get(this.props.selectedChatId);
+        if (!chat) return;
+
+        if (chat.type
+            && chat.type['@type'] === 'chatTypeSupergroup'
+            && chat.type.supergroup_id === update.supergroup.id){
+            this.forceUpdate();
+        }
     }
 
     handleJoin(){
@@ -71,14 +125,19 @@ class DialogFooterControl extends React.Component {
         if (!chat) return;
         if (!chat.notification_settings) return;
 
-        const newNotificationSettings = {...chat.notification_settings};
-        newNotificationSettings.mute_for = muteFor;
+        const newNotificationSettings = {...chat.notification_settings, use_default_mute_for : false, mute_for : muteFor};
 
         TdLibController
             .send({
                 '@type': 'setChatNotificationSettings',
                 chat_id: chatId,
                 notification_settings: newNotificationSettings
+            })
+            .then(result => {
+                console.log(result);
+            })
+            .catch(error => {
+                console.log(error);
             });
     }
 

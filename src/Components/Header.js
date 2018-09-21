@@ -73,7 +73,7 @@ class Header extends Component{
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
         BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
-        BasicGroupStore.on('updateSupergroup', this.onUpdateSupergroup);
+        SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
 
@@ -88,9 +88,9 @@ class Header extends Component{
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        SupergroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
+        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
-        SupergroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
 
         ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);

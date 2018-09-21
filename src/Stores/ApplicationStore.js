@@ -5,6 +5,8 @@ class ApplicationStore extends EventEmitter{
     constructor(){
         super();
 
+        this.scopeNotificationSettings = new Map();
+
         this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
 
@@ -21,6 +23,12 @@ class ApplicationStore extends EventEmitter{
             }
             case 'updateConnectionState':{
                 this.connectionState = update.state;
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'updateScopeNotificationSettings':{
+                this.setNotificationSettings(update.scope['@type'], update.notification_settings);
 
                 this.emit(update['@type'], update);
                 break;
@@ -47,6 +55,14 @@ class ApplicationStore extends EventEmitter{
     assign(source1, source2){
         Object.assign(source1, source2);
         //this.set(Object.assign({}, source1, source2));
+    }
+
+    getNotificationSettings(scope){
+        return this.scopeNotificationSettings.get(scope);
+    }
+
+    setNotificationSettings(scope, notificationSettings){
+        return this.scopeNotificationSettings.set(scope, notificationSettings);
     }
 }
 

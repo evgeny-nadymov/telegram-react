@@ -2,6 +2,7 @@ import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
+import ApplicationStore from '../Stores/ApplicationStore';
 import dateFormat from 'dateformat';
 import {getUserStatus, isAccentUserSubtitle} from './User';
 import {getSupergroupStatus} from './Supergroup';
@@ -186,9 +187,9 @@ function getLastMessageSenderName(chat){
 
 function getLastMessageContent(chat){
     if (!chat) return '[chat undefined]';
-    if (!chat.last_message) return '';
+    if (!chat.last_message) return null;
     const content = chat.last_message.content;
-    if (!content) return '';
+    if (!content) return null;
 
     let caption = '';
     if (content.caption && content.caption.text){
@@ -388,11 +389,34 @@ function isChatMuted(chat){
 
 function getChatMuteFor(chat){
     if (!chat) return 0;
-    if (!chat.notification_settings) return 0;
-    if (chat.notification_settings['@type'] !== 'chatNotificationSettings') return 0;
-    if (!chat.notification_settings.mute_for) return 0;
 
-    return chat.notification_settings.mute_for;
+    if (chat.use_default_mute_for){
+        switch (chat.type) {
+            case 'chatTypePrivate':
+            case 'chatTypeSecret':{
+                const notificationSettings = ApplicationStore.getNotificationSettings('notificationSettingsScopePrivateChats');
+                if (notificationSettings){
+                    return notificationSettings.mute_for;
+                }
+
+                return 0;
+            }
+            case 'chatTypeBasicGroup':
+            case 'chatTypeSupergroup':{
+                const notificationSettings = ApplicationStore.getNotificationSettings('notificationSettingsScopeGroupChats');
+                if (notificationSettings){
+                    return notificationSettings.mute_for;
+                }
+
+                return 0;
+            }
+        }
+    }
+    else{
+        if (!chat.notification_settings) return 0;
+
+        return chat.notification_settings.mute_for;
+    }
 }
 
 function getLastMessageDate(chat){

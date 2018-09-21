@@ -64,7 +64,7 @@ class DialogContentControl extends React.Component {
         }
 
         if (!contentControl){
-            const content = getLastMessageContent(chat);
+            const content = getLastMessageContent(chat) || '\u00A0';
             const senderName = getLastMessageSenderName(chat);
             contentControl = (
                 <React.Fragment>

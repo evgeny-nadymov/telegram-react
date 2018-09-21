@@ -42,6 +42,8 @@ class DialogsList extends React.Component {
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
+        //BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
+        //SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
 
         if (!this.once
             && this.props.authState === 'ready'){
@@ -56,6 +58,8 @@ class DialogsList extends React.Component {
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
+        //BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
+        //SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
 
     onUpdateState(state){
@@ -67,6 +71,34 @@ class DialogsList extends React.Component {
                 break;
         }
     }
+
+    // onUpdateBasicGroup(update){
+    //     const chat = ChatStore.get(this.props.selectedChatId);
+    //     if (!chat) return;
+    //
+    //     if (chat.type
+    //         && chat.type['@type'] === 'chatTypeBasicGroup'
+    //         && chat.type.basic_group_id === update.basic_group.id){
+    //
+    //         update.order = '';
+    //         update.chat_id = chat.id;
+    //         this.onUpdate(update);
+    //     }
+    // }
+    //
+    // onUpdateSupergroup(update){
+    //     const chat = ChatStore.get(this.props.selectedChatId);
+    //     if (!chat) return;
+    //
+    //     if (chat.type
+    //         && chat.type['@type'] === 'chatTypeSupergroup'
+    //         && chat.type.supergroup_id === update.supergroup.id){
+    //
+    //         update.order = '';
+    //         update.chat_id = chat.id;
+    //         this.onUpdate(update);
+    //     }
+    // }
 
     onUpdate(update) {
         if (update.order === '0') return;

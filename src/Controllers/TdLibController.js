@@ -128,7 +128,6 @@ class TdLibController extends EventEmitter{
                 if (!this.loggingOut) {
                     document.title += ': Zzz…';
                     this.emit('tdlib_updateAppInactive');
-                    //alert('Telegram supports only one active tab with the app.\n' + 'Please reload this page to continue using this tab or close it.');
                 }
                 else{
                     this.init();
