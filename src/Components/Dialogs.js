@@ -5,11 +5,23 @@ import Header from './Header';
 import DialogsList from './DialogsList';
 
 class Dialogs extends Component{
+    constructor(props){
+        super(props);
+
+        this.dialogsList = React.createRef();
+
+        this.handleHeaderClick = this.handleHeaderClick.bind(this);
+    }
+
+    handleHeaderClick(){
+        this.dialogsList.current.scrollToTop();
+    }
+
     render(){
         return (
             <div className='master'>
-                <DialogsHeader onClearCache={this.props.onClearCache}/>
-                <DialogsList authState={this.props.authState} onSelectChat={this.props.onSelectChat}/>
+                <DialogsHeader onClearCache={this.props.onClearCache} onClick={this.handleHeaderClick}/>
+                <DialogsList ref={this.dialogsList} authState={this.props.authState} onSelectChat={this.props.onSelectChat}/>
             </div>
         );
     }

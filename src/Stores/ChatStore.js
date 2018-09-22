@@ -98,7 +98,7 @@ class ChatStore extends EventEmitter{
             case 'updateChatOrder': {
                 let chat = this.get(update.chat_id);
                 if (chat){
-                    this.assign(chat, { order : update.order === '0' ? chat.order : update.order });
+                    this.assign(chat, { order : update.order });
                 }
 
                 this.emit(update['@type'], update);

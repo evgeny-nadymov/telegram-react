@@ -223,6 +223,9 @@ class MessagesList extends React.Component {
                 }
             }
         }
+        else{
+            this.replace([]);
+        }
 
         if (previousChat){
             TdLibController

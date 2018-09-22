@@ -18,6 +18,7 @@ class DialogFooterControl extends React.Component {
         this.handleJoin = this.handleJoin.bind(this);
         this.handleMute = this.handleMute.bind(this);
         this.handleUnmute = this.handleUnmute.bind(this);
+        this.handleDeleteAndExit = this.handleDeleteAndExit.bind(this);
 
         this.onUpdateBasicGroup = this.onUpdateBasicGroup.bind(this);
         this.onUpdateSupergroup = this.onUpdateSupergroup.bind(this);
@@ -132,13 +133,24 @@ class DialogFooterControl extends React.Component {
                 '@type': 'setChatNotificationSettings',
                 chat_id: chatId,
                 notification_settings: newNotificationSettings
-            })
-            .then(result => {
-                console.log(result);
-            })
-            .catch(error => {
-                console.log(error);
             });
+    }
+
+    handleDeleteAndExit(){
+        if (!this.props.selectedChatId) return;
+
+        TdLibController
+            .send({
+                '@type': 'deleteChatHistory',
+                chat_id: this.props.selectedChatId,
+                remove_from_chat_list: true
+            });
+
+        // TdLibController
+        //     .send({
+        //         '@type': 'leaveChat',
+        //         chat_id: this.props.selectedChatId
+        //     });
     }
 
     render() {
@@ -155,13 +167,13 @@ class DialogFooterControl extends React.Component {
                             return (<InputBoxControl/>);
                         }
                         case 'chatMemberStatusBanned' : {
-                            return null;
+                            return (<DialogCommandControl command='delete and exit' onCommand={this.handleDeleteAndExit}/>);
                         }
                         case 'chatMemberStatusCreator' : {
                             return (<InputBoxControl/>);
                         }
                         case 'chatMemberStatusLeft' : {
-                            return (<DialogCommandControl command='join' onCommand={this.handleJoin}/>);
+                            return null;
                         }
                         case 'chatMemberStatusMember' : {
                             return (<InputBoxControl/>);
@@ -193,7 +205,7 @@ class DialogFooterControl extends React.Component {
                             return (<InputBoxControl/>);
                         }
                         case 'chatMemberStatusBanned' : {
-                            return null;
+                            return (<DialogCommandControl command='delete and exit' onCommand={this.handleDeleteAndExit}/>);
                         }
                         case 'chatMemberStatusCreator' : {
                             return (<InputBoxControl/>);

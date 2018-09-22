@@ -9,11 +9,3 @@
     display: flex;
     flex-direction: column;
 }
-
-.dialogs-list {
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: 100%;
-    position: relative;
-    padding: 0 12px;
-}

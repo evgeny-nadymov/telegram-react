@@ -5,7 +5,8 @@ function getBasicGroupStatus(basicGroup){
     if (!basicGroup) return null;
 
     if (basicGroup.status
-        && basicGroup.status['@type'] === 'chatMemberStatusBanned'){
+        && (basicGroup.status['@type'] === 'chatMemberStatusBanned'
+            || basicGroup.status['@type'] === 'chatMemberStatusLeft')){
         return 'group is inaccessible';
     }
 

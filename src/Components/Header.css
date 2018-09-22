@@ -33,6 +33,7 @@
     font-family: 'Product Sans', 'Roboto', sans-serif;
     padding: 0 24px;
     user-select: none;
+    background: transparent;
 }
 
 .header-status-content{

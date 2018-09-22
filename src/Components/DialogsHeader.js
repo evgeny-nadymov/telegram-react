@@ -9,6 +9,7 @@ import IconButton from '@material-ui/core/IconButton/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
 import TdLibController from '../Controllers/TdLibController';
+import ChatStore from '../Stores/ChatStore';
 import './Header.css';
 
 const styles = {
@@ -137,7 +138,7 @@ class DialogsHeader extends React.Component {
                 </IconButton>
                 { mainMenuControl }
                 { confirmLogoutDialog }
-                <div className='header-status grow cursor-default'>
+                <div className='header-status grow cursor-pointer' onClick={this.props.onClick}>
                     <span className='header-status-content'>Telegram</span>
                 </div>
                 <IconButton className={classes.searchIconButton} aria-label="Search">
