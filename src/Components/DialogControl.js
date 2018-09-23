@@ -12,6 +12,8 @@ class DialogControl extends Component{
     constructor(props){
         super(props);
 
+        this.dialog = React.createRef();
+
         const chat = ChatStore.get(this.props.chatId);
         this.state={
             chat : chat
@@ -44,6 +46,16 @@ class DialogControl extends Component{
         }
     }
 
+    componentDidUpdate(prevProps, prevState){
+        // const {chatId} = this.props;
+        // const selectedChatId = ChatStore.getSelectedChatId();
+        // const isSelected = selectedChatId === chatId;
+        //
+        // if (isSelected){
+        //     this.dialog.current.scrollIntoView({ block : 'end', behavior : 'smooth' });
+        // }
+    }
+
     handleSelect(){
         const chat = ChatStore.get(this.props.chatId);
         if (!chat) return;
@@ -58,7 +70,7 @@ class DialogControl extends Component{
         const isSelected = selectedChatId === chatId;
 
         return (
-            <div className={isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>
+            <div ref={this.dialog} className={isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>
                 <div className='dialog-wrapper'>
                     <ChatTileControl chatId={chatId}/>
                     <div className='dialog-inner-wrapper'>

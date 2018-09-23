@@ -20,6 +20,7 @@ class MessagesList extends React.Component {
     constructor(props){
         super(props);
 
+        this.sessionId = Date.now();
         this.state = {
             previousPropsSelectedChatId : 0,
             history : [],
@@ -54,9 +55,14 @@ class MessagesList extends React.Component {
     getSnapshotBeforeUpdate(prevProps, prevState) {
         const list = this.listRef.current;
 
-        console.log('SCROLL GETSNAPSHOTBEFOREUPDATE list.scrollHeight=' + list.scrollHeight);
+        const snapshot = {
+            scrollTop : list.scrollTop,
+            scrollHeight : list.scrollHeight,
+            offsetHeight : list.offsetHeight };
 
-        return list.scrollHeight;
+        console.log(`SCROLL GETSNAPSHOTBEFOREUPDATE list.scrollTop=${list.scrollTop} list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} selectedChatId=${this.props.selectedChatId}`);
+
+        return snapshot;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -68,8 +74,8 @@ class MessagesList extends React.Component {
         this.handleScrollBehavior(snapshot);
     }
 
-    handleScrollBehavior(previousScrollHeight){
-        console.log('SCROLL HANDLESCROLLBEHAVIOR previousScrollHeight=' + previousScrollHeight + ' scrollBehavior=' + this.state.scrollBehavior);
+    handleScrollBehavior(snapshot){
+        console.log(`SCROLL HANDLESCROLLBEHAVIOR scrollBehavior=${this.state.scrollBehavior} previousScrollTop=${snapshot.scrollTop} previousScrollHeight=${snapshot.scrollHeight} previousOffsetHeight=${snapshot.offsetHeight} selectedChatId=${this.props.selectedChatId}`);
         switch (this.state.scrollBehavior) {
             case ScrollBehaviorEnum.NONE:{
 
@@ -81,9 +87,9 @@ class MessagesList extends React.Component {
             }
             case ScrollBehaviorEnum.KEEP_SCROLL_POSITION:{
                 const list = this.listRef.current;
-                console.log('SCROLL HANDLESCROLLBEHAVIOR list.scrollHeight=' + list.scrollHeight + ' previousScrollHeight=' + previousScrollHeight + ' list.scrollTop=' + list.scrollTop);
-                list.scrollTop = list.scrollHeight - previousScrollHeight;
-                console.log('SCROLL HANDLESCROLLBEHAVIOR list.scrollTop=' + list.scrollTop);
+                console.log(`SCROLL KEEP_SCROLL_POSITION before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
+                list.scrollTop = snapshot.scrollTop + (list.scrollHeight - snapshot.scrollHeight);
+                console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
                 break;
             }
         }
@@ -132,9 +138,9 @@ class MessagesList extends React.Component {
     }
 
     handleScroll(){
-        //console.log('SCROLL HANDLESCROLL suppressHandleScroll=' + this.suppressHandleScroll);
 
         const list = this.listRef.current;
+        console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
 
         if (this.suppressHandleScroll){
             this.suppressHandleScroll = false;
@@ -142,12 +148,12 @@ class MessagesList extends React.Component {
         }
 
         if (list && list.scrollTop <= 0){
-            //console.log('SCROLL HANDLESCROLL onLoadNext');
+            console.log('SCROLL HANDLESCROLL onLoadNext');
 
             this.onLoadNext();
         }
         else{
-            //console.log('SCROLL HANDLESCROLL updateItemsInView');
+            console.log('SCROLL HANDLESCROLL updateItemsInView');
 
             this.updateItemsInView();
         }
@@ -172,7 +178,11 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
 
+        this.sessionId = Date.now();
+
         if (chat){
+            let sessionId = this.sessionId;
+
             TdLibController
                 .send({
                     '@type': 'openChat',
@@ -189,6 +199,10 @@ class MessagesList extends React.Component {
                 });
 
             //TODO: replace result with one-way data flow
+            if (sessionId !== this.sessionId){
+                return;
+            }
+
             if (this.props.selectedChatId !== chatId){
                 return;
             }
@@ -531,11 +545,18 @@ class MessagesList extends React.Component {
 
     scrollToBottom() {
         this.suppressHandleScroll = true;
-
         const list = this.listRef.current;
-        console.log('SCROLL SCROLLTOBOTTOM list.scrollHeight=' + list.scrollHeight + ' list.offsetHeight=' + list.offsetHeight + ' list.scrollTop=' + list.scrollTop);
-        list.scrollTop = list.scrollHeight - list.offsetHeight;
-        console.log('SCROLL SCROLLTOBOTTOM list.scrollTop=' + list.scrollTop);
+        console.log(`SCROLL SCROLLTOBOTTOM before list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} list.scrollTop=${list.scrollTop} selectedChatId=${this.props.selectedChatId}`);
+
+        const nextScrollTop = list.scrollHeight - list.offsetHeight;
+        if (nextScrollTop !== list.scrollTop){
+            list.scrollTop = list.scrollHeight - list.offsetHeight;
+            console.log(`SCROLL SCROLLTOBOTTOM after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} selectedChatId=${this.props.selectedChatId}`);
+        }
+        else{
+            console.log(`SCROLL SCROLLTOBOTTOM after(already bottom) list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} selectedChatId=${this.props.selectedChatId}`);
+        }
+
     };
 
     render() {
