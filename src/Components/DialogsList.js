@@ -22,6 +22,7 @@ class DialogsList extends React.Component {
         this.listRef = React.createRef();
 
         this.once = false;
+        this.subscriptions = [];
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
@@ -45,8 +46,6 @@ class DialogsList extends React.Component {
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
-        //BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
-        //SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
 
         if (!this.once
             && this.props.authState === 'ready'){
@@ -55,15 +54,21 @@ class DialogsList extends React.Component {
         }
     }
 
+    createListeners(){
+
+    }
+
     componentWillUnmount(){
+        for (let i = 0; i < this.subscriptions.length; i++){
+            this.subscriptions[i].unsubscribe();
+        }
+
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
 
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatOrder', this.onUpdateChatOrder);
-        //BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
-        //SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
 
     onUpdateState(state){
@@ -75,34 +80,6 @@ class DialogsList extends React.Component {
                 break;
         }
     }
-
-    // onUpdateBasicGroup(update){
-    //     const chat = ChatStore.get(this.props.selectedChatId);
-    //     if (!chat) return;
-    //
-    //     if (chat.type
-    //         && chat.type['@type'] === 'chatTypeBasicGroup'
-    //         && chat.type.basic_group_id === update.basic_group.id){
-    //
-    //         update.order = '';
-    //         update.chat_id = chat.id;
-    //         this.onUpdate(update);
-    //     }
-    // }
-    //
-    // onUpdateSupergroup(update){
-    //     const chat = ChatStore.get(this.props.selectedChatId);
-    //     if (!chat) return;
-    //
-    //     if (chat.type
-    //         && chat.type['@type'] === 'chatTypeSupergroup'
-    //         && chat.type.supergroup_id === update.supergroup.id){
-    //
-    //         update.order = '';
-    //         update.chat_id = chat.id;
-    //         this.onUpdate(update);
-    //     }
-    // }
 
     onUpdateChatOrder(update){
         // NOTE: updateChatOrder is primary used to delete chats with order=0
