@@ -205,7 +205,10 @@ class DialogsList extends React.Component {
             }
         }
 
-        this.reorderChats(chatIds, newChatIds);
+        this.reorderChats(chatIds, newChatIds,
+            () =>{
+                this.loadChatContents(newChatIds);
+            });
     }
 
     componentDidUpdate(){
@@ -287,6 +290,9 @@ class DialogsList extends React.Component {
     }
 
     loadChatContents(chatIds){
+        if (!chatIds) return;
+        if (!chatIds.length) return;
+
         let store = FileController.getStore();
 
         for (let i = 0; i < chatIds.length; i++){
