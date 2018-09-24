@@ -122,20 +122,22 @@ function getText(message){
 
     let text = [];
 
-    if (message.content
-        && message.content['@type'] === 'messageText'
-        && message.content.text
-        && message.content.text['@type'] === 'formattedText'
-        && message.content.text.text) {
-        text = getFormattedText(message.content.text);
+    const {content} = message;
+
+    if (content
+        && content['@type'] === 'messageText'
+        && content.text
+        && content.text['@type'] === 'formattedText'
+        && content.text.text) {
+        text = getFormattedText(content.text);
     }
     else {
         //text.push('[' + message.content['@type'] + ']');//JSON.stringify(x);
-        if (message.content && message.content.caption
-            && message.content.caption['@type'] === 'formattedText'
-            && message.content.caption.text){
+        if (content && content.caption
+            && content.caption['@type'] === 'formattedText'
+            && content.caption.text){
             text.push("\n");
-            let formattedText = getFormattedText(message.content.caption);
+            let formattedText = getFormattedText(content.caption);
             if (formattedText){
                 text = text.concat(formattedText);
             }

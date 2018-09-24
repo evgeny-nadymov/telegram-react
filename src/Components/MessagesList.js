@@ -140,7 +140,7 @@ class MessagesList extends React.Component {
     handleScroll(){
 
         const list = this.listRef.current;
-        console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
+        //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
 
         if (this.suppressHandleScroll){
             this.suppressHandleScroll = false;
@@ -148,12 +148,12 @@ class MessagesList extends React.Component {
         }
 
         if (list && list.scrollTop <= 0){
-            console.log('SCROLL HANDLESCROLL onLoadNext');
+            //console.log('SCROLL HANDLESCROLL onLoadNext');
 
             this.onLoadNext();
         }
         else{
-            console.log('SCROLL HANDLESCROLL updateItemsInView');
+            //console.log('SCROLL HANDLESCROLL updateItemsInView');
 
             this.updateItemsInView();
         }

@@ -16,6 +16,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     padding: 22px 0 22px 0;
+    white-space: pre-wrap;
 }
 
 #inputbox-message:empty::before {
