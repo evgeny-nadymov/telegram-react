@@ -1,6 +1,6 @@
 import React from 'react';
 import MessageStore from '../Stores/MessageStore';
-import { getServiceMessageContent } from '../Utils/Message';
+import { getServiceMessageContent } from '../Utils/ServiceMessage';
 import './ServiceMessageControl.css';
 
 class ServiceMessageControl extends React.Component {

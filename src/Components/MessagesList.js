@@ -9,7 +9,7 @@ import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, ge
 import UserStore from '../Stores/UserStore';
 import MessageControl from './MessageControl';
 import './MessagesList.css';
-import { isServiceMessage } from '../Utils/Message';
+import { isServiceMessage } from '../Utils/ServiceMessage';
 import ServiceMessageControl from './ServiceMessageControl';
 
 const ScrollBehaviorEnum = Object.freeze({

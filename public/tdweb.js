@@ -1453,17 +1453,17 @@ var TdClient = function () {
   function TdClient(options) {
     (0, _classCallCheck3.default)(this, TdClient);
 
-    _logger2.default.setVerbosity(options.jsVerbosity || 'info');
+    _logger2.default.setVerbosity(options.jsVerbosity);
     this.worker = new _worker2.default();
     var self = this;
     this.worker.onmessage = function (e) {
       var response = e.data;
-      _logger2.default.debug('receive from worker: ' + (0, _stringify2.default)(response, function (key, value) {
+      _logger2.default.info('receive from worker: ', JSON.parse((0, _stringify2.default)(response, function (key, value) {
         if (key === 'arr') {
           return undefined;
         }
         return value;
-      }));
+      })));
       if ('@extra' in response) {
         var query_id = response['@extra'].query_id;
 
@@ -1504,7 +1504,7 @@ var TdClient = function () {
     key: 'onBroadcastMessage',
     value: function onBroadcastMessage(e) {
       var message = e.data;
-      _logger2.default.info('got broadcast message: ' + (0, _stringify2.default)(message));
+      _logger2.default.info('got broadcast message: ', message);
       if (message.timestamp > this.timestamp) {
         this.close();
         return;
@@ -1531,7 +1531,7 @@ var TdClient = function () {
         state: this.state,
         timestamp: this.timestamp
       };
-      _logger2.default.info('Post state: ' + (0, _stringify2.default)(state));
+      _logger2.default.info('Post state: ', state);
       this.channel.postMessage(state);
     }
   }, {
@@ -1560,7 +1560,7 @@ var TdClient = function () {
       this.wantSendStart = false;
       this.state = 'active';
       var query = { '@type': 'start' };
-      _logger2.default.debug('send to worker: ' + (0, _stringify2.default)(query));
+      _logger2.default.info('send to worker: ', query);
       this.worker.postMessage(query);
     }
   }, {
@@ -1579,7 +1579,7 @@ var TdClient = function () {
       }
       this.isClosing = true;
 
-      _logger2.default.info('close state: ' + this.state);
+      _logger2.default.info('close state: ', this.state);
 
       if (this.state === 'start') {
         this.onClosed();
@@ -1593,7 +1593,7 @@ var TdClient = function () {
       }
 
       var query = { '@type': 'close' };
-      _logger2.default.debug('send to worker: ' + (0, _stringify2.default)(query));
+      _logger2.default.info('send to worker: ', query);
       this.worker.postMessage(query);
 
       this.state = 'closing';
@@ -1683,7 +1683,7 @@ var TdClient = function () {
         _logger2.default.setVerbosity(query.verbosity);
       }
 
-      _logger2.default.debug('send to worker: ' + (0, _stringify2.default)(query));
+      _logger2.default.info('send to worker: ', query);
       this.worker.postMessage(query);
       return new _promise2.default(function (resolve, reject) {
         _this.query_callbacks.set(_this.query_id, [resolve, reject]);
@@ -3664,7 +3664,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "4f27137ad2938e3a30a9.worker.js");
+  return new Worker(__webpack_require__.p + "583fd257b638934a160b.worker.js");
 };
 
 /***/ }),
@@ -3907,42 +3907,57 @@ var Logger = function () {
 
   (0, _createClass3.default)(Logger, [{
     key: 'debug',
-    value: function debug(str) {
+    value: function debug() {
       if (this.checkVerbosity(4)) {
-        console.log(str);
+        var _console;
+
+        (_console = console).log.apply(_console, arguments);
       }
     }
   }, {
     key: 'log',
-    value: function log(str) {
+    value: function log() {
       if (this.checkVerbosity(4)) {
-        console.log(str);
+        var _console2;
+
+        (_console2 = console).log.apply(_console2, arguments);
       }
     }
   }, {
     key: 'info',
-    value: function info(str) {
+    value: function info() {
       if (this.checkVerbosity(3)) {
-        console.info(str);
+        var _console3;
+
+        (_console3 = console).info.apply(_console3, arguments);
       }
     }
   }, {
     key: 'warn',
-    value: function warn(str) {
+    value: function warn() {
       if (this.checkVerbosity(2)) {
-        console.warn(str);
+        var _console4;
+
+        (_console4 = console).warn.apply(_console4, arguments);
       }
     }
   }, {
     key: 'error',
-    value: function error(str) {
+    value: function error() {
       if (this.checkVerbosity(1)) {
-        console.error(str);
+        var _console5;
+
+        (_console5 = console).error.apply(_console5, arguments);
       }
     }
   }, {
     key: 'setVerbosity',
     value: function setVerbosity(level) {
+      var default_level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
+
+      if (level === undefined) {
+        level = default_level;
+      }
       if (typeof level === 'string') {
         level = { 'ERROR': 1, 'WARNINIG': 2, 'INFO': 3, 'LOG': 4, 'DEBUG': 4 }[level.toUpperCase()] || 2;
       }

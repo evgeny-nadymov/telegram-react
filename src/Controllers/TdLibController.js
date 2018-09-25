@@ -12,7 +12,7 @@ class TdLibController extends EventEmitter{
         this.clientParameters = {
             useTestDC : false,
             verbosity : 1,
-            jsVerbosity : 4
+            jsVerbosity : 3
         };
 
         this.setMaxListeners(Infinity);
@@ -75,7 +75,7 @@ class TdLibController extends EventEmitter{
     }
 
     onUpdate(update) {
-        console.log('receive from worker', update);
+        //console.log('receive from worker', update);
 
         switch (update['@type']) {
             case 'updateAuthorizationState':
