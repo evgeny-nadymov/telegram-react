@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import OptionStore from '../Stores/OptionStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class UserStore extends EventEmitter{
@@ -44,6 +45,14 @@ class UserStore extends EventEmitter{
     assign(source1, source2){
         Object.assign(source1, source2);
         //this.set(Object.assign({}, source1, source2));
+    }
+
+    getMe(){
+        const myId = OptionStore.get('my_id');
+        if (!myId) return null;
+        if (!myId.value) return null;
+
+        return this.get(myId.value.value);
     }
 
     get(userId){

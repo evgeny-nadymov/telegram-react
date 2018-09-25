@@ -9,6 +9,8 @@ import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, ge
 import UserStore from '../Stores/UserStore';
 import MessageControl from './MessageControl';
 import './MessagesList.css';
+import { isServiceMessage } from '../Utils/Message';
+import ServiceMessageControl from './ServiceMessageControl';
 
 const ScrollBehaviorEnum = Object.freeze({
     NONE : 'NONE',
@@ -561,7 +563,18 @@ class MessagesList extends React.Component {
 
     render() {
         this.messages = this.state.history.map(x => {
-            return (<MessageControl key={x.id} showTitle={true} sendingState={x.sending_state} chatId={x.chat_id} messageId={x.id} onSelectChat={this.props.onSelectChat}/>);
+            return (isServiceMessage(x)
+                ? <ServiceMessageControl
+                    key={x.id}
+                    chatId={x.chat_id}
+                    messageId={x.id}/>
+                : <MessageControl
+                    key={x.id}
+                    chatId={x.chat_id}
+                    messageId={x.id}
+                    showTitle={true}
+                    sendingState={x.sending_state}
+                    onSelectChat={this.props.onSelectChat}/>);
         });
 
         return (

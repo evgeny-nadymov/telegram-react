@@ -1,0 +1,11 @@
+.service-message-wrapper{
+    max-width: 500px;
+    padding: 0 15px;
+    margin: 0 auto;
+}
+
+.service-message-content{
+    margin: 16px 10px 16px 16px;
+    color: #70777B;
+    text-align: center;
+}

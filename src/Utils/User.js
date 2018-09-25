@@ -93,7 +93,16 @@ function isAccentUserSubtitle(user) {
     return false;
 }
 
+function getUserFullName(user) {
+    if (!user) return null;
+
+    if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`;
+    if (user.first_name) return user.first_name;
+    if (user.last_name) return user.last_name;
+}
+
 export {
     getUserStatus,
-    isAccentUserSubtitle
+    isAccentUserSubtitle,
+    getUserFullName
 }
