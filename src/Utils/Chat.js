@@ -8,6 +8,7 @@ import {getUserStatus, isAccentUserSubtitle} from './User';
 import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
 import {getLetters} from './Common';
+import { getServiceMessageContent, isServiceMessage } from './ServiceMessage';
 
 function getGroupChatTypingString(inputTypingManager){
     if (!inputTypingManager) return null;
@@ -168,6 +169,7 @@ function getChatDraft(chat){
 function getLastMessageSender(chat){
     if (!chat) return null;
     if (!chat.last_message) return null;
+    if (isServiceMessage(chat.last_message)) return null;
     if (!chat.last_message.sender_user_id) return null;
 
     return UserStore.get(chat.last_message.sender_user_id);
@@ -196,170 +198,128 @@ function getLastMessageContent(chat){
         caption = `, ${content.caption.text}`;
     }
 
-    let text = '';
     switch (content['@type']) {
         case 'messageAnimation': {
-            text = 'GIF';
-            break;
+            return 'GIF' + caption;
         }
         case 'messageAudio': {
-            text = 'Audio';
-            break;
+            return 'Audio' + caption;
         }
         case 'messageBasicGroupChatCreate': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageCall': {
-            text = 'Call';
-            break;
+            return 'Call' + caption;
         }
         case 'messageChatAddMembers': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatChangePhoto': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatChangeTitle': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatDeleteMember': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatDeletePhoto': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatJoinByLink': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatSetTtl': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatUpgradeFrom': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageChatUpgradeTo': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageContact': {
-            text = 'Contact';
-            break;
+            return 'Contact' + caption;
         }
         case 'messageContactRegistered': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageCustomServiceAction': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageDocument':{
-            text = 'Document';
-            break;
+            return 'Document' + caption;
         }
         case 'messageExpiredPhoto':{
-            text = 'Photo';
-            break;
+            return 'Photo' + caption;
         }
         case 'messageExpiredVideo':{
-            text = 'Video';
-            break;
+            return 'Video' + caption;
         }
         case 'messageGame': {
-            text = 'Game';
-            break;
+            return 'Game' + caption;
         }
         case 'messageGameScore': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageInvoice': {
-            text = 'Invoice';
-            break;
+            return 'Invoice' + caption;
         }
         case 'messageLocation': {
-            text = 'Location';
-            break;
+            return 'Location' + caption;
         }
         case 'messagePassportDataReceived': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messagePassportDataSent': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messagePaymentSuccessful': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messagePaymentSuccessfulBot': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messagePhoto': {
-            text = 'Photo';
-            break;
+            return 'Photo' + caption;
         }
         case 'messagePinMessage': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageScreenshotTaken': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageSticker': {
-            text = 'Sticker';
-            break;
+            return 'Sticker' + caption;
         }
         case 'messageSupergroupChatCreate': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageText': {
-            text = content.text.text;
-            break;
+            return content.text.text + caption;
         }
         case 'messageUnsupported': {
-            text = 'Unsupported';
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         case 'messageVenue': {
-            text = 'Venue';
-            break;
+            return 'Venue' + caption;
         }
         case 'messageVideo': {
-            text = 'Video';
-            break;
+            return 'Video' + caption;
         }
         case 'messageVideoNote': {
-            text = 'Video message';
-            break;
+            return 'Video message' + caption;
         }
         case 'messageVoiceNote': {
-            text = 'Voice message';
-            break;
+            return 'Voice message' + caption;
         }
         case 'messageWebsiteConnected': {
-            text = `[${content['@type']}]`;
-            break;
+            return getServiceMessageContent(chat.last_message);
         }
         default: {
-            text = `[${content['@type']}]`;
+            return `[${content['@type']}]`;
         }
     }
-
-    return text + caption;
 }
 
 function getChatUnreadMessageIcon(chat){

@@ -74,7 +74,7 @@ function getUserStatus(user){
             return 'online';
         }
         case 'userStatusRecently':{
-            return 'recently';
+            return 'last seen recently';
         }
     }
 

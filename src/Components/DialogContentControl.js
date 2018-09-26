@@ -69,7 +69,7 @@ class DialogContentControl extends React.Component {
             contentControl = (
                 <React.Fragment>
                     {senderName && <span className='dialog-content-accent'>{senderName}: </span>}
-                    <span>{content}</span>
+                    {content}
                 </React.Fragment>
             );
         }

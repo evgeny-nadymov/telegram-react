@@ -101,7 +101,12 @@ class DialogDetails extends Component{
         return (
             <div className='details'>
                 <Header />
-                <MessagesList ref={this.messagesList} selectedChatId={this.state.selectedChatId} onSelectChat={this.props.onSelectChat}/>
+                <MessagesList
+                    ref={this.messagesList}
+                    selectedChatId={this.state.selectedChatId}
+                    onSelectChat={this.props.onSelectChat}
+                    onSelectUser={this.props.onSelectUser}
+                />
                 <DialogFooterControl selectedChatId={this.state.selectedChatId}/>
             </div>
         );

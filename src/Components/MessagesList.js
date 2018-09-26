@@ -567,7 +567,8 @@ class MessagesList extends React.Component {
                 ? <ServiceMessageControl
                     key={x.id}
                     chatId={x.chat_id}
-                    messageId={x.id}/>
+                    messageId={x.id}
+                    onSelectChat={this.props.onSelectChat}/>
                 : <MessageControl
                     key={x.id}
                     chatId={x.chat_id}

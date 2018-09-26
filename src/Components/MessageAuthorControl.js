@@ -6,6 +6,14 @@ import { getUserFullName } from '../Utils/User';
 class MessageAuthorControl extends React.Component {
     constructor(props){
         super(props);
+
+        this.handleSelectUser = this.handleSelectUser.bind(this);
+    }
+
+    handleSelectUser(){
+        const user = UserStore.get(this.props.userId);
+
+        this.props.onSelect(user);
     }
 
     render() {
@@ -15,7 +23,9 @@ class MessageAuthorControl extends React.Component {
         const fullName = getUserFullName(user) || 'Deleted Account';
 
         return (
-            <a className='message-author' onClick={this.props.onSelect}>{fullName}</a>
+            this.props.onSelect
+                ? <a className='message-author' onClick={this.handleSelectUser}>{fullName}</a>
+                : <React.Fragment>{fullName}</React.Fragment>
         );
     }
 }
