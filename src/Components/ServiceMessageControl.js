@@ -46,9 +46,16 @@ class ServiceMessageControl extends React.Component {
         let serviceMessageContent = getServiceMessageContent(message, this.handleSelectUser);
 
         return (
-            <div className='service-message-wrapper'>
-                <div className='service-message-content'>
-                {serviceMessageContent}
+            <div className='service-message'>
+                {this.props.showUnreadSeparator &&
+                    <div className='message-unread-separator'>
+                        Unread messages
+                    </div>
+                }
+                <div className='service-message-wrapper'>
+                    <div className='service-message-content'>
+                    {serviceMessageContent}
+                    </div>
                 </div>
             </div>
         );

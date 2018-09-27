@@ -1566,6 +1566,7 @@ var TdClient = function () {
   }, {
     key: 'onClosed',
     value: function onClosed() {
+      this.isClosing = true;
       this.worker.terminate();
       _logger2.default.info('worker is terminated');
       this.state = 'closed';
@@ -3664,7 +3665,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "583fd257b638934a160b.worker.js");
+  return new Worker(__webpack_require__.p + "a602a6c1ea2332cd058d.worker.js");
 };
 
 /***/ }),
@@ -3959,7 +3960,7 @@ var Logger = function () {
         level = default_level;
       }
       if (typeof level === 'string') {
-        level = { 'ERROR': 1, 'WARNINIG': 2, 'INFO': 3, 'LOG': 4, 'DEBUG': 4 }[level.toUpperCase()] || 2;
+        level = { ERROR: 1, WARNINIG: 2, INFO: 3, LOG: 4, DEBUG: 4 }[level.toUpperCase()] || 2;
       }
       this.level = level;
     }
@@ -3972,7 +3973,6 @@ var Logger = function () {
   return Logger;
 }();
 
-;
 var log = new Logger();
 exports.default = log;
 

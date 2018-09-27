@@ -9,3 +9,8 @@
     color: #70777B;
     text-align: center;
 }
+
+.service-message:before, .service-message:after{
+    content: ' ';
+    display: table;
+}

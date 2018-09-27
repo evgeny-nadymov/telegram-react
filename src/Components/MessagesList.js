@@ -84,49 +84,39 @@ class MessagesList extends React.Component {
 
     handleScrollBehavior(snapshot){
         console.log(`SCROLL HANDLESCROLLBEHAVIOR scrollBehavior=${this.state.scrollBehavior} previousScrollTop=${snapshot.scrollTop} previousScrollHeight=${snapshot.scrollHeight} previousOffsetHeight=${snapshot.offsetHeight} selectedChatId=${this.props.selectedChatId}`);
-        Label:if (this.state.scrollBehavior === ScrollBehaviorEnum.NONE) {
-            {
+        if (this.state.scrollBehavior === ScrollBehaviorEnum.NONE) {
 
+        }
+        else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
+            this.scrollToBottom();
+        }
+        else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
+            const list = this.listRef.current;
+            console.log(`SCROLL SCROLL_TO_UNREAD before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
 
-            }
-        } else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
-            {
-                this.scrollToBottom();
-
-            }
-        } else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
-            {
-                const list = this.listRef.current;
-                console.log(`SCROLL SCROLL_TO_UNREAD before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-
-                let scrollTop = 0;
-                for (let i = 0; i < this.state.history.length; i++) {
-                    let itemComponent = this.itemsMap.get(i);
-                    let item = ReactDOM.findDOMNode(itemComponent);
-                    if (item) {
-                        console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
-                        if (itemComponent.props.showUnreadSeparator) {
-                            list.scrollTop = scrollTop;
-                            break;
-                        }
-                        else {
-                            scrollTop += item.scrollHeight;
-                        }
+            let scrollTop = 12 + 10; // message-list-top min-height + unread messages margin-top
+            for (let i = 0; i < this.state.history.length; i++) {
+                let itemComponent = this.itemsMap.get(i);
+                let item = ReactDOM.findDOMNode(itemComponent);
+                if (item) {
+                    console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                    if (itemComponent.props.showUnreadSeparator) {
+                        list.scrollTop = item.offsetTop + 10; // + unread messages margin-top
+                        break;
+                    }
+                    else {
+                        scrollTop += item.scrollHeight;
                     }
                 }
-
-                console.log(`SCROLL SCROLL_TO_UNREAD after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-
-
             }
-        } else if (this.state.scrollBehavior === ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
-            {
-                const list = this.listRef.current;
-                console.log(`SCROLL KEEP_SCROLL_POSITION before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-                list.scrollTop = snapshot.scrollTop + (list.scrollHeight - snapshot.scrollHeight);
-                console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
 
-            }
+            console.log(`SCROLL SCROLL_TO_UNREAD after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
+        }
+        else if (this.state.scrollBehavior === ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
+            const list = this.listRef.current;
+            console.log(`SCROLL KEEP_SCROLL_POSITION before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
+            list.scrollTop = snapshot.scrollTop + (list.scrollHeight - snapshot.scrollHeight);
+            console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
         }
     }
 

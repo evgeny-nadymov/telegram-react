@@ -62,7 +62,7 @@ pre code {
     margin: 0 auto;
 }
 
-.message-wrapper:before, .message-wrapper:after{
+.message:before, .message:after{
     content: ' ';
     display: table;
 }
