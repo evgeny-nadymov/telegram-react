@@ -221,6 +221,11 @@ class MessageControl extends Component{
 
         return (
             <div className='message'>
+                {this.props.showUnreadSeparator &&
+                    <div className='message-unread-separator'>
+                        Unread messages
+                    </div>
+                }
                 <div className='message-wrapper'>
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-content'>

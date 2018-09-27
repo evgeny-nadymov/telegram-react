@@ -2,10 +2,9 @@ import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import MessageStore from '../Stores/MessageStore';
-import MessageAuthorControl from '../Components/MessageAuthorControl';
+import MessageUserControl from '../Components/MessageUserControl';
 import Currency from './Currency';
 import React from 'react';
-import { getUserFullName } from './User';
 
 let serviceMap = new Map();
 serviceMap.set('messageBasicGroupChatCreate', 'messageBasicGroupChatCreate');
@@ -111,12 +110,12 @@ function getPassportElementTypeString(type){
 function getMessageAuthor(message, onSelectUser) {
     if (!message) return null;
 
+    if (message.sender_user_id !== 0){
+        return (<MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>);
+    }
+
     const chat = ChatStore.get(message.chat_id);
     if (!chat) return null;
-
-    if (message.sender_user_id !== 0){
-        return (<MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>);
-    }
 
     return chat.title;
 }
@@ -141,14 +140,14 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` created group «${title}»`}
                 </React.Fragment>
             );
         }
         case 'messageChatAddMembers' : {
             const members = content.member_user_ids
-                .map(x => <MessageAuthorControl userId={x} onSelect={onSelectUser}/>)
+                .map(x => <MessageUserControl userId={x} onSelect={onSelectUser}/>)
                 .reduce((accumulator, current, index, array) => {
                     const separator = index === array.length - 1 ? ' and ': ', ';
                     return accumulator === null ? [current] : [...accumulator, separator, current]
@@ -171,13 +170,13 @@ function getServiceMessageContent(message, onSelectUser){
             && content.member_user_ids[0] === message.sender_user_id
                 ? (
                     <React.Fragment>
-                        <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                         {' joined the group'}
                     </React.Fragment>
                 )
                 : (
                     <React.Fragment>
-                        <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                         {' added '}
                         {members}
                     </React.Fragment>
@@ -194,7 +193,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` updated group photo`}
                 </React.Fragment>
             );
@@ -212,7 +211,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` changed group name to «${title}»`}
                 </React.Fragment>
             );
@@ -225,7 +224,7 @@ function getServiceMessageContent(message, onSelectUser){
                     : (
                         <React.Fragment>
                             {'You removed '}
-                            <MessageAuthorControl userId={content.user_id} onSelect={onSelectUser}/>
+                            <MessageUserControl userId={content.user_id} onSelect={onSelectUser}/>
                         </React.Fragment>
                     );
             }
@@ -233,15 +232,15 @@ function getServiceMessageContent(message, onSelectUser){
             return content.user_id === message.sender_user_id
                 ? (
                     <React.Fragment>
-                        <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                         {' left the group'}
                     </React.Fragment>
                 )
                 : (
                     <React.Fragment>
-                        <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                         {' removed '}
-                        <MessageAuthorControl userId={content.user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={content.user_id} onSelect={onSelectUser}/>
                     </React.Fragment>
                 );
         }
@@ -257,7 +256,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {' removed group photo'}
                 </React.Fragment>
             );
@@ -270,7 +269,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {' joined the group via invite link'}
                 </React.Fragment>
             );
@@ -286,7 +285,7 @@ function getServiceMessageContent(message, onSelectUser){
 
                 return (
                     <React.Fragment>
-                        <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                         {' disabled the self-destruct timer'}
                     </React.Fragment>
                 );
@@ -298,7 +297,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` set the self-destruct timer to ${ttlString}`}
                 </React.Fragment>
             );
@@ -315,7 +314,7 @@ function getServiceMessageContent(message, onSelectUser){
         case 'messageContactRegistered' : {
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {' just joined Telegram'}
                 </React.Fragment>
             );
@@ -338,7 +337,7 @@ function getServiceMessageContent(message, onSelectUser){
 
                 return (
                     <React.Fragment>
-                        <MessageAuthorControl userId={messageGame.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={messageGame.sender_user_id} onSelect={onSelectUser}/>
                         {` scored ${content.score} in «${game.title}»`}
                     </React.Fragment>
                 );
@@ -350,7 +349,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` scored ${content.score}`}
                 </React.Fragment>
             );
@@ -368,7 +367,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
                     {' received the following documents: '}
                     {passportElementTypes}
                 </React.Fragment>
@@ -388,7 +387,7 @@ function getServiceMessageContent(message, onSelectUser){
                 return (
                     <React.Fragment>
                         {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                        <MessageAuthorControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                        <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
                         {` for ${invoice.title}`}
                     </React.Fragment>
                 );
@@ -397,7 +396,7 @@ function getServiceMessageContent(message, onSelectUser){
             return (
                 <React.Fragment>
                     {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                    <MessageAuthorControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
                 </React.Fragment>
             );
         }
@@ -519,7 +518,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {' took a screenshot!'}
                 </React.Fragment>
             );
@@ -537,7 +536,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <React.Fragment>
-                    <MessageAuthorControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
                     {` created group «${title}»`}
                 </React.Fragment>
             );

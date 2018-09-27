@@ -1,9 +1,9 @@
 import React from 'react';
-import './MessageAuthorControl.css';
+import './MessageUserControl.css';
 import UserStore from '../Stores/UserStore';
 import { getUserFullName } from '../Utils/User';
 
-class MessageAuthorControl extends React.Component {
+class MessageUserControl extends React.Component {
     constructor(props){
         super(props);
 
@@ -30,4 +30,4 @@ class MessageAuthorControl extends React.Component {
     }
 }
 
-export default MessageAuthorControl;
+export default MessageUserControl;

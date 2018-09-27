@@ -54,10 +54,12 @@ class DialogContentControl extends React.Component {
         if (!contentControl){
             const draft = getChatDraft(chat);
             if (draft){
+                const text = draft.text || '\u00A0';
+
                 contentControl = (
                     <React.Fragment>
                         <span className='dialog-content-draft'>Draft: </span>
-                        <span>{draft.text}</span>
+                        {text}
                     </React.Fragment>
                 );
             }
