@@ -1,4 +1,5 @@
 import {PHOTO_SIZE} from '../Constants';
+import { formatNumber } from 'libphonenumber-js';
 
 function orderCompare(order1, order2){
     let diff = order1.length - order2.length;
@@ -207,6 +208,11 @@ function readImageSize (file, callback) {
     reader.readAsDataURL(file);
 }
 
+function formatPhoneNumber(number){
+    let unformattedNumber = number && number.startsWith('+') ? number : '+' + number;
+    return formatNumber(unformattedNumber, 'International');
+}
+
 export {
     orderCompare,
     getSize,
@@ -216,4 +222,6 @@ export {
     throttle,
     debounce,
     getLetters,
-    readImageSize};
+    readImageSize,
+    formatPhoneNumber
+};

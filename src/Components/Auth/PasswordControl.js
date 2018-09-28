@@ -9,6 +9,8 @@ import Button from '@material-ui/core/Button';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import './PasswordControl.css';
+import FormHelperText from '@material-ui/core/FormHelperText/FormHelperText';
+import TdLibController from '../../Controllers/TdLibController';
 
 const styles = theme => ({
     root: {
@@ -16,7 +18,7 @@ const styles = theme => ({
         flexWrap: 'wrap',
     },
     margin: {
-        margin: '8px 0'
+        margin: '16px 0 8px 0'
     },
     withoutLabel: {
         marginTop: theme.spacing.unit * 3,
@@ -24,9 +26,14 @@ const styles = theme => ({
     textField: {
         flexBasis: 200,
     },
-    button: {
-        margin: '20px',
+    buttonLeft: {
+        marginRight: '8px',
+        marginTop: '16px'
     },
+    buttonRight: {
+        marginLeft: '8px',
+        marginTop: '16px'
+    }
 });
 
 
@@ -38,23 +45,25 @@ class PasswordControl extends React.Component {
         this.state ={
             password : '',
             showPassword : false,
-            hasError : false
+            error : ''
         };
 
         this.handleClickShowPassword = this.handleClickShowPassword.bind(this);
         this.handleMouseDownPassword = this.handleMouseDownPassword.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleKeyPress = this.handleKeyPress.bind(this);
         this.handleBack = this.handleBack.bind(this);
         this.handleNext = this.handleNext.bind(this);
+        this.handleDone = this.handleDone.bind(this);
     }
 
     handleNext(){
-        if (this.password
-            && this.isValid(this.password)){
-            this.props.onPasswordEnter(this.password);
+        if (this.password){
+            this.setState({ error : '' });
+            this.handleDone();
         }
         else{
-            this.setState({hasError : true});
+            this.setState({ error : 'Invalid password. Please try again.' });
         }
     }
 
@@ -62,8 +71,34 @@ class PasswordControl extends React.Component {
         this.props.onChangePhone();
     }
 
-    isValid(password){
-        return true;
+    handleDone(){
+        const password = this.password;
+
+        this.setState({ loading: true });
+        TdLibController
+            .send({
+                '@type': 'checkAuthenticationPassword',
+                password: password
+            })
+            .then(result => {
+
+            })
+            .catch(error => {
+                let errorString = null;
+                if (error
+                    && error['@type'] === 'error'
+                    && error.message){
+                    errorString = error.message;
+                }
+                else{
+                    errorString = JSON.stringify(error);
+                }
+
+                this.setState({ error: errorString });
+            })
+            .finally(() => {
+                this.setState({ loading: false });
+            });
     }
 
     handleMouseDownPassword = event => {
@@ -78,36 +113,68 @@ class PasswordControl extends React.Component {
         this.password = e.target.value;
     }
 
+    handleKeyPress(e){
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            this.handleNext();
+        }
+    }
+
     render() {
-        const { classes } = this.props;
+        const {loading, error, showPassword} = this.state;
+        const {passwordHint, classes} = this.props;
 
         return (
-            <div className='password-wrapper'>
+            <div>
+                <div className='authorization-header'>
+                    <span className='authorization-header-content'>Cloud Password Check</span>
+                </div>
+                <div>
+                    Please enter your cloud password.
+                </div>
                 <FormControl fullWidth className={classNames(classes.margin, classes.textField)}>
-                    <InputLabel htmlFor="adornment-password">Password</InputLabel>
+                    <InputLabel
+                        htmlFor='adornment-password'
+                        error={error}>
+                        Your cloud password
+                    </InputLabel>
                     <Input
                         fullWidth
                         autoFocus
-                        id="adornment-password"
-                        type={this.state.showPassword ? 'text' : 'password'}
+                        id='adornment-password'
+                        type={showPassword ? 'text' : 'password'}
+                        disabled={loading}
+                        error={error}
                         onChange={this.handleChange}
+                        onKeyPress={this.handleKeyPress}
                         endAdornment={
-                            <InputAdornment position="end">
+                            <InputAdornment position='end'>
                                 <IconButton
-                                    aria-label="Toggle password visibility"
+                                    aria-label='Toggle password visibility'
                                     onClick={this.handleClickShowPassword}
                                     onMouseDown={this.handleMouseDownPassword}>
-                                    {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                                    {showPassword ? <VisibilityOff /> : <Visibility />}
                                 </IconButton>
                             </InputAdornment>
                         }
                     />
                 </FormControl>
-                <div>
-                    <Button className={this.props.classes.button} onClick={this.handleBack}>
+                {passwordHint && <FormHelperText id='password-hint-text'><span className='password-hint-label'>Hint: </span>{passwordHint}</FormHelperText>}
+                <FormHelperText id='password-error-text'>{error}</FormHelperText>
+                <div className='authorization-actions'>
+                    <Button
+                        fullWidth
+                        className={classes.buttonLeft}
+                        onClick={this.handleBack}
+                        disabled={loading}>
                         Back
                     </Button>
-                    <Button color='primary' className={this.props.classes.button} onClick={this.handleNext}>
+                    <Button
+                        fullWidth
+                        color='primary'
+                        className={classes.buttonRight}
+                        onClick={this.handleNext}
+                        disabled={loading}>
                         Next
                     </Button>
                 </div>

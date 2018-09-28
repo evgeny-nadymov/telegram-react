@@ -22,12 +22,12 @@
 #inputbox-message:empty::before {
     content: attr(placeholder);
     color: #8E9396;
-    pointer-events: none
+    pointer-events: none;
 }
 
 #inputbox-message:empty:active::before,
 #inputbox-message:empty:focus::before {
-    opacity: .75
+    opacity: .75;
 }
 
 #inputbox-message:focus {

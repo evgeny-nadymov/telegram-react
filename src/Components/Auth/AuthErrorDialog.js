@@ -8,13 +8,14 @@ class AuthErrorDialog extends React.Component {
     constructor(props){
         super(props);
 
-        this.handleAuthError = this.handleAuthError.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-
         this.state = {
             open: false,
             error: null
         };
+
+        this.handleAuthError = this.handleAuthError.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
     componentDidMount(){
@@ -38,6 +39,13 @@ class AuthErrorDialog extends React.Component {
         });
     }
 
+    handleKeyDown(e){
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            this.handleClose();
+        }
+    }
+
     render() {
         let errorString = null;
         if (this.state.error
@@ -52,6 +60,7 @@ class AuthErrorDialog extends React.Component {
         return (
             <Dialog
                 open={this.state.open}
+                onKeyDown={this.handleKeyDown}
                 onClose={this.handleClose}
                 aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Error</DialogTitle>

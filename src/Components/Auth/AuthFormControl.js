@@ -19,47 +19,51 @@ class AuthFormControl extends React.Component {
     constructor(props){
         super(props);
 
-        this.handlePhoneEnter = this.handlePhoneEnter.bind(this);
-        this.handleCodeEnter = this.handleCodeEnter.bind(this);
-        this.handleChangePhone = this.handleChangePhone.bind(this);
-        this.handlePasswordEnter = this.handlePasswordEnter.bind(this);
-    }
+        this.phone = null;
 
-    handleSubmit(status, text){
-        TdLibController.onInputExternal(status, text);
+        this.handlePhoneEnter = this.handlePhoneEnter.bind(this);
     }
     
-    handlePhoneEnter(phone, testServer){
-        //alert('phone=' + phone + ' test_server=' + testServer);
-        this.handleSubmit('waitPhoneNumber', phone);
-    }
-
-    handleChangePhone(){
-        TdLibController.setState({ status: 'waitPhoneNumber' });
-    }
-
-    handleCodeEnter(code){
-        this.handleSubmit('waitCode', code);
-    }
-
-    handlePasswordEnter(password){
-        this.handleSubmit('waitPassword', password);
+    handlePhoneEnter(phone){
+        this.phone = phone;
     }
 
     render() {
+        const {authorizationState} = this.props;
+
         let control = null;
-        switch (this.props.authState){
-            case 'waitPhoneNumber':
-                control = (<SignInControl onPhoneEnter={this.handlePhoneEnter}/>);
+        switch (authorizationState['@type']){
+            case 'authorizationStateWaitPhoneNumber':
+                // control = (
+                //     <React.Fragment>
+                //         <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
+                //         <ConfirmCodeControl phone={this.phone} onCodeEnter={this.handleCodeEnter} onChangePhone={this.handleChangePhone}/>
+                //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
+                //         <SignUpControl/>
+                //     </React.Fragment>);
+                control = (
+                    <SignInControl
+                        phone={this.phone}
+                        onPhoneEnter={this.handlePhoneEnter}/>
+                );
                 break;
-            case 'waitCode':
-                control = (<ConfirmCodeControl onCodeEnter={this.handleCodeEnter} onChangePhone={this.handleChangePhone}/>);
+            case 'authorizationStateWaitCode':
+                control = (
+                    <ConfirmCodeControl
+                        termsOfService={authorizationState.terms_of_service}
+                        codeInfo={authorizationState.code_info}
+                        onChangePhone={this.props.onChangePhone}/>
+                );
+                //control = (<SignUpControl/>);
                 break;
-            case 'waitPassword':
-                control = (<PasswordControl onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>);
-                break;
-            case 'signup':
-                control = (<SignUpControl/>);
+            case 'authorizationStateWaitPassword':
+                control = (
+                    <PasswordControl
+                        passwordHint={authorizationState.password_hint}
+                        hasRecoveryEmailAddress={authorizationState.has_recovery_email_address}
+                        recoveryEmailAddressPattern={authorizationState.recovery_email_address_pattern}
+                        onChangePhone={this.props.onChangePhone}/>
+                );
                 break;
             default:
                 break;
@@ -67,20 +71,8 @@ class AuthFormControl extends React.Component {
         
         return (
             <div className='sign-in-wrap'>
-                <div className='sign-in-head-background'></div>
-                <div className='sign-in-page'>
-                    <div className='sign-in-page'>
-                        <div className='sign-in-head-wrap'>
-                            <a className='sign-in-head-logo-link' href='https://telegram.org' target='_blank'>
-                                <i className='icon icon-tg-logo'></i>
-                                <i className='icon icon-tg-title'></i>
-                            </a>
-                            <div className='sign-in-middle-column'></div>
-                        </div>
-                        <div className='sign-in-form-wrap'>
-                            {control}
-                        </div>
-                    </div>
+                <div className='authorization-form-content'>
+                    {control}
                 </div>
                 <AuthErrorDialog/>
             </div>

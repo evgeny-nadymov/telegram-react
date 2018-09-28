@@ -1,65 +1,27 @@
-.sign-in-head-background{
-    background: #5682a3;
-    height: 226px;
-}
-
-.sign-in-page{
-    margin: -131px auto 90px;
-    max-width: 404px;
-}
-
-.sign-in-head-wrap{
-    height: 75px;
-    display: flex;
-}
-
-.sign-in-form-wrap{
+.authorization-form-content{
     background: #fff;
     padding: 44px 65px;
     box-shadow: 0 1px 1px rgba(97,127,152,.2), 1px 0 0 rgba(97,127,152,.1), -1px 0 0 rgba(97,127,152,.1);
-    border-radius: 2px;
+    border-radius: 8px;
     border: 0;
-    margin: 0;
-    max-width: none;
+    margin: 90px auto 90px;
+    max-width: 274px;
 }
 
-.sign-in-head-logo-link {
-    display: inline-block;
-    line-height: 30px;
-    padding: 23px 15px 22px;
+.authorization-header{
+    font-size: 22px;
+    font-family: 'Product Sans', 'Roboto', sans-serif;
+    padding: 22px 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
-.icon-tg-logo{
-    background-image: url(../../Assets/Icons/General_2x.png);
-    background-size: 40px 948px;
-    width: 30px;
-    height: 30px;
-    display: inline-block;
-    vertical-align: top;
-    margin-right: 18px;
-    background-repeat: no-repeat;
-    background-position: -5px -10px;
+.authorization-header-content{
+    word-wrap: break-word;
+    white-space: nowrap;
 }
 
-.icon-tg-title{
-    width: 62px;
-    height: 14px;
-    display: inline-block;
-    vertical-align: middle;
-    background-image: url(../../Assets/Telegram.svg);
-    background-repeat: no-repeat;
-    background-position: 0 0;
-    margin-top: 1px;
-}
-
-.sign-in-middle-column{
-    flex-grow: 1;
-}
-
-.sign-in-head-submit-wrap {
-    font-weight: 700;
-}
-
-.sign-in-button{
-    margin-left: 20px;
+.authorization-actions{
+    text-align: center;
+    display: flex;
 }

@@ -2,22 +2,26 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { DialogActions, DialogContent, DialogContentText, DialogTitle, InputAdornment } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
+import TdLibController from '../../Controllers/TdLibController';
 import './SignInControl.css';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel/FormControlLabel';
+import { formatPhoneNumber } from '../../Utils/Common';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import IconButton from '@material-ui/core/IconButton';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 const styles = {
     button: {
-        margin: '20px',
+        margin: '16px 0 0 0',
     },
     phone: {
         fontWeight: 'bold',
         textAlign: 'center'
-    },
-    disableTransition: {
-        transition: 'none',
     }
 };
 
@@ -27,27 +31,25 @@ class SignInControl extends React.Component {
         super(props);
 
         this.state = {
-            hasError : false,
+            error : '',
             openConfirmation : false,
-            testServer : false,
+            loading : false
         };
 
         this.handleChange = this.handleChange.bind(this);
-        this.handleSignIn = this.handleSignIn.bind(this);
-        this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.handleNext = this.handleNext.bind(this);
         this.handleClose = this.handleClose.bind(this);
         this.handleDone = this.handleDone.bind(this);
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleChangeServer = this.handleChangeServer.bind(this);
+        this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.handleDialogKeyPress = this.handleDialogKeyPress.bind(this);
     }
 
-    handleSignIn(){
-        if (this.phoneNumber
-            && this.isValidPhoneNumber(this.phoneNumber)){
-            this.setState({hasError : false, openConfirmation: true});
+    handleNext(){
+        if (this.phoneNumber && this.isValidPhoneNumber(this.phoneNumber)){
+            this.setState({error : '', openConfirmation: true});
         }
         else{
-            this.setState({hasError : true});
+            this.setState({error : 'Invalid phone number. Please try again.'});
         }
     }
 
@@ -67,14 +69,17 @@ class SignInControl extends React.Component {
         this.phoneNumber = e.target.value;
     }
 
-    handleChangeServer(e){
-        this.setState({ testServer: e.target.checked })
-    }
-
     handleKeyPress(e){
         if (e.key === 'Enter'){
             e.preventDefault();
-            this.handleSignIn();
+            this.handleNext();
+        }
+    }
+
+    handleDialogKeyPress(e){
+        if (e.key === 'Enter'){
+            e.preventDefault();
+            this.handleDone();
         }
     }
 
@@ -83,63 +88,96 @@ class SignInControl extends React.Component {
     }
 
     handleDone(){
-        this.setState({ openConfirmation: false });
+        const phoneNumber = this.phoneNumber;
 
-        this.props.onPhoneEnter(this.phoneNumber, this.state.testServer);
-    }
-    
-    handleKeyDown(e){
-        if (e.key === 'Enter'){
-            this.handleDone();
-        }
+        this.props.onPhoneEnter(phoneNumber);
+        this.setState({ openConfirmation: false, loading: true });
+        TdLibController
+            .send({
+                '@type': 'setAuthenticationPhoneNumber',
+                phone_number: phoneNumber
+            })
+            .then(result => {
+
+            })
+            .catch(error => {
+                let errorString = null;
+                if (error
+                    && error['@type'] === 'error'
+                    && error.message){
+                    errorString = error.message;
+                }
+                else{
+                    errorString = JSON.stringify(error);
+                }
+
+                this.setState({ error: errorString });
+            })
+            .finally(() => {
+                this.setState({ loading: false });
+            });
     }
 
     render() {
+        const {loading, error, openConfirmation} = this.state;
+        const {phone, classes} = this.props;
+
         return (
-            <div className='sign-in-wrapper'>
+            <FormControl fullWidth>
+                <div className='authorization-header'>
+                    <span className='authorization-header-content'>Your Phone Number</span>
+                </div>
+                <div>
+                    Please confirm your country code and enter your mobile phone number.
+                </div>
                 <TextField
+                    color='primary'
+                    disabled={loading}
+                    error={error}
                     fullWidth
                     autoFocus
-                    error={this.state.hasError}
                     id='phoneNumber'
                     label='Phone number'
                     margin='normal'
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
-                />
-                {/*<FormControlLabel*/}
-                    {/*control={*/}
-                        {/*<Switch color='primary' checked={this.state.testServer} onChange={this.handleChangeServer}/>*/}
-                    {/*}*/}
-                    {/*label='test server'*/}
-                {/*/>*/}
-                <Button color='primary' className={this.props.classes.button} onClick={this.handleSignIn}>
-                    Next
-                </Button>
+                    defaultValue={phone}/>
+                <FormHelperText id='sign-in-error-text'>{error}</FormHelperText>
+                <div className='authorization-actions'>
+                    <Button
+                        fullWidth
+                        color='primary'
+                        disabled={loading}
+                        className={classes.button}
+                        onClick={this.handleNext}>
+                        {/*<CircularProgress size={24}/>*/}
+                        Next
+                    </Button>
+                </div>
                 <Dialog
-                    open={this.state.openConfirmation}
+                    open={openConfirmation}
                     onClose={this.handleClose}
-                    onKeyDown={this.handleKeyDown}
-                    aria-labelledby="form-dialog-title">
-                    <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
+                    onKeyPress={this.handleDialogKeyPress}
+                    aria-labelledby='form-dialog-title'>
+                    <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             Is this phone number correct?
                         </DialogContentText>
-                        <DialogContentText className={this.props.classes.phone}>
-                            {this.phoneNumber}
+                        <DialogContentText className={classes.phone}>
+                            {formatPhoneNumber(this.phoneNumber)}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleClose} color="secondary">
+                        <Button onClick={this.handleClose} color='secondary'>
                             Cancel
                         </Button>
-                        <Button onClick={this.handleDone} color="primary">
+                        <Button onClick={this.handleDone} color='primary'>
                             Confirm
                         </Button>
                     </DialogActions>
                 </Dialog>
-            </div>
+            </FormControl>
         );
     }
 }

@@ -6,13 +6,13 @@ import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
 import TdLibController from './Controllers/TdLibController'
-import FileController from './Controllers/FileController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import {VERBOSITY_MAX, VERBOSITY_MIN, JS_VERBOSITY_MAX, JS_VERBOSITY_MIN} from './Constants';
 import packageJson from '../package.json';
 import AppInactiveControl from './Components/AppInactiveControl';
 import ChatStore from './Stores/ChatStore';
+import ApplicationStore from './Stores/ApplicationStore';
 
 const theme = createMuiTheme({
     palette: {
@@ -29,6 +29,7 @@ class TelegramApp extends Component{
         this.dialogDetails = React.createRef();
 
         this.state = {
+            authorizationState: null,
             authState: 'init',
             inactive: false,
         };
@@ -41,8 +42,10 @@ class TelegramApp extends Component{
 
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
+        this.onUpdateAuthorizationState = this.onUpdateAuthorizationState.bind(this);
         this.onUpdateAppInactive = this.onUpdateAppInactive.bind(this);
         this.handleSelectChat = this.handleSelectChat.bind(this);
+        this.handleChangePhone = this.handleChangePhone.bind(this);
         this.setQueryParams = this.setQueryParams.bind(this);
         this.clearCache = this.clearCache.bind(this);
     }
@@ -64,10 +67,10 @@ class TelegramApp extends Component{
                 let useTestDC = parseInt(params.get('test'), 10);
                 if (useTestDC === 0 || useTestDC === 1){
                     TdLibController.clientParameters.useTestDC = useTestDC === 1;
-                    console.log(`setQueryParams use_test_dc=${TdLibController.clientParameters.useTestDC}`);
+                    //console.log(`setQueryParams use_test_dc=${TdLibController.clientParameters.useTestDC}`);
                 }
                 else{
-                    console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
+                    // console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
                 }
             }
 
@@ -75,10 +78,10 @@ class TelegramApp extends Component{
                 let verbosity = parseInt(params.get('verbosity'), 10);
                 if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX){
                     TdLibController.clientParameters.verbosity = verbosity;
-                    console.log(`setQueryParams verbosity=${TdLibController.clientParameters.verbosity}`);
+                    // console.log(`setQueryParams verbosity=${TdLibController.clientParameters.verbosity}`);
                 }
                 else{
-                    console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
+                    // console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
                 }
             }
 
@@ -86,25 +89,31 @@ class TelegramApp extends Component{
                 let jsVerbosity = parseInt(params.get('jsverbosity'), 10);
                 if (jsVerbosity >= JS_VERBOSITY_MIN && jsVerbosity <= JS_VERBOSITY_MAX){
                     TdLibController.clientParameters.jsVerbosity = jsVerbosity;
-                    console.log(`setQueryParams jsVerbosity=${TdLibController.clientParameters.jsVerbosity}`);
+                    // console.log(`setQueryParams jsVerbosity=${TdLibController.clientParameters.jsVerbosity}`);
                 }
                 else{
-                    console.log(`setQueryParams skip jsVerbosity=${params.get('jsVerbosity')} valid values=[${JS_VERBOSITY_MIN}..${JS_VERBOSITY_MAX}]`);
+                    // console.log(`setQueryParams skip jsVerbosity=${params.get('jsVerbosity')} valid values=[${JS_VERBOSITY_MIN}..${JS_VERBOSITY_MAX}]`);
                 }
             }
         }
     }
 
     componentDidMount(){
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         TdLibController.on('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.on('tdlib_status', this.onUpdateState);
         TdLibController.on('tdlib_update', this.onUpdate);
     }
 
     componentWillUnmount(){
+        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         TdLibController.removeListener('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
         TdLibController.removeListener('tdlib_update', this.onUpdate);
+    }
+
+    onUpdateAuthorizationState(update){
+        this.setState({ authorizationState: update.authorization_state });
     }
 
     onUpdateAppInactive(){
@@ -114,7 +123,7 @@ class TelegramApp extends Component{
     onUpdateState(state){
         switch (state.status) {
             case 'ready':
-                this.setState({authState : state.status});
+                this.setState({ authState : state.status });
                 TdLibController
                     .send({
                         '@type': 'setOption',
@@ -131,20 +140,16 @@ class TelegramApp extends Component{
 
                 break;
             case 'waitPhoneNumber':
-                this.setState({authState: state.status});
+                this.setState({ authState: state.status });
                 break;
             case 'waitCode':
-                this.setState({authState: state.status});
+                this.setState({ authState: state.status });
                 break;
             case 'waitPassword':
-                this.setState({authState: state.status});
+                this.setState({ authState: state.status });
                 break;
             case 'init':
-                this.setState({
-                    history: [],
-                    scrollBottom: false,
-                    authState: state.status
-                });
+                this.setState({ authState: state.status });
                 break;
             default:
                 break;
@@ -213,58 +218,83 @@ class TelegramApp extends Component{
         //     .then(() => alert('cache cleared'));
     }
 
-    render(){
-        let page = null;
+    handleChangePhone(){
+        this.setState({ authorizationState: { '@type': 'authorizationStateWaitPhoneNumber' } });
+    }
 
-        if (this.state.inactive){
+    render(){
+        const {inactive, authorizationState} = this.state;
+
+        let page = (
+            <React.Fragment>
+                <div className='im-page-wrap'>
+                    <Dialogs
+                        onSelectChat={this.handleSelectChat}
+                        authState={this.state.authState}
+                        onClearCache={this.clearCache}/>
+                    <DialogDetails
+                        ref={this.dialogDetails}
+                        currentUser={this.state.currentUser}
+                        onSelectChat={this.handleSelectChat}
+                    />
+                </div>
+                <Footer/>
+            </React.Fragment>
+        );
+
+        if (inactive){
             page = (
-                <div id='app-inner'>
+                <React.Fragment>
                     <div className='header-wrapper'/>
                     <div className='im-page-wrap'>
                         <AppInactiveControl/>
                     </div>
                     <Footer/>
-                </div>
+                </React.Fragment>
             );
         }
-        else{
-            switch (this.state.authState){
-                case 'waitPhoneNumber':
-                case 'waitCode':
-                case 'waitPassword':
+        else if (authorizationState){
+            switch (authorizationState['@type']){
+                case 'authorizationStateClosed': {
+
+                    break;
+                }
+                case 'authorizationStateClosing': {
+
+                    break;
+                }
+                case 'authorizationStateLoggingOut': {
+
+                    break;
+                }
+                case 'authorizationStateReady': {
+
+                    break;
+                }
+                case 'authorizationStateWaitCode':
+                case 'authorizationStateWaitPassword':
+                case 'authorizationStateWaitPhoneNumber':
                     page = (
-                        <div id='app-inner'>
-                            <AuthFormControl authState={this.state.authState}/>
-                        </div>
+                        <AuthFormControl authorizationState={authorizationState} onChangePhone={this.handleChangePhone}/>
                     );
                     break;
-                case 'init':
-                case 'ready':
-                default:
-                    page = (
-                        <div id='app-inner'>
-                            <div className='im-page-wrap'>
-                                <Dialogs
-                                    onSelectChat={this.handleSelectChat}
-                                    authState={this.state.authState}
-                                    onClearCache={this.clearCache}/>
-                                <DialogDetails
-                                    ref={this.dialogDetails}
-                                    currentUser={this.state.currentUser}
-                                    onSelectChat={this.handleSelectChat}
-                                />
-                            </div>
-                            <Footer/>
-                        </div>
-                    );
+                case 'authorizationStateWaitEncryptionKey': {
+
                     break;
+                }
+                case 'authorizationStateWaitTdlibParameters': {
+
+                    break;
+                }
             }
         }
 
         return (
             <MuiThemeProvider theme={theme}>
                 <div id='app'>
-                    {page}
+                    <div id='app-inner'>
+                        {page}
+                    </div>
                 </div>
             </MuiThemeProvider>
         );

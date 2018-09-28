@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './ContactControl.css';
 import UserTileControl from '../UserTileControl';
 import UserStore from '../../Stores/UserStore';
-import {formatNumber} from 'libphonenumber-js';
+import { formatPhoneNumber } from '../../Utils/Common';
 
 class ContactControl extends React.Component {
     constructor(props){
@@ -23,8 +23,7 @@ class ContactControl extends React.Component {
 
         let user = UserStore.get(contact.user_id) || { 'id': contact.user_id, 'first_name' : contact.first_name, 'last_name': contact.last_name };
         let fullName = `${contact.first_name} ${contact.last_name}`;
-        let unformattedNumber = contact.phone_number && contact.phone_number.startsWith('+') ? contact.phone_number : '+' + contact.phone_number;
-        let number = formatNumber(unformattedNumber, 'International');
+        let number = formatPhoneNumber(contact.phone_number);
         let containsUserId = contact.user_id && contact.user_id > 0;
 
         return (
