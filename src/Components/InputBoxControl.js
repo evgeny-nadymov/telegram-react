@@ -19,6 +19,7 @@ import MenuItem from '@material-ui/core/MenuItem/MenuItem';
 import Menu from '@material-ui/core/Menu/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import EmojiPickerButton from './EmojiPickerButton';
 
 const styles = {
     iconButton : {
@@ -49,6 +50,7 @@ class InputBoxControl extends Component{
         this.handleAttachPhotoComplete = this.handleAttachPhotoComplete.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.handleEmojiSelect = this.handleEmojiSelect.bind(this);
 
         this.handleSendPhoto = this.handleSendPhoto.bind(this);
         this.handleSendingMessage = this.handleSendingMessage.bind(this);
@@ -357,6 +359,12 @@ class InputBoxControl extends Component{
         }*/
     }
 
+    handleEmojiSelect(emoji){
+        if (!emoji) return;
+
+        this.newMessage.current.innerText += emoji.native;
+    }
+
     render(){
         const {classes} = this.props;
 
@@ -376,9 +384,10 @@ class InputBoxControl extends Component{
         return (
             <div className='inputbox-wrapper'>
                 <div className='inputbox-left-column'>
-                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
-                        <InsertEmoticonIcon />
-                    </IconButton>
+                    {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
+                        {/*<InsertEmoticonIcon />*/}
+                    {/*</IconButton>*/}
+                    <EmojiPickerButton onSelect={this.handleEmojiSelect}/>
                 </div>
                 <div className='inputbox-middle-column'>
                     <div

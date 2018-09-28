@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.52",
+  "version": "0.0.57",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "^0.2.16",
@@ -9,6 +9,7 @@
     "@material-ui/icons": "^3.0.1",
     "classnames": "^2.2.6",
     "dateformat": "^3.0.3",
+    "emoji-mart": "^2.8.1",
     "events": "^2.1.0",
     "husky": "^0.14.3",
     "libphonenumber-js": "^1.4.6",
