@@ -2,11 +2,9 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import Popover from '@material-ui/core/Popover';
-import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import { Picker } from 'emoji-mart';
 import './EmojiPickerButton.css';
-// import './emoji-mart.css';
 
 const styles = {
     iconButton : {
@@ -35,7 +33,17 @@ class EmojiPickerButton extends React.Component {
     render() {
         const { classes } = this.props;
         const { anchorEl } = this.state;
+
         const open = Boolean(anchorEl);
+
+        if (!this.picker){
+            this.picker = (
+                <Picker
+                    set='apple'
+                    showPreview={false}
+                    onSelect={this.props.onSelect}/>
+            );
+        }
 
         return (
             <React.Fragment>
@@ -58,13 +66,7 @@ class EmojiPickerButton extends React.Component {
                         horizontal: 'left',
                     }}>
 
-                    <Picker
-                        set='apple'
-                        showPreview={false}
-                        perLine={9}
-                        onSelect={this.props.onSelect}
-                        // style={{ height: '300px' }}
-                    />
+                    {this.picker}
                 </Popover>
             </React.Fragment>
         );
