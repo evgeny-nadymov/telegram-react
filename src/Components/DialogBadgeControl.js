@@ -96,13 +96,13 @@ class DialogBadgeControl extends React.Component {
         const muteClassName = isChatMuted(chat) ? 'dialog-badge-muted' : '';
 
         return (
-            <React.Fragment>
+            <>
                 {unreadMessageIcon && <i className='dialog-badge-unread'/>}
                 {unreadMentionCount && <div className='dialog-badge'><div className='dialog-badge-mention'>@</div></div> }
                 {showUnreadCount
                     ? <div className={classNames(muteClassName, 'dialog-badge')}><span className='dialog-badge-text'>{unreadCount}</span></div>
                     : (chat.is_pinned && !unreadMessageIcon ? <i className='dialog-badge-pinned'/> : null) }
-            </React.Fragment>
+            </>
         );
     }
 }

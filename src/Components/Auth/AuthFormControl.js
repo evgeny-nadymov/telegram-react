@@ -35,12 +35,12 @@ class AuthFormControl extends React.Component {
         switch (authorizationState['@type']){
             case 'authorizationStateWaitPhoneNumber':
                 // control = (
-                //     <React.Fragment>
+                //     <>
                 //         <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
                 //         <ConfirmCodeControl phone={this.phone} onCodeEnter={this.handleCodeEnter} onChangePhone={this.handleChangePhone}/>
                 //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
                 //         <SignUpControl/>
-                //     </React.Fragment>);
+                //     </>);
                 control = (
                     <SignInControl
                         phone={this.phone}

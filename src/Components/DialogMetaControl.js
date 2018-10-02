@@ -41,9 +41,9 @@ class DialogMetaControl extends React.Component {
         const date = getLastMessageDate(chat);
 
         return (
-            <React.Fragment>
+            <>
                 {date && <div className='dialog-meta-date'>{date}</div>}
-            </React.Fragment>
+            </>
         );
     }
 }

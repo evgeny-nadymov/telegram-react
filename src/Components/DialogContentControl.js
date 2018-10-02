@@ -57,10 +57,10 @@ class DialogContentControl extends React.Component {
                 const text = draft.text || '\u00A0';
 
                 contentControl = (
-                    <React.Fragment>
+                    <>
                         <span className='dialog-content-draft'>Draft: </span>
                         {text}
-                    </React.Fragment>
+                    </>
                 );
             }
         }
@@ -69,10 +69,10 @@ class DialogContentControl extends React.Component {
             const content = getLastMessageContent(chat) || '\u00A0';
             const senderName = getLastMessageSenderName(chat);
             contentControl = (
-                <React.Fragment>
+                <>
                     {senderName && <span className='dialog-content-accent'>{senderName}: </span>}
                     {content}
-                </React.Fragment>
+                </>
             );
         }
 

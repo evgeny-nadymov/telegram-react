@@ -25,7 +25,7 @@ class MessageUserControl extends React.Component {
         return (
             this.props.onSelect
                 ? <a className='message-author' onClick={this.handleSelectUser}>{fullName}</a>
-                : <React.Fragment>{fullName}</React.Fragment>
+                : <>{fullName}</>
         );
     }
 }

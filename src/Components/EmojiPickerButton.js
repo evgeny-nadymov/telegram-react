@@ -46,7 +46,7 @@ class EmojiPickerButton extends React.Component {
         }
 
         return (
-            <React.Fragment>
+            <>
                 <IconButton className={classes.iconButton} aria-label='Emoticon' onClick={this.switchPopover}>
                     <InsertEmoticonIcon />
                 </IconButton>
@@ -68,7 +68,7 @@ class EmojiPickerButton extends React.Component {
 
                     {this.picker}
                 </Popover>
-            </React.Fragment>
+            </>
         );
     }
 }

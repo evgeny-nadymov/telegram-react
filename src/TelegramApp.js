@@ -226,7 +226,7 @@ class TelegramApp extends Component{
         const {inactive, authorizationState} = this.state;
 
         let page = (
-            <React.Fragment>
+            <>
                 <div className='im-page-wrap'>
                     <Dialogs
                         onSelectChat={this.handleSelectChat}
@@ -239,18 +239,18 @@ class TelegramApp extends Component{
                     />
                 </div>
                 <Footer/>
-            </React.Fragment>
+            </>
         );
 
         if (inactive){
             page = (
-                <React.Fragment>
+                <>
                     <div className='header-wrapper'/>
                     <div className='im-page-wrap'>
                         <AppInactiveControl/>
                     </div>
                     <Footer/>
-                </React.Fragment>
+                </>
             );
         }
         else if (authorizationState){

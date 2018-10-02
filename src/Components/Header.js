@@ -220,11 +220,11 @@ class Header extends Component{
 
         let title = '';
         let titleProgressAnimation = (
-            <React.Fragment>
+            <>
                 <span className='header-progress'>.</span>
                 <span className='header-progress'>.</span>
                 <span className='header-progress'>.</span>
-            </React.Fragment>);
+            </>);
         let subtitle = '';
         let isAccentSubtitle = isAccentChatSubtitle(chat);
         if (authorizationState && authorizationState.status !== 'ready'){
