@@ -26,12 +26,14 @@ class DialogContentControl extends React.Component {
     componentWillMount(){
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
+        ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateUserChatAction', this.onUpdate);
     }
 
     componentWillUnmount(){
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
+        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateUserChatAction', this.onUpdate);
     }
 
@@ -53,7 +55,7 @@ class DialogContentControl extends React.Component {
 
         if (!contentControl){
             const draft = getChatDraft(chat);
-            if (draft){
+            if (draft && chat.unread_count === 0 && chat.unread_mention_count === 0){
                 const text = draft.text || '\u00A0';
 
                 contentControl = (
