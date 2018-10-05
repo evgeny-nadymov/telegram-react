@@ -16,19 +16,19 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/js/runtime~main.f35f25f7.js"
   },
   {
-    "revision": "6e668035b6e929b44cb3",
-    "url": "/telegram-react/static/js/main.6e668035.chunk.js"
+    "revision": "eb7748c313ab7e0023a5",
+    "url": "/telegram-react/static/js/main.eb7748c3.chunk.js"
   },
   {
     "revision": "193a901f94c4a0f1cc96",
     "url": "/telegram-react/static/js/1.193a901f.chunk.js"
   },
   {
-    "revision": "6e668035b6e929b44cb3",
+    "revision": "eb7748c313ab7e0023a5",
     "url": "/telegram-react/static/css/main.8d77368d.chunk.css"
   },
   {
-    "revision": "8d728bbe251ec1d8a2a2707f9fef1378",
+    "revision": "7815cf3167cc2bd68bb37f0619e68f51",
     "url": "/telegram-react/index.html"
   }
 ];
