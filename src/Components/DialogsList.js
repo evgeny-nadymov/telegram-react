@@ -296,6 +296,7 @@ class DialogsList extends React.Component {
     };
 
     render() {
+
         const chats = this.state.chatIds.map(x =>
             (<DialogControl
                 key={x}

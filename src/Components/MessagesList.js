@@ -676,7 +676,9 @@ class MessagesList extends React.Component {
         let firstUnreadMessageId = Number.MAX_VALUE;
         for (let i = this.state.history.length - 1; i >= 0; i--){
             const {id} = this.state.history[i];
-            if (id > this.lastReadInboxMessageId && id < firstUnreadMessageId){
+            if (!this.state.history[i].is_outgoing
+                && id > this.lastReadInboxMessageId
+                && id < firstUnreadMessageId){
                 firstUnreadMessageId = id;
             }
             else{
@@ -693,7 +695,7 @@ class MessagesList extends React.Component {
                     chatId={x.chat_id}
                     messageId={x.id}
                     onSelectChat={this.props.onSelectChat}
-                    showUnreadSeparator={firstUnreadMessageId === x.id}/>
+                    showUnreadSeparator={!x.is_outgoing && firstUnreadMessageId === x.id}/>
                 : <MessageControl
                     key={x.id}
                     ref={el => this.itemsMap.set(i, el)}

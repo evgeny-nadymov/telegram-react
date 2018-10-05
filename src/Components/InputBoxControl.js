@@ -20,6 +20,7 @@ import Menu from '@material-ui/core/Menu/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import EmojiPickerButton from './EmojiPickerButton';
+import AttachButton from './AttachButton';
 
 const styles = {
     iconButton : {
@@ -42,7 +43,6 @@ class InputBoxControl extends Component{
         };
 
         this.handleMenuClick = this.handleMenuClick.bind(this);
-        this.handleMenuClose = this.handleMenuClose.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleAttachDocument = this.handleAttachDocument.bind(this);
         this.handleAttachPhoto = this.handleAttachPhoto.bind(this);
@@ -151,10 +151,6 @@ class InputBoxControl extends Component{
         this.setState({ anchorEl : event.currentTarget });
     }
 
-    handleMenuClose(){
-        this.setState({ anchorEl : null });
-    }
-
     handleSubmit(){
         let text = this.newMessage.current.innerText || this.newMessage.current.textContent;
         this.newMessage.current.innerText = null;
@@ -178,16 +174,12 @@ class InputBoxControl extends Component{
             result => { });
     }
 
-    handleAttachDocument(){
-        this.handleMenuClose();
-
-        setTimeout(that => { that.attachDocument.current.click(); }, 300, this);
+    handleAttachPhoto(){
+        this.attachPhoto.current.click();
     }
 
-    handleAttachPhoto(){
-        this.handleMenuClose();
-
-        setTimeout(that => { that.attachPhoto.current.click(); }, 300, this);
+    handleAttachDocument(){
+        this.attachDocument.current.click();
     }
 
     handleAttachDocumentComplete(){
@@ -401,44 +393,13 @@ class InputBoxControl extends Component{
                         onKeyUp={this.handleInputChange}>
                         {text}
                     </div>
-                    <input ref={this.attachDocument} className='inputbox-attach-button' type='file' multiple='multiple' onChange={this.handleAttachDocumentComplete}/>
-                    <input ref={this.attachPhoto} className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' onChange={this.handleAttachPhotoComplete}/>
                 </div>
                 <div className='inputbox-right-column'>
-                    <IconButton
-                        className={classes.iconButton}
-                        aria-label='Attach'
-                        open={Boolean(anchorEl)}
-                        onClick={this.handleMenuClick}>
-                        <AttachFileIcon className='inputbox-attach-icon'/>
-                    </IconButton>
-                    <Menu
-                        id='attach-menu'
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        transformOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
-                        }}
-                        onClose={this.handleMenuClose}>
-                        <MenuItem onClick={this.handleAttachPhoto}>
-                            <ListItemIcon>
-                                <PhotoIcon />
-                            </ListItemIcon>
-                            <ListItemText inset primary='Photo' />
-                        </MenuItem>
-                        <MenuItem onClick={this.handleAttachDocument}>
-                            <ListItemIcon>
-                                <InsertDriveFileIcon />
-                            </ListItemIcon>
-                            <ListItemText inset primary='Document' />
-                        </MenuItem>
-                    </Menu>
+                    <input ref={this.attachDocument} className='inputbox-attach-button' type='file' multiple='multiple' onChange={this.handleAttachDocumentComplete}/>
+                    <input ref={this.attachPhoto} className='inputbox-attach-button' type='file' multiple='multiple' accept='image/*' onChange={this.handleAttachPhotoComplete}/>
+                    <AttachButton
+                        onAttachPhoto={this.handleAttachPhoto}
+                        onAttachDocument={this.handleAttachDocument}/>
 
                     {/*<IconButton>*/}
                         {/*<KeyboardVoiceIcon />*/}
