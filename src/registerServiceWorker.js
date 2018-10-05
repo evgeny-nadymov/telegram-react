@@ -1,3 +1,5 @@
+import ApplicationStore from './Stores/ApplicationStore';
+
 // In production, we register a service worker to serve assets from local cache.
 
 // This lets the app load faster on subsequent visits in production, and gives
@@ -19,7 +21,8 @@ const isLocalhost = Boolean(
 );
 
 export default function register() {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  if (//process.env.NODE_ENV === 'production' &&
+      'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL, window.location);
     if (publicUrl.origin !== window.location.origin) {
@@ -44,6 +47,7 @@ export default function register() {
 }
 
 function registerValidSW(swUrl) {
+
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
@@ -56,7 +60,10 @@ function registerValidSW(swUrl) {
               // the fresh content will have been added to the cache.
               // It's the perfect time to display a "New content is
               // available; please refresh." message in your web app.
-              console.log('New content is available; please refresh.');
+              const msg = 'New content is available; please refresh.';
+              console.log(msg);
+
+              ApplicationStore.emit('clientUpdateNewContentAvailable');
             } else {
               // At this point, everything has been precached.
               // It's the perfect time to display a

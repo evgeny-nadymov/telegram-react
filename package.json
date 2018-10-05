@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.57",
+  "version": "0.0.65",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "^0.2.16",
@@ -23,7 +23,8 @@
     "react-dom": "^16.5.2",
     "react-file-download": "^0.3.5",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^2.0.3"
+    "react-scripts": "^2.0.3",
+    "sw-precache-cra": "^1.0.0-alpha.2"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
@@ -34,11 +35,12 @@
   "scripts": {
     "precommit": "lint-staged",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && sw-precache-cra --config sw-config.js --no-minify",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "sw-precache-cra-list-config": "sw-precache-cra --list-config"
   },
   "devDependencies": {
     "gh-pages": "^1.2.0"
