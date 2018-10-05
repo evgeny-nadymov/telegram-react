@@ -51,7 +51,6 @@ class AttachButton extends React.Component {
 
     render() {
         const {classes} = this.props;
-
         const {anchorEl} = this.state;
 
         return (
