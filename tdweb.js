@@ -1505,7 +1505,9 @@ var TdClient = function () {
     value: function onBroadcastMessage(e) {
       var message = e.data;
       _logger2.default.info('got broadcast message: ', message);
-      if (message.timestamp > this.timestamp) {
+      if (message.isBackground && !this.isBackground) {
+        // continue
+      } else if (!message.isBackground && this.isBackground || message.timestamp > this.timestamp) {
         this.close();
         return;
       }
@@ -1529,7 +1531,8 @@ var TdClient = function () {
       var state = {
         id: this.uid,
         state: this.state,
-        timestamp: this.timestamp
+        timestamp: this.timestamp,
+        isBackground: this.isBackground
       };
       _logger2.default.info('Post state: ', state);
       this.channel.postMessage(state);
@@ -1611,6 +1614,7 @@ var TdClient = function () {
               case 0:
                 this.uid = (0, _v2.default)();
                 this.state = 'start';
+                this.isBackground = !!options.isBackground;
                 this.timestamp = Date.now();
                 this.waitSet = new _set2.default();
 
@@ -1627,24 +1631,24 @@ var TdClient = function () {
                   self.onBroadcastMessage(message);
                 };
 
-                _context.next = 12;
+                _context.next = 13;
                 return sleep(300);
 
-              case 12:
+              case 13:
                 if (!(this.waitSet.size !== 0)) {
-                  _context.next = 15;
+                  _context.next = 16;
                   break;
                 }
 
-                _context.next = 15;
+                _context.next = 16;
                 return new _promise2.default(function (resolve) {
                   self.onWaitSetEmpty = resolve;
                 });
 
-              case 15:
+              case 16:
                 this.sendStart();
 
-              case 16:
+              case 17:
               case 'end':
                 return _context.stop();
             }
@@ -3665,7 +3669,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "a602a6c1ea2332cd058d.worker.js");
+  return new Worker(__webpack_require__.p + "7b1382edd75a7da942a3.worker.js");
 };
 
 /***/ }),
