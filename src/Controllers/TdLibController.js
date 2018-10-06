@@ -27,7 +27,7 @@ class TdLibController extends EventEmitter{
         let clientParameters = {
             verbosity : this.clientParameters.verbosity,
             jsVerbosity : this.clientParameters.jsVerbosity,
-            mode : 'webasm',
+            mode : 'wasm',
             prefix : this.clientParameters.useTestDC ? 'tdlib_test' : 'tdlib'
         };
 

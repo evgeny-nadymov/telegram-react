@@ -46,7 +46,7 @@
 /******/ 		return new Promise(function(resolve) {
 /******/ 			// "1" is the signal for "already loaded"
 /******/ 			if(!installedChunks[chunkId]) {
-/******/ 				importScripts("" + chunkId + "." + "a602a6c1ea2332cd058d" + ".worker.js");
+/******/ 				importScripts("" + chunkId + "." + "7b1382edd75a7da942a3" + ".worker.js");
 /******/ 			}
 /******/ 			resolve();
 /******/ 		});
@@ -1777,7 +1777,7 @@ var _asyncToGenerator2 = __webpack_require__(126);
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var loadTdLibWasm = function () {
-  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee() {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(useStreaming) {
     var Module, td_wasm, TdModule;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
@@ -1798,10 +1798,15 @@ var loadTdLibWasm = function () {
                 },
                 instantiateWasm: function instantiateWasm(imports, successCallback) {
                   _logger2.default.info('start instantiateWasm');
-                  (0, _wasmUtils.instantiateCachedURL)(tdlibVersion, td_wasm, imports).then(function (instance) {
+                  var next = function next(instance) {
                     _logger2.default.info('finish instantiateWasm');
                     successCallback(instance);
-                  });
+                  };
+                  if (useStreaming) {
+                    (0, _wasmUtils.instantiateStreaming)(td_wasm, imports).then(next);
+                  } else {
+                    (0, _wasmUtils.instantiateCachedURL)(tdlibVersion, td_wasm, imports).then(next);
+                  }
                   return {};
                 },
                 ENVIROMENT: 'WORKER'
@@ -1820,7 +1825,7 @@ var loadTdLibWasm = function () {
     }, _callee, this);
   }));
 
-  return function loadTdLibWasm() {
+  return function loadTdLibWasm(_x) {
     return _ref.apply(this, arguments);
   };
 }();
@@ -1887,7 +1892,7 @@ var loadTdLib = function () {
             return _context3.abrupt('return', loadTdLibAsmjs());
 
           case 2:
-            return _context3.abrupt('return', loadTdLibWasm());
+            return _context3.abrupt('return', loadTdLibWasm(mode !== 'wasm'));
 
           case 3:
           case 'end':
@@ -1897,7 +1902,7 @@ var loadTdLib = function () {
     }, _callee3, this);
   }));
 
-  return function loadTdLib(_x) {
+  return function loadTdLib(_x2) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -1925,7 +1930,7 @@ var _detectBrowser = __webpack_require__(132);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var browser = (0, _detectBrowser.detect)();
-var tdlibVersion = 4;
+var tdlibVersion = 5;
 
 var OutboundFileSystem = function () {
   function OutboundFileSystem(root, FS) {
@@ -2019,7 +2024,7 @@ var InboundFileSystem = function () {
         }, _callee4, this, [[0, 8]]);
       }));
 
-      function persist(_x2, _x3) {
+      function persist(_x3, _x4) {
         return _ref4.apply(this, arguments);
       }
 
@@ -2068,7 +2073,7 @@ var InboundFileSystem = function () {
         }, _callee5, this, [[0, 13]]);
       }));
 
-      function create(_x4, _x5, _x6) {
+      function create(_x5, _x6, _x7) {
         return _ref5.apply(this, arguments);
       }
 
@@ -2192,7 +2197,7 @@ var DbFileSystem = function () {
         }, _callee8, this, [[0, 13]]);
       }));
 
-      function create(_x7, _x8) {
+      function create(_x8, _x9) {
         return _ref8.apply(this, arguments);
       }
 
@@ -2258,7 +2263,7 @@ var TdFileSystem = function () {
         }, _callee9, this, [[0, 17]]);
       }));
 
-      function create(_x9, _x10) {
+      function create(_x10, _x11) {
         return _ref9.apply(this, arguments);
       }
 
@@ -2397,7 +2402,7 @@ var TdClient = function () {
         }, _callee10, this);
       }));
 
-      function init(_x11) {
+      function init(_x12) {
         return _ref10.apply(this, arguments);
       }
 
@@ -2573,7 +2578,7 @@ var TdClient = function () {
         }, _callee11, this);
       }));
 
-      function close(_x12) {
+      function close(_x13) {
         return _ref11.apply(this, arguments);
       }
 
@@ -2601,7 +2606,7 @@ var TdClient = function () {
         }, _callee12, this);
       }));
 
-      function asyncOnFatalError(_x13) {
+      function asyncOnFatalError(_x14) {
         return _ref12.apply(this, arguments);
       }
 
@@ -2651,7 +2656,7 @@ var TdClient = function () {
         }, _callee13, this);
       }));
 
-      function saveFile(_x14, _x15) {
+      function saveFile(_x15, _x16) {
         return _ref13.apply(this, arguments);
       }
 
@@ -7837,6 +7842,7 @@ var _promise = __webpack_require__(43);
 
 var _promise2 = _interopRequireDefault(_promise);
 
+exports.instantiateStreaming = instantiateStreaming;
 exports.fetchAndInstantiate = fetchAndInstantiate;
 exports.instantiateCachedURL = instantiateCachedURL;
 
@@ -7847,6 +7853,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // This library function fetches the wasm module at 'url', instantiates it with
 // the given 'importObject', and returns the instantiated object instance
 
+function instantiateStreaming(url, importObject) {
+  return WebAssembly.instantiateStreaming(fetch(url), importObject).then(function (results) {
+    return results.instance;
+  });
+}
 function fetchAndInstantiate(url, importObject) {
   return fetch(url).then(function (response) {
     return response.arrayBuffer();
