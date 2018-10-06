@@ -41,7 +41,7 @@ class Footer extends React.Component {
         return (
             <div className='footer-wrapper'>
                 <span>
-                    {packageJson.version} - {status}
+                    {packageJson.version}
                 </span>
             </div>
         );

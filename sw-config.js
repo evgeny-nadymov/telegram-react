@@ -10,8 +10,10 @@ module.exports = {
             './build/static/js/*.js',
             './build/static/css/*.css',
             './build/static/media/**',
-            './build/*.wasm',],
+            './build/*.wasm',
+            './build/*.mem',
+            './build/*.worker.js'],
     stripPrefix: './build',
     replacePrefix: '/telegram-react',
-    maximumFileSizeToCacheInBytes: 10485760
+    maximumFileSizeToCacheInBytes: 31457280
 };

@@ -3,8 +3,8 @@ import ChatStore from '../Stores/ChatStore';
 import {debounce, getPhotoSize, itemsInView} from '../Utils/Common';
 import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
-import {MESSAGE_SLICE_LIMIT} from '../Constants';
 import FileController from '../Controllers/FileController';
+import {MESSAGE_SLICE_LIMIT} from '../Constants';
 import {getChatPhoto, getContactFile, getDocumentThumbnailFile, getPhotoFile, getStickerFile} from '../Utils/File';
 import UserStore from '../Stores/UserStore';
 import MessageControl from './MessageControl';
@@ -367,13 +367,13 @@ class MessagesList extends React.Component {
     }
 
     loadMessageContents(messages, loadRemote = true){
-
         let store = FileController.getStore();
-
-        for (let i = messages.length - 1; i >= 0 ; i--){
+        //console.log('AuthFormControl.render length=' + messages.length);
+        for (let i = messages.length - 1; i >= 0; i--) {
+            //console.log('AuthFormControl.render i=' + i);
             let message = messages[i];
-            if (message && message.content){
-                switch (message.content['@type']){
+            if (message && message.content) {
+                switch (message.content['@type']) {
                     case 'messagePhoto': {
 
                         // preview
@@ -390,18 +390,16 @@ class MessagesList extends React.Component {
                             }
                         }*/
 
-                        // regular
                         let [id, pid, idb_key] = getPhotoFile(message);
                         if (pid) {
                             let photoSize = getPhotoSize(message.content.photo.sizes);
                             if (photoSize){
                                 let obj = photoSize.photo;
                                 if (!obj.blob){
+                                    let localMessage = message;
                                     FileController.getLocalFile(store, obj, idb_key, null,
-                                        () => MessageStore.updateMessagePhoto(message.id),
-                                        () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
-                                        'load_contents',
-                                        message.id);
+                                        () => MessageStore.updateMessagePhoto(localMessage.id),
+                                        () => { if (loadRemote) FileController.getRemoteFile(id, 1, localMessage); });
                                 }
                             }
                         }
@@ -412,11 +410,10 @@ class MessagesList extends React.Component {
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
+                                let localMessage = message;
                                 FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => MessageStore.updateMessageSticker(message.id),
-                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
-                                    'load_contents',
-                                    message.id);
+                                    () => MessageStore.updateMessageSticker(localMessage.id),
+                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, localMessage); });
                             }
                         }
                         break;
@@ -432,9 +429,7 @@ class MessagesList extends React.Component {
                                     if (!obj.blob){
                                         FileController.getLocalFile(store, obj, idb_key, null,
                                             () => UserStore.updatePhoto(user.id),
-                                            () => { if (loadRemote)  FileController.getRemoteFile(id, 1, user); },
-                                            'load_contents',
-                                            message.id);
+                                            () => { if (loadRemote)  FileController.getRemoteFile(id, 1, user); });
                                     }
                                 }
                             }
@@ -446,17 +441,17 @@ class MessagesList extends React.Component {
                         if (pid) {
                             let obj = message.content.document.thumbnail.photo;
                             if (!obj.blob){
+                                let localMessage = message;
                                 FileController.getLocalFile(store, obj, idb_key, null,
                                     () => MessageStore.updateMessageDocumentThumbnail(obj.id),
-                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, message); },
-                                    'load_contents',
-                                    message.id);
+                                    () => { if (loadRemote)  FileController.getRemoteFile(id, 1, localMessage); });
                             }
                         }
                         break;
                     }
-                    default:
+                    default: {
                         break;
+                    }
                 }
             }
         }
