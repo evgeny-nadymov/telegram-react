@@ -240,7 +240,7 @@ class MessagesList extends React.Component {
                     chat_id: chat.id,
                 });
 
-            const unread = chat.last_message && chat.last_message.id > chat.last_read_inbox_message_id;
+            const unread = chat.unread_count > 0;
             const fromMessageId = unread ? chat.last_read_inbox_message_id : 0;
             const offset = unread ? -1 - MESSAGE_SLICE_LIMIT : 0;
             const limit = unread ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
@@ -667,17 +667,21 @@ class MessagesList extends React.Component {
     };
 
     render() {
+        const {selectedChatId} = this.props;
+        const chat = ChatStore.get(selectedChatId);
 
-        let firstUnreadMessageId = Number.MAX_VALUE;
-        for (let i = this.state.history.length - 1; i >= 0; i--){
-            const {id} = this.state.history[i];
-            if (!this.state.history[i].is_outgoing
-                && id > this.lastReadInboxMessageId
-                && id < firstUnreadMessageId){
-                firstUnreadMessageId = id;
-            }
-            else{
-                break;
+        let unreadSeparatorMessageId = Number.MAX_VALUE;
+        if (chat && chat.unread_count > 0){
+            for (let i = this.state.history.length - 1; i >= 0; i--){
+                const {id} = this.state.history[i];
+                if (!this.state.history[i].is_outgoing
+                    && id > this.lastReadInboxMessageId
+                    && id < unreadSeparatorMessageId){
+                    unreadSeparatorMessageId = id;
+                }
+                else{
+                    break;
+                }
             }
         }
 
@@ -690,7 +694,7 @@ class MessagesList extends React.Component {
                     chatId={x.chat_id}
                     messageId={x.id}
                     onSelectChat={this.props.onSelectChat}
-                    showUnreadSeparator={!x.is_outgoing && firstUnreadMessageId === x.id}/>
+                    showUnreadSeparator={!x.is_outgoing && unreadSeparatorMessageId === x.id}/>
                 : <MessageControl
                     key={x.id}
                     ref={el => this.itemsMap.set(i, el)}
@@ -699,7 +703,7 @@ class MessagesList extends React.Component {
                     showTitle={true}
                     sendingState={x.sending_state}
                     onSelectChat={this.props.onSelectChat}
-                    showUnreadSeparator={firstUnreadMessageId === x.id}/>);
+                    showUnreadSeparator={unreadSeparatorMessageId === x.id}/>);
         });
 
         return (
