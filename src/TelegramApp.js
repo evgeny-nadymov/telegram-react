@@ -191,17 +191,6 @@ class TelegramApp extends Component{
         }
     }
 
-    onUpdateMessageSendSucceeded(old_message_id, message){
-        const selectedChatId = ChatStore.getSelectedChatId();
-        if (selectedChatId !== message.chat_id) return;
-
-        let updatedHistory = this.state.history.map((obj) =>{
-            return obj.id === old_message_id ? message : obj;
-        });
-
-        this.setHistory(updatedHistory);
-    }
-
     handleSelectChat(chat){
         const selectedChatId = ChatStore.getSelectedChatId();
         const chatId = chat ? chat.id : 0;
