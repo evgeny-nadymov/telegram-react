@@ -34,6 +34,7 @@
     padding: 22px 24px;
     user-select: none;
     background: transparent;
+    overflow: hidden;
 }
 
 .header-status-content{
