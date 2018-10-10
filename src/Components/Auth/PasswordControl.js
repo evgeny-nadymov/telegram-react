@@ -144,7 +144,7 @@ class PasswordControl extends React.Component {
                         id='adornment-password'
                         type={showPassword ? 'text' : 'password'}
                         disabled={loading}
-                        error={error}
+                        error={Boolean(error)}
                         onChange={this.handleChange}
                         onKeyPress={this.handleKeyPress}
                         endAdornment={

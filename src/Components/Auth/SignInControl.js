@@ -133,7 +133,7 @@ class SignInControl extends React.Component {
                 <TextField
                     color='primary'
                     disabled={loading}
-                    error={error}
+                    error={Boolean(error)}
                     fullWidth
                     autoFocus
                     id='phoneNumber'

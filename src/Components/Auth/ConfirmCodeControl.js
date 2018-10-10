@@ -181,7 +181,7 @@ class ConfirmCodeControl extends React.Component {
                 <TextField
                     color='primary'
                     disabled={loading}
-                    error={error}
+                    error={Boolean(error)}
                     fullWidth
                     autoFocus
                     label='Your code'
