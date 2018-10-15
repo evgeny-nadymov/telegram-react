@@ -3,4 +3,5 @@
     overflow-x: hidden;
     height: 100%;
     position: relative;
+    transform: translateZ(0);
 }

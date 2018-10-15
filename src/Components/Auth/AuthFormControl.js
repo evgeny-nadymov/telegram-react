@@ -54,7 +54,6 @@ class AuthFormControl extends React.Component {
                         codeInfo={authorizationState.code_info}
                         onChangePhone={this.props.onChangePhone}/>
                 );
-                //control = (<SignUpControl/>);
                 break;
             case 'authorizationStateWaitPassword':
                 control = (

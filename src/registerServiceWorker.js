@@ -46,6 +46,16 @@ export default function register() {
     }
 }
 
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/')
+    ;
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
 function registerValidSW(swUrl) {
     navigator.serviceWorker
         .register(swUrl)
@@ -74,6 +84,23 @@ function registerValidSW(swUrl) {
                     }
                 };
             };
+
+            return registration;
+        })
+        .then(registration => {
+            const subscribeOptions = {
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(
+                    'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
+                )
+            };
+
+            return registration.pushManager.subscribe(subscribeOptions);
+        })
+        .then(pushSubscription => {
+            console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
+
+            return pushSubscription;
         })
         .catch(error => {
             console.error('Error during service worker registration:', error);

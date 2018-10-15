@@ -12,8 +12,10 @@ module.exports = {
             './build/static/media/**',
             './build/*.wasm',
             './build/*.mem',
-            './build/*.worker.js'],
+            './build/*.worker.js',
+            './build/tdweb.js'],
     stripPrefix: './build',
     replacePrefix: '/telegram-react',
-    maximumFileSizeToCacheInBytes: 31457280
+    maximumFileSizeToCacheInBytes: 31457280,
+    importScripts: ['./custom-service-worker.js']
 };

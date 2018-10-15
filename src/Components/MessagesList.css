@@ -6,6 +6,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     position: relative;
+    transform: translateZ(0);
 }
 
 .messages-list-top{
