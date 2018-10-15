@@ -37,7 +37,7 @@
 /* eslint-disable indent, no-unused-vars, no-multiple-empty-lines, max-nested-callbacks, space-before-function-paren, quotes, comma-spacing */
 'use strict';
 
-var precacheConfig = [["/telegram-react/0.7b1382edd75a7da942a3.worker.js","f902e8ea7f1dcd64fc7e4ef089b63bc7"],["/telegram-react/1.7b1382edd75a7da942a3.worker.js","29c6cad1fb3f0afecb6ea5ffaa820364"],["/telegram-react/7b1382edd75a7da942a3.worker.js","895221135f77f6da2bddec2293cd7a55"],["/telegram-react/b0f6eeafb9bb7f08376ddf72e2b74a92.wasm","b0f6eeafb9bb7f08376ddf72e2b74a92"],["/telegram-react/fe369f77e00b480c4309a5d2aa024889.mem","fe369f77e00b480c4309a5d2aa024889"],["/telegram-react/index.html","aaa4df267bf07405c76cb7314481fbaf"],["/telegram-react/static/css/main.0750f001.chunk.css","823562183a58959b3e64788dd97f159e"],["/telegram-react/static/js/1.c97f1315.chunk.js","78f9806854970a2278be77d1cbb7befc"],["/telegram-react/static/js/main.21894d2b.chunk.js","9b3cd62d69e5263bef4d765a80681a69"],["/telegram-react/static/js/runtime~main.f35f25f7.js","a317e8711fd682be0e8b51a9401c3aa8"],["/telegram-react/static/media/General_2x.5270d71c.png","5270d71cd78fd282a3736b0e6ae7f048"],["/telegram-react/static/media/Manytabs_2x.7a71629a.png","7a71629a5e4f7482b6320b103f1d543c"],["/telegram-react/static/media/Telegram.4964c9bb.svg","4964c9bbfba510f495319c52562d70d4"],["/telegram-react/tdweb.js","48eb3116550bb83ba297eb6e79fa1a6e"]];
+var precacheConfig = [["/telegram-react/0.7b1382edd75a7da942a3.worker.js","f902e8ea7f1dcd64fc7e4ef089b63bc7"],["/telegram-react/1.7b1382edd75a7da942a3.worker.js","29c6cad1fb3f0afecb6ea5ffaa820364"],["/telegram-react/7b1382edd75a7da942a3.worker.js","895221135f77f6da2bddec2293cd7a55"],["/telegram-react/b0f6eeafb9bb7f08376ddf72e2b74a92.wasm","b0f6eeafb9bb7f08376ddf72e2b74a92"],["/telegram-react/fe369f77e00b480c4309a5d2aa024889.mem","fe369f77e00b480c4309a5d2aa024889"],["/telegram-react/index.html","24d03817483b8a19c3456015571942e7"],["/telegram-react/static/css/main.c4913c71.chunk.css","a354f2a32f302987ddf083a801e661ea"],["/telegram-react/static/js/1.c97f1315.chunk.js","78f9806854970a2278be77d1cbb7befc"],["/telegram-react/static/js/main.6a4df2e6.chunk.js","d171d86e4015a6989345988046cdba3c"],["/telegram-react/static/js/runtime~main.f35f25f7.js","a317e8711fd682be0e8b51a9401c3aa8"],["/telegram-react/static/media/General_2x.5270d71c.png","5270d71cd78fd282a3736b0e6ae7f048"],["/telegram-react/static/media/Manytabs_2x.7a71629a.png","7a71629a5e4f7482b6320b103f1d543c"],["/telegram-react/static/media/Telegram.4964c9bb.svg","4964c9bbfba510f495319c52562d70d4"],["/telegram-react/tdweb.js","48eb3116550bb83ba297eb6e79fa1a6e"]];
 var cacheName = 'sw-precache-v3-sw-precache-webpack-plugin-' + (self.registration ? self.registration.scope : '');
 
 
@@ -266,5 +266,5 @@ self.addEventListener('fetch', function(event) {
 
 
 
-importScripts("./customServiceWorker.js");
+importScripts("./custom-service-worker.js");
 
