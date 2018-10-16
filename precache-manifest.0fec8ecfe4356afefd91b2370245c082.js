@@ -28,7 +28,7 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/css/main.c4913c71.chunk.css"
   },
   {
-    "revision": "a9137975411063e60c3f0212dadf63a9",
+    "revision": "aec012057c2eb354a1d99835cc66f726",
     "url": "/telegram-react/index.html"
   }
 ];
