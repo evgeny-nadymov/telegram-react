@@ -78,10 +78,17 @@ pre code {
     margin: 8px 10px 8px 16px;
 }
 
+.message-title{
+    display: flex;
+    flex-direction: row;
+}
+
 .message-author{
     margin: 0 0 4px;
     color: #3a6d99;
     font-weight: 500;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .message-text{
@@ -90,10 +97,10 @@ pre code {
 }
 
 .message-meta{
-    float: right!important;
     user-select: none;
     color: #adadad;
     font-size: .85em;
+    margin: 1px 0 0 6px;
 }
 
 .message-body{
