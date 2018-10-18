@@ -6,8 +6,7 @@
  */
 
 self.addEventListener('push', function(event) {
-    console.log('[Service Worker] Push Received.');
-    console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+    console.log(`[SW] Push Received with data: "${event.data.text()}"`);
 
     const title = 'Push Codelab';
     const options = {
