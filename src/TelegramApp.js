@@ -20,6 +20,7 @@ import packageJson from '../package.json';
 import AppInactiveControl from './Components/AppInactiveControl';
 import ChatStore from './Stores/ChatStore';
 import ApplicationStore from './Stores/ApplicationStore';
+import registerServiceWorker from './registerServiceWorker';
 
 const theme = createMuiTheme({
     palette: {
@@ -121,6 +122,14 @@ class TelegramApp extends Component{
 
     onUpdateAuthorizationState(update){
         this.setState({ authorizationState: update.authorization_state });
+
+        if (update.authorization_state
+            && (update.authorization_state['@type'] === 'authorizationStateReady'
+                || update.authorization_state['@type'] === 'authorizationStateWaitCode'
+                || update.authorization_state['@type'] === 'authorizationStateWaitPassword'
+                || update.authorization_state['@type'] === 'authorizationStateWaitPhoneNumber')){
+            registerServiceWorker();
+        }
     }
 
     onUpdateAppInactive(){

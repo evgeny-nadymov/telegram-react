@@ -30,18 +30,19 @@ class TdLibController extends EventEmitter{
     }
 
     init(){
+        const { verbosity, jsVerbosity, useTestDC } = this.clientParameters;
 
-        let clientParameters = {
-            verbosity : this.clientParameters.verbosity,
-            jsVerbosity : this.clientParameters.jsVerbosity,
-            mode : 'wasm',
-            prefix : this.clientParameters.useTestDC ? 'tdlib_test' : 'tdlib'
+        let parameters = {
+            verbosity : verbosity,
+            jsVerbosity : jsVerbosity,
+            mode : 'wasm',  // 'wasm-streaming'/'wasm'/'asmjs'
+            prefix : useTestDC ? 'tdlib_test' : 'tdlib',
+            isBackground : false
         };
 
-        console.log(`TdLibController start client with params=[verbosity: ${clientParameters.verbosity}, jsVerbosity: ${clientParameters.jsVerbosity}, mode: ${clientParameters.mode}, prefix: ${clientParameters.prefix}]`);
+        console.log(`[TdLibController] Start client with params=${JSON.stringify(parameters)}`);
 
-        this.client = new TdClient(clientParameters);
-        //this.client.setJsVerbosity(this.clientParameters.jsVerbosity);
+        this.client = new TdClient(parameters);
         this.client.onUpdate = this.onUpdate;
 
         this.setState({
@@ -59,13 +60,13 @@ class TdLibController extends EventEmitter{
     }
 
     sendTdParameters() {
-        this.client.send({
+        this.send({
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
                 use_test_dc: this.clientParameters.useTestDC,
-                api_id: 12183,
-                api_hash: '41c3080d9028cf002792a512d4e20089',
+                api_id: process.env.REACT_APP_TELEGRAM_API_ID,
+                api_hash: process.env.REACT_APP_TELEGRAM_API_HASH,
                 system_language_code: 'en',
                 device_model: 'Web',
                 system_version: 'Unknown',

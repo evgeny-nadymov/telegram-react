@@ -271,6 +271,7 @@ class Header extends Component{
                     <span className='header-status-content'>{title}</span>
                     {titleProgressAnimation}
                     <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
+                    <span className='header-status-tail'/>
                 </div>
                 <IconButton className={classes.messageSearchIconButton} aria-label='Search'>
                     <SearchIcon />

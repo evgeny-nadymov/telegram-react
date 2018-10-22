@@ -6,6 +6,8 @@
  */
 
 import ApplicationStore from './Stores/ApplicationStore';
+import TdLibController from './Controllers/TdLibController';
+import { arrayBufferToBase64 } from './Utils/Common';
 
 // In production, we register a service worker to serve assets from local cache.
 
@@ -27,9 +29,10 @@ const isLocalhost = Boolean(
     )
 );
 
-export default function register() {
-    if (//process.env.NODE_ENV === 'production' &&
-        'serviceWorker' in navigator) {
+export default async function register() {
+    console.log('[SW] Register');
+
+    if ('serviceWorker' in navigator) {
         // The URL constructor is available in all browsers that support SW.
         const publicUrl = new URL(process.env.PUBLIC_URL, window.location);
         if (publicUrl.origin !== window.location.origin) {
@@ -39,120 +42,120 @@ export default function register() {
             return;
         }
 
-        window.addEventListener('load', () => {
-            const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
+        const serviceWorkerName = process.env.NODE_ENV === 'production'? 'service-worker.js' : 'custom-service-worker.js';
+        const swUrl = `${process.env.PUBLIC_URL}/${serviceWorkerName}`;
 
-            if (!isLocalhost) {
-                // Is not local host. Just register service worker
-                registerValidSW(swUrl);
-            } else {
-                // This is running on localhost. Lets check if a service worker still exists or not.
-                checkValidServiceWorker(swUrl);
-            }
-        });
+        if (!isLocalhost) {
+            // Is not local host. Just register service worker
+            await registerValidSW(swUrl);
+        } else {
+            // This is running on localhost. Lets check if a service worker still exists or not.
+            await checkValidServiceWorker(swUrl);
+        }
     }
 }
 
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/')
-    ;
-    const rawData = window.atob(base64);
-    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-}
+async function registerValidSW(swUrl) {
+    try{
+        const registration = await navigator.serviceWorker.register(swUrl);
+        registration.onupdatefound = () => {
+            const installingWorker = registration.installing;
+            installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed') {
+                    if (navigator.serviceWorker.controller) {
+                        // At this point, the old content will have been purged and
+                        // the fresh content will have been added to the cache.
+                        // It's the perfect time to display a "New content is
+                        // available; please refresh." message in your web app.
+                        console.log('New content is available; please refresh.');
 
-function registerValidSW(swUrl) {
-    navigator.serviceWorker
-        .register(swUrl)
-        .then(registration => {
-
-            registration.onupdatefound = () => {
-                const installingWorker = registration.installing;
-                installingWorker.onstatechange = () => {
-                    //console.log('[SW] onstatechange state=' + installingWorker.state);
-
-                    if (installingWorker.state === 'installed') {
-                        if (navigator.serviceWorker.controller) {
-                            // At this point, the old content will have been purged and
-                            // the fresh content will have been added to the cache.
-                            // It's the perfect time to display a "New content is
-                            // available; please refresh." message in your web app.
-                            console.log('New content is available; please refresh.');
-
-                            ApplicationStore.emit('clientUpdateNewContentAvailable');
-                        } else {
-                            // At this point, everything has been precached.
-                            // It's the perfect time to display a
-                            // "Content is cached for offline use." message.
-                            console.log('Content is cached for offline use.');
-                        }
+                        ApplicationStore.emit('clientUpdateNewContentAvailable');
+                    } else {
+                        // At this point, everything has been precached.
+                        // It's the perfect time to display a
+                        // "Content is cached for offline use." message.
+                        console.log('Content is cached for offline use.');
                     }
-                };
+                }
             };
+        };
 
-            return registration;
-        })
-        .then(registration => {
-            const subscribeOptions = {
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(
-                    'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U'
-                )
-            };
-
-            return registration.pushManager.subscribe(subscribeOptions);
-        })
-        .then(pushSubscription => {
-            console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
-
-            return pushSubscription;
-        })
-        .catch(error => {
-            console.error('Error during service worker registration:', error);
-        });
-}
-
-function checkValidServiceWorker(swUrl) {
-    // Check if the service worker can be found. If it can't reload the page.
-    fetch(swUrl)
-        .then(response => {
-            // Ensure service worker exists, and that we really are getting a JS file.
-            if (
-                response.status === 404 ||
-                response.headers.get('content-type').indexOf('javascript') === -1
-            ) {
-                // No service worker found. Probably a different app. Reload the page.
-                navigator.serviceWorker.ready.then(registration => {
-                    registration.unregister().then(() => {
-                        window.location.reload();
-                    });
-                });
-            } else {
-                // Service worker found. Proceed as normal.
-                registerValidSW(swUrl);
-            }
-        })
-        .catch(() => {
-            console.log(
-                'No internet connection found. App is running in offline mode.'
-            );
-        });
-}
-
-export function unregister() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.unregister();
-        });
+        await subscribeNotifications(registration);
+    }
+    catch (error) {
+        console.error('[SW] Error during service worker registration: ', error);
     }
 }
 
-export function update() {
+async function subscribeNotifications(registration){
+    try{
+        let pushSubscription = await registration.pushManager.getSubscription();
+        if (pushSubscription) await pushSubscription.unsubscribe();
+
+        pushSubscription = await registration.pushManager.subscribe({ userVisibleOnly: true });
+        console.log('[SW] Received PushSubscription: ', JSON.stringify(pushSubscription));
+
+        const { endpoint } = pushSubscription;
+        const p256dh_base64url = arrayBufferToBase64(pushSubscription.getKey('p256dh'));
+        const auth_base64url = arrayBufferToBase64(pushSubscription.getKey('auth'));
+
+        if (endpoint && p256dh_base64url && auth_base64url){
+            const { authorizationState } = ApplicationStore;
+            if (authorizationState && authorizationState['@type'] === 'authorizationStateReady'){
+                await TdLibController.send({
+                    '@type': 'registerDevice',
+                    device_token: {
+                        '@type': 'deviceTokenWebPush',
+                        endpoint: endpoint,
+                        p256dh_base64url: p256dh_base64url,
+                        auth_base64url: auth_base64url
+                    },
+                    other_user_ids: []
+                });
+            }
+        }
+    }
+    catch (error) {
+        console.error('[SW] Error during service worker push subscription: ', error);
+    }
+}
+
+async function checkValidServiceWorker(swUrl) {
+    // Check if the service worker can be found. If it can't reload the page.
+    try {
+        const response = await fetch(swUrl);
+
+        // Ensure service worker exists, and that we really are getting a JS file.
+        if (response.status === 404
+            || response.headers.get('content-type').indexOf('javascript') === -1) {
+            // No service worker found. Probably a different app. Reload the page.
+            const registration = await navigator.serviceWorker.ready;
+            await registration.unregister();
+
+            window.location.reload();
+        }
+        else {
+            // Service worker found. Proceed as normal.
+            await registerValidSW(swUrl);
+        }
+    }
+    catch (error) {
+        console.log('[SW] No internet connection found. App is running in offline mode.');
+    }
+}
+
+export async function unregister() {
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.update();
-        });
+        let registration = await navigator.serviceWorker.ready;
+
+        await registration.unregister();
+    }
+}
+
+export async function update() {
+    if ('serviceWorker' in navigator) {
+        let registration = await navigator.serviceWorker.ready;
+
+        await registration.update();
     }
 }

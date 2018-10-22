@@ -551,6 +551,7 @@ class MessagesList extends React.Component {
 
         if (!chat) return;
         if (this.loading) return;
+        if (this.completed) return;
 
         let fromMessageId = 0;
         if (this.state.history && this.state.history.length > 0){

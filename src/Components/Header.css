@@ -38,17 +38,20 @@
 .header-status{
     font-size: 22px;
     font-family: 'Product Sans', 'Roboto', sans-serif;
-    padding: 12px 24px;
+    padding: 0 0 0 24px;
     user-select: none;
     background: transparent;
     overflow: hidden;
+    display: flex;
+    align-items: baseline;
 }
 
 .header-status-content{
     word-wrap: break-word;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 180px;
+    overflow: hidden;
+    padding: 12px 0;
 }
 
 .header-status-title-accent{
@@ -57,7 +60,6 @@
     word-wrap: break-word;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 180px;
     margin-left: 8px;
 }
 
@@ -67,8 +69,12 @@
     word-wrap: break-word;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 180px;
     margin-left: 8px;
+}
+
+.header-status-tail{
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .cursor-pointer{

@@ -220,6 +220,41 @@ function formatPhoneNumber(number){
     return formatNumber(unformattedNumber, 'International');
 }
 
+/**
+ * use this to make a Base64 encoded string URL friendly,
+ * i.e. '+' and '/' are replaced with '-' and '_' also any trailing '='
+ * characters are removed
+ *
+ * @param {String} str the encoded string
+ * @returns {String} the URL friendly encoded String
+ */
+function Base64EncodeUrl(str){
+    return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+}
+
+/**
+ * Use this to recreate a Base64 encoded string that was made URL friendly
+ * using Base64EncodeurlFriendly.
+ * '-' and '_' are replaced with '+' and '/' and also it is padded with '+'
+ *
+ * @param {String} str the encoded string
+ * @returns {String} the URL friendly encoded String
+ */
+function Base64DecodeUrl(str){
+    str = (str + '===').slice(0, str.length + (str.length % 4));
+    return str.replace(/-/g, '+').replace(/_/g, '/');
+}
+
+function arrayBufferToBase64( buffer ) {
+    var binary = '';
+    var bytes = new Uint8Array( buffer );
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+    }
+    return Base64EncodeUrl(window.btoa(binary));
+}
+
 export {
     orderCompare,
     getSize,
@@ -230,5 +265,6 @@ export {
     debounce,
     getLetters,
     readImageSize,
-    formatPhoneNumber
+    formatPhoneNumber,
+    arrayBufferToBase64
 };
