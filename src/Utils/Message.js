@@ -62,7 +62,16 @@ function getFormattedText(text){
         switch (text.entities[i].type['@type']){
             case 'textEntityTypeUrl': {
                 let url = entityText.startsWith('http') ? entityText : 'http://' + entityText;
-                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{decodeURI(entityText)}</a>));
+                let decodedUrl;
+                try{
+                    decodedUrl = decodeURI(entityText);
+                }
+                catch (error) {
+                    console.error('uri: ' + entityText + '\n' +  error);
+                    decodedUrl = entityText;
+                }
+
+                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{decodedUrl}</a>));
                 break; }
             case 'textEntityTypeTextUrl': {
                 let url = text.entities[i].type.url.startsWith('http') ? text.entities[i].type.url : 'http://' + text.entities[i].type.url;
