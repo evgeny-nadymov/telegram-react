@@ -410,15 +410,10 @@ function getLastMessageDate(chat){
     return dateFormat(date, 'd.mm.yyyy');
 }
 
-function getChatSubtitle(chat){
+function getChatSubtitleWithoutTyping(chat) {
     if (!chat) return null;
-
-    const chatTypingString = getChatTypingString(chat);
-    if (chatTypingString){
-        return chatTypingString;
-    }
-
     if (!chat.type) return null;
+
     switch (chat.type['@type']) {
         case 'chatTypeBasicGroup' : {
             const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
@@ -446,6 +441,17 @@ function getChatSubtitle(chat){
     }
 
     return null;
+}
+
+function getChatSubtitle(chat) {
+    if (!chat) return null;
+
+    const chatTypingString = getChatTypingString(chat);
+    if (chatTypingString) {
+        return chatTypingString;
+    }
+
+    return getChatSubtitleWithoutTyping(chat);
 }
 
 function getChatLetters(chat){
@@ -487,6 +493,93 @@ function isAccentChatSubtitle(chat){
     return false;
 }
 
+function getChatUsername(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            return null;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            const user = UserStore.get(chat.type.user_id);
+            if (user){
+                return user.username;
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup){
+                return supergroup.username;
+            }
+            break;
+        }
+    }
+
+    return null;
+}
+
+function getChatPhoneNumber(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            return null;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            const user = UserStore.get(chat.type.user_id);
+            if (user){
+                return user.phone_number;
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            return null;
+        }
+    }
+
+    return null;
+}
+
+function getChatBio(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            return null;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            const fullInfo = UserStore.getFullInfo(chat.type.user_id);
+            if (fullInfo){
+                return fullInfo.bio;
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            const fullInfo = SupergroupStore.getFullInfo(chat.type.supergroup_id);
+            if (fullInfo){
+                return fullInfo.description;
+            }
+
+            break;
+        }
+    }
+
+    return null;
+}
+
 export {
     getChatDraft,
     getChatTypingString,
@@ -495,10 +588,14 @@ export {
     getChatUnreadMentionCount,
     getChatMuteFor,
     getChatSubtitle,
+    getChatSubtitleWithoutTyping,
     getLastMessageSenderName,
     getLastMessageContent,
     getLastMessageDate,
     getChatLetters,
     isAccentChatSubtitle,
-    isChatMuted
+    isChatMuted,
+    getChatUsername,
+    getChatPhoneNumber,
+    getChatBio
 };

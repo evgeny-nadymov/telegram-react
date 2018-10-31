@@ -41,6 +41,7 @@ class DialogTitleControl extends React.Component {
 
     render() {
         const chat = ChatStore.get(this.props.chatId);
+        if (!chat) return null;
 
         const title = chat.title || 'Deleted account';
 

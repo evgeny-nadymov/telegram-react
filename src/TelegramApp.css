@@ -22,23 +22,41 @@ body {
     overflow: hidden;
 }
 
-#root, #app, #app-inner{
+#root{
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-.im-page-wrap {
+#app{
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.page{
     height: calc(100% - 23px);
     background: #fff;
-    max-width: 1010px;
+    max-width: 1010px; /*1010px;*/
     min-width: 300px;
     margin: 0 auto;
-    box-shadow: 0px 1px 0 #dfe5ec;
+    box-shadow: 0 1px 0 #dfe5ec;
     border-left: 1px solid #dfe5ec;
     border-right: 1px solid #dfe5ec;
     border-bottom: 1px solid #d2dbe3;
     overflow: hidden;
     border-radius: 0 0 8px 8px;
+}
+
+.page-third-column{
+    max-width: 1440px;
+}
+
+.accent-color{
+    color: #0070C9 !important;
+}
+
+.accent-background{
+    background: #0070C9 !important;
 }
 

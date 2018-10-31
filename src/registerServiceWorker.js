@@ -44,6 +44,7 @@ export default async function register() {
 
         const serviceWorkerName = process.env.NODE_ENV === 'production'? 'service-worker.js' : 'custom-service-worker.js';
         const swUrl = `${process.env.PUBLIC_URL}/${serviceWorkerName}`;
+        console.log(`[SW] Service worker url: ${swUrl}`);
 
         if (!isLocalhost) {
             // Is not local host. Just register service worker
@@ -56,6 +57,7 @@ export default async function register() {
 }
 
 async function registerValidSW(swUrl) {
+    console.log('[SW] RegisterValidSW');
     try{
         const registration = await navigator.serviceWorker.register(swUrl);
         registration.onupdatefound = () => {
@@ -121,6 +123,7 @@ async function subscribeNotifications(registration){
 }
 
 async function checkValidServiceWorker(swUrl) {
+    console.log('[SW] CheckValidServiceWorker');
     // Check if the service worker can be found. If it can't reload the page.
     try {
         const response = await fetch(swUrl);

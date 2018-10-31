@@ -6,16 +6,17 @@
  */
 
 import React, {Component} from 'react';
-import ChatStore from '../Stores/ChatStore';
-import UserStore from '../Stores/UserStore';
-import BasicGroupStore from '../Stores/BasicGroupStore';
-import SupergroupStore from '../Stores/SupergroupStore';
-import TdLibController from '../Controllers/TdLibController';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import {withStyles} from '@material-ui/core/styles';
 import {getChatSubtitle, isAccentChatSubtitle} from '../Utils/Chat';
+import ChatStore from '../Stores/ChatStore';
+import UserStore from '../Stores/UserStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
+import SupergroupStore from '../Stores/SupergroupStore';
+import ApplicationStore from '../Stores/ApplicationStore';
+import TdLibController from '../Controllers/TdLibController';
 import './Header.css';
 
 const styles = {
@@ -79,10 +80,10 @@ class Header extends Component{
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
-        SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+        BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
 
         ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
@@ -95,10 +96,10 @@ class Header extends Component{
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
-        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
         BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
 
         ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
@@ -220,6 +221,10 @@ class Header extends Component{
         }
     }
 
+    openChatDetails(){
+        ApplicationStore.changeChatDetailsVisibility(true);
+    }
+
     render(){
         const {classes} = this.props;
         const {authorizationState, connectionState} = this.state;
@@ -267,7 +272,7 @@ class Header extends Component{
 
         return (
             <div className='header-details'>
-                <div className='header-status grow cursor-default'>
+                <div className='header-status grow cursor-pointer' onClick={this.openChatDetails}>
                     <span className='header-status-content'>{title}</span>
                     {titleProgressAnimation}
                     <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>

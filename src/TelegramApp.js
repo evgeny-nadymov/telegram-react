@@ -7,20 +7,22 @@
 
 import React, {Component} from 'react';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import './TelegramApp.css';
 import Dialogs from './Components/Dialogs';
 import DialogDetails from './Components/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
-import TdLibController from './Controllers/TdLibController'
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
-import {VERBOSITY_MAX, VERBOSITY_MIN, JS_VERBOSITY_MAX, JS_VERBOSITY_MIN} from './Constants';
 import packageJson from '../package.json';
 import AppInactiveControl from './Components/AppInactiveControl';
+import registerServiceWorker from './registerServiceWorker';
+import ChatDetails from './Components/ChatDetails';
+import classNames from 'classnames';
 import ChatStore from './Stores/ChatStore';
 import ApplicationStore from './Stores/ApplicationStore';
-import registerServiceWorker from './registerServiceWorker';
+import TdLibController from './Controllers/TdLibController'
+import {VERBOSITY_MAX, VERBOSITY_MIN, JS_VERBOSITY_MAX, JS_VERBOSITY_MIN} from './Constants';
+import './TelegramApp.css';
 
 const theme = createMuiTheme({
     palette: {
@@ -51,6 +53,7 @@ class TelegramApp extends Component{
         this.onUpdateState = this.onUpdateState.bind(this);
         this.onUpdate = this.onUpdate.bind(this);
         this.onUpdateAuthorizationState = this.onUpdateAuthorizationState.bind(this);
+        this.onUpdateChatDetailsVisibility = this.onUpdateChatDetailsVisibility.bind(this);
         this.onUpdateAppInactive = this.onUpdateAppInactive.bind(this);
         this.handleSelectChat = this.handleSelectChat.bind(this);
         this.handleChangePhone = this.handleChangePhone.bind(this);
@@ -108,6 +111,7 @@ class TelegramApp extends Component{
 
     componentDidMount(){
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         TdLibController.on('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.on('tdlib_status', this.onUpdateState);
         TdLibController.on('tdlib_update', this.onUpdate);
@@ -115,6 +119,7 @@ class TelegramApp extends Component{
 
     componentWillUnmount(){
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         TdLibController.removeListener('tdlib_updateAppInactive', this.onUpdateAppInactive);
         TdLibController.removeListener('tdlib_status', this.onUpdateState);
         TdLibController.removeListener('tdlib_update', this.onUpdate);
@@ -131,6 +136,11 @@ class TelegramApp extends Component{
             registerServiceWorker();
         }
     }
+
+    onUpdateChatDetailsVisibility(update){
+        this.forceUpdate();
+    }
+
 
     onUpdateAppInactive(){
         this.setState({ inactive : true });
@@ -228,11 +238,12 @@ class TelegramApp extends Component{
     }
 
     render(){
-        const {inactive, authorizationState} = this.state;
+        const { inactive, authorizationState } = this.state;
+        const { isChatDetailsVisible } = ApplicationStore;
 
         let page = (
             <>
-                <div className='im-page-wrap'>
+                <div className={classNames('page', { 'page-third-column': isChatDetailsVisible })}>
                     <Dialogs
                         onSelectChat={this.handleSelectChat}
                         authState={this.state.authState}
@@ -242,6 +253,9 @@ class TelegramApp extends Component{
                         currentUser={this.state.currentUser}
                         onSelectChat={this.handleSelectChat}
                     />
+                    {
+                        isChatDetailsVisible && <ChatDetails/>
+                    }
                 </div>
                 <Footer/>
             </>
@@ -297,9 +311,7 @@ class TelegramApp extends Component{
         return (
             <MuiThemeProvider theme={theme}>
                 <div id='app'>
-                    <div id='app-inner'>
-                        {page}
-                    </div>
+                    {page}
                 </div>
             </MuiThemeProvider>
         );

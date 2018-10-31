@@ -5,12 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.details {
+.dialog-details {
     float: left;
     width: calc(64% - 0px);
+    /*max-width: 672px;*/
     margin: 0;
     box-sizing: border-box;
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.dialog-details-third-column{
+    width: calc(46.6% - 0px);
 }

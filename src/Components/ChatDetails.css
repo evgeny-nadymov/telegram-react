@@ -5,18 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.dialogs {
+.chat-details {
     float: left;
-    width: calc(36% - 0px);
+    width: calc(26.7% - 0px);
+    /*max-width: 384px;*/
     margin: 0;
     box-sizing: border-box;
-    border-right: 1px solid #E9EBED;
+    border-left: 1px solid #E9EBED;
     height: 100%;
     min-width: 150px;
     display: flex;
     flex-direction: column;
 }
 
-.dialogs-third-column{
-    width: calc(26.7% - 0px);
+.chat-details-info{
+    margin: 10px 22px;
 }

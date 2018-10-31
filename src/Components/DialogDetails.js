@@ -6,12 +6,14 @@
  */
 
 import React, {Component} from 'react';
-import './DialogDetails.css';
+import classNames from 'classnames';
 import InputBoxControl from './InputBoxControl';
-import ChatStore from '../Stores/ChatStore';
 import DialogFooterControl from './DialogFooterControl';
 import Header from './Header';
 import MessagesList from './MessagesList';
+import ChatStore from '../Stores/ChatStore';
+import ApplicationStore from '../Stores/ApplicationStore';
+import './DialogDetails.css';
 
 class DialogDetails extends Component{
 
@@ -25,6 +27,7 @@ class DialogDetails extends Component{
         };
 
         this.showDialogFooter = this.showDialogFooter.bind(this);
+        this.onUpdateChatDetailsVisibility = this.onUpdateChatDetailsVisibility.bind(this);
         this.onUpdateSelectedChatId = this.onUpdateSelectedChatId.bind(this);
     }
 
@@ -37,11 +40,17 @@ class DialogDetails extends Component{
     }
 
     componentDidMount(){
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ChatStore.on('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
     }
 
     componentWillUnmount(){
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+    }
+
+    onUpdateChatDetailsVisibility(update){
+        this.forceUpdate();
     }
 
     onUpdateSelectedChatId(update){
@@ -104,10 +113,11 @@ class DialogDetails extends Component{
 
         const dialogFooter = this.showDialogFooter() ? (<DialogFooterControl/>) : (<InputBoxControl currentUser={this.props.currentUser} />);
         const selectedChat = ChatStore.get(ChatStore.getSelectedChatId());
+        const { isChatDetailsVisible } = ApplicationStore;
 
         return (
-            <div className='details'>
-                <Header />
+            <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
+                <Header/>
                 <MessagesList
                     ref={this.messagesList}
                     selectedChatId={this.state.selectedChatId}

@@ -6,11 +6,14 @@
  */
 
 import React, {Component} from 'react';
-import './Dialogs.css';
+import classNames from 'classnames';
 import DialogsHeader from './DialogsHeader';
 import Header from './Header';
 import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
+import ApplicationStore from '../Stores/ApplicationStore';
+import './Dialogs.css';
+import TdLibController from '../Controllers/TdLibController';
 
 class Dialogs extends Component{
     constructor(props){
@@ -19,6 +22,19 @@ class Dialogs extends Component{
         this.dialogsList = React.createRef();
 
         this.handleHeaderClick = this.handleHeaderClick.bind(this);
+        this.onUpdateChatDetailsVisibility = this.onUpdateChatDetailsVisibility.bind(this);
+    }
+
+    componentDidMount(){
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+    }
+
+    componentWillUnmount(){
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+    }
+
+    onUpdateChatDetailsVisibility(update){
+        this.forceUpdate();
     }
 
     handleHeaderClick(){
@@ -26,9 +42,10 @@ class Dialogs extends Component{
     }
 
     render(){
+        const { isChatDetailsVisible } = ApplicationStore;
         
         return (
-            <div className='master'>
+            <div className={classNames('dialogs', { 'dialogs-third-column': isChatDetailsVisible })}>
                 <DialogsHeader onClearCache={this.props.onClearCache} onClick={this.handleHeaderClick}/>
                 <DialogsList ref={this.dialogsList} authState={this.props.authState} onSelectChat={this.props.onSelectChat}/>
                 <UpdatePanel/>

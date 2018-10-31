@@ -73,6 +73,8 @@ class ChatTileControl extends Component{
 
     render(){
         const chat = ChatStore.get(this.props.chatId);
+        if (!chat) return null;
+
         let letters = getChatLetters(chat);
         let blob = chat.photo && chat.photo.small? chat.photo.small.blob : null;
         let src;

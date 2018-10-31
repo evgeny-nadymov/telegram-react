@@ -5,7 +5,3 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-self.addEventListener('message', function(e) {
-    console.log('[Worker] Receive message: ' + e.data);
-    //self.postMessage(e.data);
-}, false);
