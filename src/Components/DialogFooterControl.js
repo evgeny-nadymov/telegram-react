@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
-import ChatStore from '../Stores/ChatStore';
-import BasicGroupStore from '../Stores/BasicGroupStore';
-import SupergroupStore from '../Stores/SupergroupStore';
-import ApplicationStore from '../Stores/ApplicationStore';
 import {withStyles} from '@material-ui/core/styles';
 import InputBoxControl from './InputBoxControl';
 import DialogCommandControl from './DialogCommandControl';
 import { isChatMuted } from '../Utils/Chat';
+import { debounce } from '../Utils/Common';
+import ChatStore from '../Stores/ChatStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
+import SupergroupStore from '../Stores/SupergroupStore';
+import ApplicationStore from '../Stores/ApplicationStore';
+import TdLibController from '../Controllers/TdLibController';
 import './DialogFooterControl.css';
-import TdLibController from "../Controllers/TdLibController";
 
 class DialogFooterControl extends React.Component {
 

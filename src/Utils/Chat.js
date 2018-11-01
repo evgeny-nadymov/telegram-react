@@ -32,7 +32,7 @@ function getGroupChatTypingString(inputTypingManager){
             if (!firstUser) {
                 firstUser = UserStore.get(userId);
             }
-            if (!secondUser) {
+            else if (!secondUser) {
                 secondUser = UserStore.get(userId);
                 break;
             }

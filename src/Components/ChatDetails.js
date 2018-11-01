@@ -7,17 +7,10 @@
 
 import React from 'react';
 import {withStyles} from '@material-ui/core/styles';
-import ChatTileControl from './ChatTileControl';
-import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
-import ChatStore from '../Stores/ChatStore';
-import DialogTitleControl from './DialogTitleControl';
-import DialogStatusControl from './DialogStatusControl';
 import CloseIcon from '@material-ui/icons/Close';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import CallIcon from '@material-ui/icons/Call';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
@@ -27,15 +20,19 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
-import Switch from '@material-ui/core/Switch';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import List from '@material-ui/core/List';
-import { getChatUsername, getChatPhoneNumber, getChatBio, isAccentChatSubtitle } from '../Utils/Chat';
+import ChatTileControl from './ChatTileControl';
+import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
+import DialogTitleControl from './DialogTitleControl';
+import DialogStatusControl from './DialogStatusControl';
+import NotificationsListItem from './NotificationsListItem';
+import { getChatUsername, getChatPhoneNumber, getChatBio, isChatMuted } from '../Utils/Chat';
 import { formatPhoneNumber } from '../Utils/Common';
-import './ChatDetails.css';
+import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
+import './ChatDetails.css';
 
 const styles = {
     closeIconButton : {
@@ -51,12 +48,12 @@ class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
 
+        const selectedChatId = ChatStore.getSelectedChatId();
+
         this.state = {
-            selectedChatId: ChatStore.getSelectedChatId(),
-            notifications: true
+            selectedChatId: selectedChatId
         };
 
-        this.handleToggleNotifications = this.handleToggleNotifications.bind(this);
         this.onUpdateBasicGroupFullInfo = this.onUpdateBasicGroupFullInfo.bind(this);
         this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
         this.onUpdateUserFullInfo = this.onUpdateUserFullInfo.bind(this);
@@ -119,11 +116,12 @@ class ChatDetails extends React.Component {
     }
 
     onClientUpdateSelectedChatId(update){
-        this.setState({ selectedChatId: ChatStore.getSelectedChatId() });
-    }
 
-    handleToggleNotifications(){
-        this.setState({ notifications: !this.state.notifications });
+        const selectedChatId = ChatStore.getSelectedChatId();
+        const chat = ChatStore.get(selectedChatId);
+        const isMuted = isChatMuted(chat);
+
+        this.setState({ selectedChatId: selectedChatId, isMuted: isMuted });
     }
 
     handleClick = () => {
@@ -132,7 +130,7 @@ class ChatDetails extends React.Component {
 
     render() {
         // const { classes } = this.props;
-        const { selectedChatId, notifications } = this.state;
+        const { selectedChatId } = this.state;
         const chat = ChatStore.get(selectedChatId);
         if (!chat) {
             return (
@@ -193,23 +191,7 @@ class ChatDetails extends React.Component {
                 </List>
                 <Divider/>
                 <List>
-                    <ListItem button onClick={this.handleToggleNotifications}>
-                        <ListItemIcon>
-                            {
-                                notifications
-                                    ? <NotificationsActiveIcon/>
-                                    : <NotificationsIcon/>
-                            }
-                        </ListItemIcon>
-                        <ListItemText primary='Notifications'/>
-                        <ListItemSecondaryAction>
-                            <Switch
-                                color='primary'
-                                onChange={this.handleToggleNotifications}
-                                checked={notifications}
-                            />
-                        </ListItemSecondaryAction>
-                    </ListItem>
+                    <NotificationsListItem chatId={selectedChatId}/>
                     <ListItem button onClick={this.handleClick}>
                         <ListItemIcon>
                             <MoreHorizIcon/>
@@ -217,13 +199,13 @@ class ChatDetails extends React.Component {
                         <ListItemText primary='More'/>
                         {this.state.open ? <ExpandLess /> : <ExpandMore />}
                     </ListItem>
-                    <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-                        <List component="div" disablePadding>
+                    <Collapse in={this.state.open} timeout='auto' unmountOnExit>
+                        <List component='div' disablePadding>
                             <ListItem button>
                                 <ListItemIcon>
                                     <StarBorder />
                                 </ListItemIcon>
-                                <ListItemText inset primary="Starred" />
+                                <ListItemText inset primary='Starred' />
                             </ListItem>
                         </List>
                     </Collapse>

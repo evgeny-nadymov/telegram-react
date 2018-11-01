@@ -265,7 +265,7 @@ class TelegramApp extends Component{
             page = (
                 <>
                     <div className='header-wrapper'/>
-                    <div className='im-page-wrap'>
+                    <div className='page'>
                         <AppInactiveControl/>
                     </div>
                     <Footer/>

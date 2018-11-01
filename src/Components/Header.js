@@ -6,6 +6,7 @@
  */
 
 import React, {Component} from 'react';
+import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
@@ -222,6 +223,10 @@ class Header extends Component{
     }
 
     openChatDetails(){
+        const chatId = ChatStore.getSelectedChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
         ApplicationStore.changeChatDetailsVisibility(true);
     }
 
@@ -272,18 +277,23 @@ class Header extends Component{
 
         return (
             <div className='header-details'>
-                <div className='header-status grow cursor-pointer' onClick={this.openChatDetails}>
+                <div className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')} onClick={this.openChatDetails}>
                     <span className='header-status-content'>{title}</span>
                     {titleProgressAnimation}
                     <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>{subtitle}</span>
                     <span className='header-status-tail'/>
                 </div>
-                <IconButton className={classes.messageSearchIconButton} aria-label='Search'>
-                    <SearchIcon />
-                </IconButton>
-                <IconButton className={classes.moreIconButton} aria-label='More'>
-                    <MoreVertIcon />
-                </IconButton>
+                {
+                    chat &&
+                        <>
+                            <IconButton className={classes.messageSearchIconButton} aria-label='Search'>
+                                <SearchIcon/>
+                            </IconButton>
+                            < IconButton className={classes.moreIconButton} aria-label='More'>
+                            <MoreVertIcon />
+                            </IconButton>
+                        </>
+                }
             </div>
         );
     }
