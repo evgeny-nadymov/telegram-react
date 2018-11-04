@@ -16,6 +16,10 @@ import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
 import {getLetters} from './Common';
 import { getServiceMessageContent, isServiceMessage } from './ServiceMessage';
+import InputBoxControl from '../Components/InputBoxControl';
+import DialogCommandControl from '../Components/DialogCommandControl';
+import React from 'react';
+import NotificationsCommandControl from '../Components/NotificationsCommandControl';
 
 function getGroupChatTypingString(inputTypingManager){
     if (!inputTypingManager) return null;
@@ -580,6 +584,108 @@ function getChatBio(chatId) {
     return null;
 }
 
+function isGroupChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' :
+        case 'chatTypeSupergroup' :{
+            return true;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            return false;
+        }
+    }
+}
+
+function isChannelChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+
+            return supergroup && supergroup.is_channel;
+        }
+        case 'chatTypeBasicGroup' :
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            return false;
+        }
+    }
+}
+
+function isChatMember(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup && supergroup.status){
+                switch (supergroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusBanned' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusRestricted' : {
+                        return supergroup.status.is_member;
+                    }
+                }
+            }
+        }
+        case 'chatTypeBasicGroup' : {
+            const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+            if (basicGroup && basicGroup.status){
+                switch (basicGroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusBanned' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusRestricted' : {
+                        return basicGroup.status.is_member;
+                    }
+                }
+            }
+            break;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' : {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export {
     getChatDraft,
     getChatTypingString,
@@ -597,5 +703,8 @@ export {
     isChatMuted,
     getChatUsername,
     getChatPhoneNumber,
-    getChatBio
+    getChatBio,
+    isGroupChat,
+    isChannelChat,
+    isChatMember
 };

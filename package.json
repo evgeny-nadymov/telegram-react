@@ -1,13 +1,14 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.99",
+  "version": "0.0.101",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "^0.2.19",
     "@material-ui/core": "^3.3.2",
     "@material-ui/icons": "^3.0.1",
     "classnames": "^2.2.6",
+    "copy-to-clipboard": "^3.0.8",
     "dateformat": "^3.0.3",
     "emoji-mart": "^2.8.1",
     "events": "^2.1.0",

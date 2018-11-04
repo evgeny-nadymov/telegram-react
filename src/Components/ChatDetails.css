@@ -19,5 +19,13 @@
 }
 
 .chat-details-info{
-    margin: 10px 22px;
+    margin: 10px 16px;
+}
+
+.chat-details-list{
+    overflow-y: scroll;
+}
+
+.chat-details-info-icon{
+    transform: rotateZ(180deg);
 }

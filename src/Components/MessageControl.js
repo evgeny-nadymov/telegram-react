@@ -6,17 +6,28 @@
  */
 
 import React, {Component} from 'react';
-import './MessageControl.css';
+import ReplyControl from './ReplyControl';
+import MessageStatusControl from './MessageStatusControl';
+import UserTileControl from './UserTileControl';
+import {saveData, saveBlob} from '../Utils/File';
+import {
+    getTitle,
+    getDate,
+    getDateHint,
+    getText,
+    getMedia,
+    getReply,
+    getForward,
+    getUnread,
+    getSender
+} from '../Utils/Message';
+import {getPhotoSize} from '../Utils/Common';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import FileController from '../Controllers/FileController';
-import ReplyControl from './ReplyControl';
-import {saveData, saveBlob} from '../Utils/File';
-import {getTitle, getDate, getDateHint, getText, getMedia, getReply, getForward, getUnread} from '../Utils/Message';
-import MessageStatusControl from './MessageStatusControl';
-import {getPhotoSize} from '../Utils/Common';
+import './MessageControl.css';
 
 class MessageControl extends Component{
     constructor(props){
@@ -225,6 +236,7 @@ class MessageControl extends Component{
         let reply = getReply(message);
         let forward = getForward(message);
         this.unread = getUnread(message);
+        let sender = getSender(message);
 
         return (
             <div className='message'>
@@ -235,6 +247,9 @@ class MessageControl extends Component{
                 }
                 <div className='message-wrapper'>
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
+                    <div className='message-sender-tile'>
+                        <UserTileControl user={sender}/>
+                    </div>
                     <div className='message-content'>
                         <div className='message-body'>
                             <div className='message-title'>

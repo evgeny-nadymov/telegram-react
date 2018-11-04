@@ -235,6 +235,13 @@ function getUnread(message) {
     return chat.last_read_outbox_message_id < message.id;
 }
 
+function getSender(message) {
+    if (!message) return null;
+    if (!message.sender_user_id) return null;
+
+    return UserStore.get(message.sender_user_id);
+}
+
 export {
     getTitle,
     getText,
@@ -243,5 +250,6 @@ export {
     getMedia,
     getReply,
     getForward,
-    getUnread
+    getUnread,
+    getSender
 };

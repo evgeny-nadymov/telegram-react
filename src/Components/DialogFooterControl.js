@@ -6,15 +6,12 @@
  */
 
 import React from 'react';
-import {withStyles} from '@material-ui/core/styles';
 import InputBoxControl from './InputBoxControl';
 import DialogCommandControl from './DialogCommandControl';
-import { isChatMuted } from '../Utils/Chat';
-import { debounce } from '../Utils/Common';
+import NotificationsCommandControl from './NotificationsCommandControl';
 import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
-import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
 import './DialogFooterControl.css';
 
@@ -24,14 +21,10 @@ class DialogFooterControl extends React.Component {
         super(props);
 
         this.handleJoin = this.handleJoin.bind(this);
-        this.handleMute = this.handleMute.bind(this);
-        this.handleUnmute = this.handleUnmute.bind(this);
         this.handleDeleteAndExit = this.handleDeleteAndExit.bind(this);
 
         this.onUpdateBasicGroup = this.onUpdateBasicGroup.bind(this);
         this.onUpdateSupergroup = this.onUpdateSupergroup.bind(this);
-        this.onUpdateChatNotificationSettings = this.onUpdateChatNotificationSettings.bind(this);
-        this.onUpdateScopeNotificationSettings = this.onUpdateScopeNotificationSettings.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -43,46 +36,13 @@ class DialogFooterControl extends React.Component {
     }
 
     componentDidMount(){
-        ChatStore.on('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
-        ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
         BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
-        ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
         BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
-    }
-
-    onUpdateChatNotificationSettings(update){
-        if (!update.chat_id) return;
-        if (update.chat_id !== this.props.selectedChatId) return;
-
-        this.forceUpdate();
-    }
-
-    onUpdateScopeNotificationSettings(update){
-        const chat = ChatStore.get(this.props.selectedChatId);
-        if (!chat) return;
-
-        switch (update.scope['@type']) {
-            case 'notificationSettingsScopeGroupChats': {
-                if (chat.type['@type'] === 'chatTypeBasicGroup'
-                    || chat.type['@type'] === 'chatTypeSupergroup'){
-                    this.forceUpdate();
-                }
-                break;
-            }
-            case 'notificationSettingsScopePrivateChats':{
-                if (chat.type['@type'] === 'chatTypePrivate'
-                    || chat.type['@type'] === 'chatTypeSecret'){
-                    this.forceUpdate();
-                }
-                break;
-            }
-        }
     }
 
     onUpdateBasicGroup(update){
@@ -117,33 +77,6 @@ class DialogFooterControl extends React.Component {
             });
     }
 
-    handleMute(){
-        if (!this.props.selectedChatId) return;
-
-        this.setChatNotificationSettings(this.props.selectedChatId, 2147483647); // int32.max = 2^32 - 1
-    }
-
-    handleUnmute(){
-        if (!this.props.selectedChatId) return;
-
-        this.setChatNotificationSettings(this.props.selectedChatId, 0);
-    }
-
-    setChatNotificationSettings(chatId, muteFor){
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-        if (!chat.notification_settings) return;
-
-        const newNotificationSettings = {...chat.notification_settings, use_default_mute_for : false, mute_for : muteFor};
-
-        TdLibController
-            .send({
-                '@type': 'setChatNotificationSettings',
-                chat_id: chatId,
-                notification_settings: newNotificationSettings
-            });
-    }
-
     handleDeleteAndExit(){
         if (!this.props.selectedChatId) return;
 
@@ -162,7 +95,8 @@ class DialogFooterControl extends React.Component {
     }
 
     render() {
-        const chat = ChatStore.get(this.props.selectedChatId);
+        const { selectedChatId } = this.props;
+        const chat = ChatStore.get(selectedChatId);
         if (!chat) return null;
         if (!chat.type) return null;
 
@@ -223,12 +157,7 @@ class DialogFooterControl extends React.Component {
                         }
                         case 'chatMemberStatusMember' : {
                             if (supergroup.is_channel){
-                                const isMuted = isChatMuted(chat);
-                                return (
-                                    <DialogCommandControl
-                                        command={isMuted ? 'unmute' : 'mute'}
-                                        onCommand={isChatMuted(chat) ? this.handleUnmute : this.handleMute}/>
-                                );
+                                return (<NotificationsCommandControl chatId={selectedChatId}/>);
                             }
                             else{
                                 return (<InputBoxControl/>);

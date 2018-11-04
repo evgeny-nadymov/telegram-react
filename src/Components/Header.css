@@ -36,8 +36,7 @@
 }
 
 .header-status{
-    font-size: 22px;
-    font-family: 'Product Sans', 'Roboto', sans-serif;
+    font: 22px/27px 'Product Sans', 'Roboto', sans-serif;
     padding: 0 0 0 24px;
     user-select: none;
     background: transparent;
@@ -51,7 +50,6 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    padding: 12px 0;
 }
 
 .header-status-title-accent{

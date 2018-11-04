@@ -6,6 +6,7 @@
  */
 
 import dateFormat from 'dateformat';
+import UserStore from '../Stores/UserStore';
 
 function getUserStatus(user){
     if (!user) return null;
@@ -108,8 +109,18 @@ function getUserFullName(user) {
     if (user.last_name) return user.last_name;
 }
 
+function isUserBlocked(userId){
+    const fullInfo = UserStore.getFullInfo(userId);
+    if (fullInfo){
+        return fullInfo.is_blocked;
+    }
+
+    return false;
+}
+
 export {
     getUserStatus,
     isAccentUserSubtitle,
-    getUserFullName
+    getUserFullName,
+    isUserBlocked
 }

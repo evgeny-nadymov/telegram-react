@@ -60,6 +60,9 @@ class TdLibController extends EventEmitter{
     }
 
     sendTdParameters() {
+        //console.log('API_ID=' + process.env.REACT_APP_TELEGRAM_API_ID);
+        //console.log('API_HASH=' + process.env.REACT_APP_TELEGRAM_API_HASH);
+
         this.send({
             '@type': 'setTdlibParameters',
             parameters: {
