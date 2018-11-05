@@ -245,13 +245,14 @@ class MessageControl extends Component{
                         Unread messages
                     </div>
                 }
+
                 <div className='message-wrapper'>
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
                     <div className='message-sender-tile'>
                         <UserTileControl user={sender}/>
                     </div>
                     <div className='message-content'>
-                        <div className='message-body'>
+                        {/*<div className='message-body'>*/}
                             <div className='message-title'>
                                 {!forward && <div className='message-author'>{title}</div>}
                                 {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
@@ -269,7 +270,7 @@ class MessageControl extends Component{
                             {reply && <ReplyControl chatId={message.chat_id} messageId={reply}/>}
                             {media}
                             <div className='message-text'>{text}</div>
-                        </div>
+                        {/*</div>*/}
                     </div>
                 </div>
             </div>

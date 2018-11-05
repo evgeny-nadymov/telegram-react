@@ -24,6 +24,7 @@
 
 .chat-details-list{
     overflow-y: scroll;
+    height: 100%;
 }
 
 .chat-details-info-icon{

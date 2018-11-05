@@ -36,7 +36,7 @@
 }
 
 .header-status{
-    font: 22px/27px 'Product Sans', 'Roboto', sans-serif;
+    font: 22px/normal 'Product Sans', 'Roboto', sans-serif;
     padding: 0 0 0 24px;
     user-select: none;
     background: transparent;

@@ -153,7 +153,7 @@ class ChatDetails extends React.Component {
 
         copy('https://t.me/' + username);
 
-        this.setState({ openUsernameHint: true });
+        this.setState({ openUsernameHint: true, openPhoneHint: false });
     };
 
     handleCloseUsernameHint = (event, reason) => {
@@ -171,7 +171,7 @@ class ChatDetails extends React.Component {
 
         copy(formatPhoneNumber(phoneNumber));
 
-        this.setState({ openPhoneHint: true });
+        this.setState({ openUsernameHint: false, openPhoneHint: true });
     };
 
     handleClosePhoneHint = (event, reason) => {
@@ -261,7 +261,7 @@ class ChatDetails extends React.Component {
                                             'aria-describedby': 'message-id',
                                         }}
                                         message={<span id="message-id">Link copied</span>}
-                                        action={[
+                                        action={
                                             <IconButton
                                                 key='close'
                                                 aria-label='Close'
@@ -269,8 +269,8 @@ class ChatDetails extends React.Component {
                                                 className={classes.close}
                                                 onClick={this.handleCloseUsernameHint}>
                                                 <CloseIcon />
-                                            </IconButton>,
-                                        ]}
+                                            </IconButton>
+                                        }
                                     />
                                 </>
                         }
