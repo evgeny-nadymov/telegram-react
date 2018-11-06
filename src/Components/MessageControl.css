@@ -65,25 +65,23 @@ pre code {
 
 .message-wrapper{
     max-width: 500px;
-    padding: 0 15px;
+    padding: 8px 15px;
     margin: 0 auto;
     display: flex;
     flex-direction: row;
 }
 
-.message:before, .message:after{
-    content: ' ';
-    display: table;
-}
-
 .message-content{
-    margin: 8px 10px 8px 16px;
-    width: 100%;
+    margin-left: 12px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 .message-title{
     display: flex;
     flex-direction: row;
+    align-items: baseline;
 }
 
 .message-author{
@@ -104,7 +102,7 @@ pre code {
     user-select: none;
     color: #adadad;
     font-size: .85em;
-    margin: 1px 0 0 6px;
+    margin-left: 6px;
 }
 
 .message-body{
@@ -137,9 +135,4 @@ pre code {
     color: #8096a8;
     text-align: center;
     padding: 4px 10px;
-    margin: 10px 0;
-}
-
-.message-sender-tile{
-    margin: 8px 0;
 }

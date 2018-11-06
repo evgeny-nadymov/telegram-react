@@ -8,19 +8,21 @@
 .contact{
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .contact-name{
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
-    padding-top: 6px;
 }
 
 .contact-phone{
-
+    color: #70777b;
+    font-size: 14px;
 }
 
 .contact-content{
     flex-grow: 1;
-    margin-left: 10px;
+    flex-shrink: 1;
+    margin-left: 16px;
 }

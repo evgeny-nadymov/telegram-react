@@ -35,7 +35,7 @@ class TdLibController extends EventEmitter{
         let parameters = {
             verbosity : verbosity,
             jsVerbosity : jsVerbosity,
-            mode : 'wasm',  // 'wasm-streaming'/'wasm'/'asmjs'
+            mode : 'wasm-streaming',  // 'wasm-streaming'/'wasm'/'asmjs'
             prefix : useTestDC ? 'tdlib_test' : 'tdlib',
             isBackground : false
         };
@@ -60,16 +60,23 @@ class TdLibController extends EventEmitter{
     }
 
     sendTdParameters() {
-        //console.log('API_ID=' + process.env.REACT_APP_TELEGRAM_API_ID);
-        //console.log('API_HASH=' + process.env.REACT_APP_TELEGRAM_API_HASH);
+        const apiId = process.env.REACT_APP_TELEGRAM_API_ID;
+        const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
+
+        if (!apiId || !apiHash){
+            if (window.confirm('API id is missing!\nIn order to obtain an API id and develop your own application using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id'))
+            {
+                window.location.href='https://core.telegram.org/api/obtaining_api_id';
+            }
+        }
 
         this.send({
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
                 use_test_dc: this.clientParameters.useTestDC,
-                api_id: process.env.REACT_APP_TELEGRAM_API_ID,
-                api_hash: process.env.REACT_APP_TELEGRAM_API_HASH,
+                api_id: apiId,
+                api_hash: apiHash,
                 system_language_code: 'en',
                 device_model: 'Web',
                 system_version: 'Unknown',

@@ -248,29 +248,25 @@ class MessageControl extends Component{
 
                 <div className='message-wrapper'>
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
-                    <div className='message-sender-tile'>
-                        <UserTileControl user={sender}/>
-                    </div>
+                    <UserTileControl user={sender}/>
                     <div className='message-content'>
-                        {/*<div className='message-body'>*/}
-                            <div className='message-title'>
-                                {!forward && <div className='message-author'>{title}</div>}
-                                {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
-                                <div className='message-meta'>
-                                    {message.views > 0 &&
-                                        <>
-                                            <i className='message-views-icon'/>
-                                            <span className='message-views'> {message.views}&nbsp;&nbsp;</span>
-                                        </>
-                                    }
-                                    {message.edit_date > 0 && <span>edited </span>}
-                                    <span className='message-date' title={dateHint}>{date}</span>
-                                </div>
+                        <div className='message-title'>
+                            {!forward && <div className='message-author'>{title}</div>}
+                            {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
+                            <div className='message-meta'>
+                                {message.views > 0 &&
+                                    <>
+                                        <i className='message-views-icon'/>
+                                        <span className='message-views'> {message.views}&nbsp;&nbsp;</span>
+                                    </>
+                                }
+                                {message.edit_date > 0 && <span>edited </span>}
+                                <span className='message-date' title={dateHint}>{date}</span>
                             </div>
-                            {reply && <ReplyControl chatId={message.chat_id} messageId={reply}/>}
-                            {media}
-                            <div className='message-text'>{text}</div>
-                        {/*</div>*/}
+                        </div>
+                        {reply && <ReplyControl chatId={message.chat_id} messageId={reply}/>}
+                        {media}
+                        <div className='message-text'>{text}</div>
                     </div>
                 </div>
             </div>

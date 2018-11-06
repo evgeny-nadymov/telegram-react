@@ -216,8 +216,9 @@ function readImageSize (file, callback) {
 }
 
 function formatPhoneNumber(number){
-    let unformattedNumber = number && number.startsWith('+') ? number : '+' + number;
-    return formatNumber(unformattedNumber, 'International');
+    const unformattedNumber = number && number.startsWith('+') ? number : '+' + number;
+    const formattedNumber = formatNumber(unformattedNumber, 'International');
+    return formattedNumber || unformattedNumber;
 }
 
 /**

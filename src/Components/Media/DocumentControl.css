@@ -8,11 +8,12 @@
 .document{
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .document-tile{
-    position: relative;
     cursor: pointer;
+    height: 48px;
 }
 
 .document-progress{
@@ -32,16 +33,21 @@
 
 .document-content{
     flex-grow: 1;
-    margin-left: 10px;
+    flex-shrink: 1;
+    margin-left: 16px;
 }
 
 .document-title{
-    padding-top: 6px;
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 .document-name{
     color: #3a6d99;
-    font-weight: 700;
+    font-weight: 500;
     max-width: 110px;
     overflow: hidden;
     white-space: nowrap;
@@ -49,7 +55,8 @@
 }
 
 .document-size{
-    color: #999;
+    color: #70777b;
+    font-size: 14px;
 }
 
 .document-action{

@@ -26,8 +26,11 @@ import './TelegramApp.css';
 
 const theme = createMuiTheme({
     palette: {
-        primary: { main: '#3B9EDB'},
+        primary: { main: '#3B9EDB' },
     },
+    typography: {
+        useNextVariants: true,
+    }
 });
 
 class TelegramApp extends Component{

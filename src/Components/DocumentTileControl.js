@@ -75,13 +75,16 @@ class DocumentTileControl extends React.Component {
         }
 
         return src ?
-            (<div><img className={photoClasses} src={src} draggable={false} alt=''/></div>) :
+            (<img className={photoClasses} src={src} draggable={false} alt=''/>) :
             (<div className={photoClasses}>
-                {!this.props.showProgress && <i className={iconClassName}/>}
-                {this.props.showProgress && <svg className='document-tile-cancel'>
-                    <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
-                    <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>
-                </svg>}
+                { !this.props.showProgress && <i className={iconClassName}/> }
+                {
+                    this.props.showProgress &&
+                    <svg className='document-tile-cancel'>
+                        <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
+                        <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>
+                    </svg>
+                }
             </div>);
     }
 }

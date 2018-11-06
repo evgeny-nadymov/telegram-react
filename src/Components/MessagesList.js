@@ -108,7 +108,7 @@ class MessagesList extends React.Component {
                 if (item) {
                     console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
                     if (itemComponent.props.showUnreadSeparator) {
-                        list.scrollTop = item.offsetTop + 10; // + unread messages margin-top
+                        list.scrollTop = item.offsetTop; // + unread messages margin-top
                         break;
                     }
                     else {
