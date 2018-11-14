@@ -7,12 +7,10 @@
 
 import React from 'react';
 import {withStyles} from '@material-ui/core/styles';
-import {
-    IconButton
-} from '@material-ui/core';
+import {IconButton} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
-import ApplicationStore from '../Stores/ApplicationStore';
-import './Header.css';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import '../ColumnMiddle/Header.css';
 import './ChatDetailsHeaderControl.css';
 
 const styles = {
@@ -24,25 +22,23 @@ const styles = {
 class ChatDetailsHeaderControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.handleClose = this.handleClose.bind(this);
-    }
-
-    handleClose(){
-        ApplicationStore.changeChatDetailsVisibility(false);
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, backButton, onClick } = this.props;
 
         return (
             <div className='header-master'>
                 <IconButton
                     className={classes.closeIconButton}
-                    onClick={this.handleClose}>
-                    <CloseIcon />
+                    onClick={this.props.onClose}>
+                    {
+                        backButton ?
+                            <ArrowBackIcon /> :
+                            <CloseIcon/>
+                    }
                 </IconButton>
-                <div className='header-status grow cursor-pointer'>
+                <div className='header-status grow cursor-pointer' onClick={onClick}>
                     <span className='header-status-content'>Chat Info</span>
                 </div>
             </div>);

@@ -1,0 +1,44 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.document-tile-background{
+    background: rgba(218,228,234,.5);
+}
+
+.document-tile-download-icon{
+    display: inline-block;
+    line-height: 0;
+    width: 12px;
+    height: 18px;
+    margin: 15px 18px;
+    background: url(../../Assets/Icons/General.png) no-repeat -14px -509px;
+}
+
+.document-tile-save-icon{
+    display: inline-block;
+    line-height: 0;
+    width: 16px;
+    height: 18px;
+    margin: 15px 16px;
+    background: url(../../Assets/Icons/General.png) no-repeat -12px -561px;
+}
+
+.document-tile-cancel{
+    height: 18px;
+    width: 18px;
+    stroke: #90a8bc;
+    /*stroke: red;*/
+    stroke-width: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 15px;
+}
+
+.document-tile-cancel-line{
+    stroke-linecap: round;
+}

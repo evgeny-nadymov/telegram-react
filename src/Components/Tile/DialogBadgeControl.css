@@ -1,0 +1,68 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.dialog-badge{
+    background: #3B9EDB;
+    font-size: 13px;
+    padding: 0 5px;
+    border-radius: 11px;
+    text-align: center;
+    margin-top: -2px;
+    margin-left: 6px;
+    font-weight: 500;
+    color: #fff;
+    line-height: 1;
+    vertical-align: baseline;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.dialog-badge-text{
+    min-width: 11px;
+}
+
+.dialog-badge-mention{
+    min-width: 11px;
+    transform: translateY(-1px);
+}
+
+.dialog-badge-muted{
+    background: #D8D8D8;
+}
+
+.dialog-badge-pinned{
+    display: inline-block;
+    float: right;
+    min-width: 14px;
+    height: 14px;
+    overflow: hidden;
+    margin-bottom: 4px;
+    margin-left: 6px;
+    background: url(../../Assets/Icons/General_2x.png);
+    background-position: -13px -916px;
+    background-size: 40px 948px;
+}
+
+.dialog-badge-unread{
+    background: #c1d6e5;
+    display: inline-block;
+    float: right;
+    width: 8px;
+    height: 8px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 3px 0 0;
+    min-width: 8px;
+}
+
+.dialog-badge-wrapper{
+    display: flex;
+    flex-direction: column;
+    margin-left: 6px;
+    height: 48px;
+}

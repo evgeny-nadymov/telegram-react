@@ -24,10 +24,10 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
-import ChatTileControl from './ChatTileControl';
+import Typography from '@material-ui/core/Typography';
+import UserControl from '../Tile/UserControl';
+import ChatControl from '../Tile/ChatControl';
 import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
-import DialogTitleControl from './DialogTitleControl';
-import DialogStatusControl from './DialogStatusControl';
 import NotificationsListItem from './NotificationsListItem';
 import {
     getChatUsername,
@@ -36,15 +36,25 @@ import {
     isChatMuted,
     isGroupChat,
     isChannelChat,
-    isChatMember
-} from '../Utils/Chat';
-import { isUserBlocked } from '../Utils/User';
-import { formatPhoneNumber } from '../Utils/Common';
-import ChatStore from '../Stores/ChatStore';
-import UserStore from '../Stores/UserStore';
-import BasicGroupStore from '../Stores/BasicGroupStore';
-import SupergroupStore from '../Stores/SupergroupStore';
-import TdLibController from '../Controllers/TdLibController';
+    isChatMember,
+    getGroupChatMembers,
+    getChatFullInfo
+} from '../../Utils/Chat';
+import {
+    getUserStatusOrder,
+    isUserBlocked
+} from '../../Utils/User';
+import {
+    loadUserPhotos,
+    loadChatPhotos
+} from '../../Utils/File';
+import { formatPhoneNumber } from '../../Utils/Common';
+import ChatStore from '../../Stores/ChatStore';
+import UserStore from '../../Stores/UserStore';
+import BasicGroupStore from '../../Stores/BasicGroupStore';
+import SupergroupStore from '../../Stores/SupergroupStore';
+import TdLibController from '../../Controllers/TdLibController';
+import FileController from '../../Controllers/FileController';
 import './ChatDetails.css';
 
 const styles = theme => ({
@@ -64,18 +74,33 @@ class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
 
-        const selectedChatId = ChatStore.getSelectedChatId();
+        this.chatDetailsList = React.createRef();
 
+        const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+        const isMuted = isChatMuted(chat);
+
+        this.members = new Map();
         this.state = {
-            selectedChatId: selectedChatId
+            prevChatId: chatId,
+            isMuted: isMuted,
+            openMore: false
         };
+    }
 
-        this.handleBlock = this.handleBlock.bind(this);
+    static getDerivedStateFromProps(props, state){
+        if (props.chatId !== state.prevChatId){
+            const chat = ChatStore.get(props.chatId);
+            const isMuted = isChatMuted(chat);
 
-        this.onUpdateBasicGroupFullInfo = this.onUpdateBasicGroupFullInfo.bind(this);
-        this.onUpdateSupergroupFullInfo = this.onUpdateSupergroupFullInfo.bind(this);
-        this.onUpdateUserFullInfo = this.onUpdateUserFullInfo.bind(this);
-        this.onClientUpdateSelectedChatId = this.onClientUpdateSelectedChatId.bind(this);
+            return {
+                prevChatId: props.chatId,
+                isMuted: isMuted,
+                openMore: false
+            }
+        }
+
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -86,33 +111,46 @@ class ChatDetails extends React.Component {
         return false;
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot){
+        if (prevProps.chatId !== this.props.chatId){
+            this.handleSelectChat();
+            // alert(`[ChatInfo] componentDidUpdate new_chat_id=${prevProps.chatId} old_chat_id=${this.props.chatId}`);
+        }
+    }
+
     componentDidMount(){
+        this.handleSelectChat();
+
+        UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
-        ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
     componentWillUnmount(){
+        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
         BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
-    onUpdateBasicGroupFullInfo(update){
-        const chat = ChatStore.get(this.state.selectedChatId);
+    onUpdateBasicGroupFullInfo = (update) => {
+        const chat = ChatStore.get(this.props.chatId);
         if (!chat) return;
 
         if (chat.type
             && chat.type['@type'] === 'chatTypeBasicGroup'
             && chat.type.basic_group_id === update.basic_group_id){
-            this.forceUpdate(); // update bio
-        }
-    }
 
-    onUpdateSupergroupFullInfo(update){
-        const chat = ChatStore.get(this.state.selectedChatId);
+            this.handleSelectChat();
+
+            this.forceUpdate(); // update bio
+
+        }
+    };
+
+    onUpdateSupergroupFullInfo = (update) => {
+        const chat = ChatStore.get(this.props.chatId);
         if (!chat) return;
 
         if (chat.type
@@ -120,10 +158,10 @@ class ChatDetails extends React.Component {
             && chat.type.supergroup_id === update.supergroup_id){
             this.forceUpdate(); // update bio
         }
-    }
+    };
 
-    onUpdateUserFullInfo(update){
-        const chat = ChatStore.get(this.state.selectedChatId);
+    onUpdateUserFullInfo = (update) => {
+        const chat = ChatStore.get(this.props.chatId);
         if (!chat) return;
 
         if (chat.type
@@ -131,24 +169,44 @@ class ChatDetails extends React.Component {
             && chat.type.user_id === update.user_id){
             this.forceUpdate(); // update bio
         }
-    }
+    };
 
-    onClientUpdateSelectedChatId(update){
+    onUpdateUserStatus = (update) => {
+        if (this.members.has(update.user_id)){
+            this.forceUpdate();
+        }
+    };
 
-        const selectedChatId = ChatStore.getSelectedChatId();
-        const chat = ChatStore.get(selectedChatId);
-        const isMuted = isChatMuted(chat);
+    handleSelectChat = () => {
+        this.getFullInfo();
 
-        this.setState({ selectedChatId: selectedChatId, isMuted: isMuted, open: false });
-    }
+        this.loadChatContents();
+    };
 
-    handleClick = () => {
-        this.setState(state => ({ open: !state.open }));
+    loadChatContents = () => {
+        const { chatId } = this.props;
+
+        const store = FileController.getStore();
+
+        loadChatPhotos(store, [chatId]);
+        const members = getGroupChatMembers(chatId).map(x => x.user_id);
+        console.log('loadChatContents members=' + members);
+        loadUserPhotos(store, members);
+    };
+
+    getFullInfo = () => {
+        const { chatId } = this.props;
+
+        getChatFullInfo(chatId);
+    };
+
+    handleMoreClick = () => {
+        this.setState({ openMore: !this.state.openMore });
     };
 
     handleUsernameHint = () => {
-        const { selectedChatId } = this.state;
-        const username = getChatUsername(selectedChatId);
+        const { chatId } = this.props;
+        const username = getChatUsername(chatId);
         if (!username) return;
 
         copy('https://t.me/' + username);
@@ -165,8 +223,8 @@ class ChatDetails extends React.Component {
     };
 
     handlePhoneHint = () => {
-        const { selectedChatId } = this.state;
-        const phoneNumber = getChatPhoneNumber(selectedChatId);
+        const { chatId } = this.props;
+        const phoneNumber = getChatPhoneNumber(chatId);
         if (!phoneNumber) return;
 
         copy(formatPhoneNumber(phoneNumber));
@@ -182,10 +240,21 @@ class ChatDetails extends React.Component {
         this.setState({ openPhoneHint: false });
     };
 
-    handleBlock(){
-        const { selectedChatId } = this.state;
+    handleSendMessage = () => {
+        const selectedChatId = ChatStore.getSelectedChatId();
+        const { chatId } = this.props;
+        if (selectedChatId === chatId){
+            //this.dialogDetails.current.scrollToBottom();
+        }
+        else{
+            ChatStore.setSelectedChatId(chatId);
+        }
+    };
 
-        const chat = ChatStore.get(selectedChatId);
+    handleBlock = () => {
+        const { chatId } = this.props;
+
+        const chat = ChatStore.get(chatId);
         if (!chat) return;
         if (!chat.type) return;
 
@@ -197,12 +266,20 @@ class ChatDetails extends React.Component {
                 '@type': isUserBlocked(user_id) ? 'unblockUser' : 'blockUser',
                 user_id: user_id
             });
-    }
+    };
+
+    handleGroupsInCommon = () => {
+
+    };
+
+    handleHeaderClick = () => {
+        this.chatDetailsList.current.scrollTop = 0;
+    };
 
     render() {
-        const { classes } = this.props;
-        const { selectedChatId } = this.state;
-        const chat = ChatStore.get(selectedChatId);
+        const { chatId, classes, openSharedMedia } = this.props;
+        const { openMore, openUsernameHint, openPhoneHint } = this.state;
+        const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
                 <div className='chat-details'>
@@ -211,33 +288,42 @@ class ChatDetails extends React.Component {
             );
         }
 
-        const username = getChatUsername(selectedChatId);
-        const phoneNumber = getChatPhoneNumber(selectedChatId);
-        const bio = getChatBio(selectedChatId);
-        const isGroup = isGroupChat(selectedChatId);
+        const username = getChatUsername(chatId);
+        const phoneNumber = getChatPhoneNumber(chatId);
+        const bio = getChatBio(chatId);
+        const isGroup = isGroupChat(chatId);
         let isBlocked = false;
         if (!isGroup && chat.type){
             isBlocked = isUserBlocked(chat.type.user_id);
         }
-        const isMember = isChatMember(selectedChatId);
-        const isChannel = isChannelChat(selectedChatId);
+        const isMember = isChatMember(chatId);
+        const isChannel = isChannelChat(chatId);
+
+        const members = getGroupChatMembers(chatId);
+        const users = [];
+        this.members = new Map();
+        members.forEach((member) => {
+            const user = UserStore.get(member.user_id);
+            if (user){
+                this.members.set(user.id, user.id);
+                users.push(user);
+            }
+        });
+
+        const sortedUsers = users.sort((x, y) => {
+            return getUserStatusOrder(y) - getUserStatusOrder(x);
+        });
+        const items = sortedUsers.map(user => (<ListItem button key={user.id}><UserControl userId={user.id} onSelectUser={this.props.onSelectUser}/></ListItem>));
 
         return (
             <div className='chat-details'>
-                <ChatDetailsHeaderControl/>
-                <div className='chat-details-list'>
+                <ChatDetailsHeaderControl
+                    backButton={this.props.backButton}
+                    onClose={this.props.onClose}
+                    onClick={this.handleHeaderClick}/>
+                <div ref={this.chatDetailsList} className='chat-details-list'>
                     <div className='chat-details-info'>
-                        <div className='dialog-wrapper'>
-                            <ChatTileControl chatId={selectedChatId}/>
-                            <div className='dialog-inner-wrapper'>
-                                <div className='dialog-row-wrapper'>
-                                    <DialogTitleControl chatId={selectedChatId}/>
-                                </div>
-                                <div className='dialog-row-wrapper'>
-                                    <DialogStatusControl chatId={selectedChatId}/>
-                                </div>
-                            </div>
-                        </div>
+                        <ChatControl chatId={chatId}/>
                     </div>
                     <List>
                         {
@@ -247,14 +333,14 @@ class ChatDetails extends React.Component {
                                         <ListItemIcon>
                                             <AlternateEmailIcon/>
                                         </ListItemIcon>
-                                        <ListItemText primary={username}/>
+                                        <ListItemText primary={<Typography variant='inherit' noWrap>{username}</Typography>}/>
                                     </ListItem>
                                     <Snackbar
                                         anchorOrigin={{
                                             vertical: 'bottom',
                                             horizontal: 'left',
                                         }}
-                                        open={this.state.openUsernameHint}
+                                        open={openUsernameHint}
                                         autoHideDuration={3000}
                                         onClose={this.handleCloseUsernameHint}
                                         ContentProps={{
@@ -281,14 +367,14 @@ class ChatDetails extends React.Component {
                                         <ListItemIcon>
                                             <CallIcon/>
                                         </ListItemIcon>
-                                        <ListItemText primary={formatPhoneNumber(phoneNumber)}/>
+                                        <ListItemText primary={<Typography variant='inherit' noWrap>{formatPhoneNumber(phoneNumber)}</Typography>}/>
                                     </ListItem>
                                     <Snackbar
                                         anchorOrigin={{
                                             vertical: 'bottom',
                                             horizontal: 'left',
                                         }}
-                                        open={this.state.openPhoneHint}
+                                        open={openPhoneHint}
                                         autoHideDuration={3000}
                                         onClose={this.handleClosePhoneHint}
                                         ContentProps={{
@@ -320,32 +406,37 @@ class ChatDetails extends React.Component {
                     </List>
                     <Divider/>
                     <List>
-                        <NotificationsListItem chatId={selectedChatId}/>
-                        <ListItem button onClick={this.handleClick}>
+                        <NotificationsListItem chatId={chatId}/>
+                        <ListItem button onClick={this.handleMoreClick}>
                             <ListItemIcon>
                                 <MoreHorizIcon/>
                             </ListItemIcon>
-                            <ListItemText primary='More'/>
-                            {this.state.open ? <ExpandLess /> : <ExpandMore />}
+                            <ListItemText primary={<Typography variant='inherit' noWrap>More</Typography>}/>
+                            {openMore ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
-                        <Collapse in={this.state.open} timeout='auto' unmountOnExit>
+                        <Collapse in={openMore} timeout='auto' unmountOnExit>
                             <List component='div' disablePadding>
                                 {
                                     !isGroup &&
-                                    <ListItem button onClick={this.handleBlock}>
-                                        <ListItemText inset primary={ isBlocked? 'Unblock' : 'Block' }/>
-                                    </ListItem>
+                                        <>
+                                            <ListItem button onClick={this.handleSendMessage}>
+                                                <ListItemText inset primary={<Typography variant='inherit' noWrap>Send Message</Typography>}/>
+                                            </ListItem>
+                                            <ListItem button onClick={this.handleBlock}>
+                                                <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isBlocked? 'Unblock' : 'Block' }</Typography>}/>
+                                            </ListItem>
+                                        </>
                                 }
                                 {
                                     isGroup && isMember &&
                                     <ListItem button>
-                                        <ListItemText inset primary={ isChannel? 'Leave Channel' : 'Delete and Exit' } />
+                                        <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isChannel? 'Leave Channel' : 'Delete and Exit' }</Typography>} />
                                     </ListItem>
                                 }
                                 {
                                     isGroup && !isMember &&
                                     <ListItem button>
-                                        <ListItemText inset primary='Report' />
+                                        <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>Report</Typography>} />
                                     </ListItem>
                                 }
                             </List>
@@ -353,18 +444,22 @@ class ChatDetails extends React.Component {
                     </List>
                     <Divider/>
                     <List>
-                        <ListItem button>
+                        <ListItem button onClick={openSharedMedia}>
                             <ListItemIcon>
                                 <PhotoIcon/>
                             </ListItemIcon>
-                            <ListItemText primary='Shared Media'/>
+                            <ListItemText primary={<Typography variant='inherit' noWrap>Shared Media</Typography>}/>
                         </ListItem>
-                        {/*<ListItem button>*/}
-                            {/*<ListItemIcon>*/}
-                                {/*<CloseIcon/>*/}
-                            {/*</ListItemIcon>*/}
-                            {/*<ListItemText primary='Groups in Common'/>*/}
-                        {/*</ListItem>*/}
+                        {
+                            !isGroup &&
+                            <ListItem button onClick={this.handleGroupsInCommon}>
+                                <ListItemText inset primary={<Typography variant='inherit' noWrap>Groups in Common</Typography>}/>
+                            </ListItem>
+                        }
+                    </List>
+                    <Divider/>
+                    <List>
+                        {items}
                     </List>
                 </div>
             </div>
