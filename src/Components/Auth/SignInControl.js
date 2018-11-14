@@ -46,13 +46,14 @@ class SignInControl extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleNext = this.handleNext.bind(this);
         this.handleClose = this.handleClose.bind(this);
-        this.handleDone = this.handleDone.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.handleDialogKeyPress = this.handleDialogKeyPress.bind(this);
     }
 
     handleNext(){
-        if (this.phoneNumber && this.isValidPhoneNumber(this.phoneNumber)){
+        const phoneNumber = this.phoneNumber || this.props.phone;
+
+        if (this.isValidPhoneNumber(phoneNumber)){
             this.setState({error : '', openConfirmation: true});
         }
         else{
@@ -61,6 +62,8 @@ class SignInControl extends React.Component {
     }
 
     isValidPhoneNumber(phoneNumber){
+        if (!phoneNumber) return false;
+
         let isBad = !phoneNumber.match(/^[\d\-+\s]+$/);
         if (!isBad) {
             phoneNumber = phoneNumber.replace(/\D/g, '');
@@ -94,8 +97,8 @@ class SignInControl extends React.Component {
         this.setState({ openConfirmation: false });
     }
 
-    handleDone(){
-        const phoneNumber = this.phoneNumber;
+    handleDone = () => {
+        const phoneNumber = this.phoneNumber || this.props.phone;
 
         this.props.onPhoneEnter(phoneNumber);
         this.setState({ openConfirmation: false, loading: true });
@@ -123,11 +126,12 @@ class SignInControl extends React.Component {
             .finally(() => {
                 this.setState({ loading: false });
             });
-    }
+    };
 
     render() {
         const {loading, error, openConfirmation} = this.state;
         const {phone, classes} = this.props;
+        const phoneNumber = this.phoneNumber || this.props.phone;
 
         return (
             <FormControl fullWidth>
@@ -172,7 +176,7 @@ class SignInControl extends React.Component {
                             Is this phone number correct?
                         </DialogContentText>
                         <DialogContentText className={classes.phone}>
-                            {formatPhoneNumber(this.phoneNumber)}
+                            {formatPhoneNumber(phoneNumber)}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

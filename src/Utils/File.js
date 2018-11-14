@@ -5,8 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {getPhotoSize} from "./Common";
-import UserStore from "../Stores/UserStore";
+import {getPhotoSize} from './Common';
+import UserStore from '../Stores/UserStore';
+import FileController from '../Controllers/FileController';
+import ChatStore from '../Stores/ChatStore';
 
 function getChatPhoto(chat) {
     if (chat['@type'] !== 'chat') {
@@ -209,6 +211,38 @@ function saveBlob(blob, filename) {
     }
 }
 
+function loadUserPhotos(store, userIds) {
+    if (!userIds) return;
+    if (!userIds.length) return;
+
+    for (let i = 0; i < userIds.length; i++) {
+        let user = UserStore.get(userIds[i]);
+        if (user){
+            let [id, pid, idb_key] = getUserPhoto(user);
+            if (pid) {
+                FileController.getLocalFile(store, user.profile_photo.small, idb_key, null,
+                    () => UserStore.updatePhoto(user.id),
+                    () => FileController.getRemoteFile(id, 1, user));
+            }
+        }
+    }
+}
+
+function loadChatPhotos(store, chatIds) {
+    if (!chatIds) return;
+    if (!chatIds.length) return;
+
+    for (let i = 0; i < chatIds.length; i++){
+        let chat = ChatStore.get(chatIds[i]);
+        let [id, pid, idb_key] = getChatPhoto(chat);
+        if (pid) {
+            FileController.getLocalFile(store, chat.photo.small, idb_key, null,
+                () => ChatStore.updatePhoto(chat.id),
+                () => FileController.getRemoteFile(id, 1, chat));
+        }
+    }
+}
+
 export {
     getUserPhoto,
     getChatPhoto,
@@ -219,4 +253,6 @@ export {
     getDocumentThumbnailFile,
     saveData,
     saveBlob,
+    loadUserPhotos,
+    loadChatPhotos
 };

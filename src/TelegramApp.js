@@ -6,18 +6,18 @@
  */
 
 import React, {Component} from 'react';
+import classNames from 'classnames';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
-import Dialogs from './Components/Dialogs';
-import DialogDetails from './Components/DialogDetails';
+import DialogInfo from './Components/ColumnRight/DialogInfo';
+import Dialogs from './Components/ColumnLeft/Dialogs';
+import DialogDetails from './Components/ColumnMiddle/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
-import AppInactiveControl from './Components/AppInactiveControl';
+import AppInactiveControl from './Components/Additional/AppInactiveControl';
 import registerServiceWorker from './registerServiceWorker';
-import ChatDetails from './Components/ChatDetails';
-import classNames from 'classnames';
 import ChatStore from './Stores/ChatStore';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController'
@@ -27,6 +27,7 @@ import './TelegramApp.css';
 const theme = createMuiTheme({
     palette: {
         primary: { main: '#3B9EDB' },
+        secondary: { main: '#FF5555' }
     },
     typography: {
         useNextVariants: true,
@@ -136,7 +137,7 @@ class TelegramApp extends Component{
                 || update.authorization_state['@type'] === 'authorizationStateWaitCode'
                 || update.authorization_state['@type'] === 'authorizationStateWaitPassword'
                 || update.authorization_state['@type'] === 'authorizationStateWaitPhoneNumber')){
-            registerServiceWorker();
+            //registerServiceWorker();
         }
     }
 
@@ -220,7 +221,7 @@ class TelegramApp extends Component{
         }
     }
 
-    handleSelectChat(chat){
+    handleSelectChat = (chat) => {
         const selectedChatId = ChatStore.getSelectedChatId();
         const chatId = chat ? chat.id : 0;
         if (selectedChatId === chatId){
@@ -229,7 +230,20 @@ class TelegramApp extends Component{
         else{
             ChatStore.setSelectedChatId(chatId);
         }
-    }
+    };
+
+    handleSelectUser = async (user) => {
+        if (!user) return;
+
+        const chat = await TdLibController
+            .send({
+                '@type': 'createPrivateChat',
+                user_id: user.id,
+                force: true
+            });
+
+        this.handleSelectChat(chat);
+    };
 
     clearCache(){
         // this.store.clear()
@@ -255,9 +269,9 @@ class TelegramApp extends Component{
                         ref={this.dialogDetails}
                         currentUser={this.state.currentUser}
                         onSelectChat={this.handleSelectChat}
-                    />
+                        onSelectUser={this.handleSelectUser}/>
                     {
-                        isChatDetailsVisible && <ChatDetails/>
+                        isChatDetailsVisible && <DialogInfo/>
                     }
                 </div>
                 <Footer/>

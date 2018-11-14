@@ -7,11 +7,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './DocumentControl.css';
-import DocumentTileControl from '../DocumentTileControl';
-import FileController from '../../Controllers/FileController';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Footer from '../Footer';
+import DocumentTileControl from '../Tile/DocumentTileControl';
+import FileController from '../../Controllers/FileController';
+import './DocumentControl.css';
 
 const circleStyle = { circle: 'document-progress-circle' };
 

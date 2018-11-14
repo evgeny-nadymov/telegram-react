@@ -7,6 +7,9 @@
 
 import dateFormat from 'dateformat';
 import UserStore from '../Stores/UserStore';
+import { getLetters } from './Common';
+import { getUserPhoto } from './File';
+import FileController from '../Controllers/FileController';
 
 function getUserStatus(user){
     if (!user) return null;
@@ -26,10 +29,10 @@ function getUserStatus(user){
             return 'last seen a long time ago';
         }
         case 'userStatusLastMonth':{
-            return 'within a month';
+            return 'last seen within a month';
         }
         case 'userStatusLastWeek':{
-            return 'within a week';
+            return 'last seen within a week';
         }
         case 'userStatusOffline':{
             let {was_online} = user.status;
@@ -38,17 +41,17 @@ function getUserStatus(user){
             const now = new Date();
             const wasOnline = new Date(was_online * 1000);
             if (wasOnline > now){
-                return 'offline';
+                return 'last seen just now';
             }
 
             let diff = new Date(now - wasOnline);
 
-            // within minute
+            // within a minute
             if (diff.getTime() / 1000 < 60){
                 return 'last seen just now';
             }
 
-            // within hour
+            // within an hour
             if (diff.getTime() / 1000 < 60 * 60){
                 const minutes = Math.floor(diff.getTime() / 1000 / 60);
                 return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
@@ -103,10 +106,22 @@ function isAccentUserSubtitle(user) {
 
 function getUserFullName(user) {
     if (!user) return null;
+    if (!user.type) return null;
 
-    if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`;
-    if (user.first_name) return user.first_name;
-    if (user.last_name) return user.last_name;
+    switch (user.type['@type']) {
+        case 'userTypeBot':
+        case 'userTypeRegular': {
+            if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`;
+            if (user.first_name) return user.first_name;
+            if (user.last_name) return user.last_name;
+        }
+        case 'userTypeDeleted':
+        case 'userTypeUnknown': {
+            return 'Deleted account';
+        }
+    }
+
+    return null;
 }
 
 function isUserBlocked(userId){
@@ -118,9 +133,50 @@ function isUserBlocked(userId){
     return false;
 }
 
+function getUserLetters(user){
+    if (!user) return null;
+
+    let title = getUserFullName(user);
+    let letters = getLetters(title);
+    if (letters && letters.length > 0){
+        return letters;
+    }
+
+    return user.first_name ? user.first_name.charAt(0) : (user.last_name ? user.last_name.charAt(0) : '');
+}
+
+function getUserStatusOrder(user) {
+    if (!user) return 0;
+    if (!user.status) return 0;
+    if (user.type['@type'] === 'userTypeBot') return 0;
+
+    switch (user.status['@type']) {
+        case 'userStatusEmpty': {
+            return 0;
+        }
+        case 'userStatusLastMonth': {
+            return 10;
+        }
+        case 'userStatusLastWeek': {
+            return 100;
+        }
+        case 'userStatusOffline': {
+            return user.status.was_online;
+        }
+        case 'userStatusOnline': {
+            return user.status.expires;
+        }
+        case 'userStatusRecently': {
+            return 1000;
+        }
+    }
+}
+
 export {
     getUserStatus,
     isAccentUserSubtitle,
     getUserFullName,
-    isUserBlocked
+    isUserBlocked,
+    getUserLetters,
+    getUserStatusOrder
 }

@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './ContactControl.css';
-import UserTileControl from '../UserTileControl';
+import UserTileControl from '../Tile/UserTileControl';
 import UserStore from '../../Stores/UserStore';
 import { formatPhoneNumber } from '../../Utils/Common';
 

@@ -12,7 +12,7 @@ import MessageStore from '../../Stores/MessageStore';
 import {getSize, getFitSize} from '../../Utils/Common';
 import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../Constants';
 import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress';
-import DocumentTileControl from '../DocumentTileControl';
+import DocumentTileControl from '../Tile/DocumentTileControl';
 import FileController from '../../Controllers/FileController';
 
 const backgroundCircleStyle = { circle: 'photo-progress-circle-background' };

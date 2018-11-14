@@ -72,6 +72,14 @@ class ApplicationStore extends EventEmitter{
         //this.set(Object.assign({}, source1, source2));
     }
 
+    getConnectionState(){
+        return this.connectionState;
+    }
+
+    getAuthorizationState(){
+        return this.authorizationState;
+    }
+
     getNotificationSettings(scope){
         return this.scopeNotificationSettings.get(scope);
     }

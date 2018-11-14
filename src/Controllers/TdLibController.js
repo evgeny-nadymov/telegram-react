@@ -35,7 +35,7 @@ class TdLibController extends EventEmitter{
         let parameters = {
             verbosity : verbosity,
             jsVerbosity : jsVerbosity,
-            mode : 'wasm-streaming',  // 'wasm-streaming'/'wasm'/'asmjs'
+            mode : 'wasm',  // 'wasm-streaming'/'wasm'/'asmjs'
             prefix : useTestDC ? 'tdlib_test' : 'tdlib',
             isBackground : false
         };

@@ -9,7 +9,7 @@ import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import MessageStore from '../Stores/MessageStore';
-import MessageUserControl from '../Components/MessageUserControl';
+import MessageUserControl from '../Components/Message/MessageUserControl';
 import Currency from './Currency';
 import React from 'react';
 

@@ -256,6 +256,12 @@ function arrayBufferToBase64( buffer ) {
     return Base64EncodeUrl(window.btoa(binary));
 }
 
+function isAuthorizationReady(state){
+    if (!state) return false;
+
+    return state['@type'] === 'authorizationStateReady';
+}
+
 export {
     orderCompare,
     getSize,
@@ -267,5 +273,6 @@ export {
     getLetters,
     readImageSize,
     formatPhoneNumber,
-    arrayBufferToBase64
+    arrayBufferToBase64,
+    isAuthorizationReady
 };

@@ -42,7 +42,11 @@ function getBasicGroupOnlineCount(basicGroupFullInfo) {
     let count = 0;
     for (let i = 0; i < basicGroupFullInfo.members.length; i++){
         let user = UserStore.get(basicGroupFullInfo.members[i].user_id);
-        if (user && user.status && user.status['@type'] === 'userStatusOnline'){
+        if (user
+            && user.type
+            && user.type['@type'] !== 'userTypeBot'
+            && user.status
+            && user.status['@type'] === 'userStatusOnline'){
             count++;
         }
     }

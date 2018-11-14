@@ -16,10 +16,8 @@ import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
 import {getLetters} from './Common';
 import { getServiceMessageContent, isServiceMessage } from './ServiceMessage';
-import InputBoxControl from '../Components/InputBoxControl';
-import DialogCommandControl from '../Components/DialogCommandControl';
 import React from 'react';
-import NotificationsCommandControl from '../Components/NotificationsCommandControl';
+import TdLibController from '../Controllers/TdLibController';
 
 function getGroupChatTypingString(inputTypingManager){
     if (!inputTypingManager) return null;
@@ -472,7 +470,7 @@ function getChatLetters(chat){
     return chat.title.charAt(0);
 }
 
-function isAccentChatSubtitle(chat){
+function isAccentChatSubtitleWithoutTyping(chat){
     if (!chat) return false;
     if (!chat.type) return false;
 
@@ -495,6 +493,16 @@ function isAccentChatSubtitle(chat){
     }
 
     return false;
+}
+
+function isAccentChatSubtitle(chat){
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    const typingString = getChatTypingString(chat);
+    if (typingString) return false;
+
+    return isAccentChatSubtitleWithoutTyping(chat);
 }
 
 function getChatUsername(chatId) {
@@ -686,6 +694,115 @@ function isChatMember(chatId) {
     return false;
 }
 
+function getChatTitle(chat){
+    if (!chat) return null;
+
+    return chat.title || 'Deleted account';
+}
+
+function getGroupChatMembers(chatId){
+    const fallbackValue = [];
+
+    const chat = ChatStore.get(chatId);
+    if (!chat) return fallbackValue;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            const fullInfo = BasicGroupStore.getFullInfo(chat.type.basic_group_id);
+            if (fullInfo){
+                return fullInfo.members || fallbackValue;
+            }
+
+            break;
+        }
+        case 'chatTypeSupergroup': {
+
+            break;
+        }
+        case 'chatTypeSecret':
+        case 'chatTypePrivate': {
+            break;
+        }
+    }
+
+    return fallbackValue;
+}
+
+function getChatFullInfo(chatId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
+    if (!chat.type) return;
+
+    switch (chat.type['@type']){
+        case 'chatTypePrivate' : {
+            TdLibController.send(
+                {
+                    '@type': 'getUserFullInfo',
+                    user_id: chat.type.user_id,
+                });
+            break;
+        }
+        case 'chatTypeSecret' : {
+            TdLibController.send(
+                {
+                    '@type': 'getUserFullInfo',
+                    user_id: chat.type.user_id,
+                });
+            break;
+        }
+        case 'chatTypeBasicGroup' : {
+            TdLibController.send(
+                {
+                    '@type': 'getBasicGroupFullInfo',
+                    basic_group_id: chat.type.basic_group_id,
+                });
+            break;
+        }
+        case 'chatTypeSupergroup' : {
+            TdLibController.send(
+                {
+                    '@type': 'getSupergroupFullInfo',
+                    supergroup_id: chat.type.supergroup_id,
+                });
+            break;
+        }
+    }
+}
+
+function hasBasicGroupId(chatId, basicGroupId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    return type
+        && type['@type'] === 'chatTypeBasicGroup'
+        && type.basic_group_id === basicGroupId;
+}
+
+function hasSupergroupId(chatId, supergroupId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    return type
+        && type['@type'] === 'chatTypeSupergroup'
+        && type.supergroup_id === supergroupId;
+}
+
+
+function hasUserId(chatId, userId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    return type
+        && (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret')
+        && type.user_id === userId;
+}
+
 export {
     getChatDraft,
     getChatTypingString,
@@ -700,11 +817,18 @@ export {
     getLastMessageDate,
     getChatLetters,
     isAccentChatSubtitle,
+    isAccentChatSubtitleWithoutTyping,
     isChatMuted,
     getChatUsername,
     getChatPhoneNumber,
     getChatBio,
     isGroupChat,
     isChannelChat,
-    isChatMember
+    isChatMember,
+    getChatTitle,
+    getGroupChatMembers,
+    getChatFullInfo,
+    hasBasicGroupId,
+    hasSupergroupId,
+    hasUserId
 };

@@ -184,7 +184,7 @@ class FileController extends EventEmitter{
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
-    getLocalFile(store, obj, idb_key, arr, callback, faultCallback) {
+    getLocalFile(store, obj, idb_key, arr, callback, faultCallback, debugMessage) {
         if (!idb_key){
             faultCallback();
             return;
@@ -194,6 +194,12 @@ class FileController extends EventEmitter{
             obj.blob = new Blob([arr]);
 
             callback();
+            return;
+        }
+
+        if (obj.blob){
+            //console.log(debugMessage);
+            //callback();
             return;
         }
 

@@ -17,4 +17,4 @@ ReactDOM.render(
         <Route path='' component={TelegramApp} />
     </Router>,
     document.getElementById('root'));
-// registerServiceWorker();
+registerServiceWorker();
