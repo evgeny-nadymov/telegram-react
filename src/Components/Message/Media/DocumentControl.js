@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import DocumentTileControl from '../Tile/DocumentTileControl';
-import FileController from '../../Controllers/FileController';
+import DocumentTileControl from '../../Tile/DocumentTileControl';
+import FileController from '../../../Controllers/FileController';
 import './DocumentControl.css';
 
 const circleStyle = { circle: 'document-progress-circle' };

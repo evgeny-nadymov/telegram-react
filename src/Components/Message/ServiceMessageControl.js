@@ -13,6 +13,13 @@ import './ServiceMessageControl.css';
 class ServiceMessageControl extends React.Component {
     constructor(props){
         super(props);
+
+        if (process.env.NODE_ENV !== 'production'){
+            const { chatId, messageId } = this.props;
+            this.state = {
+                message: MessageStore.get(chatId, messageId)
+            };
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -43,7 +50,8 @@ class ServiceMessageControl extends React.Component {
 
         return (
             <div className='service-message'>
-                {this.props.showUnreadSeparator &&
+                {
+                    this.props.showUnreadSeparator &&
                     <div className='message-unread-separator'>
                         Unread messages
                     </div>

@@ -5,13 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import React from 'react';
+import Currency from './Currency';
+import MessageAuthor from '../Components/Message/MessageAuthor';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import MessageStore from '../Stores/MessageStore';
-import MessageUserControl from '../Components/Message/MessageUserControl';
-import Currency from './Currency';
-import React from 'react';
 
 let serviceMap = new Map();
 serviceMap.set('messageBasicGroupChatCreate', 'messageBasicGroupChatCreate');
@@ -118,7 +118,7 @@ function getMessageAuthor(message, onSelectUser) {
     if (!message) return null;
 
     if (message.sender_user_id !== 0){
-        return (<MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>);
+        return (<MessageAuthor userId={message.sender_user_id} onSelect={onSelectUser}/>);
     }
 
     const chat = ChatStore.get(message.chat_id);
@@ -147,14 +147,14 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` created group «${title}»`}
                 </>
             );
         }
         case 'messageChatAddMembers' : {
             const members = content.member_user_ids
-                .map(x => <MessageUserControl userId={x} onSelect={onSelectUser}/>)
+                .map(x => <MessageAuthor userId={x} onSelectUser={onSelectUser}/>)
                 .reduce((accumulator, current, index, array) => {
                     const separator = index === array.length - 1 ? ' and ': ', ';
                     return accumulator === null ? [current] : [...accumulator, separator, current]
@@ -177,13 +177,13 @@ function getServiceMessageContent(message, onSelectUser){
             && content.member_user_ids[0] === message.sender_user_id
                 ? (
                     <>
-                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                         {' joined the group'}
                     </>
                 )
                 : (
                     <>
-                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                         {' added '}
                         {members}
                     </>
@@ -200,7 +200,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` updated group photo`}
                 </>
             );
@@ -218,7 +218,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` changed group name to «${title}»`}
                 </>
             );
@@ -231,7 +231,7 @@ function getServiceMessageContent(message, onSelectUser){
                     : (
                         <>
                             {'You removed '}
-                            <MessageUserControl userId={content.user_id} onSelect={onSelectUser}/>
+                            <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser}/>
                         </>
                     );
             }
@@ -239,15 +239,15 @@ function getServiceMessageContent(message, onSelectUser){
             return content.user_id === message.sender_user_id
                 ? (
                     <>
-                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                         {' left the group'}
                     </>
                 )
                 : (
                     <>
-                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                         {' removed '}
-                        <MessageUserControl userId={content.user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser}/>
                     </>
                 );
         }
@@ -263,7 +263,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {' removed group photo'}
                 </>
             );
@@ -276,7 +276,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {' joined the group via invite link'}
                 </>
             );
@@ -292,7 +292,7 @@ function getServiceMessageContent(message, onSelectUser){
 
                 return (
                     <>
-                        <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                         {' disabled the self-destruct timer'}
                     </>
                 );
@@ -304,7 +304,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` set the self-destruct timer to ${ttlString}`}
                 </>
             );
@@ -321,7 +321,7 @@ function getServiceMessageContent(message, onSelectUser){
         case 'messageContactRegistered' : {
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {' just joined Telegram'}
                 </>
             );
@@ -344,7 +344,7 @@ function getServiceMessageContent(message, onSelectUser){
 
                 return (
                     <>
-                        <MessageUserControl userId={messageGame.sender_user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={messageGame.sender_user_id} onSelectUser={onSelectUser}/>
                         {` scored ${content.score} in «${game.title}»`}
                     </>
                 );
@@ -356,7 +356,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` scored ${content.score}`}
                 </>
             );
@@ -374,7 +374,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
                     {' received the following documents: '}
                     {passportElementTypes}
                 </>
@@ -394,7 +394,7 @@ function getServiceMessageContent(message, onSelectUser){
                 return (
                     <>
                         {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                        <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                        <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
                         {` for ${invoice.title}`}
                     </>
                 );
@@ -403,7 +403,7 @@ function getServiceMessageContent(message, onSelectUser){
             return (
                 <>
                     {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                    <MessageUserControl userId={chat.type.user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
                 </>
             );
         }
@@ -525,7 +525,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {' took a screenshot!'}
                 </>
             );
@@ -543,7 +543,7 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageUserControl userId={message.sender_user_id} onSelect={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
                     {` created group «${title}»`}
                 </>
             );

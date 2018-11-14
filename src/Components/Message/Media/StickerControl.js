@@ -7,9 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import {getFitSize} from '../../../Utils/Common';
+import MessageStore from '../../../Stores/MessageStore';
 import './StickerControl.css';
-import MessageStore from "../../Stores/MessageStore";
-import {getFitSize} from "../../Utils/Common";
 
 class StickerControl extends React.Component {
     constructor(props){

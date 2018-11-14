@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import PhotoControl from '../Components/Media/PhotoControl';
-import StickerControl from '../Components/Media/StickerControl';
-import LocationControl from '../Components/Media/LocationControl';
-import VenueControl from '../Components/Media/VenueControl';
-import ContactControl from '../Components/Media/ContactControl';
-import DocumentControl from '../Components/Media/DocumentControl';
+import PhotoControl from '../Components/Message/Media/PhotoControl';
+import StickerControl from '../Components/Message/Media/StickerControl';
+import LocationControl from '../Components/Message/Media/LocationControl';
+import VenueControl from '../Components/Message/Media/VenueControl';
+import ContactControl from '../Components/Message/Media/ContactControl';
+import DocumentControl from '../Components/Message/Media/DocumentControl';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import dateFormat from "dateformat";
@@ -71,11 +71,11 @@ function getFormattedText(text){
                     decodedUrl = entityText;
                 }
 
-                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{decodedUrl}</a>));
+                result.push((<a key={text.entities[i].offset} href={url} title={url} target='_blank' rel='noopener noreferrer'>{decodedUrl}</a>));
                 break; }
             case 'textEntityTypeTextUrl': {
                 let url = text.entities[i].type.url.startsWith('http') ? text.entities[i].type.url : 'http://' + text.entities[i].type.url;
-                result.push((<a key={text.entities[i].offset} href={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
+                result.push((<a key={text.entities[i].offset} href={url} title={url} target='_blank' rel='noopener noreferrer'>{entityText}</a>));
                 break; }
             case 'textEntityTypeBold':
                 result.push((<strong key={text.entities[i].offset}>{entityText}</strong>));

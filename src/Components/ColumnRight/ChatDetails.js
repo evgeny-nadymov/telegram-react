@@ -12,13 +12,9 @@ import PhotoIcon from '@material-ui/icons/Photo';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import CallIcon from '@material-ui/icons/Call';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import CloseIcon from '@material-ui/icons/Close';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
-import Collapse from '@material-ui/core/Collapse';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -29,20 +25,18 @@ import UserControl from '../Tile/UserControl';
 import ChatControl from '../Tile/ChatControl';
 import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
 import NotificationsListItem from './NotificationsListItem';
+import MoreListItem from './MoreListItem';
 import {
     getChatUsername,
     getChatPhoneNumber,
     getChatBio,
     isChatMuted,
     isGroupChat,
-    isChannelChat,
-    isChatMember,
     getGroupChatMembers,
     getChatFullInfo
 } from '../../Utils/Chat';
 import {
     getUserStatusOrder,
-    isUserBlocked
 } from '../../Utils/User';
 import {
     loadUserPhotos,
@@ -53,7 +47,6 @@ import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
-import TdLibController from '../../Controllers/TdLibController';
 import FileController from '../../Controllers/FileController';
 import './ChatDetails.css';
 
@@ -200,10 +193,6 @@ class ChatDetails extends React.Component {
         getChatFullInfo(chatId);
     };
 
-    handleMoreClick = () => {
-        this.setState({ openMore: !this.state.openMore });
-    };
-
     handleUsernameHint = () => {
         const { chatId } = this.props;
         const username = getChatUsername(chatId);
@@ -240,34 +229,6 @@ class ChatDetails extends React.Component {
         this.setState({ openPhoneHint: false });
     };
 
-    handleSendMessage = () => {
-        const selectedChatId = ChatStore.getSelectedChatId();
-        const { chatId } = this.props;
-        if (selectedChatId === chatId){
-            //this.dialogDetails.current.scrollToBottom();
-        }
-        else{
-            ChatStore.setSelectedChatId(chatId);
-        }
-    };
-
-    handleBlock = () => {
-        const { chatId } = this.props;
-
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-        if (!chat.type) return;
-
-        const { user_id } = chat.type;
-        if (!user_id) return;
-
-        TdLibController
-            .send({
-                '@type': isUserBlocked(user_id) ? 'unblockUser' : 'blockUser',
-                user_id: user_id
-            });
-    };
-
     handleGroupsInCommon = () => {
 
     };
@@ -278,7 +239,7 @@ class ChatDetails extends React.Component {
 
     render() {
         const { chatId, classes, openSharedMedia } = this.props;
-        const { openMore, openUsernameHint, openPhoneHint } = this.state;
+        const { openUsernameHint, openPhoneHint } = this.state;
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
@@ -292,12 +253,7 @@ class ChatDetails extends React.Component {
         const phoneNumber = getChatPhoneNumber(chatId);
         const bio = getChatBio(chatId);
         const isGroup = isGroupChat(chatId);
-        let isBlocked = false;
-        if (!isGroup && chat.type){
-            isBlocked = isUserBlocked(chat.type.user_id);
-        }
-        const isMember = isChatMember(chatId);
-        const isChannel = isChannelChat(chatId);
+
 
         const members = getGroupChatMembers(chatId);
         const users = [];
@@ -407,40 +363,7 @@ class ChatDetails extends React.Component {
                     <Divider/>
                     <List>
                         <NotificationsListItem chatId={chatId}/>
-                        <ListItem button onClick={this.handleMoreClick}>
-                            <ListItemIcon>
-                                <MoreHorizIcon/>
-                            </ListItemIcon>
-                            <ListItemText primary={<Typography variant='inherit' noWrap>More</Typography>}/>
-                            {openMore ? <ExpandLess /> : <ExpandMore />}
-                        </ListItem>
-                        <Collapse in={openMore} timeout='auto' unmountOnExit>
-                            <List component='div' disablePadding>
-                                {
-                                    !isGroup &&
-                                        <>
-                                            <ListItem button onClick={this.handleSendMessage}>
-                                                <ListItemText inset primary={<Typography variant='inherit' noWrap>Send Message</Typography>}/>
-                                            </ListItem>
-                                            <ListItem button onClick={this.handleBlock}>
-                                                <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isBlocked? 'Unblock' : 'Block' }</Typography>}/>
-                                            </ListItem>
-                                        </>
-                                }
-                                {
-                                    isGroup && isMember &&
-                                    <ListItem button>
-                                        <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isChannel? 'Leave Channel' : 'Delete and Exit' }</Typography>} />
-                                    </ListItem>
-                                }
-                                {
-                                    isGroup && !isMember &&
-                                    <ListItem button>
-                                        <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>Report</Typography>} />
-                                    </ListItem>
-                                }
-                            </List>
-                        </Collapse>
+                        <MoreListItem chatId={chatId}/>
                     </List>
                     <Divider/>
                     <List>

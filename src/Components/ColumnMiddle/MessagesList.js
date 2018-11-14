@@ -672,6 +672,8 @@ class MessagesList extends React.Component {
             }
         }
 
+        console.log('[MessagesList] unreadSeparatorMessageId=' + unreadSeparatorMessageId);
+
         this.itemsMap.clear();
         this.messages = this.state.history.map((x, i) => {
             return (isServiceMessage(x)

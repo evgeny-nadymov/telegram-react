@@ -7,13 +7,12 @@
 
 import React, {Fragment} from 'react';
 import PropTypes from 'prop-types';
-import './PhotoControl.css';
-import MessageStore from '../../Stores/MessageStore';
-import {getSize, getFitSize} from '../../Utils/Common';
-import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../Constants';
 import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress';
-import DocumentTileControl from '../Tile/DocumentTileControl';
-import FileController from '../../Controllers/FileController';
+import {getSize, getFitSize} from '../../../Utils/Common';
+import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../../Constants';
+import MessageStore from '../../../Stores/MessageStore';
+import FileController from '../../../Controllers/FileController';
+import './PhotoControl.css';
 
 const backgroundCircleStyle = { circle: 'photo-progress-circle-background' };
 const circleStyle = { circle: 'photo-progress-circle' };

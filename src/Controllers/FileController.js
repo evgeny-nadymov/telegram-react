@@ -5,14 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import TdLibController from './TdLibController';
+import {EventEmitter} from 'events';
+import {getPhotoSize} from '../Utils/Common';
+import {getDocumentThumbnailFile} from '../Utils/File';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
-import {getPhotoSize} from '../Utils/Common';
-import {getDocumentThumbnailFile} from '../Utils/File';
-import {EventEmitter} from 'events';
+import ApplicationStore from '../Stores/ApplicationStore';
+import TdLibController from './TdLibController';
 
 class FileController extends EventEmitter{
     constructor(){
@@ -23,11 +24,11 @@ class FileController extends EventEmitter{
 
         this.setMaxListeners(Infinity);
 
-        this.onUpdateFile = this.onUpdateFile.bind(this);
         FileStore.on('updateFile', this.onUpdateFile);
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
-    onUpdateFile(update) {
+    onUpdateFile = (update) => {
         if (!update) return;
 
         const {file} = update;
@@ -149,7 +150,16 @@ class FileController extends EventEmitter{
                 this.emit('file_upload_update', file);
             }
         }
-    }
+    };
+
+    onUpdateAuthorizationState = async (update) => {
+        if (!update) return;
+        if (!update.authorization_state) return;
+
+        if (update.authorization_state['@type'] === 'authorizationStateWaitTdlibParameters'){
+            await this.initDB();
+        }
+    };
 
     async initDB(){
         /*if (this.store) return;
@@ -165,11 +175,13 @@ class FileController extends EventEmitter{
         if (this.db) return;
         if (this.initiatingDB) return;
 
-        console.log('initDB');
+        console.log('[FileController] start initDB');
 
         this.initiatingDB = true;
         this.db = await this.openDB();
         this.initiatingDB = false;
+
+        console.log('[FileController] stop initDB');
     }
 
     openDB(){
@@ -184,7 +196,7 @@ class FileController extends EventEmitter{
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
-    getLocalFile(store, obj, idb_key, arr, callback, faultCallback, debugMessage) {
+    getLocalFile(store, obj, idb_key, arr, callback, faultCallback) {
         if (!idb_key){
             faultCallback();
             return;
@@ -198,8 +210,6 @@ class FileController extends EventEmitter{
         }
 
         if (obj.blob){
-            //console.log(debugMessage);
-            //callback();
             return;
         }
 

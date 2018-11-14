@@ -59,3 +59,7 @@ body {
     background: #0070C9 !important;
 }
 
+.pointer{
+    cursor: pointer;
+}
+

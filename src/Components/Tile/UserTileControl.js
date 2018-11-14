@@ -6,6 +6,7 @@
  */
 
 import React, {Component} from 'react';
+import classNames from 'classnames';
 import { getUserLetters } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -59,15 +60,22 @@ class UserTileControl extends Component{
         }
     };
 
+    handleSelect = () => {
+        const { userId, onSelect } = this.props;
+        if (!onSelect) return;
+
+        onSelect(userId);
+    };
+
     render(){
-        const { userId } = this.props;
+        const { userId, onSelect } = this.props;
         if (!userId) return null;
 
         const user = UserStore.get(userId);
         if (!user) return null;
 
-        let letters = getUserLetters(user);
-        let blob = user.profile_photo && user.profile_photo.small? user.profile_photo.small.blob : null;
+        const letters = getUserLetters(user);
+        const blob = user.profile_photo && user.profile_photo.small? user.profile_photo.small.blob : null;
 
         let src;
         try{
@@ -77,14 +85,16 @@ class UserTileControl extends Component{
             console.log(`UserTileControl.render user_id=${userId} with error ${error}`);
         }
 
-        let photoClasses = 'tile-photo';
-        if (!blob){
-            photoClasses += ` tile_color_${(Math.abs(userId) % 8 + 1)}`;
-        }
+        const tileColor = `tile_color_${(Math.abs(userId) % 8 + 1)}`;
+        const className = classNames(
+            'tile-photo',
+            {[tileColor]: !blob},
+            {pointer: onSelect}
+        );
 
         return src ?
-            (<img className={photoClasses} src={src} draggable={false} alt='' />) :
-            (<div className={photoClasses}><span className='tile-text'>{letters}</span></div>);
+            (<img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect}/>) :
+            (<div className={className} onClick={this.handleSelect}><span className='tile-text'>{letters}</span></div>);
     }
 }
 

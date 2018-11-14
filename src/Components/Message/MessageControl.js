@@ -8,8 +8,13 @@
 import React, {Component} from 'react';
 import ReplyControl from './ReplyControl';
 import MessageStatusControl from './MessageStatusControl';
+import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
-import {saveData, saveBlob} from '../../Utils/File';
+import ChatTileControl from '../Tile/ChatTileControl';
+import {
+    saveData,
+    saveBlob
+} from '../../Utils/File';
 import {
     getDate,
     getDateHint,
@@ -27,11 +32,17 @@ import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import FileController from '../../Controllers/FileController';
 import './MessageControl.css';
-import MessageUserControl from './MessageUserControl';
 
 class MessageControl extends Component{
     constructor(props){
         super(props);
+
+        if (process.env.NODE_ENV !== 'production'){
+            const { chatId, messageId } = this.props;
+            this.state = {
+                message: MessageStore.get(chatId, messageId)
+            };
+        }
 
         this.openForward = this.openForward.bind(this);
         this.openMedia = this.openMedia.bind(this);
@@ -40,10 +51,36 @@ class MessageControl extends Component{
         this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (nextProps.chatId !== this.props.chatId){
+            return true;
+        }
+
+        if (nextProps.messageId !== this.props.messageId){
+            return true;
+        }
+
+        if (nextProps.sendingState !== this.props.sendingState){
+            return true;
+        }
+
+        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator){
+            return true;
+        }
+
+        return false;
+    }
+
     componentWillMount(){
         MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
+    }
+
+    componentWillUnmount(){
+        MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
+        MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
+        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     handleUpdateMessageEdited(payload) {
@@ -65,32 +102,6 @@ class MessageControl extends Component{
             && this.props.messageId === payload.message_id){
             this.forceUpdate();
         }
-    }
-
-    componentWillUnmount(){
-        MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
-        MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
-        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
-    }
-
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chatId !== this.props.chatId){
-            return true;
-        }
-
-        if (nextProps.messageId !== this.props.messageId){
-            return true;
-        }
-
-        if (nextProps.sendingState !== this.props.sendingState){
-            return true;
-        }
-
-        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator){
-            return true;
-        }
-
-        return false;
     }
 
     openForward(){
@@ -231,18 +242,42 @@ class MessageControl extends Component{
         }
     }
 
+    handleSelectUser = (userId) => {
+        const { onSelectUser } = this.props;
+
+        const user = UserStore.get(userId);
+        if (!user) return;
+
+        onSelectUser(user);
+    };
+
+    handleSelectChat = () => {
+        const { chatId, onSelectChat } = this.props;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        onSelectChat(chat);
+    };
+
     render(){
-        let message = MessageStore.get(this.props.chatId, this.props.messageId);
+        const { chatId, messageId } = this.props;
+
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return (<div>[empty message]</div>);
 
-        let text = getText(message);
-        let date = getDate(message);
-        let dateHint = getDateHint(message);
-        let media = getMedia(message, this.openMedia);
-        let reply = getReply(message);
-        let forward = getForward(message);
+        const text = getText(message);
+        const date = getDate(message);
+        const dateHint = getDateHint(message);
+        const media = getMedia(message, this.openMedia);
+        const reply = getReply(message);
+        const forward = getForward(message);
         this.unread = getUnread(message);
-        let senderUserId = getSenderUserId(message);
+        const senderUserId = getSenderUserId(message);
+
+        const tileControl = senderUserId
+            ? (<UserTileControl userId={senderUserId} onSelect={this.handleSelectUser}/>)
+            : (<ChatTileControl chatId={chatId} onSelect={this.handleSelectChat}/>);
 
         return (
             <div className='message'>
@@ -254,10 +289,10 @@ class MessageControl extends Component{
 
                 <div className='message-wrapper'>
                     {this.unread && <MessageStatusControl chatId={message.chat_id} messageId={message.id} sendingState={message.sending_state}/>}
-                    <UserTileControl userId={senderUserId}/>
+                    {tileControl}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward && <MessageUserControl userId={message.sender_user_id} onSelect={this.props.onSelectUser}/>}
+                            {!forward && <MessageAuthor chatId={chatId} onSelectChat={this.props.onSelectChat} userId={senderUserId} onSelectUser={this.props.onSelectUser}/>}
                             {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
                             <div className='message-meta'>
                                 {message.views > 0 &&

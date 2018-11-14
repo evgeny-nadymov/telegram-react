@@ -275,7 +275,7 @@ class DialogsList extends React.Component {
 
         this.appendChats(result.chat_ids,
             async () => {
-                await FileController.initDB();
+                //await FileController.initDB();
                 this.loadChatContents(result.chat_ids);
             });
     }

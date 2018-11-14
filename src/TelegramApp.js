@@ -13,6 +13,7 @@ import Dialogs from './Components/ColumnLeft/Dialogs';
 import DialogDetails from './Components/ColumnMiddle/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import Footer from './Components/Footer';
+import MediaViewer from './Components/MediaViewer';
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
@@ -324,6 +325,8 @@ class TelegramApp extends Component{
                 }
             }
         }
+
+        const mediaViewer = (<MediaViewer/>);
 
         return (
             <MuiThemeProvider theme={theme}>

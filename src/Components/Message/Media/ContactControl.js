@@ -7,10 +7,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import UserTileControl from '../../Tile/UserTileControl';
+import { formatPhoneNumber } from '../../../Utils/Common';
+import UserStore from '../../../Stores/UserStore';
 import './ContactControl.css';
-import UserTileControl from '../Tile/UserTileControl';
-import UserStore from '../../Stores/UserStore';
-import { formatPhoneNumber } from '../../Utils/Common';
 
 class ContactControl extends React.Component {
     constructor(props){
