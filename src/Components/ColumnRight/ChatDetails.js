@@ -183,7 +183,6 @@ class ChatDetails extends React.Component {
 
         loadChatPhotos(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);
-        console.log('loadChatContents members=' + members);
         loadUserPhotos(store, members);
     };
 

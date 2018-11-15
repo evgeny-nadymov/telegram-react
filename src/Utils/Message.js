@@ -241,6 +241,18 @@ function getSenderUserId(message) {
     return message.sender_user_id;
 }
 
+function filterMessages(result, history){
+    if (result.messages.length === 0) return;
+    if (history.length === 0) return;
+
+    const map = history.reduce(function(accumulator, current) {
+        accumulator.set(current.id, current.id);
+        return accumulator;
+    }, new Map());
+
+    result.messages = result.messages.filter(x => !map.has(x.id));
+}
+
 export {
     getTitle,
     getText,
@@ -250,5 +262,6 @@ export {
     getReply,
     getForward,
     getUnread,
-    getSenderUserId
+    getSenderUserId,
+    filterMessages
 };

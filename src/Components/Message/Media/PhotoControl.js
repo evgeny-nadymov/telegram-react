@@ -145,10 +145,11 @@ class PhotoControl extends React.Component {
         this.isUploadingActive = isUploadingActive;
 
         return (
-                <div className='photo-img-wrapper' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}}>
+                <div className='photo-wrapper' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}}>
                     <img className={className} width={fitPhotoSize.width} height={fitPhotoSize.height} src={src} alt=''/>
-                    {showProgress &&
-                        <Fragment>
+                    {
+                        showProgress &&
+                        <>
                             <svg className='photo-tile-circle'>
                                 <circle cx='22' cy='22' r='22' fill='black'/>
                             </svg>
@@ -159,7 +160,7 @@ class PhotoControl extends React.Component {
                             <div className='photo-progress' onClick={this.props.openMedia}>
                                 <CircularProgress classes={circleStyle} variant='static' value={progress} size={42} thickness={3} />
                             </div>
-                        </Fragment>
+                        </>
                     }
                 </div>
             );

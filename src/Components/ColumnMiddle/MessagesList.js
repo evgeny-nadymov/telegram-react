@@ -15,13 +15,10 @@ import {
     itemsInView
 } from '../../Utils/Common';
 import {
-    getChatPhoto,
-    getContactFile,
-    getDocumentThumbnailFile,
-    getPhotoFile,
-    getStickerFile,
-    loadUserPhotos
+    loadChatPhotos,
+    loadMessageContents
 } from '../../Utils/File';
+import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { getChatFullInfo } from '../../Utils/Chat';
 import {MESSAGE_SLICE_LIMIT} from '../../Constants';
@@ -45,33 +42,25 @@ class MessagesList extends React.Component {
 
         this.sessionId = Date.now();
         this.state = {
-            previousPropsSelectedChatId : 0,
+            prevChatId : 0,
             history : [],
             scrollBehavior : ScrollBehaviorEnum.NONE,
+            separatorMessageId : 0
         };
 
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
         this.itemsMap = new Map();
 
-        this.updateItemsInView = debounce(this.updateItemsInView.bind(this), 250);
-        this.loadIncompleteHistory = this.loadIncompleteHistory.bind(this);
-        this.onLoadNext = this.onLoadNext.bind(this);
-        this.onLoadPrevious = this.onLoadPrevious.bind(this);
-        this.handleUpdateItemsInView = this.handleUpdateItemsInView.bind(this);
-        this.onUpdateNewMessage = this.onUpdateNewMessage.bind(this);
-        this.onUpdateDeleteMessages = this.onUpdateDeleteMessages.bind(this);
-        this.onUpdateChatLastMessage = this.onUpdateChatLastMessage.bind(this);
-        this.handleScroll = this.handleScroll.bind(this);
-        this.handleScrollBehavior = this.handleScrollBehavior.bind(this);
-        this.filterMessages = this.filterMessages.bind(this);
+        this.updateItemsInView = debounce(this.updateItemsInView, 250);
     }
 
     static getDerivedStateFromProps(props, state){
-        if (props.selectedChatId !== state.previousPropsSelectedChatId){
+        if (props.chatId !== state.prevChatId){
             return {
-                previousPropsSelectedChatId : props.selectedChatId,
+                prevChatId : props.chatId,
                 scrollBehavior : ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
+                separatorMessageId : 0
             }
         }
 
@@ -79,75 +68,41 @@ class MessagesList extends React.Component {
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
-        const list = this.listRef.current;
+        const { chatId } = this.props;
 
+        const list = this.listRef.current;
         const snapshot = {
             scrollTop : list.scrollTop,
             scrollHeight : list.scrollHeight,
-            offsetHeight : list.offsetHeight };
+            offsetHeight : list.offsetHeight
+        };
 
-        console.log(`SCROLL GETSNAPSHOTBEFOREUPDATE list.scrollTop=${list.scrollTop} list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} selectedChatId=${this.props.selectedChatId}`);
+        console.log(`SCROLL GETSNAPSHOTBEFOREUPDATE list.scrollTop=${list.scrollTop} list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} chatId=${chatId}`);
 
         return snapshot;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        const { chatId } = this.props;
 
-        if (prevProps.selectedChatId !== this.props.selectedChatId){
-            this.handleSelectChat(this.props.selectedChatId, prevProps.selectedChatId);
+        if (prevProps.chatId !== chatId){
+            this.handleSelectChat(chatId, prevProps.chatId);
         }
 
         this.handleScrollBehavior(snapshot);
     }
 
-    handleScrollBehavior(snapshot){
-        console.log(`SCROLL HANDLESCROLLBEHAVIOR scrollBehavior=${this.state.scrollBehavior} previousScrollTop=${snapshot.scrollTop} previousScrollHeight=${snapshot.scrollHeight} previousOffsetHeight=${snapshot.offsetHeight} selectedChatId=${this.props.selectedChatId}`);
-        if (this.state.scrollBehavior === ScrollBehaviorEnum.NONE) {
-
-        }
-        else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
-            this.scrollToBottom();
-        }
-        else if (this.state.scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
-            const list = this.listRef.current;
-            console.log(`SCROLL SCROLL_TO_UNREAD before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-
-            let scrollTop = 12 + 10; // message-list-top min-height + unread messages margin-top
-            for (let i = 0; i < this.state.history.length; i++) {
-                let itemComponent = this.itemsMap.get(i);
-                let item = ReactDOM.findDOMNode(itemComponent);
-                if (item) {
-                    console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
-                    if (itemComponent.props.showUnreadSeparator) {
-                        list.scrollTop = item.offsetTop; // + unread messages margin-top
-                        break;
-                    }
-                    else {
-                        scrollTop += item.scrollHeight;
-                    }
-                }
-            }
-
-            console.log(`SCROLL SCROLL_TO_UNREAD after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-        }
-        else if (this.state.scrollBehavior === ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
-            const list = this.listRef.current;
-            console.log(`SCROLL KEEP_SCROLL_POSITION before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-            list.scrollTop = snapshot.scrollTop + (list.scrollHeight - snapshot.scrollHeight);
-            console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-        }
-    }
-
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState.history !== this.state.history
-            || nextProps.selectedChatId !== this.props.selectedChatId){
+        const { chatId } = this.props;
+        const { history } = this.state;
+
+        if (nextProps.chatId !== chatId){
             return true;
         }
 
-        // const list = this.listRef.current;
-        // if (list && list.scrollTop !== 0){
-        //     return true;
-        // }
+        if (nextState.history !== history){
+            return true;
+        }
 
         return false;
     }
@@ -164,15 +119,21 @@ class MessagesList extends React.Component {
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
     }
 
-    onUpdateChatLastMessage(update){
-        if  (update.chat_id === this.props.selectedChatId && !update.last_message){
+    onUpdateChatLastMessage = (update) => {
+        const { chatId } = this.props;
+        if (chatId !== update.chat_id) return;
+
+        if  (!update.last_message){
             this.completed = false;
         }
-    }
+    };
 
-    onUpdateNewMessage(message){
+    onUpdateNewMessage = (update) => {
         if (!this.completed) return;
-        if (this.props.selectedChatId !== message.chat_id) return;
+
+        const { message } = update;
+        const { chatId } = this.props;
+        if (chatId !== message.chat_id) return;
 
         let scrollBehavior = ScrollBehaviorEnum.NONE;
         const list = this.listRef.current;
@@ -185,47 +146,25 @@ class MessagesList extends React.Component {
             scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
         }
 
-        let history = [message];
+        const history = [message];
 
         this.insertAfter(history, scrollBehavior);
-        this.loadMessageContents(history);
+        const store = FileController.getStore();
+        loadMessageContents(store, history);
         MessagesList.viewMessages(history);
-    }
+    };
 
-    onUpdateDeleteMessages(update){
+    onUpdateDeleteMessages = (update) => {
+        const { chatId } = this.props;
+        if (chatId !== update.chat_id) return;
+
         if (!update.is_permanent) return;
 
-        if (this.props.selectedChatId !== update.chat_id) return;
 
         this.deleteHistory(update.message_ids);
-    }
+    };
 
-    handleScroll(){
-
-        const list = this.listRef.current;
-        //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} selectedChatId=${this.props.selectedChatId}`);
-
-        if (this.suppressHandleScroll){
-            this.suppressHandleScroll = false;
-            return;
-        }
-
-        if (list.scrollTop <= 0){
-            console.log('SCROLL HANDLESCROLL onLoadNext');
-            this.onLoadNext();
-        }
-        else if (list.scrollTop + list.offsetHeight === list.scrollHeight){
-            console.log('SCROLL HANDLESCROLL onLoadPrevious');
-            this.onLoadPrevious();
-        }
-        else{
-            //console.log('SCROLL HANDLESCROLL updateItemsInView');
-
-            //this.updateItemsInView();
-        }
-    }
-
-    updateItemsInView(){
+    updateItemsInView = () => {
         if (!this.messages) return;
 
         let messages = [];
@@ -237,8 +176,29 @@ class MessagesList extends React.Component {
             }
         }
 
-        this.handleUpdateItemsInView(messages);
-    }
+        if (!messages.length) return;
+
+        /*let ids = messages.map(x => x.id);
+        console.log('[perf] load_messages_contents ids=[' + ids + ']');
+
+                let messagesMap = new Map(messages.map((i) => [i.id, i]));
+
+                if (this.previousMessages){
+                    let cancelMessages = [];
+                    for (let i = 0; i < this.previousMessages.length; i++){
+                        if (!messagesMap.has(this.previousMessages[i].id)){
+                            cancelMessages.push(this.previousMessages[i]);
+                        }
+                    }
+                    if (cancelMessages.length > 0) {
+                        this.cancelLoadMessageContents(cancelMessages);
+                    }
+                }
+                this.previousMessages = messages;*/
+
+        const store = FileController.getStore();
+        loadMessageContents(store, messages);
+    };
 
     async handleSelectChat(chatId, previousChatId){
         const chat = ChatStore.get(chatId);
@@ -247,7 +207,6 @@ class MessagesList extends React.Component {
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
-        this.lastReadInboxMessageId = chat.last_read_inbox_message_id;
 
         if (chat){
             let sessionId = this.sessionId;
@@ -277,7 +236,7 @@ class MessagesList extends React.Component {
                 return;
             }
 
-            if (this.props.selectedChatId !== chatId){
+            if (this.props.chatId !== chatId){
                 return;
             }
 
@@ -290,36 +249,41 @@ class MessagesList extends React.Component {
 
             MessageStore.setItems(result.messages);
             result.messages.reverse();
-            this.replace(result.messages, unread ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
-            this.loadMessageContents(result.messages);
+
+            // calculate separator
+            let separatorMessageId = Number.MAX_VALUE;
+            if (chat && chat.unread_count > 1){
+                for (let i = result.messages.length - 1; i >= 0; i--){
+                    const {id} = result.messages[i];
+                    if (!result.messages[i].is_outgoing
+                        && id > chat.last_read_inbox_message_id
+                        && id < separatorMessageId){
+                        separatorMessageId = id;
+                    }
+                    else{
+                        break;
+                    }
+                }
+            }
+            separatorMessageId = separatorMessageId === Number.MAX_VALUE? 0 : separatorMessageId;
+            console.log('[MessagesList] separator_message_id=' + separatorMessageId);
+
+            this.replace(separatorMessageId, result.messages, unread ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+
+            // load files
+            const store = FileController.getStore();
+            loadMessageContents(store, result.messages);
+            loadChatPhotos(store, [chatId]);
+
             MessagesList.viewMessages(result.messages);
 
             this.loadIncompleteHistory(result);
 
             // load full info
             getChatFullInfo(chat.id);
-
-            // load photo
-            if (chat.photo){
-                let store = FileController.getStore();
-
-                let file = chat.photo.small;
-                if (file){
-                    let [id, pid, idb_key] = getChatPhoto(chat);
-                    if (pid) {
-                        if (!file.blob){
-                            FileController.getLocalFile(store, file, idb_key, null,
-                                () => ChatStore.updatePhoto(chat.id),
-                                () => FileController.getRemoteFile(id, 1, chat),
-                                'load_chat',
-                                null);
-                        }
-                    }
-                }
-            }
         }
         else{
-            this.replace([], ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+            this.replace(0, [], ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
         }
 
         if (previousChat){
@@ -342,105 +306,6 @@ class MessagesList extends React.Component {
                 chat_id: messages[0].chat_id,
                 message_ids: messages.map(x => x.id)
             });
-    }
-
-    loadMessageContents(messages){
-        let store = FileController.getStore();
-
-        let users = new Map();
-        for (let i = messages.length - 1; i >= 0; i--) {
-            let message = messages[i];
-            if (message) {
-                if (message.sender_user_id){
-                    users.set(message.sender_user_id, message.sender_user_id);
-                }
-
-                if (message.content){
-                    switch (message.content['@type']) {
-                        case 'messagePhoto': {
-
-                            // preview
-                            /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                            if (previewPid) {
-                                let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                                if (!preview.blob){
-                                    FileController.getLocalFile(store, preview, previewIdbKey, null,
-                                        () => MessageStore.updateMessagePhoto(message.id),
-                                        () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
-                                        'load_contents_preview_',
-                                        message.id);
-
-                                }
-                            }*/
-
-                            let [id, pid, idb_key] = getPhotoFile(message);
-                            if (pid) {
-                                let photoSize = getPhotoSize(message.content.photo.sizes);
-                                if (photoSize){
-                                    let obj = photoSize.photo;
-                                    if (!obj.blob){
-                                        let localMessage = message;
-                                        FileController.getLocalFile(store, obj, idb_key, null,
-                                            () => MessageStore.updateMessagePhoto(localMessage.id),
-                                            () => FileController.getRemoteFile(id, 1, localMessage));
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                        case 'messageSticker': {
-                            let [id, pid, idb_key] = getStickerFile(message);
-                            if (pid) {
-                                let obj = message.content.sticker.sticker;
-                                if (!obj.blob){
-                                    let localMessage = message;
-                                    FileController.getLocalFile(store, obj, idb_key, null,
-                                        () => MessageStore.updateMessageSticker(localMessage.id),
-                                        () => FileController.getRemoteFile(id, 1, localMessage));
-                                }
-                            }
-                            break;
-                        }
-                        case 'messageContact':{
-                            let contact = message.content.contact;
-                            if (contact && contact.user_id > 0){
-                                let user = UserStore.get(contact.user_id);
-                                if (user){
-                                    let [id, pid, idb_key] = getContactFile(message);
-                                    if (pid) {
-                                        let obj = user.profile_photo.small;
-                                        if (!obj.blob){
-                                            FileController.getLocalFile(store, obj, idb_key, null,
-                                                () => UserStore.updatePhoto(user.id),
-                                                () => FileController.getRemoteFile(id, 1, user));
-                                        }
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                        case 'messageDocument': {
-                            let [id, pid, idb_key] = getDocumentThumbnailFile(message);
-                            if (pid) {
-                                let obj = message.content.document.thumbnail.photo;
-                                if (!obj.blob){
-                                    let localMessage = message;
-                                    FileController.getLocalFile(store, obj, idb_key, null,
-                                        () => MessageStore.updateMessageDocumentThumbnail(obj.id),
-                                        () => FileController.getRemoteFile(id, 1, localMessage));
-                                }
-                            }
-                            break;
-                        }
-                        default: {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        loadUserPhotos(store, [...users.keys()]);
     }
 
     cancelLoadMessageContents(messages) {
@@ -476,7 +341,7 @@ class MessagesList extends React.Component {
         }
     }
 
-    async loadIncompleteHistory(result){
+    loadIncompleteHistory = async (result) => {
         const MAX_ITERATIONS = 5;
         let incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
 
@@ -484,10 +349,10 @@ class MessagesList extends React.Component {
             result = await this.onLoadNext();
             incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
         }
-    }
+    };
 
-    async onLoadNext(){
-        const chatId = this.props.selectedChatId;
+    onLoadNext = async () => {
+        const { chatId } = this.props;
 
         if (!chatId) return;
         if (this.loading) return;
@@ -510,7 +375,7 @@ class MessagesList extends React.Component {
                 this.loading = false;
             });
 
-        if (this.props.selectedChatId !== chatId){
+        if (this.props.chatId !== chatId){
             return;
         }
         //TODO: replace result with one-way data flow
@@ -518,14 +383,15 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.insertBefore(result.messages);
-        this.loadMessageContents(result.messages);
+        const store = FileController.getStore();
+        loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
         return result;
-    }
+    };
 
-    async onLoadPrevious(){
-        const chatId = this.props.selectedChatId;
+    onLoadPrevious = async () => {
+        const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
 
         if (!chat) return;
@@ -550,7 +416,7 @@ class MessagesList extends React.Component {
                 this.loading = false;
             });
 
-        if (this.props.selectedChatId !== chatId){
+        if (this.props.chatId !== chatId){
             return;
         }
 
@@ -561,57 +427,22 @@ class MessagesList extends React.Component {
             this.completed = true;
         }
 
-        this.filterMessages(result, this.state.history);
+        filterMessages(result, this.state.history);
 
         //TODO: replace result with one-way data flow
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.insertAfter(result.messages, ScrollBehaviorEnum.NONE);
-        this.loadMessageContents(result.messages);
+        const store = FileController.getStore();
+        loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
         return result;
-    }
+    };
 
-    filterMessages(result, history){
-        if (result.messages.length === 0) return;
-        if (history.length === 0) return;
-
-        const map = history.reduce(function(accumulator, current) {
-            accumulator.set(current.id, current.id);
-            return accumulator;
-        }, new Map());
-
-        result.messages = result.messages.filter(x => !map.has(x.id));
-    }
-
-    handleUpdateItemsInView(messages){
-        if (!messages) return;
-
-        /*let ids = messages.map(x => x.id);
-        console.log('[perf] load_messages_contents ids=[' + ids + ']');
-
-                let messagesMap = new Map(messages.map((i) => [i.id, i]));
-
-                if (this.previousMessages){
-                    let cancelMessages = [];
-                    for (let i = 0; i < this.previousMessages.length; i++){
-                        if (!messagesMap.has(this.previousMessages[i].id)){
-                            cancelMessages.push(this.previousMessages[i]);
-                        }
-                    }
-                    if (cancelMessages.length > 0) {
-                        this.cancelLoadMessageContents(cancelMessages);
-                    }
-                }
-                this.previousMessages = messages;*/
-
-        this.loadMessageContents(messages);
-    }
-
-    replace(history, scrollBehavior, callback) {
-        this.setState({ history: history, scrollBehavior: scrollBehavior }, callback);
+    replace(separatorMessageId, history, scrollBehavior, callback) {
+        this.setState({ separatorMessageId: separatorMessageId, history: history, scrollBehavior: scrollBehavior }, callback);
     }
 
     insertBefore(history, callback) {
@@ -627,55 +458,98 @@ class MessagesList extends React.Component {
     }
 
     deleteHistory(message_ids, callback) {
-        let history = this.state.history;
+        const { history } = this.state;
         if (history.length === 0) return;
 
         let map = new Map(message_ids.map(x => [x, x]));
 
-        history = history.filter(x => !map.has(x.id));
-
-        this.setState({ history: history, scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM }, callback);
+        this.setState({ history: history.filter(x => !map.has(x.id)), scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM }, callback);
     }
 
-    scrollToBottom() {
+    handleScroll = () => {
+
+        const list = this.listRef.current;
+        //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
+
+        if (this.suppressHandleScroll){
+            this.suppressHandleScroll = false;
+            return;
+        }
+
+        if (list.scrollTop <= 0){
+            console.log('SCROLL HANDLESCROLL onLoadNext');
+            this.onLoadNext();
+        }
+        else if (list.scrollTop + list.offsetHeight === list.scrollHeight){
+            console.log('SCROLL HANDLESCROLL onLoadPrevious');
+            this.onLoadPrevious();
+        }
+        else{
+            //console.log('SCROLL HANDLESCROLL updateItemsInView');
+
+            //this.updateItemsInView();
+        }
+    };
+
+    handleScrollBehavior = (snapshot) => {
+        const { chatId } = this.props;
+        const { scrollBehavior, history } = this.state;
+        const { scrollTop, scrollHeight, offsetHeight } = snapshot;
+
+        console.log(`SCROLL HANDLESCROLLBEHAVIOR scrollBehavior=${scrollBehavior} previousScrollTop=${scrollTop} previousScrollHeight=${scrollHeight} previousOffsetHeight=${offsetHeight} chatId=${chatId}`);
+        if (scrollBehavior === ScrollBehaviorEnum.NONE) {
+
+        }
+        else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
+            this.scrollToBottom();
+        }
+        else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
+            const list = this.listRef.current;
+            console.log(`SCROLL SCROLL_TO_UNREAD before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
+
+            for (let i = 0; i < history.length; i++) {
+                let itemComponent = this.itemsMap.get(i);
+                let item = ReactDOM.findDOMNode(itemComponent);
+                if (item) {
+                    console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                    if (itemComponent.props.showUnreadSeparator) {
+                        list.scrollTop = item.offsetTop; // + unread messages margin-top
+                        break;
+                    }
+                }
+            }
+
+            console.log(`SCROLL SCROLL_TO_UNREAD after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
+        }
+        else if (scrollBehavior === ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
+            const list = this.listRef.current;
+            console.log(`SCROLL KEEP_SCROLL_POSITION before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
+            list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+            console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
+        }
+    };
+
+    scrollToBottom = () => {
         this.suppressHandleScroll = true;
         const list = this.listRef.current;
-        console.log(`SCROLL SCROLLTOBOTTOM before list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} list.scrollTop=${list.scrollTop} selectedChatId=${this.props.selectedChatId}`);
+        console.log(`SCROLL SCROLLTOBOTTOM before list.scrollHeight=${list.scrollHeight} list.offsetHeight=${list.offsetHeight} list.scrollTop=${list.scrollTop} chatId=${this.props.chatId}`);
 
         const nextScrollTop = list.scrollHeight - list.offsetHeight;
         if (nextScrollTop !== list.scrollTop){
             list.scrollTop = list.scrollHeight - list.offsetHeight;
-            console.log(`SCROLL SCROLLTOBOTTOM after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} selectedChatId=${this.props.selectedChatId}`);
+            console.log(`SCROLL SCROLLTOBOTTOM after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} chatId=${this.props.chatId}`);
         }
         else{
-            console.log(`SCROLL SCROLLTOBOTTOM after(already bottom) list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} selectedChatId=${this.props.selectedChatId}`);
+            console.log(`SCROLL SCROLLTOBOTTOM after(already bottom) list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} suppressHandleScroll=${this.suppressHandleScroll} chatId=${this.props.chatId}`);
         }
-
     };
 
     render() {
-        const { selectedChatId, onSelectChat, onSelectUser } = this.props;
-        const chat = ChatStore.get(selectedChatId);
-
-        let unreadSeparatorMessageId = Number.MAX_VALUE;
-        if (chat && chat.unread_count > 1){
-            for (let i = this.state.history.length - 1; i >= 0; i--){
-                const {id} = this.state.history[i];
-                if (!this.state.history[i].is_outgoing
-                    && id > this.lastReadInboxMessageId
-                    && id < unreadSeparatorMessageId){
-                    unreadSeparatorMessageId = id;
-                }
-                else{
-                    break;
-                }
-            }
-        }
-
-        console.log('[MessagesList] unreadSeparatorMessageId=' + unreadSeparatorMessageId);
+        const { onSelectChat, onSelectUser } = this.props;
+        const { history, separatorMessageId } = this.state;
 
         this.itemsMap.clear();
-        this.messages = this.state.history.map((x, i) => {
+        this.messages = history.map((x, i) => {
             return (isServiceMessage(x)
                 ? <ServiceMessageControl
                     key={x.id}
@@ -684,7 +558,7 @@ class MessagesList extends React.Component {
                     messageId={x.id}
                     onSelectChat={onSelectChat}
                     onSelectUser={onSelectUser}
-                    showUnreadSeparator={!x.is_outgoing && unreadSeparatorMessageId === x.id}/>
+                    showUnreadSeparator={separatorMessageId === x.id}/>
                 : <MessageControl
                     key={x.id}
                     ref={el => this.itemsMap.set(i, el)}
@@ -694,7 +568,7 @@ class MessagesList extends React.Component {
                     sendingState={x.sending_state}
                     onSelectChat={onSelectChat}
                     onSelectUser={onSelectUser}
-                    showUnreadSeparator={!x.is_outgoing && unreadSeparatorMessageId === x.id}/>);
+                    showUnreadSeparator={separatorMessageId === x.id}/>);
         });
 
         return (

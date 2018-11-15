@@ -12,10 +12,11 @@
     border-radius: 6px;
 }
 
-.photo-img-wrapper{
+.photo-wrapper{
     border-radius: 6px;
     transform: translateZ(0);
     overflow: hidden;
+    cursor: pointer;
 }
 
 .photo-img-blur{

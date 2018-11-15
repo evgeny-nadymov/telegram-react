@@ -6,6 +6,7 @@
  */
 
 import React, {Component} from 'react';
+import classNames from 'classnames';
 import {getChatLetters} from '../../Utils/Chat';
 import {getChatPhoto} from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
@@ -15,9 +16,6 @@ import './ChatTileControl.css';
 class ChatTileControl extends Component{
     constructor(props){
         super(props);
-
-        this.onPhotoUpdated = this.onPhotoUpdated.bind(this);
-        this.onUpdateChatPhoto = this.onUpdateChatPhoto.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -38,25 +36,27 @@ class ChatTileControl extends Component{
         ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
     }
 
-    onPhotoUpdated(payload) {
+    onPhotoUpdated = (payload) => {
         if (this.props.chatId
             && this.props.chatId === payload.chatId){
             this.forceUpdate();
         }
-    }
+    };
 
-    onUpdateChatPhoto(update){
+    onUpdateChatPhoto = (update) => {
+        const { chatId } = this.props;
+
         if (!update.chat_id) return;
-        if (update.chat_id !== this.props.chatId) return;
+        if (update.chat_id !== chatId) return;
 
-        const chat = ChatStore.get(this.props.chatId);
+        const chat = ChatStore.get(chatId);
         if (!update.photo){
             this.forceUpdate();
         }
         else{
             this.loadChatContent(chat)
         }
-    }
+    };
 
     loadChatContent(chat){
         if (!chat) return;
@@ -71,29 +71,40 @@ class ChatTileControl extends Component{
         }
     }
 
+    handleSelect = () => {
+        const { chatId, onSelect } = this.props;
+        if (!onSelect) return;
+
+        onSelect(chatId);
+    };
+
     render(){
-        const chat = ChatStore.get(this.props.chatId);
+        const { chatId, onSelect } = this.props;
+
+        const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        let letters = getChatLetters(chat);
-        let blob = chat.photo && chat.photo.small? chat.photo.small.blob : null;
+        const letters = getChatLetters(chat);
+        const blob = chat.photo && chat.photo.small? chat.photo.small.blob : null;
+
         let src;
         try{
             src = blob ? URL.createObjectURL(blob) : null;
         }
         catch(error){
-            console.log(`ChatTileControl.render chat_id=${chat.id} with error ${error}`);
+            console.log(`[ChatTileControl] render chat_id=${chat.id} with error ${error}`);
         }
 
-        let chatId = chat.id || 1;
-        let photoClasses = 'tile-photo';
-        if (!blob){
-            photoClasses += ` tile_color_${(Math.abs(chatId) % 8 + 1)}`;
-        }
+        const tileColor = `tile_color_${(Math.abs(chatId) % 8 + 1)}`;
+        const className = classNames(
+            'tile-photo',
+            {[tileColor]: !blob},
+            {pointer: onSelect}
+        );
 
         return src ?
-            (<img className={photoClasses} src={src} draggable={false} alt='' />) :
-            (<div className={photoClasses}><span className='tile-text'>{letters}</span></div>);
+            (<img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect}/>) :
+            (<div className={className} onClick={this.handleSelect}><span className='tile-text'>{letters}</span></div>);
     }
 }
 

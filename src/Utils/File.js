@@ -9,6 +9,7 @@ import {getPhotoSize} from './Common';
 import UserStore from '../Stores/UserStore';
 import FileController from '../Controllers/FileController';
 import ChatStore from '../Stores/ChatStore';
+import MessageStore from '../Stores/MessageStore';
 
 function getChatPhoto(chat) {
     if (chat['@type'] !== 'chat') {
@@ -243,6 +244,105 @@ function loadChatPhotos(store, chatIds) {
     }
 }
 
+
+function loadMessageContents(store, messages){
+
+    let users = new Map();
+    for (let i = messages.length - 1; i >= 0; i--) {
+        let message = messages[i];
+        if (message) {
+            if (message.sender_user_id){
+                users.set(message.sender_user_id, message.sender_user_id);
+            }
+
+            if (message.content){
+                switch (message.content['@type']) {
+                    case 'messagePhoto': {
+
+                        // preview
+                        /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
+                        if (previewPid) {
+                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                            if (!preview.blob){
+                                FileController.getLocalFile(store, preview, previewIdbKey, null,
+                                    () => MessageStore.updateMessagePhoto(message.id),
+                                    () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
+                                    'load_contents_preview_',
+                                    message.id);
+
+                            }
+                        }*/
+
+                        let [id, pid, idb_key] = getPhotoFile(message);
+                        if (pid) {
+                            let photoSize = getPhotoSize(message.content.photo.sizes);
+                            if (photoSize){
+                                let obj = photoSize.photo;
+                                if (!obj.blob){
+                                    let localMessage = message;
+                                    FileController.getLocalFile(store, obj, idb_key, null,
+                                        () => MessageStore.updateMessagePhoto(localMessage.id),
+                                        () => FileController.getRemoteFile(id, 1, localMessage));
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageSticker': {
+                        let [id, pid, idb_key] = getStickerFile(message);
+                        if (pid) {
+                            let obj = message.content.sticker.sticker;
+                            if (!obj.blob){
+                                let localMessage = message;
+                                FileController.getLocalFile(store, obj, idb_key, null,
+                                    () => MessageStore.updateMessageSticker(localMessage.id),
+                                    () => FileController.getRemoteFile(id, 1, localMessage));
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageContact':{
+                        let contact = message.content.contact;
+                        if (contact && contact.user_id > 0){
+                            let user = UserStore.get(contact.user_id);
+                            if (user){
+                                let [id, pid, idb_key] = getContactFile(message);
+                                if (pid) {
+                                    let obj = user.profile_photo.small;
+                                    if (!obj.blob){
+                                        FileController.getLocalFile(store, obj, idb_key, null,
+                                            () => UserStore.updatePhoto(user.id),
+                                            () => FileController.getRemoteFile(id, 1, user));
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageDocument': {
+                        let [id, pid, idb_key] = getDocumentThumbnailFile(message);
+                        if (pid) {
+                            let obj = message.content.document.thumbnail.photo;
+                            if (!obj.blob){
+                                let localMessage = message;
+                                FileController.getLocalFile(store, obj, idb_key, null,
+                                    () => MessageStore.updateMessageDocumentThumbnail(obj.id),
+                                    () => FileController.getRemoteFile(id, 1, localMessage));
+                            }
+                        }
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    loadUserPhotos(store, [...users.keys()]);
+}
+
 export {
     getUserPhoto,
     getChatPhoto,
@@ -254,5 +354,6 @@ export {
     saveData,
     saveBlob,
     loadUserPhotos,
-    loadChatPhotos
+    loadChatPhotos,
+    loadMessageContents
 };

@@ -82,7 +82,7 @@ class UserTileControl extends Component{
             src = blob ? URL.createObjectURL(blob) : null;
         }
         catch(error){
-            console.log(`UserTileControl.render user_id=${userId} with error ${error}`);
+            console.log(`[UserTileControl] render user_id=${userId} with error ${error}`);
         }
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8 + 1)}`;

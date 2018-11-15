@@ -114,7 +114,7 @@ class DialogDetails extends Component{
                 <Header chatId={selectedChatId}/>
                 <MessagesList
                     ref={this.messagesList}
-                    selectedChatId={selectedChatId}
+                    chatId={selectedChatId}
                     onSelectChat={onSelectChat}
                     onSelectUser={onSelectUser}/>
                 <Footer chatId={selectedChatId}/>

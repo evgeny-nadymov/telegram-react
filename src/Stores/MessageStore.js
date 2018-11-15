@@ -24,7 +24,7 @@ class MessageStore extends EventEmitter {
         switch (update['@type']) {
             case 'updateNewMessage':
                 this.set(update.message);
-                this.emit('updateNewMessage', update.message);
+                this.emit('updateNewMessage', update);
                 break;
             case 'updateDeleteMessages':
                 this.emit('updateDeleteMessages', update);
