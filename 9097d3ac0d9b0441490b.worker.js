@@ -46,7 +46,7 @@
 /******/ 		return new Promise(function(resolve) {
 /******/ 			// "1" is the signal for "already loaded"
 /******/ 			if(!installedChunks[chunkId]) {
-/******/ 				importScripts("" + chunkId + "." + "8a284b1d234c7273e0e7" + ".worker.js");
+/******/ 				importScripts("" + chunkId + "." + "9097d3ac0d9b0441490b" + ".worker.js");
 /******/ 			}
 /******/ 			resolve();
 /******/ 		});
@@ -2099,8 +2099,16 @@ var DbFileSystem = function () {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
+                if (!this.readOnly) {
+                  _context6.next = 2;
+                  break;
+                }
+
+                return _context6.abrupt('return');
+
+              case 2:
                 start = performance.now();
-                _context6.next = 3;
+                _context6.next = 5;
                 return new _promise2.default(function (resolve, reject) {
                   _this.FS.syncfs(false, function () {
                     var syncfs_time = (performance.now() - start) / 1000;
@@ -2111,7 +2119,7 @@ var DbFileSystem = function () {
                   });
                 });
 
-              case 3:
+              case 5:
               case 'end':
                 return _context6.stop();
             }
@@ -2155,6 +2163,7 @@ var DbFileSystem = function () {
     key: 'create',
     value: function () {
       var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(root, FS) {
+        var readOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var dbfs;
         return _regenerator2.default.wrap(function _callee8$(_context8) {
           while (1) {
@@ -2166,38 +2175,39 @@ var DbFileSystem = function () {
                 dbfs.root = root;
                 dbfs.FS = FS;
                 dbfs.syncfs_total_time = 0;
+                dbfs.readOnly = readOnly;
                 FS.mkdir(root);
                 FS.mount(FS.filesystems.IDBFS, {}, root);
 
-                _context8.next = 9;
+                _context8.next = 10;
                 return new _promise2.default(function (resolve, reject) {
                   FS.syncfs(true, function (err) {
                     resolve();
                   });
                 });
 
-              case 9:
+              case 10:
 
                 dbfs.syncfsInterval = setInterval(function () {
                   dbfs.sync();
                 }, 5000);
                 return _context8.abrupt('return', dbfs);
 
-              case 13:
-                _context8.prev = 13;
+              case 14:
+                _context8.prev = 14;
                 _context8.t0 = _context8['catch'](0);
 
                 _logger2.default.error('Failed to init DbFileSystem: ', _context8.t0);
 
-              case 16:
+              case 17:
               case 'end':
                 return _context8.stop();
             }
           }
-        }, _callee8, this, [[0, 13]]);
+        }, _callee8, this, [[0, 14]]);
       }));
 
-      function create(_x8, _x9) {
+      function create(_x9, _x10) {
         return _ref8.apply(this, arguments);
       }
 
@@ -2216,6 +2226,7 @@ var TdFileSystem = function () {
     key: 'create',
     value: function () {
       var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(prefix, FS) {
+        var readOnly = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
         var tdfs, inboundFileSystem, dbFileSystem;
         return _regenerator2.default.wrap(function _callee9$(_context9) {
           while (1) {
@@ -2236,7 +2247,7 @@ var TdFileSystem = function () {
 
                 //IDBFS. MEMFS which is flushed to IDB from time to time
 
-                dbFileSystem = DbFileSystem.create(prefix + '/dbfs', FS);
+                dbFileSystem = DbFileSystem.create(prefix + '/dbfs', FS, readOnly);
                 _context9.next = 10;
                 return inboundFileSystem;
 
@@ -2263,7 +2274,7 @@ var TdFileSystem = function () {
         }, _callee9, this, [[0, 17]]);
       }));
 
-      function create(_x10, _x11) {
+      function create(_x12, _x13) {
         return _ref9.apply(this, arguments);
       }
 
@@ -2328,7 +2339,10 @@ var TdClient = function () {
                   td_execute: this.TdModule.cwrap('td_execute', 'string', ['number', 'string']),
                   td_receive: this.TdModule.cwrap('td_receive', 'string', ['number']),
                   td_set_verbosity: function td_set_verbosity(verbosity) {
-                    _this2.td_functions.td_execute(0, (0, _stringify2.default)({ '@type': 'setLogVerbosityLevel', new_verbosity_level: verbosity }));
+                    _this2.td_functions.td_execute(0, (0, _stringify2.default)({
+                      '@type': 'setLogVerbosityLevel',
+                      new_verbosity_level: verbosity
+                    }));
                   },
                   td_get_timeout: this.TdModule.cwrap('td_get_timeout', 'number', [])
                 };
@@ -2377,7 +2391,7 @@ var TdClient = function () {
 
                 _logger2.default.info('FS start init');
                 _context10.next = 32;
-                return TdFileSystem.create('/' + prefix, this.FS);
+                return TdFileSystem.create('/' + prefix, this.FS, options.readOnly);
 
               case 32:
                 this.tdfs = _context10.sent;
@@ -2405,7 +2419,7 @@ var TdClient = function () {
         }, _callee10, this);
       }));
 
-      function init(_x12) {
+      function init(_x14) {
         return _ref10.apply(this, arguments);
       }
 
@@ -2581,7 +2595,7 @@ var TdClient = function () {
         }, _callee11, this);
       }));
 
-      function close(_x13) {
+      function close(_x15) {
         return _ref11.apply(this, arguments);
       }
 
@@ -2609,7 +2623,7 @@ var TdClient = function () {
         }, _callee12, this);
       }));
 
-      function asyncOnFatalError(_x14) {
+      function asyncOnFatalError(_x16) {
         return _ref12.apply(this, arguments);
       }
 
@@ -2659,7 +2673,7 @@ var TdClient = function () {
         }, _callee13, this);
       }));
 
-      function saveFile(_x15, _x16) {
+      function saveFile(_x17, _x18) {
         return _ref13.apply(this, arguments);
       }
 
