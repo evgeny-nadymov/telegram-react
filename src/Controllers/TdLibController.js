@@ -8,16 +8,15 @@
 import { EventEmitter } from 'events';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
 import packageJson from '../../package.json';
+import { JS_VERBOSITY_MAX, JS_VERBOSITY_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 
 class TdLibController extends EventEmitter{
     constructor(){
         super();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        this.onAuthError = this.onAuthError.bind(this);
-
         this.clientParameters = {
             useTestDC : false,
+            readOnly : false,
             verbosity : 1,
             jsVerbosity : 3
         };
@@ -29,14 +28,17 @@ class TdLibController extends EventEmitter{
         return this.client.send(request);
     }
 
-    init(){
-        const { verbosity, jsVerbosity, useTestDC } = this.clientParameters;
+    init(location){
+        this.setInitParameters(location);
+
+        const { verbosity, jsVerbosity, useTestDC, readOnly } = this.clientParameters;
 
         let parameters = {
             verbosity : verbosity,
             jsVerbosity : jsVerbosity,
             mode : 'wasm',  // 'wasm-streaming'/'wasm'/'asmjs'
             prefix : useTestDC ? 'tdlib_test' : 'tdlib',
+            readOnly : readOnly,
             isBackground : false
         };
 
@@ -49,6 +51,59 @@ class TdLibController extends EventEmitter{
             status: 'init'
         });
     }
+
+    setInitParameters = (location) => {
+        if (!location) return;
+
+        const { search } = location;
+        if (!search) return;
+
+        const params = new URLSearchParams(search.toLowerCase());
+
+        if (params.has('test')){
+            const useTestDC = parseInt(params.get('test'), 10);
+            if (useTestDC === 0 || useTestDC === 1){
+                this.clientParameters.useTestDC = useTestDC === 1;
+                //console.log(`setQueryParams use_test_dc=${TdLibController.clientParameters.useTestDC}`);
+            }
+            else{
+                // console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
+            }
+        }
+
+        if (params.has('verbosity')){
+            const verbosity = parseInt(params.get('verbosity'), 10);
+            if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX){
+                this.clientParameters.verbosity = verbosity;
+                // console.log(`setQueryParams verbosity=${TdLibController.clientParameters.verbosity}`);
+            }
+            else{
+                // console.log(`setQueryParams skip verbosity=${params.get('verbosity')} valid values=[${VERBOSITY_MIN}..${VERBOSITY_MAX}]`);
+            }
+        }
+
+        if (params.has('jsverbosity')){
+            const jsVerbosity = parseInt(params.get('jsverbosity'), 10);
+            if (jsVerbosity >= JS_VERBOSITY_MIN && jsVerbosity <= JS_VERBOSITY_MAX){
+                this.clientParameters.jsVerbosity = jsVerbosity;
+                // console.log(`setQueryParams jsVerbosity=${TdLibController.clientParameters.jsVerbosity}`);
+            }
+            else{
+                // console.log(`setQueryParams skip jsVerbosity=${params.get('jsVerbosity')} valid values=[${JS_VERBOSITY_MIN}..${JS_VERBOSITY_MAX}]`);
+            }
+        }
+
+        if (params.has('readonly')){
+            const readOnly = parseInt(params.get('readonly'), 10);
+            if (readOnly === 0 || readOnly === 1){
+                this.clientParameters.readOnly = readOnly === 1;
+                //console.log(`setQueryParams use_test_dc=${TdLibController.clientParameters.useTestDC}`);
+            }
+            else{
+                // console.log(`setQueryParams skip use_test_dc=${params.get('test')} valid values=[0,1]`);
+            }
+        }
+    };
 
     getState(){
         return this.state;
@@ -95,7 +150,7 @@ class TdLibController extends EventEmitter{
         });
     }
 
-    onUpdate(update) {
+    onUpdate = (update) => {
         //console.log('receive from worker', update);
 
         switch (update['@type']) {
@@ -110,7 +165,7 @@ class TdLibController extends EventEmitter{
         }
 
         this.emit('tdlib_update', update);
-    }
+    };
 
     onUpdateAuthorizationState(update) {
         if (!update) return;
@@ -159,9 +214,9 @@ class TdLibController extends EventEmitter{
         }
     }
 
-    onAuthError(error){
+    onAuthError = (error) => {
         this.emit('tdlib_auth_error', error);
-    }
+    };
 
     onInputExternal(status, line) {
         switch (status) {

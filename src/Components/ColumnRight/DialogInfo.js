@@ -22,6 +22,7 @@ class DialogInfo extends React.Component {
             selectedChatId: ChatStore.getSelectedChatId()
         };
     }
+
     componentDidMount(){
         ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
@@ -89,8 +90,8 @@ class DialogInfo extends React.Component {
                     chatId={chatId}
                     backButton={backButton}
                     openSharedMedia={this.handelOpenSharedMedia}
-                    onSelectUser={this.handleSelectUser}
-                    onClose={this.handleCloseChatDetails}/>);
+                    onClose={this.handleCloseChatDetails}
+                    onSelectUser={this.handleSelectUser}/>);
         }
 
         return (

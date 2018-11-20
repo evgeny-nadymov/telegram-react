@@ -6,28 +6,20 @@
  */
 
 import React, {Component} from 'react';
-import './InputBoxControl.css';
-import OutputTypingManager from '../../Utils/OutputTypingManager';
-import FileController from '../../Controllers/FileController';
-import MessageStore from '../../Stores/MessageStore';
-import ChatStore from '../../Stores/ChatStore';
-import TdLibController from '../../Controllers/TdLibController';
-import {getSize, readImageSize} from '../../Utils/Common';
-import {PHOTO_SIZE} from '../../Constants';
 import {withStyles} from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import PhotoIcon from '@material-ui/icons/Photo';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import SendIcon from '@material-ui/icons/Send';
-import KeyboardVoiceIcon from '@material-ui/icons/KeyboardVoice';
-import MenuItem from '@material-ui/core/MenuItem/MenuItem';
-import Menu from '@material-ui/core/Menu/Menu';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
 import AttachButton from './../ColumnMiddle/AttachButton';
+import OutputTypingManager from '../../Utils/OutputTypingManager';
+import {getSize, readImageSize} from '../../Utils/Common';
+import {PHOTO_SIZE} from '../../Constants';
+import FileStore from '../../Stores/FileStore';
+import MessageStore from '../../Stores/MessageStore';
+import ChatStore from '../../Stores/ChatStore';
+import FileController from '../../Controllers/FileController';
+import TdLibController from '../../Controllers/TdLibController';
+import './InputBoxControl.css';
 
 const styles = {
     iconButton : {
@@ -311,7 +303,7 @@ class InputBoxControl extends Component{
                     && !file.blob){
 
                     file.blob = blob;
-                    MessageStore.updateMessagePhoto(message.id);
+                    FileStore.updatePhotoBlob(message.chat_id, message.id, file.id);
                 }
             }
         }

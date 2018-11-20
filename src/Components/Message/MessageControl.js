@@ -12,8 +12,7 @@ import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import {
-    saveData,
-    saveBlob
+    saveOrDownload
 } from '../../Utils/File';
 import {
     getDate,
@@ -26,10 +25,10 @@ import {
     getSenderUserId
 } from '../../Utils/Message';
 import {getPhotoSize} from '../../Utils/Common';
-import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
-import TdLibController from '../../Controllers/TdLibController';
+import FileStore from '../../Stores/FileStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import FileController from '../../Controllers/FileController';
 import './MessageControl.css';
 
@@ -44,8 +43,6 @@ class MessageControl extends Component{
             };
         }
 
-        this.openForward = this.openForward.bind(this);
-        this.openMedia = this.openMedia.bind(this);
         this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
         this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
         this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
@@ -104,77 +101,62 @@ class MessageControl extends Component{
         }
     }
 
-    openForward(){
-        let message = MessageStore.get(this.props.chatId, this.props.messageId);
+    openForward = () => {
+        const { chatId, messageId, onSelectUser, onSelectChat } = this.props;
 
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return;
-        if (!message.forward_info) return null;
 
-        switch (message.forward_info['@type']) {
+        const { forward_info } = message;
+        if (!forward_info) return null;
+
+        switch (forward_info['@type']) {
             case 'messageForwardedFromUser': {
-                let user = UserStore.get(message.forward_info.sender_user_id);
-                if (user) {
-                    TdLibController
-                        .send({
-                            '@type': 'createPrivateChat',
-                            user_id: message.forward_info.sender_user_id,
-                            force: true
-                        })
-                        .then(chat => {
-                            this.props.onSelectChat(chat);
-                        });
+                if (onSelectUser){
+                    onSelectUser(forward_info.sender_user_id);
                 }
                 break;
             }
             case 'messageForwardedPost': {
-                let chat = ChatStore.get(message.forward_info.chat_id);
-
-                this.props.onSelectChat(chat);
+                if (onSelectChat){
+                    onSelectChat(forward_info.chat_id);
+                }
                 break;
             }
         }
-    }
+    };
 
-    openMedia(){
-        let message = MessageStore.get(this.props.chatId, this.props.messageId);
+    openMedia = () => {
+        const { chatId, messageId, onSelectUser } = this.props;
 
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return;
-        if (!message.content) return null;
 
-        switch (message.content['@type']) {
+        const { content } = message;
+        if (!content) return null;
+
+        switch (content['@type']) {
             case 'messageContact': {
-                let user = UserStore.get(message.content.contact.user_id);
-                if (user) {
-                    TdLibController
-                        .send({
-                            '@type': 'createPrivateChat',
-                            user_id: message.content.contact.user_id,
-                            force: true
-                        })
-                        .then(chat => {
-                            this.props.onSelectChat(chat);
-                        });
+                const { contact } = content;
+                if (contact && onSelectUser){
+                    onSelectUser(contact.user_id);
                 }
                 break;
             }
             case 'messageDocument': {
-                if (message.content){
+                const { document } = content;
+                if (document){
+                    const file = document.document;
+                    if (file) {
 
-                    let document = message.content.document;
-                    if (document){
-
-                        let file = document.document;
-                        if (file) {
-
-                            if (file.local.is_downloading_active){
-                                FileController.cancelGetRemoteFile(file.id, message);
-                            }
-                            else if (file.remote.is_uploading_active){
-                                FileController.cancelUploadFile(file.id, message);
-                            }
-                            else {
-                                this.saveOrDownload(file, document.file_name, message);
-                            }
+                        if (file.local.is_downloading_active){
+                            FileController.cancelGetRemoteFile(file.id, message);
+                        }
+                        else if (file.remote.is_uploading_active){
+                            FileController.cancelUploadFile(file.id, message);
+                        }
+                        else {
+                            saveOrDownload(file, document.file_name, message);
                         }
                     }
                 }
@@ -182,73 +164,44 @@ class MessageControl extends Component{
                 break;
             }
             case 'messagePhoto': {
-                if (message.content){
-
-                    let photo = message.content.photo;
-                    if (photo){
-
-                        let photoSize = getPhotoSize(message.content.photo.sizes);
-                        if (photoSize){
-                            let file = photoSize.photo;
-                            if (file) {
-
+                // cancel download/upload
+                const { photo } = message.content;
+                if (photo){
+                    const photoSize = getPhotoSize(photo.sizes);
+                    if (photoSize){
+                        let file = photoSize.photo;
+                        if (file) {
+                            file = FileStore.get(file.id);
+                            if (file){
                                 if (file.local.is_downloading_active){
                                     FileController.cancelGetRemoteFile(file.id, message);
+                                    return;
                                 }
                                 else if (file.remote.is_uploading_active){
                                     FileController.cancelUploadFile(file.id, message);
+                                    return;
                                 }
-                                else {
-                                    this.saveOrDownload(file, document.file_name, message);
-                                }
+                                // else {
+                                //     saveOrDownload(file, document.file_name, message);
+                                // }
                             }
                         }
                     }
                 }
 
+                // open media viewer
+                ApplicationStore.setMediaViewerContent({ chatId: chatId, messageId: messageId });
+
                 break;
             }
         }
-    }
-
-    saveOrDownload(file, fileName, message){
-        if (!file) return;
-        if (!fileName) return;
-
-        if (file.arr) {
-            saveData(file.arr, fileName);
-            return;
-        }
-
-        if (file.idb_key){
-            let store = FileController.getStore();
-
-            FileController.getLocalFile(store, file, file.idb_key, null,
-                () => {
-                    if (file.blob){
-                        saveBlob(file.blob, fileName);
-                    }
-                },
-                () => {
-                    if (file.local.can_be_downloaded){
-                        FileController.getRemoteFile(file.id, 1, message);
-                    }
-                });
-            return;
-        }
-
-        if (file.local.can_be_downloaded){
-            FileController.getRemoteFile(file.id, 1, message);
-        }
-    }
+    };
 
     handleSelectUser = (userId) => {
         const { onSelectUser } = this.props;
+        if (!onSelectUser) return;
 
-        const user = UserStore.get(userId);
-        if (!user) return;
-
-        onSelectUser(user);
+        onSelectUser(userId);
     };
 
     handleSelectChat = () => {
@@ -261,7 +214,7 @@ class MessageControl extends Component{
     };
 
     render(){
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, onSelectUser, onSelectChat } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return (<div>[empty message]</div>);
@@ -292,13 +245,14 @@ class MessageControl extends Component{
                     {tileControl}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward && <MessageAuthor chatId={chatId} onSelectChat={this.props.onSelectChat} userId={senderUserId} onSelectUser={this.props.onSelectUser}/>}
+                            {!forward && <MessageAuthor chatId={chatId} onSelectChat={onSelectChat} userId={senderUserId} onSelectUser={onSelectUser}/>}
                             {forward && <div className='message-author'>Forwarded from <a onClick={this.openForward}>{forward}</a></div>}
                             <div className='message-meta'>
+                                <span>&nbsp;</span>
                                 {message.views > 0 &&
                                     <>
                                         <i className='message-views-icon'/>
-                                        <span className='message-views'> {message.views}&nbsp;&nbsp;</span>
+                                        <span className='message-views'>&nbsp;{message.views}&nbsp;&nbsp;</span>
                                     </>
                                 }
                                 {message.edit_date > 0 && <span>edited </span>}

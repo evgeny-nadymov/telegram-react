@@ -23,6 +23,10 @@ class Dialogs extends Component{
         this.onUpdateChatDetailsVisibility = this.onUpdateChatDetailsVisibility.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        return false;
+    }
+
     componentDidMount(){
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
     }
@@ -45,7 +49,7 @@ class Dialogs extends Component{
         return (
             <div className={classNames('dialogs', { 'dialogs-third-column': isChatDetailsVisible })}>
                 <DialogsHeader onClearCache={this.props.onClearCache} onClick={this.handleHeaderClick}/>
-                <DialogsList ref={this.dialogsList} authState={this.props.authState} onSelectChat={this.props.onSelectChat}/>
+                <DialogsList ref={this.dialogsList} onSelectChat={this.props.onSelectChat}/>
                 <UpdatePanel/>
             </div>
         );

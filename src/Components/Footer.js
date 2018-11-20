@@ -9,7 +9,7 @@ import React from 'react';
 import packageJson from '../../package.json';
 import './Footer.css'
 
-class Footer extends React.Component {
+class Footer extends React.PureComponent {
 
     constructor(props){
         super(props);

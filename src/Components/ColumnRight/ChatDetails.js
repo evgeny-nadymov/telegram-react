@@ -30,7 +30,6 @@ import {
     getChatUsername,
     getChatPhoneNumber,
     getChatBio,
-    isChatMuted,
     isGroupChat,
     getGroupChatMembers,
     getChatFullInfo
@@ -47,6 +46,7 @@ import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
+import OptionStore from '../../Stores/OptionStore';
 import FileController from '../../Controllers/FileController';
 import './ChatDetails.css';
 
@@ -67,37 +67,53 @@ class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
 
-        this.chatDetailsList = React.createRef();
+        this.chatDetailsListRef = React.createRef();
 
         const { chatId } = this.props;
-        const chat = ChatStore.get(chatId);
-        const isMuted = isChatMuted(chat);
 
         this.members = new Map();
         this.state = {
-            prevChatId: chatId,
-            isMuted: isMuted,
-            openMore: false
+            prevChatId: chatId
         };
     }
 
     static getDerivedStateFromProps(props, state){
         if (props.chatId !== state.prevChatId){
-            const chat = ChatStore.get(props.chatId);
-            const isMuted = isChatMuted(chat);
 
             return {
-                prevChatId: props.chatId,
-                isMuted: isMuted,
-                openMore: false
+                prevChatId: props.chatId
             }
         }
 
         return null;
     }
 
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        const { chatId } = this.props;
+
+        const list = this.chatDetailsListRef.current;
+        const { scrollTop, scrollHeight, offsetHeight } = list;
+        const snapshot = {
+            scrollTop : scrollTop,
+            scrollHeight : scrollHeight,
+            offsetHeight : offsetHeight
+        };
+
+        console.log(`[ChatDetails] getSnapshotBeforeUpdate chatId=${chatId} scrollTop=${scrollTop} scrollHeight=${scrollHeight} offsetHeight=${offsetHeight}`);
+
+        return snapshot;
+    }
+
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState !== this.state){
+        if (nextProps.chatId !== this.props.chatId){
+            return true;
+        }
+
+        if (nextState.openUsernameHint !== this.state.openUsernameHint){
+            return true;
+        }
+
+        if (nextState.openPhoneHint !== this.state.openPhoneHint){
             return true;
         }
 
@@ -105,10 +121,16 @@ class ChatDetails extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot){
-        if (prevProps.chatId !== this.props.chatId){
+        const { chatId } = this.props;
+        if (prevProps.chatId !== chatId) {
             this.handleSelectChat();
-            // alert(`[ChatInfo] componentDidUpdate new_chat_id=${prevProps.chatId} old_chat_id=${this.props.chatId}`);
         }
+
+        const list = this.chatDetailsListRef.current;
+        const { scrollTop, scrollHeight, offsetHeight } = snapshot;
+        console.log(`[ChatDetails] componentDidUpdate before chatId=${chatId} list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`);
+        list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+        console.log(`[ChatDetails] componentDidUpdate after chatId=${chatId} list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`);
     }
 
     componentDidMount(){
@@ -135,6 +157,7 @@ class ChatDetails extends React.Component {
             && chat.type['@type'] === 'chatTypeBasicGroup'
             && chat.type.basic_group_id === update.basic_group_id){
 
+            console.log('[ChatDetails] onUpdateBasicGroupFullInfo');
             this.handleSelectChat();
 
             this.forceUpdate(); // update bio
@@ -149,6 +172,8 @@ class ChatDetails extends React.Component {
         if (chat.type
             && chat.type['@type'] === 'chatTypeSupergroup'
             && chat.type.supergroup_id === update.supergroup_id){
+
+            console.log('[ChatDetails] onUpdateSupergroupFullInfo');
             this.forceUpdate(); // update bio
         }
     };
@@ -160,12 +185,16 @@ class ChatDetails extends React.Component {
         if (chat.type
             && (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret')
             && chat.type.user_id === update.user_id){
+
+            console.log('[ChatDetails] onUpdateUserFullInfo');
             this.forceUpdate(); // update bio
         }
     };
 
     onUpdateUserStatus = (update) => {
         if (this.members.has(update.user_id)){
+
+            console.log('[ChatDetails] onUpdateUserStatus');
             this.forceUpdate();
         }
     };
@@ -197,7 +226,10 @@ class ChatDetails extends React.Component {
         const username = getChatUsername(chatId);
         if (!username) return;
 
-        copy('https://t.me/' + username);
+        const telegramUrlOption = OptionStore.get('t_me_url');
+        const usernameLink = telegramUrlOption ? telegramUrlOption.value : 'https://telegram.org/';
+
+        copy(usernameLink + username);
 
         this.setState({ openUsernameHint: true, openPhoneHint: false });
     };
@@ -233,12 +265,14 @@ class ChatDetails extends React.Component {
     };
 
     handleHeaderClick = () => {
-        this.chatDetailsList.current.scrollTop = 0;
+        console.log('[ChatDetails] handleHeaderClick');
+        this.chatDetailsListRef.current.scrollTop = 0;
     };
 
     render() {
-        const { chatId, classes, openSharedMedia } = this.props;
+        const { chatId, classes, openSharedMedia, onSelectUser } = this.props;
         const { openUsernameHint, openPhoneHint } = this.state;
+
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
@@ -252,7 +286,6 @@ class ChatDetails extends React.Component {
         const phoneNumber = getChatPhoneNumber(chatId);
         const bio = getChatBio(chatId);
         const isGroup = isGroupChat(chatId);
-
 
         const members = getGroupChatMembers(chatId);
         const users = [];
@@ -268,7 +301,8 @@ class ChatDetails extends React.Component {
         const sortedUsers = users.sort((x, y) => {
             return getUserStatusOrder(y) - getUserStatusOrder(x);
         });
-        const items = sortedUsers.map(user => (<ListItem button key={user.id}><UserControl userId={user.id} onSelectUser={this.props.onSelectUser}/></ListItem>));
+        const items = sortedUsers.map(user => (<ListItem button key={user.id}><UserControl userId={user.id} onSelect={onSelectUser}/></ListItem>));
+        // const items = sortedUsers.map(user => (<div key={user.id} style={{margin: '12px', height: '50px', width: '50px', background: 'red'}}/>));
 
         return (
             <div className='chat-details'>
@@ -276,7 +310,7 @@ class ChatDetails extends React.Component {
                     backButton={this.props.backButton}
                     onClose={this.props.onClose}
                     onClick={this.handleHeaderClick}/>
-                <div ref={this.chatDetailsList} className='chat-details-list'>
+                <div ref={this.chatDetailsListRef} className='chat-details-list'>
                     <div className='chat-details-info'>
                         <ChatControl chatId={chatId}/>
                     </div>

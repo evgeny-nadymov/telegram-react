@@ -413,7 +413,7 @@ function getServiceMessageContent(message, onSelectUser){
         case 'messagePinMessage' : {
             const author = getMessageAuthor(message, onSelectUser);
             const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
-            if (!pinnedMessage){
+            if (!pinnedMessage || !pinnedMessage.content){
                 return (
                     <>
                         {author}

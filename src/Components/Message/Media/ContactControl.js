@@ -36,7 +36,7 @@ class ContactControl extends React.Component {
         return (
             <div className='contact'>
                 <div className='contact-tile'>
-                    <UserTileControl user={user}/>
+                    <UserTileControl userId={user.id}/>
                 </div>
                 <div className='contact-content'>
                     <div className='contact-name'>

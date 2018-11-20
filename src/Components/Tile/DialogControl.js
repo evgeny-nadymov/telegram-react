@@ -6,7 +6,7 @@
  */
 
 import React, {Component} from 'react';
-import ChatTileControl from './/ChatTileControl';
+import ChatTileControl from './ChatTileControl';
 import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
 import DialogTitleControl from './DialogTitleControl';
@@ -54,10 +54,11 @@ class DialogControl extends Component{
     }
 
     handleSelect(){
-        const chat = ChatStore.get(this.props.chatId);
-        if (!chat) return;
+        const { chatId, onSelect } = this.props;
+        if (!chatId) return;
+        if (!onSelect) return;
 
-        this.props.onSelect(chat);
+        onSelect(chatId);
     }
 
     render(){

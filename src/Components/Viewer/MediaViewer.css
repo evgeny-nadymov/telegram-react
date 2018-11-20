@@ -1,0 +1,168 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.media-viewer{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(26, 26, 26, 0.7);
+    display: flex;
+    flex-direction: column;
+}
+
+.media-viewer-wrapper{
+    flex-grow: 1;
+    flex-shrink: 1;
+    display: flex;
+}
+
+.media-viewer-left-column{
+    width: 104px;
+    display: flex;
+    flex-direction: column;
+}
+
+.media-viewer-button{
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.media-viewer-button:hover,
+.media-viewer-button-close:hover,
+.media-viewer-button-save:hover,
+.media-viewer-button-forward:hover,
+.media-viewer-button-delete:hover{
+    opacity: 1;
+    background: rgba(0, 0, 0, .2);
+}
+
+.media-viewer-button-placeholder{
+    height: 104px;
+    width: 100%;
+}
+
+.media-viewer-button-close{
+    width: 100%;
+    height: 104px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+}
+
+.media-viewer-previous-icon{
+    width: 16px;
+    height: 24px;
+    pointer-events: none;
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-position: -12px -41px;
+    background-repeat: no-repeat;
+}
+
+.media-viewer-next-icon{
+    width: 16px;
+    height: 24px;
+    pointer-events: none;
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-position: -14px -75px;
+    background-repeat: no-repeat;
+}
+
+.media-viewer-close-icon{
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-position: -10px -10px;
+    background-repeat: no-repeat;
+}
+
+.media-viewer-content-column{
+    flex-grow: 1;
+    flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.media-viewer-right-column{
+    width: 104px;
+    display: flex;
+    flex-direction: column;
+}
+
+.media-viewer-footer{
+    min-height: 68px;
+    width: 100%;
+    background: #313131;
+    display: flex;
+    flex-direction: row;
+}
+
+.media-viewer-footer-middle-column{
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.media-viewer-footer-commands{
+    display: flex;
+    flex-direction: row;
+}
+
+.media-viewer-button-save,
+.media-viewer-button-forward,
+.media-viewer-button-delete{
+    cursor: pointer;
+    opacity: 0.5;
+    /*padding: 22px 26px;*/
+    height: 100%;
+}
+
+.media-viewer-button-save-icon{
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-repeat: no-repeat;
+    background-position: -12px -163px;
+    width: 16px;
+    height: 20px;
+    margin: 22px 26px;
+}
+
+.media-viewer-button-forward-icon{
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-repeat: no-repeat;
+    background-position: -9px -109px;
+    width: 23px;
+    height: 15px;
+    margin: 24px 22px;
+
+}
+
+.media-viewer-button-delete-icon{
+    background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
+    background-size: 40px 200px;
+    background-repeat: no-repeat;
+    background-position: -13px -135px;
+    width: 14px;
+    height: 18px;
+    margin: 23px 27px;
+}

@@ -114,11 +114,12 @@ class MessageStore extends EventEmitter {
             })
             .then(message => {
                 this.set(message);
-                this.emit('messageLoaded', message);
-                /*for (let i = 0; message.length; i++){
-                    this.set(message[i]);
-                    this.emit('messageLoaded', message[i]);
-                }*/
+                this.emit('getMessageResult', message);
+            })
+            .catch(error => {
+                const deletedMessage = { '@type': 'deletedMessage', chat_id: chatId, id: messageId, content: null };
+                this.set(deletedMessage);
+                this.emit('getMessageResult', deletedMessage);
             });
     }
 
@@ -152,18 +153,6 @@ class MessageStore extends EventEmitter {
         for (let i = 0; i < messages.length; i++){
             this.set(messages[i]);
         }
-    }
-
-    updateMessagePhoto(messageId){
-        this.emit('message_photo_changed', {messageId: messageId});
-    }
-
-    updateMessageSticker(messageId){
-        this.emit('message_sticker_changed', {messageId: messageId});
-    }
-
-    updateMessageDocumentThumbnail(fileId){
-        this.emit('message_document_thumbnail_changed', {fileId: fileId});
     }
 }
 

@@ -108,6 +108,9 @@ class MessagesList extends React.Component {
     }
 
     componentDidMount(){
+        const { chatId } = this.props;
+        this.handleSelectChat(chatId, 0);
+
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
@@ -268,7 +271,7 @@ class MessagesList extends React.Component {
             separatorMessageId = separatorMessageId === Number.MAX_VALUE? 0 : separatorMessageId;
             console.log('[MessagesList] separator_message_id=' + separatorMessageId);
 
-            this.replace(separatorMessageId, result.messages, unread ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+            this.replace(separatorMessageId, result.messages, unread && separatorMessageId ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
 
             // load files
             const store = FileController.getStore();
@@ -507,6 +510,7 @@ class MessagesList extends React.Component {
             const list = this.listRef.current;
             console.log(`SCROLL SCROLL_TO_UNREAD before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
 
+            let scrolled = false;
             for (let i = 0; i < history.length; i++) {
                 let itemComponent = this.itemsMap.get(i);
                 let item = ReactDOM.findDOMNode(itemComponent);
@@ -514,9 +518,14 @@ class MessagesList extends React.Component {
                     console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
                     if (itemComponent.props.showUnreadSeparator) {
                         list.scrollTop = item.offsetTop; // + unread messages margin-top
+                        scrolled = true;
                         break;
                     }
                 }
+            }
+
+            if (!scrolled){
+                this.scrollToBottom();
             }
 
             console.log(`SCROLL SCROLL_TO_UNREAD after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);

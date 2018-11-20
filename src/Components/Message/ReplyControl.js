@@ -6,31 +6,31 @@
  */
 
 import React from 'react';
-import {getTitle} from '../../Utils/Message';
+import { getContent, getTitle } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
 import './ReplyControl.css'
 
 class ReplyControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.handleMessageLoaded = this.handleMessageLoaded.bind(this);
     }
 
     componentDidMount(){
-        MessageStore.on('messageLoaded', this.handleMessageLoaded);
-    }
-
-    handleMessageLoaded(payload) {
-        if (this.props.chatId === payload.chat_id
-            && this.props.messageId === payload.id){
-            this.forceUpdate();
-        }
+        MessageStore.on('getMessageResult', this.onGetMessageResult);
     }
 
     componentWillUnmount(){
-        MessageStore.removeListener('messageLoaded', this.handleMessageLoaded);
+        MessageStore.removeListener('getMessageResult', this.onGetMessageResult);
     }
+
+    onGetMessageResult = (result) => {
+        const { chatId, messageId } = this.props;
+
+        if (chatId === result.chat_id
+            && messageId === result.id){
+            this.forceUpdate();
+        }
+    };
 
     getSubtitle(message){
         if (!message) return 'Loading...';
@@ -50,18 +50,24 @@ class ReplyControl extends React.Component {
         }
     }
 
-    render() {
-        if (!this.props.chatId) return null;
-        if (!this.props.messageId) return null;
+    isDeletedMessage = (message) => {
+        return message && message['@type'] === 'deletedMessage';
+    };
 
-        let message = MessageStore.get(this.props.chatId, this.props.messageId);
-        let title = getTitle(message);
-        let subtitle = this.getSubtitle(message);
+    render() {
+        const { chatId, messageId } = this.props;
+
+        if (!chatId) return null;
+        if (!messageId) return null;
+
+        const message = MessageStore.get(chatId, messageId);
+        const title = this.isDeletedMessage(message)? null : getTitle(message);
+        const subtitle = this.isDeletedMessage(message)? 'Deleted message' : getContent(message);
 
         return (
-            <div className='reply-wrapper'>
+            <div className='reply'>
                 <div className='reply-border'/>
-                <div className='reply-content-wrapper'>
+                <div className='reply-content'>
                     {title && <div className='reply-content-title'>{title}</div>}
                     <div className='reply-content-subtitle'>{subtitle}</div>
                 </div>

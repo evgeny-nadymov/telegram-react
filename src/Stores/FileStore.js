@@ -15,13 +15,12 @@ class FileStore extends EventEmitter {
         this.items = new Map();
         this.blobItems = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
 
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateFile':{
                 this.set(update.file);
@@ -34,7 +33,7 @@ class FileStore extends EventEmitter {
             default:
                 break;
         }
-    }
+    };
 
     get(fileId){
         return this.items.get(fileId);
@@ -51,6 +50,18 @@ class FileStore extends EventEmitter {
     setBlob(fileId, blob){
         this.blobItems.set(fileId, blob);
     }
+
+    updatePhotoBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdatePhotoBlob', { chatId: chatId, messageId: messageId, fileId: fileId });
+    };
+
+    updateStickerBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateStickerBlob', { chatId: chatId, messageId: messageId, fileId: fileId });
+    };
+
+    updateDocumentThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateDocumentThumbnailBlob', { chatId: chatId, messageId: messageId, fileId: fileId });
+    };
 }
 
 const store = new FileStore();

@@ -6,6 +6,7 @@
  */
 
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getUserLetters } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
@@ -97,5 +98,10 @@ class UserTileControl extends Component{
             (<div className={className} onClick={this.handleSelect}><span className='tile-text'>{letters}</span></div>);
     }
 }
+
+UserTileControl.propTypes = {
+    userId : PropTypes.number.isRequired,
+    onSelect : PropTypes.func
+};
 
 export default UserTileControl;

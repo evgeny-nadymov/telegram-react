@@ -6,56 +6,51 @@
  */
 
 import React from 'react';
-import MessageStore from '../../Stores/MessageStore';
+import classNames from 'classnames';
+import FileStore from '../../Stores/FileStore';
 import './DocumentTileControl.css';
 
 class DocumentTileControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.onPhotoUpdated = this.onPhotoUpdated.bind(this);
     }
 
-     shouldComponentUpdate(nextProps, nextState){
-    //     if (nextProps.document !== this.props.document
-    //         || nextProps.document.document !== this.props.document.document
-    //         ){
-    //         return true;
-    //     }
-
-        return true;
-    }
-
-    componentWillMount(){
-        MessageStore.on('message_document_thumbnail_changed', this.onPhotoUpdated);
-    }
-
-    onPhotoUpdated(payload) {
-        if (this.props.document
-            && this.props.document.thumbnail
-            && this.props.document.thumbnail.photo
-            && this.props.document.thumbnail.photo.id === payload.fileId){
-            this.forceUpdate();
-        }
+    componentDidMount(){
+        FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     componentWillUnmount(){
-        MessageStore.removeListener('message_document_thumbnail_changed', this.onPhotoUpdated);
+        FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
+    onClientUpdateDocumentThumbnailBlob = (update) => {
+        const { document } = this.props;
+        if (!document) return;
+
+        const { thumbnail } = document;
+        if (!thumbnail) return;
+
+        const file = thumbnail.photo;
+        if (!file) return;
+
+        const { fileId } = update;
+
+        if (file.id === fileId) {
+            this.forceUpdate();
+        }
+    };
 
     render() {
-        const document = this.props.document;
+        const { document, showProgress } = this.props;
         if (!document) return null;
 
-        let blob =
-            document.thumbnail
-            && document.thumbnail.photo
-            && document.thumbnail.photo.blob? document.thumbnail.photo.blob : null;
+        const { thumbnail } = document;
 
-        let iconClassName =
-            document.document && document.document.idb_key
-            || document.document.local && document.document.local.is_downloading_completed
+        const blob = thumbnail && thumbnail.photo? thumbnail.photo.blob : null;
+
+        const file = document.document;
+
+        let iconClassName = file && file.idb_key || file.local && file.local.is_downloading_completed
             ? 'document-tile-save-icon'
             : 'document-tile-download-icon';
 
@@ -69,17 +64,17 @@ class DocumentTileControl extends React.Component {
             console.log(`DocumentTileControl.render document_id=${document.id} with error ${error}`);
         }
 
-        let photoClasses = 'tile-photo';
-        if (!blob){
-            photoClasses += ` document-tile-background`;
-        }
+        const className = classNames(
+            'tile-photo',
+            {'document-tile-background': !blob}
+        );
 
         return src ?
-            (<img className={photoClasses} src={src} draggable={false} alt=''/>) :
-            (<div className={photoClasses}>
-                { !this.props.showProgress && <i className={iconClassName}/> }
+            (<img className={className} src={src} draggable={false} alt=''/>) :
+            (<div className={className}>
+                { !showProgress && <i className={iconClassName}/> }
                 {
-                    this.props.showProgress &&
+                    showProgress &&
                     <svg className='document-tile-cancel'>
                         <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
                         <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>

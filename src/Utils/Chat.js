@@ -5,18 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import UserStore from '../Stores/UserStore';
-import ChatStore from '../Stores/ChatStore';
-import BasicGroupStore from '../Stores/BasicGroupStore';
-import SupergroupStore from '../Stores/SupergroupStore';
-import ApplicationStore from '../Stores/ApplicationStore';
+import React from 'react';
 import dateFormat from 'dateformat';
 import {getUserStatus, isAccentUserSubtitle} from './User';
 import {getSupergroupStatus} from './Supergroup';
 import {getBasicGroupStatus} from './BasicGroup';
 import {getLetters} from './Common';
-import { getServiceMessageContent, isServiceMessage } from './ServiceMessage';
-import React from 'react';
+import {getContent} from './Message';
+import {isServiceMessage} from './ServiceMessage';
+import UserStore from '../Stores/UserStore';
+import ChatStore from '../Stores/ChatStore';
+import BasicGroupStore from '../Stores/BasicGroupStore';
+import SupergroupStore from '../Stores/SupergroupStore';
+import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
 
 function getGroupChatTypingString(inputTypingManager){
@@ -198,137 +199,11 @@ function getLastMessageSenderName(chat){
 
 function getLastMessageContent(chat){
     if (!chat) return '[chat undefined]';
-    if (!chat.last_message) return null;
-    const content = chat.last_message.content;
-    if (!content) return null;
 
-    let caption = '';
-    if (content.caption && content.caption.text){
-        caption = `, ${content.caption.text}`;
-    }
+    const { last_message } = chat;
+    if (!last_message) return null;
 
-    switch (content['@type']) {
-        case 'messageAnimation': {
-            return 'GIF' + caption;
-        }
-        case 'messageAudio': {
-            return 'Audio' + caption;
-        }
-        case 'messageBasicGroupChatCreate': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageCall': {
-            return 'Call' + caption;
-        }
-        case 'messageChatAddMembers': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatChangePhoto': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatChangeTitle': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatDeleteMember': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatDeletePhoto': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatJoinByLink': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatSetTtl': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatUpgradeFrom': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageChatUpgradeTo': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageContact': {
-            return 'Contact' + caption;
-        }
-        case 'messageContactRegistered': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageCustomServiceAction': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageDocument':{
-            return 'Document' + caption;
-        }
-        case 'messageExpiredPhoto':{
-            return 'Photo' + caption;
-        }
-        case 'messageExpiredVideo':{
-            return 'Video' + caption;
-        }
-        case 'messageGame': {
-            return 'Game' + caption;
-        }
-        case 'messageGameScore': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageInvoice': {
-            return 'Invoice' + caption;
-        }
-        case 'messageLocation': {
-            return 'Location' + caption;
-        }
-        case 'messagePassportDataReceived': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messagePassportDataSent': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messagePaymentSuccessful': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messagePaymentSuccessfulBot': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messagePhoto': {
-            return 'Photo' + caption;
-        }
-        case 'messagePinMessage': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageScreenshotTaken': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageSticker': {
-            return 'Sticker' + caption;
-        }
-        case 'messageSupergroupChatCreate': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageText': {
-            return content.text.text + caption;
-        }
-        case 'messageUnsupported': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        case 'messageVenue': {
-            return 'Venue' + caption;
-        }
-        case 'messageVideo': {
-            return 'Video' + caption;
-        }
-        case 'messageVideoNote': {
-            return 'Video message' + caption;
-        }
-        case 'messageVoiceNote': {
-            return 'Voice message' + caption;
-        }
-        case 'messageWebsiteConnected': {
-            return getServiceMessageContent(chat.last_message);
-        }
-        default: {
-            return `[${content['@type']}]`;
-        }
-    }
+    return getContent(last_message);
 }
 
 function getChatUnreadMessageIcon(chat){

@@ -8,14 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {getFitSize} from '../../../Utils/Common';
-import MessageStore from '../../../Stores/MessageStore';
+import FileStore from '../../../Stores/FileStore';
 import './StickerControl.css';
 
 class StickerControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.onStickerUpdated = this.onStickerUpdated.bind(this);
     }
 
     /*shouldComponentUpdate(nextProps, nextState){
@@ -26,27 +24,41 @@ class StickerControl extends React.Component {
         return false;
     }*/
 
-    componentWillMount(){
-        MessageStore.on('message_sticker_changed', this.onStickerUpdated);
-    }
-
-    onStickerUpdated(payload) {
-        if (this.props.message && this.props.message.id === payload.messageId){
-            this.forceUpdate();
-        }
+    componentDidMount(){
+        FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
     componentWillUnmount(){
-        MessageStore.removeListener('message_sticker_changed', this.onStickerUpdated);
+        FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
+    onClientUpdateStickerBlob = (update) => {
+        const { message } = this.props;
+        if (!message) return;
+        const { chatId, messageId } = update;
+
+        if (message.chat_id === chatId
+            && message.id === messageId) {
+            this.forceUpdate();
+        }
+    };
+
     render() {
-        let file = this.props.message.content.sticker.sticker;
+        const { message } = this.props;
+        if (!message) return null;
+
+        const { content } = message;
+        if (!content) return null;
+
+        const { sticker } = content;
+        if (!sticker) return null;
+
+        let file = sticker.sticker;
         if (!file) return null;
 
         let size = {
-            width: this.props.message.content.sticker.width,
-            height: this.props.message.content.sticker.height
+            width: sticker.width,
+            height: sticker.height
         };
 
         let fitSize = getFitSize(size, 192);

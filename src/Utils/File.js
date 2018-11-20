@@ -5,11 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {getPhotoSize} from './Common';
+import { getPhotoSize, getSize } from './Common';
+import { PHOTO_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
-import FileController from '../Controllers/FileController';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
+import FileController from '../Controllers/FileController';
+import FileStore from '../Stores/FileStore';
 
 function getChatPhoto(chat) {
     if (chat['@type'] !== 'chat') {
@@ -106,7 +108,7 @@ function getPhotoPreviewFile(message) {
     return [0, '', ''];
 }
 
-function getPhotoFile(message) {
+function getPhotoFile(message, size = PHOTO_SIZE) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
     }
@@ -116,7 +118,7 @@ function getPhotoFile(message) {
     }
 
     if (message.content.photo) {
-        let photoSize = getPhotoSize(message.content.photo.sizes);
+        let photoSize = getSize(message.content.photo.sizes, size);
         if (photoSize && photoSize['@type'] === 'photoSize'){
             let file = photoSize.photo;
             if (file && file.remote.id) {
@@ -273,15 +275,15 @@ function loadMessageContents(store, messages){
                             }
                         }*/
 
-                        let [id, pid, idb_key] = getPhotoFile(message);
+                        const [id, pid, idb_key] = getPhotoFile(message);
                         if (pid) {
-                            let photoSize = getPhotoSize(message.content.photo.sizes);
+                            const photoSize = getPhotoSize(message.content.photo.sizes);
                             if (photoSize){
                                 let obj = photoSize.photo;
                                 if (!obj.blob){
                                     let localMessage = message;
                                     FileController.getLocalFile(store, obj, idb_key, null,
-                                        () => MessageStore.updateMessagePhoto(localMessage.id),
+                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
                                         () => FileController.getRemoteFile(id, 1, localMessage));
                                 }
                             }
@@ -289,13 +291,13 @@ function loadMessageContents(store, messages){
                         break;
                     }
                     case 'messageSticker': {
-                        let [id, pid, idb_key] = getStickerFile(message);
+                        const [id, pid, idb_key] = getStickerFile(message);
                         if (pid) {
-                            let obj = message.content.sticker.sticker;
+                            const obj = message.content.sticker.sticker;
                             if (!obj.blob){
                                 let localMessage = message;
                                 FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => MessageStore.updateMessageSticker(localMessage.id),
+                                    () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
                                     () => FileController.getRemoteFile(id, 1, localMessage));
                             }
                         }
@@ -320,13 +322,13 @@ function loadMessageContents(store, messages){
                         break;
                     }
                     case 'messageDocument': {
-                        let [id, pid, idb_key] = getDocumentThumbnailFile(message);
+                        const [id, pid, idb_key] = getDocumentThumbnailFile(message);
                         if (pid) {
-                            let obj = message.content.document.thumbnail.photo;
+                            const obj = message.content.document.thumbnail.photo;
                             if (!obj.blob){
-                                let localMessage = message;
+                                const localMessage = message;
                                 FileController.getLocalFile(store, obj, idb_key, null,
-                                    () => MessageStore.updateMessageDocumentThumbnail(obj.id),
+                                    () => FileStore.updateDocumentThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
                                     () => FileController.getRemoteFile(id, 1, localMessage));
                             }
                         }
@@ -343,6 +345,67 @@ function loadMessageContents(store, messages){
     loadUserPhotos(store, [...users.keys()]);
 }
 
+function saveOrDownload(file, fileName, message){
+    if (!file) return;
+    if (!fileName) return;
+
+    if (file.arr) {
+        saveData(file.arr, fileName);
+        return;
+    }
+
+    if (file.blob){
+        saveBlob(file.blob, fileName);
+        return;
+    }
+
+    if (file.idb_key){
+        let store = FileController.getStore();
+
+        FileController.getLocalFile(store, file, file.idb_key, null,
+            () => {
+                if (file.blob){
+                    saveBlob(file.blob, fileName);
+                }
+            },
+            () => {
+                if (file.local.can_be_downloaded){
+                    FileController.getRemoteFile(file.id, 1, message);
+                }
+            });
+        return;
+    }
+
+    if (file.local.can_be_downloaded){
+        FileController.getRemoteFile(file.id, 1, message);
+    }
+}
+
+
+
+function getMediaFile(chatId, messageId, size){
+    if (!size) return null;
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messagePhoto': {
+            const { photo } = content;
+            if (photo){
+                const photoSize = getSize(photo.sizes, size);
+                if (photoSize){
+                    return [photoSize.width, photoSize.height, photoSize.photo];
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
 export {
     getUserPhoto,
     getChatPhoto,
@@ -355,5 +418,7 @@ export {
     saveBlob,
     loadUserPhotos,
     loadChatPhotos,
-    loadMessageContents
+    loadMessageContents,
+    saveOrDownload,
+    getMediaFile
 };

@@ -16,6 +16,7 @@ import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import dateFormat from "dateformat";
 import { getUserFullName } from './User';
+import { getServiceMessageContent } from './ServiceMessage';
 
 function getTitle(message){
     if (!message) return null;
@@ -253,9 +254,145 @@ function filterMessages(result, history){
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
+function getContent(message){
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    let caption = '';
+    if (content.caption && content.caption.text){
+        caption = `, ${content.caption.text}`;
+    }
+
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            return 'GIF' + caption;
+        }
+        case 'messageAudio': {
+            return 'Audio' + caption;
+        }
+        case 'messageBasicGroupChatCreate': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageCall': {
+            return 'Call' + caption;
+        }
+        case 'messageChatAddMembers': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatChangePhoto': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatChangeTitle': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatDeleteMember': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatDeletePhoto': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatJoinByLink': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatSetTtl': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatUpgradeFrom': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageChatUpgradeTo': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageContact': {
+            return 'Contact' + caption;
+        }
+        case 'messageContactRegistered': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageCustomServiceAction': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageDocument':{
+            return 'Document' + caption;
+        }
+        case 'messageExpiredPhoto':{
+            return 'Photo' + caption;
+        }
+        case 'messageExpiredVideo':{
+            return 'Video' + caption;
+        }
+        case 'messageGame': {
+            return 'Game' + caption;
+        }
+        case 'messageGameScore': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageInvoice': {
+            return 'Invoice' + caption;
+        }
+        case 'messageLocation': {
+            return 'Location' + caption;
+        }
+        case 'messagePassportDataReceived': {
+            return getServiceMessageContent(message);
+        }
+        case 'messagePassportDataSent': {
+            return getServiceMessageContent(message);
+        }
+        case 'messagePaymentSuccessful': {
+            return getServiceMessageContent(message);
+        }
+        case 'messagePaymentSuccessfulBot': {
+            return getServiceMessageContent(message);
+        }
+        case 'messagePhoto': {
+            return 'Photo' + caption;
+        }
+        case 'messagePinMessage': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageScreenshotTaken': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageSticker': {
+            return 'Sticker' + caption;
+        }
+        case 'messageSupergroupChatCreate': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageText': {
+            return content.text.text + caption;
+        }
+        case 'messageUnsupported': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageVenue': {
+            return 'Venue' + caption;
+        }
+        case 'messageVideo': {
+            return 'Video' + caption;
+        }
+        case 'messageVideoNote': {
+            return 'Video message' + caption;
+        }
+        case 'messageVoiceNote': {
+            return 'Voice message' + caption;
+        }
+        case 'messageWebsiteConnected': {
+            return getServiceMessageContent(message);
+        }
+        default: {
+            return `[${content['@type']}]`;
+        }
+    }
+}
+
 export {
     getTitle,
     getText,
+    getContent,
     getDate,
     getDateHint,
     getMedia,

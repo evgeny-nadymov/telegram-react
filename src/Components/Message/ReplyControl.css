@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.reply-wrapper{
+.reply{
     margin-bottom: 5px;
     margin-top: 2px;
     display: flex;
@@ -19,7 +19,7 @@
     min-width: 2px;
 }
 
-.reply-content-wrapper{
+.reply-content{
     margin-left: 12px;
     flex-grow: 1;
     flex-shrink: 1;
@@ -35,7 +35,7 @@
 }
 
 .reply-content-subtitle{
-    color: #70777b;
+    color: #70777B;
     font-size: 14px;
     overflow: hidden;
     white-space: nowrap;

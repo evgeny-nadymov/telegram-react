@@ -20,15 +20,13 @@ class MessageAuthor extends React.Component {
     handleSelect = () => {
         const { chatId, userId, onSelectUser, onSelectChat } = this.props;
 
-        const user = UserStore.get(userId);
-        if (user){
-            onSelectUser(user);
+        if (onSelectUser){
+            onSelectUser(userId);
             return;
         }
 
-        const chat = ChatStore.get(chatId);
-        if (chat){
-            onSelectChat(chat);
+        if (onSelectChat){
+            onSelectChat(chatId);
             return;
         }
     };

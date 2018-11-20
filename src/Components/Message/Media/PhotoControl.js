@@ -5,12 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, {Fragment} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress';
 import {getSize, getFitSize} from '../../../Utils/Common';
 import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../../Constants';
-import MessageStore from '../../../Stores/MessageStore';
+import FileStore from '../../../Stores/FileStore';
 import FileController from '../../../Controllers/FileController';
 import './PhotoControl.css';
 
@@ -20,36 +20,6 @@ const circleStyle = { circle: 'photo-progress-circle' };
 class PhotoControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.onPhotoUpdated = this.onPhotoUpdated.bind(this);
-        this.onProgressUpdated = this.onProgressUpdated.bind(this);
-    }
-
-    componentWillMount(){
-        this.mount = true;
-        FileController.on('file_update', this.onProgressUpdated);
-        FileController.on('file_upload_update', this.onProgressUpdated);
-        MessageStore.on('message_photo_changed', this.onPhotoUpdated)
-    }
-
-    onProgressUpdated(payload) {
-        if (this.photoSize
-            && this.photoSize.photo
-            && this.photoSize.photo.id === payload.id){
-
-            payload.blob = this.photoSize.photo.blob;
-            this.photoSize.photo = payload;
-            this.payload = payload;
-
-            this.forceUpdate();
-        }
-    }
-
-    componentWillUnmount(){
-        FileController.removeListener('file_upload_update', this.onProgressUpdated);
-        FileController.removeListener('file_update', this.onProgressUpdated);
-        MessageStore.removeListener('message_photo_changed', this.onPhotoUpdated);
-        this.mount = false;
     }
 
     /*shouldComponentUpdate(nextProps, nextState){
@@ -60,17 +30,57 @@ class PhotoControl extends React.Component {
         return false;
     }*/
 
-    onPhotoUpdated(payload) {
-        if (this.props.message && this.props.message.id === payload.messageId){
-            this.forceUpdate();
-        }
+    componentDidMount() {
+        this.mount = true;
+        FileController.on('file_update', this.onProgressUpdated);
+        FileController.on('file_upload_update', this.onProgressUpdated);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob)
     }
 
+    componentWillUnmount() {
+        FileController.removeListener('file_upload_update', this.onProgressUpdated);
+        FileController.removeListener('file_update', this.onProgressUpdated);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        this.mount = false;
+    }
+
+    onProgressUpdated = (payload) => {
+        if (this.photoSize
+            && this.photoSize.photo
+            && this.photoSize.photo.id === payload.id){
+
+            payload.blob = this.photoSize.photo.blob;
+            this.photoSize.photo = payload;
+            this.payload = payload;
+
+            this.forceUpdate();
+        }
+    };
+
+    onClientUpdatePhotoBlob = (update) => {
+        const { message } = this.props;
+        if (!message) return;
+        const { chatId, messageId } = update;
+
+        if (message.chat_id === chatId
+            && message.id === messageId) {
+            this.forceUpdate();
+        }
+    };
+
     render() {
-        this.photoSize = !this.photoSize ? getSize(this.props.message.content.photo.sizes, PHOTO_SIZE) : this.photoSize;
+        let { size, displaySize, openMedia } = this.props;
+        if (!size) {
+            size = PHOTO_SIZE;
+        }
+        if (!displaySize) {
+            displaySize = PHOTO_DISPLAY_SIZE;
+        }
+
+        this.photoSize = !this.photoSize ? getSize(this.props.message.content.photo.sizes, size) : this.photoSize;
         if (!this.photoSize) return null;
 
-        let fitPhotoSize = getFitSize(this.photoSize, PHOTO_DISPLAY_SIZE);
+        let fitPhotoSize = getFitSize(this.photoSize, displaySize);
         if (!fitPhotoSize) return null;
 
         let file = this.photoSize.photo;
@@ -145,7 +155,7 @@ class PhotoControl extends React.Component {
         this.isUploadingActive = isUploadingActive;
 
         return (
-                <div className='photo-wrapper' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}}>
+                <div className='photo-wrapper' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}} onClick={openMedia}>
                     <img className={className} width={fitPhotoSize.width} height={fitPhotoSize.height} src={src} alt=''/>
                     {
                         showProgress &&
@@ -157,7 +167,7 @@ class PhotoControl extends React.Component {
                                 <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
                                 <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>
                             </svg>
-                            <div className='photo-progress' onClick={this.props.openMedia}>
+                            <div className='photo-progress'>
                                 <CircularProgress classes={circleStyle} variant='static' value={progress} size={42} thickness={3} />
                             </div>
                         </>

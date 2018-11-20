@@ -16,6 +16,7 @@ class ApplicationStore extends EventEmitter{
         this.authorizationState = null;
         this.connectionState = null;
         this.isChatDetailsVisible = false;
+        this.mediaViewerContent = null;
 
         this.onUpdate = this.onUpdate.bind(this);
         TdLibController.on('tdlib_update', this.onUpdate);
@@ -26,6 +27,11 @@ class ApplicationStore extends EventEmitter{
     changeChatDetailsVisibility(visibility){
         this.isChatDetailsVisible = visibility;
         this.emit('clientUpdateChatDetailsVisibility', visibility);
+    }
+
+    setMediaViewerContent(content){
+        this.mediaViewerContent = content;
+        this.emit('clientUpdateMediaViewerContent', content);
     }
 
     onUpdate(update){

@@ -6,8 +6,6 @@
  */
 
 import {EventEmitter} from 'events';
-import {getPhotoSize} from '../Utils/Common';
-import {getDocumentThumbnailFile} from '../Utils/File';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import MessageStore from '../Stores/MessageStore';
@@ -86,23 +84,26 @@ class FileController extends EventEmitter{
                                         }*/
 
                                         // regular
-                                        let photoSize = getPhotoSize(obj.content.photo.sizes);
-                                        if (photoSize)
-                                        {
-                                            let source = photoSize.photo;
-                                            if (source && source.id === file.id){
-                                                this.getLocalFile(store, source, idb_key, file.arr,
-                                                    () => MessageStore.updateMessagePhoto(obj.id),
-                                                    () => { });
+                                        for (let i = 0; i < obj.content.photo.sizes.length; i++){
+                                            let photoSize = obj.content.photo.sizes[i];
+                                            if (photoSize)
+                                            {
+                                                let source = photoSize.photo;
+                                                if (source && source.id === file.id){
+                                                    this.getLocalFile(store, source, idb_key, file.arr,
+                                                        () => FileStore.updatePhotoBlob(obj.chat_id, obj.id, file.id),
+                                                        () => { });
+                                                }
                                             }
                                         }
+
                                         break;
                                     case 'messageSticker':{
 
                                         let source = obj.content.sticker.sticker;
                                         if (source && source.id === file.id){
                                             this.getLocalFile(store, source, idb_key, file.arr,
-                                                () => MessageStore.updateMessageSticker(obj.id),
+                                                () => FileStore.updateStickerBlob(obj.chat_id, obj.id, file.id),
                                                 () => this.getRemoteFile(file.id, 1, obj));
                                         }
                                         break;
@@ -112,7 +113,7 @@ class FileController extends EventEmitter{
                                             let source = obj.content.document.thumbnail.photo;
                                             if (source && source.id === file.id){
                                                 this.getLocalFile(store, source, idb_key, file.arr,
-                                                    () => MessageStore.updateMessageDocumentThumbnail(source.id),
+                                                    () => FileStore.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj));
                                             }
                                         }
@@ -186,7 +187,7 @@ class FileController extends EventEmitter{
 
     openDB(){
         return new Promise((resolve, reject) =>{
-            let request = window.indexedDB.open('/tdlib');
+            const request = window.indexedDB.open('/tdlib');
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
@@ -196,34 +197,39 @@ class FileController extends EventEmitter{
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
-    getLocalFile(store, obj, idb_key, arr, callback, faultCallback) {
+    getLocalFile(store, file, idb_key, arr, callback, faultCallback) {
         if (!idb_key){
             faultCallback();
             return;
         }
 
         if (arr){
-            obj.blob = new Blob([arr]);
-
+            file.blob = new Blob([arr]);
+            FileStore.setBlob(file.id, file.blob);
             callback();
             return;
         }
 
-        if (obj.blob){
+        if (file.blob){
+            //callback();
             return;
         }
 
-        let getItem = store.get(idb_key);
-        getItem.onsuccess = function (event) {
-            let blob = event.target.result;
+        const request = store.get(idb_key);
+        request.onsuccess = (event) => {
+            const blob = event.target.result;
 
             if (blob){
-                obj.blob = blob;
+                file.blob = blob;
+                FileStore.setBlob(file.id, file.blob);
                 callback();
             }
             else{
                 faultCallback();
             }
+        };
+        request.onerror = () => {
+            faultCallback();
         };
     }
 
@@ -254,8 +260,7 @@ class FileController extends EventEmitter{
             let items = this.uploads.get(fileId);
             items.push(obj);
         }
-        else
-        {
+        else{
             this.uploads.set(fileId, [obj]);
         }
 
