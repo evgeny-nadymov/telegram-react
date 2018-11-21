@@ -14,13 +14,11 @@ class MessageStore extends EventEmitter {
 
         this.items = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        TdLibController.on('tdlib_update', this.onUpdate);
-
+        this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateNewMessage':
                 this.set(update.message);
@@ -103,7 +101,15 @@ class MessageStore extends EventEmitter {
             default:
                 break;
         }
-    }
+    };
+
+    addTdLibListener = () => {
+        TdLibController.addListener('tdlib_update', this.onUpdate);
+    };
+
+    removeTdLibListener = () => {
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    };
 
     load(chatId, messageId){
         TdLibController

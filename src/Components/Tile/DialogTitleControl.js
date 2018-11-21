@@ -24,15 +24,23 @@ class DialogTitleControl extends React.Component {
     }
 
     componentDidMount(){
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatTitle', this.onUpdate);
     }
 
     componentWillUnmount(){
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatTitle', this.onUpdate);
     }
 
+    onFastUpdatingComplete = (update) => {
+        this.forceUpdate();
+    };
+
     onUpdate = (update) => {
-        if (update.chat_id !== this.props.chatId) return;
+        const { chatId } = this.props;
+
+        if (update.chat_id !== chatId) return;
 
         this.forceUpdate();
     };
@@ -41,6 +49,8 @@ class DialogTitleControl extends React.Component {
         const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+
         const title = getChatTitle(chat);
 
         return (<div className='dialog-title'>{title}</div>);

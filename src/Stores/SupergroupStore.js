@@ -15,13 +15,11 @@ class SupergroupStore extends EventEmitter{
         this.items = new Map();
         this.fullInfoItems = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        TdLibController.on('tdlib_update', this.onUpdate);
-
+        this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateSupergroup':
                 this.set(update.supergroup);
@@ -36,7 +34,15 @@ class SupergroupStore extends EventEmitter{
             default:
                 break;
         }
-    }
+    };
+
+    addTdLibListener = () => {
+        TdLibController.addListener('tdlib_update', this.onUpdate);
+    };
+
+    removeTdLibListener = () => {
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    };
 
     get(id){
         return this.items.get(id);
@@ -56,5 +62,5 @@ class SupergroupStore extends EventEmitter{
 }
 
 const store = new SupergroupStore();
-
+window.supergroup = store;
 export default store;

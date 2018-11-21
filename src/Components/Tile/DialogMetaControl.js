@@ -13,8 +13,6 @@ import './DialogMetaControl.css';
 class DialogMetaControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.onUpdate = this.onUpdate.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -26,25 +24,39 @@ class DialogMetaControl extends React.Component {
     }
 
     componentWillMount(){
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
+        ChatStore.on('updateChatReadInbox', this.onUpdate);
+        ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.on('updateMessageMentionRead', this.onUpdate);
     }
 
     componentWillUnmount(){
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
+        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
+        ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
     }
 
-    onUpdate(update) {
-        if (!this.props.chatId) return;
-        if (this.props.chatId !== update.chat_id) return;
+    onFastUpdatingComplete = (update) => {
+        this.forceUpdate();
+    };
+
+    onUpdate = (update) => {
+        const { chatId } = this.props;
+
+        if (chatId !== update.chat_id) return;
 
         this.forceUpdate();
-    }
+    };
 
     render() {
-        const chat = ChatStore.get(this.props.chatId);
+        const { chatId } = this.props;
 
+        const chat = ChatStore.get(chatId);
         const date = getLastMessageDate(chat);
 
         return (

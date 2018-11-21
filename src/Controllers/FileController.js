@@ -63,7 +63,7 @@ class FileController extends EventEmitter{
                                 let source = obj.profile_photo.small;
                                 if (source && source.id === file.id){
                                     this.getLocalFile(store, source, idb_key, file.arr,
-                                        () => UserStore.updatePhoto(obj.id),
+                                        () => FileStore.updateUserPhotoBlob(obj.id, file.id),
                                         () => this.getRemoteFile(file.id, 1));
                                 }
 
@@ -98,8 +98,7 @@ class FileController extends EventEmitter{
                                         }
 
                                         break;
-                                    case 'messageSticker':{
-
+                                    case 'messageSticker': {
                                         let source = obj.content.sticker.sticker;
                                         if (source && source.id === file.id){
                                             this.getLocalFile(store, source, idb_key, file.arr,
@@ -117,6 +116,7 @@ class FileController extends EventEmitter{
                                                     () => this.getRemoteFile(file.id, 1, obj));
                                             }
                                         }
+
                                         if (obj.content.document.document){
                                             let source = obj.content.document.document;
                                             if (source && source.id === file.id){

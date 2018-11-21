@@ -21,19 +21,6 @@ import './DialogBadgeControl.css';
 class DialogBadgeControl extends React.Component {
     constructor(props){
         super(props);
-
-        // const chat = ChatStore.get(this.props.chatId);
-        // this.state = {
-        //     isPinned : chat.is_pinned,
-        //     lastMessage : chat.last_message,
-        //     notificationSettings : chat.notification_settings,
-        //     isMarkedAsUnread : chat.is_marked_as_unread,
-        //     unreadCount : chat.unread_count,
-        //     unreadMentionCount : chat.unread_mention_count
-        // };
-
-        this.onUpdate = this.onUpdate.bind(this);
-        this.onUpdateScopeNotificationSettings = this.onUpdateScopeNotificationSettings.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -45,6 +32,7 @@ class DialogBadgeControl extends React.Component {
     }
 
     componentDidMount(){
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatNotificationSettings', this.onUpdate);
@@ -55,6 +43,7 @@ class DialogBadgeControl extends React.Component {
     }
 
     componentWillUnmount(){
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
@@ -64,15 +53,22 @@ class DialogBadgeControl extends React.Component {
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
-    onUpdate(update){
-        if (!update.chat_id) return;
-        if (update.chat_id !== this.props.chatId) return;
+    onFastUpdatingComplete = (update) => {
+        this.forceUpdate();
+    };
+
+    onUpdate = (update) => {
+        const { chatId } = this.props;
+
+        if (update.chat_id !== chatId) return;
 
         this.forceUpdate();
-    }
+    };
 
-    onUpdateScopeNotificationSettings(update){
-        const chat = ChatStore.get(this.props.chatId);
+    onUpdateScopeNotificationSettings = (update) => {
+        const { chatId } = this.props;
+
+        const chat = ChatStore.get(chatId);
         if (!chat) return;
 
         switch (update.scope['@type']) {
@@ -91,10 +87,13 @@ class DialogBadgeControl extends React.Component {
                 break;
             }
         }
-    }
+    };
 
     render() {
-        const chat = ChatStore.get(this.props.chatId);
+        const { chatId } = this.props;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
 
         const unreadMessageIcon = getChatUnreadMessageIcon(chat);
         const unreadCount = getChatUnreadCount(chat);

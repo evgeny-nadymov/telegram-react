@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { getUserLetters } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
 import './UserTileControl.css';
 
 class UserTileControl extends Component{
@@ -27,35 +28,63 @@ class UserTileControl extends Component{
     }
 
     componentWillMount(){
-        UserStore.on('user_photo_changed', this.onPhotoUpdated);
-        // ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
 
     }
 
     componentWillUnmount(){
-        UserStore.removeListener('user_photo_changed', this.onPhotoUpdated);
-        // ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
     }
 
-    onPhotoUpdated = (payload) => {
-        if (this.props.userId === payload.userId){
+    onClientUpdatePhotoBlob = (update) => {
+        const { userId } = this.props;
+
+        if (userId === update.userId) {
             this.forceUpdate();
         }
     };
 
-    onUpdateChatPhoto = (update) => {
-        let chat = ChatStore.get(update.chat_id);
-        if (chat && chat.type){
-            switch (chat.type['@type']) {
-                case 'chatTypeBasicGroup' :
-                case 'chatTypeSupergroup' : {
-                    return;
+    onClientUpdateChatBlob = (update) => {
+        const { userId } = this.props;
+
+        const chat = ChatStore.get(update.chatId);
+        if (!chat) return;
+        if (!chat.type) return;
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup' :
+            case 'chatTypeSupergroup' : {
+                return;
+            }
+            case 'chatTypePrivate' :
+            case 'chatTypeSecret' : {
+                if (chat.type.user_id === userId){
+                    this.forceUpdate();
                 }
-                case 'chatTypePrivate' :
-                case 'chatTypeSecret' : {
-                    if (chat.type.user_id === this.props.userId){
-                        this.forceUpdate();
-                    }
+            }
+        }
+    };
+
+    onUpdateChatPhoto = (update) => {
+        const { userId } = this.props;
+
+        const chat = ChatStore.get(update.chat_id);
+        if (!chat) return;
+        if (!chat.type) return;
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup' :
+            case 'chatTypeSupergroup' : {
+                return;
+            }
+            case 'chatTypePrivate' :
+            case 'chatTypeSecret' : {
+                if (chat.type.user_id === userId){
+                    this.forceUpdate();
                 }
             }
         }

@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import {getChatLetters} from '../../Utils/Chat';
 import {getChatPhoto} from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
 import FileController from '../../Controllers/FileController';
 import './ChatTileControl.css';
 
@@ -27,18 +28,25 @@ class ChatTileControl extends Component{
     }
 
     componentDidMount(){
-        ChatStore.on('chat_photo_changed', this.onPhotoUpdated);
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener('chat_photo_changed', this.onPhotoUpdated);
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
     }
 
-    onPhotoUpdated = (payload) => {
-        if (this.props.chatId
-            && this.props.chatId === payload.chatId){
+    onFastUpdatingComplete = (update) => {
+        this.forceUpdate();
+    };
+
+    onClientUpdateChatBlob = (update) => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chatId){
             this.forceUpdate();
         }
     };
@@ -66,7 +74,7 @@ class ChatTileControl extends Component{
         let [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
             FileController.getLocalFile(store, chat.photo.small, idb_key, null,
-                () => ChatStore.updatePhoto(chat.id),
+                () => FileStore.updateChatPhotoBlob(chat.id, id),
                 () => FileController.getRemoteFile(id, 1, chat));
         }
     }

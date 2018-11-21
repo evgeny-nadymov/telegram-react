@@ -10,7 +10,8 @@ import {
     getChatTypingString,
     getChatDraft,
     getLastMessageSenderName,
-    getLastMessageContent
+    getLastMessageContent,
+    showChatDraft
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogContentControl.css';
@@ -18,8 +19,6 @@ import './DialogContentControl.css';
 class DialogContentControl extends React.Component {
     constructor(props){
         super(props);
-
-        this.onUpdate = this.onUpdate.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -31,6 +30,7 @@ class DialogContentControl extends React.Component {
     }
 
     componentWillMount(){
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
@@ -38,21 +38,30 @@ class DialogContentControl extends React.Component {
     }
 
     componentWillUnmount(){
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateUserChatAction', this.onUpdate);
     }
 
-    onUpdate(update) {
-        if (!this.props.chatId) return;
-        if (this.props.chatId !== update.chat_id) return;
+    onFastUpdatingComplete = (update) => {
+        this.forceUpdate();
+    };
+
+    onUpdate = (update) => {
+        const { chatId } = this.props;
+
+        if (chatId !== update.chat_id) return;
 
         this.forceUpdate();
-    }
+    };
 
     render() {
-        const chat = ChatStore.get(this.props.chatId);
+        const { chatId } = this.props;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
 
         let contentControl = null;
         const typingString = getChatTypingString(chat);
@@ -62,7 +71,7 @@ class DialogContentControl extends React.Component {
 
         if (!contentControl){
             const draft = getChatDraft(chat);
-            if (draft && chat.unread_count === 0 && chat.unread_mention_count === 0){
+            if (showChatDraft(chat)){
                 const text = draft.text || '\u00A0';
 
                 contentControl = (

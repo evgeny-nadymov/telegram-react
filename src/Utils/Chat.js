@@ -166,6 +166,12 @@ function getChatTypingString(chat){
     return null;
 }
 
+function showChatDraft(chat) {
+    const draft = getChatDraft(chat);
+
+    return draft && chat.unread_count === 0 && chat.unread_mention_count === 0;
+}
+
 function getChatDraft(chat){
     if (chat
         && chat.draft_message
@@ -267,7 +273,7 @@ function getLastMessageDate(chat){
     if (!chat) return null;
     if (!chat.last_message) return null;
     if (!chat.last_message.date) return null;
-    if (chat.draft_message) return null;
+    if (showChatDraft(chat)) return null;
 
     let date = new Date(chat.last_message.date * 1000);
 
@@ -680,6 +686,7 @@ function hasUserId(chatId, userId){
 
 export {
     getChatDraft,
+    showChatDraft,
     getChatTypingString,
     getChatUnreadMessageIcon,
     getChatUnreadCount,

@@ -32,13 +32,14 @@ class DialogsList extends React.Component {
         this.listRef = React.createRef();
 
         this.state = {
-            chatIds: [],
-            authorizationState: ApplicationStore.getAuthorizationState()
+            chats: [],
+            authorizationState: ApplicationStore.getAuthorizationState(),
+            connectionState: ApplicationStore.getConnectionState()
         };
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState.chatIds !== this.state.chatIds){
+        if (nextState.chats !== this.state.chats){
             return true;
         }
 
@@ -49,6 +50,8 @@ class DialogsList extends React.Component {
         this.loadFirstSlice();
 
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        // ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
@@ -57,6 +60,8 @@ class DialogsList extends React.Component {
 
     componentWillUnmount(){
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        // ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
@@ -66,12 +71,37 @@ class DialogsList extends React.Component {
     onUpdateAuthorizationState = (update) => {
         const { authorization_state } = update;
 
-        this.setState({ authorizationState: authorization_state },  () => { this.loadFirstSlice(); });
+        this.setState({ authorizationState: authorization_state },  () => this.loadFirstSlice());
+    };
+
+    onFastUpdatingComplete = (update) => {
+        this.onLoadNext(true);
+        // this.setState({ chats: [] }, () => this.onLoadNext(true));
+    };
+
+    onUpdateConnectionState = (update) => {
+        console.log(this);
+        const newConnectionState = update.state;
+        const { connectionState } = this.state;
+
+        this.setState({ connectionState: newConnectionState });
+
+        const updatingCompleted =
+            connectionState
+            && connectionState['@type'] === 'connectionStateUpdating'
+            && newConnectionState['@type'] !== 'connectionStateUpdating';
+        if (!updatingCompleted) return;
+
+        const hasSkippedUpdates = ChatStore.skippedUpdates.length > 0;
+        if (!hasSkippedUpdates) return;
+
+        ChatStore.skippedUpdates = [];
+        this.setState({ chats: [] }, () => this.onLoadNext(true));
     };
 
     loadFirstSlice = () => {
         const { authorizationState } = this.state;
-        if (authorizationState && authorizationState['@type'] === 'authorizationStateReady'){
+        if (authorizationState && authorizationState['@type'] === 'authorizationStateReady') {
             this.onLoadNext();
         }
     };
@@ -92,8 +122,8 @@ class DialogsList extends React.Component {
         }
 
         let chatIds = [];
-        for (let i = 0; i < this.state.chatIds.length; i++){
-            let chat = ChatStore.get(this.state.chatIds[i]);
+        for (let i = 0; i < this.state.chats.length; i++){
+            let chat = ChatStore.get(this.state.chats[i]);
             if (chat && chat.order !== '0'){
                 switch (chat.type['@type']) {
                     case 'chatTypeBasicGroup' : {
@@ -126,18 +156,20 @@ class DialogsList extends React.Component {
     };
 
     onUpdate = (update) => {
-        if (update.order === '0') return;
-
-        const chat = ChatStore.get(update.chat_id);
+        const { chat_id, order } = update;
+        if (order === '0') return;
+        const chat = ChatStore.get(chat_id);
         if (!chat || chat.order === '0') {
             return;
         }
 
+        const { chats } = this.state;
+
         let newChatIds = [];
-        if (this.state.chatIds.length > 0){
-            const existingChat = this.state.chatIds.find(x => x === update.chat_id);
+        if (chats.length > 0){
+            const existingChat = chats.find(x => x === chat_id);
             if (!existingChat){
-                const minChatOrder = ChatStore.get(this.state.chatIds[this.state.chatIds.length - 1]).order;
+                const minChatOrder = ChatStore.get(chats[chats.length - 1]).order;
                 if (orderCompare(minChatOrder, chat.order) === 1) {
                     return;
                 }
@@ -147,8 +179,8 @@ class DialogsList extends React.Component {
 
         // get last chat.order values
         let chatIds = [];
-        for (let i = 0; i < this.state.chatIds.length; i++){
-            let chat = ChatStore.get(this.state.chatIds[i]);
+        for (let i = 0; i < chats.length; i++){
+            let chat = ChatStore.get(chats[i]);
             if (chat && chat.order !== '0'){
                 switch (chat.type['@type']) {
                     case 'chatTypeBasicGroup' : {
@@ -178,7 +210,7 @@ class DialogsList extends React.Component {
         }
 
         this.reorderChats(chatIds, newChatIds,
-            () =>{
+            () => {
                 this.loadChatContents(newChatIds);
             });
     };
@@ -188,11 +220,11 @@ class DialogsList extends React.Component {
             return orderCompare(ChatStore.get(b).order, ChatStore.get(a).order);
         });
 
-        if (!DialogsList.isDifferentOrder(this.state.chatIds, orderedChatIds)){
+        if (!DialogsList.isDifferentOrder(this.state.chats, orderedChatIds)){
             return;
         }
 
-        this.setState({ chatIds: orderedChatIds }, callback);
+        this.setState({ chats: orderedChatIds }, callback);
     }
 
     static isDifferentOrder(oldChatIds, newChatIds){
@@ -215,13 +247,15 @@ class DialogsList extends React.Component {
         }
     };
 
-    onLoadNext = async () => {
+    onLoadNext = async (replace = false) => {
+        const { chats } = this.state;
+
         if (this.loading) return;
 
         let offsetOrder = '9223372036854775807'; // 2^63
         let offsetChatId = 0;
-        if (this.state.chatIds && this.state.chatIds.length > 0){
-            const chat = ChatStore.get(this.state.chatIds[this.state.chatIds.length - 1]);
+        if (!replace && chats && chats.length > 0){
+            const chat = ChatStore.get(chats[chats.length - 1]);
             if (chat){
                 offsetOrder = chat.order;
                 offsetChatId = chat.id;
@@ -229,7 +263,7 @@ class DialogsList extends React.Component {
         }
 
         this.loading = true;
-        let result = await TdLibController
+        const result = await TdLibController
             .send({
                 '@type': 'getChats',
                 offset_chat_id: offsetChatId,
@@ -247,22 +281,27 @@ class DialogsList extends React.Component {
             result.chat_ids.shift();
         }
 
-        this.appendChats(result.chat_ids,
-            async () => {
-                //await FileController.initDB();
-                this.loadChatContents(result.chat_ids);
-            });
+        if (replace){
+            this.replaceChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+        }
+        else{
+            this.appendChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+        }
     };
 
-    loadChatContents(chatIds){
+    loadChatContents(chats){
         const store = FileController.getStore();
-        loadChatPhotos(store, chatIds);
+        loadChatPhotos(store, chats);
     }
 
-    appendChats(chatIds, callback){
-        if (chatIds.length === 0) return;
+    appendChats(chats, callback){
+        if (chats.length === 0) return;
 
-        this.setState({ chatIds: this.state.chatIds.concat(chatIds) }, callback);
+        this.setState({ chats: this.state.chats.concat(chats) }, callback);
+    }
+
+    replaceChats(chats, callback){
+        this.setState({ chats: chats }, callback);
     }
 
     scrollToTop() {
@@ -271,11 +310,10 @@ class DialogsList extends React.Component {
     };
 
     render() {
-        const chats = this.state.chatIds.map(x =>
-            (<DialogControl
-                key={x}
-                chatId={x}
-                onSelect={this.props.onSelectChat}/>));
+        const { onSelectChat } = this.props;
+        const { chats } = this.state;
+
+        const dialogs = chats.map(x => (<DialogControl key={x} chatId={x} onSelect={onSelectChat}/>));
 
         {/*<Scrollbars*/}
             {/*ref={this.listRef}*/}
@@ -288,7 +326,7 @@ class DialogsList extends React.Component {
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
-                {chats}
+                {dialogs}
             </div>
         );
     }

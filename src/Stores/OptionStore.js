@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { EventEmitter } from "events";
-import TdLibController from "../Controllers/TdLibController";
+import { EventEmitter } from 'events';
+import TdLibController from '../Controllers/TdLibController';
 
 class OptionStore extends EventEmitter{
     constructor(){
@@ -14,13 +14,11 @@ class OptionStore extends EventEmitter{
 
         this.items = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        TdLibController.on('tdlib_update', this.onUpdate);
-
+        this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateOption':
                 this.items.set(update.name, update.value);
@@ -28,7 +26,15 @@ class OptionStore extends EventEmitter{
             default:
                 break;
         }
-    }
+    };
+
+    addTdLibListener = () => {
+        TdLibController.addListener('tdlib_update', this.onUpdate);
+    };
+
+    removeTdLibListener = () => {
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    };
 
     get(name){
         return this.items.get(name);
@@ -36,5 +42,5 @@ class OptionStore extends EventEmitter{
 }
 
 const store = new OptionStore();
-
+window.option = store;
 export default store;

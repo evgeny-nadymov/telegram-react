@@ -16,13 +16,11 @@ class UserStore extends EventEmitter{
         this.items = new Map();
         this.fullInfoItems = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        TdLibController.on('tdlib_update', this.onUpdate);
-
+        this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateUser':{
                 this.set(update.user);
@@ -47,7 +45,15 @@ class UserStore extends EventEmitter{
             default:
                 break;
         }
-    }
+    };
+
+    addTdLibListener = () => {
+        TdLibController.addListener('tdlib_update', this.onUpdate);
+    };
+
+    removeTdLibListener = () => {
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    };
 
     assign(source1, source2){
         Object.assign(source1, source2);
@@ -77,12 +83,8 @@ class UserStore extends EventEmitter{
     setFullInfo(id, fullInfo){
         this.fullInfoItems.set(id, fullInfo);
     }
-
-    updatePhoto(userId){
-        this.emit('user_photo_changed', { userId: userId });
-    }
 }
 
 const store = new UserStore();
-
+window.user = store;
 export default store;

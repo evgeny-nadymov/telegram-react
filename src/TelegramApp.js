@@ -63,18 +63,16 @@ class TelegramApp extends Component{
 
     componentDidMount(){
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ApplicationStore.on('clientUpdateMediaViewerContent', this.onUpdateMediaViewerContent);
-        TdLibController.on('tdlib_updateAppInactive', this.onUpdateAppInactive);
-        TdLibController.on('tdlib_update', this.onUpdate);
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
     }
 
     componentWillUnmount(){
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onUpdateMediaViewerContent);
-        TdLibController.removeListener('tdlib_updateAppInactive', this.onUpdateAppInactive);
-        TdLibController.removeListener('tdlib_update', this.onUpdate);
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
     }
 
     onUpdateAuthorizationState = (update) => {
@@ -101,57 +99,16 @@ class TelegramApp extends Component{
         }
     };
 
-    onUpdateChatDetailsVisibility = (update) => {
+    onClientUpdateChatDetailsVisibility = (update) => {
         this.setState({ isChatDetailsVisible: ApplicationStore.isChatDetailsVisible });
     };
 
-    onUpdateMediaViewerContent = (content) =>{
-        this.setState({ mediaViewerContent: content });
+    onClientUpdateMediaViewerContent = (update) =>{
+        this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
     };
 
-    onUpdateAppInactive = () => {
+    onClientUpdateAppInactive = (update) => {
         this.setState({ inactive : true });
-    };
-
-    onUpdate = (update) => {
-        // NOTE: important to start init DB after receiving first update
-        //FileController.initDB();
-
-        switch (update['@type']) {
-            case 'updateFatalError':
-                alert('Oops! Something went wrong. We need to refresh this page.');
-                window.location.reload();
-
-                break;
-            case 'updateServiceNotification':
-                const { type, content } = update;
-
-                if (content
-                    && content['@type'] === 'messageText') {
-
-                    const { text } = content;
-                    if (text
-                        && text['@type'] === 'formattedText'
-                        && text.text) {
-                        switch (type) {
-                            case 'AUTH_KEY_DROP_DUPLICATE':
-                                let result = window.confirm(text.text);
-                                if (result) {
-                                    TdLibController.logOut();
-                                }
-                                break;
-                            default:
-                                alert(text.text);
-                                break;
-                        }
-                    }
-                }
-
-                break;
-            default:
-
-                break;
-        }
     };
 
     handleSelectChat = (chatId) => {
@@ -242,10 +199,7 @@ class TelegramApp extends Component{
                 case 'authorizationStateWaitCode':
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
-                    page = (
-                        <AuthFormControl authorizationState={authorizationState} onChangePhone={this.handleChangePhone}/>
-                    );
-
+                    page = (<AuthFormControl authorizationState={authorizationState} onChangePhone={this.handleChangePhone}/>);
                     break;
                 case 'authorizationStateWaitEncryptionKey': {
 

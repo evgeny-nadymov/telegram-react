@@ -34,37 +34,24 @@ class DialogsHeader extends React.Component {
         this.state = {
             open: false
         };
-
-        this.handleDone = this.handleDone.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-        this.handleCheckUpdates = this.handleCheckUpdates.bind(this);
-        this.handleLogOut = this.handleLogOut.bind(this);
-        this.handleClearCache = this.handleClearCache.bind(this);
     }
 
-    handleCheckUpdates(){
-    }
-
-    handleLogOut(){
+    handleLogOut = () => {
         this.setState({ open: true });
-    }
+    };
 
-    handleClearCache(){
-        this.props.onClearCache();
-    }
-
-    handleDone(){
+    handleDone = () => {
         this.handleClose();
         TdLibController.logOut();
-    }
+    };
 
-    handleClose(){
+    handleClose = () => {
         this.setState({ open: false });
-    }
+    };
 
     render() {
-        const {classes, onClick} = this.props;
-        const {open} = this.state;
+        const { classes, onClick } = this.props;
+        const { open } = this.state;
 
         const confirmLogoutDialog = open?
             (<Dialog
@@ -90,7 +77,7 @@ class DialogsHeader extends React.Component {
 
         return (
             <div className='header-master'>
-                <MainMenuButton onCheckUpdates={this.handleCheckUpdates} onLogOut={this.handleLogOut}/>
+                <MainMenuButton onLogOut={this.handleLogOut}/>
                 { confirmLogoutDialog }
                 <div className='header-status grow cursor-pointer' onClick={onClick}>
                     <span className='header-status-content'>Telegram</span>

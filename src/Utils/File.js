@@ -224,7 +224,7 @@ function loadUserPhotos(store, userIds) {
             let [id, pid, idb_key] = getUserPhoto(user);
             if (pid) {
                 FileController.getLocalFile(store, user.profile_photo.small, idb_key, null,
-                    () => UserStore.updatePhoto(user.id),
+                    () => FileStore.updateUserPhotoBlob(user.id, id),
                     () => FileController.getRemoteFile(id, 1, user));
             }
         }
@@ -240,7 +240,7 @@ function loadChatPhotos(store, chatIds) {
         let [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
             FileController.getLocalFile(store, chat.photo.small, idb_key, null,
-                () => ChatStore.updatePhoto(chat.id),
+                () => FileStore.updateChatPhotoBlob(chat.id, id),
                 () => FileController.getRemoteFile(id, 1, chat));
         }
     }
@@ -313,7 +313,7 @@ function loadMessageContents(store, messages){
                                     let obj = user.profile_photo.small;
                                     if (!obj.blob){
                                         FileController.getLocalFile(store, obj, idb_key, null,
-                                            () => UserStore.updatePhoto(user.id),
+                                            () => FileStore.updateUserPhotoBlob(user.id, id),
                                             () => FileController.getRemoteFile(id, 1, user));
                                     }
                                 }

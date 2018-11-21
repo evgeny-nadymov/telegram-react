@@ -25,9 +25,6 @@ class DialogControl extends Component{
         this.state={
             chat : chat
         };
-
-        this.handleSelect = this.handleSelect.bind(this);
-        this.onUpdateSelectedChatId = this.onUpdateSelectedChatId.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -46,20 +43,20 @@ class DialogControl extends Component{
         ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
     }
 
-    onUpdateSelectedChatId(update){
+    onUpdateSelectedChatId = (update) => {
         if (this.props.chatId === update.previousChatId
             || this.props.chatId === update.nextChatId){
             this.forceUpdate();
         }
-    }
+    };
 
-    handleSelect(){
+    handleSelect = () => {
         const { chatId, onSelect } = this.props;
         if (!chatId) return;
         if (!onSelect) return;
 
         onSelect(chatId);
-    }
+    };
 
     render(){
         const {chatId} = this.props;

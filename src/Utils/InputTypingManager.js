@@ -9,10 +9,11 @@ import ChatStore from '../Stores/ChatStore';
 import {INPUT_TYPING_INTERVAL} from '../Constants';
 
 class InputTypingManager {
-    constructor(chatId){
+    constructor(chatId, timeoutCallback){
         this.actions = new Map();
         this.timerId = null;
         this.chatId = chatId;
+        this.timeoutCallback = timeoutCallback;
 
         this.handleTimer = this.handleTimer.bind(this);
         this.addAction = this.addAction.bind(this);
@@ -38,8 +39,8 @@ class InputTypingManager {
             action: { '@type': 'chatActionTimerUpdate' }
         };
 
-        ChatStore.emit('updateUserChatAction', update);
-        //ChatStore.updateChatTyping(update);
+        this.timeoutCallback(update);
+        // ChatStore.emit('updateUserChatAction', update);
 
         this.setActionsTimeout();
     }

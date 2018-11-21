@@ -15,13 +15,11 @@ class BasicGroupStore extends EventEmitter{
         this.items = new Map();
         this.fullInfoItems = new Map();
 
-        this.onUpdate = this.onUpdate.bind(this);
-        TdLibController.on('tdlib_update', this.onUpdate);
-
+        this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate(update){
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateBasicGroup':{
                 this.set(update.basic_group);
@@ -37,7 +35,15 @@ class BasicGroupStore extends EventEmitter{
             default:
                 break;
         }
-    }
+    };
+
+    addTdLibListener = () => {
+        TdLibController.addListener('tdlib_update', this.onUpdate);
+    };
+
+    removeTdLibListener = () => {
+        TdLibController.removeListener('tdlib_update', this.onUpdate);
+    };
 
     get(groupId){
         return this.items.get(groupId);
@@ -57,5 +63,5 @@ class BasicGroupStore extends EventEmitter{
 }
 
 const store = new BasicGroupStore();
-
+window.basicgroup = store;
 export default store;
