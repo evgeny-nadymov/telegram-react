@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import ChatStore from '../../Stores/ChatStore';
 import ChatDetails from './ChatDetails';
 import SharedMedia from './SharedMedia';
 import TdLibController from '../../Controllers/TdLibController';
+import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogInfo.css';
 
@@ -19,20 +19,20 @@ class DialogInfo extends React.Component {
         super(props);
 
         this.state = {
-            selectedChatId: ChatStore.getSelectedChatId()
+            currentChatId: ApplicationStore.getChatId()
         };
     }
 
     componentDidMount(){
-        ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    onClientUpdateSelectedChatId = update => {
-        this.setState({ selectedChatId: update.nextChatId, userChatId: null, openSharedMedia: false });
+    onClientUpdateChatId = update => {
+        this.setState({ currentChatId: update.nextChatId, userChatId: null, openSharedMedia: false });
     };
 
     handelOpenSharedMedia = () => {
@@ -70,11 +70,11 @@ class DialogInfo extends React.Component {
     };
 
     render() {
-        const {selectedChatId, userChatId, openSharedMedia} = this.state;
+        const {currentChatId, userChatId, openSharedMedia} = this.state;
 
         let content = null;
         if (openSharedMedia){
-            const chatId = userChatId || selectedChatId;
+            const chatId = userChatId || currentChatId;
 
             content =
                 (<SharedMedia
@@ -82,7 +82,7 @@ class DialogInfo extends React.Component {
                     close={this.handleCloseSharedMedia}/>);
         }
         else {
-            const chatId = userChatId || selectedChatId;
+            const chatId = userChatId || currentChatId;
             const backButton = userChatId === chatId;
 
             content =

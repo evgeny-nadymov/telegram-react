@@ -54,7 +54,7 @@ class FileController extends EventEmitter{
                                 let source = obj.photo.small;
                                 if (source && source.id === file.id){
                                     this.getLocalFile(store, source, idb_key, file.arr,
-                                        () => ChatStore.updatePhoto(obj.id),
+                                        () => FileStore.updateChatPhotoBlob(obj.id, file.id),
                                         () => this.getRemoteFile(file.id, 1));
                                 }
                                 break;

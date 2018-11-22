@@ -72,6 +72,7 @@ class Header extends Component{
     componentDidMount(){
         ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
 
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
@@ -81,13 +82,12 @@ class Header extends Component{
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
         BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
-
-        ChatStore.on('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
     componentWillUnmount(){
         ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
 
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
@@ -97,11 +97,9 @@ class Header extends Component{
         SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
         BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
-
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onClientUpdateSelectedChatId);
     }
 
-    onClientUpdateSelectedChatId = (update) => {
+    onClientUpdateChatId = (update) => {
         this.forceUpdate();
     };
 
@@ -114,7 +112,7 @@ class Header extends Component{
     };
 
     onUpdateChatTitle(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
         if (chat.id !== update.chat_id) return;
 
@@ -122,7 +120,7 @@ class Header extends Component{
     }
 
     onUpdateUserStatus(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
         if (!chat.type) return;
 
@@ -156,15 +154,15 @@ class Header extends Component{
     }
 
     onUpdateUserChatAction(update){
-        const selectedChatId = ChatStore.getSelectedChatId();
+        const currentChatId = ApplicationStore.getChatId();
 
-        if (selectedChatId === update.chat_id){
+        if (currentChatId === update.chat_id){
             this.forceUpdate();
         }
     }
 
     onUpdateBasicGroup(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
 
         if (chat.type
@@ -175,7 +173,7 @@ class Header extends Component{
     }
 
     onUpdateSupergroup(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
 
         if (chat.type
@@ -186,7 +184,7 @@ class Header extends Component{
     }
 
     onUpdateBasicGroupFullInfo(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
 
         if (chat.type
@@ -197,7 +195,7 @@ class Header extends Component{
     }
 
     onUpdateSupergroupFullInfo(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
 
         if (chat.type
@@ -208,7 +206,7 @@ class Header extends Component{
     }
 
     onUpdateUserFullInfo(update){
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
         if (!chat) return;
 
         if (chat.type
@@ -219,7 +217,7 @@ class Header extends Component{
     }
 
     openChatDetails(){
-        const chatId = ChatStore.getSelectedChatId();
+        const chatId = ApplicationStore.getChatId();
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -229,7 +227,7 @@ class Header extends Component{
     render(){
         const { classes } = this.props;
         const { authorizationState, connectionState } = this.state;
-        const chat = ChatStore.get(ChatStore.getSelectedChatId());
+        const chat = ChatStore.get(ApplicationStore.getChatId());
 
         const isAccentSubtitle = isAccentChatSubtitle(chat);
         let title = getChatTitle(chat);

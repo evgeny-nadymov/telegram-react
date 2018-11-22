@@ -16,7 +16,6 @@ class ChatStore extends EventEmitter{
 
         this.items = new Map();
         this.typingManagers = new Map();
-        this.selectedChatId = 0;
         this.skippedUpdates = [];
 
         this.addTdLibListener();
@@ -236,21 +235,6 @@ class ChatStore extends EventEmitter{
     removeTdLibListener = () => {
         TdLibController.removeListener('tdlib_update', this.onUpdate);
     };
-
-    setSelectedChatId(chatId){
-        const update = {
-            '@type' : 'clientUpdateSelectedChatId',
-            nextChatId : chatId,
-            previousChatId : this.selectedChatId
-        };
-
-        this.selectedChatId = chatId;
-        this.emit(update['@type'], update);
-    }
-
-    getSelectedChatId(){
-        return this.selectedChatId;
-    }
 
     assign(source1, source2){
         //Object.assign(source1, source2);

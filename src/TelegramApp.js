@@ -112,12 +112,12 @@ class TelegramApp extends Component{
     };
 
     handleSelectChat = (chatId) => {
-        const selectedChatId = ChatStore.getSelectedChatId();
-        if (selectedChatId === chatId){
+        const currentChatId = ApplicationStore.getChatId();
+        if (currentChatId === chatId){
             this.dialogDetailsRef.current.scrollToBottom();
         }
         else{
-            ChatStore.setSelectedChatId(chatId);
+            ApplicationStore.setChatId(chatId);
         }
     };
 

@@ -19,6 +19,7 @@ import { isUserBlocked } from '../../Utils/User';
 import { isChannelChat, isChatMember, isGroupChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
+import ApplicationStore from '../../Stores/ApplicationStore';
 
 class MoreListItem extends React.Component {
     constructor(props){
@@ -48,13 +49,13 @@ class MoreListItem extends React.Component {
     };
 
     handleSendMessage = () => {
-        const selectedChatId = ChatStore.getSelectedChatId();
+        const currentChatId = ApplicationStore.getChatId();
         const { chatId } = this.props;
-        if (selectedChatId === chatId){
+        if (currentChatId === chatId){
             //this.dialogDetails.current.scrollToBottom();
         }
         else{
-            ChatStore.setSelectedChatId(chatId);
+            ApplicationStore.setChatId(chatId);
         }
     };
 

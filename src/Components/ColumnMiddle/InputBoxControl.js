@@ -17,6 +17,7 @@ import {PHOTO_SIZE} from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import FileController from '../../Controllers/FileController';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
@@ -37,7 +38,7 @@ class InputBoxControl extends Component{
         this.newMessage = React.createRef();
 
         this.state = {
-            selectedChatId : ChatStore.getSelectedChatId(),
+            currentChatId : ApplicationStore.getChatId(),
             anchorEl : null
         };
 
@@ -53,12 +54,11 @@ class InputBoxControl extends Component{
 
         this.handleSendPhoto = this.handleSendPhoto.bind(this);
         this.handleSendingMessage = this.handleSendingMessage.bind(this);
-        this.onUpdateSelectedChatId = this.onUpdateSelectedChatId.bind(this);
         this.getNewChatDraftMessage = this.getNewChatDraftMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState.selectedChatId !== this.state.selectedChatId){
+        if (nextState.currentChatId !== this.state.currentChatId){
             return true;
         }
 
@@ -70,20 +70,20 @@ class InputBoxControl extends Component{
     }
 
     componentDidMount(){
-        ChatStore.on('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount(){
-        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.selectedChatId);
+        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.currentChatId);
 
         this.setChatDraftMessage(newChatDraftMessage);
 
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    onUpdateSelectedChatId(update){
-        this.setState({ selectedChatId : update.nextChatId });
-    }
+    onClientUpdateChatId = (update) => {
+        this.setState({ currentChatId : update.nextChatId });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot){
 
@@ -91,9 +91,9 @@ class InputBoxControl extends Component{
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState){
-        if (prevState.selectedChatId === this.state.selectedChatId) return;
+        if (prevState.currentChatId === this.state.currentChatId) return;
 
-        return this.getNewChatDraftMessage(prevState.selectedChatId);
+        return this.getNewChatDraftMessage(prevState.currentChatId);
     }
 
     setChatDraftMessage(chatDraftMessage){
@@ -110,8 +110,8 @@ class InputBoxControl extends Component{
             });
     }
 
-    getNewChatDraftMessage(selectedChatId){
-        let chat = ChatStore.get(selectedChatId);
+    getNewChatDraftMessage(currentChatId){
+        let chat = ChatStore.get(currentChatId);
         if (!chat) return;
 
         const {draft_message} = chat;
@@ -140,7 +140,7 @@ class InputBoxControl extends Component{
                 }
             };
 
-            return { chatId : selectedChatId, draftMessage : draftMessage } ;
+            return { chatId : currentChatId, draftMessage : draftMessage } ;
         }
 
         return null;
@@ -245,7 +245,7 @@ class InputBoxControl extends Component{
         }
 
         if (innerText){
-            const selectedChat = ChatStore.get(this.state.selectedChatId);
+            const selectedChat = ChatStore.get(this.state.currentChatId);
             if (!selectedChat.OutputTypingManager){
                 selectedChat.OutputTypingManager = new OutputTypingManager(selectedChat.id);
             }
@@ -310,13 +310,13 @@ class InputBoxControl extends Component{
     }
 
     onSendInternal(content, callback){
-        if (!this.state.selectedChatId) return;
+        if (!this.state.currentChatId) return;
         if (!content) return;
 
         TdLibController
             .send({
                 '@type': 'sendMessage',
-                chat_id: this.state.selectedChatId,
+                chat_id: this.state.currentChatId,
                 reply_to_message_id: 0,
                 input_message_content: content
             })
@@ -330,7 +330,7 @@ class InputBoxControl extends Component{
                 TdLibController
                     .send({
                         '@type': 'viewMessages',
-                        chat_id: this.state.selectedChatId,
+                        chat_id: this.state.currentChatId,
                         message_ids: messageIds
                     });
 
@@ -359,8 +359,8 @@ class InputBoxControl extends Component{
     render(){
         const {classes} = this.props;
 
-        const {selectedChatId, anchorEl} = this.state;
-        const selectedChat = ChatStore.get(selectedChatId);
+        const {currentChatId, anchorEl} = this.state;
+        const selectedChat = ChatStore.get(currentChatId);
 
         let text = '';
         if (selectedChat){

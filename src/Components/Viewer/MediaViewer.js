@@ -162,7 +162,7 @@ class MediaViewer extends React.Component {
 
                     <div className='media-viewer-content-column'>
                         {/*<PhotoControl message={message} openMedia={this.handleOpenMedia} size={1280} displaySize={1280}/>*/}
-                        <MediaViewerContent chatId={chatId} messageId={messageId} size={1280}/>
+                        <MediaViewerContent chatId={chatId} messageId={messageId} size={PHOTO_BIG_SIZE}/>
                     </div>
 
                     <div className='media-viewer-right-column'>

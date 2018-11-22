@@ -12,6 +12,7 @@ import DialogBadgeControl from './DialogBadgeControl';
 import DialogTitleControl from './DialogTitleControl';
 import DialogMetaControl from './DialogMetaControl';
 import ChatStore from '../../Stores/ChatStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogControl.css';
 
 class DialogControl extends Component{
@@ -36,16 +37,18 @@ class DialogControl extends Component{
     }
 
     componentDidMount(){
-        ChatStore.on('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount(){
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    onUpdateSelectedChatId = (update) => {
-        if (this.props.chatId === update.previousChatId
-            || this.props.chatId === update.nextChatId){
+    onClientUpdateChatId = (update) => {
+        const { chatId } = this.props;
+
+        if (chatId === update.previousChatId
+            || chatId === update.nextChatId){
             this.forceUpdate();
         }
     };
@@ -59,10 +62,10 @@ class DialogControl extends Component{
     };
 
     render(){
-        const {chatId} = this.props;
+        const { chatId } = this.props;
 
-        const selectedChatId = ChatStore.getSelectedChatId();
-        const isSelected = selectedChatId === chatId;
+        const currentChatId = ApplicationStore.getChatId();
+        const isSelected = currentChatId === chatId;
 
         return (
             <div ref={this.dialog} className={isSelected ? 'dialog-active' : 'dialog'} onMouseDown={this.handleSelect}>

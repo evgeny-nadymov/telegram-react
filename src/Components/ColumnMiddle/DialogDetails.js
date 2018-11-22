@@ -22,12 +22,12 @@ class DialogDetails extends Component{
         this.messagesList = React.createRef();
 
         this.state = {
-            selectedChatId : ChatStore.getSelectedChatId()
+            currentChatId : ApplicationStore.getChatId()
         };
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState.selectedChatId !== this.state.selectedChatId){
+        if (nextState.currentChatId !== this.state.currentChatId){
             return true;
         }
 
@@ -36,20 +36,20 @@ class DialogDetails extends Component{
 
     componentDidMount(){
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ChatStore.on('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount(){
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ChatStore.removeListener('clientUpdateSelectedChatId', this.onUpdateSelectedChatId);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     onUpdateChatDetailsVisibility = (update) => {
         this.forceUpdate();
     };
 
-    onUpdateSelectedChatId = (update) => {
-        this.setState({ selectedChatId : update.nextChatId })
+    onClientUpdateChatId = (update) => {
+        this.setState({ currentChatId : update.nextChatId })
     };
 
     scrollToBottom = () => {
@@ -57,7 +57,7 @@ class DialogDetails extends Component{
     };
 
     showDialogFooter = () => {
-        const chat = ChatStore.get(this.state.selectedChatId);
+        const chat = ChatStore.get(this.state.currentChatId);
         if (!chat) return false;
 
         const {type} = chat;
@@ -106,18 +106,18 @@ class DialogDetails extends Component{
             return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { onSelectChat, onSelectUser } = this.props;
-        const { selectedChatId } = this.state;
+        const { currentChatId } = this.state;
         const { isChatDetailsVisible } = ApplicationStore;
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
-                <Header chatId={selectedChatId}/>
+                <Header chatId={currentChatId}/>
                 <MessagesList
                     ref={this.messagesList}
-                    chatId={selectedChatId}
+                    chatId={currentChatId}
                     onSelectChat={onSelectChat}
                     onSelectUser={onSelectUser}/>
-                <Footer chatId={selectedChatId}/>
+                <Footer chatId={currentChatId}/>
             </div>
         );
     }
