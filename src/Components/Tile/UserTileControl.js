@@ -31,13 +31,14 @@ class UserTileControl extends Component{
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
-
+        ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
     }
 
     componentWillUnmount(){
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
         FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
+        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
     }
 
     onClientUpdatePhotoBlob = (update) => {
@@ -84,6 +85,27 @@ class UserTileControl extends Component{
             case 'chatTypePrivate' :
             case 'chatTypeSecret' : {
                 if (chat.type.user_id === userId){
+                    this.forceUpdate();
+                }
+            }
+        }
+    };
+
+    onUpdateChatTitle = (update) => {
+        const { userId } = this.props;
+
+        const chat = ChatStore.get(update.chat_id);
+        if (!chat) return;
+        if (!chat.type) return;
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup' :
+            case 'chatTypeSupergroup' : {
+                return;
+            }
+            case 'chatTypePrivate' :
+            case 'chatTypeSecret' : {
+                if (chat.type.user_id === userId && !chat.photo){
                     this.forceUpdate();
                 }
             }

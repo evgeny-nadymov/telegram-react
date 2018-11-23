@@ -197,6 +197,24 @@ class FileController extends EventEmitter{
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
+    getReadWriteStore(){
+        return this.db.transaction(['keyvaluepairs'], 'readwrite').objectStore('keyvaluepairs');
+    }
+
+    deleteLocalFile = (store, file) => {
+        if (!file.idb_key){
+            return;
+        }
+
+        const request = store.delete(file.idb_key);
+        request.onsuccess = (event) => {
+            alert('Local file deleted');
+        };
+        request.onerror = () => {
+
+        };
+    };
+
     getLocalFile(store, file, idb_key, arr, callback, faultCallback) {
         if (!idb_key){
             faultCallback();
@@ -236,6 +254,13 @@ class FileController extends EventEmitter{
     getRemoteFile(fileId, priority, obj){
         if (this.downloads.has(fileId)){
             let items = this.downloads.get(fileId);
+
+            for (let i = 0; i < items.length; i++){
+                if (items[i] === obj){
+                    return;
+                }
+            }
+
             items.push(obj);
         }
         else

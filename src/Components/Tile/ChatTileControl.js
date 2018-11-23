@@ -6,6 +6,7 @@
  */
 
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import {getChatLetters} from '../../Utils/Chat';
 import {getChatPhoto} from '../../Utils/File';
@@ -31,12 +32,14 @@ class ChatTileControl extends Component{
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
+        ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
     }
 
     componentWillUnmount(){
         ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
+        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
     }
 
     onFastUpdatingComplete = (update) => {
@@ -52,6 +55,18 @@ class ChatTileControl extends Component{
     };
 
     onUpdateChatPhoto = (update) => {
+        const { chatId } = this.props;
+
+        if (!update.chat_id) return;
+        if (update.chat_id !== chatId) return;
+
+        const chat = ChatStore.get(chatId);
+        if (!update.photo){
+            this.forceUpdate();
+        }
+    };
+
+    onUpdateChatTitle = (update) => {
         const { chatId } = this.props;
 
         if (!update.chat_id) return;
@@ -115,5 +130,9 @@ class ChatTileControl extends Component{
             (<div className={className} onClick={this.handleSelect}><span className='tile-text'>{letters}</span></div>);
     }
 }
+
+ChatTileControl.propTypes = {
+    chatId : PropTypes.number.isRequired
+};
 
 export default ChatTileControl;

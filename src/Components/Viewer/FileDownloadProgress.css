@@ -1,0 +1,32 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+.file-download-progress{
+    position: absolute;
+    width: 48px;
+    height: 48px;
+}
+
+.file-download-progress-indicator{
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    margin: 3px;
+    animation: spin 4s linear infinite;
+}
+
+.file-download-progress-background{
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(26, 26, 26, 0.7);
+}
+
+.file-download-progress-circle {
+    stroke-linecap: round;
+    color: #ffffff;
+}

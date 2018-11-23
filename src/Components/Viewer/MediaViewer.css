@@ -17,6 +17,7 @@
 }
 
 .media-viewer-wrapper{
+    cursor: pointer;
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
@@ -36,6 +37,18 @@
     align-items: center;
     justify-content: center;
     opacity: 0.5;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.media-viewer-button-disabled{
+    width: 100%;
+    height: 100%;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.15;
     flex-grow: 1;
     flex-shrink: 1;
 }

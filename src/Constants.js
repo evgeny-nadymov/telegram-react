@@ -19,3 +19,4 @@ export const JS_VERBOSITY_MAX = 20;
 export const MUTED_VALUE = 2147483647; // int32.max = 2^32 - 1
 export const UNMUTED_VALUE = 0;
 export const NOTIFICATIONS_DEBOUNCE_DELAY_MS = 500;
+export const COMPLETE_PROGRESS_ANIMATION_MS = 300;

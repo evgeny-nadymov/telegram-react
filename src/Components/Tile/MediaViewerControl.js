@@ -19,6 +19,12 @@ import MessageAuthor from '../Message/MessageAuthor';
 
 class MediaViewerControl extends React.Component {
 
+    constructor(props){
+        super(props);
+    }
+
+
+
     render() {
         const { chatId, messageId } = this.props;
 

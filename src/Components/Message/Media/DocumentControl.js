@@ -18,7 +18,6 @@ class DocumentControl extends React.Component {
 
     constructor(props){
         super(props);
-        this.onProgressUpdated = this.onProgressUpdated.bind(this);
     }
 
     componentWillMount(){
@@ -27,7 +26,13 @@ class DocumentControl extends React.Component {
         FileController.on('file_upload_update', this.onProgressUpdated);
     }
 
-    onProgressUpdated(payload) {
+    componentWillUnmount(){
+        FileController.removeListener('file_upload_update', this.onProgressUpdated);
+        FileController.removeListener('file_update', this.onProgressUpdated);
+        this.mount = false;
+    }
+
+    onProgressUpdated = (payload) => {
         if (this.props.message
             && this.props.message.content
             && this.props.message.content.document
@@ -37,13 +42,7 @@ class DocumentControl extends React.Component {
             this.payload = payload;
             this.forceUpdate();
         }
-    }
-
-    componentWillUnmount(){
-        FileController.removeListener('file_upload_update', this.onProgressUpdated);
-        FileController.removeListener('file_update', this.onProgressUpdated);
-        this.mount = false;
-    }
+    };
 
     getSizeString(size){
         if (!size) return `0 B`;
