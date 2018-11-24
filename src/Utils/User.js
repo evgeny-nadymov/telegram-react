@@ -6,10 +6,8 @@
  */
 
 import dateFormat from 'dateformat';
-import UserStore from '../Stores/UserStore';
 import { getLetters } from './Common';
-import { getUserPhoto } from './File';
-import FileController from '../Controllers/FileController';
+import UserStore from '../Stores/UserStore';
 
 function getUserStatus(user){
     if (!user) return null;

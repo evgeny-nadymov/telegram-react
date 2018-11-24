@@ -6,9 +6,14 @@
  */
 
 import { EventEmitter } from 'events';
-import TdClient from '@arseny30/tdweb/dist/tdweb';
 import packageJson from '../../package.json';
-import { JS_VERBOSITY_MAX, JS_VERBOSITY_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
+import {
+    JS_VERBOSITY_MAX,
+    JS_VERBOSITY_MIN,
+    VERBOSITY_MAX,
+    VERBOSITY_MIN
+} from '../Constants';
+import TdClient from '@arseny30/tdweb/dist/tdweb';
 
 class TdLibController extends EventEmitter{
     constructor(){

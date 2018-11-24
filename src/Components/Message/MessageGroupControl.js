@@ -6,15 +6,13 @@
  */
 
 import React, {Component} from 'react';
+import MessageControl from './../Message/MessageControl';
+import UserTileControl from './../Tile/UserTileControl';
+import {getTitle, getDate, getText, getMedia, getReply, getForward} from '../../Utils/Message';
+import UserStore from '../../Stores/UserStore';
+import ChatStore from '../../Stores/ChatStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MessageGroupControl.css';
-import UserStore from '../Stores/UserStore';
-import ChatStore from '../Stores/ChatStore';
-import MessageControl from './Message/MessageControl';
-import UserTileControl from './Tile/UserTileControl';
-import MessageStore from '../Stores/MessageStore';
-import TdLibController from '../Controllers/TdLibController';
-import ReplyControl from './Message/ReplyControl';
-import {getTitle, getDate, getText, getMedia, getReply, getForward} from '../Utils/Message';
 
 class MessageGroupControl extends Component{
     constructor(props){

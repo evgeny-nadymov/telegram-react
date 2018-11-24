@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
+import dateFormat from 'dateformat';
 import PhotoControl from '../Components/Message/Media/PhotoControl';
 import StickerControl from '../Components/Message/Media/StickerControl';
 import LocationControl from '../Components/Message/Media/LocationControl';
 import VenueControl from '../Components/Message/Media/VenueControl';
 import ContactControl from '../Components/Message/Media/ContactControl';
 import DocumentControl from '../Components/Message/Media/DocumentControl';
-import UserStore from '../Stores/UserStore';
-import ChatStore from '../Stores/ChatStore';
-import dateFormat from "dateformat";
 import { getUserFullName } from './User';
 import { getServiceMessageContent } from './ServiceMessage';
+import UserStore from '../Stores/UserStore';
+import ChatStore from '../Stores/ChatStore';
 
 function getTitle(message){
     if (!message) return null;

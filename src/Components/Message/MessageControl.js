@@ -27,9 +27,8 @@ import {
 import {getPhotoSize} from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
-import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import FileController from '../../Controllers/FileController';
+import FileStore from '../../Stores/FileStore';
 import './MessageControl.css';
 
 class MessageControl extends Component{
@@ -150,10 +149,10 @@ class MessageControl extends Component{
                     if (file) {
 
                         if (file.local.is_downloading_active){
-                            FileController.cancelGetRemoteFile(file.id, message);
+                            FileStore.cancelGetRemoteFile(file.id, message);
                         }
                         else if (file.remote.is_uploading_active){
-                            FileController.cancelUploadFile(file.id, message);
+                            FileStore.cancelUploadFile(file.id, message);
                         }
                         else {
                             saveOrDownload(file, document.file_name, message);
@@ -174,11 +173,11 @@ class MessageControl extends Component{
                             file = FileStore.get(file.id);
                             if (file){
                                 if (file.local.is_downloading_active){
-                                    FileController.cancelGetRemoteFile(file.id, message);
+                                    FileStore.cancelGetRemoteFile(file.id, message);
                                     return;
                                 }
                                 else if (file.remote.is_uploading_active){
-                                    FileController.cancelUploadFile(file.id, message);
+                                    FileStore.cancelUploadFile(file.id, message);
                                     return;
                                 }
                                 // else {

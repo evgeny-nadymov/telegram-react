@@ -7,19 +7,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
-import PhotoControl from '../Message/Media/PhotoControl';
 import { getSize } from '../../Utils/Common';
 import { getPhotoFile, saveOrDownload } from '../../Utils/File';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
-import FileController from '../../Controllers/FileController';
-import './MediaViewer.css';
 import TdLibController from '../../Controllers/TdLibController';
+import './MediaViewer.css';
 
 class MediaViewer extends React.Component {
 
@@ -84,7 +81,7 @@ class MediaViewer extends React.Component {
         if (!messages) return;
         if (!messages.length) return;
 
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
 
         for (let i = 0; i < messages.length; i++){
             let message = messages[i];
@@ -98,9 +95,9 @@ class MediaViewer extends React.Component {
                         if (previewPid) {
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
-                                FileController.getLocalFile(store, preview, previewIdbKey, null,
+                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
                                     () => MessageStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
+                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
                                     'load_contents_preview_',
                                     message.id);
 
@@ -114,9 +111,9 @@ class MediaViewer extends React.Component {
                                 let file = photoSize.photo;
                                 if (!file.blob) {
                                     const localMessage = message;
-                                    FileController.getLocalFile(store, file, idb_key, null,
+                                    FileStore.getLocalFile(store, file, idb_key, null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
-                                        () => FileController.getRemoteFile(id, 1, localMessage));
+                                        () => FileStore.getRemoteFile(id, 1, localMessage));
                                 }
                             }
                         }
@@ -214,9 +211,9 @@ class MediaViewer extends React.Component {
                 let file = photoSize.photo;
                 file = FileStore.get(file.id) || file;
                 if (file) {
-                    const store = FileController.getReadWriteStore();
+                    const store = FileStore.getReadWriteStore();
 
-                    FileController.deleteLocalFile(store, file);
+                    FileStore.deleteLocalFile(store, file);
                 }
             }
         }

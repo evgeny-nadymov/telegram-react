@@ -14,13 +14,6 @@ import {withStyles} from '@material-ui/core/styles';
 import {update} from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import BasicGroupStore from '../../Stores/BasicGroupStore';
-import ChatStore from '../../Stores/ChatStore';
-import FileStore from '../../Stores/FileStore';
-import MessageStore from '../../Stores/MessageStore';
-import OptionStore from '../../Stores/OptionStore';
-import SupergroupStore from '../../Stores/SupergroupStore';
-import UserStore from '../../Stores/UserStore';
 
 const styles = {
     menuIconButton : {

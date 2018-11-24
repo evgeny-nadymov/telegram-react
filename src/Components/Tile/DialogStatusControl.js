@@ -6,16 +6,14 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
+import {
+    getChatSubtitleWithoutTyping,
+    isAccentChatSubtitleWithoutTyping
+} from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
-import {
-    getChatSubtitleWithoutTyping,
-    isAccentChatSubtitle,
-    isAccentChatSubtitleWithoutTyping
-} from '../../Utils/Chat';
 import './DialogStatusControl.css';
 
 class DialogStatusControl extends React.Component {

@@ -13,9 +13,9 @@ import {
 } from '../../Utils/Message';
 import UserTileControl from './UserTileControl';
 import ChatTileControl from './ChatTileControl';
+import MessageAuthor from '../Message/MessageAuthor';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerControl.css';
-import MessageAuthor from '../Message/MessageAuthor';
 
 class MediaViewerControl extends React.Component {
 

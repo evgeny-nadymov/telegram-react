@@ -11,7 +11,6 @@ import CircularProgress from '@material-ui/core/CircularProgress/CircularProgres
 import {getSize, getFitSize} from '../../../Utils/Common';
 import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
-import FileController from '../../../Controllers/FileController';
 import './PhotoControl.css';
 
 const backgroundCircleStyle = { circle: 'photo-progress-circle-background' };
@@ -32,14 +31,14 @@ class PhotoControl extends React.Component {
 
     componentDidMount() {
         this.mount = true;
-        FileController.on('file_update', this.onProgressUpdated);
-        FileController.on('file_upload_update', this.onProgressUpdated);
+        FileStore.on('file_update', this.onProgressUpdated);
+        FileStore.on('file_upload_update', this.onProgressUpdated);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob)
     }
 
     componentWillUnmount() {
-        FileController.removeListener('file_upload_update', this.onProgressUpdated);
-        FileController.removeListener('file_update', this.onProgressUpdated);
+        FileStore.removeListener('file_upload_update', this.onProgressUpdated);
+        FileStore.removeListener('file_update', this.onProgressUpdated);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
         this.mount = false;
     }

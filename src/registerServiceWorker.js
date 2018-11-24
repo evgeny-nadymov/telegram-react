@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { arrayBufferToBase64 } from './Utils/Common';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
-import { arrayBufferToBase64 } from './Utils/Common';
 
 // In production, we register a service worker to serve assets from local cache.
 

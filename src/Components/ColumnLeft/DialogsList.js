@@ -21,7 +21,7 @@ import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import FileController from '../../Controllers/FileController';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
 
@@ -290,7 +290,7 @@ class DialogsList extends React.Component {
     };
 
     loadChatContents(chats){
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
         loadChatPhotos(store, chats);
     }
 

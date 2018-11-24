@@ -12,7 +12,6 @@ import {getChatLetters} from '../../Utils/Chat';
 import {getChatPhoto} from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
-import FileController from '../../Controllers/FileController';
 import './ChatTileControl.css';
 
 class ChatTileControl extends Component{
@@ -84,13 +83,13 @@ class ChatTileControl extends Component{
     loadChatContent(chat){
         if (!chat) return;
 
-        let store = FileController.getStore();
+        let store = FileStore.getStore();
 
         let [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
-            FileController.getLocalFile(store, chat.photo.small, idb_key, null,
+            FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
-                () => FileController.getRemoteFile(id, 1, chat));
+                () => FileStore.getRemoteFile(id, 1, chat));
         }
     }
 

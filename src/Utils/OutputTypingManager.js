@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import TdLibController from '../Controllers/TdLibController'
 import {OUTPUT_TYPING_INTERVAL} from '../Constants';
+import TdLibController from '../Controllers/TdLibController'
 
 class OutputTypingManager {
     constructor(chatId){

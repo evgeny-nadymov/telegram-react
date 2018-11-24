@@ -14,11 +14,10 @@ import AttachButton from './../ColumnMiddle/AttachButton';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import {getSize, readImageSize} from '../../Utils/Common';
 import {PHOTO_SIZE} from '../../Constants';
-import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import FileController from '../../Controllers/FileController';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
 
@@ -195,7 +194,7 @@ class InputBoxControl extends Component{
             this.onSendInternal(
                 content,
                 result => {
-                    FileController.uploadFile(result.content.document.document.id, result);
+                    FileStore.uploadFile(result.content.document.document.id, result);
                 });
         }
 
@@ -279,7 +278,7 @@ class InputBoxControl extends Component{
                     this.handleSendingMessage(cachedMessage, file);
                 }
 
-                FileController.uploadFile(result.content.photo.sizes[0].photo.id, result);
+                FileStore.uploadFile(result.content.photo.sizes[0].photo.id, result);
             });
     }
 

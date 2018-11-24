@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DocumentTileControl from '../../Tile/DocumentTileControl';
-import FileController from '../../../Controllers/FileController';
+import FileStore from '../../../Stores/FileStore';
 import './DocumentControl.css';
 
 const circleStyle = { circle: 'document-progress-circle' };
@@ -22,13 +22,13 @@ class DocumentControl extends React.Component {
 
     componentWillMount(){
         this.mount = true;
-        FileController.on('file_update', this.onProgressUpdated);
-        FileController.on('file_upload_update', this.onProgressUpdated);
+        FileStore.on('file_update', this.onProgressUpdated);
+        FileStore.on('file_upload_update', this.onProgressUpdated);
     }
 
     componentWillUnmount(){
-        FileController.removeListener('file_upload_update', this.onProgressUpdated);
-        FileController.removeListener('file_update', this.onProgressUpdated);
+        FileStore.removeListener('file_upload_update', this.onProgressUpdated);
+        FileStore.removeListener('file_update', this.onProgressUpdated);
         this.mount = false;
     }
 

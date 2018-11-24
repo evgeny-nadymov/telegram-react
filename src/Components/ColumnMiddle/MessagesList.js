@@ -24,9 +24,8 @@ import { getChatFullInfo } from '../../Utils/Chat';
 import {MESSAGE_SLICE_LIMIT} from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
-import UserStore from '../../Stores/UserStore';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
-import FileController from '../../Controllers/FileController';
 import './MessagesList.css';
 
 const ScrollBehaviorEnum = Object.freeze({
@@ -152,7 +151,7 @@ class MessagesList extends React.Component {
         const history = [message];
 
         this.insertAfter(history, scrollBehavior);
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
         loadMessageContents(store, history);
         MessagesList.viewMessages(history);
     };
@@ -199,7 +198,7 @@ class MessagesList extends React.Component {
                 }
                 this.previousMessages = messages;*/
 
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
         loadMessageContents(store, messages);
     };
 
@@ -274,7 +273,7 @@ class MessagesList extends React.Component {
             this.replace(separatorMessageId, result.messages, unread && separatorMessageId ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
 
             // load files
-            const store = FileController.getStore();
+            const store = FileStore.getStore();
             loadMessageContents(store, result.messages);
             loadChatPhotos(store, [chatId]);
 
@@ -322,7 +321,7 @@ class MessagesList extends React.Component {
                         if (pid) {
                             let obj = getPhotoSize(message.content.photo.sizes);
                             if (!obj.blob){
-                                FileController.cancelGetRemoteFile(id, message);
+                                FileStore.cancelGetRemoteFile(id, message);
                             }
                         }
                         break;
@@ -332,7 +331,7 @@ class MessagesList extends React.Component {
                         if (pid) {
                             let obj = message.content.sticker.sticker;
                             if (!obj.blob){
-                                FileController.cancelGetRemoteFile(id, message);
+                                FileStore.cancelGetRemoteFile(id, message);
                             }
                         }
                         break;
@@ -386,7 +385,7 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.insertBefore(result.messages);
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
@@ -437,7 +436,7 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         this.insertAfter(result.messages, ScrollBehaviorEnum.NONE);
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 

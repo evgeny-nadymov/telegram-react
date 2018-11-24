@@ -47,7 +47,7 @@ import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import OptionStore from '../../Stores/OptionStore';
-import FileController from '../../Controllers/FileController';
+import FileStore from '../../Stores/FileStore';
 import './ChatDetails.css';
 
 const styles = theme => ({
@@ -208,7 +208,7 @@ class ChatDetails extends React.Component {
     loadChatContents = () => {
         const { chatId } = this.props;
 
-        const store = FileController.getStore();
+        const store = FileStore.getStore();
 
         loadChatPhotos(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);

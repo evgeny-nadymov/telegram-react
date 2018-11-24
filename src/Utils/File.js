@@ -10,7 +10,6 @@ import { PHOTO_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
-import FileController from '../Controllers/FileController';
 import FileStore from '../Stores/FileStore';
 
 function getChatPhoto(chat) {
@@ -223,9 +222,9 @@ function loadUserPhotos(store, userIds) {
         if (user){
             let [id, pid, idb_key] = getUserPhoto(user);
             if (pid) {
-                FileController.getLocalFile(store, user.profile_photo.small, idb_key, null,
+                FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
                     () => FileStore.updateUserPhotoBlob(user.id, id),
-                    () => FileController.getRemoteFile(id, 1, user));
+                    () => FileStore.getRemoteFile(id, 1, user));
             }
         }
     }
@@ -239,9 +238,9 @@ function loadChatPhotos(store, chatIds) {
         let chat = ChatStore.get(chatIds[i]);
         let [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
-            FileController.getLocalFile(store, chat.photo.small, idb_key, null,
+            FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
-                () => FileController.getRemoteFile(id, 1, chat));
+                () => FileStore.getRemoteFile(id, 1, chat));
         }
     }
 }
@@ -266,9 +265,9 @@ function loadMessageContents(store, messages){
                         if (previewPid) {
                             let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
                             if (!preview.blob){
-                                FileController.getLocalFile(store, preview, previewIdbKey, null,
+                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
                                     () => MessageStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  FileController.getRemoteFile(previewId, 2, message); },
+                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
                                     'load_contents_preview_',
                                     message.id);
 
@@ -282,9 +281,9 @@ function loadMessageContents(store, messages){
                                 let obj = photoSize.photo;
                                 if (!obj.blob){
                                     let localMessage = message;
-                                    FileController.getLocalFile(store, obj, idb_key, null,
+                                    FileStore.getLocalFile(store, obj, idb_key, null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileController.getRemoteFile(id, 1, localMessage));
+                                        () => FileStore.getRemoteFile(id, 1, localMessage));
                                 }
                             }
                         }
@@ -296,9 +295,9 @@ function loadMessageContents(store, messages){
                             const obj = message.content.sticker.sticker;
                             if (!obj.blob){
                                 let localMessage = message;
-                                FileController.getLocalFile(store, obj, idb_key, null,
+                                FileStore.getLocalFile(store, obj, idb_key, null,
                                     () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
-                                    () => FileController.getRemoteFile(id, 1, localMessage));
+                                    () => FileStore.getRemoteFile(id, 1, localMessage));
                             }
                         }
                         break;
@@ -312,9 +311,9 @@ function loadMessageContents(store, messages){
                                 if (pid) {
                                     let obj = user.profile_photo.small;
                                     if (!obj.blob){
-                                        FileController.getLocalFile(store, obj, idb_key, null,
+                                        FileStore.getLocalFile(store, obj, idb_key, null,
                                             () => FileStore.updateUserPhotoBlob(user.id, id),
-                                            () => FileController.getRemoteFile(id, 1, user));
+                                            () => FileStore.getRemoteFile(id, 1, user));
                                     }
                                 }
                             }
@@ -327,9 +326,9 @@ function loadMessageContents(store, messages){
                             const obj = message.content.document.thumbnail.photo;
                             if (!obj.blob){
                                 const localMessage = message;
-                                FileController.getLocalFile(store, obj, idb_key, null,
+                                FileStore.getLocalFile(store, obj, idb_key, null,
                                     () => FileStore.updateDocumentThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
-                                    () => FileController.getRemoteFile(id, 1, localMessage));
+                                    () => FileStore.getRemoteFile(id, 1, localMessage));
                             }
                         }
                         break;
@@ -360,9 +359,9 @@ function saveOrDownload(file, fileName, message){
     }
 
     if (file.idb_key){
-        let store = FileController.getStore();
+        let store = FileStore.getStore();
 
-        FileController.getLocalFile(store, file, file.idb_key, null,
+        FileStore.getLocalFile(store, file, file.idb_key, null,
             () => {
                 if (file.blob){
                     saveBlob(file.blob, fileName);
@@ -370,14 +369,14 @@ function saveOrDownload(file, fileName, message){
             },
             () => {
                 if (file.local.can_be_downloaded){
-                    FileController.getRemoteFile(file.id, 1, message);
+                    FileStore.getRemoteFile(file.id, 1, message);
                 }
             });
         return;
     }
 
     if (file.local.can_be_downloaded){
-        FileController.getRemoteFile(file.id, 1, message);
+        FileStore.getRemoteFile(file.id, 1, message);
     }
 }
 
