@@ -107,12 +107,11 @@ class MediaViewer extends React.Component {
                             }
                         }*/
 
-                        const size = PHOTO_BIG_SIZE;
-                        const [id, pid, idb_key] = getPhotoFile(message, size);
+                        const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
                         if (pid) {
-                            const photoSize = getSize(content.photo.sizes, size);
+                            const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
                             if (photoSize) {
-                                const file = photoSize.photo;
+                                let file = photoSize.photo;
                                 if (!file.blob) {
                                     const localMessage = message;
                                     FileController.getLocalFile(store, file, idb_key, null,
@@ -202,8 +201,9 @@ class MediaViewer extends React.Component {
 
     handleDelete = () => {
         const { chatId, messageId } = this.props;
+        const { currentMessageId } = this.state;
 
-        const message = MessageStore.get(chatId, messageId);
+        const message = MessageStore.get(chatId, currentMessageId);
         if (!message) return;
         if (!message.content) return;
 
@@ -211,7 +211,8 @@ class MediaViewer extends React.Component {
         if (photo){
             const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
             if (photoSize){
-                const file = photoSize.photo;
+                let file = photoSize.photo;
+                file = FileStore.get(file.id) || file;
                 if (file) {
                     const store = FileController.getReadWriteStore();
 

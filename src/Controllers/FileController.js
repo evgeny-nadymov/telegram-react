@@ -6,9 +6,6 @@
  */
 
 import {EventEmitter} from 'events';
-import ChatStore from '../Stores/ChatStore';
-import UserStore from '../Stores/UserStore';
-import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from './TdLibController';

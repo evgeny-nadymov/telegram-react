@@ -18,7 +18,8 @@ class MediaViewerContent extends React.Component {
         super(props);
 
         const { chatId, messageId, size } = this.props;
-        const [width, height, file] = getMediaFile(chatId, messageId, size);
+        let [width, height, file] = getMediaFile(chatId, messageId, size);
+        file = FileStore.get(file.id) || file;
         this.state = {
             prevChatId: chatId,
             prevMessageId: messageId,
@@ -34,7 +35,8 @@ class MediaViewerContent extends React.Component {
         if (chatId !== state.prevChatId
             || messageId !== state.prevMessageId) {
 
-            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            let [width, height, file] = getMediaFile(chatId, messageId, size);
+            file = FileStore.get(file.id) || file;
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
