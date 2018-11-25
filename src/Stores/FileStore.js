@@ -234,6 +234,10 @@ class FileStore extends EventEmitter {
             return;
         }
 
+        delete file.blob;
+
+        this.deleteBlob(file.id);
+
         const request = store.delete(file.idb_key);
         request.onsuccess = (event) => {
             alert('Local file deleted');
@@ -342,6 +346,10 @@ class FileStore extends EventEmitter {
 
     setBlob(fileId, blob){
         this.blobItems.set(fileId, blob);
+    }
+
+    deleteBlob(fileId){
+        this.blobItems.delete(fileId);
     }
 
     updatePhotoBlob = (chatId, messageId, fileId) => {

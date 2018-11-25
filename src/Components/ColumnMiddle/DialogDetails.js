@@ -56,6 +56,10 @@ class DialogDetails extends Component{
         this.messagesList.current.scrollToBottom();
     };
 
+    scrollToStart = () => {
+        this.messagesList.current.scrollToStart();
+    };
+
     showDialogFooter = () => {
         const chat = ChatStore.get(this.state.currentChatId);
         if (!chat) return false;

@@ -552,6 +552,64 @@ class MessagesList extends React.Component {
         }
     };
 
+    scrollToStart = async () => {
+        const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        this.sessionId = Date.now();
+        this.loading = false;
+        this.completed = false;
+        let sessionId = this.sessionId;
+
+        const fromMessageId = 0;
+        const offset = 0;
+        const limit = MESSAGE_SLICE_LIMIT;
+
+        let result = await TdLibController
+            .send({
+                '@type': 'getChatHistory',
+                chat_id: chat.id,
+                from_message_id: fromMessageId,
+                offset: offset,
+                limit: limit
+            });
+
+        //TODO: replace result with one-way data flow
+        if (sessionId !== this.sessionId){
+            return;
+        }
+
+        if (this.props.chatId !== chatId){
+            return;
+        }
+
+        if (chat.last_message){
+            this.completed = result.messages.length > 0 && chat.last_message.id === result.messages[0].id;
+        }
+        else{
+            this.completed = true;
+        }
+
+        MessageStore.setItems(result.messages);
+        result.messages.reverse();
+
+        // calculate separator
+        let separatorMessageId = 0;
+        console.log('[MessagesList] separator_message_id=' + separatorMessageId);
+
+        this.replace(separatorMessageId, result.messages, ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+
+        // load files
+        const store = FileStore.getStore();
+        loadMessageContents(store, result.messages);
+        loadChatPhotos(store, [chatId]);
+
+        MessagesList.viewMessages(result.messages);
+
+        this.loadIncompleteHistory(result);
+    };
+
     render() {
         const { onSelectChat, onSelectUser } = this.props;
         const { history, separatorMessageId } = this.state;
