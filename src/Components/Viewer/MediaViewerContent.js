@@ -9,8 +9,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getMediaFile } from '../../Utils/File';
 import FileDownloadProgress from './FileDownloadProgress';
+import MediaCaption from './MediaCaption';
 import FileStore from '../../Stores/FileStore';
+import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
+import { getText } from '../../Utils/Message';
 
 class MediaViewerContent extends React.Component {
 
@@ -20,12 +23,16 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
         let [width, height, file] = getMediaFile(chatId, messageId, size);
         file = FileStore.get(file.id) || file;
+        const message = MessageStore.get(chatId, messageId);
+        const text = getText(message);
+
         this.state = {
             prevChatId: chatId,
             prevMessageId: messageId,
             width: width,
             height: height,
-            file: file
+            file: file,
+            text: text
         }
     }
 
@@ -37,22 +44,27 @@ class MediaViewerContent extends React.Component {
 
             let [width, height, file] = getMediaFile(chatId, messageId, size);
             file = FileStore.get(file.id) || file;
+            const message = MessageStore.get(chatId, messageId);
+            const text = getText(message);
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
                 width: width,
                 height: height,
-                file: file
+                file: file,
+                text: text
             }
         }
     }
 
     componentDidMount(){
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentWillUnmount(){
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
     onClientUpdatePhotoBlob = (update) => {
@@ -68,32 +80,42 @@ class MediaViewerContent extends React.Component {
         }
     };
 
+    onUpdateMessageContent = (update) => {
+        const { chatId, messageId, size } = this.props;
+        const { chat_id, message_id } = update;
+
+        if (chatId === chat_id && messageId === message_id) {
+            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            const message = MessageStore.get(chatId, messageId);
+            const text = getText(message);
+            this.setState({
+                width: width,
+                height: height,
+                file: file,
+                text: text
+            });
+        }
+    };
+
     handleContentClick = event => {
         event.stopPropagation();
 
         this.props.onClick(event);
     };
 
-    getFile = () => {
-        const { file } = this.state;
-        if (!file) return null;
-
-        return FileStore.get(file.id) || file;
-    };
-
     render() {
-        const { width, height, file } = this.state;
+        const { width, height, file, text } = this.state;
         if (!file) return null;
 
+        const latestFile = FileStore.get(file.id) || file;
         const blob = FileStore.getBlob(file.id) || file.blob;
-        const src = blob ? URL.createObjectURL(blob) : null;
-
-        const latestFile = this.getFile();
+        const src = FileStore.getBlobUrl(blob);
 
         return (
             <div className='media-viewer-content'>
                 <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick}/>
                 <FileDownloadProgress file={latestFile}/>
+                { (text && text.length > 0) && <MediaCaption text={text}/> }
             </div>
         );
     }

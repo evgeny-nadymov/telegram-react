@@ -111,7 +111,7 @@ class ChatTileControl extends Component{
 
         let src;
         try{
-            src = blob ? URL.createObjectURL(blob) : null;
+            src = FileStore.getBlobUrl(blob);
         }
         catch(error){
             console.log(`[ChatTileControl] render chat_id=${chat.id} with error ${error}`);

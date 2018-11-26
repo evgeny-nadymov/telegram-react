@@ -24,7 +24,7 @@
 }
 
 .media-viewer-left-column{
-    width: 104px;
+    min-width: 104px;
     display: flex;
     flex-direction: column;
 }
@@ -117,7 +117,7 @@
 }
 
 .media-viewer-right-column{
-    width: 104px;
+    min-width: 104px;
     display: flex;
     flex-direction: column;
 }

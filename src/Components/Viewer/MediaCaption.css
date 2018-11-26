@@ -1,0 +1,18 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+.media-caption{
+    position: absolute;
+    bottom: 12px;
+    max-width: 600px;
+    color: white;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 6px;
+}
+
+.media-caption-text{
+    margin: 12px;
+}

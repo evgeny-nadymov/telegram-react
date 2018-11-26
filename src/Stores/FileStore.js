@@ -12,6 +12,7 @@ class FileStore extends EventEmitter {
     constructor() {
         super();
 
+        this.urls = new WeakMap();
         this.items = new Map();
         this.blobItems = new Map();
 
@@ -88,20 +89,43 @@ class FileStore extends EventEmitter {
                         let obj = items[i];
                         switch (obj['@type']){
                             case 'chat':{
-                                let source = obj.photo.small;
+                                const { photo } = obj;
+
+                                let source = photo.small;
                                 if (source && source.id === file.id){
                                     this.getLocalFile(store, source, idb_key, arr,
                                         () => this.updateChatPhotoBlob(obj.id, file.id),
-                                        () => this.getRemoteFile(file.id, 1));
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
                                 }
+
+                                source = photo.big;
+                                if (source && source.id === file.id){
+                                    this.getLocalFile(store, source, idb_key, arr,
+                                        () => this.updateChatPhotoBlob(obj.id, file.id),
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
+                                }
+
                                 break;
                             }
                             case 'user':{
-                                let source = obj.profile_photo.small;
+                                const { profile_photo } = obj;
+
+                                let source = profile_photo.small;
                                 if (source && source.id === file.id){
                                     this.getLocalFile(store, source, idb_key, arr,
                                         () => this.updateUserPhotoBlob(obj.id, file.id),
-                                        () => this.getRemoteFile(file.id, 1));
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
+                                }
+
+                                source = profile_photo.big;
+                                if (source && source.id === file.id){
+                                    this.getLocalFile(store, source, idb_key, arr,
+                                        () => this.updateUserPhotoBlob(obj.id, file.id),
+                                        () => this.getRemoteFile(file.id, 1, obj));
+                                    break;
                                 }
 
                                 break;
@@ -109,55 +133,64 @@ class FileStore extends EventEmitter {
                             case 'message':
                                 switch (obj.content['@type']){
                                     case 'messagePhoto':
-                                        // preview
-                                        /*let preview = this.getPreviewPhotoSize(obj.content.photo.sizes);
-                                        if (preview && preview.photo.id === file.id)
-                                        {
-                                            this.getLocalFile(store, preview, idb_key,
-                                                () => MessageStore.updateMessagePhoto(obj.id),
-                                                () => { },
-                                                'update_',
-                                                obj.id);
-                                        }*/
+                                        const { photo } = obj.content;
 
-                                        // regular
-                                        for (let i = 0; i < obj.content.photo.sizes.length; i++){
-                                            let photoSize = obj.content.photo.sizes[i];
-                                            if (photoSize)
-                                            {
+                                        for (let i = 0; i < photo.sizes.length; i++){
+                                            let photoSize = photo.sizes[i];
+                                            if (photoSize){
                                                 let source = photoSize.photo;
                                                 if (source && source.id === file.id){
                                                     this.getLocalFile(store, source, idb_key, arr,
                                                         () => this.updatePhotoBlob(obj.chat_id, obj.id, file.id),
-                                                        () => { });
+                                                        () => this.getRemoteFile(file.id, 1, obj));
+                                                    break;
                                                 }
                                             }
                                         }
 
                                         break;
                                     case 'messageSticker': {
-                                        let source = obj.content.sticker.sticker;
-                                        if (source && source.id === file.id){
-                                            this.getLocalFile(store, source, idb_key, arr,
-                                                () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
-                                                () => this.getRemoteFile(file.id, 1, obj));
+                                        const { sticker } = obj.content;
+
+                                        if (sticker.thumbnail){
+                                            let source = sticker.thumbnail.photo;
+                                            if (source && source.id === file.id){
+                                                this.getLocalFile(store, source, idb_key, arr,
+                                                    () => this.updateStickerThumbnailBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj));
+                                                break;
+                                            }
+                                        }
+
+                                        if (sticker.sticker){
+                                            let source = sticker.sticker;
+                                            if (source && source.id === file.id){
+                                                this.getLocalFile(store, source, idb_key, arr,
+                                                    () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj));
+                                                break;
+                                            }
                                         }
                                         break;
                                     }
                                     case 'messageDocument': {
-                                        if (obj.content.document.thumbnail){
-                                            let source = obj.content.document.thumbnail.photo;
+                                        const { document } = obj.content;
+
+                                        if (document.thumbnail){
+                                            let source = document.thumbnail.photo;
                                             if (source && source.id === file.id){
                                                 this.getLocalFile(store, source, idb_key, arr,
                                                     () => this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj));
+                                                break;
                                             }
                                         }
 
-                                        if (obj.content.document.document){
-                                            let source = obj.content.document.document;
+                                        if (document.document){
+                                            let source = document.document;
                                             if (source && source.id === file.id){
-                                                this.emit('file_update', file);
+                                                //this.emit('file_update', file);
+                                                break;
                                                 // this.getLocalFile(store, source, idb_key, arr,
                                                 //     () => this.emit('file_update', file),
                                                 //     () => this.getRemoteFile(file.id, 1, obj));
@@ -176,16 +209,16 @@ class FileStore extends EventEmitter {
                 }
             }
             else{
-                this.emit('file_update', file);
+                //this.emit('file_update', file);
             }
         }
         else if (this.uploads.has(file.id)){
             if (file.remote.is_uploading_completed){
                 this.uploads.delete(file.id);
-                this.emit('file_upload_update', file);
+                //this.emit('file_upload_update', file);
             }
             else{
-                this.emit('file_upload_update', file);
+                //this.emit('file_upload_update', file);
             }
         }
     };
@@ -332,28 +365,53 @@ class FileStore extends EventEmitter {
         }
     }
 
-    get(fileId){
+    get = (fileId) => {
         return this.items.get(fileId);
-    }
+    };
 
-    set(file){
+    set = (file) => {
         this.items.set(file.id, file);
-    }
+    };
 
-    getBlob(fileId){
+    getBlob = (fileId) => {
         return this.blobItems.get(fileId);
-    }
+    };
 
-    setBlob(fileId, blob){
+    setBlob = (fileId, blob) => {
         this.blobItems.set(fileId, blob);
-    }
+    };
 
-    deleteBlob(fileId){
+    deleteBlob = (fileId) => {
         this.blobItems.delete(fileId);
-    }
+    };
+
+    getBlobUrl = (blob) => {
+        if (!blob){
+            return null;
+        }
+
+        if (this.urls.has(blob)){
+            return this.urls.get(blob);
+        }
+
+        const url = URL.createObjectURL(blob);
+        this.urls.set(blob, url);
+
+        return url;
+    };
+
+    deleteBlobUrl = (blob) => {
+        if (this.urls.has(blob)){
+            this.urls.delete(blob);
+        }
+    };
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdatePhotoBlob', { chatId: chatId, messageId: messageId, fileId: fileId });
+    };
+
+    updateStickerThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateStickerThumbnailBlob', { chatId: chatId, messageId: messageId, fileId: fileId });
     };
 
     updateStickerBlob = (chatId, messageId, fileId) => {

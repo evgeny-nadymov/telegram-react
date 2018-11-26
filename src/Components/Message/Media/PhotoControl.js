@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import {getSize, getFitSize} from '../../../Utils/Common';
 import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
@@ -31,26 +31,27 @@ class PhotoControl extends React.Component {
 
     componentDidMount() {
         this.mount = true;
-        FileStore.on('file_update', this.onProgressUpdated);
-        FileStore.on('file_upload_update', this.onProgressUpdated);
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob)
+        FileStore.on('updateFile', this.onUpdateFile);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.on('file_upload_update', this.onUpdateFile);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('file_upload_update', this.onProgressUpdated);
-        FileStore.removeListener('file_update', this.onProgressUpdated);
+        FileStore.removeListener('updateFile', this.onUpdateFile);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.removeListener('file_upload_update', this.onUpdateFile);
         this.mount = false;
     }
 
-    onProgressUpdated = (payload) => {
+    onUpdateFile = (update) => {
+        const { file } = update;
+
         if (this.photoSize
             && this.photoSize.photo
-            && this.photoSize.photo.id === payload.id){
+            && this.photoSize.photo.id === file.id){
 
-            payload.blob = this.photoSize.photo.blob;
-            this.photoSize.photo = payload;
-            this.payload = payload;
+            file.blob = this.photoSize.photo.blob;
+            this.photoSize.photo = file;
 
             this.forceUpdate();
         }
@@ -127,7 +128,7 @@ class PhotoControl extends React.Component {
         let className = 'photo-img';
         let src = '';
         try{
-            src = file && file.blob ? URL.createObjectURL(file.blob) : '';
+            src = FileStore.getBlobUrl(file.blob);
         }
         catch(error){
             console.log(`PhotoControl.render photo with error ${error}`);
@@ -141,7 +142,7 @@ class PhotoControl extends React.Component {
                 if (previewFile && previewFile.blob){
                     className += ' photo-img-blur';
                     try{
-                        src = previewFile && previewFile.blob ? URL.createObjectURL(previewFile.blob) : '';
+                        src = FileStore.getBlobUrl(previewFile.blob);
                     }
                     catch(error){
                         console.log(`PhotoControl.render photo with error ${error}`);

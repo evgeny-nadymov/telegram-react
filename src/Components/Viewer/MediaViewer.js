@@ -109,7 +109,8 @@ class MediaViewer extends React.Component {
                             const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
                             if (photoSize) {
                                 let file = photoSize.photo;
-                                if (!file.blob) {
+                                let blob = file.blob || FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(store, file, idb_key, null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),

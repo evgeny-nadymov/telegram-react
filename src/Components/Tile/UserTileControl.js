@@ -131,7 +131,7 @@ class UserTileControl extends Component{
 
         let src;
         try{
-            src = blob ? URL.createObjectURL(blob) : null;
+            src = FileStore.getBlobUrl(blob);
         }
         catch(error){
             console.log(`[UserTileControl] render user_id=${userId} with error ${error}`);

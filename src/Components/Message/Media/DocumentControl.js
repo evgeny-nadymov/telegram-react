@@ -22,26 +22,34 @@ class DocumentControl extends React.Component {
 
     componentWillMount(){
         this.mount = true;
-        FileStore.on('file_update', this.onProgressUpdated);
+        FileStore.on('updateFile', this.onProgressUpdated);
         FileStore.on('file_upload_update', this.onProgressUpdated);
     }
 
     componentWillUnmount(){
         FileStore.removeListener('file_upload_update', this.onProgressUpdated);
-        FileStore.removeListener('file_update', this.onProgressUpdated);
+        FileStore.removeListener('updateFile', this.onProgressUpdated);
         this.mount = false;
     }
 
-    onProgressUpdated = (payload) => {
-        if (this.props.message
-            && this.props.message.content
-            && this.props.message.content.document
-            && this.props.message.content.document.document
-            && this.props.message.content.document.document.id === payload.id){
-            this.props.message.content.document.document = payload;
-            this.payload = payload;
-            this.forceUpdate();
-        }
+    onProgressUpdated = (update) => {
+        const { file } = update;
+        const { message } = this.props;
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        const { document } = content;
+        if (!document) return;
+
+        const currentFile = document.document;
+        if (!currentFile) return;
+        if (currentFile.id !== file.id) return;
+
+        document.document = file;
+        this.payload = file;
+        this.forceUpdate();
     };
 
     getSizeString(size){

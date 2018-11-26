@@ -58,7 +58,7 @@ class DocumentTileControl extends React.Component {
 
         let src;
         try{
-            src = blob ? URL.createObjectURL(blob) : null;
+            src = FileStore.getBlobUrl(blob);
         }
         catch(error){
             console.log(`DocumentTileControl.render document_id=${document.id} with error ${error}`);
