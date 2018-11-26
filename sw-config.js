@@ -17,5 +17,6 @@ module.exports = {
     stripPrefix: './build',
     replacePrefix: '/telegram-react',
     maximumFileSizeToCacheInBytes: 31457280,
-    importScripts: ['./custom-service-worker.js']
+    importScripts: ['./custom-service-worker.js'],
+    ignoreUrlParametersMatching: [/./]
 };
