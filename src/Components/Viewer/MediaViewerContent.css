@@ -20,6 +20,14 @@
     max-height: 100%;
 }
 
+.media-viewer-content-image-preview{
+    position: absolute;
+}
+
+.media-viewer-content-wrapper{
+    position: absolute;
+}
+
 .media-viewer-progress{
     position: relative;
 }

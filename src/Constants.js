@@ -9,6 +9,7 @@ export const PHOTO_SIZE = 320;
 export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;
 export const MESSAGE_SLICE_LIMIT = 20;
+export const MEDIA_SLICE_LIMIT = 20;
 export const CHAT_SLICE_LIMIT = 25;
 export const INPUT_TYPING_INTERVAL = 8;
 export const OUTPUT_TYPING_INTERVAL = 8;

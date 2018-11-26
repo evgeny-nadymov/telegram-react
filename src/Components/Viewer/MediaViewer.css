@@ -21,6 +21,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
+    overflow: hidden;
 }
 
 .media-viewer-left-column{
@@ -133,6 +134,10 @@
 .media-viewer-footer-middle-column{
     flex-grow: 1;
     flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
 }
 
 .media-viewer-footer-commands{
@@ -178,4 +183,8 @@
     width: 14px;
     height: 18px;
     margin: 23px 27px;
+}
+
+.media-viewer-footer-text{
+    color: rgba(255, 255, 255, 0.6);
 }

@@ -7,13 +7,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getMediaFile } from '../../Utils/File';
 import FileDownloadProgress from './FileDownloadProgress';
 import MediaCaption from './MediaCaption';
+import { getMediaFile } from '../../Utils/File';
+import { getText } from '../../Utils/Message';
+import { PHOTO_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
-import { getText } from '../../Utils/Message';
 
 class MediaViewerContent extends React.Component {
 
@@ -23,6 +24,10 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
         let [width, height, file] = getMediaFile(chatId, messageId, size);
         file = FileStore.get(file.id) || file;
+
+        let [previewWidth, previewHeight, previewFile] = getMediaFile(chatId, messageId, PHOTO_SIZE);
+        previewFile = FileStore.get(previewFile.id) || previewFile;
+
         const message = MessageStore.get(chatId, messageId);
         const text = getText(message);
 
@@ -32,7 +37,10 @@ class MediaViewerContent extends React.Component {
             width: width,
             height: height,
             file: file,
-            text: text
+            text: text,
+            previewWidth: previewWidth,
+            previewHeight: previewHeight,
+            previewFile: previewFile
         }
     }
 
@@ -44,17 +52,27 @@ class MediaViewerContent extends React.Component {
 
             let [width, height, file] = getMediaFile(chatId, messageId, size);
             file = FileStore.get(file.id) || file;
+
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message);
+
+            let [previewWidth, previewHeight, previewFile] = getMediaFile(chatId, messageId, PHOTO_SIZE);
+            previewFile = FileStore.get(previewFile.id) || previewFile;
+
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
                 width: width,
                 height: height,
                 file: file,
-                text: text
+                text: text,
+                previewWidth: previewWidth,
+                previewHeight: previewHeight,
+                previewFile: previewFile
             }
         }
+
+        return null;
     }
 
     componentDidMount(){
@@ -104,16 +122,21 @@ class MediaViewerContent extends React.Component {
     };
 
     render() {
-        const { width, height, file, text } = this.state;
+        const { width, height, file, text, previewFile } = this.state;
         if (!file) return null;
 
         const latestFile = FileStore.get(file.id) || file;
         const blob = FileStore.getBlob(file.id) || file.blob;
         const src = FileStore.getBlobUrl(blob);
 
+        const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
+        const previewSrc = FileStore.getBlobUrl(previewBlob);
+
         return (
             <div className='media-viewer-content'>
                 <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick}/>
+                {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
+                {/*<div className='media-viewer-content-wrapper'/>*/}
                 <FileDownloadProgress file={latestFile}/>
                 { (text && text.length > 0) && <MediaCaption text={text}/> }
             </div>

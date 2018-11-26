@@ -11,7 +11,8 @@ import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
 import { getSize } from '../../Utils/Common';
 import { getPhotoFile, saveOrDownload } from '../../Utils/File';
-import { PHOTO_SIZE, PHOTO_BIG_SIZE } from '../../Constants';
+import { filterMessages } from '../../Utils/Message';
+import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
@@ -135,11 +136,9 @@ class MediaViewer extends React.Component {
             query: '',
             sender_user_id: 0,
             from_message_id: messageId,
-            offset: -50,
-            limit: 100,
-            filter: {
-                '@type': 'searchMessagesFilterPhoto'
-            }
+            offset: - MEDIA_SLICE_LIMIT,
+            limit: 2 * MEDIA_SLICE_LIMIT,
+            filter: { '@type': 'searchMessagesFilterPhoto' }
         });
 
         MessageStore.setItems(result.messages);
@@ -149,8 +148,10 @@ class MediaViewer extends React.Component {
         const { currentMessageId } = this.state;
         const index = this.history.findIndex(x => x.id === currentMessageId);
 
-        this.setState({ hasNextMedia: this.hasNextMedia(index), hasPreviousMedia: this.hasPreviousMedia(index) });
-        //alert(`total_count=${result.total_count} count=${result.messages.length}`);
+        this.setState({
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index)
+        });
     };
 
     onKeyDown = (event) => {
@@ -220,6 +221,13 @@ class MediaViewer extends React.Component {
         }
     };
 
+    hasPreviousMedia = index => {
+        if (index === -1) return false;
+
+        const nextIndex = index + 1;
+        return nextIndex < this.history.length;
+    };
+
     handlePrevious = event => {
         if (event) {
             event.stopPropagation();
@@ -229,7 +237,46 @@ class MediaViewer extends React.Component {
         const index = this.history.findIndex(x => x.id === currentMessageId);
         const nextIndex = index + 1;
 
-        this.loadNextMedia(nextIndex);
+        this.loadMedia(nextIndex, () => {
+            if (nextIndex === this.history.length - 1){
+                this.loadPrevious();
+            }
+        });
+    };
+
+    loadPrevious = async () => {
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: currentMessageId,
+            offset: 0,
+            limit: MEDIA_SLICE_LIMIT,
+            filter: { '@type': 'searchMessagesFilterPhoto' }
+        });
+
+        filterMessages(result, this.history);
+        MessageStore.setItems(result.messages);
+
+        this.history = this.history.concat(result.messages);
+
+        const index = this.history.findIndex(x => x.id === currentMessageId);
+
+        this.setState({
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index)
+        });
+    };
+
+    hasNextMedia = index => {
+        if (index === -1) return false;
+
+        const nextIndex = index - 1;
+        return nextIndex >= 0;
     };
 
     handleNext = event => {
@@ -241,33 +288,52 @@ class MediaViewer extends React.Component {
         const index = this.history.findIndex(x => x.id === currentMessageId);
         const nextIndex = index - 1;
 
-        this.loadNextMedia(nextIndex);
+        this.loadMedia(nextIndex, () => {
+            if (nextIndex === 0){
+                this.loadNext();
+            }
+        });
     };
 
-    loadNextMedia = nextIndex => {
-        if (nextIndex < 0) return;
-        if (nextIndex >= this.history.length) return;
+    loadNext = async () => {
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: currentMessageId,
+            offset: - MEDIA_SLICE_LIMIT,
+            limit: MEDIA_SLICE_LIMIT + 1,
+            filter: { '@type': 'searchMessagesFilterPhoto' }
+        });
+
+        filterMessages(result, this.history);
+        MessageStore.setItems(result.messages);
+
+        this.history = result.messages.concat(this.history);
+
+        const index = this.history.findIndex(x => x.id === currentMessageId);
 
         this.setState({
-            currentMessageId: this.history[nextIndex].id,
-            hasNextMedia: this.hasNextMedia(nextIndex),
-            hasPreviousMedia: this.hasPreviousMedia(nextIndex)
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index)
         });
-        this.loadContent([this.history[nextIndex]]);
     };
 
-    hasNextMedia = index => {
-        if (index === -1) return false;
+    loadMedia = (index, callback) => {
+        if (index < 0) return;
+        if (index >= this.history.length) return;
 
-        const nextIndex = index - 1;
-        return nextIndex >= 0;
-    };
+        this.setState({
+            currentMessageId: this.history[index].id,
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index)
+        }, callback);
 
-    hasPreviousMedia = index => {
-        if (index === -1) return false;
-
-        const nextIndex = index + 1;
-        return nextIndex < this.history.length;
+        this.loadContent([this.history[index]]);
     };
 
     render() {
@@ -300,7 +366,12 @@ class MediaViewer extends React.Component {
                 </div>
                 <div className='media-viewer-footer'>
                     <MediaViewerControl chatId={chatId} messageId={currentMessageId}/>
-                    <div className='media-viewer-footer-middle-column'/>
+                    <div className='media-viewer-footer-middle-column'>
+                        {/*<div className='media-viewer-footer-text'>*/}
+                            {/*<span>Photo</span>*/}
+                            {/*<span>&nbsp;1 of 999</span>*/}
+                        {/*</div>*/}
+                    </div>
                     <div className='media-viewer-footer-commands'>
                         <div className='media-viewer-button-save' title='Save' onClick={this.handleSave}>
                             <div className='media-viewer-button-save-icon'/>
