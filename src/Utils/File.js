@@ -383,12 +383,12 @@ function saveOrDownload(file, fileName, message){
 
 
 function getMediaFile(chatId, messageId, size){
-    if (!size) return null;
+    if (!size) return [0, 0, null];
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return null;
+    if (!message) return [0, 0, null];
 
     const { content } = message;
-    if (!content) return null;
+    if (!content) return [0, 0, null];
 
     switch (content['@type']) {
         case 'messagePhoto': {
@@ -402,7 +402,7 @@ function getMediaFile(chatId, messageId, size){
         }
     }
 
-    return null;
+    return [0, 0, null];
 }
 
 export {

@@ -55,6 +55,8 @@ class MessageStore extends EventEmitter {
                 if (chat){
                     let message = chat.get(update.message_id);
                     if (message){
+                        const oldContent = message.content;
+                        update.old_content = oldContent;
                         message.content = update.new_content;
                     }
                 }

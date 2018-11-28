@@ -82,12 +82,14 @@ class MediaViewer extends React.Component {
         document.addEventListener('keydown', this.onKeyDown, false);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentWillUnmount(){
         document.removeEventListener('keydown', this.onKeyDown, false);
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
+        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
     onKeyDown = (event) => {
@@ -102,6 +104,76 @@ class MediaViewer extends React.Component {
         }
     };
 
+    within = (item, first, last) => {
+        return item > first && item < last;
+    };
+
+    onUpdateMessageContent = (update) => {
+        const { chat_id, message_id, new_content, old_content } = update;
+        const { chatId } = this.props;
+        const { currentMessageId, totalCount } = this.state;
+
+        if (chatId !== chat_id) return;
+
+        const message = MessageStore.get(chat_id, message_id);
+        if (!message) return;
+
+        this.loadContent([message]);
+
+        const addMessage = this.isMediaContent(new_content) && !this.isMediaContent(old_content);
+        if (addMessage) {
+            if (this.history.length >= 2
+                && (this.within(message_id, this.history[0].id, this.history[this.history.length - 1].id) || this.firstSliceLoaded)) {
+                let inserted = false;
+                let history = [];
+                for (let i = 0; i < this.history.length; i++) {
+                    if (this.history[i].id > message_id){
+                        history.push(this.history[i]);
+                    }
+                    else{
+                        if (!inserted) {
+                            inserted = true;
+                            history.push(message);
+                        }
+                        history.push(this.history[i]);
+                    }
+                }
+                this.history = history;
+            }
+
+            const index = this.history.findIndex(x => x.id === currentMessageId);
+            this.setState({
+                hasNextMedia: this.hasNextMedia(index),
+                hasPreviousMedia: this.hasPreviousMedia(index),
+                totalCount: totalCount + 1
+            });
+        }
+
+        const removeMessage = !this.isMediaContent(new_content) && this.isMediaContent(old_content);
+        if (removeMessage) {
+            let oldHistory = this.history;
+            this.history = this.history.filter(x => x.id !== message_id);
+
+            if (currentMessageId === message_id) {
+                const filterMap = new Map();
+                filterMap.set(message_id, message_id);
+
+                this.moveToNextMedia(oldHistory, filterMap);
+                this.setState({
+                    totalCount: Math.max(totalCount - 1, 0)
+                });
+            }
+            else {
+                const index = this.history.findIndex(x => x.id === currentMessageId);
+                this.setState({
+                    hasNextMedia: this.hasNextMedia(index),
+                    hasPreviousMedia: this.hasPreviousMedia(index),
+                    totalCount: Math.max(totalCount - 1, 0)
+                });
+            }
+        }
+    };
+
     onUpdateDeleteMessages = (update) => {
         const { chat_id, message_ids, is_permanent } = update;
         const { chatId } = this.props;
@@ -110,55 +182,61 @@ class MediaViewer extends React.Component {
         if (!is_permanent) return;
         if (chatId !== chat_id) return;
 
-        const map = message_ids.reduce((accumulator, currentId) => {
+        const filterMap = message_ids.reduce((accumulator, currentId) => {
             accumulator.set(currentId, currentId);
             return accumulator;
         }, new Map());
 
-        const history = this.history;
-        let deletedCount = history.length;
+        const oldHistory = this.history;
+        let deletedCount = oldHistory.length;
 
-        this.history = this.history.filter(x => !map.has(x.id));
+        this.history = this.history.filter(x => !filterMap.has(x.id));
         deletedCount -= this.history.length;
 
-        this.setState({ totalCount: totalCount - deletedCount >= 0 ? totalCount - deletedCount : 0 });
+        this.setState({ totalCount: Math.max(totalCount - deletedCount, 0) });
 
         if (!this.history.length){
             ApplicationStore.setMediaViewerContent(null);
             return;
         }
 
-        if (map.has(currentMessageId)){
-            const index = history.findIndex(x => x.id === currentMessageId);
-            let nextId = 0;
-            for (let i = index - 1; i >= 0; i--){
-                if (!map.has(history[i].id)){
-                    nextId = history[i].id;
+        if (filterMap.has(currentMessageId)){
+            this.moveToNextMedia(oldHistory, filterMap);
+        }
+    };
+
+    moveToNextMedia = (oldHistory, filterMap) => {
+        const { currentMessageId } = this.state;
+
+        const index = oldHistory.findIndex(x => x.id === currentMessageId);
+        let nextId = 0;
+        for (let i = index - 1; i >= 0; i--){
+            if (filterMap && !filterMap.has(oldHistory[i].id)){
+                nextId = oldHistory[i].id;
+                break;
+            }
+        }
+        if (!nextId){
+            for (let i = index + 1; i < oldHistory.length; i++){
+                if (filterMap && !filterMap.has(oldHistory[i].id)){
+                    nextId = oldHistory[i].id;
                     break;
                 }
             }
-            if (!nextId){
-                for (let i = index + 1; i < history.length; i++){
-                    if (!map.has(history[i].id)){
-                        nextId = history[i].id;
-                        break;
-                    }
-                }
-            }
-
-            if (nextId){
-                const nextIndex = this.history.findIndex(x => x.id === nextId);
-
-                return this.loadMedia(nextIndex, () => {
-                    if (nextIndex === 0){
-                        this.loadNext();
-                    }
-                    else if (nextIndex === this.history.length - 1){
-                        this.loadPrevious();
-                    }
-                });
-            }
         }
+
+        if (!nextId) return;
+
+        const nextIndex = this.history.findIndex(x => x.id === nextId);
+
+        return this.loadMedia(nextIndex, () => {
+            if (nextIndex === 0){
+                this.loadNext();
+            }
+            else if (nextIndex === this.history.length - 1){
+                this.loadPrevious();
+            }
+        });
     };
 
     onUpdateNewMessage = (update) => {
@@ -167,7 +245,7 @@ class MediaViewer extends React.Component {
 
         const { message } = update;
         if (!message) return;
-        if (!this.isMediaMessage(message)) return;
+        if (!this.isMediaContent(message.content)) return;
 
         if (message.chat_id !== chatId) return;
         if (!this.firstSliceLoaded) return;
@@ -182,10 +260,7 @@ class MediaViewer extends React.Component {
         });
     };
 
-    isMediaMessage(message){
-        if (!message) return false;
-
-        const { content } = message;
+    isMediaContent(content){
         if (!content) return false;
 
         return content['@type'] === 'messagePhoto';
@@ -506,7 +581,7 @@ class MediaViewer extends React.Component {
 
         return (
             <div className='media-viewer'>
-                <div className='media-viewer-wrapper' onClick={this.handleClose}>
+                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder'/>
                         <div className={hasPreviousMedia ? 'media-viewer-button' : 'media-viewer-button-disabled'} onClick={this.handlePrevious}>

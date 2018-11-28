@@ -112,14 +112,32 @@ class MessagesList extends React.Component {
 
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
     }
 
     componentWillUnmount(){
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
     }
+
+    onUpdateMessageContent = (update) => {
+        const { chatId } = this.props;
+        const { history } = this.state;
+        const { chat_id, message_id } = update;
+
+        if (chatId !== chat_id) return;
+
+        if (history.findIndex(x => x.id === message_id) !== -1) {
+            const message = MessageStore.get(chat_id, message_id);
+            if (!message) return;
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, [message]);
+        }
+    };
 
     onUpdateChatLastMessage = (update) => {
         const { chatId } = this.props;
