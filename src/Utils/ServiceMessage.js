@@ -41,7 +41,7 @@ function isServiceMessage(message) {
     if (!message) return false;
     if (!message.content) return false;
 
-    return serviceMap.has(message.content['@type']);
+    return serviceMap.has(message.content['@type']) || message.ttl > 0;
 }
 
 function getTTLString(ttl){
@@ -137,6 +137,47 @@ function getServiceMessageContent(message, onSelectUser){
     const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
 
     const {content} = message;
+    if (message.ttl > 0){
+        switch (content['@type']) {
+            case 'messagePhoto' : {
+                if (isOutgoing) {
+                    return 'You sent a self-destructing photo. Please view it on your mobile';
+                }
+
+                return (
+                    <>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        {' sent a self-destructing photo. Please view it on your mobile'}
+                    </>
+                );
+            }
+            case 'messageVideo' : {
+                if (isOutgoing) {
+                    return 'You sent a self-destructing video. Please view it on your mobile';
+                }
+
+                return (
+                    <>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        {' sent a self-destructing video. Please view it on your mobile'}
+                    </>
+                );
+            }
+            default : {
+                if (isOutgoing) {
+                    return 'You sent a self-destructing message. Please view it on your mobile';
+                }
+
+                return (
+                    <>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        {' sent a self-destructing message. Please view it on your mobile'}
+                    </>
+                );
+            }
+        }
+    }
+
     switch (content['@type']) {
         case 'messageBasicGroupChatCreate' : {
             const {title} = ChatStore.get(message.chat_id);

@@ -265,6 +265,10 @@ function getContent(message){
         caption = `, ${content.caption.text}`;
     }
 
+    if (message.ttl > 0){
+        return getServiceMessageContent(message);
+    }
+
     switch (content['@type']) {
         case 'messageAnimation': {
             return 'GIF' + caption;

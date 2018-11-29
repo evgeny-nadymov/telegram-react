@@ -32,6 +32,7 @@ class ChatStore extends EventEmitter{
                 else{
                     this.updating = false;
                     if (this.skippedUpdates.length > 0){
+                        TdLibController.parameters.fastUpdating = false;
                         this.emitUpdate({ '@type': 'clientUpdateFastUpdatingComplete', updates: this.skippedUpdates });
                         this.skippedUpdates = [];
                     }
