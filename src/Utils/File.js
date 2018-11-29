@@ -6,7 +6,7 @@
  */
 
 import { getPhotoSize, getSize } from './Common';
-import { PHOTO_SIZE } from '../Constants';
+import { PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
@@ -405,6 +405,74 @@ function getMediaFile(chatId, messageId, size){
     return [0, 0, null];
 }
 
+
+
+function loadMediaViewerContent (messages){
+    if (!messages) return;
+    if (!messages.length) return;
+
+    const store = FileStore.getStore();
+
+    for (let i = 0; i < messages.length; i++){
+        let message = messages[i];
+        const { content } = message;
+        if (content){
+            switch (content['@type']) {
+                case 'messagePhoto': {
+
+                    // preview
+                    /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
+                    if (previewPid) {
+                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                        if (!preview.blob){
+                            FileStore.getLocalFile(store, preview, previewIdbKey, null,
+                                () => MessageStore.updateMessagePhoto(message.id),
+                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                'load_contents_preview_',
+                                message.id);
+
+                        }
+                    }*/
+
+                    const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
+                    if (pid) {
+                        const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
+                        if (photoSize) {
+                            let file = photoSize.photo;
+                            let blob = file.blob || FileStore.getBlob(file.id);
+                            if (!blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(store, file, idb_key, null,
+                                    () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
+                                    () => FileStore.getRemoteFile(id, 1, localMessage));
+                            }
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
+function preloadMediaViewerContent(index, history) {
+    if (!history.length) return;
+
+    const messages = [];
+    if (index > 0) {
+        messages.push(history[index - 1]);
+    }
+    if (index < history.length - 1){
+        messages.push(history[index + 1]);
+    }
+    if (index >= 0 && index < history.length){
+        messages.push(history[index]);
+    }
+
+    loadMediaViewerContent(messages);
+}
+
 export {
     getUserPhoto,
     getChatPhoto,
@@ -418,6 +486,8 @@ export {
     loadUserPhotos,
     loadChatPhotos,
     loadMessageContents,
+    loadMediaViewerContent,
+    preloadMediaViewerContent,
     saveOrDownload,
     getMediaFile
 };

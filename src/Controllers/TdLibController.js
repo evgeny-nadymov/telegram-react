@@ -24,7 +24,7 @@ class TdLibController extends EventEmitter{
             readOnly: false,
             verbosity: 1,
             jsVerbosity: 3,
-            fastUpdating: false
+            fastUpdating: true
         };
 
         this.setMaxListeners(Infinity);

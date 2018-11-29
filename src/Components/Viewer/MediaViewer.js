@@ -7,15 +7,30 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
+} from '@material-ui/core';
 import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
 import { getSize } from '../../Utils/Common';
-import { getPhotoFile, saveOrDownload } from '../../Utils/File';
-import { filterMessages } from '../../Utils/Message';
+import {
+    getPhotoFile,
+    loadMediaViewerContent,
+    preloadMediaViewerContent,
+    saveOrDownload
+} from '../../Utils/File';
+import { filterMessages, isMediaContent } from '../../Utils/Message';
+import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import OptionStore from '../../Stores/OptionStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
 
@@ -34,12 +49,13 @@ class MediaViewer extends React.Component {
             currentMessageId: messageId,
             hasNextMedia: false,
             hasPreviousMedia: false,
+            open: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState){
         const { chatId, messageId } = this.props;
-        const { currentMessageId, hasPreviousMedia, hasNextMedia, firstSliceLoaded, totalCount } = this.state;
+        const { currentMessageId, hasPreviousMedia, hasNextMedia, firstSliceLoaded, totalCount, open } = this.state;
 
         if (nextProps.chatId !== chatId){
             return true;
@@ -69,13 +85,17 @@ class MediaViewer extends React.Component {
             return true;
         }
 
+        if (nextState.open !== open){
+            return true;
+        }
+
         return false;
     }
 
     componentDidMount(){
         const { chatId, messageId } = this.props;
         const message = MessageStore.get(chatId, messageId);
-        this.loadContent([message]);
+        loadMediaViewerContent([message]);
 
         this.loadHistory();
 
@@ -94,6 +114,9 @@ class MediaViewer extends React.Component {
 
     onKeyDown = (event) => {
         if (event.keyCode === 27) {
+            const { open } = this.state;
+            if (open) return;
+
             this.handleClose();
         }
         else if (event.keyCode === 39){
@@ -102,10 +125,6 @@ class MediaViewer extends React.Component {
         else if (event.keyCode === 37){
             this.handlePrevious();
         }
-    };
-
-    within = (item, first, last) => {
-        return item > first && item < last;
     };
 
     onUpdateMessageContent = (update) => {
@@ -118,12 +137,12 @@ class MediaViewer extends React.Component {
         const message = MessageStore.get(chat_id, message_id);
         if (!message) return;
 
-        this.loadContent([message]);
+        loadMediaViewerContent([message]);
 
-        const addMessage = this.isMediaContent(new_content) && !this.isMediaContent(old_content);
+        const addMessage = isMediaContent(new_content) && !isMediaContent(old_content);
         if (addMessage) {
             if (this.history.length >= 2
-                && (this.within(message_id, this.history[0].id, this.history[this.history.length - 1].id) || this.firstSliceLoaded)) {
+                && (this.firstSliceLoaded || between(message_id, this.history[0].id, this.history[this.history.length - 1].id))) {
                 let inserted = false;
                 let history = [];
                 for (let i = 0; i < this.history.length; i++) {
@@ -149,7 +168,7 @@ class MediaViewer extends React.Component {
             });
         }
 
-        const removeMessage = !this.isMediaContent(new_content) && this.isMediaContent(old_content);
+        const removeMessage = !isMediaContent(new_content) && isMediaContent(old_content);
         if (removeMessage) {
             let oldHistory = this.history;
             this.history = this.history.filter(x => x.id !== message_id);
@@ -205,47 +224,13 @@ class MediaViewer extends React.Component {
         }
     };
 
-    moveToNextMedia = (oldHistory, filterMap) => {
-        const { currentMessageId } = this.state;
-
-        const index = oldHistory.findIndex(x => x.id === currentMessageId);
-        let nextId = 0;
-        for (let i = index - 1; i >= 0; i--){
-            if (filterMap && !filterMap.has(oldHistory[i].id)){
-                nextId = oldHistory[i].id;
-                break;
-            }
-        }
-        if (!nextId){
-            for (let i = index + 1; i < oldHistory.length; i++){
-                if (filterMap && !filterMap.has(oldHistory[i].id)){
-                    nextId = oldHistory[i].id;
-                    break;
-                }
-            }
-        }
-
-        if (!nextId) return;
-
-        const nextIndex = this.history.findIndex(x => x.id === nextId);
-
-        return this.loadMedia(nextIndex, () => {
-            if (nextIndex === 0){
-                this.loadNext();
-            }
-            else if (nextIndex === this.history.length - 1){
-                this.loadPrevious();
-            }
-        });
-    };
-
     onUpdateNewMessage = (update) => {
         const { chatId } = this.props;
         const { currentMessageId, totalCount } = this.state;
 
         const { message } = update;
         if (!message) return;
-        if (!this.isMediaContent(message.content)) return;
+        if (!isMediaContent(message.content)) return;
 
         if (message.chat_id !== chatId) return;
         if (!this.firstSliceLoaded) return;
@@ -258,61 +243,6 @@ class MediaViewer extends React.Component {
             hasPreviousMedia: this.hasPreviousMedia(index),
             totalCount: totalCount + 1
         });
-    };
-
-    isMediaContent(content){
-        if (!content) return false;
-
-        return content['@type'] === 'messagePhoto';
-    }
-
-    loadContent = (messages) => {
-        if (!messages) return;
-        if (!messages.length) return;
-
-        const store = FileStore.getStore();
-
-        for (let i = 0; i < messages.length; i++){
-            let message = messages[i];
-            const { content } = message;
-            if (content){
-                switch (content['@type']) {
-                    case 'messagePhoto': {
-
-                        // preview
-                        /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                        if (previewPid) {
-                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                            if (!preview.blob){
-                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                    () => MessageStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                    'load_contents_preview_',
-                                    message.id);
-
-                            }
-                        }*/
-
-                        const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
-                        if (pid) {
-                            const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
-                            if (photoSize) {
-                                let file = photoSize.photo;
-                                let blob = file.blob || FileStore.getBlob(file.id);
-                                if (!blob) {
-                                    const localMessage = message;
-                                    FileStore.getLocalFile(store, file, idb_key, null,
-                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage));
-                                }
-                            }
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
     };
 
     loadHistory = async () => {
@@ -343,7 +273,7 @@ class MediaViewer extends React.Component {
             hasPreviousMedia: this.hasPreviousMedia(index)
         });
 
-        this.preloadContent(index);
+        preloadMediaViewerContent(index, this.history);
 
         const maxCount = 1500;
         let count = 0;
@@ -376,23 +306,6 @@ class MediaViewer extends React.Component {
                 totalCount: result.total_count
             });
         }
-    };
-
-    preloadContent = (index) => {
-        if (!this.history.length) return;
-
-        const messages = [];
-        if (index > 0) {
-            messages.push(this.history[index - 1]);
-        }
-        if (index < this.history.length - 1){
-            messages.push(this.history[index + 1]);
-        }
-        if (index >= 0 && index < this.history.length){
-            messages.push(this.history[index]);
-        }
-
-        this.loadContent(messages);
     };
 
     handleClose = () => {
@@ -428,6 +341,9 @@ class MediaViewer extends React.Component {
     };
 
     handleDelete = () => {
+        this.handleDialogOpen();
+        return;
+
         const { chatId, messageId } = this.props;
         const { currentMessageId } = this.state;
 
@@ -566,21 +482,107 @@ class MediaViewer extends React.Component {
             hasPreviousMedia: this.hasPreviousMedia(index)
         }, callback);
 
-        this.preloadContent(index);
+        preloadMediaViewerContent(index, this.history);
         return true;
+    };
+
+    moveToNextMedia = (oldHistory, filterMap) => {
+        const { currentMessageId } = this.state;
+
+        const index = oldHistory.findIndex(x => x.id === currentMessageId);
+        let nextId = 0;
+        for (let i = index - 1; i >= 0; i--){
+            if (filterMap && !filterMap.has(oldHistory[i].id)){
+                nextId = oldHistory[i].id;
+                break;
+            }
+        }
+        if (!nextId){
+            for (let i = index + 1; i < oldHistory.length; i++){
+                if (filterMap && !filterMap.has(oldHistory[i].id)){
+                    nextId = oldHistory[i].id;
+                    break;
+                }
+            }
+        }
+
+        if (!nextId) return;
+
+        const nextIndex = this.history.findIndex(x => x.id === nextId);
+
+        return this.loadMedia(nextIndex, () => {
+            if (nextIndex === 0){
+                this.loadNext();
+            }
+            else if (nextIndex === this.history.length - 1){
+                this.loadPrevious();
+            }
+        });
+    };
+
+    handleDialogOpen = () => {
+        this.setState({ open: true });
+    };
+
+    handleDialogClose = () => {
+        this.setState({ open: false });
+    };
+
+    handleDone = () => {
+        this.setState({ open: false });
+
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const message = MessageStore.get(chatId, currentMessageId);
+        if (!message) return;
+        if (message.sender_user_id !== OptionStore.get('my_id').value) return;
+
+        TdLibController.send({
+            '@type': 'deleteMessages',
+            chat_id: chatId,
+            message_ids: [currentMessageId],
+            revoke: true
+        });
     };
 
     render() {
         const { chatId, messageId } = this.props;
-        const { currentMessageId, hasNextMedia, hasPreviousMedia, firstSliceLoaded, totalCount } = this.state;
+        const { currentMessageId, hasNextMedia, hasPreviousMedia, firstSliceLoaded, totalCount, open } = this.state;
 
         let index = -1;
         if (totalCount && firstSliceLoaded){
             index = this.history.findIndex(x => x.id === currentMessageId);
         }
 
+        const message = MessageStore.get(chatId, currentMessageId);
+        const canDeleteMedia = message && message.sender_user_id === OptionStore.get('my_id').value;
+
+        const confirmDeleteDialog = open?
+            (<Dialog
+                open={open}
+                onClose={this.handleDialogClose}
+                aria-labelledby='form-dialog-title'>
+                <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Are you sure you want to delete this media?
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleDialogClose} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button onClick={this.handleDone} color='primary'>
+                        Ok
+                    </Button>
+                </DialogActions>
+            </Dialog>)
+            : null;
+
         return (
             <div className='media-viewer'>
+                {confirmDeleteDialog}
                 <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder'/>
@@ -618,9 +620,11 @@ class MediaViewer extends React.Component {
                         <div className='media-viewer-button-forward' title='Forward' onClick={this.handleForward}>
                             <div className='media-viewer-button-forward-icon'/>
                         </div>
-                        <div className='media-viewer-button-delete' title='Delete' onClick={this.handleDelete}>
-                            <div className='media-viewer-button-delete-icon'/>
-                        </div>
+                        {   canDeleteMedia &&
+                            <div className='media-viewer-button-delete' title='Delete' onClick={this.handleDelete}>
+                                <div className='media-viewer-button-delete-icon'/>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>

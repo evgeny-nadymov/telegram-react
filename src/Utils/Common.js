@@ -262,6 +262,10 @@ function isAuthorizationReady(state){
     return state['@type'] === 'authorizationStateReady';
 }
 
+function between(item, first, last) {
+    return item > first && item < last;
+}
+
 export {
     orderCompare,
     getSize,
@@ -274,5 +278,6 @@ export {
     readImageSize,
     formatPhoneNumber,
     arrayBufferToBase64,
-    isAuthorizationReady
+    isAuthorizationReady,
+    between
 };

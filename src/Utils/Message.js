@@ -389,6 +389,12 @@ function getContent(message){
     }
 }
 
+function isMediaContent(content){
+    if (!content) return false;
+
+    return content['@type'] === 'messagePhoto';
+}
+
 export {
     getTitle,
     getText,
@@ -400,5 +406,6 @@ export {
     getForward,
     getUnread,
     getSenderUserId,
-    filterMessages
+    filterMessages,
+    isMediaContent
 };
