@@ -33,6 +33,7 @@ import ApplicationStore from '../../Stores/ApplicationStore';
 import OptionStore from '../../Stores/OptionStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
+import MediaViewerButton from './MediaViewerButton';
 
 class MediaViewer extends React.Component {
 
@@ -49,13 +50,13 @@ class MediaViewer extends React.Component {
             currentMessageId: messageId,
             hasNextMedia: false,
             hasPreviousMedia: false,
-            open: false
+            deleteConfirmationOpened: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState){
         const { chatId, messageId } = this.props;
-        const { currentMessageId, hasPreviousMedia, hasNextMedia, firstSliceLoaded, totalCount, open } = this.state;
+        const { currentMessageId, hasPreviousMedia, hasNextMedia, firstSliceLoaded, totalCount, deleteConfirmationOpened } = this.state;
 
         if (nextProps.chatId !== chatId){
             return true;
@@ -85,7 +86,7 @@ class MediaViewer extends React.Component {
             return true;
         }
 
-        if (nextState.open !== open){
+        if (nextState.deleteConfirmationOpened !== deleteConfirmationOpened){
             return true;
         }
 
@@ -114,8 +115,8 @@ class MediaViewer extends React.Component {
 
     onKeyDown = (event) => {
         if (event.keyCode === 27) {
-            const { open } = this.state;
-            if (open) return;
+            const { deleteConfirmationOpened } = this.state;
+            if (deleteConfirmationOpened) return;
 
             this.handleClose();
         }
@@ -521,15 +522,15 @@ class MediaViewer extends React.Component {
     };
 
     handleDialogOpen = () => {
-        this.setState({ open: true });
+        this.setState({ deleteConfirmationOpened: true });
     };
 
     handleDialogClose = () => {
-        this.setState({ open: false });
+        this.setState({ deleteConfirmationOpened: false });
     };
 
     handleDone = () => {
-        this.setState({ open: false });
+        this.setState({ deleteConfirmationOpened: false });
 
         const { chatId } = this.props;
         const { currentMessageId } = this.state;
@@ -548,7 +549,7 @@ class MediaViewer extends React.Component {
 
     render() {
         const { chatId, messageId } = this.props;
-        const { currentMessageId, hasNextMedia, hasPreviousMedia, firstSliceLoaded, totalCount, open } = this.state;
+        const { currentMessageId, hasNextMedia, hasPreviousMedia, firstSliceLoaded, totalCount, deleteConfirmationOpened } = this.state;
 
         let index = -1;
         if (totalCount && firstSliceLoaded){
@@ -558,9 +559,9 @@ class MediaViewer extends React.Component {
         const message = MessageStore.get(chatId, currentMessageId);
         const canDeleteMedia = message && message.sender_user_id === OptionStore.get('my_id').value;
 
-        const confirmDeleteDialog = open?
+        const deleteConfirmation = deleteConfirmationOpened?
             (<Dialog
-                open={open}
+                open={deleteConfirmationOpened}
                 onClose={this.handleDialogClose}
                 aria-labelledby='form-dialog-title'>
                 <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
@@ -582,27 +583,26 @@ class MediaViewer extends React.Component {
 
         return (
             <div className='media-viewer'>
-                {confirmDeleteDialog}
+                {deleteConfirmation}
                 <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder'/>
-                        <div className={hasPreviousMedia ? 'media-viewer-button' : 'media-viewer-button-disabled'} onClick={this.handlePrevious}>
+                        <MediaViewerButton disabled={!hasPreviousMedia} onClick={this.handlePrevious}>
                             <div className='media-viewer-previous-icon'/>
-                        </div>
+                        </MediaViewerButton>
                     </div>
 
                     <div className='media-viewer-content-column'>
                         <MediaViewerContent chatId={chatId} messageId={currentMessageId} size={PHOTO_BIG_SIZE} onClick={this.handlePrevious}/>
-                        {/*<MediaViewerContent chatId={chatId} messageId={messageId} size={PHOTO_SIZE}/>*/}
                     </div>
 
                     <div className='media-viewer-right-column'>
                         <div className='media-viewer-button-close' onClick={this.handleClose}>
                             <div className='media-viewer-close-icon'/>
                         </div>
-                        <div className={hasNextMedia ? 'media-viewer-button' : 'media-viewer-button-disabled'} onClick={this.handleNext}>
+                        <MediaViewerButton disabled={!hasNextMedia} onClick={this.handleNext}>
                             <div className='media-viewer-next-icon'/>
-                        </div>
+                        </MediaViewerButton>
                     </div>
                 </div>
                 <div className='media-viewer-footer'>
