@@ -1,0 +1,19 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.media-viewer-footer-text-wrapper {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.media-viewer-footer-text {
+  flex-grow: 1;
+  flex-shrink: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}

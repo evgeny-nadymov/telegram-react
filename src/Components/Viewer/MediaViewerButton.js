@@ -7,23 +7,39 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './MediaViewer.css';
+import classNames from 'classnames';
+import './MediaViewerButton.css';
 
 class MediaViewerButton extends React.Component {
+  handleClick = event => {
+    event.stopPropagation();
 
-    render() {
-        const { disabled, onClick, children } = this.props;
+    const { disabled, onClick } = this.props;
 
-        return (
-            <div className={!disabled ? 'media-viewer-button' : 'media-viewer-button-disabled'} onClick={onClick}>
-                {children}
-            </div>
-        );
-    }
+    if (disabled) return;
+
+    onClick(event);
+  };
+
+  render() {
+    const { disabled, grow, children } = this.props;
+
+    const className = classNames(
+      disabled ? 'media-viewer-button-disabled' : 'media-viewer-button',
+      { grow: grow }
+    );
+
+    return (
+      <div className={className} onClick={this.handleClick}>
+        {children}
+      </div>
+    );
+  }
 }
 
 MediaViewerButton.propTypes = {
-    disabled: PropTypes.bool
+  disabled: PropTypes.bool,
+  onClick: PropTypes.func
 };
 
 export default MediaViewerButton;

@@ -5,23 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.media-viewer-button {
+.media-viewer-footer-button {
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   opacity: 0.5;
 }
 
-.media-viewer-button-disabled {
+.media-viewer-footer-button-disabled {
   cursor: default;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.15;
+  opacity: 0.25;
 }
 
-.media-viewer-button:hover {
+.media-viewer-footer-button:hover {
   opacity: 1;
   background: rgba(0, 0, 0, 0.2);
 }
