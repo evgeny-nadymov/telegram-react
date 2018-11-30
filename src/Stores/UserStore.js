@@ -9,80 +9,80 @@ import { EventEmitter } from 'events';
 import OptionStore from '../Stores/OptionStore';
 import TdLibController from '../Controllers/TdLibController';
 
-class UserStore extends EventEmitter{
-    constructor(){
-        super();
+class UserStore extends EventEmitter {
+  constructor() {
+    super();
 
-        this.items = new Map();
-        this.fullInfoItems = new Map();
+    this.items = new Map();
+    this.fullInfoItems = new Map();
 
-        this.addTdLibListener();
-        this.setMaxListeners(Infinity);
-    }
+    this.addTdLibListener();
+    this.setMaxListeners(Infinity);
+  }
 
-    onUpdate = (update) => {
-        switch (update['@type']) {
-            case 'updateUser':{
-                this.set(update.user);
+  onUpdate = update => {
+    switch (update['@type']) {
+      case 'updateUser': {
+        this.set(update.user);
 
-                this.emit(update['@type'], update);
-                break;
-            }
-            case 'updateUserFullInfo':
-                this.setFullInfo(update.user_id, update.user_full_info);
+        this.emit(update['@type'], update);
+        break;
+      }
+      case 'updateUserFullInfo':
+        this.setFullInfo(update.user_id, update.user_full_info);
 
-                this.emit(update['@type'], update);
-                break;
-            case 'updateUserStatus':{
-                let user = this.get(update.user_id);
-                if (user){
-                    this.assign(user, { status : update.status });
-                }
-
-                this.emit(update['@type'], update);
-                break;
-            }
-            default:
-                break;
+        this.emit(update['@type'], update);
+        break;
+      case 'updateUserStatus': {
+        let user = this.get(update.user_id);
+        if (user) {
+          this.assign(user, { status: update.status });
         }
-    };
 
-    addTdLibListener = () => {
-        TdLibController.addListener('tdlib_update', this.onUpdate);
-    };
-
-    removeTdLibListener = () => {
-        TdLibController.removeListener('tdlib_update', this.onUpdate);
-    };
-
-    assign(source1, source2){
-        Object.assign(source1, source2);
-        //this.set(Object.assign({}, source1, source2));
+        this.emit(update['@type'], update);
+        break;
+      }
+      default:
+        break;
     }
+  };
 
-    getMe(){
-        const myId = OptionStore.get('my_id');
-        if (!myId) return null;
-        if (!myId.value) return null;
+  addTdLibListener = () => {
+    TdLibController.addListener('update', this.onUpdate);
+  };
 
-        return this.get(myId.value.value);
-    }
+  removeTdLibListener = () => {
+    TdLibController.removeListener('update', this.onUpdate);
+  };
 
-    get(userId){
-        return this.items.get(userId);
-    }
+  assign(source1, source2) {
+    Object.assign(source1, source2);
+    //this.set(Object.assign({}, source1, source2));
+  }
 
-    set(user){
-        this.items.set(user.id, user);
-    }
+  getMe() {
+    const myId = OptionStore.get('my_id');
+    if (!myId) return null;
+    if (!myId.value) return null;
 
-    getFullInfo(id){
-        return this.fullInfoItems.get(id);
-    }
+    return this.get(myId.value.value);
+  }
 
-    setFullInfo(id, fullInfo){
-        this.fullInfoItems.set(id, fullInfo);
-    }
+  get(userId) {
+    return this.items.get(userId);
+  }
+
+  set(user) {
+    this.items.set(user.id, user);
+  }
+
+  getFullInfo(id) {
+    return this.fullInfoItems.get(id);
+  }
+
+  setFullInfo(id, fullInfo) {
+    this.fullInfoItems.set(id, fullInfo);
+  }
 }
 
 const store = new UserStore();

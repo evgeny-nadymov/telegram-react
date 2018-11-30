@@ -8,58 +8,58 @@
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
 
-class BasicGroupStore extends EventEmitter{
-    constructor(){
-        super();
+class BasicGroupStore extends EventEmitter {
+  constructor() {
+    super();
 
-        this.items = new Map();
-        this.fullInfoItems = new Map();
+    this.items = new Map();
+    this.fullInfoItems = new Map();
 
-        this.addTdLibListener();
-        this.setMaxListeners(Infinity);
+    this.addTdLibListener();
+    this.setMaxListeners(Infinity);
+  }
+
+  onUpdate = update => {
+    switch (update['@type']) {
+      case 'updateBasicGroup': {
+        this.set(update.basic_group);
+
+        this.emit(update['@type'], update);
+        break;
+      }
+      case 'updateBasicGroupFullInfo':
+        this.setFullInfo(update.basic_group_id, update.basic_group_full_info);
+
+        this.emit(update['@type'], update);
+        break;
+      default:
+        break;
     }
+  };
 
-    onUpdate = (update) => {
-        switch (update['@type']) {
-            case 'updateBasicGroup':{
-                this.set(update.basic_group);
+  addTdLibListener = () => {
+    TdLibController.addListener('update', this.onUpdate);
+  };
 
-                this.emit(update['@type'], update);
-                break;
-            }
-            case 'updateBasicGroupFullInfo':
-                this.setFullInfo(update.basic_group_id, update.basic_group_full_info);
+  removeTdLibListener = () => {
+    TdLibController.removeListener('update', this.onUpdate);
+  };
 
-                this.emit(update['@type'], update);
-                break;
-            default:
-                break;
-        }
-    };
+  get(groupId) {
+    return this.items.get(groupId);
+  }
 
-    addTdLibListener = () => {
-        TdLibController.addListener('tdlib_update', this.onUpdate);
-    };
+  set(group) {
+    this.items.set(group.id, group);
+  }
 
-    removeTdLibListener = () => {
-        TdLibController.removeListener('tdlib_update', this.onUpdate);
-    };
+  getFullInfo(id) {
+    return this.fullInfoItems.get(id);
+  }
 
-    get(groupId){
-        return this.items.get(groupId);
-    }
-
-    set(group){
-        this.items.set(group.id, group);
-    }
-
-    getFullInfo(id){
-        return this.fullInfoItems.get(id);
-    }
-
-    setFullInfo(id, fullInfo){
-        this.fullInfoItems.set(id, fullInfo);
-    }
+  setFullInfo(id, fullInfo) {
+    this.fullInfoItems.set(id, fullInfo);
+  }
 }
 
 const store = new BasicGroupStore();
