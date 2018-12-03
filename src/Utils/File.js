@@ -275,17 +275,17 @@ function loadMessageContents(store, messages) {
           case 'messagePhoto': {
             // preview
             /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                        if (previewPid) {
-                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                            if (!preview.blob){
-                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                    () => MessageStore.updateMessagePhoto(message.id),
-                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                    'load_contents_preview_',
-                                    message.id);
+                                    if (previewPid) {
+                                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                                        if (!preview.blob){
+                                            FileStore.getLocalFile(store, preview, previewIdbKey, null,
+                                                () => MessageStore.updateMessagePhoto(message.id),
+                                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                                'load_contents_preview_',
+                                                message.id);
 
-                            }
-                        }*/
+                                        }
+                                    }*/
 
             const [id, pid, idb_key] = getPhotoFile(message);
             if (pid) {
@@ -470,17 +470,17 @@ function loadMediaViewerContent(messages) {
         case 'messagePhoto': {
           // preview
           /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                    if (previewPid) {
-                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                        if (!preview.blob){
-                            FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                () => MessageStore.updateMessagePhoto(message.id),
-                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                'load_contents_preview_',
-                                message.id);
+                              if (previewPid) {
+                                  let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                                  if (!preview.blob){
+                                      FileStore.getLocalFile(store, preview, previewIdbKey, null,
+                                          () => MessageStore.updateMessagePhoto(message.id),
+                                          () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                          'load_contents_preview_',
+                                          message.id);
 
-                        }
-                    }*/
+                                  }
+                              }*/
 
           const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
           if (pid) {
@@ -518,12 +518,12 @@ function preloadMediaViewerContent(index, history) {
   if (!history.length) return;
 
   const messages = [];
-  if (index > 0) {
-    messages.push(history[index - 1]);
-  }
-  if (index < history.length - 1) {
-    messages.push(history[index + 1]);
-  }
+  // if (index > 0) {
+  //     messages.push(history[index - 1]);
+  // }
+  // if (index < history.length - 1) {
+  //     messages.push(history[index + 1]);
+  // }
   if (index >= 0 && index < history.length) {
     messages.push(history[index]);
   }

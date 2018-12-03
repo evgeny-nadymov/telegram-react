@@ -21,8 +21,11 @@ import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
+import MediaViewerFooterButton from './MediaViewerFooterButton';
+import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getSize } from '../../Utils/Common';
 import {
+  getMediaFile,
   loadMediaViewerContent,
   preloadMediaViewerContent,
   saveOrDownload
@@ -35,7 +38,6 @@ import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
-import MediaViewerFooterButton from './MediaViewerFooterButton';
 
 class MediaViewer extends React.Component {
   constructor(props) {
@@ -339,7 +341,7 @@ class MediaViewer extends React.Component {
     const { chatId, messageId } = this.props;
     const { currentMessageId } = this.state;
 
-    const message = MessageStore.get(chatId, messageId);
+    const message = MessageStore.get(chatId, currentMessageId);
     if (!message) return;
     if (!message.content) return;
 
@@ -602,7 +604,7 @@ class MediaViewer extends React.Component {
 
     const canBeDeleted =
       can_be_deleted_only_for_self || can_be_deleted_for_all_users;
-    const canBeForwarded = can_be_forwarded;
+    const canBeForwarded = false; //can_be_forwarded;
 
     const deleteConfirmation = deleteConfirmationOpened ? (
       <Dialog
@@ -639,6 +641,14 @@ class MediaViewer extends React.Component {
         </DialogActions>
       </Dialog>
     ) : null;
+
+    const [width, height, file] = getMediaFile(
+      chatId,
+      currentMessageId,
+      PHOTO_BIG_SIZE
+    );
+
+    const fileId = file ? file.id : 0;
 
     return (
       <div className="media-viewer">
@@ -687,9 +697,9 @@ class MediaViewer extends React.Component {
                 : null
             }
           />
-          <MediaViewerFooterButton title="Save" onClick={this.handleSave}>
+          <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>
             <div className="media-viewer-save-icon" />
-          </MediaViewerFooterButton>
+          </MediaViewerDownloadButton>
           <MediaViewerFooterButton
             title="Forward"
             disabled={!canBeForwarded}

@@ -34,6 +34,7 @@ class MediaViewerFooterButton extends React.Component {
 
 MediaViewerFooterButton.propTypes = {
   title: PropTypes.string,
+  disabled: PropTypes.bool,
   onClick: PropTypes.func
 };
 

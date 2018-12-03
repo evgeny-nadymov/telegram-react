@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import {withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import {
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Button,
-    IconButton
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  IconButton
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import TdLibController from '../../Controllers/TdLibController';
@@ -22,71 +22,77 @@ import MainMenuButton from './MainMenuButton';
 import '../ColumnMiddle/Header.css';
 
 const styles = {
-    searchIconButton : {
-        margin: '8px 12px 8px 0',
-    }
+  searchIconButton: {
+    margin: '8px 12px 8px 0'
+  }
 };
 
 class DialogsHeader extends React.Component {
-    constructor(props){
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            open: false
-        };
-    }
-
-    handleLogOut = () => {
-        this.setState({ open: true });
+    this.state = {
+      open: false
     };
+  }
 
-    handleDone = () => {
-        this.handleClose();
-        TdLibController.logOut();
-    };
+  handleLogOut = () => {
+    this.setState({ open: true });
+  };
 
-    handleClose = () => {
-        this.setState({ open: false });
-    };
+  handleDone = () => {
+    this.handleClose();
+    TdLibController.logOut();
+  };
 
-    render() {
-        const { classes, onClick } = this.props;
-        const { open } = this.state;
+  handleClose = () => {
+    this.setState({ open: false });
+  };
 
-        const confirmLogoutDialog = open?
-            (<Dialog
-                open={open}
-                onClose={this.handleClose}
-                aria-labelledby='form-dialog-title'>
-                <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to log out?
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleClose} color='primary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={this.handleDone} color='primary'>
-                        Ok
-                    </Button>
-                </DialogActions>
-            </Dialog>)
-            : null;
+  render() {
+    const { classes, onClick } = this.props;
+    const { open } = this.state;
 
-        return (
-            <div className='header-master'>
-                <MainMenuButton onLogOut={this.handleLogOut}/>
-                { confirmLogoutDialog }
-                <div className='header-status grow cursor-pointer' onClick={onClick}>
-                    <span className='header-status-content'>Telegram</span>
-                </div>
-                <IconButton className={classes.searchIconButton} aria-label='Search'>
-                    <SearchIcon />
-                </IconButton>
-            </div>);
-    }
+    const confirmLogoutDialog = open ? (
+      <Dialog
+        open={open}
+        onClose={this.handleClose}
+        aria-labelledby="form-dialog-title"
+      >
+        <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to log out?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={this.handleDone} color="primary">
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
+    ) : null;
+
+    return (
+      <div className="header-master">
+        <MainMenuButton onLogOut={this.handleLogOut} />
+        {confirmLogoutDialog}
+        <div className="header-status grow cursor-pointer" onClick={onClick}>
+          <span className="header-status-content">Telegram</span>
+        </div>
+        <IconButton
+          className={classes.searchIconButton}
+          disabled
+          aria-label="Search"
+        >
+          <SearchIcon />
+        </IconButton>
+      </div>
+    );
+  }
 }
 
 export default withStyles(styles)(DialogsHeader);

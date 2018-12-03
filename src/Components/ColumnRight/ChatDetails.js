@@ -450,7 +450,7 @@ class ChatDetails extends React.Component {
           </List>
           <Divider />
           <List>
-            <ListItem button onClick={openSharedMedia}>
+            <ListItem button disabled onClick={openSharedMedia}>
               <ListItemIcon>
                 <PhotoIcon />
               </ListItemIcon>
@@ -463,7 +463,7 @@ class ChatDetails extends React.Component {
               />
             </ListItem>
             {!isGroup && (
-              <ListItem button onClick={this.handleGroupsInCommon}>
+              <ListItem button disabled onClick={this.handleGroupsInCommon}>
                 <ListItemText
                   inset
                   primary={

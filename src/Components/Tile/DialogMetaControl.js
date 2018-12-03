@@ -6,64 +6,66 @@
  */
 
 import React from 'react';
-import {getLastMessageDate} from '../../Utils/Chat';
+import { getLastMessageDate } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogMetaControl.css';
 
 class DialogMetaControl extends React.Component {
-    constructor(props){
-        super(props);
+  constructor(props) {
+    super(props);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.chatId !== this.props.chatId) {
+      return true;
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chatId !== this.props.chatId){
-            return true;
-        }
+    return false;
+  }
 
-        return false;
-    }
+  componentDidMount() {
+    ChatStore.on(
+      'clientUpdateFastUpdatingComplete',
+      this.onFastUpdatingComplete
+    );
+    ChatStore.on('updateChatDraftMessage', this.onUpdate);
+    ChatStore.on('updateChatLastMessage', this.onUpdate);
+    ChatStore.on('updateChatReadInbox', this.onUpdate);
+    ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
+    ChatStore.on('updateMessageMentionRead', this.onUpdate);
+  }
 
-    componentWillMount(){
-        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.on('updateChatDraftMessage', this.onUpdate);
-        ChatStore.on('updateChatLastMessage', this.onUpdate);
-        ChatStore.on('updateChatReadInbox', this.onUpdate);
-        ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
-        ChatStore.on('updateMessageMentionRead', this.onUpdate);
-    }
+  componentWillUnmount() {
+    ChatStore.removeListener(
+      'clientUpdateFastUpdatingComplete',
+      this.onFastUpdatingComplete
+    );
+    ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
+    ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
+    ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
+    ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
+    ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
+  }
 
-    componentWillUnmount(){
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
-        ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
-        ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
-    }
+  onFastUpdatingComplete = update => {
+    this.forceUpdate();
+  };
 
-    onFastUpdatingComplete = (update) => {
-        this.forceUpdate();
-    };
+  onUpdate = update => {
+    const { chatId } = this.props;
 
-    onUpdate = (update) => {
-        const { chatId } = this.props;
+    if (chatId !== update.chat_id) return;
 
-        if (chatId !== update.chat_id) return;
+    this.forceUpdate();
+  };
 
-        this.forceUpdate();
-    };
+  render() {
+    const { chatId } = this.props;
 
-    render() {
-        const { chatId } = this.props;
+    const chat = ChatStore.get(chatId);
+    const date = getLastMessageDate(chat);
 
-        const chat = ChatStore.get(chatId);
-        const date = getLastMessageDate(chat);
-
-        return (
-            <>
-                {date && <div className='dialog-meta-date'>{date}</div>}
-            </>
-        );
-    }
+    return <>{date && <div className="dialog-meta-date">{date}</div>}</>;
+  }
 }
 export default DialogMetaControl;

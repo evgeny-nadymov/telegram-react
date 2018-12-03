@@ -21,6 +21,7 @@ class MediaViewerContent extends React.Component {
     super(props);
 
     const { chatId, messageId, size } = this.props;
+
     let [width, height, file] = getMediaFile(chatId, messageId, size);
     file = FileStore.get(file.id) || file;
 
@@ -54,15 +55,15 @@ class MediaViewerContent extends React.Component {
       let [width, height, file] = getMediaFile(chatId, messageId, size);
       file = FileStore.get(file.id) || file;
 
-      const message = MessageStore.get(chatId, messageId);
-      const text = getText(message);
-
       let [previewWidth, previewHeight, previewFile] = getMediaFile(
         chatId,
         messageId,
         PHOTO_SIZE
       );
       previewFile = FileStore.get(previewFile.id) || previewFile;
+
+      const message = MessageStore.get(chatId, messageId);
+      const text = getText(message);
 
       return {
         prevChatId: chatId,
@@ -136,7 +137,6 @@ class MediaViewerContent extends React.Component {
     const { width, height, file, text, previewFile } = this.state;
     if (!file) return null;
 
-    const latestFile = FileStore.get(file.id) || file;
     const blob = FileStore.getBlob(file.id) || file.blob;
     const src = FileStore.getBlobUrl(blob);
 
@@ -152,7 +152,7 @@ class MediaViewerContent extends React.Component {
           onClick={this.handleContentClick}
         />
         {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-        <FileDownloadProgress file={latestFile} />
+        <FileDownloadProgress file={file} />
         {text && text.length > 0 && <MediaCaption text={text} />}
       </div>
     );
