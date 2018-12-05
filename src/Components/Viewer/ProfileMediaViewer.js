@@ -34,6 +34,7 @@ import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ProfileMediaViewer.css';
 import MediaViewerContent from './MediaViewerContent';
+import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 
 class ProfileMediaViewer extends React.Component {
     constructor(props) {
@@ -107,16 +108,10 @@ class ProfileMediaViewer extends React.Component {
         this.loadHistory();
 
         document.addEventListener('keydown', this.onKeyDown, false);
-        // MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
-        // MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
-        // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown, false);
-        // MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
-        // MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
-        // MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
     onKeyDown = event => {
@@ -165,16 +160,21 @@ class ProfileMediaViewer extends React.Component {
 
     handleSave = () => {
         const { chatId } = this.props;
-        const { currentMessageId } = this.state;
+        const { currentIndex, totalCount } = this.state;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        const photo = getPhotoFromChat(chatId);
+        let index = -1;
+        if (totalCount) {
+            index = currentIndex;
+        }
+
+        const photo = index > 0 && index < this.history.length ? getProfilePhotoFromPhoto(this.history[index]) : getPhotoFromChat(chatId);
         if (!photo) return;
         if (!photo.big) return;
 
-        const file = photo.big;
+        const file = FileStore.get(photo.big.id) || photo.big;
         if (!file) return;
 
         saveOrDownload(file, file.id + '.jpg', chat);
@@ -246,7 +246,7 @@ class ProfileMediaViewer extends React.Component {
         });
 
         //filterMessages(result, this.history);
-        MessageStore.setItems(result.messages);
+        //MessageStore.setItems(result.messages);
 
         this.history = this.history.concat(result.messages);
 
@@ -395,6 +395,7 @@ class ProfileMediaViewer extends React.Component {
         const deleteConfirmation = null;
         const photo = index > 0 && index < this.history.length ? getProfilePhotoFromPhoto(this.history[index]) : getPhotoFromChat(chatId);
         const userProfilePhoto = index >= 0 && index < this.history.length ? this.history[index] : null;
+        const fileId = photo.big.id;
         return (
             <div className='media-viewer'>
                 {deleteConfirmation}
@@ -431,9 +432,9 @@ class ProfileMediaViewer extends React.Component {
                                 ? `${totalCount - index} of ${totalCount}`
                                 : null
                         }/>
-                    <MediaViewerFooterButton title='Save' onClick={this.handleSave}>
+                    <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>
                         <div className='media-viewer-save-icon' />
-                    </MediaViewerFooterButton>
+                    </MediaViewerDownloadButton>
                     <MediaViewerFooterButton title='Forward' disabled={true} onClick={this.handleForward}>
                         <div className='media-viewer-forward-icon' />
                     </MediaViewerFooterButton>

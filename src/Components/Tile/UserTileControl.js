@@ -126,11 +126,12 @@ class UserTileControl extends Component {
         const user = UserStore.get(userId);
         if (!user) return null;
 
+        const { profile_photo } = user;
+
         const letters = getUserLetters(user);
-        const blob =
-            user.profile_photo && user.profile_photo.small
-                ? user.profile_photo.small.blob
-                : null;
+        const blob = profile_photo && profile_photo.small?
+            FileStore.getBlob(profile_photo.small.id) :
+            null;
 
         let src;
         try {
