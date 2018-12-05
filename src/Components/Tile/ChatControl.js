@@ -11,27 +11,27 @@ import DialogTitleControl from './DialogTitleControl';
 import DialogStatusControl from './DialogStatusControl';
 
 class ChatControl extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+    constructor(props) {
+        super(props);
+    }
 
-  render() {
-    const { chatId, onSelect } = this.props;
+    render() {
+        const { chatId, onSelect } = this.props;
 
-    return (
-      <div className="dialog-wrapper">
-        <ChatTileControl chatId={chatId} onSelect={onSelect} />
-        <div className="dialog-inner-wrapper">
-          <div className="dialog-row-wrapper">
-            <DialogTitleControl chatId={chatId} />
-          </div>
-          <div className="dialog-row-wrapper">
-            <DialogStatusControl chatId={chatId} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+        return (
+            <div className='dialog-wrapper'>
+                <ChatTileControl chatId={chatId} onSelect={onSelect} />
+                <div className='dialog-inner-wrapper'>
+                    <div className='dialog-row-wrapper'>
+                        <DialogTitleControl chatId={chatId} />
+                    </div>
+                    <div className='dialog-row-wrapper'>
+                        <DialogStatusControl chatId={chatId} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
 
 export default ChatControl;

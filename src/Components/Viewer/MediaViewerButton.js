@@ -11,35 +11,35 @@ import classNames from 'classnames';
 import './MediaViewerButton.css';
 
 class MediaViewerButton extends React.Component {
-  handleClick = event => {
-    event.stopPropagation();
+    handleClick = event => {
+        event.stopPropagation();
 
-    const { disabled, onClick } = this.props;
+        const { disabled, onClick } = this.props;
 
-    if (disabled) return;
+        if (disabled) return;
 
-    onClick(event);
-  };
+        onClick(event);
+    };
 
-  render() {
-    const { disabled, grow, children } = this.props;
+    render() {
+        const { disabled, grow, children } = this.props;
 
-    const className = classNames(
-      disabled ? 'media-viewer-button-disabled' : 'media-viewer-button',
-      { grow: grow }
-    );
+        const className = classNames(
+            disabled ? 'media-viewer-button-disabled' : 'media-viewer-button',
+            { grow: grow }
+        );
 
-    return (
-      <div className={className} onClick={this.handleClick}>
-        {children}
-      </div>
-    );
-  }
+        return (
+            <div className={className} onClick={this.handleClick}>
+                {children}
+            </div>
+        );
+    }
 }
 
 MediaViewerButton.propTypes = {
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func
+    disabled: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
 export default MediaViewerButton;

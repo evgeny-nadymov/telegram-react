@@ -26,261 +26,231 @@ import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
 const theme = createMuiTheme({
-  palette: {
-    primary: { main: '#3B9EDB' },
-    secondary: { main: '#FF5555' }
-  },
-  typography: {
-    useNextVariants: true
-  }
+    palette: {
+        primary: { main: '#3B9EDB' },
+        secondary: { main: '#FF5555' }
+    },
+    typography: {
+        useNextVariants: true
+    }
 });
 
 class TelegramApp extends Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    console.log(`Start Telegram Web ${packageJson.version}`);
+        console.log(`Start Telegram Web ${packageJson.version}`);
 
-    this.dialogDetailsRef = React.createRef();
+        this.dialogDetailsRef = React.createRef();
 
-    this.state = {
-      authorizationState: null,
-      inactive: false,
-      mediaViewerContent: ApplicationStore.mediaViewerContent
+        this.state = {
+            authorizationState: null,
+            inactive: false,
+            mediaViewerContent: ApplicationStore.mediaViewerContent
+        };
+
+        /*this.store = localForage.createInstance({
+                    name: '/tdlib'
+                });*/
+
+        //this.initDB();
+    }
+
+    componentWillMount() {
+        const { location } = this.props;
+
+        TdLibController.init(location);
+    }
+
+    componentDidMount() {
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+    }
+
+    componentWillUnmount() {
+        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.removeListener('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+    }
+
+    onUpdateAuthorizationState = update => {
+        const { authorization_state } = update;
+
+        this.setState({ authorizationState: authorization_state });
+
+        if (authorization_state) {
+            if (
+                authorization_state['@type'] === 'authorizationStateReady' ||
+                authorization_state['@type'] === 'authorizationStateWaitCode' ||
+                authorization_state['@type'] === 'authorizationStateWaitPassword' ||
+                authorization_state['@type'] === 'authorizationStateWaitPhoneNumber'
+            ) {
+                //registerServiceWorker();
+            }
+
+            if (authorization_state['@type'] === 'authorizationStateReady') {
+                TdLibController.send({
+                    '@type': 'setOption',
+                    name: 'online',
+                    value: { '@type': 'optionValueBoolean', value: true }
+                });
+            }
+        }
     };
 
-    /*this.store = localForage.createInstance({
-                name: '/tdlib'
-            });*/
-
-    //this.initDB();
-  }
-
-  componentWillMount() {
-    const { location } = this.props;
-
-    TdLibController.init(location);
-  }
-
-  componentDidMount() {
-    ApplicationStore.on(
-      'updateAuthorizationState',
-      this.onUpdateAuthorizationState
-    );
-    ApplicationStore.on(
-      'clientUpdateChatDetailsVisibility',
-      this.onClientUpdateChatDetailsVisibility
-    );
-    ApplicationStore.on(
-      'clientUpdateMediaViewerContent',
-      this.onClientUpdateMediaViewerContent
-    );
-    ApplicationStore.on(
-      'clientUpdateProfileMediaViewerContent',
-      this.onClientUpdateProfileMediaViewerContent
-    );
-    ApplicationStore.on(
-      'clientUpdateAppInactive',
-      this.onClientUpdateAppInactive
-    );
-  }
-
-  componentWillUnmount() {
-    ApplicationStore.removeListener(
-      'updateAuthorizationState',
-      this.onUpdateAuthorizationState
-    );
-    ApplicationStore.removeListener(
-      'clientUpdateChatDetailsVisibility',
-      this.onClientUpdateChatDetailsVisibility
-    );
-    ApplicationStore.removeListener(
-      'clientUpdateMediaViewerContent',
-      this.onClientUpdateMediaViewerContent
-    );
-    ApplicationStore.removeListener(
-      'clientUpdateProfileMediaViewerContent',
-      this.onClientUpdateProfileMediaViewerContent
-    );
-    ApplicationStore.removeListener(
-      'clientUpdateAppInactive',
-      this.onClientUpdateAppInactive
-    );
-  }
-
-  onUpdateAuthorizationState = update => {
-    const { authorization_state } = update;
-
-    this.setState({ authorizationState: authorization_state });
-
-    if (authorization_state) {
-      if (
-        authorization_state['@type'] === 'authorizationStateReady' ||
-        authorization_state['@type'] === 'authorizationStateWaitCode' ||
-        authorization_state['@type'] === 'authorizationStateWaitPassword' ||
-        authorization_state['@type'] === 'authorizationStateWaitPhoneNumber'
-      ) {
-        //registerServiceWorker();
-      }
-
-      if (authorization_state['@type'] === 'authorizationStateReady') {
-        TdLibController.send({
-          '@type': 'setOption',
-          name: 'online',
-          value: { '@type': 'optionValueBoolean', value: true }
+    onClientUpdateChatDetailsVisibility = update => {
+        this.setState({
+            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
         });
-      }
+    };
+
+    onClientUpdateMediaViewerContent = update => {
+        this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
+    };
+
+    onClientUpdateProfileMediaViewerContent = update => {
+        this.setState({
+            profileMediaViewerContent: ApplicationStore.profileMediaViewerContent
+        });
+    };
+
+    onClientUpdateAppInactive = update => {
+        this.setState({ inactive: true });
+    };
+
+    handleSelectChat = chatId => {
+        const currentChatId = ApplicationStore.getChatId();
+        if (currentChatId === chatId) {
+            const chat = ChatStore.get(chatId);
+            if (chat && chat.unread_count > 0) {
+                this.dialogDetailsRef.current.scrollToStart();
+            } else {
+                this.dialogDetailsRef.current.scrollToBottom();
+            }
+        } else {
+            ApplicationStore.setChatId(chatId);
+        }
+    };
+
+    handleSelectUser = async userId => {
+        if (!userId) return;
+
+        let chat = await TdLibController.send({
+            '@type': 'createPrivateChat',
+            user_id: userId,
+            force: true
+        });
+
+        this.handleSelectChat(chat.id);
+    };
+
+    clearCache = () => {
+        // this.store.clear()
+        //     .then(() => alert('cache cleared'));
+    };
+
+    handleChangePhone = () => {
+        this.setState({
+            authorizationState: { '@type': 'authorizationStateWaitPhoneNumber' }
+        });
+    };
+
+    render() {
+        const {
+            inactive,
+            authorizationState,
+            isChatDetailsVisible,
+            mediaViewerContent,
+            profileMediaViewerContent
+        } = this.state;
+
+        let page = (
+            <>
+                <div
+                    className={classNames('page', {
+                        'page-third-column': isChatDetailsVisible
+                    })}
+                >
+                    <Dialogs
+                        onClearCache={this.clearCache}
+                        onSelectChat={this.handleSelectChat}
+                    />
+                    <DialogDetails
+                        ref={this.dialogDetailsRef}
+                        onSelectChat={this.handleSelectChat}
+                        onSelectUser={this.handleSelectUser}
+                    />
+                    {isChatDetailsVisible && (
+                        <DialogInfo
+                            onSelectChat={this.handleSelectChat}
+                            onSelectUser={this.handleSelectUser}
+                        />
+                    )}
+                </div>
+                <Footer />
+            </>
+        );
+
+        if (inactive) {
+            page = (
+                <>
+                    <div className="header-wrapper" />
+                    <div className="page">
+                        <AppInactiveControl />
+                    </div>
+                    <Footer />
+                </>
+            );
+        } else if (authorizationState) {
+            switch (authorizationState['@type']) {
+                case 'authorizationStateClosed': {
+                    break;
+                }
+                case 'authorizationStateClosing': {
+                    break;
+                }
+                case 'authorizationStateLoggingOut': {
+                    break;
+                }
+                case 'authorizationStateReady': {
+                    break;
+                }
+                case 'authorizationStateWaitCode':
+                case 'authorizationStateWaitPassword':
+                case 'authorizationStateWaitPhoneNumber':
+                    page = (
+                        <AuthFormControl
+                            authorizationState={authorizationState}
+                            onChangePhone={this.handleChangePhone}
+                        />
+                    );
+                    break;
+                case 'authorizationStateWaitEncryptionKey': {
+                    break;
+                }
+                case 'authorizationStateWaitTdlibParameters': {
+                    break;
+                }
+            }
+        }
+
+        return (
+            <MuiThemeProvider theme={theme}>
+                <div id="app">
+                    {page}
+                    {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
+                    {profileMediaViewerContent && (
+                        <ProfileMediaViewer {...profileMediaViewerContent} />
+                    )}
+                </div>
+            </MuiThemeProvider>
+        );
     }
-  };
-
-  onClientUpdateChatDetailsVisibility = update => {
-    this.setState({
-      isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
-    });
-  };
-
-  onClientUpdateMediaViewerContent = update => {
-    this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
-  };
-
-  onClientUpdateProfileMediaViewerContent = update => {
-    this.setState({
-      profileMediaViewerContent: ApplicationStore.profileMediaViewerContent
-    });
-  };
-
-  onClientUpdateAppInactive = update => {
-    this.setState({ inactive: true });
-  };
-
-  handleSelectChat = chatId => {
-    const currentChatId = ApplicationStore.getChatId();
-    if (currentChatId === chatId) {
-      const chat = ChatStore.get(chatId);
-      if (chat && chat.unread_count > 0) {
-        this.dialogDetailsRef.current.scrollToStart();
-      } else {
-        this.dialogDetailsRef.current.scrollToBottom();
-      }
-    } else {
-      ApplicationStore.setChatId(chatId);
-    }
-  };
-
-  handleSelectUser = async userId => {
-    if (!userId) return;
-
-    let chat = await TdLibController.send({
-      '@type': 'createPrivateChat',
-      user_id: userId,
-      force: true
-    });
-
-    this.handleSelectChat(chat.id);
-  };
-
-  clearCache = () => {
-    // this.store.clear()
-    //     .then(() => alert('cache cleared'));
-  };
-
-  handleChangePhone = () => {
-    this.setState({
-      authorizationState: { '@type': 'authorizationStateWaitPhoneNumber' }
-    });
-  };
-
-  render() {
-    const {
-      inactive,
-      authorizationState,
-      isChatDetailsVisible,
-      mediaViewerContent,
-      profileMediaViewerContent
-    } = this.state;
-
-    let page = (
-      <>
-        <div
-          className={classNames('page', {
-            'page-third-column': isChatDetailsVisible
-          })}
-        >
-          <Dialogs
-            onClearCache={this.clearCache}
-            onSelectChat={this.handleSelectChat}
-          />
-          <DialogDetails
-            ref={this.dialogDetailsRef}
-            onSelectChat={this.handleSelectChat}
-            onSelectUser={this.handleSelectUser}
-          />
-          {isChatDetailsVisible && (
-            <DialogInfo
-              onSelectChat={this.handleSelectChat}
-              onSelectUser={this.handleSelectUser}
-            />
-          )}
-        </div>
-        <Footer />
-      </>
-    );
-
-    if (inactive) {
-      page = (
-        <>
-          <div className="header-wrapper" />
-          <div className="page">
-            <AppInactiveControl />
-          </div>
-          <Footer />
-        </>
-      );
-    } else if (authorizationState) {
-      switch (authorizationState['@type']) {
-        case 'authorizationStateClosed': {
-          break;
-        }
-        case 'authorizationStateClosing': {
-          break;
-        }
-        case 'authorizationStateLoggingOut': {
-          break;
-        }
-        case 'authorizationStateReady': {
-          break;
-        }
-        case 'authorizationStateWaitCode':
-        case 'authorizationStateWaitPassword':
-        case 'authorizationStateWaitPhoneNumber':
-          page = (
-            <AuthFormControl
-              authorizationState={authorizationState}
-              onChangePhone={this.handleChangePhone}
-            />
-          );
-          break;
-        case 'authorizationStateWaitEncryptionKey': {
-          break;
-        }
-        case 'authorizationStateWaitTdlibParameters': {
-          break;
-        }
-      }
-    }
-
-    return (
-      <MuiThemeProvider theme={theme}>
-        <div id="app">
-          {page}
-          {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
-          {profileMediaViewerContent && (
-            <ProfileMediaViewer {...profileMediaViewerContent} />
-          )}
-        </div>
-      </MuiThemeProvider>
-    );
-  }
 }
 
 /*window.onblur = function(){

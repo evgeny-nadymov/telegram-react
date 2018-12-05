@@ -9,56 +9,56 @@ import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
 
 class SupergroupStore extends EventEmitter {
-  constructor() {
-    super();
+    constructor() {
+        super();
 
-    this.items = new Map();
-    this.fullInfoItems = new Map();
+        this.items = new Map();
+        this.fullInfoItems = new Map();
 
-    this.addTdLibListener();
-    this.setMaxListeners(Infinity);
-  }
-
-  onUpdate = update => {
-    switch (update['@type']) {
-      case 'updateSupergroup':
-        this.set(update.supergroup);
-
-        this.emit(update['@type'], update);
-        break;
-      case 'updateSupergroupFullInfo':
-        this.setFullInfo(update.supergroup_id, update.supergroup_full_info);
-
-        this.emit(update['@type'], update);
-        break;
-      default:
-        break;
+        this.addTdLibListener();
+        this.setMaxListeners(Infinity);
     }
-  };
 
-  addTdLibListener = () => {
-    TdLibController.addListener('update', this.onUpdate);
-  };
+    onUpdate = update => {
+        switch (update['@type']) {
+            case 'updateSupergroup':
+                this.set(update.supergroup);
 
-  removeTdLibListener = () => {
-    TdLibController.removeListener('update', this.onUpdate);
-  };
+                this.emit(update['@type'], update);
+                break;
+            case 'updateSupergroupFullInfo':
+                this.setFullInfo(update.supergroup_id, update.supergroup_full_info);
 
-  get(id) {
-    return this.items.get(id);
-  }
+                this.emit(update['@type'], update);
+                break;
+            default:
+                break;
+        }
+    };
 
-  set(supergroup) {
-    this.items.set(supergroup.id, supergroup);
-  }
+    addTdLibListener = () => {
+        TdLibController.addListener('update', this.onUpdate);
+    };
 
-  getFullInfo(id) {
-    return this.fullInfoItems.get(id);
-  }
+    removeTdLibListener = () => {
+        TdLibController.removeListener('update', this.onUpdate);
+    };
 
-  setFullInfo(id, fullInfo) {
-    this.fullInfoItems.set(id, fullInfo);
-  }
+    get(id) {
+        return this.items.get(id);
+    }
+
+    set(supergroup) {
+        this.items.set(supergroup.id, supergroup);
+    }
+
+    getFullInfo(id) {
+        return this.fullInfoItems.get(id);
+    }
+
+    setFullInfo(id, fullInfo) {
+        this.fullInfoItems.set(id, fullInfo);
+    }
 }
 
 const store = new SupergroupStore();

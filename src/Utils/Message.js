@@ -168,7 +168,7 @@ function getDateHint(message){
     if (!message) return null;
     if (!message.date) return null;
 
-    let date = new Date(message.date * 1000);
+    const date = new Date(message.date * 1000);
     return dateFormat(date, 'H:MM:ss d.mm.yyyy');//date.toDateString();
 }
 

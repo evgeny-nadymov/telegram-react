@@ -9,12 +9,12 @@ import React, { Component } from 'react';
 import MessageControl from './../Message/MessageControl';
 import UserTileControl from './../Tile/UserTileControl';
 import {
-  getTitle,
-  getDate,
-  getText,
-  getMedia,
-  getReply,
-  getForward
+    getTitle,
+    getDate,
+    getText,
+    getMedia,
+    getReply,
+    getForward
 } from '../../Utils/Message';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -22,114 +22,114 @@ import TdLibController from '../../Controllers/TdLibController';
 import './MessageGroupControl.css';
 
 class MessageGroupControl extends Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    //this.openForward = this.openForward.bind(this);
-    //this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
-    //this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
-    //this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
-  }
-
-  componentDidMount() {
-    //MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
-    //MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
-    //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
-  }
-
-  handleUpdateMessageEdited(payload) {
-    //if (this.props.message.chat_id === payload.chat_id
-    //    && this.props.message.id === payload.message_id){
-    //    this.forceUpdate();
-    //}
-  }
-
-  handleUpdateMessageViews(payload) {
-    //if (this.props.message.chat_id === payload.chat_id
-    //    && this.props.message.id === payload.message_id){
-    //    this.forceUpdate();
-    //}
-  }
-
-  handleUpdateMessageContent(payload) {
-    //if (this.props.message.chat_id === payload.chat_id
-    //    && this.props.message.id === payload.message_id){
-    //    this.forceUpdate();
-    //}
-  }
-
-  componentWillUnmount() {
-    //MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
-    //MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
-    //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.key !== this.props.key) {
-      return true;
+        //this.openForward = this.openForward.bind(this);
+        //this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
+        //this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
+        //this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
     }
 
-    return false;
-  }
+    componentDidMount() {
+        //MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
+        //MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
+        //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
+    }
 
-  openForward() {
-    let message = this.props.message;
+    handleUpdateMessageEdited(payload) {
+        //if (this.props.message.chat_id === payload.chat_id
+        //    && this.props.message.id === payload.message_id){
+        //    this.forceUpdate();
+        //}
+    }
 
-    if (!message) return;
-    if (!message.forward_info) return null;
+    handleUpdateMessageViews(payload) {
+        //if (this.props.message.chat_id === payload.chat_id
+        //    && this.props.message.id === payload.message_id){
+        //    this.forceUpdate();
+        //}
+    }
 
-    switch (message.forward_info['@type']) {
-      case 'messageForwardedFromUser': {
-        let user = UserStore.get(message.forward_info.sender_user_id);
-        if (user) {
-          TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: message.forward_info.sender_user_id,
-            force: true
-          }).then(chat => {
-            this.props.onSelectChat(chat);
-          });
+    handleUpdateMessageContent(payload) {
+        //if (this.props.message.chat_id === payload.chat_id
+        //    && this.props.message.id === payload.message_id){
+        //    this.forceUpdate();
+        //}
+    }
+
+    componentWillUnmount() {
+        //MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
+        //MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
+        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.key !== this.props.key) {
+            return true;
         }
-        break;
-      }
-      case 'messageForwardedPost': {
-        let chat = ChatStore.get(message.forward_info.chat_id);
 
-        this.props.onSelectChat(chat);
-        break;
-      }
+        return false;
     }
-  }
 
-  render() {
-    let messages = this.props.messages;
-    if (!messages) return <div>[empty group]</div>;
+    openForward() {
+        let message = this.props.message;
 
-    let user = UserStore.get(this.props.messages[0].sender_user_id);
+        if (!message) return;
+        if (!message.forward_info) return null;
 
-    const groupContent = this.props.messages.map(x => (
-      <MessageControl
-        key={x.id}
-        showTitle={x.id === this.props.messages[0].id}
-        sendingState={x.sending_state}
-        message={x}
-        onSelectChat={this.props.onSelectChat}
-      />
-    ));
+        switch (message.forward_info['@type']) {
+            case 'messageForwardedFromUser': {
+                let user = UserStore.get(message.forward_info.sender_user_id);
+                if (user) {
+                    TdLibController.send({
+                        '@type': 'createPrivateChat',
+                        user_id: message.forward_info.sender_user_id,
+                        force: true
+                    }).then(chat => {
+                        this.props.onSelectChat(chat);
+                    });
+                }
+                break;
+            }
+            case 'messageForwardedPost': {
+                let chat = ChatStore.get(message.forward_info.chat_id);
 
-    return (
-      <div className="group-wrapper">
-        {user && (
-          <div className="group-sender">
-            <div className="group-tile">
-              <UserTileControl user={user} />
+                this.props.onSelectChat(chat);
+                break;
+            }
+        }
+    }
+
+    render() {
+        let messages = this.props.messages;
+        if (!messages) return <div>[empty group]</div>;
+
+        let user = UserStore.get(this.props.messages[0].sender_user_id);
+
+        const groupContent = this.props.messages.map(x => (
+            <MessageControl
+                key={x.id}
+                showTitle={x.id === this.props.messages[0].id}
+                sendingState={x.sending_state}
+                message={x}
+                onSelectChat={this.props.onSelectChat}
+            />
+        ));
+
+        return (
+            <div className="group-wrapper">
+                {user && (
+                    <div className="group-sender">
+                        <div className="group-tile">
+                            <UserTileControl user={user} />
+                        </div>
+                    </div>
+                )}
+                <div className="group-content">{groupContent}</div>
             </div>
-          </div>
-        )}
-        <div className="group-content">{groupContent}</div>
-      </div>
-    );
-  }
+        );
+    }
 }
 
 export default MessageGroupControl;

@@ -3,39 +3,39 @@ import PropTypes from 'prop-types';
 import './MediaViewerFooterButton.css';
 
 class MediaViewerFooterButton extends React.Component {
-  handleClick = event => {
-    event.stopPropagation();
+    handleClick = event => {
+        event.stopPropagation();
 
-    const { onClick, disabled } = this.props;
+        const { onClick, disabled } = this.props;
 
-    if (disabled) return;
+        if (disabled) return;
 
-    onClick(event);
-  };
+        onClick(event);
+    };
 
-  render() {
-    const { title, disabled, children } = this.props;
+    render() {
+        const { title, disabled, children } = this.props;
 
-    return (
-      <div
-        className={
-          disabled
-            ? 'media-viewer-footer-button-disabled'
-            : 'media-viewer-footer-button'
-        }
-        title={title}
-        onClick={this.handleClick}
-      >
-        {children}
-      </div>
-    );
-  }
+        return (
+            <div
+                className={
+                    disabled
+                        ? 'media-viewer-footer-button-disabled'
+                        : 'media-viewer-footer-button'
+                }
+                title={title}
+                onClick={this.handleClick}
+            >
+                {children}
+            </div>
+        );
+    }
 }
 
 MediaViewerFooterButton.propTypes = {
-  title: PropTypes.string,
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func
+    title: PropTypes.string,
+    disabled: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
 export default MediaViewerFooterButton;

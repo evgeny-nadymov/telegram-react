@@ -17,152 +17,152 @@ import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
 
 class MediaViewerContent extends React.Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    const { chatId, messageId, size } = this.props;
+        const { chatId, messageId, size } = this.props;
 
-    let [width, height, file] = getMediaFile(chatId, messageId, size);
-    file = FileStore.get(file.id) || file;
+        let [width, height, file] = getMediaFile(chatId, messageId, size);
+        file = FileStore.get(file.id) || file;
 
-    let [previewWidth, previewHeight, previewFile] = getMediaFile(
-      chatId,
-      messageId,
-      PHOTO_SIZE
-    );
-    previewFile = FileStore.get(previewFile.id) || previewFile;
+        let [previewWidth, previewHeight, previewFile] = getMediaFile(
+            chatId,
+            messageId,
+            PHOTO_SIZE
+        );
+        previewFile = FileStore.get(previewFile.id) || previewFile;
 
-    const message = MessageStore.get(chatId, messageId);
-    const text = getText(message);
+        const message = MessageStore.get(chatId, messageId);
+        const text = getText(message);
 
-    this.state = {
-      prevChatId: chatId,
-      prevMessageId: messageId,
-      width: width,
-      height: height,
-      file: file,
-      text: text,
-      previewWidth: previewWidth,
-      previewHeight: previewHeight,
-      previewFile: previewFile
+        this.state = {
+            prevChatId: chatId,
+            prevMessageId: messageId,
+            width: width,
+            height: height,
+            file: file,
+            text: text,
+            previewWidth: previewWidth,
+            previewHeight: previewHeight,
+            previewFile: previewFile
+        };
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        const { chatId, messageId, size } = props;
+
+        if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
+            let [width, height, file] = getMediaFile(chatId, messageId, size);
+            file = FileStore.get(file.id) || file;
+
+            let [previewWidth, previewHeight, previewFile] = getMediaFile(
+                chatId,
+                messageId,
+                PHOTO_SIZE
+            );
+            previewFile = FileStore.get(previewFile.id) || previewFile;
+
+            const message = MessageStore.get(chatId, messageId);
+            const text = getText(message);
+
+            return {
+                prevChatId: chatId,
+                prevMessageId: messageId,
+                width: width,
+                height: height,
+                file: file,
+                text: text,
+                previewWidth: previewWidth,
+                previewHeight: previewHeight,
+                previewFile: previewFile
+            };
+        }
+
+        return null;
+    }
+
+    componentDidMount() {
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+    }
+
+    componentWillUnmount() {
+        FileStore.removeListener(
+            'clientUpdatePhotoBlob',
+            this.onClientUpdatePhotoBlob
+        );
+        MessageStore.removeListener(
+            'updateMessageContent',
+            this.onUpdateMessageContent
+        );
+    }
+
+    onClientUpdatePhotoBlob = update => {
+        const { chatId, messageId, size } = this.props;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            this.setState({
+                width: width,
+                height: height,
+                file: file
+            });
+        }
     };
-  }
 
-  static getDerivedStateFromProps(props, state) {
-    const { chatId, messageId, size } = props;
+    onUpdateMessageContent = update => {
+        const { chatId, messageId, size } = this.props;
+        const { chat_id, message_id } = update;
 
-    if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
-      let [width, height, file] = getMediaFile(chatId, messageId, size);
-      file = FileStore.get(file.id) || file;
+        if (chatId === chat_id && messageId === message_id) {
+            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            const message = MessageStore.get(chatId, messageId);
+            const text = getText(message);
+            this.setState({
+                width: width,
+                height: height,
+                file: file,
+                text: text
+            });
+        }
+    };
 
-      let [previewWidth, previewHeight, previewFile] = getMediaFile(
-        chatId,
-        messageId,
-        PHOTO_SIZE
-      );
-      previewFile = FileStore.get(previewFile.id) || previewFile;
+    handleContentClick = event => {
+        if (event) event.stopPropagation();
 
-      const message = MessageStore.get(chatId, messageId);
-      const text = getText(message);
+        this.props.onClick(event);
+    };
 
-      return {
-        prevChatId: chatId,
-        prevMessageId: messageId,
-        width: width,
-        height: height,
-        file: file,
-        text: text,
-        previewWidth: previewWidth,
-        previewHeight: previewHeight,
-        previewFile: previewFile
-      };
+    render() {
+        const { width, height, file, text, previewFile } = this.state;
+        if (!file) return null;
+
+        const blob = FileStore.getBlob(file.id) || file.blob;
+        const src = FileStore.getBlobUrl(blob);
+
+        const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
+        const previewSrc = FileStore.getBlobUrl(previewBlob);
+
+        return (
+            <div className='media-viewer-content'>
+                <img
+                    className='media-viewer-content-image'
+                    src={src}
+                    alt=''
+                    onClick={this.handleContentClick}
+                />
+                {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
+                <FileDownloadProgress file={file} />
+                {text && text.length > 0 && <MediaCaption text={text} />}
+            </div>
+        );
     }
-
-    return null;
-  }
-
-  componentDidMount() {
-    FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-    MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
-  }
-
-  componentWillUnmount() {
-    FileStore.removeListener(
-      'clientUpdatePhotoBlob',
-      this.onClientUpdatePhotoBlob
-    );
-    MessageStore.removeListener(
-      'updateMessageContent',
-      this.onUpdateMessageContent
-    );
-  }
-
-  onClientUpdatePhotoBlob = update => {
-    const { chatId, messageId, size } = this.props;
-
-    if (chatId === update.chatId && messageId === update.messageId) {
-      const [width, height, file] = getMediaFile(chatId, messageId, size);
-      this.setState({
-        width: width,
-        height: height,
-        file: file
-      });
-    }
-  };
-
-  onUpdateMessageContent = update => {
-    const { chatId, messageId, size } = this.props;
-    const { chat_id, message_id } = update;
-
-    if (chatId === chat_id && messageId === message_id) {
-      const [width, height, file] = getMediaFile(chatId, messageId, size);
-      const message = MessageStore.get(chatId, messageId);
-      const text = getText(message);
-      this.setState({
-        width: width,
-        height: height,
-        file: file,
-        text: text
-      });
-    }
-  };
-
-  handleContentClick = event => {
-    if (event) event.stopPropagation();
-
-    this.props.onClick(event);
-  };
-
-  render() {
-    const { width, height, file, text, previewFile } = this.state;
-    if (!file) return null;
-
-    const blob = FileStore.getBlob(file.id) || file.blob;
-    const src = FileStore.getBlobUrl(blob);
-
-    const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
-    const previewSrc = FileStore.getBlobUrl(previewBlob);
-
-    return (
-      <div className="media-viewer-content">
-        <img
-          className="media-viewer-content-image"
-          src={src}
-          alt=""
-          onClick={this.handleContentClick}
-        />
-        {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-        <FileDownloadProgress file={file} />
-        {text && text.length > 0 && <MediaCaption text={text} />}
-      </div>
-    );
-  }
 }
 
 MediaViewerContent.propTypes = {
-  chatId: PropTypes.number.isRequired,
-  messageId: PropTypes.number.isRequired,
-  size: PropTypes.number.isRequired
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    size: PropTypes.number.isRequired
 };
 
 export default MediaViewerContent;

@@ -8,6 +8,8 @@
 export const PHOTO_SIZE = 320;
 export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;
+export const PROFILE_PHOTO_SMALL_SIZE = 160;
+export const PROFILE_PHOTO_BIG_SIZE = 640;
 export const MESSAGE_SLICE_LIMIT = 20;
 export const MEDIA_SLICE_LIMIT = 20;
 export const CHAT_SLICE_LIMIT = 25;

@@ -6,7 +6,14 @@
  */
 
 import dateFormat from 'dateformat';
-import { getLetters } from './Common';
+import {
+    getLetters,
+    getSize
+} from './Common';
+import {
+    PROFILE_PHOTO_BIG_SIZE,
+    PROFILE_PHOTO_SMALL_SIZE
+} from '../Constants';
 import UserStore from '../Stores/UserStore';
 
 function getUserStatus(user){
@@ -170,11 +177,37 @@ function getUserStatusOrder(user) {
     }
 }
 
+function getProfilePhotoFromPhoto(photo){
+    if (!photo) return null;
+    if (!photo.sizes) return null;
+    if (!photo.sizes.length) return null;
+
+    const smallSize = getSize(photo.sizes, PROFILE_PHOTO_SMALL_SIZE);
+    const bigSize = getSize(photo.sizes, PROFILE_PHOTO_BIG_SIZE);
+
+    return {
+        '@type': 'profilePhoto',
+        id: photo.id,
+        small: smallSize.photo,
+        big: bigSize.photo
+    };
+}
+
+function getProfilePhotoDateHint(userProfilePhoto){
+    if (!userProfilePhoto) return null;
+    if (!userProfilePhoto.added_date) return null;
+
+    const date = new Date(userProfilePhoto.added_date * 1000);
+    return dateFormat(date, 'H:MM:ss d.mm.yyyy');
+}
+
 export {
     getUserStatus,
     isAccentUserSubtitle,
     getUserFullName,
     isUserBlocked,
     getUserLetters,
-    getUserStatusOrder
+    getUserStatusOrder,
+    getProfilePhotoFromPhoto,
+    getProfilePhotoDateHint
 }

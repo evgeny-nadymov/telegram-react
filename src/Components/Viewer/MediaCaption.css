@@ -16,4 +16,5 @@
 .media-caption-text{
     margin: 12px;
     text-align: center;
+    overflow-wrap: break-word;
 }

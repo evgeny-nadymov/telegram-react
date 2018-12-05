@@ -9,36 +9,36 @@ import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
 
 class OptionStore extends EventEmitter {
-  constructor() {
-    super();
+    constructor() {
+        super();
 
-    this.items = new Map();
+        this.items = new Map();
 
-    this.addTdLibListener();
-    this.setMaxListeners(Infinity);
-  }
-
-  onUpdate = update => {
-    switch (update['@type']) {
-      case 'updateOption':
-        this.items.set(update.name, update.value);
-        break;
-      default:
-        break;
+        this.addTdLibListener();
+        this.setMaxListeners(Infinity);
     }
-  };
 
-  addTdLibListener = () => {
-    TdLibController.addListener('update', this.onUpdate);
-  };
+    onUpdate = update => {
+        switch (update['@type']) {
+            case 'updateOption':
+                this.items.set(update.name, update.value);
+                break;
+            default:
+                break;
+        }
+    };
 
-  removeTdLibListener = () => {
-    TdLibController.removeListener('update', this.onUpdate);
-  };
+    addTdLibListener = () => {
+        TdLibController.addListener('update', this.onUpdate);
+    };
 
-  get(name) {
-    return this.items.get(name);
-  }
+    removeTdLibListener = () => {
+        TdLibController.removeListener('update', this.onUpdate);
+    };
+
+    get(name) {
+        return this.items.get(name);
+    }
 }
 
 const store = new OptionStore();

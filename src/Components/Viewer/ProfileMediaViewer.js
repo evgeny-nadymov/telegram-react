@@ -11,16 +11,21 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
+import ProfileMediaViewerControl from '../Tile/ProfileMediaViewerControl';
 import {
-  getPhotoFromChat,
-  getChatUserId,
-  isPrivateChat
+    getPhotoFromChat,
+    getChatUserId,
+    isPrivateChat
 } from '../../Utils/Chat';
 import {
-  loadProfileMediaViewerContent,
-  saveOrDownload
+    getProfilePhotoDateHint,
+    getProfilePhotoFromPhoto
+} from '../../Utils/User';
+import {
+    loadProfileMediaViewerContent,
+    preloadProfileMediaViewerContent,
+    saveOrDownload
 } from '../../Utils/File';
-import { getSize } from '../../Utils/Common';
 import { MEDIA_SLICE_LIMIT, PHOTO_BIG_SIZE } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -28,292 +33,421 @@ import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ProfileMediaViewer.css';
+import MediaViewerContent from './MediaViewerContent';
 
 class ProfileMediaViewer extends React.Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    this.history = [];
+        this.history = [];
 
-    const { chatId, fileId } = this.props;
+        const { chatId, fileId } = this.props;
 
-    this.state = {
-      prevChatId: chatId,
-      prevFileId: fileId,
-      currentFileId: fileId,
-      hasNextMedia: false,
-      hasPreviousMedia: false,
-      deleteConfirmationOpened: false
-    };
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    const { chatId, messageId } = this.props;
-    const {
-      currentFileId,
-      hasPreviousMedia,
-      hasNextMedia,
-      firstSliceLoaded,
-      totalCount,
-      deleteConfirmationOpened
-    } = this.state;
-
-    if (nextProps.chatId !== chatId) {
-      return true;
+        this.state = {
+            prevChatId: chatId,
+            prevFileId: fileId,
+            currentIndex: 0,
+            hasNextMedia: false,
+            hasPreviousMedia: false,
+            deleteConfirmationOpened: false
+        };
     }
 
-    if (nextProps.messageId !== messageId) {
-      return true;
-    }
+    shouldComponentUpdate(nextProps, nextState) {
+        const { chatId, messageId } = this.props;
+        const {
+            currentFileId,
+            hasPreviousMedia,
+            hasNextMedia,
+            firstSliceLoaded,
+            totalCount,
+            deleteConfirmationOpened
+        } = this.state;
 
-    if (nextState.currentFileId !== currentFileId) {
-      return true;
-    }
-
-    if (nextState.hasPrevousMedia !== hasPreviousMedia) {
-      return true;
-    }
-
-    if (nextState.hasNextMedia !== hasNextMedia) {
-      return true;
-    }
-
-    if (nextState.firstSliceLoaded !== firstSliceLoaded) {
-      return true;
-    }
-
-    if (nextState.totalCount !== totalCount) {
-      return true;
-    }
-
-    if (nextState.deleteConfirmationOpened !== deleteConfirmationOpened) {
-      return true;
-    }
-
-    return false;
-  }
-
-  componentDidMount() {
-    const { chatId } = this.props;
-    const photo = getPhotoFromChat(chatId);
-    loadProfileMediaViewerContent(chatId, [photo]);
-
-    this.loadHistory();
-
-    document.addEventListener('keydown', this.onKeyDown, false);
-    // MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
-    // MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
-    // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.onKeyDown, false);
-    // MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
-    // MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
-    // MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
-  }
-
-  onKeyDown = event => {
-    if (event.keyCode === 27) {
-      const { deleteConfirmationOpened } = this.state;
-      if (deleteConfirmationOpened) return;
-
-      this.handleClose();
-    } else if (event.keyCode === 39) {
-      // this.handleNext();
-    } else if (event.keyCode === 37) {
-      // this.handlePrevious();
-    }
-  };
-
-  loadHistory = async () => {
-    const { chatId } = this.props;
-
-    if (!isPrivateChat(chatId)) return;
-
-    let result = await TdLibController.send({
-      '@type': 'getUserProfilePhotos',
-      user_id: getChatUserId(chatId),
-      offset: 0,
-      limit: 100
-    });
-
-    //filterMessages(result, this.history);
-    //MessageStore.setItems(result.messages);
-
-    this.history = result.photos;
-    this.firstSliceLoaded = result.photos.length === 0;
-
-    const { currentMessageId } = this.state;
-    const index = this.history.findIndex(x => x.id === currentMessageId);
-
-    this.setState({
-      hasNextMedia: this.hasNextMedia(index),
-      hasPreviousMedia: this.hasPreviousMedia(index)
-    });
-
-    //preloadProfileMediaViewerContent(index, this.history);
-  };
-
-  hasPreviousMedia = index => {
-    if (index === -1) return false;
-
-    const nextIndex = index + 1;
-    return nextIndex < this.history.length;
-  };
-
-  hasNextMedia = index => {
-    if (index === -1) return false;
-
-    const nextIndex = index - 1;
-    return nextIndex >= 0;
-  };
-
-  handleClose = () => {
-    ApplicationStore.setProfileMediaViewerContent(null);
-  };
-
-  handleSave = () => {
-    const { chatId } = this.props;
-    const { currentMessageId } = this.state;
-
-    const chat = ChatStore.get(chatId);
-    if (!chat) return;
-
-    const photo = getPhotoFromChat(chatId);
-    if (!photo) return;
-    if (!photo.big) return;
-
-    const file = photo.big;
-    if (!file) return;
-
-    saveOrDownload(file, file.id + '.jpg', chat);
-  };
-
-  handleForward = () => {};
-
-  handleDelete = () => {
-    return;
-    this.handleDialogOpen();
-    return;
-
-    const { chatId, messageId } = this.props;
-    const { currentMessageId } = this.state;
-
-    const message = MessageStore.get(chatId, currentMessageId);
-    if (!message) return;
-    if (!message.content) return;
-
-    const { photo } = message.content;
-    if (photo) {
-      const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-      if (photoSize) {
-        let file = photoSize.photo;
-        file = FileStore.get(file.id) || file;
-        if (file) {
-          const store = FileStore.getReadWriteStore();
-
-          FileStore.deleteLocalFile(store, file);
+        if (nextProps.chatId !== chatId) {
+            return true;
         }
-      }
+
+        if (nextProps.messageId !== messageId) {
+            return true;
+        }
+
+        if (nextState.currentFileId !== currentFileId) {
+            return true;
+        }
+
+        if (nextState.hasPrevousMedia !== hasPreviousMedia) {
+            return true;
+        }
+
+        if (nextState.hasNextMedia !== hasNextMedia) {
+            return true;
+        }
+
+        if (nextState.firstSliceLoaded !== firstSliceLoaded) {
+            return true;
+        }
+
+        if (nextState.totalCount !== totalCount) {
+            return true;
+        }
+
+        if (nextState.deleteConfirmationOpened !== deleteConfirmationOpened) {
+            return true;
+        }
+
+        return false;
     }
-  };
 
-  render() {
-    const { chatId } = this.props;
-    const {
-      currentMessageId,
-      hasNextMedia,
-      hasPreviousMedia,
-      firstSliceLoaded,
-      totalCount,
-      deleteConfirmationOpened,
-      deleteForAll
-    } = this.state;
+    componentDidMount() {
+        const { chatId } = this.props;
+        const photo = getPhotoFromChat(chatId);
+        loadProfileMediaViewerContent(chatId, [photo]);
 
-    let index = -1;
-    if (totalCount && firstSliceLoaded) {
-      index = this.history.findIndex(x => x.id === currentMessageId);
+        this.loadHistory();
+
+        document.addEventListener('keydown', this.onKeyDown, false);
+        // MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
+        // MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
+        // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
-    // const message = MessageStore.get(chatId, currentMessageId);
-    // const {
-    // 	can_be_forwarded,
-    // 	can_be_deleted_only_for_self,
-    // 	can_be_deleted_for_all_users
-    // } = message;
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onKeyDown, false);
+        // MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
+        // MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
+        // MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+    }
 
-    // const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
-    // const canBeForwarded = can_be_forwarded;
+    onKeyDown = event => {
+        if (event.keyCode === 27) {
+            const { deleteConfirmationOpened } = this.state;
+            if (deleteConfirmationOpened) return;
 
-    const deleteConfirmation = null;
-    const photo = getPhotoFromChat(chatId);
-    return (
-      <div className="media-viewer">
-        {deleteConfirmation}
-        <div className="media-viewer-wrapper" onClick={this.handlePrevious}>
-          <div className="media-viewer-left-column">
-            <div className="media-viewer-button-placeholder" />
-            <MediaViewerButton
-              disabled={!hasPreviousMedia}
-              grow
-              onClick={this.handlePrevious}
-            >
-              <div className="media-viewer-previous-icon" />
-            </MediaViewerButton>
-          </div>
+            this.handleClose();
+        } else if (event.keyCode === 39) {
+            this.handlePrevious();
+        } else if (event.keyCode === 37) {
+            this.handleNext();
+        }
+    };
 
-          <div className="media-viewer-content-column">
-            <ProfileMediaViewerContent chatId={chatId} photo={photo} />
-          </div>
+    loadHistory = async () => {
+        const { chatId } = this.props;
 
-          <div className="media-viewer-right-column">
-            <MediaViewerButton onClick={this.handleClose}>
-              <div className="media-viewer-close-icon" />
-            </MediaViewerButton>
-            <MediaViewerButton
-              disabled={!hasNextMedia}
-              grow
-              onClick={this.handleNext}
-            >
-              <div className="media-viewer-next-icon" />
-            </MediaViewerButton>
-          </div>
-        </div>
-        <div className="media-viewer-footer">
-          <MediaViewerFooterText
-            title="Photo"
-            subtitle={
-              totalCount && index >= 0
-                ? `${totalCount - index} of ${totalCount}`
-                : null
+        if (!isPrivateChat(chatId)) return;
+
+        let result = await TdLibController.send({
+            '@type': 'getUserProfilePhotos',
+            user_id: getChatUserId(chatId),
+            offset: 0,
+            limit: 100
+        });
+
+        this.history = result.photos;
+        this.firstSliceLoaded = result.photos.length === 0;
+
+        const index = 0;
+
+        this.setState({
+            currentIndex: index,
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index),
+            totalCount: result.total_count
+        });
+
+        preloadProfileMediaViewerContent(chatId, index, this.history);
+    };
+
+    handleClose = () => {
+        ApplicationStore.setProfileMediaViewerContent(null);
+    };
+
+    handleSave = () => {
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        const photo = getPhotoFromChat(chatId);
+        if (!photo) return;
+        if (!photo.big) return;
+
+        const file = photo.big;
+        if (!file) return;
+
+        saveOrDownload(file, file.id + '.jpg', chat);
+    };
+
+    handleForward = () => {};
+
+    handleDelete = () => {
+        // return;
+        // this.handleDialogOpen();
+        // return;
+
+        const { chatId, messageId } = this.props;
+        const { currentIndex, totalCount } = this.state;
+
+        let index = -1;
+        if (totalCount) {
+            index = currentIndex;
+        }
+
+        const photo = index > 0 && index < this.history.length ? getProfilePhotoFromPhoto(this.history[index]) : getPhotoFromChat(chatId);
+        if (photo) {
+            let file = photo.big;
+            file = FileStore.get(file.id) || file;
+            if (file) {
+                const store = FileStore.getReadWriteStore();
+
+                FileStore.deleteLocalFile(store, file);
             }
-          />
-          <MediaViewerFooterButton title="Save" onClick={this.handleSave}>
-            <div className="media-viewer-save-icon" />
-          </MediaViewerFooterButton>
-          <MediaViewerFooterButton
-            title="Forward"
-            disabled={true}
-            onClick={this.handleForward}
-          >
-            <div className="media-viewer-forward-icon" />
-          </MediaViewerFooterButton>
-          <MediaViewerFooterButton
-            title="Delete"
-            disabled={true}
-            onClick={this.handleDelete}
-          >
-            <div className="media-viewer-delete-icon" />
-          </MediaViewerFooterButton>
-        </div>
-      </div>
-    );
-  }
+        }
+    };
+
+    hasPreviousMedia = (index) => {
+        if (index === -1) return false;
+
+        const nextIndex = index + 1;
+        return nextIndex < this.history.length;
+    };
+
+    handlePrevious = (event) => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const { currentIndex } = this.state;
+        const nextIndex = currentIndex + 1;
+
+        return this.loadMedia(nextIndex, () => {
+            if (nextIndex === this.history.length - 1) {
+                this.loadPrevious();
+            }
+        });
+    };
+
+    loadPrevious = async () => {
+        return;
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: currentMessageId,
+            offset: 0,
+            limit: MEDIA_SLICE_LIMIT,
+            filter: { '@type': 'searchMessagesFilterPhoto' }
+        });
+
+        //filterMessages(result, this.history);
+        MessageStore.setItems(result.messages);
+
+        this.history = this.history.concat(result.messages);
+
+        const index = this.history.findIndex(x => x.id === currentMessageId);
+
+        this.setState({
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index),
+            totalCount: result.total_count
+        });
+    };
+
+    hasNextMedia = (index) => {
+        if (index === -1) return false;
+
+        const nextIndex = index - 1;
+        return nextIndex >= 0;
+    };
+
+    handleNext = (event) => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const { currentIndex } = this.state;
+        const nextIndex = currentIndex - 1;
+
+        return this.loadMedia(nextIndex, () => {
+            if (nextIndex === 0) {
+                this.loadNext();
+            }
+        });
+    };
+
+    loadNext = async () => {
+        return;
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        let result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: currentMessageId,
+            offset: -MEDIA_SLICE_LIMIT,
+            limit: MEDIA_SLICE_LIMIT + 1,
+            filter: { '@type': 'searchMessagesFilterPhoto' }
+        });
+
+        //filterMessages(result, this.history);
+        MessageStore.setItems(result.messages);
+
+        this.firstSliceLoaded = result.messages.length === 0;
+        this.history = result.messages.concat(this.history);
+
+        const index = this.history.findIndex(x => x.id === currentMessageId);
+
+        this.setState({
+            hasNextMedia: this.hasNextMedia(index),
+            hasPreviousMedia: this.hasPreviousMedia(index),
+            firstSliceLoaded: this.firstSliceLoaded,
+            totalCount: result.total_count
+        });
+    };
+
+    loadMedia = (index, callback) => {
+        if (index < 0) return false;
+        if (index >= this.history.length) return false;
+
+        this.setState(
+            {
+                currentIndex: index,
+                hasNextMedia: this.hasNextMedia(index),
+                hasPreviousMedia: this.hasPreviousMedia(index)
+            },
+            callback
+        );
+
+        const { chatId } = this.props;
+
+        preloadProfileMediaViewerContent(chatId, index, this.history);
+        return true;
+    };
+
+    moveToNextMedia = (oldHistory, filterMap) => {
+        const { currentMessageId } = this.state;
+
+        const index = oldHistory.findIndex(x => x.id === currentMessageId);
+        let nextId = 0;
+        for (let i = index - 1; i >= 0; i--) {
+            if (filterMap && !filterMap.has(oldHistory[i].id)) {
+                nextId = oldHistory[i].id;
+                break;
+            }
+        }
+        if (!nextId) {
+            for (let i = index + 1; i < oldHistory.length; i++) {
+                if (filterMap && !filterMap.has(oldHistory[i].id)) {
+                    nextId = oldHistory[i].id;
+                    break;
+                }
+            }
+        }
+
+        if (!nextId) return;
+
+        const nextIndex = this.history.findIndex(x => x.id === nextId);
+
+        return this.loadMedia(nextIndex, () => {
+            if (nextIndex === 0) {
+                this.loadNext();
+            } else if (nextIndex === this.history.length - 1) {
+                this.loadPrevious();
+            }
+        });
+    };
+
+    render() {
+        const { chatId } = this.props;
+        const {
+            currentIndex,
+            hasNextMedia,
+            hasPreviousMedia,
+            firstSliceLoaded,
+            totalCount,
+            deleteConfirmationOpened,
+            deleteForAll
+        } = this.state;
+
+        let index = -1;
+        if (totalCount) {
+            index = currentIndex;
+        }
+
+        // const message = MessageStore.get(chatId, currentMessageId);
+        // const {
+        // 	can_be_forwarded,
+        // 	can_be_deleted_only_for_self,
+        // 	can_be_deleted_for_all_users
+        // } = message;
+
+        // const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
+        // const canBeForwarded = can_be_forwarded;
+
+        const deleteConfirmation = null;
+        const photo = index > 0 && index < this.history.length ? getProfilePhotoFromPhoto(this.history[index]) : getPhotoFromChat(chatId);
+        const userProfilePhoto = index >= 0 && index < this.history.length ? this.history[index] : null;
+        return (
+            <div className='media-viewer'>
+                {deleteConfirmation}
+                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
+                    <div className='media-viewer-left-column'>
+                        <div className='media-viewer-button-placeholder' />
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                            <div className='media-viewer-previous-icon' />
+                        </MediaViewerButton>
+                    </div>
+
+                    <div className='media-viewer-content-column'>
+                        <ProfileMediaViewerContent
+                            chatId={chatId}
+                            photo={photo}
+                            onClick={this.handlePrevious} />
+                    </div>
+
+                    <div className='media-viewer-right-column'>
+                        <MediaViewerButton onClick={this.handleClose}>
+                            <div className='media-viewer-close-icon' />
+                        </MediaViewerButton>
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                            <div className='media-viewer-next-icon' />
+                        </MediaViewerButton>
+                    </div>
+                </div>
+                <div className='media-viewer-footer'>
+                    <ProfileMediaViewerControl chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)} />
+                    <MediaViewerFooterText
+                        title='Photo'
+                        subtitle={
+                            totalCount && index >= 0
+                                ? `${totalCount - index} of ${totalCount}`
+                                : null
+                        }/>
+                    <MediaViewerFooterButton title='Save' onClick={this.handleSave}>
+                        <div className='media-viewer-save-icon' />
+                    </MediaViewerFooterButton>
+                    <MediaViewerFooterButton title='Forward' disabled={true} onClick={this.handleForward}>
+                        <div className='media-viewer-forward-icon' />
+                    </MediaViewerFooterButton>
+                    <MediaViewerFooterButton title='Delete' disabled={true} onClick={this.handleDelete}>
+                        <div className='media-viewer-delete-icon' />
+                    </MediaViewerFooterButton>
+                </div>
+            </div>
+        );
+    }
 }
 
 ProfileMediaViewer.propTypes = {
-  chatId: PropTypes.number.isRequired
+    chatId: PropTypes.number.isRequired
 };
 
 export default ProfileMediaViewer;
