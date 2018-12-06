@@ -99,10 +99,11 @@ class DialogsList extends React.Component {
         this.setState({ chats: [] }, () => this.onLoadNext(true));
     };
 
-    loadFirstSlice = () => {
+    loadFirstSlice = async () => {
         const { authorizationState } = this.state;
         if (authorizationState && authorizationState['@type'] === 'authorizationStateReady') {
-            this.onLoadNext();
+
+            await FileStore.initDB(() => this.onLoadNext());
         }
     };
 

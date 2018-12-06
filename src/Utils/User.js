@@ -157,7 +157,7 @@ function getUserStatusOrder(user) {
 
     switch (user.status['@type']) {
         case 'userStatusEmpty': {
-            return 0;
+            return 1;
         }
         case 'userStatusLastMonth': {
             return 10;

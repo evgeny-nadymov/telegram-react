@@ -399,6 +399,20 @@ function isMediaContent(content){
     return content['@type'] === 'messagePhoto';
 }
 
+function getLocationId(location){
+    if (!location) return null;
+
+    const { longitude, latitude } = location;
+    return `loc=${latitude},${longitude}&size=300,150&scale=2&zoom=16`;
+}
+
+function getVenueId(location){
+    if (!location) return null;
+
+    const { longitude, latitude } = location;
+    return `loc=${latitude},${longitude}&size=300,150&scale=2&zoom=16`;
+}
+
 export {
     getTitle,
     getText,
@@ -411,5 +425,7 @@ export {
     getUnread,
     getSenderUserId,
     filterMessages,
-    isMediaContent
+    isMediaContent,
+    getLocationId,
+    getVenueId
 };

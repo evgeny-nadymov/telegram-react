@@ -6,13 +6,15 @@
  */
 
 import { getPhotoSize, getSize } from './Common';
-import { PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
+import { getChatUserId } from './Chat';
+import { getProfilePhotoFromPhoto } from './User';
+import { getLocationId, getVenueId } from './Message';
+import { MEDIA_SLICE_LIMIT, PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
-import { getChatUserId } from './Chat';
-import { getProfilePhotoFromPhoto } from './User';
+import TdLibController from '../Controllers/TdLibController';
 
 function getChatPhoto(chat) {
     if (chat['@type'] !== 'chat') {
@@ -295,19 +297,9 @@ function loadMessageContents(store, messages) {
                                 let obj = photoSize.photo;
                                 if (!obj.blob) {
                                     let localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        obj,
-                                        idb_key,
-                                        null,
-                                        () =>
-                                            FileStore.updatePhotoBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                id
-                                            ),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
-                                    );
+                                    FileStore.getLocalFile(store, obj, idb_key, null,
+                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
+                                        () => FileStore.getRemoteFile(id, 1, localMessage));
                                 }
                             }
                         }
@@ -319,19 +311,9 @@ function loadMessageContents(store, messages) {
                             const obj = message.content.sticker.sticker;
                             if (!obj.blob) {
                                 let localMessage = message;
-                                FileStore.getLocalFile(
-                                    store,
-                                    obj,
-                                    idb_key,
-                                    null,
-                                    () =>
-                                        FileStore.updateStickerBlob(
-                                            localMessage.chat_id,
-                                            localMessage.id,
-                                            id
-                                        ),
-                                    () => FileStore.getRemoteFile(id, 1, localMessage)
-                                );
+                                FileStore.getLocalFile(store, obj, idb_key, null,
+                                    () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
+                                    () => FileStore.getRemoteFile(id, 1, localMessage));
                             }
                         }
                         break;
@@ -345,14 +327,9 @@ function loadMessageContents(store, messages) {
                                 if (pid) {
                                     let obj = user.profile_photo.small;
                                     if (!obj.blob) {
-                                        FileStore.getLocalFile(
-                                            store,
-                                            obj,
-                                            idb_key,
-                                            null,
+                                        FileStore.getLocalFile(store, obj, idb_key, null,
                                             () => FileStore.updateUserPhotoBlob(user.id, id),
-                                            () => FileStore.getRemoteFile(id, 1, user)
-                                        );
+                                            () => FileStore.getRemoteFile(id, 1, user));
                                     }
                                 }
                             }
@@ -365,19 +342,99 @@ function loadMessageContents(store, messages) {
                             const obj = message.content.document.thumbnail.photo;
                             if (!obj.blob) {
                                 const localMessage = message;
-                                FileStore.getLocalFile(
-                                    store,
-                                    obj,
-                                    idb_key,
-                                    null,
-                                    () =>
-                                        FileStore.updateDocumentThumbnailBlob(
-                                            localMessage.chat_id,
-                                            localMessage.id,
-                                            obj.id
-                                        ),
+                                FileStore.getLocalFile(store, obj, idb_key, null,
+                                    () => FileStore.updateDocumentThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
                                     () => FileStore.getRemoteFile(id, 1, localMessage)
                                 );
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageLocation': {
+
+                        const { location } = message.content;
+                        const locationId = getLocationId(location);
+                        if (locationId){
+                            const file = FileStore.getLocationFile(locationId);
+                            if (file) {
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(store, file, file.idb_key, null,
+                                        () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, file.id),
+                                        () => FileStore.getRemoteFile(file.id, 1, localMessage)
+                                    );
+                                }
+                            }
+                            else {
+                                const localMessage = message;
+                                TdLibController.send({
+                                    '@type': 'getMapThumbnailFile',
+                                    location: location,
+                                    zoom: 13,
+                                    width: 300,
+                                    height: 150,
+                                    scale: 2,
+                                    chat_id: message.chat_id})
+                                    .then(result => {
+                                        FileStore.setLocationFile(locationId, result);
+
+                                        if (result) {
+                                            const blob = FileStore.getBlob(result.id);
+                                            if (!blob) {
+                                                FileStore.getLocalFile(store, result, result.idb_key, null,
+                                                    () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
+                                                    () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                                );
+                                            }
+                                        }
+                                    })
+                                ;
+                            }
+                         }
+                         break;
+                    }
+                    case 'messageVenue': {
+
+                        const { venue } = message.content;
+                        const { location } = venue;
+                        const locationId = getVenueId(location);
+                        if (locationId){
+                            const file = FileStore.getLocationFile(locationId);
+                            if (file) {
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(store, file, file.idb_key, null,
+                                        () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, file.id),
+                                        () => FileStore.getRemoteFile(file.id, 1, localMessage)
+                                    );
+                                }
+                            }
+                            else {
+                                const localMessage = message;
+                                TdLibController.send({
+                                    '@type': 'getMapThumbnailFile',
+                                    location: location,
+                                    zoom: 16,
+                                    width: 100,
+                                    height: 100,
+                                    scale: 2,
+                                    chat_id: message.chat_id})
+                                    .then(result => {
+                                        FileStore.setLocationFile(locationId, result);
+
+                                        if (result) {
+                                            const blob = FileStore.getBlob(result.id);
+                                            if (!blob) {
+                                                FileStore.getLocalFile(store, result, result.idb_key, null,
+                                                    () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
+                                                    () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                                );
+                                            }
+                                        }
+                                    })
+                                ;
                             }
                         }
                         break;

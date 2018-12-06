@@ -125,16 +125,18 @@ class PhotoControl extends React.Component {
             }, timeToCompleteAnimation);
         }
 
+        const blob = FileStore.getBlob(file.id) || file.blob;
+
         let className = 'photo-img';
         let src = '';
         try{
-            src = FileStore.getBlobUrl(file.blob);
+            src = FileStore.getBlobUrl(blob);
         }
         catch(error){
             console.log(`PhotoControl.render photo with error ${error}`);
         }
 
-        if (!file.blob && this.props.message.content.photo.sizes.length > 0)
+        if (!blob && this.props.message.content.photo.sizes.length > 0)
         {
             let previewSize = this.props.message.content.photo.sizes[0];
             if (previewSize){

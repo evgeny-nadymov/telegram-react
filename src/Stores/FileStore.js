@@ -12,9 +12,12 @@ class FileStore extends EventEmitter {
     constructor() {
         super();
 
+        this.callbacks = [];
+
         this.urls = new WeakMap();
         this.items = new Map();
         this.blobItems = new Map();
+        this.locationItems = new Map();
 
         this.downloads = new Map();
         this.uploads = new Map();
@@ -200,7 +203,7 @@ class FileStore extends EventEmitter {
         }
     };
 
-    async initDB() {
+    async initDB(callback) {
         /*if (this.store) return;
             if (this.initiatingDB) return;
 
@@ -211,8 +214,16 @@ class FileStore extends EventEmitter {
             this.initiatingDB = false;
 
             return;*/
-        if (this.db) return;
-        if (this.initiatingDB) return;
+        if (this.db) {
+            if (callback) callback();
+            return;
+        }
+
+        if (this.initiatingDB) {
+            console.log('[FileStore] add callback');
+            if (callback) this.callbacks.push(callback);
+            return;
+        }
 
         console.log('[FileStore] start initDB');
 
@@ -221,6 +232,14 @@ class FileStore extends EventEmitter {
         this.initiatingDB = false;
 
         console.log('[FileStore] stop initDB');
+
+        if (this.callbacks.length){
+            console.log('[FileStore] invoke callbacks count=' + this.callbacks.length);
+            for (let i = 0; i < this.callbacks.length; i++){
+                this.callbacks[i]();
+            }
+            this.callbacks = [];
+        }
     }
 
     openDB() {
@@ -353,15 +372,15 @@ class FileStore extends EventEmitter {
         }
     }
 
-    get = fileId => {
+    get = (fileId) => {
         return this.items.get(fileId);
     };
 
-    set = file => {
+    set = (file) => {
         this.items.set(file.id, file);
     };
 
-    getBlob = fileId => {
+    getBlob = (fileId) => {
         return this.blobItems.get(fileId);
     };
 
@@ -369,11 +388,23 @@ class FileStore extends EventEmitter {
         this.blobItems.set(fileId, blob);
     };
 
-    deleteBlob = fileId => {
+    deleteBlob = (fileId) => {
         this.blobItems.delete(fileId);
     };
 
-    getBlobUrl = blob => {
+    getLocationFile = (locationId) => {
+        const fileId = this.locationItems.get(locationId);
+
+        return this.get(fileId);
+    };
+
+    setLocationFile = (locationId, file) => {
+        this.locationItems.set(locationId, file.id);
+
+        this.set(file);
+    };
+
+    getBlobUrl = (blob) => {
         if (!blob) {
             return null;
         }
@@ -388,13 +419,14 @@ class FileStore extends EventEmitter {
         return url;
     };
 
-    deleteBlobUrl = blob => {
+    deleteBlobUrl = (blob) => {
         if (this.urls.has(blob)) {
             this.urls.delete(blob);
         }
     };
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
+        //console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdatePhotoBlob', {
             chatId: chatId,
             messageId: messageId,
@@ -420,6 +452,14 @@ class FileStore extends EventEmitter {
 
     updateDocumentThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateDocumentThumbnailBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateLocationBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId

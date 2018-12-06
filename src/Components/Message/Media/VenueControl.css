@@ -7,19 +7,17 @@
 
 .venue{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 
 .venue-content{
-    margin-left: 12px;
+    margin-top: 6px;
 }
 
 .venue-title{
-
     color: #3a6d99;
     display: inline-block;
-    font-weight: 700;
-    max-width: 170px;
+    max-width: 300px;
     overflow: hidden;
     vertical-align: text-top;
     white-space: nowrap;
