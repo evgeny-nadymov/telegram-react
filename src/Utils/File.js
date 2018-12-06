@@ -628,6 +628,32 @@ function preloadProfileMediaViewerContent(chatId, index, history) {
     loadProfileMediaViewerContent(chatId, items);
 }
 
+function loadUserContent(user){
+    if (!user) return;
+
+    const store = FileStore.getStore();
+
+    let [id, pid, idb_key] = getUserPhoto(user);
+    if (pid) {
+        FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+            () => FileStore.updateUserPhotoBlob(user.id, id),
+            () => FileStore.getRemoteFile(id, 1, user));
+    }
+}
+
+function loadChatContent(chat){
+    if (!chat) return;
+
+    let store = FileStore.getStore();
+
+    let [id, pid, idb_key] = getChatPhoto(chat);
+    if (pid) {
+        FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
+            () => FileStore.updateChatPhotoBlob(chat.id, id),
+            () => FileStore.getRemoteFile(id, 1, chat));
+    }
+}
+
 export {
     getBigPhoto,
     getSmallPhoto,
@@ -647,6 +673,8 @@ export {
     preloadMediaViewerContent,
     loadProfileMediaViewerContent,
     preloadProfileMediaViewerContent,
+    loadUserContent,
+    loadChatContent,
     saveOrDownload,
     getMediaFile
 };

@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getUserLetters } from '../../Utils/User';
+import { loadChatContent } from '../../Utils/File';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -85,7 +86,12 @@ class UserTileControl extends Component {
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
                 if (chat.type.user_id === userId) {
-                    this.forceUpdate();
+                    if (!update.photo){
+                        this.forceUpdate();
+                    }
+                    else{
+                        loadChatContent(chat)
+                    }
                 }
             }
         }
@@ -137,9 +143,7 @@ class UserTileControl extends Component {
         try {
             src = FileStore.getBlobUrl(blob);
         } catch (error) {
-            console.log(
-                `[UserTileControl] render user_id=${userId} with error ${error}`
-            );
+            console.log(`[UserTileControl] render user_id=${userId} with error ${error}`);
         }
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;

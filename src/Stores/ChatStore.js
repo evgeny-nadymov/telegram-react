@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import InputTypingManager from '../Utils/InputTypingManager';
+import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class ChatStore extends EventEmitter {
@@ -21,7 +22,7 @@ class ChatStore extends EventEmitter {
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate = update => {
+    onUpdate = (update) => {
         switch (update['@type']) {
             case 'updateConnectionState': {
                 if (update.state['@type'] === 'connectionStateUpdating') {
@@ -126,9 +127,26 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatPhoto': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, { photo: update.photo });
+
+                    switch (chat.type['@type']) {
+                        case 'chatTypeBasicGroup' : {
+                            break;
+                        }
+                        case 'chatTypeSupergroup' : {
+                            break;
+                        }
+                        case 'chatTypePrivate' :
+                        case 'chatTypeSecret' : {
+                            const user = UserStore.get(chat.type.user_id);
+                            if (user){
+                                UserStore.assign(user, { profile_photo: update.photo });
+                            }
+                            break;
+                        }
+                    }
                 }
 
                 this.emitFastUpdate(update);

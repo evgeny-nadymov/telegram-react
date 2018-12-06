@@ -332,39 +332,6 @@ class ProfileMediaViewer extends React.Component {
         return true;
     };
 
-    moveToNextMedia = (oldHistory, filterMap) => {
-        const { currentMessageId } = this.state;
-
-        const index = oldHistory.findIndex(x => x.id === currentMessageId);
-        let nextId = 0;
-        for (let i = index - 1; i >= 0; i--) {
-            if (filterMap && !filterMap.has(oldHistory[i].id)) {
-                nextId = oldHistory[i].id;
-                break;
-            }
-        }
-        if (!nextId) {
-            for (let i = index + 1; i < oldHistory.length; i++) {
-                if (filterMap && !filterMap.has(oldHistory[i].id)) {
-                    nextId = oldHistory[i].id;
-                    break;
-                }
-            }
-        }
-
-        if (!nextId) return;
-
-        const nextIndex = this.history.findIndex(x => x.id === nextId);
-
-        return this.loadMedia(nextIndex, () => {
-            if (nextIndex === 0) {
-                this.loadNext();
-            } else if (nextIndex === this.history.length - 1) {
-                this.loadPrevious();
-            }
-        });
-    };
-
     render() {
         const { chatId } = this.props;
         const {
@@ -381,16 +348,6 @@ class ProfileMediaViewer extends React.Component {
         if (totalCount) {
             index = currentIndex;
         }
-
-        // const message = MessageStore.get(chatId, currentMessageId);
-        // const {
-        // 	can_be_forwarded,
-        // 	can_be_deleted_only_for_self,
-        // 	can_be_deleted_for_all_users
-        // } = message;
-
-        // const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
-        // const canBeForwarded = can_be_forwarded;
 
         const deleteConfirmation = null;
         const photo = index > 0 && index < this.history.length ? getProfilePhotoFromPhoto(this.history[index]) : getPhotoFromChat(chatId);

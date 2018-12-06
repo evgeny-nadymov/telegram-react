@@ -8,8 +8,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import {getChatLetters} from '../../Utils/Chat';
-import {getChatPhoto} from '../../Utils/File';
+import { getChatLetters } from '../../Utils/Chat';
+import { loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './ChatTileControl.css';
@@ -76,22 +76,9 @@ class ChatTileControl extends Component{
             this.forceUpdate();
         }
         else{
-            this.loadChatContent(chat)
+            loadChatContent(chat)
         }
     };
-
-    loadChatContent(chat){
-        if (!chat) return;
-
-        let store = FileStore.getStore();
-
-        let [id, pid, idb_key] = getChatPhoto(chat);
-        if (pid) {
-            FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
-                () => FileStore.updateChatPhotoBlob(chat.id, id),
-                () => FileStore.getRemoteFile(id, 1, chat));
-        }
-    }
 
     handleSelect = () => {
         const { chatId, onSelect } = this.props;

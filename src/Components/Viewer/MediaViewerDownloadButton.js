@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FileStore from '../../Stores/FileStore';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
+import FileStore from '../../Stores/FileStore';
 import './MediaViewerFooterButton.css';
 
 class MediaViewerDownloadButton extends React.Component {
@@ -74,11 +74,11 @@ class MediaViewerDownloadButton extends React.Component {
         }
     };
 
-    static saveDisabled = fileId => {
+    static saveDisabled = (fileId) => {
         return !Boolean(FileStore.getBlob(fileId));
     };
 
-    handleClick = event => {
+    handleClick = (event) => {
         event.stopPropagation();
 
         const { onClick } = this.props;

@@ -65,7 +65,7 @@ class UserStore extends EventEmitter {
         if (!myId) return null;
         if (!myId.value) return null;
 
-        return this.get(myId.value.value);
+        return this.get(myId.value);
     }
 
     get(userId) {
