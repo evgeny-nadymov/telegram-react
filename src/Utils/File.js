@@ -393,7 +393,7 @@ function loadMessageContents(store, messages) {
     loadUserPhotos(store, [...users.keys()]);
 }
 
-function saveOrDownload(file, fileName, message) {
+function saveOrDownload(file, fileName, obj) {
     if (!file) return;
     if (!fileName) return;
 
@@ -407,14 +407,16 @@ function saveOrDownload(file, fileName, message) {
         return;
     }
 
+    const blob = FileStore.getBlob(file.id);
+    if (blob){
+        saveBlob(blob, fileName);
+        return;
+    }
+
     if (file.idb_key) {
         let store = FileStore.getStore();
 
-        FileStore.getLocalFile(
-            store,
-            file,
-            file.idb_key,
-            null,
+        FileStore.getLocalFile(store, file, file.idb_key, null,
             () => {
                 if (file.blob) {
                     saveBlob(file.blob, fileName);
@@ -422,7 +424,7 @@ function saveOrDownload(file, fileName, message) {
             },
             () => {
                 if (file.local.can_be_downloaded) {
-                    FileStore.getRemoteFile(file.id, 1, message);
+                    FileStore.getRemoteFile(file.id, 1, obj);
                 }
             }
         );
@@ -430,7 +432,7 @@ function saveOrDownload(file, fileName, message) {
     }
 
     if (file.local.can_be_downloaded) {
-        FileStore.getRemoteFile(file.id, 1, message);
+        FileStore.getRemoteFile(file.id, 1, obj);
     }
 }
 

@@ -41,15 +41,15 @@ class ProfileMediaViewerContent extends React.Component {
 
     componentDidMount() {
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateUserBlob);
+        FileStore.on('clientUpdateUserBlob', this.onClientUpdateUserBlob);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateUserBlob);
+        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
     }
 
-    onClientUpdateChatBlob = update => {
+    onClientUpdateChatBlob = (update) => {
         const { chatId, photo } = this.props;
 
         if (chatId === update.chatId && photo.big.id === update.fileId) {
@@ -60,7 +60,7 @@ class ProfileMediaViewerContent extends React.Component {
         }
     };
 
-    onClientUpdateUserBlob = update => {
+    onClientUpdateUserBlob = (update) => {
         const { chatId, photo } = this.props;
         const userId = getChatUserId(chatId);
 

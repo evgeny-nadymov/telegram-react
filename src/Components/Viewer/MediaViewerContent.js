@@ -87,17 +87,11 @@ class MediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener(
-            'clientUpdatePhotoBlob',
-            this.onClientUpdatePhotoBlob
-        );
-        MessageStore.removeListener(
-            'updateMessageContent',
-            this.onUpdateMessageContent
-        );
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
-    onClientUpdatePhotoBlob = update => {
+    onClientUpdatePhotoBlob = (update) => {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
@@ -110,7 +104,7 @@ class MediaViewerContent extends React.Component {
         }
     };
 
-    onUpdateMessageContent = update => {
+    onUpdateMessageContent = (update) => {
         const { chatId, messageId, size } = this.props;
         const { chat_id, message_id } = update;
 
@@ -127,7 +121,7 @@ class MediaViewerContent extends React.Component {
         }
     };
 
-    handleContentClick = event => {
+    handleContentClick = (event) => {
         if (event) event.stopPropagation();
 
         this.props.onClick(event);

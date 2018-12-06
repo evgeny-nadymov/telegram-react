@@ -28,20 +28,20 @@ class UserTileControl extends Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.on('clientUpdateUserBlob', this.onClientUpdateUserBlob);
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
         FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
     }
 
-    onClientUpdatePhotoBlob = update => {
+    onClientUpdateUserBlob = (update) => {
         const { userId } = this.props;
 
         if (userId === update.userId) {
@@ -49,7 +49,7 @@ class UserTileControl extends Component {
         }
     };
 
-    onClientUpdateChatBlob = update => {
+    onClientUpdateChatBlob = (update) => {
         const { userId } = this.props;
 
         const chat = ChatStore.get(update.chatId);
@@ -70,7 +70,7 @@ class UserTileControl extends Component {
         }
     };
 
-    onUpdateChatPhoto = update => {
+    onUpdateChatPhoto = (update) => {
         const { userId } = this.props;
 
         const chat = ChatStore.get(update.chat_id);

@@ -33,14 +33,38 @@ class MediaViewerDownloadButton extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdatePhotoBlob', this.handleUpdateFile);
+        FileStore.on('clientUpdateUserBlob', this.onClientUpdateUserBlob);
+        FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.handleUpdateFile);
+        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
+        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
-    handleUpdateFile = update => {
+    onClientUpdateUserBlob = (update) => {
+        const { fileId } = this.state;
+
+        if (fileId === update.fileId) {
+            this.setState({
+                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
+            });
+        }
+    };
+
+    onClientUpdateChatBlob = (update) => {
+        const { fileId } = this.state;
+
+        if (fileId === update.fileId) {
+            this.setState({
+                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
+            });
+        }
+    };
+
+    onClientUpdatePhotoBlob = (update) => {
         const { fileId } = this.state;
 
         if (fileId === update.fileId) {
@@ -71,8 +95,7 @@ class MediaViewerDownloadButton extends React.Component {
             <MediaViewerFooterButton
                 disabled={disabled}
                 title='Save'
-                onClick={this.handleClick}
-            >
+                onClick={this.handleClick}>
                 <div className='media-viewer-save-icon' />
             </MediaViewerFooterButton>
         );

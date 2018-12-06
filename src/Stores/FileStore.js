@@ -427,7 +427,7 @@ class FileStore extends EventEmitter {
     };
 
     updateUserPhotoBlob(userId, fileId) {
-        this.emit('clientUpdatePhotoBlob', { userId: userId, fileId: fileId });
+        this.emit('clientUpdateUserBlob', { userId: userId, fileId: fileId });
     }
 
     updateChatPhotoBlob(chatId, fileId) {
