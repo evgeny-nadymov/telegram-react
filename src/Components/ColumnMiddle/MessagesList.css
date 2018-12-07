@@ -5,6 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.messages-list{
+    box-sizing: border-box;
+    flex: 1 1 0;
+    display: flex;
+    position: relative;
+}
+
 .messages-list-wrapper{
     box-sizing: border-box;
     flex: 1 1 0;
@@ -12,7 +19,6 @@
     flex-direction: column;
     overflow-x: hidden;
     overflow-y: auto;
-    position: relative;
     transform: translateZ(0);
 }
 
@@ -22,6 +28,43 @@
     position: relative;
 }
 
-.messages-list{
+.messages-list-items{
     flex: 0 0 auto;
+}
+
+.files-drop-target{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: #dfe5ec44;
+    padding: 12px;
+}
+
+.files-drop-target-wrapper{
+    background: #ffffff;
+    border-radius: 8px;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 1px 0 #dfe5ec;
+    border: 1px solid #dfe5ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.files-drop-target-text{
+    text-align: center;
+}
+
+.files-drop-target-title{
+    font-size: 48px;
+    line-height: normal;
+}
+
+.files-drop-target-subtitle{
+    font-size: 24px;
+    line-height: normal;
 }

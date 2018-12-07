@@ -191,11 +191,7 @@ class InputBoxControl extends Component{
                 document: { '@type': 'inputFileBlob', name: file.name, blob: file }
             };
 
-            this.onSendInternal(
-                content,
-                result => {
-                    FileStore.uploadFile(result.content.document.document.id, result);
-                });
+            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
         }
 
         this.attachDocument.current.value = '';
@@ -323,14 +319,11 @@ class InputBoxControl extends Component{
 
                 //MessageStore.set(result);
 
-                let messageIds = [];
-                messageIds.push(result.id);
-
                 TdLibController
                     .send({
                         '@type': 'viewMessages',
                         chat_id: this.state.currentChatId,
-                        message_ids: messageIds
+                        message_ids: [result.id]
                     });
 
                 callback(result);
@@ -356,9 +349,9 @@ class InputBoxControl extends Component{
     }
 
     render(){
-        const {classes} = this.props;
+        const { classes } = this.props;
+        const { currentChatId, anchorEl } = this.state;
 
-        const {currentChatId, anchorEl} = this.state;
         const selectedChat = ChatStore.get(currentChatId);
 
         let text = '';

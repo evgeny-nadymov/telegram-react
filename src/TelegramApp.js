@@ -160,6 +160,16 @@ class TelegramApp extends Component {
         });
     };
 
+    handleDragOver = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    handleDrop = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
     render() {
         const {
             inactive,
@@ -241,7 +251,7 @@ class TelegramApp extends Component {
 
         return (
             <MuiThemeProvider theme={theme}>
-                <div id="app">
+                <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
                     {page}
                     {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                     {profileMediaViewerContent && (

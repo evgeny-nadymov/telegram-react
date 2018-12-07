@@ -20,8 +20,8 @@ import {
 } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { getChatFullInfo } from '../../Utils/Chat';
-import {MESSAGE_SLICE_LIMIT} from '../../Constants';
+import { canSendFiles, getChatFullInfo } from '../../Utils/Chat';
+import { MESSAGE_SLICE_LIMIT } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
@@ -93,13 +93,17 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState){
         const { chatId } = this.props;
-        const { history } = this.state;
+        const { history, dragging } = this.state;
 
         if (nextProps.chatId !== chatId){
             return true;
         }
 
         if (nextState.history !== history){
+            return true;
+        }
+
+        if (nextState.dragging !== dragging){
             return true;
         }
 
@@ -628,9 +632,90 @@ class MessagesList extends React.Component {
         this.loadIncompleteHistory(result);
     };
 
+    handleListDragEnter = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const { chatId } = this.props;
+        if (!canSendFiles(chatId)) return;
+
+        this.setState({ dragging: true });
+    };
+
+    handleDragEnter = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    handleAttachDocumentComplete = (files) => {
+        if (files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++){
+            let file = files[i];
+            const content = {
+                '@type': 'inputMessageDocument',
+                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            };
+
+            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
+        }
+    };
+
+    onSendInternal = (content, callback) => {
+        const { chatId } = this.props;
+        if (!content) return;
+
+        TdLibController
+            .send({
+                '@type': 'sendMessage',
+                chat_id: chatId,
+                reply_to_message_id: 0,
+                input_message_content: content
+            })
+            .then(result => {
+
+                //MessageStore.set(result);
+
+                TdLibController
+                    .send({
+                        '@type': 'viewMessages',
+                        chat_id: chatId,
+                        message_ids: [result.id]
+                    });
+
+                callback(result);
+            })
+            .catch(error => {
+                alert('sendMessage error ' + JSON.stringify(error));
+            });
+
+        /*if (this.state.selectedChat.draft_message){
+            TdLibController
+                .send({
+                    '@type': 'setChatDraftMessage',
+                    chat_id: this.state.selectedChat.id,
+                    draft_message: null
+                });
+        }*/
+    };
+
+    handleDrop = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ dragging: false });
+
+        this.handleAttachDocumentComplete(event.dataTransfer.files);
+    };
+
+    handleDragLeave = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({ dragging: false });
+    };
+
     render() {
         const { onSelectChat, onSelectUser } = this.props;
-        const { history, separatorMessageId } = this.state;
+        const { history, separatorMessageId, dragging } = this.state;
 
         this.itemsMap.clear();
         this.messages = history.map((x, i) => {
@@ -656,12 +741,32 @@ class MessagesList extends React.Component {
         });
 
         return (
-            <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
-                <div className='messages-list-top'/>
-                <div ref={this.itemsRef} className='messages-list'>
-                    {this.messages}
+                <div
+                    className='messages-list'
+                    onDragEnter={this.handleListDragEnter}>
+                    <div ref={this.listRef}
+                         className='messages-list-wrapper'
+                         onScroll={this.handleScroll}>
+                        <div className='messages-list-top'/>
+                        <div ref={this.itemsRef} className='messages-list-items'>
+                            {this.messages}
+                        </div>
+                    </div>
+                    {   dragging &&
+                        (<div
+                            className='files-drop-target'
+                            onDragEnter={this.handleDragEnter}
+                            onDragLeave={this.handleDragLeave}
+                            onDrop={this.handleDrop}>
+                            <div className='files-drop-target-wrapper'>
+                                <div className='files-drop-target-text'>
+                                    <div className='files-drop-target-title'>Drop files here</div>
+                                    <div className='files-drop-target-subtitle'>to send them witout compression</div>
+                                </div>
+                            </div>
+                        </div>)
+                    }
                 </div>
-            </div>
         );
     }
 }

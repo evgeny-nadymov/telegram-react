@@ -19,6 +19,9 @@ import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
+import InputBoxControl from '../Components/ColumnMiddle/InputBoxControl';
+import FooterCommand from '../Components/ColumnMiddle/FooterCommand';
+import NotificationsCommandControl from '../Components/ColumnMiddle/NotificationsCommandControl';
 
 function getGroupChatTypingString(inputTypingManager) {
     if (!inputTypingManager) return null;
@@ -745,6 +748,90 @@ function getPhotoFromChat(chatId) {
     return chat.photo;
 }
 
+function canSendFiles(chatId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+            if (basicGroup && basicGroup.status){
+                switch (basicGroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusBanned' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusRestricted' : {
+                        if (basicGroup.status.is_member){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            break;
+        }
+        case 'chatTypePrivate' : {
+            return true;
+        }
+        case 'chatTypeSecret' : {
+            return true;
+        }
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup && supergroup.status){
+                switch (supergroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusBanned' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator' : {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft' : {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember' : {
+                        if (supergroup.is_channel){
+                            return false;
+                        }
+                        else{
+                            return true;
+                        }
+                    }
+                    case 'chatMemberStatusRestricted' : {
+                        if (supergroup.status.is_member){
+                            return true;
+                        }
+                        else{
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 export {
     getChatDraft,
     showChatDraft,
@@ -776,5 +863,6 @@ export {
     hasSupergroupId,
     hasUserId,
     getChatUserId,
-    getPhotoFromChat
+    getPhotoFromChat,
+    canSendFiles
 };
