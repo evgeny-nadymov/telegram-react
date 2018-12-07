@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import UserTileControl from './UserTileControl';
 import UserStatusControl from './UserStatusControl';
 import { getUserFullName } from '../../Utils/User';
@@ -13,14 +14,6 @@ import UserStore from '../../Stores/UserStore';
 import './UserControl.css';
 
 class UserControl extends React.Component {
-
-    constructor(props){
-        super(props);
-
-        this.state = {
-            user: UserStore.get(this.props.userId)
-        }
-    }
 
     shouldComponentUpdate(nextProps, nextState){
         return nextProps.userId !== this.props.userId;
@@ -53,9 +46,6 @@ class UserControl extends React.Component {
                         </div>
                         <div className='dialog-row-wrapper'>
                             <UserStatusControl userId={userId}/>
-                            {/*<div className={classNames('dialog-content', {'accent-color': isAccentSubtitle})}>*/}
-                                {/*{status}*/}
-                            {/*</div>*/}
                         </div>
                     </div>
                 </div>
@@ -63,5 +53,10 @@ class UserControl extends React.Component {
         );
     }
 }
+
+UserControl.propTypes = {
+    userId: PropTypes.number.isRequired,
+    onSelect: PropTypes.func
+};
 
 export default UserControl;

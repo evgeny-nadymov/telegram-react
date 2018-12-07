@@ -6,32 +6,52 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
 import DialogStatusControl from './DialogStatusControl';
+import ChatStore from '../../Stores/ChatStore';
+import './ChatControl.css';
 
 class ChatControl extends React.Component {
-    constructor(props) {
-        super(props);
+    shouldComponentUpdate(nextProps, nextState){
+        return nextProps.chatId !== this.props.chatId;
     }
 
+    handleClick = () => {
+        const { chatId, onSelect} = this.props;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        onSelect(chat);
+    };
+
     render() {
-        const { chatId, onSelect } = this.props;
+        const { chatId, onTileSelect } = this.props;
 
         return (
-            <div className='dialog-wrapper'>
-                <ChatTileControl chatId={chatId} onSelect={onSelect} />
-                <div className='dialog-inner-wrapper'>
-                    <div className='dialog-row-wrapper'>
-                        <DialogTitleControl chatId={chatId} />
-                    </div>
-                    <div className='dialog-row-wrapper'>
-                        <DialogStatusControl chatId={chatId} />
+            <div className='chat' onClick={this.handleClick}>
+                <div className='chat-wrapper'>
+                    <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
+                    <div className='dialog-inner-wrapper'>
+                        <div className='dialog-row-wrapper'>
+                            <DialogTitleControl chatId={chatId} />
+                        </div>
+                        <div className='dialog-row-wrapper'>
+                            <DialogStatusControl chatId={chatId} />
+                        </div>
                     </div>
                 </div>
             </div>
         );
     }
 }
+
+ChatControl.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    onSelect: PropTypes.func,
+    onTileSelect: PropTypes.func
+};
 
 export default ChatControl;

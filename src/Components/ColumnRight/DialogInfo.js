@@ -12,6 +12,7 @@ import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogInfo.css';
+import GroupsInCommon from './GroupsInCommon';
 
 class DialogInfo extends React.Component {
 
@@ -32,7 +33,7 @@ class DialogInfo extends React.Component {
     }
 
     onClientUpdateChatId = update => {
-        this.setState({ currentChatId: update.nextChatId, userChatId: null, openSharedMedia: false });
+        this.setState({ currentChatId: update.nextChatId, userChatId: null, openSharedMedia: false, openGroupsInCommon: false });
     };
 
     handelOpenSharedMedia = () => {
@@ -41,6 +42,24 @@ class DialogInfo extends React.Component {
 
     handleCloseSharedMedia = () =>{
         this.setState({ openSharedMedia: false });
+    };
+
+    handleOpenGroupsInCommon = () => {
+        this.setState({ openGroupsInCommon: true });
+    };
+
+    handleCloseGroupsInCommon = () => {
+        this.setState({ openGroupsInCommon: false });
+    };
+
+    handleCloseChatDetails = () => {
+        const { userChatId } = this.state;
+        if (userChatId){
+            this.setState({userChatId: null})
+        }
+        else{
+            ApplicationStore.changeChatDetailsVisibility(false);
+        }
     };
 
     handleSelectUser = async (user) => {
@@ -59,18 +78,14 @@ class DialogInfo extends React.Component {
         this.setState({ userChatId: chat.id });
     };
 
-    handleCloseChatDetails = () => {
-        const { userChatId } = this.state;
-        if (userChatId){
-            this.setState({userChatId: null})
-        }
-        else{
-            ApplicationStore.changeChatDetailsVisibility(false);
-        }
+    handleSelectChat = (chat) => {
+        if (!chat) return;
+
+        this.props.onSelectChat(chat.id);
     };
 
     render() {
-        const {currentChatId, userChatId, openSharedMedia} = this.state;
+        const { currentChatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
 
         let content = null;
         if (openSharedMedia){
@@ -81,6 +96,15 @@ class DialogInfo extends React.Component {
                     chatId={chatId}
                     close={this.handleCloseSharedMedia}/>);
         }
+        else if (openGroupsInCommon){
+            const chatId = userChatId || currentChatId;
+
+            content =
+                (<GroupsInCommon
+                    chatId={chatId}
+                    onClose={this.handleCloseGroupsInCommon}
+                    onSelectChat={this.handleSelectChat}/>);
+        }
         else {
             const chatId = userChatId || currentChatId;
             const backButton = userChatId === chatId;
@@ -90,8 +114,10 @@ class DialogInfo extends React.Component {
                     chatId={chatId}
                     backButton={backButton}
                     openSharedMedia={this.handelOpenSharedMedia}
+                    openGroupsInCommon={this.handleOpenGroupsInCommon}
                     onClose={this.handleCloseChatDetails}
-                    onSelectUser={this.handleSelectUser}/>);
+                    onSelectUser={this.handleSelectUser}
+                    onSelectChat={this.handleSelectChat}/>);
         }
 
         return (

@@ -78,7 +78,7 @@ class TelegramApp extends Component {
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
     }
 
-    onUpdateAuthorizationState = update => {
+    onUpdateAuthorizationState = (update) => {
         const { authorization_state } = update;
 
         this.setState({ authorizationState: authorization_state });
@@ -103,27 +103,27 @@ class TelegramApp extends Component {
         }
     };
 
-    onClientUpdateChatDetailsVisibility = update => {
+    onClientUpdateChatDetailsVisibility = (update) => {
         this.setState({
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
         });
     };
 
-    onClientUpdateMediaViewerContent = update => {
+    onClientUpdateMediaViewerContent = (update) => {
         this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
     };
 
-    onClientUpdateProfileMediaViewerContent = update => {
+    onClientUpdateProfileMediaViewerContent = (update) => {
         this.setState({
             profileMediaViewerContent: ApplicationStore.profileMediaViewerContent
         });
     };
 
-    onClientUpdateAppInactive = update => {
+    onClientUpdateAppInactive = (update) => {
         this.setState({ inactive: true });
     };
 
-    handleSelectChat = chatId => {
+    handleSelectChat = (chatId) => {
         const currentChatId = ApplicationStore.getChatId();
         if (currentChatId === chatId) {
             const chat = ChatStore.get(chatId);
@@ -137,7 +137,7 @@ class TelegramApp extends Component {
         }
     };
 
-    handleSelectUser = async userId => {
+    handleSelectUser = async (userId) => {
         if (!userId) return;
 
         let chat = await TdLibController.send({

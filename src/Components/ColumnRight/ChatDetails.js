@@ -260,8 +260,6 @@ class ChatDetails extends React.Component {
         this.setState({ openPhoneHint: false });
     };
 
-    handleGroupsInCommon = () => {};
-
     handleHeaderClick = () => {
         console.log('[ChatDetails] handleHeaderClick');
         this.chatDetailsListRef.current.scrollTop = 0;
@@ -277,13 +275,13 @@ class ChatDetails extends React.Component {
     };
 
     render() {
-        const { chatId, classes, openSharedMedia, onSelectUser } = this.props;
+        const { chatId, classes, openSharedMedia, openGroupsInCommon, onSelectUser } = this.props;
         const { openUsernameHint, openPhoneHint } = this.state;
 
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
-                <div className="chat-details">
+                <div className='chat-details'>
                     <ChatDetailsHeaderControl />
                 </div>
             );
@@ -316,15 +314,15 @@ class ChatDetails extends React.Component {
         // const items = sortedUsers.map(user => (<div key={user.id} style={{margin: '12px', height: '50px', width: '50px', background: 'red'}}/>));
 
         return (
-            <div className="chat-details">
+            <div className='chat-details'>
                 <ChatDetailsHeaderControl
                     backButton={this.props.backButton}
                     onClose={this.props.onClose}
                     onClick={this.handleHeaderClick}
                 />
-                <div ref={this.chatDetailsListRef} className="chat-details-list">
-                    <div className="chat-details-info">
-                        <ChatControl chatId={chatId} onSelect={this.handleOpenViewer} />
+                <div ref={this.chatDetailsListRef} className='chat-details-list'>
+                    <div className='chat-details-info'>
+                        <ChatControl chatId={chatId} onTileSelect={this.handleOpenViewer} />
                     </div>
                     <List>
                         {username && (
@@ -335,7 +333,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant="inherit" noWrap>
+                                            <Typography variant='inherit' noWrap>
                                                 {username}
                                             </Typography>
                                         }
@@ -352,12 +350,12 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id="message-id">Link copied</span>}
+                                    message={<span id='message-id'>Link copied</span>}
                                     action={
                                         <IconButton
-                                            key="close"
-                                            aria-label="Close"
-                                            color="inherit"
+                                            key='close'
+                                            aria-label='Close'
+                                            color='inherit'
                                             className={classes.close}
                                             onClick={this.handleCloseUsernameHint}
                                         >
@@ -375,7 +373,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant="inherit" noWrap>
+                                            <Typography variant='inherit' noWrap>
                                                 {formatPhoneNumber(phoneNumber)}
                                             </Typography>
                                         }
@@ -392,12 +390,12 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id="message-id">Phone copied</span>}
+                                    message={<span id='message-id'>Phone copied</span>}
                                     action={[
                                         <IconButton
-                                            key="close"
-                                            aria-label="Close"
-                                            color="inherit"
+                                            key='close'
+                                            aria-label='Close'
+                                            color='inherit'
                                             className={classes.close}
                                             onClick={this.handleClosePhoneHint}
                                         >
@@ -410,7 +408,7 @@ class ChatDetails extends React.Component {
                         {bio && (
                             <ListItem>
                                 <ListItemIcon>
-                                    <ErrorOutlineIcon className="chat-details-info-icon" />
+                                    <ErrorOutlineIcon className='chat-details-info-icon' />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={bio}
@@ -432,18 +430,18 @@ class ChatDetails extends React.Component {
                             </ListItemIcon>
                             <ListItemText
                                 primary={
-                                    <Typography variant="inherit" noWrap>
+                                    <Typography variant='inherit' noWrap>
                                         Shared Media
                                     </Typography>
                                 }
                             />
                         </ListItem>
                         {!isGroup && (
-                            <ListItem button disabled onClick={this.handleGroupsInCommon}>
+                            <ListItem button onClick={openGroupsInCommon}>
                                 <ListItemText
                                     inset
                                     primary={
-                                        <Typography variant="inherit" noWrap>
+                                        <Typography variant='inherit' noWrap>
                                             Groups in Common
                                         </Typography>
                                     }

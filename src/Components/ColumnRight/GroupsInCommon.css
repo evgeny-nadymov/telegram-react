@@ -5,13 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.chat{
-    width: 100%;
-    height: 100%;
+.groups-in-common{
+    display: flex;
+    flex-direction: column;
 }
 
-.chat-wrapper{
-    display: flex;
-    align-items: center;
-    user-select: none;
+groups-in-common-chats{
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
