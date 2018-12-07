@@ -16,7 +16,7 @@ import {
     itemsInView
 } from '../../Utils/Common';
 import {
-    loadChatPhotos,
+    loadChatsContent,
     loadMessageContents
 } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
@@ -299,7 +299,7 @@ class MessagesList extends React.Component {
             // load files
             const store = FileStore.getStore();
             loadMessageContents(store, result.messages);
-            loadChatPhotos(store, [chatId]);
+            loadChatsContent(store, [chatId]);
 
             MessagesList.viewMessages(result.messages);
 
@@ -627,7 +627,7 @@ class MessagesList extends React.Component {
         // load files
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        loadChatPhotos(store, [chatId]);
+        loadChatsContent(store, [chatId]);
 
         MessagesList.viewMessages(result.messages);
 

@@ -35,7 +35,7 @@ import {
     getChatFullInfo
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
-import { loadUserPhotos, loadChatPhotos } from '../../Utils/File';
+import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
@@ -208,7 +208,7 @@ class ChatDetails extends React.Component {
 
         const store = FileStore.getStore();
 
-        loadChatPhotos(store, [chatId]);
+        loadChatsContent(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);
         loadUserPhotos(store, members);
     };

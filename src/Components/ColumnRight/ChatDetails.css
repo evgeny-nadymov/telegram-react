@@ -20,7 +20,8 @@
 
 .chat-details-list{
     overflow-y: scroll;
-    height: 100%;
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
 .chat-details-info-icon{

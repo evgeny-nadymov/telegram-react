@@ -10,7 +10,7 @@ import { Scrollbars } from 'react-custom-scrollbars';
 import DialogControl from '../Tile/DialogControl';
 import {CHAT_SLICE_LIMIT} from '../../Constants';
 import {
-    loadChatPhotos
+    loadChatsContent
 } from '../../Utils/File';
 import {
     itemsInView,
@@ -292,7 +292,7 @@ class DialogsList extends React.Component {
 
     loadChatContents(chats){
         const store = FileStore.getStore();
-        loadChatPhotos(store, chats);
+        loadChatsContent(store, chats);
     }
 
     appendChats(chats, callback){

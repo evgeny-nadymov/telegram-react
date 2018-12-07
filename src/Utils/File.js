@@ -244,7 +244,7 @@ function loadUserPhotos(store, userIds) {
     }
 }
 
-function loadChatPhotos(store, chatIds) {
+function loadChatsContent(store, chatIds) {
     if (!chatIds) return;
     if (!chatIds.length) return;
 
@@ -724,7 +724,7 @@ export {
     saveData,
     saveBlob,
     loadUserPhotos,
-    loadChatPhotos,
+    loadChatsContent,
     loadMessageContents,
     loadMediaViewerContent,
     preloadMediaViewerContent,

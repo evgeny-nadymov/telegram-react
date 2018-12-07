@@ -11,8 +11,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ChatControl from '../Tile/ChatControl';
 import GroupsInCommonHeader from './GroupsInCommonHeader';
 import { getChatUserId } from '../../Utils/Chat';
+import { loadChatsContent } from '../../Utils/File';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './GroupsInCommon';
+import './GroupsInCommon.css';
 
 class GroupsInCommon extends React.Component {
 
@@ -38,6 +40,10 @@ class GroupsInCommon extends React.Component {
                 limit: 100
             })
             .then(result => {
+
+                const store = FileStore.getStore();
+                loadChatsContent(store, result.chat_ids);
+
                 this.setState({ chatIds: result.chat_ids });
             });
     };
