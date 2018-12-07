@@ -20,6 +20,7 @@ class ApplicationStore extends EventEmitter {
         this.isChatDetailsVisible = false;
         this.mediaViewerContent = null;
         this.profileMediaViewerContent = null;
+        this.dragging = false;
 
         this.addTdLibListener();
         this.addStatistics();
@@ -187,6 +188,15 @@ class ApplicationStore extends EventEmitter {
     setNotificationSettings(scope, notificationSettings) {
         return this.scopeNotificationSettings.set(scope, notificationSettings);
     }
+
+    getDragging = () => {
+        return this.dragging;
+    };
+
+    setDragging = (value) => {
+        this.dragging = value;
+        this.emit('clientUpdateDragging', value);
+    };
 
     assign(source1, source2) {
         Object.assign(source1, source2);
