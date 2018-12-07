@@ -111,7 +111,26 @@ class FileStore extends EventEmitter {
                             }
                             case 'message':
                                 switch (obj.content['@type']) {
-                                    case 'messagePhoto':
+                                    case 'messageText': {
+                                        const { web_page } = obj.content;
+
+                                        for (let i = 0; i < web_page.photo.sizes.length; i++) {
+                                            let photoSize = web_page.photo.sizes[i];
+                                            if (photoSize) {
+                                                let source = photoSize.photo;
+                                                if (source && source.id === file.id) {
+                                                    this.getLocalFile(store, source, idb_key, arr,
+                                                        () => this.updateWebPageBlob(obj.chat_id, obj.id, file.id),
+                                                        () => this.getRemoteFile(file.id, 1, obj)
+                                                    );
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        break;
+                                    }
+                                    case 'messagePhoto': {
                                         const { photo } = obj.content;
 
                                         for (let i = 0; i < photo.sizes.length; i++) {
@@ -129,6 +148,7 @@ class FileStore extends EventEmitter {
                                         }
 
                                         break;
+                                    }
                                     case 'messageSticker': {
                                         const { sticker } = obj.content;
 
@@ -423,6 +443,15 @@ class FileStore extends EventEmitter {
         if (this.urls.has(blob)) {
             this.urls.delete(blob);
         }
+    };
+
+    updateWebPageBlob = (chatId, messageId, fileId) => {
+        console.log(`clientUpdateWebPageBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        this.emit('clientUpdateWebPageBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
     };
 
     updatePhotoBlob = (chatId, messageId, fileId) => {

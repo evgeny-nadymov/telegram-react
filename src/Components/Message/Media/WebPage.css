@@ -1,0 +1,44 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.web-page{
+    display: flex;
+    flex-direction: row;
+    margin-top: 6px;
+}
+
+.web-page-wrapper{
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 12px;
+    overflow: hidden;
+}
+
+.web-page-border{
+    background: #7eaad1;
+    min-width: 2px;
+}
+
+.web-page-site-name{
+    color: #3a6d99;
+}
+
+.web-page-title{
+    font-weight: bold;
+}
+
+.web-page-description{
+
+}
+
+.web-page-photo{
+    margin-top: 6px;
+    border-radius: 6px;
+    transform: translateZ(0);
+    overflow: hidden;
+    cursor: pointer;
+}

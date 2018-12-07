@@ -155,6 +155,13 @@ function getText(message){
     return text;
 }
 
+function getWebPage(message){
+    if (!message) return null;
+    if (!message.content) return null;
+
+    return message.content.web_page;
+}
+
 function getDate(message){
     if (!message) return null;
     if (!message.date) return null;
@@ -416,6 +423,7 @@ function getVenueId(location){
 export {
     getTitle,
     getText,
+    getWebPage,
     getContent,
     getDate,
     getDateHint,

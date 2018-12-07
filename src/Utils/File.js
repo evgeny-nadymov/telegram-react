@@ -118,6 +118,28 @@ function getPhotoPreviewFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageFile(message, size = PHOTO_SIZE) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    if (!message.content || message.content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    if (message.content.web_page && message.content.web_page.photo) {
+        let photoSize = getSize(message.content.web_page.photo.sizes, size);
+        if (photoSize && photoSize['@type'] === 'photoSize') {
+            let file = photoSize.photo;
+            if (file && file.remote.id) {
+                return [file.id, file.remote.id, file.idb_key];
+            }
+        }
+    }
+
+    return [0, '', ''];
+}
+
 function getPhotoFile(message, size = PHOTO_SIZE) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -275,6 +297,23 @@ function loadMessageContents(store, messages) {
 
             if (message.content) {
                 switch (message.content['@type']) {
+                    case 'messageText': {
+                        const [id, pid, idb_key] = getWebPageFile(message);
+                        if (pid) {
+                            const photoSize = getPhotoSize(message.content.web_page.photo.sizes);
+                            if (photoSize) {
+                                let obj = photoSize.photo;
+                                if (!obj.blob) {
+                                    let localMessage = message;
+                                    FileStore.getLocalFile(store, obj, idb_key, null,
+                                        () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
+                                        () => FileStore.getRemoteFile(id, 1, localMessage));
+                                }
+                            }
+                        }
+                        break;
+                    }
+
                     case 'messagePhoto': {
                         // preview
                         /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
@@ -721,6 +760,7 @@ export {
     getPhotoFile,
     getPhotoPreviewFile,
     getDocumentThumbnailFile,
+    getWebPageFile,
     saveData,
     saveBlob,
     loadUserPhotos,

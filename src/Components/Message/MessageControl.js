@@ -20,7 +20,8 @@ import {
     getReply,
     getForward,
     getUnread,
-    getSenderUserId
+    getSenderUserId,
+    getWebPage
 } from '../../Utils/Message';
 import { getPhotoSize } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
@@ -28,6 +29,7 @@ import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import './MessageControl.css';
+import WebPage from './Media/WebPage';
 
 class MessageControl extends Component {
     constructor(props) {
@@ -222,6 +224,7 @@ class MessageControl extends Component {
         if (!message) return <div>[empty message]</div>;
 
         const text = getText(message);
+        const webPage = getWebPage(message);
         const date = getDate(message);
         const dateHint = getDateHint(message);
         const media = getMedia(message, this.openMedia);
@@ -237,12 +240,12 @@ class MessageControl extends Component {
         );
 
         return (
-            <div className="message">
+            <div className='message'>
                 {this.props.showUnreadSeparator && (
-                    <div className="message-unread-separator">Unread messages</div>
+                    <div className='message-unread-separator'>Unread messages</div>
                 )}
 
-                <div className="message-wrapper">
+                <div className='message-wrapper'>
                     {this.unread && (
                         <MessageStatusControl
                             chatId={message.chat_id}
@@ -251,8 +254,8 @@ class MessageControl extends Component {
                         />
                     )}
                     {tileControl}
-                    <div className="message-content">
-                        <div className="message-title">
+                    <div className='message-content'>
+                        <div className='message-title'>
                             {!forward && (
                                 <MessageAuthor
                                     chatId={chatId}
@@ -262,16 +265,16 @@ class MessageControl extends Component {
                                 />
                             )}
                             {forward && (
-                                <div className="message-author">
+                                <div className='message-author'>
                                     Forwarded from <a onClick={this.openForward}>{forward}</a>
                                 </div>
                             )}
-                            <div className="message-meta">
+                            <div className='message-meta'>
                                 <span>&nbsp;</span>
                                 {message.views > 0 && (
                                     <>
-                                        <i className="message-views-icon" />
-                                        <span className="message-views">
+                                        <i className='message-views-icon' />
+                                        <span className='message-views'>
                       &nbsp;
                                             {message.views}
                                             &nbsp;&nbsp;
@@ -279,7 +282,7 @@ class MessageControl extends Component {
                                     </>
                                 )}
                                 {message.edit_date > 0 && <span>edited </span>}
-                                <span className="message-date" title={dateHint}>
+                                <span className='message-date' title={dateHint}>
                   {date}
                 </span>
                             </div>
@@ -288,7 +291,8 @@ class MessageControl extends Component {
                             <ReplyControl chatId={message.chat_id} messageId={reply} />
                         )}
                         {media}
-                        <div className="message-text">{text}</div>
+                        <div className='message-text'>{text}</div>
+                        {webPage && <WebPage message={message}/>}
                     </div>
                 </div>
             </div>
