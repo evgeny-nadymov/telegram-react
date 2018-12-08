@@ -80,7 +80,9 @@ class ChatTileControl extends Component{
         }
     };
 
-    handleSelect = () => {
+    handleSelect = (event) => {
+        event.stopPropagation();
+
         const { chatId, onSelect } = this.props;
         if (!onSelect) return;
 

@@ -7,49 +7,32 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './WebPage.css'
-import FileStore from '../../../Stores/FileStore';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import { getFitSize, getSize } from '../../../Utils/Common';
+import FileStore from '../../../Stores/FileStore';
+import './WebPage.css'
 
 class WebPage extends React.Component {
+
     componentDidMount() {
-        this.mount = true;
-        // FileStore.on('updateFile', this.onUpdateFile);
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateWebPageBlob);
+        FileStore.on('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
     }
 
     componentWillUnmount() {
-        // FileStore.removeListener('updateFile', this.onUpdateFile);
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateWebPageBlob);
-        this.mount = false;
+        FileStore.removeListener('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
     }
 
     onClientUpdateWebPageBlob = (update) => {
         const { message } = this.props;
         if (!message) return;
-        const { chatId, messageId } = update;
 
-        if (message.chat_id === chatId
-            && message.id === messageId) {
+        const { chatId, messageId } = update;
+        const { chat_id, id } = message;
+
+        if (chat_id === chatId && id === messageId) {
             this.forceUpdate();
         }
     };
-
-    // onUpdateFile = (update) => {
-    //     const { file } = update;
-    //
-    //     if (this.photoSize
-    //         && this.photoSize.photo
-    //         && this.photoSize.photo.id === file.id){
-    //
-    //         file.blob = this.photoSize.photo.blob;
-    //         this.photoSize.photo = file;
-    //
-    //         this.forceUpdate();
-    //     }
-    // };
-
 
     getSiteName = (webPage) => {
         if (!webPage) return null;
@@ -82,7 +65,7 @@ class WebPage extends React.Component {
     };
 
     render() {
-        const { message } = this.props;
+        const { message, size, displaySize, openMedia } = this.props;
         if (!message) return null;
 
         const { content } = message;
@@ -97,31 +80,27 @@ class WebPage extends React.Component {
         const photo = this.getPhoto(web_page);
         const url = this.getUrl(web_page);
 
-        let { size, displaySize, openMedia } = this.props;
-        if (!size) {
-            size = PHOTO_SIZE;
-        }
-        if (!displaySize) {
-            displaySize = PHOTO_DISPLAY_SIZE;
-        }
-
-        this.photoSize = !this.photoSize ? getSize(this.props.message.content.web_page.photo.sizes, size) : this.photoSize;
-        if (!this.photoSize) return null;
-
-        let fitPhotoSize = getFitSize(this.photoSize, displaySize);
-        if (!fitPhotoSize) return null;
-
-        let file = this.photoSize.photo;
-
-        const blob = FileStore.getBlob(file.id) || file.blob;
-
-        let className = 'photo-img';
         let src = '';
-        try{
-            src = FileStore.getBlobUrl(blob);
-        }
-        catch(error){
-            console.log(`WebPage.render photo with error ${error}`);
+        let fitPhotoSize = {
+            width: 0,
+            height: 0
+        };
+        if (photo){
+            const photoSize = getSize(photo.sizes, size);
+            if (photoSize) {
+                fitPhotoSize = getFitSize(photoSize, displaySize);
+                if (fitPhotoSize) {
+                    const file = photoSize.photo;
+                    const blob = FileStore.getBlob(file.id) || file.blob;
+
+                    try{
+                        src = FileStore.getBlobUrl(blob);
+                    }
+                    catch(error){
+                        console.log(`WebPage.render photo with error ${error}`);
+                    }
+                }
+            }
         }
 
         return (
@@ -132,9 +111,9 @@ class WebPage extends React.Component {
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
                     {photo &&
-                        <div className='web-page-photo' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}} onClick={openMedia}>
-                            <a href={url} title={url} target="_blank" rel="noopener noreferrer">
-                                <img className={className} width={fitPhotoSize.width} height={fitPhotoSize.height} src={src} alt=''/>
+                        <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
+                            <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
+                                <img className='photo-img' style={fitPhotoSize} src={src} alt=''/>
                             </a>
                         </div>
                     }
@@ -145,8 +124,15 @@ class WebPage extends React.Component {
 }
 
 WebPage.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func
+    message: PropTypes.object.isRequired,
+    size: PropTypes.number,
+    displaySize: PropTypes.number,
+    openMedia: PropTypes.func
+};
+
+WebPage.defaultProps = {
+    size: PHOTO_SIZE,
+    displaySize: PHOTO_DISPLAY_SIZE
 };
 
 export default WebPage;
