@@ -165,7 +165,7 @@ class FileProgress extends React.Component {
             }, COMPLETE_PROGRESS_ANIMATION_MS);
         }
 
-        console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+        // console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
         // showCancel = true;
         // showProgress = true;
         return (

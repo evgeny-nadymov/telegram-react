@@ -153,15 +153,6 @@ class DocumentControl extends React.Component {
             }, timeToCompleteAnimation);
         }
 
-        console.log(
-            'updateFile progress=' +
-            progress +
-            ' show_progress=' +
-            showProgress +
-            ' payload=' +
-            this.payload
-        );
-
         this.isDownloadingActive = isDownloadingActive;
         this.isUploadingActive = isUploadingActive;
 

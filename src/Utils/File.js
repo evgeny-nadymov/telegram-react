@@ -253,14 +253,13 @@ function loadUserPhotos(store, userIds) {
         if (user) {
             let [id, pid, idb_key] = getUserPhoto(user);
             if (pid) {
-                FileStore.getLocalFile(
-                    store,
-                    user.profile_photo.small,
-                    idb_key,
-                    null,
-                    () => FileStore.updateUserPhotoBlob(user.id, id),
-                    () => FileStore.getRemoteFile(id, 1, user)
-                );
+                const blob = FileStore.getBlob(id);
+                if (!blob){
+                    FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+                        () => FileStore.updateUserPhotoBlob(user.id, id),
+                        () => FileStore.getRemoteFile(id, 1, user)
+                    );
+                }
             }
         }
     }
@@ -302,10 +301,11 @@ function loadMessageContents(store, messages) {
                         if (pid) {
                             const photoSize = getPhotoSize(message.content.web_page.photo.sizes);
                             if (photoSize) {
-                                let obj = photoSize.photo;
-                                if (!obj.blob) {
+                                const file = photoSize.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     let localMessage = message;
-                                    FileStore.getLocalFile(store, obj, idb_key, null,
+                                    FileStore.getLocalFile(store, file, idb_key, null,
                                         () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
                                         () => FileStore.getRemoteFile(id, 1, localMessage));
                                 }
@@ -333,10 +333,11 @@ function loadMessageContents(store, messages) {
                         if (pid) {
                             const photoSize = getPhotoSize(message.content.photo.sizes);
                             if (photoSize) {
-                                let obj = photoSize.photo;
-                                if (!obj.blob) {
+                                const file = photoSize.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     let localMessage = message;
-                                    FileStore.getLocalFile(store, obj, idb_key, null,
+                                    FileStore.getLocalFile(store, file, idb_key, null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
                                         () => FileStore.getRemoteFile(id, 1, localMessage));
                                 }
@@ -347,10 +348,11 @@ function loadMessageContents(store, messages) {
                     case 'messageSticker': {
                         const [id, pid, idb_key] = getStickerFile(message);
                         if (pid) {
-                            const obj = message.content.sticker.sticker;
-                            if (!obj.blob) {
+                            const file = message.content.sticker.sticker;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 let localMessage = message;
-                                FileStore.getLocalFile(store, obj, idb_key, null,
+                                FileStore.getLocalFile(store, file, idb_key, null,
                                     () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
                                     () => FileStore.getRemoteFile(id, 1, localMessage));
                             }

@@ -316,6 +316,10 @@ class FileStore extends EventEmitter {
             return;
         }
 
+        // if (this.getBlob(file.id)){
+        //     return;
+        // }
+
         const request = store.get(idb_key);
         request.onsuccess = event => {
             const blob = event.target.result;

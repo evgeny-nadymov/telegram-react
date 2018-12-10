@@ -53,8 +53,8 @@ class StickerControl extends React.Component {
         const { sticker } = content;
         if (!sticker) return null;
 
-        let file = sticker.sticker;
-        if (!file) return null;
+        const file = sticker.sticker;
+        const blob = FileStore.getBlob(file.id) || file.blob;
 
         let size = {
             width: sticker.width,
@@ -64,7 +64,7 @@ class StickerControl extends React.Component {
         let fitSize = getFitSize(size, 192);
         let src = '';
         try{
-            src = FileStore.getBlobUrl(file.blob);
+            src = FileStore.getBlobUrl(blob);
         }
         catch(error){
             console.log(`StickerControl.render sticker with error ${error}`);
