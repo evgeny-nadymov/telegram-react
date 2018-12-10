@@ -4,13 +4,16 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-.file-download-progress{
+.file-progress{
     position: absolute;
     width: 48px;
     height: 48px;
+    left: 50%;
+    top: 50%;
+    margin: -24px 0 0 -24px;
 }
 
-.file-download-progress-indicator{
+.file-progress-indicator{
     position: absolute;
     width: 42px;
     height: 42px;
@@ -18,7 +21,7 @@
     animation: spin 4s linear infinite;
 }
 
-.file-download-progress-background{
+.file-progress-background{
     position: absolute;
     width: 48px;
     height: 48px;
@@ -26,7 +29,20 @@
     background: rgba(26, 26, 26, 0.7);
 }
 
-.file-download-progress-circle {
+.file-progress-circle {
     stroke-linecap: round;
     color: #ffffff;
+}
+
+.file-progress-cancel-button{
+    height: 18px;
+    width: 18px;
+    stroke: #ffffff;
+    stroke-width: 3px;
+    stroke-linecap: round;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -9px;
+    margin-top: -9px;
 }

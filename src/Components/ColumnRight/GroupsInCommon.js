@@ -68,7 +68,7 @@ class GroupsInCommon extends React.Component {
         return (
             <div className='groups-in-common'>
                 <GroupsInCommonHeader onClose={onClose}/>
-                <div className='groups-in-common-chats'>
+                <div className='groups-in-common-list'>
                 {chats}
                 </div>
             </div>

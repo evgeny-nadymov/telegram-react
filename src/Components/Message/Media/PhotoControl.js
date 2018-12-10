@@ -6,19 +6,22 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import {getSize, getFitSize} from '../../../Utils/Common';
-import {PHOTO_SIZE, PHOTO_DISPLAY_SIZE} from '../../../Constants';
+import PropTypes from 'prop-types'
+import FileProgress from '../../Viewer/FileProgress';
+import { getSize, getFitSize } from '../../../Utils/Common';
+import { PHOTO_SIZE, PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './PhotoControl.css';
-
-const backgroundCircleStyle = { circle: 'photo-progress-circle-background' };
-const circleStyle = { circle: 'photo-progress-circle' };
 
 class PhotoControl extends React.Component {
     constructor(props){
         super(props);
+
+        const { message, size } = props;
+        const photoSize = getSize(message.content.photo.sizes, size);
+        this.state = {
+            photoSize: photoSize
+        };
     }
 
     /*shouldComponentUpdate(nextProps, nextState){
@@ -30,101 +33,34 @@ class PhotoControl extends React.Component {
     }*/
 
     componentDidMount() {
-        this.mount = true;
-        FileStore.on('updateFile', this.onUpdateFile);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.on('file_upload_update', this.onUpdateFile);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('updateFile', this.onUpdateFile);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('file_upload_update', this.onUpdateFile);
-        this.mount = false;
     }
 
-    onUpdateFile = (update) => {
-        const { file } = update;
-
-        if (this.photoSize
-            && this.photoSize.photo
-            && this.photoSize.photo.id === file.id){
-
-            file.blob = this.photoSize.photo.blob;
-            this.photoSize.photo = file;
-
-            this.forceUpdate();
-        }
-    };
-
     onClientUpdatePhotoBlob = (update) => {
-        const { message } = this.props;
-        if (!message) return;
-        const { chatId, messageId } = update;
+        const { photoSize } = this.state;
+        const { fileId } = update;
 
-        if (message.chat_id === chatId
-            && message.id === messageId) {
+        if (!photoSize) return;
+
+        if (photoSize.photo.id === fileId) {
             this.forceUpdate();
         }
     };
 
     render() {
-        let { size, displaySize, openMedia } = this.props;
-        if (!size) {
-            size = PHOTO_SIZE;
-        }
-        if (!displaySize) {
-            displaySize = PHOTO_DISPLAY_SIZE;
-        }
+        const { displaySize, openMedia } = this.props;
+        const { photoSize } = this.state;
 
-        this.photoSize = !this.photoSize ? getSize(this.props.message.content.photo.sizes, size) : this.photoSize;
-        if (!this.photoSize) return null;
+        if (!photoSize) return null;
 
-        let fitPhotoSize = getFitSize(this.photoSize, displaySize);
+        const fitPhotoSize = getFitSize(photoSize, displaySize);
         if (!fitPhotoSize) return null;
 
-        let file = this.photoSize.photo;
-
-        let isDownloadingActive = file.local && file.local.is_downloading_active;
-        let isUploadingActive = file.remote && file.remote.is_uploading_active;
-        let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
-        let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
-
-        let progress = 0;
-        if (isDownloadingActive){
-            progress = file.local.downloaded_size && file.size && this.isDownloadingActive
-                ? 100 - (file.size - file.local.downloaded_size) / file.size * 100
-                : 1;
-        }
-        else if (isUploadingActive){
-            progress = file.remote.uploaded_size && file.size && this.isUploadingActive
-                ? 100 - (file.size - file.remote.uploaded_size) / file.size * 100
-                : 1;
-        }
-
-        let showProgress = //isDownloadingActive ||
-            isUploadingActive;
-
-        let timeToCompleteAnimation = 300;
-        if (this.isDownloadingActive && !isDownloadingActive){
-            progress = isDownloadingCompleted ? 100 : 0;
-            showProgress = true;
-            setTimeout(() =>{
-                if (!this.mount) return;
-
-                this.forceUpdate();
-            }, timeToCompleteAnimation);
-        }
-        else if (this.isUploadingActive && !isUploadingActive){
-            progress = isUploadingCompleted ? 100 : 0;
-            showProgress = true;
-            setTimeout(() =>{
-                if (!this.mount) return;
-
-                this.forceUpdate();
-            }, timeToCompleteAnimation);
-        }
-
+        const file = photoSize.photo;
         const blob = FileStore.getBlob(file.id) || file.blob;
 
         let className = 'photo-img';
@@ -136,52 +72,42 @@ class PhotoControl extends React.Component {
             console.log(`PhotoControl.render photo with error ${error}`);
         }
 
-        if (!blob && this.props.message.content.photo.sizes.length > 0)
-        {
-            let previewSize = this.props.message.content.photo.sizes[0];
-            if (previewSize){
-                let previewFile = previewSize.photo;
-                if (previewFile && previewFile.blob){
-                    className += ' photo-img-blur';
-                    try{
-                        src = FileStore.getBlobUrl(previewFile.blob);
-                    }
-                    catch(error){
-                        console.log(`PhotoControl.render photo with error ${error}`);
-                    }
-                }
-            }
-        }
-
-        this.isDownloadingActive = isDownloadingActive;
-        this.isUploadingActive = isUploadingActive;
+        // if (!blob && this.props.message.content.photo.sizes.length > 0)
+        // {
+        //     let previewSize = this.props.message.content.photo.sizes[0];
+        //     if (previewSize){
+        //         let previewFile = previewSize.photo;
+        //         if (previewFile && previewFile.blob){
+        //             className += ' photo-img-blur';
+        //             try{
+        //                 src = FileStore.getBlobUrl(previewFile.blob);
+        //             }
+        //             catch(error){
+        //                 console.log(`PhotoControl.render photo with error ${error}`);
+        //             }
+        //         }
+        //     }
+        // }
 
         return (
-                <div className='photo-wrapper' style={{width: fitPhotoSize.width, height: fitPhotoSize.height}} onClick={openMedia}>
-                    <img className={className} width={fitPhotoSize.width} height={fitPhotoSize.height} src={src} alt=''/>
-                    {
-                        showProgress &&
-                        <>
-                            <svg className='photo-tile-circle'>
-                                <circle cx='22' cy='22' r='22' fill='black'/>
-                            </svg>
-                            <svg className='photo-tile-cancel'>
-                                <line x1='2' y1='2' x2='16' y2='16' className='document-tile-cancel-line'/>
-                                <line x1='2' y1='16' x2='16' y2='2' className='document-tile-cancel-line'/>
-                            </svg>
-                            <div className='photo-progress'>
-                                <CircularProgress classes={circleStyle} variant='static' value={progress} size={42} thickness={3} />
-                            </div>
-                        </>
-                    }
-                </div>
-            );
+            <div className='photo' style={fitPhotoSize} onClick={openMedia}>
+                <img className={className} style={fitPhotoSize} src={src} alt=''/>
+                <FileProgress file={file} showCancel/>
+            </div>
+        );
     }
 }
 
 PhotoControl.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func.isRequired
+    message: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired,
+    size: PropTypes.number,
+    displaySize: PropTypes.number
+};
+
+PhotoControl.defaultProps = {
+    size: PHOTO_SIZE,
+    displaySize: PHOTO_DISPLAY_SIZE
 };
 
 export default PhotoControl;

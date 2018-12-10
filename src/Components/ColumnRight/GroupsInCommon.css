@@ -14,8 +14,9 @@
     flex-direction: column;
 }
 
-.groups-in-common-chats{
+.groups-in-common-list{
     overflow-y: scroll;
     flex-grow: 1;
     flex-shrink: 1;
+    transform: translateZ(0);
 }

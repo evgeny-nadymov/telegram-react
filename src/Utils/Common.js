@@ -33,6 +33,10 @@ function getSize(sizes, dimension) {
     let diff = Math.abs(dimension - (useWidth ? sizes[0].width : sizes[0].height));
     let index = 0;
     for (let i = 1; i < sizes.length; i++){
+        if (sizes[i].type === 'i' && !sizes[i].photo.idb_key){
+            continue;
+        }
+
         let currDiff = Math.abs(dimension - (useWidth ? sizes[i].width : sizes[i].height));
         if (currDiff < diff){
             index = i;

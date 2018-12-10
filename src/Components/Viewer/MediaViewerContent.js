@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import FileDownloadProgress from './FileDownloadProgress';
+import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import { getMediaFile } from '../../Utils/File';
 import { getText } from '../../Utils/Message';
@@ -146,7 +146,7 @@ class MediaViewerContent extends React.Component {
                     onClick={this.handleContentClick}
                 />
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileDownloadProgress file={file} />
+                <FileProgress file={file} skipDownloading={false}/>
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
         );

@@ -455,7 +455,7 @@ class FileStore extends EventEmitter {
     };
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
-        //console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdatePhotoBlob', {
             chatId: chatId,
             messageId: messageId,

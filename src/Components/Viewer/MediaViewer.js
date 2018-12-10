@@ -301,8 +301,8 @@ class MediaViewer extends React.Component {
                 query: '',
                 sender_user_id: 0,
                 from_message_id: this.history.length > 0 ? this.history[0].id : 0,
-                offset: -MEDIA_SLICE_LIMIT,
-                limit: MEDIA_SLICE_LIMIT + 1,
+                offset: -99,
+                limit: 99 + 1,
                 filter: { '@type': 'searchMessagesFilterPhoto' }
             });
             count += result.messages.length;
@@ -586,6 +586,9 @@ class MediaViewer extends React.Component {
         if (totalCount && firstSliceLoaded) {
             index = this.history.findIndex(x => x.id === currentMessageId);
         }
+        const maxCount = Math.max(this.history.length, totalCount);
+
+        //console.log(`MediaViewer.render index=${index} currentMessageId=${currentMessageId}`, this.history);
 
         const message = MessageStore.get(chatId, currentMessageId);
         const {
@@ -684,8 +687,8 @@ class MediaViewer extends React.Component {
                     <MediaViewerFooterText
                         title='Photo'
                         subtitle={
-                            totalCount && index >= 0
-                                ? `${totalCount - index} of ${totalCount}`
+                            maxCount && index >= 0
+                                ? `${maxCount - index} of ${maxCount}`
                                 : null
                         }
                     />

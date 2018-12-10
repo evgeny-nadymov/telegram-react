@@ -46,6 +46,7 @@ class UserTileControl extends Component {
         const { userId } = this.props;
 
         if (userId === update.userId) {
+            //console.log('UserTileControl.onClientUpdateUserBlob user_id=' + userId);
             this.forceUpdate();
         }
     };
@@ -65,6 +66,7 @@ class UserTileControl extends Component {
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
                 if (chat.type.user_id === userId) {
+                    //console.log('UserTileControl.onClientUpdateChatBlob user_id=' + userId);
                     this.forceUpdate();
                 }
             }
@@ -87,6 +89,7 @@ class UserTileControl extends Component {
             case 'chatTypeSecret': {
                 if (chat.type.user_id === userId) {
                     if (!update.photo){
+                        //console.log('UserTileControl.onUpdateChatPhoto user_id=' + userId);
                         this.forceUpdate();
                     }
                     else{
@@ -112,6 +115,7 @@ class UserTileControl extends Component {
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
                 if (chat.type.user_id === userId && !chat.photo) {
+                    //console.log('UserTileControl.onUpdateChatTitle user_id=' + userId);
                     this.forceUpdate();
                 }
             }
@@ -159,8 +163,7 @@ class UserTileControl extends Component {
                 src={src}
                 draggable={false}
                 alt=''
-                onClick={this.handleSelect}
-            />
+                onClick={this.handleSelect}/>
         ) : (
             <div className={className} onClick={this.handleSelect}>
                 <span className='tile-text'>{letters}</span>

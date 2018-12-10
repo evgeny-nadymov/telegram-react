@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import FileDownloadProgress from './FileDownloadProgress';
+import FileProgress from './FileProgress';
 import { getChatUserId } from '../../Utils/Chat';
 import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
@@ -94,7 +94,7 @@ class ProfileMediaViewerContent extends React.Component {
                     onClick={this.handleContentClick}
                 />
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileDownloadProgress file={file} />
+                <FileProgress file={file} />
             </div>
         );
     }
