@@ -17,12 +17,16 @@ import {
     IconButton
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import CloseIcon from '@material-ui/icons/Close';
 import TdLibController from '../../Controllers/TdLibController';
 import MainMenuButton from './MainMenuButton';
 import '../ColumnMiddle/Header.css';
+import PropTypes from 'prop-types';
+import ApplicationStore from '../../Stores/ApplicationStore';
+import { isAuthorizationReady } from '../../Utils/Common';
 
 const styles = {
-    searchIconButton: {
+    headerIconButton: {
         margin: '8px 12px 8px 0'
     }
 };
@@ -32,9 +36,22 @@ class DialogsHeader extends React.Component {
         super(props);
 
         this.state = {
+            authorizationState: ApplicationStore.getAuthorizationState(),
             open: false
         };
     }
+
+    componentDidMount(){
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+    }
+
+    componentWillUnmount(){
+        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+    }
+
+    onUpdateAuthorizationState = (update) => {
+        this.setState({ authorizationState: update.authorization_state });
+    };
 
     handleLogOut = () => {
         this.setState({ open: true });
@@ -49,27 +66,42 @@ class DialogsHeader extends React.Component {
         this.setState({ open: false });
     };
 
+    handleSearch = () => {
+        const { onSearch, openSearch } = this.props;
+        const { authorizationState } = this.state;
+        if (!isAuthorizationReady(authorizationState)) return;
+
+        onSearch(!openSearch);
+    };
+
+    handleKeyDown = () => {
+
+    };
+
+    handleKeyUp = () => {
+
+    };
+
     render() {
-        const { classes, onClick } = this.props;
+        const { classes, onClick, openSearch } = this.props;
         const { open } = this.state;
 
         const confirmLogoutDialog = open ? (
             <Dialog
                 open={open}
                 onClose={this.handleClose}
-                aria-labelledby="form-dialog-title"
-            >
-                <DialogTitle id="form-dialog-title">Telegram</DialogTitle>
+                aria-labelledby='form-dialog-title'>
+                <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         Are you sure you want to log out?
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={this.handleClose} color="primary">
+                    <Button onClick={this.handleClose} color='primary'>
                         Cancel
                     </Button>
-                    <Button onClick={this.handleDone} color="primary">
+                    <Button onClick={this.handleDone} color='primary'>
                         Ok
                     </Button>
                 </DialogActions>
@@ -77,22 +109,45 @@ class DialogsHeader extends React.Component {
         ) : null;
 
         return (
-            <div className="header-master">
-                <MainMenuButton onLogOut={this.handleLogOut} />
-                {confirmLogoutDialog}
-                <div className="header-status grow cursor-pointer" onClick={onClick}>
-                    <span className="header-status-content">Telegram</span>
-                </div>
+            <div className='header-master'>
+                {   !openSearch
+                    ? <>
+                        <MainMenuButton onLogOut={this.handleLogOut} />
+                        { confirmLogoutDialog }
+                        <div className='header-status grow cursor-pointer' onClick={onClick}>
+                            <span className='header-status-content'>Telegram</span>
+                        </div>
+                    </>
+                    : <>
+                        <div className='header-search-input grow'>
+                            <div
+                                id='inputbox-message'
+                                ref={this.searchInput}
+                                placeholder='Search'
+                                key={Date()}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onKeyDown={this.handleKeyDown}
+                                onKeyUp={this.handleKeyUp}>
+                            </div>
+                        </div>
+                    </>
+                }
                 <IconButton
-                    className={classes.searchIconButton}
-                    disabled
-                    aria-label="Search"
-                >
-                    <SearchIcon />
+                    className={classes.headerIconButton}
+                    aria-label='Search'
+                    onClick={this.handleSearch}>
+                    { openSearch ? <CloseIcon/> : <SearchIcon/> }
                 </IconButton>
             </div>
         );
     }
 }
+
+DialogsHeader.propTypes = {
+    openSearch: PropTypes.bool.isRequired,
+    onClick: PropTypes.func.isRequired,
+    onSearch: PropTypes.func.isRequired
+};
 
 export default withStyles(styles)(DialogsHeader);

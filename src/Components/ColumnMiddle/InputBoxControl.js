@@ -378,8 +378,8 @@ class InputBoxControl extends Component{
                         ref={this.newMessage}
                         placeholder='Type a message'
                         key={Date()}
-                        contentEditable={true}
-                        suppressContentEditableWarning={true}
+                        contentEditable
+                        suppressContentEditableWarning
                         onKeyDown={this.handleKeyDown}
                         onKeyUp={this.handleInputChange}>
                         {text}

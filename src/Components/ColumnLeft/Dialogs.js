@@ -12,6 +12,8 @@ import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Dialogs.css';
+import Search from './Search';
+import PropTypes from 'prop-types';
 
 class Dialogs extends Component{
     constructor(props){
@@ -19,11 +21,21 @@ class Dialogs extends Component{
 
         this.dialogsList = React.createRef();
 
-        this.handleHeaderClick = this.handleHeaderClick.bind(this);
-        this.onUpdateChatDetailsVisibility = this.onUpdateChatDetailsVisibility.bind(this);
+        this.state = {
+            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
+            openSearch: false
+        };
     }
 
     shouldComponentUpdate(nextProps, nextState){
+        if (nextState.isChatDetailsVisible !== this.state.isChatDetailsVisible){
+            return true;
+        }
+
+        if (nextState.openSearch !== this.state.openSearch){
+            return true;
+        }
+
         return false;
     }
 
@@ -35,25 +47,48 @@ class Dialogs extends Component{
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
     }
 
-    onUpdateChatDetailsVisibility(update){
-        this.forceUpdate();
-    }
+    onUpdateChatDetailsVisibility = (update) => {
+        this.setState({
+            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
+        })
+    };
 
-    handleHeaderClick(){
+    handleHeaderClick = () => {
         this.dialogsList.current.scrollToTop();
-    }
+    };
+
+    handleSearch = (visible) => {
+        this.setState({
+            openSearch: visible
+        })
+    };
+
+    handleSelectChat = (chatId, openSearch) => {
+        const { onSelectChat } = this.props;
+
+        onSelectChat(chatId);
+
+        this.setState({ openSearch: openSearch });
+    };
 
     render(){
-        const { isChatDetailsVisible } = ApplicationStore;
+        const { isChatDetailsVisible, openSearch } = this.state;
         
         return (
             <div className={classNames('dialogs', { 'dialogs-third-column': isChatDetailsVisible })}>
-                <DialogsHeader onClearCache={this.props.onClearCache} onClick={this.handleHeaderClick}/>
-                <DialogsList ref={this.dialogsList} onSelectChat={this.props.onSelectChat}/>
+                <DialogsHeader openSearch={openSearch} onClick={this.handleHeaderClick} onSearch={this.handleSearch}/>
+                <div className='dialogs-content'>
+                    <DialogsList ref={this.dialogsList} onSelectChat={this.handleSelectChat}/>
+                    { openSearch && <Search onSelectChat={this.handleSelectChat}/> }
+                </div>
                 <UpdatePanel/>
             </div>
         );
     }
 }
+
+Search.propTypes = {
+    onSelectChat: PropTypes.func.isRequired
+};
 
 export default Dialogs;

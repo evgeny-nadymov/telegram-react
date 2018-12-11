@@ -7,7 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import { getUserStatus, isAccentUserSubtitle } from './User';
+import { getUserShortName, getUserStatus, isAccentUserSubtitle } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
@@ -19,9 +19,6 @@ import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
-import InputBoxControl from '../Components/ColumnMiddle/InputBoxControl';
-import FooterCommand from '../Components/ColumnMiddle/FooterCommand';
-import NotificationsCommandControl from '../Components/ColumnMiddle/NotificationsCommandControl';
 
 function getGroupChatTypingString(inputTypingManager) {
     if (!inputTypingManager) return null;
@@ -832,6 +829,27 @@ function canSendFiles(chatId){
     return false;
 }
 
+function getChatShortTitle(chatId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            return chat.title;
+        }
+        case 'chatTypeSupergroup' : {
+            return chat.title;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' :{
+            return getUserShortName(chat.type.user_id);
+        }
+    }
+
+    return null;
+}
+
 export {
     getChatDraft,
     showChatDraft,
@@ -864,5 +882,6 @@ export {
     hasUserId,
     getChatUserId,
     getPhotoFromChat,
-    canSendFiles
+    canSendFiles,
+    getChatShortTitle
 };

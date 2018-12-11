@@ -129,6 +129,26 @@ function getUserFullName(user) {
     return null;
 }
 
+function getUserShortName(userId) {
+    const user = UserStore.get(userId);
+    if (!user) return null;
+    if (!user.type) return null;
+
+    switch (user.type['@type']) {
+        case 'userTypeBot':
+        case 'userTypeRegular': {
+            if (user.first_name) return user.first_name;
+            if (user.last_name) return user.last_name;
+        }
+        case 'userTypeDeleted':
+        case 'userTypeUnknown': {
+            return 'Deleted account';
+        }
+    }
+
+    return null;
+}
+
 function isUserBlocked(userId){
     const fullInfo = UserStore.getFullInfo(userId);
     if (fullInfo){
@@ -209,5 +229,6 @@ export {
     getUserLetters,
     getUserStatusOrder,
     getProfilePhotoFromPhoto,
-    getProfilePhotoDateHint
+    getProfilePhotoDateHint,
+    getUserShortName
 }

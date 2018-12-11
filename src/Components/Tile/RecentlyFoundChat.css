@@ -5,14 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.dialogs-list {
-    overflow-y: auto;
-    overflow-x: hidden;
+.recently-found-chat{
+    width: 100%;
     height: 100%;
-    transform: translateZ(0);
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    margin: -1px -2px -1px 0;
 }

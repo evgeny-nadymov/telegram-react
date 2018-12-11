@@ -9,11 +9,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
-import DialogStatusControl from './DialogStatusControl';
 import ChatStore from '../../Stores/ChatStore';
-import './ChatControl.css';
+import './RecentlyFoundChat.css';
 
-class ChatControl extends React.Component {
+class RecentlyFoundChat extends React.Component {
     shouldComponentUpdate(nextProps, nextState){
         return nextProps.chatId !== this.props.chatId;
     }
@@ -22,25 +21,20 @@ class ChatControl extends React.Component {
         const { chatId, onSelect} = this.props;
         if (!onSelect) return;
 
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-
-        onSelect(chat);
+        onSelect(chatId);
     };
 
     render() {
+
         const { chatId, onTileSelect } = this.props;
 
         return (
-            <div className='chat' onClick={this.handleClick}>
+            <div className='recently-found-chat' onClick={this.handleClick}>
                 <div className='chat-wrapper'>
                     <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
                     <div className='dialog-inner-wrapper'>
                         <div className='dialog-row-wrapper'>
                             <DialogTitleControl chatId={chatId} />
-                        </div>
-                        <div className='dialog-row-wrapper'>
-                            <DialogStatusControl chatId={chatId} />
                         </div>
                     </div>
                 </div>
@@ -49,10 +43,9 @@ class ChatControl extends React.Component {
     }
 }
 
-ChatControl.propTypes = {
+RecentlyFoundChat.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onSelect: PropTypes.func,
-    onTileSelect: PropTypes.func
+    onSelect: PropTypes.func
 };
 
-export default ChatControl;
+export default RecentlyFoundChat;

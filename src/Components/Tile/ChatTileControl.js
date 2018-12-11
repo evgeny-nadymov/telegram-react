@@ -124,7 +124,8 @@ class ChatTileControl extends Component{
 }
 
 ChatTileControl.propTypes = {
-    chatId : PropTypes.number.isRequired
+    chatId: PropTypes.number.isRequired,
+    onSelect: PropTypes.func
 };
 
 export default ChatTileControl;

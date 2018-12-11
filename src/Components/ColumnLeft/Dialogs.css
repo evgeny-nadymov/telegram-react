@@ -16,6 +16,13 @@
     flex-direction: column;
 }
 
+.dialogs-content{
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+    position: relative;
+}
+
 .dialogs-third-column{
     width: calc(26.7% - 0px);
 }

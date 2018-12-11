@@ -107,3 +107,7 @@
 .header-status .header-progress:nth-of-type(4) {
     animation-delay: .3s;
 }
+
+.header-search-input{
+    padding: 0 0 0 24px;
+}

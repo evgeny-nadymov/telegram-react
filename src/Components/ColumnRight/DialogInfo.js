@@ -8,11 +8,11 @@
 import React from 'react';
 import ChatDetails from './ChatDetails';
 import SharedMedia from './SharedMedia';
+import GroupsInCommon from './GroupsInCommon';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogInfo.css';
-import GroupsInCommon from './GroupsInCommon';
 
 class DialogInfo extends React.Component {
 

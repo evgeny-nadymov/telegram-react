@@ -293,7 +293,7 @@ class FileStore extends EventEmitter {
 
         const request = store.delete(file.idb_key);
         request.onsuccess = event => {
-            alert('Local file deleted');
+            // alert('Local file deleted');
         };
         request.onerror = () => {};
     };
