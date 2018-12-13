@@ -54,17 +54,19 @@ class FileProgress extends React.Component {
             return false;
         }
 
+        const nextLocal = nextState.file ? nextState.file.local : null;
+        const nextIdbKey = nextState.file ? nextState.file.idb_key : null;
+        const prevLocal = this.state.prevFile ? this.state.prevFile.local : null;
+        const prevIdbKey = this.state.prevFile ? this.state.prevFile.idb_key : null;
+        const isDownloadingCompleted =
+            prevLocal && nextLocal
+            && !prevLocal.is_downloading_completed
+            && nextLocal.is_downloading_completed;
+        const receiveIdbKey = nextIdbKey && !prevIdbKey;
+
         if (nextState.file.id === this.state.file.id
-            && nextState.file.local
-            && !nextState.file.local.is_downloading_active
-            && nextState.file.local.is_downloading_completed
-            && nextState.file.idb_key
-            && this.state.prevFile
-            && this.state.prevFile.local
-            && this.state.prevFile.local.is_downloading_active
-            && !this.state.prevFile.local.is_downloading_completed
-            && !this.state.file.idb_key
-        ) {
+            && isDownloadingCompleted
+            && receiveIdbKey) {
             return false;
         }
 
@@ -131,7 +133,7 @@ class FileProgress extends React.Component {
             isCompleted = local.is_downloading_completed;
             progressSize = local.downloaded_size;
             size = file.size;
-            console.log(`FileProgress.getProgressParams isDownloading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            // console.log(`FileProgress.getProgressParams isDownloading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
         }
         else if (this.isUploading(file, prevFile)){
             wasActive = prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
@@ -139,10 +141,10 @@ class FileProgress extends React.Component {
             isCompleted = remote.is_uploading_completed;
             progressSize = remote.uploaded_size;
             size = file.size;
-            console.log(`FileProgress.getProgressParams isUploading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            // console.log(`FileProgress.getProgressParams isUploading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
         }
         else{
-            console.log(`FileProgress.getProgressParams none id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            // console.log(`FileProgress.getProgressParams none id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
         }
 
         return [ wasActive, isActive, isCompleted, progressSize, size ];
@@ -174,7 +176,7 @@ class FileProgress extends React.Component {
             }, COMPLETE_PROGRESS_ANIMATION_MS);
         }
 
-        console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`, file, prevFile);
+        // console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`, file, prevFile);
         // showCancel = true;
         // showProgress = true;
         return (

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import {
     Dialog,
@@ -18,12 +19,11 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
-import TdLibController from '../../Controllers/TdLibController';
 import MainMenuButton from './MainMenuButton';
-import '../ColumnMiddle/Header.css';
-import PropTypes from 'prop-types';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import { isAuthorizationReady } from '../../Utils/Common';
+import ApplicationStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
+import '../ColumnMiddle/Header.css';
 
 const styles = {
     headerIconButton: {
@@ -35,10 +35,23 @@ class DialogsHeader extends React.Component {
     constructor(props) {
         super(props);
 
+        this.searchInput = React.createRef();
+
         this.state = {
             authorizationState: ApplicationStore.getAuthorizationState(),
             open: false
         };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.props.openSearch
+            && this.props.openSearch !== prevProps.openSearch) {
+            setTimeout(() => {
+                if (this.searchInput.current){
+                    this.searchInput.current.focus();
+                }
+            }, 250);
+        }
     }
 
     componentDidMount(){
@@ -82,6 +95,18 @@ class DialogsHeader extends React.Component {
 
     };
 
+    handleInput = () => {
+        const innerText = this.searchInput.current.innerText;
+        const innerHTML = this.searchInput.current.innerHTML;
+
+        if (innerText && innerText === '\n'
+            && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')){
+            this.searchInput.current.innerHTML = '';
+        }
+
+        ApplicationStore.emit('clientUpdateSearchText', { text: innerText });
+    };
+
     render() {
         const { classes, onClick, openSearch } = this.props;
         const { open } = this.state;
@@ -121,14 +146,15 @@ class DialogsHeader extends React.Component {
                     : <>
                         <div className='header-search-input grow'>
                             <div
-                                id='inputbox-message'
+                                id='header-search-inputbox'
                                 ref={this.searchInput}
                                 placeholder='Search'
                                 key={Date()}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
-                                onKeyUp={this.handleKeyUp}>
+                                onKeyUp={this.handleKeyUp}
+                                onInput={this.handleInput}>
                             </div>
                         </div>
                     </>
@@ -136,7 +162,7 @@ class DialogsHeader extends React.Component {
                 <IconButton
                     className={classes.headerIconButton}
                     aria-label='Search'
-                    onClick={this.handleSearch}>
+                    onMouseDown={this.handleSearch}>
                     { openSearch ? <CloseIcon/> : <SearchIcon/> }
                 </IconButton>
             </div>
@@ -147,7 +173,8 @@ class DialogsHeader extends React.Component {
 DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
-    onSearch: PropTypes.func.isRequired
+    onSearch: PropTypes.func.isRequired,
+    onSearchTextChange: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(DialogsHeader);

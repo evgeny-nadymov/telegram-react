@@ -229,8 +229,8 @@ class InputBoxControl extends Component{
     }
 
     handleInputChange(){
-        let innerText = this.newMessage.current.innerText;
-        let innerHTML = this.newMessage.current.innerHTML;
+        const innerText = this.newMessage.current.innerText;
+        const innerHTML = this.newMessage.current.innerHTML;
 
         if (innerText
             && innerText === '\n'

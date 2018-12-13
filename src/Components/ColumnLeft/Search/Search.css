@@ -17,29 +17,23 @@
 }
 
 .search-top-chats{
+    min-height: 110px;
+    overflow: hidden;
+    position: relative;
+}
+
+.search-top-chats-list{
     display: flex;
     flex-direction: row;
     overflow-x: auto;
     transform: translateZ(0);
+    position: absolute;
+    left: 0;
+    top: 28px;
+    right: 0;
+    bottom: -17px;
 }
 
 .search-top-chats-placeholder{
     min-width: 10px;
-}
-
-.search-recently-found-chats-caption {
-    background: #f0f4f7;
-    color: #8096a8;
-    padding: 4px 22px;
-    display: flex;
-    flex-direction: row;
-}
-
-.search-recently-found-chats-label {
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-.search-recently-found-chats-command {
-    cursor: pointer;
 }

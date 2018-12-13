@@ -12,7 +12,7 @@ import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Dialogs.css';
-import Search from './Search';
+import Search from './Search/Search';
 import PropTypes from 'prop-types';
 
 class Dialogs extends Component{
@@ -33,6 +33,10 @@ class Dialogs extends Component{
         }
 
         if (nextState.openSearch !== this.state.openSearch){
+            return true;
+        }
+
+        if (nextState.searchText !== this.state.searchText){
             return true;
         }
 
@@ -71,15 +75,23 @@ class Dialogs extends Component{
         this.setState({ openSearch: openSearch });
     };
 
+    handleSearchTextChange = (text) => {
+        this.setState({ searchText: text });
+    };
+
     render(){
-        const { isChatDetailsVisible, openSearch } = this.state;
+        const { isChatDetailsVisible, openSearch, searchText } = this.state;
         
         return (
             <div className={classNames('dialogs', { 'dialogs-third-column': isChatDetailsVisible })}>
-                <DialogsHeader openSearch={openSearch} onClick={this.handleHeaderClick} onSearch={this.handleSearch}/>
+                <DialogsHeader
+                    openSearch={openSearch}
+                    onClick={this.handleHeaderClick}
+                    onSearch={this.handleSearch}
+                    onSearchTextChange={this.handleSearchTextChange}/>
                 <div className='dialogs-content'>
                     <DialogsList ref={this.dialogsList} onSelectChat={this.handleSelectChat}/>
-                    { openSearch && <Search onSelectChat={this.handleSelectChat}/> }
+                    { openSearch && <Search text={searchText} onSelectChat={this.handleSelectChat}/> }
                 </div>
                 <UpdatePanel/>
             </div>
