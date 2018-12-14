@@ -10,9 +10,13 @@ import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
 import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
+import FoundPublicChat from '../../Tile/FoundPublicChat';
+import FoundMessage from '../../Tile/FoundMessage';
 import SearchCaption from './SearchCaption';
 import { loadChatsContent } from '../../../Utils/File';
+import { filterMessages } from '../../../Utils/Message';
 import { MIN_USERNAME_LENGTH } from '../../../Constants';
+import MessageStore from '../../../Stores/MessageStore';
 import FileStore from '../../../Stores/FileStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import TdLibController from '../../../Controllers/TdLibController';
@@ -22,6 +26,8 @@ class Search extends React.Component {
 
     constructor(props){
         super(props);
+
+        this.listRef = React.createRef();
 
         this.state = {
             top: null,
@@ -57,6 +63,7 @@ class Search extends React.Component {
 
     searchText =  async (text) => {
         this.sessionId = new Date();
+        this.text = text;
         const sessionId = this.sessionId;
 
         const local = await TdLibController.send({
@@ -101,12 +108,29 @@ class Search extends React.Component {
         const messages = await TdLibController.send({
             '@type': 'searchMessages',
             query: text,
-            limit: 100
+            offset_date: 0,
+            offset_chat_id: 0,
+            offset_message_id: 0,
+            limit: 50
         });
+
+        MessageStore.setItems(messages.messages);
+
+        if (sessionId !== this.sessionId){
+            return;
+        }
 
         this.setState({
             messages: messages
         });
+
+        const chats = new Map();
+        for (let i = 0; i < messages.messages.length; i++){
+            chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
+        }
+
+        store = FileStore.getStore();
+        loadChatsContent(store, [...chats.keys()]);
     };
 
     loadContent = async () => {
@@ -126,7 +150,10 @@ class Search extends React.Component {
 
         this.setState({
             top: top,
-            recentlyFound: recentlyFound
+            recentlyFound: recentlyFound,
+            local: null,
+            global: null,
+            messages: null
         });
 
         const store = FileStore.getStore();
@@ -171,6 +198,98 @@ class Search extends React.Component {
         onSelectChat(chatId, false)
     };
 
+    handleSelectMessage = (chatId, messageId) => {
+        const { onSelectChat } = this.props;
+
+        onSelectChat(chatId, false)
+    };
+
+    handleScroll = () => {
+        const list = this.listRef.current;
+
+        if (list.scrollTop + list.offsetHeight === list.scrollHeight){
+            this.onLoadPrevious();
+        }
+    };
+
+    getOffset = (messages) => {
+        const length = messages? messages.messages.length : 0;
+
+        const offsetDate = length > 0
+            ? messages.messages[length - 1].date
+            : 0;
+        const offsetChatId = length > 0
+            ? messages.messages[length - 1].chat_id
+            : 0;
+        const offsetMessageId = length > 0
+            ? messages.messages[length - 1].id
+            : 0;
+
+        return {
+            offset_date: offsetDate,
+            offset_chat_id: offsetChatId,
+            offset_message_id: offsetMessageId
+        };
+    };
+
+    concatMessages = (messages, result) => {
+        if (!result) return messages;
+        if (!result.messages.length) return messages;
+
+        if (!messages) return result;
+        if (!messages.messages.length) return result;
+
+        return {
+            total_count: result.total_count,
+            messages: messages.messages.concat(result.messages)
+        }
+    };
+
+    onLoadPrevious = async () => {
+        if (this.loading) return;
+
+        console.log('SCROLL HANDLESCROLL onLoadPrevious');
+
+        const sessionId = this.sessionId;
+
+        const { messages } = this.state;
+
+        const offset = this.getOffset(messages);
+
+        this.loading = true;
+        const result = await TdLibController.send({
+            '@type': 'searchMessages',
+            query: this.text,
+            ...offset,
+            limit: 50
+        });
+        this.loading = false;
+
+        filterMessages(result, messages ? messages.messages : []);
+
+        MessageStore.setItems(result.messages);
+
+        if (sessionId !== this.sessionId){
+            return;
+        }
+
+        this.setState({
+            messages: this.concatMessages(messages, result)
+        });
+
+        const chats = new Map();
+        for (let i = 0; i < result.messages.length; i++){
+            chats.set(result.messages[i].chat_id, result.messages[i].chat_id);
+        }
+
+        const store = FileStore.getStore();
+        loadChatsContent(store, [...chats.keys()]);
+    };
+
+    handleTopChatsScroll = (event) => {
+        event.stopPropagation();
+    };
+
     render() {
         const { onSelectChat } = this.props;
         const { top, recentlyFound, local, global, messages } = this.state;
@@ -185,6 +304,7 @@ class Search extends React.Component {
                 </ListItem>
             ))
             : [];
+
         const localChats = local && local.chat_ids
             ? local.chat_ids.map(x => (
                 <ListItem button key={x} onClick={() => this.handleSelectChat(x)}>
@@ -192,20 +312,33 @@ class Search extends React.Component {
                 </ListItem>
             ))
             : [];
+
         const globalChats = global && global.chat_ids
             ? global.chat_ids.map(x => (
                 <ListItem button key={x} onClick={() => this.handleSelectChat(x)}>
-                    <RecentlyFoundChat chatId={x}/>
+                    <FoundPublicChat chatId={x}/>
+                </ListItem>
+            ))
+            : [];
+        const globalMessages = messages && messages.messages
+            ? messages.messages.map(x => (
+                <ListItem button key={`${x.chat_id}_${x.id}`} onClick={() => this.handleSelectMessage(x.chat_id, x.id)}>
+                    <FoundMessage chatId={x.chat_id} messageId={x.id}/>
                 </ListItem>
             ))
             : [];
 
+        let messagesCaption = 'No messages found';
+        if (messages && messages.total_count){
+            messagesCaption = messages.total_count === 1? 'Found 1 message' : `Found ${messages.total_count} messages`;
+        }
+
         return (
-            <div className='search'>
+            <div ref={this.listRef} className='search' onScroll={this.handleScroll}>
                 {   topChats.length > 0 &&
                     <div className='search-top-chats'>
                         <SearchCaption caption='People'/>
-                        <div className='search-top-chats-list'>
+                        <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
                             <div className='search-top-chats-placeholder'/>
                             {topChats}
                             <div className='search-top-chats-placeholder'/>
@@ -228,6 +361,12 @@ class Search extends React.Component {
                     <div className='search-global-chats'>
                         <SearchCaption caption='Global search'/>
                         {globalChats}
+                    </div>
+                }
+                {   messages &&
+                    <div className='search-global-chats'>
+                        <SearchCaption caption={messagesCaption}/>
+                        {globalMessages}
                     </div>
                 }
             </div>

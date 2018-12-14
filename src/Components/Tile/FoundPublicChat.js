@@ -9,9 +9,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
-import './RecentlyFoundChat.css';
+import './FoundPublicChat.css';
+import { getChatUsername } from '../../Utils/Chat';
 
-class RecentlyFoundChat extends React.PureComponent {
+class FoundPublicChat extends React.PureComponent {
 
     handleClick = () => {
         const { chatId, onSelect} = this.props;
@@ -24,13 +25,18 @@ class RecentlyFoundChat extends React.PureComponent {
 
         const { chatId, onTileSelect } = this.props;
 
+        const username = getChatUsername(chatId);
+
         return (
-            <div className='recently-found-chat' onClick={this.handleClick}>
-                <div className='chat-wrapper'>
-                    <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='dialog-row-wrapper'>
-                            <DialogTitleControl chatId={chatId} />
+            <div className='found-public-chat' onClick={this.handleClick}>
+                <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
+                <div className='dialog-inner-wrapper'>
+                    <div className='dialog-row-wrapper'>
+                        <DialogTitleControl chatId={chatId} />
+                    </div>
+                    <div className='dialog-row-wrapper'>
+                        <div className='dialog-content'>
+                            @{username}
                         </div>
                     </div>
                 </div>
@@ -39,9 +45,9 @@ class RecentlyFoundChat extends React.PureComponent {
     }
 }
 
-RecentlyFoundChat.propTypes = {
+FoundPublicChat.propTypes = {
     chatId: PropTypes.number.isRequired,
     onSelect: PropTypes.func
 };
 
-export default RecentlyFoundChat;
+export default FoundPublicChat;

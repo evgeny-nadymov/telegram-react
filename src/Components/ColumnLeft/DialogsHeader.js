@@ -20,7 +20,7 @@ import {
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
 import MainMenuButton from './MainMenuButton';
-import { isAuthorizationReady } from '../../Utils/Common';
+import { debounce, isAuthorizationReady, throttle } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
@@ -41,6 +41,8 @@ class DialogsHeader extends React.Component {
             authorizationState: ApplicationStore.getAuthorizationState(),
             open: false
         };
+
+        this.handleInput = debounce(this.handleInput, 250);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

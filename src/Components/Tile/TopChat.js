@@ -11,10 +11,7 @@ import { getChatShortTitle } from '../../Utils/Chat';
 import ChatTileControl from './ChatTileControl';
 import './TopChat.css';
 
-class TopChat extends React.Component {
-    shouldComponentUpdate(nextProps, nextState){
-        return nextProps.chatId !== this.props.chatId;
-    }
+class TopChat extends React.PureComponent {
 
     render() {
         const { chatId, onSelect } = this.props;

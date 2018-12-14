@@ -184,28 +184,22 @@ function getChatDraft(chat) {
     return null;
 }
 
-function getLastMessageSender(chat) {
-    if (!chat) return null;
-    if (!chat.last_message) return null;
-    if (isServiceMessage(chat.last_message)) return null;
-    if (!chat.last_message.sender_user_id) return null;
+function getMessageSenderName(message) {
+    if (!message) return null;
+    if (isServiceMessage(message)) return null;
+    if (!message.sender_user_id) return null;
 
-    return UserStore.get(chat.last_message.sender_user_id);
+    return getUserShortName(message.sender_user_id);
 }
 
 function getLastMessageSenderName(chat) {
-    const sender = getLastMessageSender(chat);
-    let senderName = null;
-    if (
-        sender &&
-        (sender.first_name || sender.last_name) &&
-        (chat.type['@type'] === 'chatTypeBasicGroup' ||
-            chat.type['@type'] === 'chatTypeSupergroup')
-    ) {
-        senderName = sender.first_name ? sender.first_name : sender.last_name;
+    if (!chat) return null;
+    if (chat.type['@type'] !== 'chatTypeBasicGroup'
+        && chat.type['@type'] !== 'chatTypeSupergroup') {
+        return null;
     }
 
-    return senderName;
+    return getMessageSenderName(chat.last_message);
 }
 
 function getLastMessageContent(chat) {
@@ -280,28 +274,32 @@ function getChatMuteFor(chat) {
     }
 }
 
+function getMessageDate(message){
+    const date = new Date(message.date * 1000);
+
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    if (date > dayStart) {
+        return dateFormat(date, 'H:MM');
+    }
+
+    const now = new Date();
+    const weekStart = now.getDate() - now.getDay() + 1;
+    const monday = new Date(now.setDate(weekStart));
+    if (date > monday) {
+        return dateFormat(date, 'ddd');
+    }
+
+    return dateFormat(date, 'd.mm.yyyy');
+}
+
 function getLastMessageDate(chat) {
     if (!chat) return null;
     if (!chat.last_message) return null;
     if (!chat.last_message.date) return null;
     if (showChatDraft(chat)) return null;
 
-    let date = new Date(chat.last_message.date * 1000);
-
-    let yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    if (date > yesterday) {
-        return dateFormat(date, 'H:MM');
-    }
-
-    let now = new Date();
-    let weekStart = now.getDate() - now.getDay() + 1;
-    let monday = new Date(now.setDate(weekStart));
-    if (date > monday) {
-        return dateFormat(date, 'ddd');
-    }
-
-    return dateFormat(date, 'd.mm.yyyy');
+    return getMessageDate(chat.last_message);
 }
 
 function getChatSubtitleWithoutTyping(chat) {
@@ -861,8 +859,10 @@ export {
     getChatSubtitle,
     getChatSubtitleWithoutTyping,
     getLastMessageSenderName,
+    getMessageSenderName,
     getLastMessageContent,
     getLastMessageDate,
+    getMessageDate,
     getChatLetters,
     isAccentChatSubtitle,
     isAccentChatSubtitleWithoutTyping,

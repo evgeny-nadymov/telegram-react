@@ -90,10 +90,8 @@ class DialogContentControl extends React.Component {
             const senderName = getLastMessageSenderName(chat);
             contentControl = (
                 <>
-                    {senderName && (
-                        <span className='dialog-content-accent'>{senderName}: </span>
-                    )}
-                    {content}
+                    { senderName && <span className='dialog-content-accent'>{senderName}: </span> }
+                    { content }
                 </>
             );
         }

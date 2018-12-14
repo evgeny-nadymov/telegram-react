@@ -270,14 +270,10 @@ function loadChatsContent(store, chatIds) {
     if (!chatIds.length) return;
 
     for (let i = 0; i < chatIds.length; i++) {
-        let chat = ChatStore.get(chatIds[i]);
-        let [id, pid, idb_key] = getChatPhoto(chat);
+        const chat = ChatStore.get(chatIds[i]);
+        const [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
-            FileStore.getLocalFile(
-                store,
-                chat.photo.small,
-                idb_key,
-                null,
+            FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
                 () => FileStore.getRemoteFile(id, 1, chat)
             );
