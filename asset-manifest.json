@@ -1,9 +1,9 @@
 {
   "main.css": "/telegram-react/static/css/main.8a811bd2.chunk.css",
-  "main.js": "/telegram-react/static/js/main.ddbdb06a.chunk.js",
-  "main.js.map": "/telegram-react/static/js/main.ddbdb06a.chunk.js.map",
-  "static/js/1.46a59232.chunk.js": "/telegram-react/static/js/1.46a59232.chunk.js",
-  "static/js/1.46a59232.chunk.js.map": "/telegram-react/static/js/1.46a59232.chunk.js.map",
+  "main.js": "/telegram-react/static/js/main.621d204d.chunk.js",
+  "main.js.map": "/telegram-react/static/js/main.621d204d.chunk.js.map",
+  "static/js/1.041ebdc3.chunk.js": "/telegram-react/static/js/1.041ebdc3.chunk.js",
+  "static/js/1.041ebdc3.chunk.js.map": "/telegram-react/static/js/1.041ebdc3.chunk.js.map",
   "runtime~main.js": "/telegram-react/static/js/runtime~main.f35f25f7.js",
   "runtime~main.js.map": "/telegram-react/static/js/runtime~main.f35f25f7.js.map",
   "static/css/main.8a811bd2.chunk.css.map": "/telegram-react/static/css/main.8a811bd2.chunk.css.map",
@@ -11,6 +11,6 @@
   "static/media/AppInactiveControl.css": "/telegram-react/static/media/Manytabs_2x.7a71629a.png",
   "static/media/MessageControl.css": "/telegram-react/static/media/General_2x.5270d71c.png",
   "index.html": "/telegram-react/index.html",
-  "precache-manifest.8e8f7690ed09fc1ecd615092098c5d44.js": "/telegram-react/precache-manifest.8e8f7690ed09fc1ecd615092098c5d44.js",
+  "precache-manifest.f8f1fc3f79c66bcc473d88026f7b2df7.js": "/telegram-react/precache-manifest.f8f1fc3f79c66bcc473d88026f7b2df7.js",
   "service-worker.js": "/telegram-react/service-worker.js"
 }
