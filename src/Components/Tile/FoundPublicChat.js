@@ -9,8 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
+import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
 import './FoundPublicChat.css';
-import { getChatUsername } from '../../Utils/Chat';
 
 class FoundPublicChat extends React.PureComponent {
 
@@ -26,6 +26,11 @@ class FoundPublicChat extends React.PureComponent {
         const { chatId, onTileSelect } = this.props;
 
         const username = getChatUsername(chatId);
+        const membersCount = getGroupChatMembersCount(chatId);
+        let subscribersString = '';
+        if (membersCount > 0){
+            subscribersString = membersCount === 1 ? ', 1 subscriber' : `, ${membersCount} subscribers`;
+        }
 
         return (
             <div className='found-public-chat' onClick={this.handleClick}>
@@ -37,6 +42,7 @@ class FoundPublicChat extends React.PureComponent {
                     <div className='dialog-row-wrapper'>
                         <div className='dialog-content'>
                             @{username}
+                            {subscribersString}
                         </div>
                     </div>
                 </div>

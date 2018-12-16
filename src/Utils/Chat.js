@@ -284,7 +284,8 @@ function getMessageDate(message){
     }
 
     const now = new Date();
-    const weekStart = now.getDate() - now.getDay() + 1;
+    const day = now.getDay();
+    const weekStart = now.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(now.setDate(weekStart));
     if (date > monday) {
         return dateFormat(date, 'ddd');
@@ -848,6 +849,37 @@ function getChatShortTitle(chatId){
     return null;
 }
 
+function getGroupChatMembersCount(chatId){
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup' : {
+            const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+            if (basicGroup){
+                return basicGroup.member_count;
+            }
+
+            return 0;
+        }
+        case 'chatTypeSupergroup' : {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup){
+                return supergroup.member_count;
+            }
+
+            return 0;
+        }
+        case 'chatTypePrivate' :
+        case 'chatTypeSecret' :{
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
 export {
     getChatDraft,
     showChatDraft,
@@ -883,5 +915,6 @@ export {
     getChatUserId,
     getPhotoFromChat,
     canSendFiles,
-    getChatShortTitle
+    getChatShortTitle,
+    getGroupChatMembersCount
 };

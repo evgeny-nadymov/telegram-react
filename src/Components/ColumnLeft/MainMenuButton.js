@@ -14,6 +14,7 @@ import {withStyles} from '@material-ui/core/styles';
 import {update} from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
 
 const styles = {
     menuIconButton : {
@@ -74,6 +75,21 @@ class MainMenuButton extends React.Component {
         await update();
     };
 
+    handleTest = () => {
+        TdLibController.send({
+                '@type': 'setLogTagVerbosityLevel',
+                tag: 'td_requests',
+                new_verbosity_level: 1
+            }
+        );
+        TdLibController.send({
+                '@type': 'setLogTagVerbosityLevel',
+                tag: 'net_query',
+                new_verbosity_level: 1
+            }
+        );
+    };
+
     render() {
         const { classes } = this.props;
         const { anchorEl, authorizationState } = this.state;
@@ -88,6 +104,7 @@ class MainMenuButton extends React.Component {
                 anchorOrigin={menuAnchorOrigin}>
                 <MenuItem onClick={this.handleCheckUpdates}>Check for updates</MenuItem>
                 <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
+                <MenuItem onClick={this.handleTest}>Test</MenuItem>
             </Menu>)
             : null;
 

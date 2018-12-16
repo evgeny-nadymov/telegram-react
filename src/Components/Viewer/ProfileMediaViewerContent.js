@@ -12,7 +12,8 @@ class ProfileMediaViewerContent extends React.Component {
 
         const { chatId, photo } = this.props;
 
-        const file = photo.big;
+        let file = photo.big;
+        file = FileStore.get(file.id) || file;
 
         this.state = {
             prevChatId: chatId,
