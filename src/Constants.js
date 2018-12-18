@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+export const LOCATION_ZOOM = 16;
+export const LOCATION_SCALE = 2;
+export const LOCATION_WIDTH = 300;
+export const LOCATION_HEIGHT = 150;
 export const PHOTO_SIZE = 320;
 export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;

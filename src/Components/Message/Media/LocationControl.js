@@ -12,9 +12,6 @@ import FileStore from '../../../Stores/FileStore';
 import './LocationControl.css';
 
 class LocationControl extends React.Component {
-    constructor(props){
-        super(props);
-    }
 
     componentDidMount() {
         FileStore.on('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
@@ -44,21 +41,22 @@ class LocationControl extends React.Component {
         const { longitude, latitude } = location;
         const locationId = getLocationId(location);
         const file = FileStore.getLocationFile(locationId);
+        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
         let src = '';
         try {
-            src = FileStore.getBlobUrl(file.blob);
+            src = FileStore.getBlobUrl(blob);
         }
         catch (error) {
             console.log(`LocationControl.render photo with error ${error}`);
         }
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
         //let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=300x150&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
-        let staticSource = `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&size=600,300&z=16&l=map&scale=2.0&lang=en_US&pt=${longitude},${latitude},pm2rdm`;
+        //let staticSource = `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&size=600,300&z=16&l=map&scale=2.0&lang=en_US&pt=${longitude},${latitude},pm2rdm`;
         const alt = `Location ${source}`;
 
         return (
             <a href={source} target='_blank' rel='noopener noreferrer'>
-                <img className='location-image' width='300' height='150' alt={alt} src={staticSource}/>
+                <img className='location-image' width='300' height='150' alt={alt} src={src}/>
             </a>
         );
     }

@@ -9,7 +9,7 @@ import { getPhotoSize, getSize } from './Common';
 import { getChatUserId } from './Chat';
 import { getProfilePhotoFromPhoto } from './User';
 import { getLocationId, getVenueId } from './Message';
-import { MEDIA_SLICE_LIMIT, PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
@@ -424,10 +424,10 @@ function loadMessageContents(store, messages) {
                                 TdLibController.send({
                                     '@type': 'getMapThumbnailFile',
                                     location: location,
-                                    zoom: 13,
-                                    width: 300,
-                                    height: 150,
-                                    scale: 2,
+                                    zoom: LOCATION_ZOOM,
+                                    width: LOCATION_WIDTH,
+                                    height: LOCATION_HEIGHT,
+                                    scale: LOCATION_SCALE,
                                     chat_id: message.chat_id})
                                     .then(result => {
                                         FileStore.setLocationFile(locationId, result);
@@ -435,6 +435,8 @@ function loadMessageContents(store, messages) {
                                         if (result) {
                                             const blob = FileStore.getBlob(result.id);
                                             if (!blob) {
+                                                store = FileStore.getStore();
+
                                                 FileStore.getLocalFile(store, result, result.idb_key, null,
                                                     () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
                                                     () => FileStore.getRemoteFile(result.id, 1, localMessage)
@@ -469,10 +471,10 @@ function loadMessageContents(store, messages) {
                                 TdLibController.send({
                                     '@type': 'getMapThumbnailFile',
                                     location: location,
-                                    zoom: 16,
-                                    width: 100,
-                                    height: 100,
-                                    scale: 2,
+                                    zoom: LOCATION_ZOOM,
+                                    width: LOCATION_WIDTH,
+                                    height: LOCATION_HEIGHT,
+                                    scale: LOCATION_SCALE,
                                     chat_id: message.chat_id})
                                     .then(result => {
                                         FileStore.setLocationFile(locationId, result);
@@ -480,6 +482,8 @@ function loadMessageContents(store, messages) {
                                         if (result) {
                                             const blob = FileStore.getBlob(result.id);
                                             if (!blob) {
+                                                store = FileStore.getStore();
+
                                                 FileStore.getLocalFile(store, result, result.idb_key, null,
                                                     () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
                                                     () => FileStore.getRemoteFile(result.id, 1, localMessage)

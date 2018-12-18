@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
+import { getLocationId } from '../Utils/Message';
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -197,6 +198,37 @@ class FileStore extends EventEmitter {
                                                 // this.getLocalFile(store, source, idb_key, arr,
                                                 //     () => this.emit('file_update', file),
                                                 //     () => this.getRemoteFile(file.id, 1, obj));
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    case 'messageLocation': {
+                                        const { location } = obj.content;
+
+                                        const locationId = getLocationId(location);
+                                        if (locationId) {
+                                            const source = this.getLocationFile(locationId);
+                                            if (source && source.id === file.id) {
+                                                this.getLocalFile(store, source, idb_key, null,
+                                                    () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj)
+                                                );
+                                            }
+                                        }
+                                        break;
+                                    }
+                                    case 'messageVenue': {
+                                        const { venue } = obj.content;
+                                        const { location } = venue;
+
+                                        const locationId = getLocationId(location);
+                                        if (locationId) {
+                                            const source = this.getLocationFile(locationId);
+                                            if (source && source.id === file.id) {
+                                                this.getLocalFile(store, source, idb_key, null,
+                                                    () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj)
+                                                );
                                             }
                                         }
                                         break;
@@ -492,6 +524,8 @@ class FileStore extends EventEmitter {
     };
 
     updateLocationBlob = (chatId, messageId, fileId) => {
+        console.log(`clientUpdateLocationBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+
         this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
             messageId: messageId,
