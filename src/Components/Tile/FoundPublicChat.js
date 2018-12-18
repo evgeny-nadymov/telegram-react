@@ -36,10 +36,10 @@ class FoundPublicChat extends React.PureComponent {
             <div className='found-public-chat' onClick={this.handleClick}>
                 <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
                 <div className='dialog-inner-wrapper'>
-                    <div className='dialog-row-wrapper'>
+                    <div className='tile-first-row'>
                         <DialogTitleControl chatId={chatId} />
                     </div>
-                    <div className='dialog-row-wrapper'>
+                    <div className='tile-second-row'>
                         <div className='dialog-content'>
                             @{username}
                             {subscribersString}

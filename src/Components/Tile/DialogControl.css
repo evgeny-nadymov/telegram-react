@@ -23,7 +23,11 @@
     margin: 0 12px;
 }
 
-.dialog-row-wrapper{
+.tile-first-row{
+    display: flex;
+}
+
+.tile-second-row{
     margin: 3px 0 0 0;
     display: flex;
 }

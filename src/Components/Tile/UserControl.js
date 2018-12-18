@@ -39,12 +39,12 @@ class UserControl extends React.Component {
                 <div className='user-wrapper'>
                     <UserTileControl userId={userId}/>
                     <div className='dialog-inner-wrapper'>
-                        <div className='dialog-row-wrapper'>
+                        <div className='tile-first-row'>
                             <div className='dialog-title'>
                                 {fullName}
                             </div>
                         </div>
-                        <div className='dialog-row-wrapper'>
+                        <div className='tile-second-row'>
                             <UserStatusControl userId={userId}/>
                         </div>
                     </div>

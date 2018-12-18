@@ -28,11 +28,11 @@ class FoundMessage extends React.PureComponent {
             <div className='found-message'>
                 <ChatTileControl chatId={chatId}/>
                 <div className='dialog-inner-wrapper'>
-                    <div className='dialog-row-wrapper'>
+                    <div className='tile-first-row'>
                         <DialogTitleControl chatId={chatId}/>
                         <div className='dialog-meta-date'>{date}</div>
                     </div>
-                    <div className='dialog-row-wrapper'>
+                    <div className='tile-second-row'>
                         <div className='dialog-content'>
                             {
                                 <>

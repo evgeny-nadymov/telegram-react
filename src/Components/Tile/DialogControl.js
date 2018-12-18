@@ -72,11 +72,11 @@ class DialogControl extends Component{
                 <div className='dialog-wrapper'>
                     <ChatTileControl chatId={chatId}/>
                     <div className='dialog-inner-wrapper'>
-                        <div className='dialog-row-wrapper'>
+                        <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId}/>
                             <DialogMetaControl chatId={chatId}/>
                         </div>
-                        <div className='dialog-row-wrapper'>
+                        <div className='tile-second-row'>
                             <DialogContentControl chatId={chatId}/>
                             <DialogBadgeControl chatId={chatId}/>
                         </div>

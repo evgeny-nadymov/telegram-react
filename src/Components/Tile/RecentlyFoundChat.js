@@ -29,7 +29,7 @@ class RecentlyFoundChat extends React.PureComponent {
                 <div className='chat-wrapper'>
                     <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
                     <div className='dialog-inner-wrapper'>
-                        <div className='dialog-row-wrapper'>
+                        <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />
                         </div>
                     </div>
