@@ -8,8 +8,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTileControl from './ChatTileControl';
+import UserTileControl from './UserTileControl';
 import DialogTitleControl from './DialogTitleControl';
-import { getMessageDate, getMessageSenderName } from '../../Utils/Chat';
+import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
 import './FoundMessage.css';
@@ -17,26 +18,36 @@ import './FoundMessage.css';
 class FoundMessage extends React.PureComponent {
 
     render() {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, chatSearch } = this.props;
         const message = MessageStore.get(chatId, messageId);
+
+        const { sender_user_id } = message;
 
         const date = getMessageDate(message);
         const senderName = getMessageSenderName(message);
+        const senderFullName = getMessageSenderFullName(message);
         const content = getContent(message) || '\u00A0';
+
+        const tile = sender_user_id && chatSearch
+            ? <UserTileControl userId={sender_user_id}/>
+            : <ChatTileControl chatId={chatId}/>;
 
         return (
             <div className='found-message'>
-                <ChatTileControl chatId={chatId}/>
+                {tile}
                 <div className='dialog-inner-wrapper'>
                     <div className='tile-first-row'>
-                        <DialogTitleControl chatId={chatId}/>
+                        {   chatSearch && senderFullName
+                            ? <div className='dialog-title'>{senderFullName}</div>
+                            : <DialogTitleControl chatId={chatId}/>
+                        }
                         <div className='dialog-meta-date'>{date}</div>
                     </div>
                     <div className='tile-second-row'>
                         <div className='dialog-content'>
                             {
                                 <>
-                                    { senderName && <span className='dialog-content-accent'>{senderName}: </span> }
+                                    { !chatSearch && senderName && <span className='dialog-content-accent'>{senderName}: </span> }
                                     { content }
                                 </>
                             }
@@ -50,7 +61,8 @@ class FoundMessage extends React.PureComponent {
 
 FoundMessage.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired
+    messageId: PropTypes.number.isRequired,
+    chatSearch: PropTypes.bool
 };
 
 export default FoundMessage;

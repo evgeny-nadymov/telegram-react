@@ -23,7 +23,9 @@ class Dialogs extends Component{
 
         this.state = {
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
-            openSearch: false
+            openSearch: false,
+            searchChatId: 0,
+            searchText: null
         };
     }
 
@@ -36,6 +38,10 @@ class Dialogs extends Component{
             return true;
         }
 
+        if (nextState.searchChatId !== this.state.searchChatId){
+            return true;
+        }
+
         if (nextState.searchText !== this.state.searchText){
             return true;
         }
@@ -44,16 +50,26 @@ class Dialogs extends Component{
     }
 
     componentDidMount(){
-        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
     }
 
     componentWillUnmount(){
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.removeListener('clientUpdateSearchChat', this.onClientUpdateSearchChat);
     }
 
-    onUpdateChatDetailsVisibility = (update) => {
+    onClientUpdateChatDetailsVisibility = (update) => {
         this.setState({
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
+        })
+    };
+
+    onClientUpdateSearchChat = (update) => {
+        this.setState({
+            openSearch: true,
+            searchChatId: update.chatId,
+            searchText: null
         })
     };
 
@@ -63,7 +79,9 @@ class Dialogs extends Component{
 
     handleSearch = (visible) => {
         this.setState({
-            openSearch: visible
+            openSearch: visible,
+            searchChatId: 0,
+            searchText: null
         })
     };
 
@@ -72,15 +90,32 @@ class Dialogs extends Component{
 
         onSelectChat(chatId);
 
-        this.setState({ openSearch: openSearch });
+        const searchChatId = openSearch ? this.state.searchChatId : 0;
+        const searchText = openSearch ? this.state.searchText : null;
+
+        this.setState({
+            openSearch: openSearch,
+            searchChatId: searchChatId,
+            searchText: searchText
+        });
+    };
+
+    handleClose = () => {
+        this.setState({
+            openSearch: false,
+            searchChatId: 0,
+            searchText: null
+        });
     };
 
     handleSearchTextChange = (text) => {
-        this.setState({ searchText: text });
+        this.setState({
+            searchText: text
+        });
     };
 
     render(){
-        const { isChatDetailsVisible, openSearch, searchText } = this.state;
+        const { isChatDetailsVisible, openSearch, searchChatId, searchText } = this.state;
         
         return (
             <div className={classNames('dialogs', { 'dialogs-third-column': isChatDetailsVisible })}>
@@ -91,7 +126,13 @@ class Dialogs extends Component{
                     onSearchTextChange={this.handleSearchTextChange}/>
                 <div className='dialogs-content'>
                     <DialogsList ref={this.dialogsList} onSelectChat={this.handleSelectChat}/>
-                    { openSearch && <Search text={searchText} onSelectChat={this.handleSelectChat}/> }
+                    { openSearch &&
+                        <Search
+                            chatId={searchChatId}
+                            text={searchText}
+                            onSelectChat={this.handleSelectChat}
+                            onClose={this.handleClose}/>
+                    }
                 </div>
                 <UpdatePanel/>
             </div>

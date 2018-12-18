@@ -265,6 +265,22 @@ function loadUserPhotos(store, userIds) {
     }
 }
 
+function loadUsersContent(store, userIds) {
+    if (!userIds) return;
+    if (!userIds.length) return;
+
+    for (let i = 0; i < userIds.length; i++) {
+        const user = UserStore.get(userIds[i]);
+        const [id, pid, idb_key] = getUserPhoto(user);
+        if (pid) {
+            FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+                () => FileStore.updateUserPhotoBlob(user.id, id),
+                () => FileStore.getRemoteFile(id, 1, user)
+            );
+        }
+    }
+}
+
 function loadChatsContent(store, chatIds) {
     if (!chatIds) return;
     if (!chatIds.length) return;
@@ -763,6 +779,7 @@ export {
     saveBlob,
     loadUserPhotos,
     loadChatsContent,
+    loadUsersContent,
     loadMessageContents,
     loadMediaViewerContent,
     preloadMediaViewerContent,

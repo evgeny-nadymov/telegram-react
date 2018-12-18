@@ -158,6 +158,10 @@ class ApplicationStore extends EventEmitter {
         return this.chatId;
     }
 
+    searchChat(chatId) {
+        this.emit('clientUpdateSearchChat', { chatId: chatId });
+    }
+
     changeChatDetailsVisibility(visibility) {
         this.isChatDetailsVisible = visibility;
         this.emit('clientUpdateChatDetailsVisibility', visibility);

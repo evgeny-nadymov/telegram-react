@@ -16,6 +16,17 @@
     transform: translateZ(0);
 }
 
+.search-chat-wrapper{
+    display: flex;
+    align-items: center;
+}
+
+.search-chat-control{
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 10px 22px;
+}
+
 .search-top-chats{
     min-height: 110px;
     overflow: hidden;

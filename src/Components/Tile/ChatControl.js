@@ -29,7 +29,7 @@ class ChatControl extends React.Component {
     };
 
     render() {
-        const { chatId, onTileSelect } = this.props;
+        const { chatId, onTileSelect, hideStatus } = this.props;
 
         return (
             <div className='chat' onClick={this.handleClick}>
@@ -39,9 +39,11 @@ class ChatControl extends React.Component {
                         <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />
                         </div>
-                        <div className='tile-second-row'>
-                            <DialogStatusControl chatId={chatId} />
-                        </div>
+                        {   !hideStatus &&
+                            <div className='tile-second-row'>
+                                <DialogStatusControl chatId={chatId}/>
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -52,7 +54,8 @@ class ChatControl extends React.Component {
 ChatControl.propTypes = {
     chatId: PropTypes.number.isRequired,
     onSelect: PropTypes.func,
-    onTileSelect: PropTypes.func
+    onTileSelect: PropTypes.func,
+    hideStatus: PropTypes.bool
 };
 
 export default ChatControl;

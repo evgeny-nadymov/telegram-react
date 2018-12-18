@@ -8,19 +8,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
+import CloseIcon from '@material-ui/icons/Close';
+import { IconButton } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import ChatControl from '../../Tile/ChatControl';
 import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
 import FoundPublicChat from '../../Tile/FoundPublicChat';
 import FoundMessage from '../../Tile/FoundMessage';
 import SearchCaption from './SearchCaption';
-import { loadChatsContent } from '../../../Utils/File';
+import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterMessages } from '../../../Utils/Message';
 import { MIN_USERNAME_LENGTH } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import FileStore from '../../../Stores/FileStore';
+import ChatStore from '../../../Stores/ChatStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
+
+const styles = {
+    closeSearchIconButton: {
+        margin: '8px 12px 8px 0'
+    }
+};
 
 class Search extends React.Component {
 
@@ -29,13 +40,36 @@ class Search extends React.Component {
 
         this.listRef = React.createRef();
 
+        const { chatId, text } = this.props;
+
         this.state = {
+            prevPropsChatId: chatId,
+            prevPropsText: text,
+
             top: null,
             recentlyFound: null,
             local: null,
             global: null,
             messages: null
         };
+    }
+
+    static getDerivedStateFromProps(props, state){
+        if (props.chatId !== state.prevPropsChatId
+            || props.text !== state.prevPropsText){
+            return {
+                prevPropsChatId: props.chatId,
+                prevPropsText: props.text,
+
+                top: null,
+                recentlyFound: null,
+                local: null,
+                global: null,
+                messages: null
+            };
+        }
+
+        return null;
     }
 
     componentDidMount() {
@@ -65,32 +99,15 @@ class Search extends React.Component {
         this.sessionId = new Date();
         this.text = text;
         const sessionId = this.sessionId;
+        let store = null;
 
-        const local = await TdLibController.send({
-            '@type': 'searchChats',
-            query: text,
-            limit: 100
-        });
+        const { chatId } = this.props;
 
-        if (sessionId !== this.sessionId){
-            return;
-        }
-
-        this.setState({
-            top: null,
-            recentlyFound: null,
-            local: local,
-            global: null,
-            messages: null
-        });
-
-        let store = FileStore.getStore();
-        loadChatsContent(store, local.chat_ids);
-
-        if (text.length >= MIN_USERNAME_LENGTH){
-            const global = await TdLibController.send({
-                '@type': 'searchPublicChats',
-                query: text
+        if (!chatId){
+            const local = await TdLibController.send({
+                '@type': 'searchChats',
+                query: text,
+                limit: 100
             });
 
             if (sessionId !== this.sessionId){
@@ -98,21 +115,58 @@ class Search extends React.Component {
             }
 
             this.setState({
-                global: global
+                top: null,
+                recentlyFound: null,
+                local: local,
+                global: null,
+                messages: null
             });
 
             store = FileStore.getStore();
-            loadChatsContent(store, global.chat_ids);
+            loadChatsContent(store, local.chat_ids);
+
+            if (text.length >= MIN_USERNAME_LENGTH){
+                const global = await TdLibController.send({
+                    '@type': 'searchPublicChats',
+                    query: text
+                });
+
+                if (sessionId !== this.sessionId){
+                    return;
+                }
+
+                this.setState({
+                    global: global
+                });
+
+                store = FileStore.getStore();
+                loadChatsContent(store, global.chat_ids);
+            }
         }
 
-        const messages = await TdLibController.send({
-            '@type': 'searchMessages',
-            query: text,
-            offset_date: 0,
-            offset_chat_id: 0,
-            offset_message_id: 0,
-            limit: 50
-        });
+        let messages = [];
+        if (chatId){
+            messages = await TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                query: text,
+                sender_user_id: 0,
+                from_message_id: 0,
+                offset: 0,
+                limit: 50,
+                filter: null
+            });
+        }
+        else{
+            messages = await TdLibController.send({
+                '@type': 'searchMessages',
+                query: text,
+                offset_date: 0,
+                offset_chat_id: 0,
+                offset_message_id: 0,
+                limit: 50
+            });
+        }
 
         MessageStore.setItems(messages.messages);
 
@@ -125,15 +179,33 @@ class Search extends React.Component {
         });
 
         const chats = new Map();
+        const users = new Map();
         for (let i = 0; i < messages.messages.length; i++){
             chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
+            if (messages.messages[i].sender_user_id){
+                users.set(messages.messages[i].sender_user_id, messages.messages[i].sender_user_id);
+            }
         }
 
         store = FileStore.getStore();
         loadChatsContent(store, [...chats.keys()]);
+        loadUsersContent(store, [...users.keys()]);
     };
 
     loadContent = async () => {
+        const { chatId } = this.props;
+        if (chatId){
+            this.setState({
+                top: null,
+                recentlyFound: null,
+                local: null,
+                global: null,
+                messages: null
+            });
+
+            return;
+        }
+
         const topPromise = TdLibController.send({
             '@type': 'getTopChats',
             category: { '@type': 'topChatCategoryUsers' },
@@ -248,7 +320,7 @@ class Search extends React.Component {
     onLoadPrevious = async () => {
         if (this.loading) return;
 
-        console.log('SCROLL HANDLESCROLL onLoadPrevious');
+        const { chatId } = this.props;
 
         const sessionId = this.sessionId;
 
@@ -257,12 +329,26 @@ class Search extends React.Component {
         const offset = this.getOffset(messages);
 
         this.loading = true;
-        const result = await TdLibController.send({
-            '@type': 'searchMessages',
-            query: this.text,
-            ...offset,
-            limit: 50
-        });
+        let result = [];
+        if (chatId){
+            result = await TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                query: this.text,
+                sender_user_id: 0,
+                from_message_id: offset.offset_message_id,
+                limit: 50,
+                filter: null
+            });
+        }
+        else{
+            result = await TdLibController.send({
+                '@type': 'searchMessages',
+                query: this.text,
+                ...offset,
+                limit: 50
+            });
+        }
         this.loading = false;
 
         filterMessages(result, messages ? messages.messages : []);
@@ -278,21 +364,34 @@ class Search extends React.Component {
         });
 
         const chats = new Map();
+        const users = new Map();
         for (let i = 0; i < result.messages.length; i++){
             chats.set(result.messages[i].chat_id, result.messages[i].chat_id);
+            if (result.messages[i].sender_user_id) {
+                users.set(result.messages[i].sender_user_id, result.messages[i].sender_user_id);
+            }
         }
 
         const store = FileStore.getStore();
         loadChatsContent(store, [...chats.keys()]);
+        loadUsersContent(store, [...users.keys()]);
     };
 
     handleTopChatsScroll = (event) => {
         event.stopPropagation();
     };
 
+    handleClose = () => {
+        const { onClose } = this.props;
+
+        onClose();
+    };
+
     render() {
-        const { onSelectChat } = this.props;
+        const { classes, chatId, onSelectChat } = this.props;
         const { top, recentlyFound, local, global, messages } = this.state;
+
+        const chat = ChatStore.get(chatId);
 
         const topChats = top && top.chat_ids
             ? top.chat_ids.map(x => (<TopChat key={x} chatId={x} onSelect={(chatId) => onSelectChat(chatId, false)}/>))
@@ -323,7 +422,7 @@ class Search extends React.Component {
         const globalMessages = messages && messages.messages
             ? messages.messages.map(x => (
                 <ListItem button key={`${x.chat_id}_${x.id}`} onClick={() => this.handleSelectMessage(x.chat_id, x.id)}>
-                    <FoundMessage chatId={x.chat_id} messageId={x.id}/>
+                    <FoundMessage chatId={x.chat_id} messageId={x.id} chatSearch={Boolean(chatId)}/>
                 </ListItem>
             ))
             : [];
@@ -335,6 +434,22 @@ class Search extends React.Component {
 
         return (
             <div ref={this.listRef} className='search' onScroll={this.handleScroll}>
+                {   chat &&
+                    <div className='search-chat'>
+                        <SearchCaption caption='Search messages in'/>
+                        <div className='search-chat-wrapper'>
+                            <div className='search-chat-control'>
+                                <ChatControl chatId={chatId} hideStatus/>
+                            </div>
+                            <IconButton
+                                className={classes.closeSearchIconButton}
+                                aria-label='Search'
+                                onMouseDown={this.handleClose}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </div>
+                    </div>
+                }
                 {   topChats.length > 0 &&
                     <div className='search-top-chats'>
                         <SearchCaption caption='People'/>
@@ -375,7 +490,10 @@ class Search extends React.Component {
 }
 
 Search.propTypes = {
-    onSelectChat: PropTypes.func.isRequired
+    chatId: PropTypes.number,
+    text: PropTypes.string,
+    onSelectChat: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired
 };
 
-export default Search;
+export default withStyles(styles)(Search);

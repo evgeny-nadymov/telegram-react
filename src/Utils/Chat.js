@@ -7,7 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import { getUserShortName, getUserStatus, isAccentUserSubtitle } from './User';
+import { getUserFullName, getUserShortName, getUserStatus, isAccentUserSubtitle } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
@@ -182,6 +182,17 @@ function getChatDraft(chat) {
         return chat.draft_message.input_message_text.text;
     }
     return null;
+}
+
+function getMessageSenderFullName(message) {
+    if (!message) return null;
+    if (isServiceMessage(message)) return null;
+    if (!message.sender_user_id) return null;
+
+    const user = UserStore.get(message.sender_user_id);
+    if (!user) return null;
+
+    return getUserFullName(user);
 }
 
 function getMessageSenderName(message) {
@@ -892,6 +903,7 @@ export {
     getChatSubtitleWithoutTyping,
     getLastMessageSenderName,
     getMessageSenderName,
+    getMessageSenderFullName,
     getLastMessageContent,
     getLastMessageDate,
     getMessageDate,

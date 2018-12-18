@@ -227,6 +227,14 @@ class Header extends Component {
         ApplicationStore.changeChatDetailsVisibility(true);
     };
 
+    handleSearchChat = () => {
+        const chatId = ApplicationStore.getChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        ApplicationStore.searchChat(chatId);
+    };
+
     render() {
         const { classes } = this.props;
         const { authorizationState, connectionState } = this.state;
@@ -299,21 +307,20 @@ class Header extends Component {
         }
 
         return (
-            <div className="header-details">
+            <div className='header-details'>
                 <div
                     className={classNames(
                         'header-status',
                         'grow',
                         chat ? 'cursor-pointer' : 'cursor-default'
                     )}
-                    onClick={this.openChatDetails}
-                >
-                    <span className="header-status-content">{title}</span>
+                    onClick={this.openChatDetails}>
+                    <span className='header-status-content'>{title}</span>
                     {showProgressAnimation && (
                         <>
-                            <span className="header-progress">.</span>
-                            <span className="header-progress">.</span>
-                            <span className="header-progress">.</span>
+                            <span className='header-progress'>.</span>
+                            <span className='header-progress'>.</span>
+                            <span className='header-progress'>.</span>
                         </>
                     )}
                     <span
@@ -325,15 +332,14 @@ class Header extends Component {
                     >
             {subtitle}
           </span>
-                    <span className="header-status-tail" />
+                    <span className='header-status-tail' />
                 </div>
                 {chat && (
                     <>
                         <IconButton
                             className={classes.messageSearchIconButton}
-                            disabled
-                            aria-label="Search"
-                        >
+                            aria-label='Search'
+                            onClick={this.handleSearchChat}>
                             <SearchIcon />
                         </IconButton>
                         <MainMenuButton openChatDetails={this.openChatDetails} />
