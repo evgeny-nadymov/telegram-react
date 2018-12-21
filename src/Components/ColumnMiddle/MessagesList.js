@@ -560,7 +560,7 @@ class MessagesList extends React.Component {
                 let itemComponent = this.itemsMap.get(i);
                 let item = ReactDOM.findDOMNode(itemComponent);
                 if (item) {
-                    console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                    // console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
                     if (itemComponent.props.showUnreadSeparator) {
                         list.scrollTop = item.offsetTop; // + unread messages margin-top
                         scrolled = true;
@@ -595,9 +595,9 @@ class MessagesList extends React.Component {
             let itemComponent = this.itemsMap.get(i);
             let item = ReactDOM.findDOMNode(itemComponent);
             if (item) {
-                console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                // console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
                 if (itemComponent.props.messageId === messageId) {
-                    list.scrollTop = item.offsetTop;
+                    list.scrollTop = item.offsetTop - list.offsetHeight / 2.0;
                     scrolled = true;
                     break;
                 }

@@ -8,6 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import ListItem from '@material-ui/core/ListItem';
+import { withStyles } from '@material-ui/core/styles';
 import ChatTileControl from './ChatTileControl';
 import UserTileControl from './UserTileControl';
 import DialogTitleControl from './DialogTitleControl';
@@ -17,15 +19,35 @@ import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './FoundMessage.css';
 
-class FoundMessage extends React.PureComponent {
+const styles = {
+    listItem: {
+        padding: '0px'
+    }
+};
+
+class FoundMessage extends React.Component {
 
     constructor(props){
         super(props);
 
         this.state = {
-            chatId: ApplicationStore.getChatId(),
-            messageId: ApplicationStore.getMessageId()
+            nextChatId: ApplicationStore.getChatId(),
+            nextMessageId: ApplicationStore.getMessageId()
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextState){
+        const { chatId, messageId } = this.props;
+
+        if (nextState.nextChatId === chatId && nextState.nextMessageId === messageId){
+            return true;
+        }
+
+        if (nextState.previousChatId === chatId && nextState.previousMessageId === messageId){
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount(){
@@ -37,18 +59,16 @@ class FoundMessage extends React.PureComponent {
     }
 
     onClientUpdateChatId = (update) => {
-        const { nextChatId, nextMessageId } = update;
 
         this.setState({
-            chatId: nextChatId,
-            messageId: nextMessageId
+            ...update
         });
     };
 
     render() {
-        const { chatId, messageId, chatSearch } = this.props;
-        const selectedChatId = this.state.chatId;
-        const selectedMessageId = this.state.messageId;
+        const { chatId, messageId, chatSearch, onClick, classes } = this.props;
+        const selectedChatId = this.state.nextChatId;
+        const selectedMessageId = this.state.nextMessageId;
         const message = MessageStore.get(chatId, messageId);
 
         const { sender_user_id } = message;
@@ -63,28 +83,30 @@ class FoundMessage extends React.PureComponent {
             : <ChatTileControl chatId={chatId}/>;
 
         return (
-            <div className={classNames('found-message', { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId })}>
-                {tile}
-                <div className='dialog-inner-wrapper'>
-                    <div className='tile-first-row'>
-                        {   chatSearch && senderFullName
-                            ? <div className='dialog-title'>{senderFullName}</div>
-                            : <DialogTitleControl chatId={chatId}/>
-                        }
-                        <div className='dialog-meta-date'>{date}</div>
-                    </div>
-                    <div className='tile-second-row'>
-                        <div className='dialog-content'>
-                            {
-                                <>
-                                    { !chatSearch && senderName && <span className='dialog-content-accent'>{senderName}: </span> }
-                                    { content }
-                                </>
+            <ListItem button className={classes.listItem} onClick={onClick}>
+                <div className={classNames('found-message', { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId })}>
+                    {tile}
+                    <div className='dialog-inner-wrapper'>
+                        <div className='tile-first-row'>
+                            {   chatSearch && senderFullName
+                                ? <div className='dialog-title'>{senderFullName}</div>
+                                : <DialogTitleControl chatId={chatId}/>
                             }
+                            <div className='dialog-meta-date'>{date}</div>
+                        </div>
+                        <div className='tile-second-row'>
+                            <div className='dialog-content'>
+                                {
+                                    <>
+                                        { !chatSearch && senderName && <span className='dialog-content-accent'>{senderName}: </span> }
+                                        { content }
+                                    </>
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </ListItem>
         );
     }
 }
@@ -92,7 +114,8 @@ class FoundMessage extends React.PureComponent {
 FoundMessage.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    chatSearch: PropTypes.bool
+    chatSearch: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
-export default FoundMessage;
+export default withStyles(styles)(FoundMessage);

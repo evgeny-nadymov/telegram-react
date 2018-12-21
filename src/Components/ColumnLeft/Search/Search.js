@@ -393,36 +393,47 @@ class Search extends React.Component {
         const chat = ChatStore.get(chatId);
 
         const topChats = top && top.chat_ids
-            ? top.chat_ids.map(x => (<TopChat key={x} chatId={x} onSelect={(chatId) => this.handleSelectMessage(chatId, null, false, false)}/>))
+            ? top.chat_ids.map(x => (
+                <TopChat
+                    key={x}
+                    chatId={x}
+                    onSelect={() => this.handleSelectMessage(x, null, false, false)}/>
+            ))
             : [];
         const recentlyFoundChats = recentlyFound && recentlyFound.chat_ids
             ? recentlyFound.chat_ids.map(x => (
-                <ListItem button key={x} onClick={() => this.handleSelectMessage(x, null, true, false)}>
-                    <RecentlyFoundChat chatId={x}/>
-                </ListItem>
+                <RecentlyFoundChat
+                    key={x}
+                    chatId={x}
+                    onClick={() => this.handleSelectMessage(x, null, true, false)}/>
             ))
             : [];
 
         const localChats = local && local.chat_ids
             ? local.chat_ids.map(x => (
-                <ListItem button key={x} onClick={() => this.handleSelectMessage(x, null, true, false)}>
-                    <RecentlyFoundChat chatId={x}/>
-                </ListItem>
+                <RecentlyFoundChat
+                    key={x}
+                    chatId={x}
+                    onClick={() => this.handleSelectMessage(x, null, true, false)}/>
             ))
             : [];
 
         const globalChats = global && global.chat_ids
             ? global.chat_ids.map(x => (
-                <ListItem button key={x} className={classes.listItem} onClick={() => this.handleSelectMessage(x, null, true, true)}>
-                    <FoundPublicChat chatId={x} />
-                </ListItem>
+                <FoundPublicChat
+                    key={x}
+                    chatId={x}
+                    onClick={() => this.handleSelectMessage(x, null, true, true)}/>
             ))
             : [];
         const globalMessages = messages && messages.messages
             ? messages.messages.map(x => (
-                <ListItem button key={`${x.chat_id}_${x.id}`} className={classes.listItem} onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}>
-                    <FoundMessage chatId={x.chat_id} messageId={x.id} chatSearch={Boolean(chatId)}/>
-                </ListItem>
+                <FoundMessage
+                    key={`${x.chat_id}_${x.id}`}
+                    chatId={x.chat_id}
+                    messageId={x.id}
+                    chatSearch={Boolean(chatId)}
+                    onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}/>
             ))
             : [];
 

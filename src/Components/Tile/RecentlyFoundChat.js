@@ -7,34 +7,40 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import ListItem from '@material-ui/core/ListItem';
+import { withStyles } from '@material-ui/core/styles';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
 import './RecentlyFoundChat.css';
 
+const styles = {
+    listItem: {
+        padding: '0px'
+    }
+};
+
 class RecentlyFoundChat extends React.PureComponent {
 
-    handleClick = () => {
-        const { chatId, onSelect} = this.props;
-        if (!onSelect) return;
-
-        onSelect(chatId);
-    };
+    shouldComponentUpdate(nextProps, nextState){
+        return false;
+    }
 
     render() {
-
-        const { chatId, onTileSelect } = this.props;
+        const { chatId, onClick, classes } = this.props;
 
         return (
-            <div className='recently-found-chat' onClick={this.handleClick}>
-                <div className='chat-wrapper'>
-                    <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} />
+            <ListItem button className={classes.listItem} onClick={onClick}>
+                <div className='recently-found-chat'>
+                    <div className='chat-wrapper'>
+                        <ChatTileControl chatId={chatId} />
+                        <div className='dialog-inner-wrapper'>
+                            <div className='tile-first-row'>
+                                <DialogTitleControl chatId={chatId} />
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </ListItem>
         );
     }
 }
@@ -44,4 +50,4 @@ RecentlyFoundChat.propTypes = {
     onSelect: PropTypes.func
 };
 
-export default RecentlyFoundChat;
+export default withStyles(styles)(RecentlyFoundChat);
