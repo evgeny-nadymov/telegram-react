@@ -37,7 +37,7 @@
 /* eslint-disable indent, no-unused-vars, no-multiple-empty-lines, max-nested-callbacks, space-before-function-paren, quotes, comma-spacing */
 'use strict';
 
-var precacheConfig = [["/telegram-react/0.13bf3014e99576e40583.worker.js","7fb89d2ae04b37c19091d270f98a19b5"],["/telegram-react/1.13bf3014e99576e40583.worker.js","83ab9875999437c350e1aae41782dda3"],["/telegram-react/13bf3014e99576e40583.worker.js","c60d81c95c68ec8acd85b80409294075"],["/telegram-react/5d209b5e8c51ef1213813dece9d77343.mem","5d209b5e8c51ef1213813dece9d77343"],["/telegram-react/d5d70fd9b4e1531d34b31440e757094c.wasm","d5d70fd9b4e1531d34b31440e757094c"],["/telegram-react/index.html","64de153c8e3b1e5c5d99ab711313f8aa"],["/telegram-react/static/css/main.da075ccc.chunk.css","5a68f94cc5260efabaea7917c4b01dd1"],["/telegram-react/static/js/1.1064b2f3.chunk.js","71e358ca61e9ac49b03c7682149dcf67"],["/telegram-react/static/js/main.66582f75.chunk.js","3a3aaf66773163ed25625991517f0e52"],["/telegram-react/static/js/runtime~main.f35f25f7.js","a317e8711fd682be0e8b51a9401c3aa8"],["/telegram-react/static/media/General_2x.5270d71c.png","5270d71cd78fd282a3736b0e6ae7f048"],["/telegram-react/static/media/Manytabs_2x.7a71629a.png","7a71629a5e4f7482b6320b103f1d543c"],["/telegram-react/static/media/Telegram.4964c9bb.svg","4964c9bbfba510f495319c52562d70d4"],["/telegram-react/tdweb.js","828292f679d062fe6cb88104ba5f7736"]];
+var precacheConfig = [["/telegram-react/0.13bf3014e99576e40583.worker.js","7fb89d2ae04b37c19091d270f98a19b5"],["/telegram-react/1.13bf3014e99576e40583.worker.js","83ab9875999437c350e1aae41782dda3"],["/telegram-react/13bf3014e99576e40583.worker.js","c60d81c95c68ec8acd85b80409294075"],["/telegram-react/5d209b5e8c51ef1213813dece9d77343.mem","5d209b5e8c51ef1213813dece9d77343"],["/telegram-react/d5d70fd9b4e1531d34b31440e757094c.wasm","d5d70fd9b4e1531d34b31440e757094c"],["/telegram-react/index.html","8dd0731901886166778a8ee18c443e09"],["/telegram-react/static/css/main.ea4d0bcc.chunk.css","1c7486d7decda3ed5df279c724d62785"],["/telegram-react/static/js/1.1209ab9f.chunk.js","837ad94828c7930eeffcb78c3bc1b5ea"],["/telegram-react/static/js/main.631b0bed.chunk.js","8be863fcc912a58b630e8af4a397b409"],["/telegram-react/static/js/runtime~main.f35f25f7.js","a317e8711fd682be0e8b51a9401c3aa8"],["/telegram-react/static/media/General_2x.5270d71c.png","5270d71cd78fd282a3736b0e6ae7f048"],["/telegram-react/static/media/Manytabs_2x.7a71629a.png","7a71629a5e4f7482b6320b103f1d543c"],["/telegram-react/static/media/Telegram.4964c9bb.svg","4964c9bbfba510f495319c52562d70d4"],["/telegram-react/tdweb.js","828292f679d062fe6cb88104ba5f7736"]];
 var cacheName = 'sw-precache-v3-sw-precache-webpack-plugin-' + (self.registration ? self.registration.scope : '');
 
 
@@ -45,7 +45,7 @@ var ignoreUrlParametersMatching = [/./];
 
 
 
-var addDirectoryIndex = function (originalUrl, index) {
+var addDirectoryIndex = function(originalUrl, index) {
     var url = new URL(originalUrl);
     if (url.pathname.slice(-1) === '/') {
       url.pathname += index;
@@ -53,7 +53,7 @@ var addDirectoryIndex = function (originalUrl, index) {
     return url.toString();
   };
 
-var cleanResponse = function (originalResponse) {
+var cleanResponse = function(originalResponse) {
     // If this is not a redirected response, then we don't have to do anything.
     if (!originalResponse.redirected) {
       return Promise.resolve(originalResponse);
@@ -75,7 +75,7 @@ var cleanResponse = function (originalResponse) {
     });
   };
 
-var createCacheKey = function (originalUrl, paramName, paramValue,
+var createCacheKey = function(originalUrl, paramName, paramValue,
                            dontCacheBustUrlsMatching) {
     // Create a new URL object to avoid modifying originalUrl.
     var url = new URL(originalUrl);
@@ -91,7 +91,7 @@ var createCacheKey = function (originalUrl, paramName, paramValue,
     return url.toString();
   };
 
-var isPathWhitelisted = function (whitelist, absoluteUrlString) {
+var isPathWhitelisted = function(whitelist, absoluteUrlString) {
     // If the whitelist is empty, then consider all URLs to be whitelisted.
     if (whitelist.length === 0) {
       return true;
@@ -104,7 +104,7 @@ var isPathWhitelisted = function (whitelist, absoluteUrlString) {
     });
   };
 
-var stripIgnoredUrlParameters = function (originalUrl,
+var stripIgnoredUrlParameters = function(originalUrl,
     ignoreUrlParametersMatching) {
     var url = new URL(originalUrl);
     // Remove the hash; see https://github.com/GoogleChrome/sw-precache/issues/290
