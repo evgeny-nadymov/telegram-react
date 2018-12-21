@@ -86,9 +86,13 @@ class Dialogs extends Component{
     };
 
     handleSelectChat = (chatId, openSearch) => {
+        this.handleSelectMessage(chatId, null, openSearch);
+    };
+
+    handleSelectMessage = (chatId, messageId, openSearch) => {
         const { onSelectChat } = this.props;
 
-        onSelectChat(chatId);
+        onSelectChat(chatId, messageId);
 
         const searchChatId = openSearch ? this.state.searchChatId : 0;
         const searchText = openSearch ? this.state.searchText : null;
@@ -130,7 +134,7 @@ class Dialogs extends Component{
                         <Search
                             chatId={searchChatId}
                             text={searchText}
-                            onSelectChat={this.handleSelectChat}
+                            onSelectMessage={this.handleSelectMessage}
                             onClose={this.handleClose}/>
                     }
                 </div>

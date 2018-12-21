@@ -42,15 +42,15 @@ class FileProgress extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { skipDownloading, skipUploading } = this.props;
+        const { showDownload, showUpload } = this.props;
 
         if (this.isDownloading(nextState.file, nextState.prevFile)
-            && skipDownloading){
+            && showDownload){
             return false;
         }
 
         if (this.isUploading(nextState.file, nextState.prevFile)
-            && skipUploading){
+            && showUpload){
             return false;
         }
 
@@ -101,7 +101,7 @@ class FileProgress extends React.Component {
     };
 
     isDownloading = (file, prevFile) => {
-        if (this.props.skipDownloading) return;
+        if (this.props.showDownload) return;
 
         const wasActive = prevFile && prevFile.local && prevFile.local.is_downloading_active;
         const isActive = file && file.local && file.local.is_downloading_active;
@@ -110,7 +110,7 @@ class FileProgress extends React.Component {
     };
 
     isUploading = (file, prevFile) => {
-        if (this.props.skipUploading) return;
+        if (this.props.showUpload) return;
 
         const wasActive = prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
         const isActive = file && file.remote && file.remote.is_uploading_active;
@@ -208,14 +208,14 @@ class FileProgress extends React.Component {
 FileProgress.propTypes = {
     file: PropTypes.object.isRequired,
     showCancel: PropTypes.bool,
-    skipDownloading: PropTypes.bool,
-    skipUploading: PropTypes.bool
+    showDownload: PropTypes.bool,
+    showUpload: PropTypes.bool
 };
 
 FileProgress.defaultProps = {
     showCancel: false,
-    skipDownloading: true,
-    skipUploading: false
+    showDownload: true,
+    showUpload: false
 };
 
 export default FileProgress;

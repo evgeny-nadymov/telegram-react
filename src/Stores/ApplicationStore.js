@@ -13,6 +13,7 @@ class ApplicationStore extends EventEmitter {
         super();
 
         this.chatId = 0;
+        this.messageId = null;
         this.statistics = new Map();
         this.scopeNotificationSettings = new Map();
         this.authorizationState = null;
@@ -143,19 +144,26 @@ class ApplicationStore extends EventEmitter {
         TdLibController.addListener('update', this.onUpdateStatistics);
     };
 
-    setChatId = chatId => {
+    setChatId = (chatId, messageId = null) => {
         const update = {
             '@type': 'clientUpdateChatId',
             nextChatId: chatId,
-            previousChatId: this.chatId
+            nextMessageId: messageId,
+            previousChatId: this.chatId,
+            previousMessageId: this.messageId
         };
 
         this.chatId = chatId;
+        this.messageId = messageId;
         this.emit(update['@type'], update);
     };
 
     getChatId() {
         return this.chatId;
+    }
+
+    getMessageId() {
+        return this.messageId;
     }
 
     searchChat(chatId) {

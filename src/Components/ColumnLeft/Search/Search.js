@@ -30,6 +30,9 @@ import './Search.css';
 const styles = {
     closeSearchIconButton: {
         margin: '8px 12px 8px 0'
+    },
+    listItem: {
+        padding: '0px'
     }
 };
 
@@ -259,21 +262,17 @@ class Search extends React.Component {
         this.setState({ recentlyFound: null });
     };
 
-    handleSelectChat = (chatId) => {
-        const { onSelectChat } = this.props;
+    handleSelectMessage = (chatId, messageId, addToRecent, keepOpen) => {
+        const { onSelectMessage } = this.props;
 
-        TdLibController.send({
-            '@type': 'addRecentlyFoundChat',
-            chat_id: chatId
-        });
+        if (addToRecent){
+            TdLibController.send({
+                '@type': 'addRecentlyFoundChat',
+                chat_id: chatId
+            });
+        }
 
-        onSelectChat(chatId, false)
-    };
-
-    handleSelectMessage = (chatId, messageId) => {
-        const { onSelectChat } = this.props;
-
-        onSelectChat(chatId, false)
+        onSelectMessage(chatId, messageId, keepOpen);
     };
 
     handleScroll = () => {
@@ -388,17 +387,17 @@ class Search extends React.Component {
     };
 
     render() {
-        const { classes, chatId, onSelectChat } = this.props;
+        const { classes, chatId } = this.props;
         const { top, recentlyFound, local, global, messages } = this.state;
 
         const chat = ChatStore.get(chatId);
 
         const topChats = top && top.chat_ids
-            ? top.chat_ids.map(x => (<TopChat key={x} chatId={x} onSelect={(chatId) => onSelectChat(chatId, false)}/>))
+            ? top.chat_ids.map(x => (<TopChat key={x} chatId={x} onSelect={(chatId) => this.handleSelectMessage(chatId, null, false, false)}/>))
             : [];
         const recentlyFoundChats = recentlyFound && recentlyFound.chat_ids
             ? recentlyFound.chat_ids.map(x => (
-                <ListItem button key={x} onClick={() => this.handleSelectChat(x)}>
+                <ListItem button key={x} onClick={() => this.handleSelectMessage(x, null, true, false)}>
                     <RecentlyFoundChat chatId={x}/>
                 </ListItem>
             ))
@@ -406,7 +405,7 @@ class Search extends React.Component {
 
         const localChats = local && local.chat_ids
             ? local.chat_ids.map(x => (
-                <ListItem button key={x} onClick={() => this.handleSelectChat(x)}>
+                <ListItem button key={x} onClick={() => this.handleSelectMessage(x, null, true, false)}>
                     <RecentlyFoundChat chatId={x}/>
                 </ListItem>
             ))
@@ -414,14 +413,14 @@ class Search extends React.Component {
 
         const globalChats = global && global.chat_ids
             ? global.chat_ids.map(x => (
-                <ListItem button key={x} onClick={() => this.handleSelectChat(x)}>
-                    <FoundPublicChat chatId={x}/>
+                <ListItem button key={x} className={classes.listItem} onClick={() => this.handleSelectMessage(x, null, true, true)}>
+                    <FoundPublicChat chatId={x} />
                 </ListItem>
             ))
             : [];
         const globalMessages = messages && messages.messages
             ? messages.messages.map(x => (
-                <ListItem button key={`${x.chat_id}_${x.id}`} onClick={() => this.handleSelectMessage(x.chat_id, x.id)}>
+                <ListItem button key={`${x.chat_id}_${x.id}`} className={classes.listItem} onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}>
                     <FoundMessage chatId={x.chat_id} messageId={x.id} chatSearch={Boolean(chatId)}/>
                 </ListItem>
             ))
@@ -492,7 +491,7 @@ class Search extends React.Component {
 Search.propTypes = {
     chatId: PropTypes.number,
     text: PropTypes.string,
-    onSelectChat: PropTypes.func.isRequired,
+    onSelectMessage: PropTypes.func.isRequired,
     onClose: PropTypes.func.isRequired
 };
 

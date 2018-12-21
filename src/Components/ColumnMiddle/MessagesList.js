@@ -34,6 +34,7 @@ const ScrollBehaviorEnum = Object.freeze({
     NONE : 'NONE',
     SCROLL_TO_BOTTOM : 'SCROLL_TO_BOTTOM',
     SCROLL_TO_UNREAD : 'SCROLL_TO_UNREAD',
+    SCROLL_TO_MESSAGE : 'SCROLL_TO_MESSAGE',
     KEEP_SCROLL_POSITION : 'KEEP_SCROLL_POSITION'
 });
 
@@ -41,9 +42,12 @@ class MessagesList extends React.Component {
     constructor(props){
         super(props);
 
+        console.log(`MessagesList.ctor chat_id=${props.chatId} message_id=${props.messageId}`);
+
         this.sessionId = Date.now();
         this.state = {
             prevChatId : 0,
+            prevMessageId : null,
             history : [],
             scrollBehavior : ScrollBehaviorEnum.NONE,
             separatorMessageId : 0
@@ -57,9 +61,11 @@ class MessagesList extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state){
-        if (props.chatId !== state.prevChatId){
+        if (props.chatId !== state.prevChatId
+            || props.messageId !== state.prevMessageId){
             return {
                 prevChatId : props.chatId,
+                prevMessageId : props.messageId,
                 scrollBehavior : ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
                 separatorMessageId : 0
             }
@@ -84,20 +90,27 @@ class MessagesList extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
+        console.log(`MessagesList.componentDidUpdate chat_id=${chatId} message_id=${messageId} prev_chat_id=${prevProps.chatId} prev_message_id=${prevProps.messageId}`);
 
-        if (prevProps.chatId !== chatId){
-            this.handleSelectChat(chatId, prevProps.chatId);
+        if (prevProps.chatId !== chatId
+            || prevProps.messageId !== messageId){
+            this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
         }
-
-        this.handleScrollBehavior(snapshot);
+        else{
+            this.handleScrollBehavior(snapshot);
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
         const { history, dragging } = this.state;
 
         if (nextProps.chatId !== chatId){
+            return true;
+        }
+
+        if (nextProps.messageId !== messageId){
             return true;
         }
 
@@ -226,7 +239,9 @@ class MessagesList extends React.Component {
         loadMessageContents(store, messages);
     };
 
-    async handleSelectChat(chatId, previousChatId){
+    async handleSelectChat(chatId, previousChatId, messageId, previousMessageId){
+        console.log('MessagesList.handleSelectChat');
+
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
 
@@ -243,10 +258,10 @@ class MessagesList extends React.Component {
                     chat_id: chat.id,
                 });
 
-            const unread = chat.unread_count > 0;
-            const fromMessageId = unread ? chat.last_read_inbox_message_id : 0;
-            const offset = unread ? -1 - MESSAGE_SLICE_LIMIT : 0;
-            const limit = unread ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
+            const unread = !messageId && chat.unread_count > 0;
+            const fromMessageId = unread ? chat.last_read_inbox_message_id : (messageId ? messageId : 0);
+            const offset = unread || messageId ? -1 - MESSAGE_SLICE_LIMIT : 0;
+            const limit = unread || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
             let result = await TdLibController
                 .send({
@@ -259,10 +274,6 @@ class MessagesList extends React.Component {
 
             //TODO: replace result with one-way data flow
             if (sessionId !== this.sessionId){
-                return;
-            }
-
-            if (this.props.chatId !== chatId){
                 return;
             }
 
@@ -294,7 +305,15 @@ class MessagesList extends React.Component {
             separatorMessageId = separatorMessageId === Number.MAX_VALUE? 0 : separatorMessageId;
             console.log('[MessagesList] separator_message_id=' + separatorMessageId);
 
-            this.replace(separatorMessageId, result.messages, unread && separatorMessageId ? ScrollBehaviorEnum.SCROLL_TO_UNREAD : ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+            let scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+            if (messageId){
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_MESSAGE;
+            }
+            else if (unread && separatorMessageId){
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_UNREAD;
+            }
+
+            this.replace(separatorMessageId, result.messages, scrollBehavior);
 
             // load files
             const store = FileStore.getStore();
@@ -518,7 +537,7 @@ class MessagesList extends React.Component {
     };
 
     handleScrollBehavior = (snapshot) => {
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
         const { scrollBehavior, history } = this.state;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
 
@@ -528,6 +547,9 @@ class MessagesList extends React.Component {
         }
         else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
             this.scrollToBottom();
+        }
+        else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_MESSAGE) {
+            this.scrollToMessage();
         }
         else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
             const list = this.listRef.current;
@@ -559,6 +581,34 @@ class MessagesList extends React.Component {
             list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
             console.log(`SCROLL KEEP_SCROLL_POSITION after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
         }
+    };
+
+    scrollToMessage = () => {
+        const { chatId, messageId } = this.props;
+        const { history } = this.state;
+
+        const list = this.listRef.current;
+        console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} before list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
+
+        let scrolled = false;
+        for (let i = 0; i < history.length; i++) {
+            let itemComponent = this.itemsMap.get(i);
+            let item = ReactDOM.findDOMNode(itemComponent);
+            if (item) {
+                console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                if (itemComponent.props.messageId === messageId) {
+                    list.scrollTop = item.offsetTop;
+                    scrolled = true;
+                    break;
+                }
+            }
+        }
+
+        if (!scrolled){
+            this.scrollToBottom();
+        }
+
+        console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} after list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${chatId}`);
     };
 
     scrollToBottom = () => {

@@ -482,7 +482,7 @@ class FileStore extends EventEmitter {
     };
 
     updateWebPageBlob = (chatId, messageId, fileId) => {
-        console.log(`clientUpdateWebPageBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        // console.log(`clientUpdateWebPageBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdateWebPageBlob', {
             chatId: chatId,
             messageId: messageId,
@@ -491,7 +491,7 @@ class FileStore extends EventEmitter {
     };
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
-        console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        // console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdatePhotoBlob', {
             chatId: chatId,
             messageId: messageId,
@@ -524,7 +524,7 @@ class FileStore extends EventEmitter {
     };
 
     updateLocationBlob = (chatId, messageId, fileId) => {
-        console.log(`clientUpdateLocationBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        // console.log(`clientUpdateLocationBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
 
         this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
@@ -534,11 +534,17 @@ class FileStore extends EventEmitter {
     };
 
     updateUserPhotoBlob(userId, fileId) {
-        this.emit('clientUpdateUserBlob', { userId: userId, fileId: fileId });
+        this.emit('clientUpdateUserBlob', {
+            userId: userId,
+            fileId: fileId
+        });
     }
 
     updateChatPhotoBlob(chatId, fileId) {
-        this.emit('clientUpdateChatBlob', { chatId: chatId, fileId: fileId });
+        this.emit('clientUpdateChatBlob', {
+            chatId: chatId,
+            fileId: fileId
+        });
     }
 }
 

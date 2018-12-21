@@ -7,18 +7,48 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ChatTileControl from './ChatTileControl';
 import UserTileControl from './UserTileControl';
 import DialogTitleControl from './DialogTitleControl';
 import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import './FoundMessage.css';
 
 class FoundMessage extends React.PureComponent {
 
+    constructor(props){
+        super(props);
+
+        this.state = {
+            chatId: ApplicationStore.getChatId(),
+            messageId: ApplicationStore.getMessageId()
+        };
+    }
+
+    componentDidMount(){
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    componentWillUnmount(){
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    onClientUpdateChatId = (update) => {
+        const { nextChatId, nextMessageId } = update;
+
+        this.setState({
+            chatId: nextChatId,
+            messageId: nextMessageId
+        });
+    };
+
     render() {
         const { chatId, messageId, chatSearch } = this.props;
+        const selectedChatId = this.state.chatId;
+        const selectedMessageId = this.state.messageId;
         const message = MessageStore.get(chatId, messageId);
 
         const { sender_user_id } = message;
@@ -33,7 +63,7 @@ class FoundMessage extends React.PureComponent {
             : <ChatTileControl chatId={chatId}/>;
 
         return (
-            <div className='found-message'>
+            <div className={classNames('found-message', { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId })}>
                 {tile}
                 <div className='dialog-inner-wrapper'>
                     <div className='tile-first-row'>

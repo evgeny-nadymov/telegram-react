@@ -123,17 +123,25 @@ class TelegramApp extends Component {
         this.setState({ inactive: true });
     };
 
-    handleSelectChat = (chatId) => {
+    handleSelectChat = (chatId, messageId = null) => {
         const currentChatId = ApplicationStore.getChatId();
-        if (currentChatId === chatId) {
+        const currentMessageId = ApplicationStore.getMessageId();
+
+        if (currentChatId === chatId
+            && messageId
+            && currentMessageId === messageId) {
+            this.dialogDetailsRef.current.scrollToMessage();
+        }
+        else if (currentChatId === chatId && !messageId) {
             const chat = ChatStore.get(chatId);
             if (chat && chat.unread_count > 0) {
                 this.dialogDetailsRef.current.scrollToStart();
             } else {
                 this.dialogDetailsRef.current.scrollToBottom();
             }
-        } else {
-            ApplicationStore.setChatId(chatId);
+        }
+        else {
+            ApplicationStore.setChatId(chatId, messageId);
         }
     };
 

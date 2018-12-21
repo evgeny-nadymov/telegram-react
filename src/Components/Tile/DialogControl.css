@@ -23,6 +23,13 @@
     margin: 0 12px;
 }
 
+.accent-background .dialog-title,
+.accent-background .dialog-content,
+.accent-background .dialog-content-accent,
+.accent-background .dialog-meta-date{
+    color: #fff;
+}
+
 .tile-first-row{
     display: flex;
 }

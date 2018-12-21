@@ -7,12 +7,36 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';
 import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import './FoundPublicChat.css';
 
 class FoundPublicChat extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+
+        this.state = {
+            chatId: ApplicationStore.getChatId()
+        };
+    }
+
+    componentDidMount(){
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    componentWillUnmount(){
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    onClientUpdateChatId = (update) => {
+        const { nextChatId } = update;
+
+        this.setState({ chatId: nextChatId });
+    };
 
     handleClick = () => {
         const { chatId, onSelect} = this.props;
@@ -23,7 +47,8 @@ class FoundPublicChat extends React.PureComponent {
 
     render() {
 
-        const { chatId, onTileSelect } = this.props;
+        const { chatId } = this.props;
+        const selectedChatId = this.state.chatId;
 
         const username = getChatUsername(chatId);
         const membersCount = getGroupChatMembersCount(chatId);
@@ -33,8 +58,8 @@ class FoundPublicChat extends React.PureComponent {
         }
 
         return (
-            <div className='found-public-chat' onClick={this.handleClick}>
-                <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
+            <div className={classNames('found-public-chat', { 'accent-background': chatId === selectedChatId })} onClick={this.handleClick}>
+                <ChatTileControl chatId={chatId} />
                 <div className='dialog-inner-wrapper'>
                     <div className='tile-first-row'>
                         <DialogTitleControl chatId={chatId} />
@@ -52,8 +77,7 @@ class FoundPublicChat extends React.PureComponent {
 }
 
 FoundPublicChat.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    onSelect: PropTypes.func
+    chatId: PropTypes.number.isRequired
 };
 
 export default FoundPublicChat;

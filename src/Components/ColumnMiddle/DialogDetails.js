@@ -22,12 +22,16 @@ class DialogDetails extends Component{
         this.messagesList = React.createRef();
 
         this.state = {
-            currentChatId : ApplicationStore.getChatId()
+            chatId: ApplicationStore.getChatId(),
+            messageId: ApplicationStore.getMessageId()
         };
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        if (nextState.currentChatId !== this.state.currentChatId){
+        if (nextState.chatId !== this.state.chatId){
+            return true;
+        }
+        if (nextState.messageId !== this.state.messageId){
             return true;
         }
 
@@ -49,7 +53,10 @@ class DialogDetails extends Component{
     };
 
     onClientUpdateChatId = (update) => {
-        this.setState({ currentChatId : update.nextChatId })
+        this.setState({ 
+            chatId: update.nextChatId, 
+            messageId: update.nextMessageId 
+        })
     };
 
     scrollToBottom = () => {
@@ -60,19 +67,8 @@ class DialogDetails extends Component{
         this.messagesList.current.scrollToStart();
     };
 
-    showDialogFooter = () => {
-        const chat = ChatStore.get(this.state.currentChatId);
-        if (!chat) return false;
-
-        const {type} = chat;
-
-        if (type && type['@type'] === 'chatTypeSupergroup'){
-            if (type.is_channel){
-                return true;
-            }
-        }
-
-        return false;
+    scrollToMessage = () => {
+        this.messagesList.current.scrollToMessage();
     };
 
     render(){
@@ -110,18 +106,19 @@ class DialogDetails extends Component{
             return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { onSelectChat, onSelectUser } = this.props;
-        const { currentChatId } = this.state;
+        const { chatId, messageId } = this.state;
         const { isChatDetailsVisible } = ApplicationStore;
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
-                <Header chatId={currentChatId}/>
+                <Header chatId={chatId}/>
                 <MessagesList
                     ref={this.messagesList}
-                    chatId={currentChatId}
+                    chatId={chatId}
+                    messageId={messageId}
                     onSelectChat={onSelectChat}
                     onSelectUser={onSelectUser}/>
-                <Footer chatId={currentChatId}/>
+                <Footer chatId={chatId}/>
             </div>
         );
     }

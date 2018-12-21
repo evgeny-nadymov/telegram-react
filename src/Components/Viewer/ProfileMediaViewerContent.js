@@ -95,7 +95,7 @@ class ProfileMediaViewerContent extends React.Component {
                     onClick={this.handleContentClick}
                 />
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileProgress file={file} />
+                <FileProgress file={file} showDownload={false}/>
             </div>
         );
     }

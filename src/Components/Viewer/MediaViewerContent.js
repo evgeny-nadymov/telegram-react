@@ -146,7 +146,7 @@ class MediaViewerContent extends React.Component {
                     onClick={this.handleContentClick}
                 />
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileProgress file={file} skipDownloading={false}/>
+                <FileProgress file={file} showDownload={false}/>
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
         );
