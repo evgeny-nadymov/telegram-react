@@ -13,51 +13,55 @@ import ChatStore from '../../Stores/ChatStore';
 import './MessageAuthor.css';
 
 class MessageAuthor extends React.Component {
-    constructor(props){
-        super(props);
+  constructor(props) {
+    super(props);
+  }
+
+  handleSelect = () => {
+    const { chatId, userId, onSelectUser, onSelectChat } = this.props;
+
+    if (onSelectUser) {
+      onSelectUser(userId);
+      return;
     }
 
-    handleSelect = () => {
-        const { chatId, userId, onSelectUser, onSelectChat } = this.props;
-
-        if (onSelectUser){
-            onSelectUser(userId);
-            return;
-        }
-
-        if (onSelectChat){
-            onSelectChat(chatId);
-            return;
-        }
-    };
-
-    render() {
-        const { chatId, userId, onSelectUser, onSelectChat } = this.props;
-
-        const user = UserStore.get(userId);
-        if (user){
-            const fullName = getUserFullName(user);
-
-            return (
-                onSelectUser
-                    ? <a className='message-author' onClick={this.handleSelect}>{fullName}</a>
-                    : <>{fullName}</>
-            );
-        }
-
-        const chat = ChatStore.get(chatId);
-        if (chat){
-            const fullName = getChatTitle(chat);
-
-            return (
-                onSelectChat
-                    ? <a className='message-author' onClick={this.handleSelect}>{fullName}</a>
-                    : <>{fullName}</>
-            );
-        }
-
-        return null;
+    if (onSelectChat) {
+      onSelectChat(chatId);
+      return;
     }
+  };
+
+  render() {
+    const { chatId, userId, onSelectUser, onSelectChat } = this.props;
+
+    const user = UserStore.get(userId);
+    if (user) {
+      const fullName = getUserFullName(user);
+
+      return onSelectUser ? (
+        <a className="message-author" onClick={this.handleSelect}>
+          {fullName}
+        </a>
+      ) : (
+        <>{fullName}</>
+      );
+    }
+
+    const chat = ChatStore.get(chatId);
+    if (chat) {
+      const fullName = getChatTitle(chatId, false);
+
+      return onSelectChat ? (
+        <a className="message-author" onClick={this.handleSelect}>
+          {fullName}
+        </a>
+      ) : (
+        <>{fullName}</>
+      );
+    }
+
+    return null;
+  }
 }
 
 export default MessageAuthor;

@@ -14,48 +14,59 @@ import ChatStore from '../../Stores/ChatStore';
 import './ChatControl.css';
 
 class ChatControl extends React.Component {
-    shouldComponentUpdate(nextProps, nextState){
-        return nextProps.chatId !== this.props.chatId;
-    }
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextProps.chatId !== this.props.chatId;
+  }
 
-    handleClick = () => {
-        const { chatId, onSelect} = this.props;
-        if (!onSelect) return;
+  handleClick = () => {
+    const { chatId, onSelect } = this.props;
+    if (!onSelect) return;
 
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
 
-        onSelect(chat);
-    };
+    onSelect(chat);
+  };
 
-    render() {
-        const { chatId, onTileSelect, hideStatus } = this.props;
+  render() {
+    const { chatId, onTileSelect, showStatus, showSavedMessages } = this.props;
 
-        return (
-            <div className='chat' onClick={this.handleClick}>
-                <div className='chat-wrapper'>
-                    <ChatTileControl chatId={chatId} onSelect={onTileSelect} />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} />
-                        </div>
-                        {   !hideStatus &&
-                            <div className='tile-second-row'>
-                                <DialogStatusControl chatId={chatId}/>
-                            </div>
-                        }
-                    </div>
-                </div>
+    return (
+      <div className="chat" onClick={this.handleClick}>
+        <div className="chat-wrapper">
+          <ChatTileControl
+            chatId={chatId}
+            onSelect={onTileSelect}
+            showSavedMessages={showSavedMessages}
+          />
+          <div className="dialog-inner-wrapper">
+            <div className="tile-first-row">
+              <DialogTitleControl chatId={chatId} />
             </div>
-        );
-    }
+            {showStatus &&
+              !showSavedMessages && (
+                <div className="tile-second-row">
+                  <DialogStatusControl chatId={chatId} />
+                </div>
+              )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 ChatControl.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    onSelect: PropTypes.func,
-    onTileSelect: PropTypes.func,
-    hideStatus: PropTypes.bool
+  chatId: PropTypes.number.isRequired,
+  showSavedMessages: PropTypes.bool,
+  showStatus: PropTypes.bool,
+  onSelect: PropTypes.func,
+  onTileSelect: PropTypes.func
+};
+
+ChatControl.defaultProps = {
+  showSavedMessages: true,
+  showStatus: true
 };
 
 export default ChatControl;

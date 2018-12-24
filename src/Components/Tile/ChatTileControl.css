@@ -5,34 +5,61 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.tile_color_1{background:#cc90e2}
-.tile_color_2{background:#80d066}
-.tile_color_3{background:#ecd074}
-.tile_color_4{background:#6fb1e4}
-.tile_color_5{background:#e57979}
-.tile_color_6{background:#f98bae}
-.tile_color_7{background:#73cdd0}
-.tile_color_8{background:#fba76f}
+.tile_color_1 {
+  background: #cc90e2;
+}
+.tile_color_2 {
+  background: #80d066;
+}
+.tile_color_3 {
+  background: #ecd074;
+}
+.tile_color_4 {
+  background: #6fb1e4;
+}
+.tile_color_5 {
+  background: #e57979;
+}
+.tile_color_6 {
+  background: #f98bae;
+}
+.tile_color_7 {
+  background: #73cdd0;
+}
+.tile_color_8 {
+  background: #fba76f;
+}
 
-.tile-text{
-    line-height: 48px;
-    font-size: 19px;
-    /*font-family: 'Nunito', sans-serif;*/
-    font-weight: 600;
-    display: block;
-    color: #fff;
-    text-align: center;
-    text-transform: uppercase;
-    user-select: none;
+.tile-text {
+  line-height: 48px;
+  font-size: 19px;
+  /*font-family: 'Nunito', sans-serif;*/
+  font-weight: 600;
+  display: block;
+  color: #fff;
+  text-align: center;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 .tile-photo {
-    width: 48px;
-    min-width: 48px;
-    height: 48px;
-    min-height: 48px;
-    border-radius: 50%;
-    overflow: hidden;
-    object-fit: cover;
-    z-index: 1;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  object-fit: cover;
+  position: relative;
+  z-index: 1;
+}
+
+.tile-saved-messages {
+  height: 24px;
+  width: 24px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff;
 }
