@@ -57,10 +57,7 @@ class Search extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        if (
-            props.chatId !== state.prevPropsChatId ||
-            props.text !== state.prevPropsText
-        ) {
+        if (props.chatId !== state.prevPropsChatId || props.text !== state.prevPropsText) {
             return {
                 prevPropsChatId: props.chatId,
                 prevPropsText: props.text,
@@ -79,20 +76,14 @@ class Search extends React.Component {
     componentDidMount() {
         this.loadContent();
 
-        ApplicationStore.on(
-            'clientUpdateSearchText',
-            this.onClientUpdateSearchText
-        );
+        ApplicationStore.on('clientUpdateSearchText', this.onClientUpdateSearchText);
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener(
-            'clientUpdateSearchText',
-            this.onClientUpdateSearchText
-        );
+        ApplicationStore.removeListener('clientUpdateSearchText', this.onClientUpdateSearchText);
     }
 
-    onClientUpdateSearchText = update => {
+    onClientUpdateSearchText = (update) => {
         const { text } = update;
 
         const trimmedText = text.trim();
@@ -104,7 +95,7 @@ class Search extends React.Component {
         }
     };
 
-    searchText = async text => {
+    searchText = async (text) => {
         this.sessionId = new Date();
         this.text = text;
         const sessionId = this.sessionId;
@@ -191,10 +182,7 @@ class Search extends React.Component {
         for (let i = 0; i < messages.messages.length; i++) {
             chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
             if (messages.messages[i].sender_user_id) {
-                users.set(
-                    messages.messages[i].sender_user_id,
-                    messages.messages[i].sender_user_id
-                );
+                users.set(messages.messages[i].sender_user_id, messages.messages[i].sender_user_id);
             }
         }
 
@@ -229,10 +217,7 @@ class Search extends React.Component {
             limit: 100
         });
 
-        const [top, recentlyFound] = await Promise.all([
-            topPromise,
-            recentlyFoundPromise
-        ]);
+        const [top, recentlyFound] = await Promise.all([topPromise, recentlyFoundPromise]);
 
         this.setState({
             top: top,
@@ -263,7 +248,7 @@ class Search extends React.Component {
         }
     };
 
-    handleClearRecentlyFound = event => {
+    handleClearRecentlyFound = (event) => {
         event.stopPropagation();
 
         TdLibController.send({
@@ -294,7 +279,7 @@ class Search extends React.Component {
         }
     };
 
-    getOffset = messages => {
+    getOffset = (messages) => {
         const length = messages ? messages.messages.length : 0;
 
         const offsetDate = length > 0 ? messages.messages[length - 1].date : 0;
@@ -371,10 +356,7 @@ class Search extends React.Component {
         for (let i = 0; i < result.messages.length; i++) {
             chats.set(result.messages[i].chat_id, result.messages[i].chat_id);
             if (result.messages[i].sender_user_id) {
-                users.set(
-                    result.messages[i].sender_user_id,
-                    result.messages[i].sender_user_id
-                );
+                users.set(result.messages[i].sender_user_id, result.messages[i].sender_user_id);
             }
         }
 
@@ -383,7 +365,7 @@ class Search extends React.Component {
         loadUsersContent(store, [...users.keys()]);
     };
 
-    handleTopChatsScroll = event => {
+    handleTopChatsScroll = (event) => {
         event.stopPropagation();
     };
 
@@ -401,67 +383,58 @@ class Search extends React.Component {
 
         const topChats =
             top && top.chat_ids
-                ? top.chat_ids.map(x => (
-                    <TopChat
-                        key={x}
-                        chatId={x}
-                        onSelect={() => this.handleSelectMessage(x, null, false, false)}
-                    />
-                ))
+                ? top.chat_ids.map((x) => (
+                      <TopChat key={x} chatId={x} onSelect={() => this.handleSelectMessage(x, null, false, false)} />
+                  ))
                 : [];
         const recentlyFoundChats =
             recentlyFound && recentlyFound.chat_ids
-                ? recentlyFound.chat_ids.map(x => (
-                    <RecentlyFoundChat
-                        key={x}
-                        chatId={x}
-                        onClick={() => this.handleSelectMessage(x, null, true, false)}
-                    />
-                ))
+                ? recentlyFound.chat_ids.map((x) => (
+                      <RecentlyFoundChat
+                          key={x}
+                          chatId={x}
+                          onClick={() => this.handleSelectMessage(x, null, true, false)}
+                      />
+                  ))
                 : [];
 
         const localChats =
             local && local.chat_ids
-                ? local.chat_ids.map(x => (
-                    <RecentlyFoundChat
-                        key={x}
-                        chatId={x}
-                        onClick={() => this.handleSelectMessage(x, null, true, false)}
-                    />
-                ))
+                ? local.chat_ids.map((x) => (
+                      <RecentlyFoundChat
+                          key={x}
+                          chatId={x}
+                          onClick={() => this.handleSelectMessage(x, null, true, false)}
+                      />
+                  ))
                 : [];
 
         const globalChats =
             global && global.chat_ids
-                ? global.chat_ids.map(x => (
-                    <FoundPublicChat
-                        key={x}
-                        chatId={x}
-                        onClick={() => this.handleSelectMessage(x, null, true, true)}
-                    />
-                ))
+                ? global.chat_ids.map((x) => (
+                      <FoundPublicChat
+                          key={x}
+                          chatId={x}
+                          onClick={() => this.handleSelectMessage(x, null, true, true)}
+                      />
+                  ))
                 : [];
         const globalMessages =
             messages && messages.messages
-                ? messages.messages.map(x => (
-                    <FoundMessage
-                        key={`${x.chat_id}_${x.id}`}
-                        chatId={x.chat_id}
-                        messageId={x.id}
-                        chatSearch={Boolean(chatId)}
-                        onClick={() =>
-                            this.handleSelectMessage(x.chat_id, x.id, false, true)
-                        }
-                    />
-                ))
+                ? messages.messages.map((x) => (
+                      <FoundMessage
+                          key={`${x.chat_id}_${x.id}`}
+                          chatId={x.chat_id}
+                          messageId={x.id}
+                          chatSearch={Boolean(chatId)}
+                          onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}
+                      />
+                  ))
                 : [];
 
         let messagesCaption = 'No messages found';
         if (messages && messages.total_count) {
-            messagesCaption =
-                messages.total_count === 1
-                    ? 'Found 1 message'
-                    : `Found ${messages.total_count} messages`;
+            messagesCaption = messages.total_count === 1 ? 'Found 1 message' : `Found ${messages.total_count} messages`;
         }
 
         return (
@@ -485,9 +458,7 @@ class Search extends React.Component {
                 {topChats.length > 0 && (
                     <div className='search-top-chats'>
                         <SearchCaption caption='People' />
-                        <div
-                            className='search-top-chats-list'
-                            onScroll={this.handleTopChatsScroll}>
+                        <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
                             <div className='search-top-chats-placeholder' />
                             {topChats}
                             <div className='search-top-chats-placeholder' />
@@ -496,10 +467,7 @@ class Search extends React.Component {
                 )}
                 {recentlyFoundChats.length > 0 && (
                     <div className='search-recently-found-chats'>
-                        <SearchCaption
-                            caption='Recent'
-                            command='Clear'
-                            onClick={this.handleClearRecentlyFound}/>
+                        <SearchCaption caption='Recent' command='Clear' onClick={this.handleClearRecentlyFound} />
                         {recentlyFoundChats}
                     </div>
                 )}
