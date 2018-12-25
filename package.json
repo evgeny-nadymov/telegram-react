@@ -14,7 +14,7 @@
     "events": "^2.1.0",
     "husky": "^0.14.3",
     "libphonenumber-js": "^1.6.9",
-    "lint-staged": "^4.2.3",
+    "lint-staged": "^4.3.0",
     "localforage": "^1.7.3",
     "localforage-getitems": "^1.4.2",
     "prettier": "^1.14.3",
@@ -24,12 +24,12 @@
     "react-dom": "^16.7.0",
     "react-file-download": "^0.3.5",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^2.1.1",
+    "react-scripts": "^2.1.2",
     "sw-precache-cra": "^1.0.0-alpha.2"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
-      "prettier --print-width 120 --tab-width 4 --single-quote --jsx-single-quote --jsx-bracket-same-line --arrow-parens always --bracket-spacing --write",
+      "prettier --print-width 120 --tab-width 4 --single-quote --jsx-single-quote --jsx-bracket-same-line --bracket-spacing --write",
       "git add"
     ]
   },

@@ -12,16 +12,15 @@ import ChatTileControl from './ChatTileControl';
 import './TopChat.css';
 
 class TopChat extends React.PureComponent {
-
     render() {
-        const { chatId, onSelect } = this.props;
+        const { chatId, onSelect, showSavedMessages } = this.props;
 
-        const shortTitle = getChatShortTitle(chatId);
+        const shortTitle = getChatShortTitle(chatId, showSavedMessages);
 
         return (
-            <div className='top-chat'>
-                <ChatTileControl chatId={chatId} onSelect={onSelect}/>
-                <div className='top-chat-title'>{shortTitle}</div>
+            <div className="top-chat">
+                <ChatTileControl chatId={chatId} onSelect={onSelect} showSavedMessages={showSavedMessages} />
+                <div className="top-chat-title">{shortTitle}</div>
             </div>
         );
     }
@@ -29,7 +28,12 @@ class TopChat extends React.PureComponent {
 
 TopChat.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onSelect: PropTypes.func
+    onSelect: PropTypes.func,
+    showSavedMessages: PropTypes.bool
+};
+
+TopChat.defaultProps = {
+    showSavedMessages: true
 };
 
 export default TopChat;

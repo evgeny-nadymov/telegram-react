@@ -7,12 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import {
-    getUserFullName,
-    getUserShortName,
-    getUserStatus,
-    isAccentUserSubtitle
-} from './User';
+import { getUserFullName, getUserShortName, getUserStatus, isAccentUserSubtitle } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
@@ -47,12 +42,8 @@ function getGroupChatTypingString(inputTypingManager) {
             return `${size} people are typing`;
         }
 
-        firstUser = firstUser.first_name
-            ? firstUser.first_name
-            : firstUser.second_name;
-        secondUser = secondUser.first_name
-            ? secondUser.first_name
-            : secondUser.second_name;
+        firstUser = firstUser.first_name ? firstUser.first_name : firstUser.second_name;
+        secondUser = secondUser.first_name ? secondUser.first_name : secondUser.second_name;
 
         if (!firstUser || !secondUser) {
             return `${size} people are typing`;
@@ -73,9 +64,7 @@ function getGroupChatTypingString(inputTypingManager) {
                 return `1 person is typing`;
             }
 
-            firstUser = firstUser.first_name
-                ? firstUser.first_name
-                : firstUser.second_name;
+            firstUser = firstUser.first_name ? firstUser.first_name : firstUser.second_name;
 
             if (!firstUser) {
                 return `1 person is typing`;
@@ -206,11 +195,7 @@ function getMessageSenderName(message) {
     if (isServiceMessage(message)) return null;
 
     const chat = ChatStore.get(message.chat_id);
-    if (
-        chat &&
-        chat.type['@type'] !== 'chatTypeBasicGroup' &&
-        chat.type['@type'] !== 'chatTypeSupergroup'
-    ) {
+    if (chat && chat.type['@type'] !== 'chatTypeBasicGroup' && chat.type['@type'] !== 'chatTypeSupergroup') {
         return null;
     }
 
@@ -236,10 +221,7 @@ function getChatUnreadMessageIcon(chat) {
     if (!chat) return false;
     if (!chat.last_message) return false;
 
-    return (
-        chat.last_message.is_outgoing &&
-        chat.last_message.id > chat.last_read_outbox_message_id
-    );
+    return chat.last_message.is_outgoing && chat.last_message.id > chat.last_read_outbox_message_id;
 }
 
 function getChatUnreadCount(chat) {
@@ -733,11 +715,7 @@ function hasBasicGroupId(chatId, basicGroupId) {
 
     const { type } = chat;
 
-    return (
-        type &&
-        type['@type'] === 'chatTypeBasicGroup' &&
-        type.basic_group_id === basicGroupId
-    );
+    return type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === basicGroupId;
 }
 
 function hasSupergroupId(chatId, supergroupId) {
@@ -746,11 +724,7 @@ function hasSupergroupId(chatId, supergroupId) {
 
     const { type } = chat;
 
-    return (
-        type &&
-        type['@type'] === 'chatTypeSupergroup' &&
-        type.supergroup_id === supergroupId
-    );
+    return type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === supergroupId;
 }
 
 function hasUserId(chatId, userId) {
@@ -760,10 +734,7 @@ function hasUserId(chatId, userId) {
     const { type } = chat;
 
     return (
-        type &&
-        (type['@type'] === 'chatTypePrivate' ||
-            type['@type'] === 'chatTypeSecret') &&
-        type.user_id === userId
+        type && (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret') && type.user_id === userId
     );
 }
 
@@ -773,10 +744,7 @@ function getChatUserId(chatId) {
 
     const { type } = chat;
 
-    return type &&
-    (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret')
-        ? type.user_id
-        : 0;
+    return type && (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret') ? type.user_id : 0;
 }
 
 function getPhotoFromChat(chatId) {
@@ -874,7 +842,11 @@ function canSendFiles(chatId) {
     return false;
 }
 
-function getChatShortTitle(chatId) {
+function getChatShortTitle(chatId, showSavedMessages = false) {
+    if (isMeChat(chatId) && showSavedMessages) {
+        return 'Saved Messages';
+    }
+
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
     if (!chat.type) return null;
