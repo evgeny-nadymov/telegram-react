@@ -14,7 +14,14 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Switch from '@material-ui/core/Switch';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
+import { withStyles } from '@material-ui/core/styles';
 import NotificationsControl from '../ColumnMiddle/NotificationsControl';
+
+const styles = {
+    listItem: {
+        padding: '11px 22px'
+    }
+};
 
 class NotificationsListItem extends NotificationsControl {
     constructor(props){
@@ -22,10 +29,11 @@ class NotificationsListItem extends NotificationsControl {
     }
 
     render() {
+        const { classes } = this.props;
         const { isMuted } = this.state;
 
         return (
-            <ListItem button onClick={this.handleSetChatNotifications}>
+            <ListItem button className={classes.listItem} onClick={this.handleSetChatNotifications}>
                 <ListItemIcon>
                     {
                         !isMuted
@@ -45,4 +53,4 @@ class NotificationsListItem extends NotificationsControl {
     }
 }
 
-export default NotificationsListItem;
+export default withStyles(styles)(NotificationsListItem);

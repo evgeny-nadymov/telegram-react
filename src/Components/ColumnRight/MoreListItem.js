@@ -15,11 +15,18 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Collapse from '@material-ui/core/Collapse';
 import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 import { isUserBlocked } from '../../Utils/User';
 import { isChannelChat, isChatMember, isGroupChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import ApplicationStore from '../../Stores/ApplicationStore';
+
+const styles = {
+    listItem: {
+        padding: '11px 22px'
+    }
+};
 
 class MoreListItem extends React.Component {
     constructor(props){
@@ -77,7 +84,7 @@ class MoreListItem extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, classes } = this.props;
         const { openMore } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -92,7 +99,7 @@ class MoreListItem extends React.Component {
 
         return (
             <>
-                <ListItem button onClick={this.handleMoreClick}>
+                <ListItem button className={classes.listItem} onClick={this.handleMoreClick}>
                     <ListItemIcon>
                         <MoreHorizIcon/>
                     </ListItemIcon>
@@ -104,23 +111,23 @@ class MoreListItem extends React.Component {
                         {
                             !isGroup &&
                             <>
-                                <ListItem button onClick={this.handleSendMessage}>
+                                <ListItem button className={classes.listItem} onClick={this.handleSendMessage}>
                                     <ListItemText inset primary={<Typography variant='inherit' noWrap>Send Message</Typography>}/>
                                 </ListItem>
-                                <ListItem button onClick={this.handleBlock}>
+                                <ListItem button className={classes.listItem} onClick={this.handleBlock}>
                                     <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isBlocked? 'Unblock' : 'Block' }</Typography>}/>
                                 </ListItem>
                             </>
                         }
                         {
                             isGroup && isMember &&
-                            <ListItem button>
+                            <ListItem button className={classes.listItem}>
                                 <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isChannel? 'Leave Channel' : 'Delete and Exit' }</Typography>} />
                             </ListItem>
                         }
                         {
                             isGroup && !isMember &&
-                            <ListItem button>
+                            <ListItem button className={classes.listItem}>
                                 <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>Report</Typography>} />
                             </ListItem>
                         }
@@ -131,4 +138,4 @@ class MoreListItem extends React.Component {
     }
 }
 
-export default MoreListItem;
+export default withStyles(styles)(MoreListItem);

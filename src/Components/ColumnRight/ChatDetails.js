@@ -55,6 +55,9 @@ const styles = theme => ({
     },
     close: {
         padding: theme.spacing.unit / 2
+    },
+    listItem: {
+        padding: '11px 22px'
     }
 });
 
@@ -307,7 +310,7 @@ class ChatDetails extends React.Component {
             return getUserStatusOrder(y) - getUserStatusOrder(x);
         });
         const items = sortedUsers.map(user => (
-            <ListItem button key={user.id}>
+            <ListItem button className={classes.listItem} key={user.id}>
                 <UserControl userId={user.id} onSelect={onSelectUser} />
             </ListItem>
         ));
@@ -327,7 +330,7 @@ class ChatDetails extends React.Component {
                     <List>
                         {username && (
                             <>
-                                <ListItem button onClick={this.handleUsernameHint}>
+                                <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
                                     <ListItemIcon>
                                         <AlternateEmailIcon />
                                     </ListItemIcon>
@@ -367,7 +370,7 @@ class ChatDetails extends React.Component {
                         )}
                         {phoneNumber && (
                             <>
-                                <ListItem button onClick={this.handlePhoneHint}>
+                                <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
                                     <ListItemIcon>
                                         <CallIcon />
                                     </ListItemIcon>
@@ -406,7 +409,7 @@ class ChatDetails extends React.Component {
                             </>
                         )}
                         {bio && (
-                            <ListItem>
+                            <ListItem className={classes.listItem}>
                                 <ListItemIcon>
                                     <ErrorOutlineIcon className='chat-details-info-icon' />
                                 </ListItemIcon>
@@ -424,7 +427,7 @@ class ChatDetails extends React.Component {
                     </List>
                     <Divider />
                     <List>
-                        <ListItem button disabled onClick={openSharedMedia}>
+                        <ListItem button disabled className={classes.listItem} onClick={openSharedMedia}>
                             <ListItemIcon>
                                 <PhotoIcon />
                             </ListItemIcon>
@@ -437,7 +440,7 @@ class ChatDetails extends React.Component {
                             />
                         </ListItem>
                         {!isGroup && (
-                            <ListItem button onClick={openGroupsInCommon}>
+                            <ListItem button className={classes.listItem} onClick={openGroupsInCommon}>
                                 <ListItemText
                                     inset
                                     primary={
