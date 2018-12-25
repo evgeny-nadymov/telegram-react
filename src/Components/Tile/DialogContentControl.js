@@ -7,105 +7,105 @@
 
 import React from 'react';
 import {
-  getChatTypingString,
-  getChatDraft,
-  getLastMessageSenderName,
-  getLastMessageContent,
-  showChatDraft
+    getChatTypingString,
+    getChatDraft,
+    getLastMessageSenderName,
+    getLastMessageContent,
+    showChatDraft
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogContentControl.css';
 
 class DialogContentControl extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.chatId !== this.props.chatId) {
-      return true;
+    constructor(props) {
+        super(props);
     }
 
-    return false;
-  }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
 
-  componentDidMount() {
-    ChatStore.on(
-      'clientUpdateFastUpdatingComplete',
-      this.onFastUpdatingComplete
-    );
-    ChatStore.on('updateChatDraftMessage', this.onUpdate);
-    ChatStore.on('updateChatLastMessage', this.onUpdate);
-    ChatStore.on('updateChatReadInbox', this.onUpdate);
-    ChatStore.on('updateUserChatAction', this.onUpdate);
-  }
-
-  componentWillUnmount() {
-    ChatStore.removeListener(
-      'clientUpdateFastUpdatingComplete',
-      this.onFastUpdatingComplete
-    );
-    ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-    ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-    ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
-    ChatStore.removeListener('updateUserChatAction', this.onUpdate);
-  }
-
-  onFastUpdatingComplete = update => {
-    this.forceUpdate();
-  };
-
-  onUpdate = update => {
-    const { chatId } = this.props;
-
-    if (chatId !== update.chat_id) return;
-
-    this.forceUpdate();
-  };
-
-  render() {
-    const { chatId } = this.props;
-
-    const chat = ChatStore.get(chatId);
-    if (!chat) return null;
-
-    let contentControl = null;
-    const typingString = getChatTypingString(chatId);
-    if (typingString) {
-      contentControl = (
-        <span className="dialog-content-accent">{typingString}</span>
-      );
+        return false;
     }
 
-    if (!contentControl) {
-      const draft = getChatDraft(chat);
-      if (showChatDraft(chat)) {
-        const text = draft.text || '\u00A0';
-
-        contentControl = (
-          <>
-            <span className="dialog-content-draft">Draft: </span>
-            {text}
-          </>
+    componentDidMount() {
+        ChatStore.on(
+            'clientUpdateFastUpdatingComplete',
+            this.onFastUpdatingComplete
         );
-      }
+        ChatStore.on('updateChatDraftMessage', this.onUpdate);
+        ChatStore.on('updateChatLastMessage', this.onUpdate);
+        ChatStore.on('updateChatReadInbox', this.onUpdate);
+        ChatStore.on('updateUserChatAction', this.onUpdate);
     }
 
-    if (!contentControl) {
-      const content = getLastMessageContent(chat) || '\u00A0';
-      const senderName = getLastMessageSenderName(chat);
-      contentControl = (
-        <>
-          {senderName && (
-            <span className="dialog-content-accent">{senderName}: </span>
-          )}
-          {content}
-        </>
-      );
+    componentWillUnmount() {
+        ChatStore.removeListener(
+            'clientUpdateFastUpdatingComplete',
+            this.onFastUpdatingComplete
+        );
+        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
+        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
+        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
+        ChatStore.removeListener('updateUserChatAction', this.onUpdate);
     }
 
-    return <div className="dialog-content">{contentControl}</div>;
-  }
+    onFastUpdatingComplete = update => {
+        this.forceUpdate();
+    };
+
+    onUpdate = update => {
+        const { chatId } = this.props;
+
+        if (chatId !== update.chat_id) return;
+
+        this.forceUpdate();
+    };
+
+    render() {
+        const { chatId } = this.props;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+
+        let contentControl = null;
+        const typingString = getChatTypingString(chatId);
+        if (typingString) {
+            contentControl = (
+                <span className='dialog-content-accent'>{typingString}</span>
+            );
+        }
+
+        if (!contentControl) {
+            const draft = getChatDraft(chat);
+            if (showChatDraft(chat)) {
+                const text = draft.text || '\u00A0';
+
+                contentControl = (
+                    <>
+                        <span className='dialog-content-draft'>Draft: </span>
+                        {text}
+                    </>
+                );
+            }
+        }
+
+        if (!contentControl) {
+            const content = getLastMessageContent(chat) || '\u00A0';
+            const senderName = getLastMessageSenderName(chat);
+            contentControl = (
+                <>
+                    {senderName && (
+                        <span className='dialog-content-accent'>{senderName}: </span>
+                    )}
+                    {content}
+                </>
+            );
+        }
+
+        return <div className='dialog-content'>{contentControl}</div>;
+    }
 }
 
 export default DialogContentControl;

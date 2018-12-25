@@ -8,153 +8,153 @@
 import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
 import {
-  VERBOSITY_JS_MAX,
-  VERBOSITY_JS_MIN,
-  VERBOSITY_MAX,
-  VERBOSITY_MIN
+    VERBOSITY_JS_MAX,
+    VERBOSITY_JS_MIN,
+    VERBOSITY_MAX,
+    VERBOSITY_MIN
 } from '../Constants';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
 
 class TdLibController extends EventEmitter {
-  constructor() {
-    super();
+    constructor() {
+        super();
 
-    this.parameters = {
-      useTestDC: false,
-      readOnly: false,
-      verbosity: 1,
-      jsVerbosity: 3,
-      fastUpdating: true
+        this.parameters = {
+            useTestDC: false,
+            readOnly: false,
+            verbosity: 1,
+            jsVerbosity: 3,
+            fastUpdating: true
+        };
+
+        this.setMaxListeners(Infinity);
+    }
+
+    init = location => {
+        this.setParameters(location);
+
+        const {
+            verbosity,
+            jsVerbosity,
+            useTestDC,
+            readOnly,
+            fastUpdating
+        } = this.parameters;
+
+        let options = {
+            verbosity: verbosity,
+            jsVerbosity: jsVerbosity,
+            mode: 'wasm', // 'wasm-streaming'/'wasm'/'asmjs'
+            prefix: useTestDC ? 'tdlib_test' : 'tdlib',
+            readOnly: readOnly,
+            isBackground: false
+        };
+
+        console.log(
+            `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(
+                options
+            )}`
+        );
+
+        this.client = new TdClient(options);
+        this.client.onUpdate = update => this.emit('update', update);
     };
 
-    this.setMaxListeners(Infinity);
-  }
+    setParameters = location => {
+        if (!location) return;
 
-  init = location => {
-    this.setParameters(location);
+        const { search } = location;
+        if (!search) return;
 
-    const {
-      verbosity,
-      jsVerbosity,
-      useTestDC,
-      readOnly,
-      fastUpdating
-    } = this.parameters;
+        const params = new URLSearchParams(search.toLowerCase());
 
-    let options = {
-      verbosity: verbosity,
-      jsVerbosity: jsVerbosity,
-      mode: 'wasm', // 'wasm-streaming'/'wasm'/'asmjs'
-      prefix: useTestDC ? 'tdlib_test' : 'tdlib',
-      readOnly: readOnly,
-      isBackground: false
+        if (params.has('test')) {
+            const useTestDC = parseInt(params.get('test'), 10);
+            if (useTestDC === 0 || useTestDC === 1) {
+                this.parameters.useTestDC = useTestDC === 1;
+            }
+        }
+
+        if (params.has('verbosity')) {
+            const verbosity = parseInt(params.get('verbosity'), 10);
+            if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX) {
+                this.parameters.verbosity = verbosity;
+            }
+        }
+
+        if (params.has('jsverbosity')) {
+            const jsVerbosity = parseInt(params.get('jsverbosity'), 10);
+            if (jsVerbosity >= VERBOSITY_JS_MIN && jsVerbosity <= VERBOSITY_JS_MAX) {
+                this.parameters.jsVerbosity = jsVerbosity;
+            }
+        }
+
+        if (params.has('readonly')) {
+            const readOnly = parseInt(params.get('readonly'), 10);
+            if (readOnly === 0 || readOnly === 1) {
+                this.parameters.readOnly = readOnly === 1;
+            }
+        }
+
+        if (params.has('fastupdating')) {
+            const fastUpdating = parseInt(params.get('fastupdating'), 10);
+            if (fastUpdating === 0 || fastUpdating === 1) {
+                this.parameters.fastUpdating = fastUpdating === 1;
+            }
+        }
     };
 
-    console.log(
-      `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(
-        options
-      )}`
-    );
+    send = request => {
+        return this.client.send(request);
+    };
 
-    this.client = new TdClient(options);
-    this.client.onUpdate = update => this.emit('update', update);
-  };
+    sendTdParameters = () => {
+        const apiId = process.env.REACT_APP_TELEGRAM_API_ID;
+        const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
 
-  setParameters = location => {
-    if (!location) return;
+        if (!apiId || !apiHash) {
+            if (
+                window.confirm(
+                    'API id is missing!\nIn order to obtain an API id and develop your own application using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id'
+                )
+            ) {
+                window.location.href = 'https://core.telegram.org/api/obtaining_api_id';
+            }
+        }
 
-    const { search } = location;
-    if (!search) return;
+        const { useTestDC } = this.parameters;
+        const { version } = packageJson;
 
-    const params = new URLSearchParams(search.toLowerCase());
+        this.send({
+            '@type': 'setTdlibParameters',
+            parameters: {
+                '@type': 'tdParameters',
+                use_test_dc: useTestDC,
+                api_id: apiId,
+                api_hash: apiHash,
+                system_language_code: 'en',
+                device_model: 'Web',
+                system_version: 'Unknown',
+                application_version: version,
+                use_secret_chats: false,
+                use_message_database: true,
+                use_file_database: false,
+                database_directory: '/db',
+                files_directory: '/'
+            }
+            // ,
+            // extra: {
+            //     a: ['a', 'b'],
+            //     b: 123
+            // }
+        });
+    };
 
-    if (params.has('test')) {
-      const useTestDC = parseInt(params.get('test'), 10);
-      if (useTestDC === 0 || useTestDC === 1) {
-        this.parameters.useTestDC = useTestDC === 1;
-      }
+    logOut() {
+        this.send({ '@type': 'logOut' }).catch(error => {
+            this.emit('tdlib_auth_error', error);
+        });
     }
-
-    if (params.has('verbosity')) {
-      const verbosity = parseInt(params.get('verbosity'), 10);
-      if (verbosity >= VERBOSITY_MIN && verbosity <= VERBOSITY_MAX) {
-        this.parameters.verbosity = verbosity;
-      }
-    }
-
-    if (params.has('jsverbosity')) {
-      const jsVerbosity = parseInt(params.get('jsverbosity'), 10);
-      if (jsVerbosity >= VERBOSITY_JS_MIN && jsVerbosity <= VERBOSITY_JS_MAX) {
-        this.parameters.jsVerbosity = jsVerbosity;
-      }
-    }
-
-    if (params.has('readonly')) {
-      const readOnly = parseInt(params.get('readonly'), 10);
-      if (readOnly === 0 || readOnly === 1) {
-        this.parameters.readOnly = readOnly === 1;
-      }
-    }
-
-    if (params.has('fastupdating')) {
-      const fastUpdating = parseInt(params.get('fastupdating'), 10);
-      if (fastUpdating === 0 || fastUpdating === 1) {
-        this.parameters.fastUpdating = fastUpdating === 1;
-      }
-    }
-  };
-
-  send = request => {
-    return this.client.send(request);
-  };
-
-  sendTdParameters = () => {
-    const apiId = process.env.REACT_APP_TELEGRAM_API_ID;
-    const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
-
-    if (!apiId || !apiHash) {
-      if (
-        window.confirm(
-          'API id is missing!\nIn order to obtain an API id and develop your own application using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id'
-        )
-      ) {
-        window.location.href = 'https://core.telegram.org/api/obtaining_api_id';
-      }
-    }
-
-    const { useTestDC } = this.parameters;
-    const { version } = packageJson;
-
-    this.send({
-      '@type': 'setTdlibParameters',
-      parameters: {
-        '@type': 'tdParameters',
-        use_test_dc: useTestDC,
-        api_id: apiId,
-        api_hash: apiHash,
-        system_language_code: 'en',
-        device_model: 'Web',
-        system_version: 'Unknown',
-        application_version: version,
-        use_secret_chats: false,
-        use_message_database: true,
-        use_file_database: false,
-        database_directory: '/db',
-        files_directory: '/'
-      }
-      // ,
-      // extra: {
-      //     a: ['a', 'b'],
-      //     b: 123
-      // }
-    });
-  };
-
-  logOut() {
-    this.send({ '@type': 'logOut' }).catch(error => {
-      this.emit('tdlib_auth_error', error);
-    });
-  }
 }
 
 const controller = new TdLibController();

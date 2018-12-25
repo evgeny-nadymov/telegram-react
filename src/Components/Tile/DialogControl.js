@@ -17,92 +17,89 @@ import './DialogControl.css';
 import PropTypes from 'prop-types';
 
 class DialogControl extends Component {
-  constructor(props) {
-    super(props);
+    constructor(props) {
+        super(props);
 
-    this.dialog = React.createRef();
+        this.dialog = React.createRef();
 
-    const chat = ChatStore.get(this.props.chatId);
-    this.state = {
-      chat: chat
+        const chat = ChatStore.get(this.props.chatId);
+        this.state = {
+            chat: chat
+        };
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
+
+        return false;
+    }
+
+    componentDidMount() {
+        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    componentWillUnmount() {
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+    }
+
+    onClientUpdateChatId = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.previousChatId || chatId === update.nextChatId) {
+            this.forceUpdate();
+        }
     };
-  }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.chatId !== this.props.chatId) {
-      return true;
-    }
+    handleSelect = () => {
+        const { chatId, onSelect } = this.props;
+        if (!chatId) return;
+        if (!onSelect) return;
 
-    return false;
-  }
+        onSelect(chatId);
+    };
 
-  componentDidMount() {
-    ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
-  }
+    render() {
+        const { chatId, showSavedMessages } = this.props;
 
-  componentWillUnmount() {
-    ApplicationStore.removeListener(
-      'clientUpdateChatId',
-      this.onClientUpdateChatId
-    );
-  }
+        const currentChatId = ApplicationStore.getChatId();
+        const isSelected = currentChatId === chatId;
 
-  onClientUpdateChatId = update => {
-    const { chatId } = this.props;
-
-    if (chatId === update.previousChatId || chatId === update.nextChatId) {
-      this.forceUpdate();
-    }
-  };
-
-  handleSelect = () => {
-    const { chatId, onSelect } = this.props;
-    if (!chatId) return;
-    if (!onSelect) return;
-
-    onSelect(chatId);
-  };
-
-  render() {
-    const { chatId, showSavedMessages } = this.props;
-
-    const currentChatId = ApplicationStore.getChatId();
-    const isSelected = currentChatId === chatId;
-
-    return (
-      <div
-        ref={this.dialog}
-        className={isSelected ? 'dialog-active' : 'dialog'}
-        onMouseDown={this.handleSelect}
-      >
-        <div className="dialog-wrapper">
-          <ChatTileControl
-            chatId={chatId}
-            showSavedMessages={showSavedMessages}
-          />
-          <div className="dialog-inner-wrapper">
-            <div className="tile-first-row">
-              <DialogTitleControl chatId={chatId} />
-              <DialogMetaControl chatId={chatId} />
+        return (
+            <div
+                ref={this.dialog}
+                className={isSelected ? 'dialog-active' : 'dialog'}
+                onMouseDown={this.handleSelect}
+            >
+                <div className='dialog-wrapper'>
+                    <ChatTileControl
+                        chatId={chatId}
+                        showSavedMessages={showSavedMessages}
+                    />
+                    <div className='dialog-inner-wrapper'>
+                        <div className='tile-first-row'>
+                            <DialogTitleControl chatId={chatId} />
+                            <DialogMetaControl chatId={chatId} />
+                        </div>
+                        <div className='tile-second-row'>
+                            <DialogContentControl chatId={chatId} />
+                            <DialogBadgeControl chatId={chatId} />
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="tile-second-row">
-              <DialogContentControl chatId={chatId} />
-              <DialogBadgeControl chatId={chatId} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+        );
+    }
 }
 
 DialogControl.propTypes = {
-  chatId: PropTypes.number.isRequired,
-  showSavedMessages: PropTypes.bool
+    chatId: PropTypes.number.isRequired,
+    showSavedMessages: PropTypes.bool
 };
 
 DialogControl.defaultProps = {
-  showSavedMessages: true
+    showSavedMessages: true
 };
 
 export default DialogControl;

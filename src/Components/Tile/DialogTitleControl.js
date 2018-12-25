@@ -6,69 +6,62 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { getChatTitle } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitleControl.css';
-import PropTypes from 'prop-types';
-import ChatControl from './ChatControl';
 
 class DialogTitleControl extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.chatId !== this.props.chatId) {
-      return true;
+    constructor(props) {
+        super(props);
     }
 
-    return false;
-  }
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
 
-  componentDidMount() {
-    ChatStore.on(
-      'clientUpdateFastUpdatingComplete',
-      this.onFastUpdatingComplete
-    );
-    ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
-  }
+        return false;
+    }
 
-  componentWillUnmount() {
-    ChatStore.removeListener(
-      'clientUpdateFastUpdatingComplete',
-      this.onFastUpdatingComplete
-    );
-    ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
-  }
+    componentDidMount() {
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
+    }
 
-  onFastUpdatingComplete = update => {
-    this.forceUpdate();
-  };
+    componentWillUnmount() {
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
+    }
 
-  onUpdateChatTitle = update => {
-    const { chatId } = this.props;
+    onFastUpdatingComplete = update => {
+        this.forceUpdate();
+    };
 
-    if (update.chat_id !== chatId) return;
+    onUpdateChatTitle = update => {
+        const { chatId } = this.props;
 
-    this.forceUpdate();
-  };
+        if (update.chat_id !== chatId) return;
 
-  render() {
-    const { chatId, showSavedMessages } = this.props;
+        this.forceUpdate();
+    };
 
-    const title = getChatTitle(chatId, showSavedMessages);
+    render() {
+        const { chatId, showSavedMessages } = this.props;
 
-    return <div className="dialog-title">{title}</div>;
-  }
+        const title = getChatTitle(chatId, showSavedMessages);
+
+        return <div className='dialog-title'>{title}</div>;
+    }
 }
 
 DialogTitleControl.propTypes = {
-  chatId: PropTypes.number.isRequired,
-  showSavedMessages: PropTypes.bool
+    chatId: PropTypes.number.isRequired,
+    showSavedMessages: PropTypes.bool
 };
 
 DialogTitleControl.defaultProps = {
-  showSavedMessages: true
+    showSavedMessages: true
 };
 
 export default DialogTitleControl;

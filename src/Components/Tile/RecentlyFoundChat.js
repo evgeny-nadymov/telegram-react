@@ -14,39 +14,39 @@ import DialogTitleControl from './DialogTitleControl';
 import './RecentlyFoundChat.css';
 
 const styles = {
-  listItem: {
-    padding: '0px'
-  }
+    listItem: {
+        padding: '0px'
+    }
 };
 
 class RecentlyFoundChat extends React.PureComponent {
-  shouldComponentUpdate(nextProps, nextState) {
-    return false;
-  }
+    shouldComponentUpdate(nextProps, nextState) {
+        return false;
+    }
 
-  render() {
-    const { chatId, onClick, classes } = this.props;
+    render() {
+        const { chatId, onClick, classes } = this.props;
 
-    return (
-      <ListItem button className={classes.listItem} onClick={onClick}>
-        <div className="recently-found-chat">
-          <div className="chat-wrapper">
-            <ChatTileControl chatId={chatId} showSavedMessages />
-            <div className="dialog-inner-wrapper">
-              <div className="tile-first-row">
-                <DialogTitleControl chatId={chatId} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </ListItem>
-    );
-  }
+        return (
+            <ListItem button className={classes.listItem} onClick={onClick}>
+                <div className='recently-found-chat'>
+                    <div className='chat-wrapper'>
+                        <ChatTileControl chatId={chatId} showSavedMessages />
+                        <div className='dialog-inner-wrapper'>
+                            <div className='tile-first-row'>
+                                <DialogTitleControl chatId={chatId} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ListItem>
+        );
+    }
 }
 
 RecentlyFoundChat.propTypes = {
-  chatId: PropTypes.number.isRequired,
-  onSelect: PropTypes.func
+    chatId: PropTypes.number.isRequired,
+    onSelect: PropTypes.func
 };
 
 export default withStyles(styles)(RecentlyFoundChat);

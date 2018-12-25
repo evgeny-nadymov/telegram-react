@@ -476,8 +476,7 @@ class Search extends React.Component {
                             <IconButton
                                 className={classes.closeSearchIconButton}
                                 aria-label='Search'
-                                onMouseDown={this.handleClose}
-                            >
+                                onMouseDown={this.handleClose}>
                                 <CloseIcon />
                             </IconButton>
                         </div>
@@ -488,8 +487,7 @@ class Search extends React.Component {
                         <SearchCaption caption='People' />
                         <div
                             className='search-top-chats-list'
-                            onScroll={this.handleTopChatsScroll}
-                        >
+                            onScroll={this.handleTopChatsScroll}>
                             <div className='search-top-chats-placeholder' />
                             {topChats}
                             <div className='search-top-chats-placeholder' />
@@ -501,8 +499,7 @@ class Search extends React.Component {
                         <SearchCaption
                             caption='Recent'
                             command='Clear'
-                            onClick={this.handleClearRecentlyFound}
-                        />
+                            onClick={this.handleClearRecentlyFound}/>
                         {recentlyFoundChats}
                     </div>
                 )}
