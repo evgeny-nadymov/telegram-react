@@ -7,29 +7,31 @@
 
 import React from 'react';
 import Button from '@material-ui/core/Button/Button';
-import {withStyles} from '@material-ui/core/styles';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import { borderStyle } from '../Theme';
 import './FooterCommand.css';
 
-const styles = {
+const styles = theme => ({
     button: {
         margin: '14px',
         minWidth: '100px'
-    }
-};
+    },
+    ...borderStyle(theme)
+});
 
 class FooterCommand extends React.Component {
-
     constructor(props) {
         super(props);
     }
 
     render() {
-        const {classes, command, onCommand} = this.props;
+        const { classes, command, onCommand } = this.props;
 
         return (
-            <div className='dialog-command-wrapper'>
-                <div className='dialog-command-actions'>
-                    <Button color='primary' className={classes.button} onClick={onCommand}>
+            <div className={classNames(classes.borderColor, 'dialog-command-wrapper')}>
+                <div className="dialog-command-actions">
+                    <Button color="primary" className={classes.button} onClick={onCommand}>
                         {command}
                     </Button>
                 </div>

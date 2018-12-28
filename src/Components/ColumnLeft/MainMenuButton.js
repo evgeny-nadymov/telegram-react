@@ -10,18 +10,18 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import {withStyles} from '@material-ui/core/styles';
-import {update} from '../../registerServiceWorker';
+import { withStyles } from '@material-ui/core/styles';
+import ThemePicker from './ThemePicker';
+import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import TdLibController from '../../Controllers/TdLibController';
 
 const styles = {
-    menuIconButton : {
-        margin: '8px -2px 8px 12px',
+    menuIconButton: {
+        margin: '8px -2px 8px 12px'
     },
-    searchIconButton : {
-        margin: '8px 12px 8px 0',
+    searchIconButton: {
+        margin: '8px 12px 8px 0'
     }
 };
 
@@ -31,7 +31,7 @@ const menuAnchorOrigin = {
 };
 
 class MainMenuButton extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -40,27 +40,27 @@ class MainMenuButton extends React.Component {
         };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
-    onUpdateAuthorizationState = (update) => {
+    onUpdateAuthorizationState = update => {
         this.setState({ authorizationState: update.authorization_state });
     };
 
-    handleMenuOpen = (event) => {
+    handleMenuOpen = event => {
         const { authorizationState } = this.state;
         if (!isAuthorizationReady(authorizationState)) return;
 
-        this.setState({ anchorEl : event.currentTarget });
+        this.setState({ anchorEl: event.currentTarget });
     };
 
     handleMenuClose = () => {
-        this.setState({ anchorEl : null });
+        this.setState({ anchorEl: null });
     };
 
     handleLogOut = () => {
@@ -75,34 +75,44 @@ class MainMenuButton extends React.Component {
         await update();
     };
 
+    handleAppearance = event => {
+        this.handleMenuClose();
+
+        this.themePicker.open();
+    };
+
     render() {
         const { classes } = this.props;
         const { anchorEl, authorizationState } = this.state;
 
-        const mainMenuControl = isAuthorizationReady(authorizationState)
-            ? (<Menu
-                id='main-menu'
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={this.handleMenuClose}
-                getContentAnchorEl={null}
-                anchorOrigin={menuAnchorOrigin}>
-                <MenuItem onClick={this.handleCheckUpdates}>Check for updates</MenuItem>
-                <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
-            </Menu>)
-            : null;
+        const mainMenuControl = isAuthorizationReady(authorizationState) ? (
+            <>
+                <Menu
+                    id="main-menu"
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={this.handleMenuClose}
+                    getContentAnchorEl={null}
+                    anchorOrigin={menuAnchorOrigin}>
+                    <MenuItem onClick={this.handleCheckUpdates}>Check for updates</MenuItem>
+                    <MenuItem onClick={this.handleAppearance}>Appearance</MenuItem>
+                    <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
+                </Menu>
+            </>
+        ) : null;
 
         return (
             <>
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
-                    aria-haspopup='true'
+                    aria-haspopup="true"
                     className={classes.menuIconButton}
-                    aria-label='Menu'
+                    aria-label="Menu"
                     onClick={this.handleMenuOpen}>
                     <MenuIcon />
                 </IconButton>
-                { mainMenuControl }
+                {mainMenuControl}
+                <ThemePicker innerRef={ref => (this.themePicker = ref)} />
             </>
         );
     }

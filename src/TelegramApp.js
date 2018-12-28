@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
@@ -25,13 +25,10 @@ import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
-const theme = createMuiTheme({
-    palette: {
-        primary: { main: '#3B9EDB' },
-        secondary: { main: '#FF5555' }
-    },
-    typography: {
-        useNextVariants: true
+const styles = theme => ({
+    page: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
+        color: theme.palette.text.primary
     }
 });
 
@@ -74,11 +71,14 @@ class TelegramApp extends Component {
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.removeListener('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.removeListener(
+            'clientUpdateProfileMediaViewerContent',
+            this.onClientUpdateProfileMediaViewerContent
+        );
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
     }
 
-    onUpdateAuthorizationState = (update) => {
+    onUpdateAuthorizationState = update => {
         const { authorization_state } = update;
 
         this.setState({ authorizationState: authorization_state });
@@ -103,23 +103,23 @@ class TelegramApp extends Component {
         }
     };
 
-    onClientUpdateChatDetailsVisibility = (update) => {
+    onClientUpdateChatDetailsVisibility = update => {
         this.setState({
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
         });
     };
 
-    onClientUpdateMediaViewerContent = (update) => {
+    onClientUpdateMediaViewerContent = update => {
         this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
     };
 
-    onClientUpdateProfileMediaViewerContent = (update) => {
+    onClientUpdateProfileMediaViewerContent = update => {
         this.setState({
             profileMediaViewerContent: ApplicationStore.profileMediaViewerContent
         });
     };
 
-    onClientUpdateAppInactive = (update) => {
+    onClientUpdateAppInactive = update => {
         this.setState({ inactive: true });
     };
 
@@ -127,25 +127,21 @@ class TelegramApp extends Component {
         const currentChatId = ApplicationStore.getChatId();
         const currentMessageId = ApplicationStore.getMessageId();
 
-        if (currentChatId === chatId
-            && messageId
-            && currentMessageId === messageId) {
+        if (currentChatId === chatId && messageId && currentMessageId === messageId) {
             this.dialogDetailsRef.current.scrollToMessage();
-        }
-        else if (currentChatId === chatId && !messageId) {
+        } else if (currentChatId === chatId && !messageId) {
             const chat = ChatStore.get(chatId);
             if (chat && chat.unread_count > 0) {
                 this.dialogDetailsRef.current.scrollToStart();
             } else {
                 this.dialogDetailsRef.current.scrollToBottom();
             }
-        }
-        else {
+        } else {
             ApplicationStore.setChatId(chatId, messageId);
         }
     };
 
-    handleSelectUser = async (userId) => {
+    handleSelectUser = async userId => {
         if (!userId) return;
 
         let chat = await TdLibController.send({
@@ -168,12 +164,12 @@ class TelegramApp extends Component {
         });
     };
 
-    handleDragOver = (event) => {
+    handleDragOver = event => {
         event.preventDefault();
         event.stopPropagation();
     };
 
-    handleDrop = (event) => {
+    handleDrop = event => {
         event.preventDefault();
         event.stopPropagation();
     };
@@ -186,28 +182,19 @@ class TelegramApp extends Component {
             mediaViewerContent,
             profileMediaViewerContent
         } = this.state;
+        const { classes } = this.props;
 
         let page = (
             <>
-                <div
-                    className={classNames('page', {
-                        'page-third-column': isChatDetailsVisible
-                    })}
-                >
-                    <Dialogs
-                        onClearCache={this.clearCache}
-                        onSelectChat={this.handleSelectChat}
-                    />
+                <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
+                    <Dialogs onClearCache={this.clearCache} onSelectChat={this.handleSelectChat} />
                     <DialogDetails
                         ref={this.dialogDetailsRef}
                         onSelectChat={this.handleSelectChat}
                         onSelectUser={this.handleSelectUser}
                     />
                     {isChatDetailsVisible && (
-                        <DialogInfo
-                            onSelectChat={this.handleSelectChat}
-                            onSelectUser={this.handleSelectUser}
-                        />
+                        <DialogInfo onSelectChat={this.handleSelectChat} onSelectUser={this.handleSelectUser} />
                     )}
                 </div>
                 <Footer />
@@ -258,15 +245,11 @@ class TelegramApp extends Component {
         }
 
         return (
-            <MuiThemeProvider theme={theme}>
-                <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
-                    {page}
-                    {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
-                    {profileMediaViewerContent && (
-                        <ProfileMediaViewer {...profileMediaViewerContent} />
-                    )}
-                </div>
-            </MuiThemeProvider>
+            <div id="app" onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
+                {page}
+                {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
+                {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
+            </div>
         );
     }
 }
@@ -290,8 +273,8 @@ window.onfocus = function(){
 };*/
 
 window.history.pushState(null, null, window.location.href);
-window.onpopstate = function () {
+window.onpopstate = function() {
     window.history.go(1);
 };
 
-export default TelegramApp;
+export default withStyles(styles)(TelegramApp);

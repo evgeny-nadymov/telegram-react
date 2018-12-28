@@ -15,6 +15,7 @@ class FileStore extends EventEmitter {
 
         this.callbacks = [];
 
+        this.db = null;
         this.urls = new WeakMap();
         this.items = new Map();
         this.blobItems = new Map();
@@ -59,10 +60,7 @@ class FileStore extends EventEmitter {
         if (!update) return;
         if (!update.authorization_state) return;
 
-        if (
-            update.authorization_state['@type'] ===
-            'authorizationStateWaitTdlibParameters'
-        ) {
+        if (update.authorization_state['@type'] === 'authorizationStateWaitTdlibParameters') {
             await this.initDB();
         }
     };
@@ -93,8 +91,11 @@ class FileStore extends EventEmitter {
                         let obj = items[i];
                         switch (obj['@type']) {
                             case 'chat': {
-
-                                this.getLocalFile(store, file, idb_key, arr,
+                                this.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    arr,
                                     () => this.updateChatPhotoBlob(obj.id, file.id),
                                     () => this.getRemoteFile(file.id, 1, obj)
                                 );
@@ -102,8 +103,11 @@ class FileStore extends EventEmitter {
                                 break;
                             }
                             case 'user': {
-
-                                this.getLocalFile(store, file, idb_key, arr,
+                                this.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    arr,
                                     () => this.updateUserPhotoBlob(obj.id, file.id),
                                     () => this.getRemoteFile(file.id, 1, obj)
                                 );
@@ -120,7 +124,11 @@ class FileStore extends EventEmitter {
                                             if (photoSize) {
                                                 let source = photoSize.photo;
                                                 if (source && source.id === file.id) {
-                                                    this.getLocalFile(store, source, idb_key, arr,
+                                                    this.getLocalFile(
+                                                        store,
+                                                        source,
+                                                        idb_key,
+                                                        arr,
                                                         () => this.updateWebPageBlob(obj.chat_id, obj.id, file.id),
                                                         () => this.getRemoteFile(file.id, 1, obj)
                                                     );
@@ -139,7 +147,11 @@ class FileStore extends EventEmitter {
                                             if (photoSize) {
                                                 let source = photoSize.photo;
                                                 if (source && source.id === file.id) {
-                                                    this.getLocalFile(store, source, idb_key, arr,
+                                                    this.getLocalFile(
+                                                        store,
+                                                        source,
+                                                        idb_key,
+                                                        arr,
                                                         () => this.updatePhotoBlob(obj.chat_id, obj.id, file.id),
                                                         () => this.getRemoteFile(file.id, 1, obj)
                                                     );
@@ -156,7 +168,11 @@ class FileStore extends EventEmitter {
                                         if (sticker.thumbnail) {
                                             let source = sticker.thumbnail.photo;
                                             if (source && source.id === file.id) {
-                                                this.getLocalFile(store, source, idb_key, arr,
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    arr,
                                                     () => this.updateStickerThumbnailBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -167,7 +183,11 @@ class FileStore extends EventEmitter {
                                         if (sticker.sticker) {
                                             let source = sticker.sticker;
                                             if (source && source.id === file.id) {
-                                                this.getLocalFile(store, source, idb_key, arr,
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    arr,
                                                     () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -182,8 +202,13 @@ class FileStore extends EventEmitter {
                                         if (document.thumbnail) {
                                             let source = document.thumbnail.photo;
                                             if (source && source.id === file.id) {
-                                                this.getLocalFile(store, source, idb_key, arr,
-                                                    () => this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    arr,
+                                                    () =>
+                                                        this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
                                                 break;
@@ -209,7 +234,11 @@ class FileStore extends EventEmitter {
                                         if (locationId) {
                                             const source = this.getLocationFile(locationId);
                                             if (source && source.id === file.id) {
-                                                this.getLocalFile(store, source, idb_key, null,
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    null,
                                                     () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -225,7 +254,11 @@ class FileStore extends EventEmitter {
                                         if (locationId) {
                                             const source = this.getLocationFile(locationId);
                                             if (source && source.id === file.id) {
-                                                this.getLocalFile(store, source, idb_key, null,
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    null,
                                                     () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -285,9 +318,9 @@ class FileStore extends EventEmitter {
 
         console.log('[FileStore] stop initDB');
 
-        if (this.callbacks.length){
+        if (this.callbacks.length) {
             console.log('[FileStore] invoke callbacks count=' + this.callbacks.length);
-            for (let i = 0; i < this.callbacks.length; i++){
+            for (let i = 0; i < this.callbacks.length; i++) {
                 this.callbacks[i]();
             }
             this.callbacks = [];
@@ -303,15 +336,11 @@ class FileStore extends EventEmitter {
     }
 
     getStore() {
-        return this.db
-            .transaction(['keyvaluepairs'], 'readonly')
-            .objectStore('keyvaluepairs');
+        return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 
     getReadWriteStore() {
-        return this.db
-            .transaction(['keyvaluepairs'], 'readwrite')
-            .objectStore('keyvaluepairs');
+        return this.db.transaction(['keyvaluepairs'], 'readwrite').objectStore('keyvaluepairs');
     }
 
     deleteLocalFile = (store, file) => {
@@ -428,15 +457,15 @@ class FileStore extends EventEmitter {
         }
     }
 
-    get = (fileId) => {
+    get = fileId => {
         return this.items.get(fileId);
     };
 
-    set = (file) => {
+    set = file => {
         this.items.set(file.id, file);
     };
 
-    getBlob = (fileId) => {
+    getBlob = fileId => {
         return this.blobItems.get(fileId);
     };
 
@@ -444,11 +473,11 @@ class FileStore extends EventEmitter {
         this.blobItems.set(fileId, blob);
     };
 
-    deleteBlob = (fileId) => {
+    deleteBlob = fileId => {
         this.blobItems.delete(fileId);
     };
 
-    getLocationFile = (locationId) => {
+    getLocationFile = locationId => {
         const fileId = this.locationItems.get(locationId);
 
         return this.get(fileId);
@@ -460,7 +489,7 @@ class FileStore extends EventEmitter {
         this.set(file);
     };
 
-    getBlobUrl = (blob) => {
+    getBlobUrl = blob => {
         if (!blob) {
             return null;
         }
@@ -475,7 +504,7 @@ class FileStore extends EventEmitter {
         return url;
     };
 
-    deleteBlobUrl = (blob) => {
+    deleteBlobUrl = blob => {
         if (this.urls.has(blob)) {
             this.urls.delete(blob);
         }

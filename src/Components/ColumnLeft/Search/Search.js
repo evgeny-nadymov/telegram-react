@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import CloseIcon from '@material-ui/icons/Close';
 import { IconButton } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
@@ -27,14 +28,17 @@ import ApplicationStore from '../../../Stores/ApplicationStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
 
-const styles = {
+const styles = theme => ({
     closeSearchIconButton: {
         margin: '8px 12px 8px 0'
     },
     listItem: {
         padding: '0px'
+    },
+    search: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
     }
-};
+});
 
 class Search extends React.Component {
     constructor(props) {
@@ -460,7 +464,7 @@ class Search extends React.Component {
         }
 
         return (
-            <div ref={this.listRef} className="search" onScroll={this.handleScroll}>
+            <div ref={this.listRef} className={classNames(classes.search, 'search')} onScroll={this.handleScroll}>
                 {chat && (
                     <div className="search-chat">
                         <SearchCaption caption="Search messages in" />

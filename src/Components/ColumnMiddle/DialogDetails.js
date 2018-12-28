@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import classNames from 'classnames';
 import Footer from './Footer';
 import Header from './Header';
@@ -14,12 +14,9 @@ import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogDetails.css';
 
-class DialogDetails extends Component{
-
-    constructor(props){
+class DialogDetails extends Component {
+    constructor(props) {
         super(props);
-
-        this.messagesList = React.createRef();
 
         this.state = {
             chatId: ApplicationStore.getChatId(),
@@ -27,52 +24,51 @@ class DialogDetails extends Component{
         };
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextState.chatId !== this.state.chatId){
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextState.chatId !== this.state.chatId) {
             return true;
         }
-        if (nextState.messageId !== this.state.messageId){
+        if (nextState.messageId !== this.state.messageId) {
             return true;
         }
 
         return false;
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    onUpdateChatDetailsVisibility = (update) => {
+    onUpdateChatDetailsVisibility = update => {
         this.forceUpdate();
     };
 
-    onClientUpdateChatId = (update) => {
-        this.setState({ 
-            chatId: update.nextChatId, 
-            messageId: update.nextMessageId 
-        })
+    onClientUpdateChatId = update => {
+        this.setState({
+            chatId: update.nextChatId,
+            messageId: update.nextMessageId
+        });
     };
 
     scrollToBottom = () => {
-        this.messagesList.current.scrollToBottom();
+        this.messagesList.scrollToBottom();
     };
 
     scrollToStart = () => {
-        this.messagesList.current.scrollToStart();
+        this.messagesList.scrollToStart();
     };
 
     scrollToMessage = () => {
-        this.messagesList.current.scrollToMessage();
+        this.messagesList.scrollToMessage();
     };
 
-    render(){
-
+    render() {
         /*let groups = [];
         if (this.props.history.length > 0){
             let currentGroup = {
@@ -111,14 +107,15 @@ class DialogDetails extends Component{
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
-                <Header chatId={chatId}/>
+                <Header chatId={chatId} />
                 <MessagesList
-                    ref={this.messagesList}
+                    innerRef={ref => (this.messagesList = ref)}
                     chatId={chatId}
                     messageId={messageId}
                     onSelectChat={onSelectChat}
-                    onSelectUser={onSelectUser}/>
-                <Footer chatId={chatId}/>
+                    onSelectUser={onSelectUser}
+                />
+                <Footer chatId={chatId} />
             </div>
         );
     }

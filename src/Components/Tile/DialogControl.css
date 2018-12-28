@@ -5,41 +5,41 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.dialog:hover{
-    background: #f2f6fa;
+.dialog:hover {
+    /*background: #f2f6fa;*/
 }
 
-.dialog{
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 0 12px;
+.dialog {
+    /*border-radius: 8px;*/
+    /*cursor: pointer;*/
+    /*margin: 0 12px;*/
 }
 
 .dialog-active {
-    border-radius: 8px;
-    background-color: #3B9EDB;
-    color: #fff;
-    cursor: pointer;
-    margin: 0 12px;
+    /*background-color: #3B9EDB;*/
+    /*color: #fff;*/
+    /*border-radius: 8px;*/
+    /*cursor: pointer;*/
+    /*margin: 0 12px;*/
 }
 
 .accent-background .dialog-title,
 .accent-background .dialog-content,
 .accent-background .dialog-content-accent,
-.accent-background .dialog-meta-date{
+.accent-background .dialog-meta-date {
     color: #fff;
 }
 
-.tile-first-row{
+.tile-first-row {
     display: flex;
 }
 
-.tile-second-row{
+.tile-second-row {
     margin: 3px 0 0 0;
     display: flex;
 }
 
-.dialog-inner-wrapper{
+.dialog-inner-wrapper {
     width: 48px;
     overflow: hidden;
     flex-grow: 1;
@@ -47,7 +47,7 @@
     z-index: 1;
 }
 
-.dialog-wrapper{
+.dialog-wrapper {
     padding: 10px 12px 10px 10px;
     display: flex;
     align-items: center;

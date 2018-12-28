@@ -108,6 +108,10 @@ class ChatDetails extends React.Component {
             return true;
         }
 
+        if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
         if (nextState.openUsernameHint !== this.state.openUsernameHint) {
             return true;
         }
@@ -127,9 +131,17 @@ class ChatDetails extends React.Component {
 
         const list = this.chatDetailsListRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
-        console.log(`[ChatDetails] componentDidUpdate before chatId=${chatId} list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`);
+        console.log(
+            `[ChatDetails] componentDidUpdate before chatId=${chatId} list.scrollTop=${
+                list.scrollTop
+            } list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`
+        );
         list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
-        console.log(`[ChatDetails] componentDidUpdate after chatId=${chatId} list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`);
+        console.log(
+            `[ChatDetails] componentDidUpdate after chatId=${chatId} list.scrollTop=${
+                list.scrollTop
+            } list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`
+        );
     }
 
     componentDidMount() {
@@ -184,8 +196,7 @@ class ChatDetails extends React.Component {
 
         if (
             chat.type &&
-            (chat.type['@type'] === 'chatTypePrivate' ||
-                chat.type['@type'] === 'chatTypeSecret') &&
+            (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') &&
             chat.type.user_id === update.user_id
         ) {
             console.log('[ChatDetails] onUpdateUserFullInfo');
@@ -228,9 +239,7 @@ class ChatDetails extends React.Component {
         if (!username) return;
 
         const telegramUrlOption = OptionStore.get('t_me_url');
-        const usernameLink = telegramUrlOption
-            ? telegramUrlOption.value
-            : 'https://telegram.org/';
+        const usernameLink = telegramUrlOption ? telegramUrlOption.value : 'https://telegram.org/';
 
         copy(usernameLink + username);
 
@@ -284,7 +293,7 @@ class ChatDetails extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
-                <div className='chat-details'>
+                <div className="chat-details">
                     <ChatDetailsHeaderControl />
                 </div>
             );
@@ -317,14 +326,14 @@ class ChatDetails extends React.Component {
         // const items = sortedUsers.map(user => (<div key={user.id} style={{margin: '12px', height: '50px', width: '50px', background: 'red'}}/>));
 
         return (
-            <div className='chat-details'>
+            <div className="chat-details">
                 <ChatDetailsHeaderControl
                     backButton={this.props.backButton}
                     onClose={this.props.onClose}
                     onClick={this.handleHeaderClick}
                 />
-                <div ref={this.chatDetailsListRef} className='chat-details-list'>
-                    <div className='chat-details-info'>
+                <div ref={this.chatDetailsListRef} className="chat-details-list">
+                    <div className="chat-details-info">
                         <ChatControl chatId={chatId} onTileSelect={this.handleOpenViewer} />
                     </div>
                     <List>
@@ -336,7 +345,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant='inherit' noWrap>
+                                            <Typography variant="inherit" noWrap>
                                                 {username}
                                             </Typography>
                                         }
@@ -353,15 +362,14 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id='message-id'>Link copied</span>}
+                                    message={<span id="message-id">Link copied</span>}
                                     action={
                                         <IconButton
-                                            key='close'
-                                            aria-label='Close'
-                                            color='inherit'
+                                            key="close"
+                                            aria-label="Close"
+                                            color="inherit"
                                             className={classes.close}
-                                            onClick={this.handleCloseUsernameHint}
-                                        >
+                                            onClick={this.handleCloseUsernameHint}>
                                             <CloseIcon />
                                         </IconButton>
                                     }
@@ -376,7 +384,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant='inherit' noWrap>
+                                            <Typography variant="inherit" noWrap>
                                                 {formatPhoneNumber(phoneNumber)}
                                             </Typography>
                                         }
@@ -393,15 +401,14 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id='message-id'>Phone copied</span>}
+                                    message={<span id="message-id">Phone copied</span>}
                                     action={[
                                         <IconButton
-                                            key='close'
-                                            aria-label='Close'
-                                            color='inherit'
+                                            key="close"
+                                            aria-label="Close"
+                                            color="inherit"
                                             className={classes.close}
-                                            onClick={this.handleClosePhoneHint}
-                                        >
+                                            onClick={this.handleClosePhoneHint}>
                                             <CloseIcon />
                                         </IconButton>
                                     ]}
@@ -411,7 +418,7 @@ class ChatDetails extends React.Component {
                         {bio && (
                             <ListItem className={classes.listItem}>
                                 <ListItemIcon>
-                                    <ErrorOutlineIcon className='chat-details-info-icon' />
+                                    <ErrorOutlineIcon className="chat-details-info-icon" />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={bio}
@@ -433,7 +440,7 @@ class ChatDetails extends React.Component {
                             </ListItemIcon>
                             <ListItemText
                                 primary={
-                                    <Typography variant='inherit' noWrap>
+                                    <Typography variant="inherit" noWrap>
                                         Shared Media
                                     </Typography>
                                 }
@@ -444,7 +451,7 @@ class ChatDetails extends React.Component {
                                 <ListItemText
                                     inset
                                     primary={
-                                        <Typography variant='inherit' noWrap>
+                                        <Typography variant="inherit" noWrap>
                                             Groups in Common
                                         </Typography>
                                     }
@@ -460,4 +467,4 @@ class ChatDetails extends React.Component {
     }
 }
 
-export default withStyles(styles)(ChatDetails);
+export default withStyles(styles, { withTheme: true })(ChatDetails);

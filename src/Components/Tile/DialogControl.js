@@ -6,6 +6,9 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import ChatTileControl from './ChatTileControl';
 import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
@@ -14,7 +17,21 @@ import DialogMetaControl from './DialogMetaControl';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogControl.css';
-import PropTypes from 'prop-types';
+
+const styles = theme => ({
+    dialogActive: {
+        color: '#fff',
+        backgroundColor: theme.palette.primary.main,
+        borderRadius: '8px',
+        cursor: 'pointer',
+        margin: '0 12px'
+    },
+    dialog: {
+        borderRadius: '8px',
+        cursor: 'pointer',
+        margin: '0 12px'
+    }
+});
 
 class DialogControl extends Component {
     constructor(props) {
@@ -30,6 +47,10 @@ class DialogControl extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
+
+        if (nextProps.theme !== this.props.theme) {
             return true;
         }
 
@@ -61,7 +82,7 @@ class DialogControl extends Component {
     };
 
     render() {
-        const { chatId, showSavedMessages } = this.props;
+        const { chatId, showSavedMessages, classes } = this.props;
 
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
@@ -69,20 +90,19 @@ class DialogControl extends Component {
         return (
             <div
                 ref={this.dialog}
-                className={isSelected ? 'dialog-active' : 'dialog'}
-                onMouseDown={this.handleSelect}
-            >
-                <div className='dialog-wrapper'>
-                    <ChatTileControl
-                        chatId={chatId}
-                        showSavedMessages={showSavedMessages}
-                    />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
+                className={classNames(
+                    isSelected ? classes.dialogActive : classes.dialog,
+                    isSelected ? 'dialog-active' : 'dialog'
+                )}
+                onMouseDown={this.handleSelect}>
+                <div className="dialog-wrapper">
+                    <ChatTileControl chatId={chatId} showSavedMessages={showSavedMessages} />
+                    <div className="dialog-inner-wrapper">
+                        <div className="tile-first-row">
                             <DialogTitleControl chatId={chatId} />
                             <DialogMetaControl chatId={chatId} />
                         </div>
-                        <div className='tile-second-row'>
+                        <div className="tile-second-row">
                             <DialogContentControl chatId={chatId} />
                             <DialogBadgeControl chatId={chatId} />
                         </div>
@@ -102,4 +122,4 @@ DialogControl.defaultProps = {
     showSavedMessages: true
 };
 
-export default DialogControl;
+export default withStyles(styles, { withTheme: true })(DialogControl);

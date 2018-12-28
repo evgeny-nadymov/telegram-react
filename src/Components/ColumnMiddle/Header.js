@@ -11,12 +11,8 @@ import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
 import MainMenuButton from './MainMenuButton';
-import {
-    getChatSubtitle,
-    getChatTitle,
-    isAccentChatSubtitle,
-    isMeChat
-} from '../../Utils/Chat';
+import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
+import { borderStyle } from '../Theme';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
@@ -24,7 +20,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Header.css';
 
-const styles = {
+const styles = theme => ({
     button: {
         margin: '14px'
     },
@@ -39,8 +35,9 @@ const styles = {
     },
     moreIconButton: {
         margin: '8px 12px 8px 0'
-    }
-};
+    },
+    ...borderStyle(theme)
+});
 
 class Header extends Component {
     constructor(props) {
@@ -56,63 +53,39 @@ class Header extends Component {
         if (nextState !== this.state) {
             return true;
         }
+        if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
 
         return false;
     }
 
     componentDidMount() {
         ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
-        ApplicationStore.on(
-            'updateAuthorizationState',
-            this.onUpdateAuthorizationState
-        );
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
 
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.on(
-            'updateBasicGroupFullInfo',
-            this.onUpdateBasicGroupFullInfo
-        );
-        SupergroupStore.on(
-            'updateSupergroupFullInfo',
-            this.onUpdateSupergroupFullInfo
-        );
+        BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
         BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener(
-            'updateConnectionState',
-            this.onUpdateConnectionState
-        );
-        ApplicationStore.removeListener(
-            'updateAuthorizationState',
-            this.onUpdateAuthorizationState
-        );
-        ApplicationStore.removeListener(
-            'clientUpdateChatId',
-            this.onClientUpdateChatId
-        );
+        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
+        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
 
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
-        ChatStore.removeListener(
-            'updateUserChatAction',
-            this.onUpdateUserChatAction
-        );
+        ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
         UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.removeListener(
-            'updateBasicGroupFullInfo',
-            this.onUpdateBasicGroupFullInfo
-        );
-        SupergroupStore.removeListener(
-            'updateSupergroupFullInfo',
-            this.onUpdateSupergroupFullInfo
-        );
+        BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
         BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
@@ -146,9 +119,7 @@ class Header extends Component {
             case 'chatTypeBasicGroup': {
                 const fullInfo = BasicGroupStore.getFullInfo(chat.type.basic_group_id);
                 if (fullInfo && fullInfo.members) {
-                    const member = fullInfo.members.find(
-                        x => x.user_id === update.user_id
-                    );
+                    const member = fullInfo.members.find(x => x.user_id === update.user_id);
                     if (member) {
                         this.forceUpdate();
                     }
@@ -239,8 +210,7 @@ class Header extends Component {
 
         if (
             chat.type &&
-            (chat.type['@type'] === 'chatTypePrivate' ||
-                chat.type['@type'] === 'chatTypeSecret') &&
+            (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') &&
             chat.type.user_id === update.user_id
         ) {
             this.forceUpdate();
@@ -336,37 +306,28 @@ class Header extends Component {
         }
 
         return (
-            <div className='header-details'>
+            <div className={classNames(classes.borderColor, 'header-details')}>
                 <div
-                    className={classNames(
-                        'header-status',
-                        'grow',
-                        chat ? 'cursor-pointer' : 'cursor-default'
-                    )}
+                    className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
                     onClick={this.openChatDetails}>
-                    <span className='header-status-content'>{title}</span>
-                    { showProgressAnimation && (
+                    <span className="header-status-content">{title}</span>
+                    {showProgressAnimation && (
                         <>
-                            <span className='header-progress'>.</span>
-                            <span className='header-progress'>.</span>
-                            <span className='header-progress'>.</span>
+                            <span className="header-progress">.</span>
+                            <span className="header-progress">.</span>
+                            <span className="header-progress">.</span>
                         </>
                     )}
-                    <span
-                        className={
-                            isAccentSubtitle
-                                ? 'header-status-title-accent'
-                                : 'header-status-title'
-                        }>
+                    <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>
                         {subtitle}
                     </span>
-                    <span className='header-status-tail' />
+                    <span className="header-status-tail" />
                 </div>
-                { chat && (
+                {chat && (
                     <>
                         <IconButton
                             className={classes.messageSearchIconButton}
-                            aria-label='Search'
+                            aria-label="Search"
                             onClick={this.handleSearchChat}>
                             <SearchIcon />
                         </IconButton>
@@ -378,4 +339,4 @@ class Header extends Component {
     }
 }
 
-export default withStyles(styles)(Header);
+export default withStyles(styles, { withTheme: true })(Header);

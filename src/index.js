@@ -7,15 +7,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route } from 'react-router-dom'
-import TelegramApp from './TelegramApp';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import ThemeWrapper from './ThemeWrapper';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
 ReactDOM.render(
     <Router>
-        <Route path='' component={TelegramApp} />
+        <Route path="" component={ThemeWrapper} />
     </Router>,
-    document.getElementById('root'));
+    document.getElementById('root')
+);
 
 registerServiceWorker();
