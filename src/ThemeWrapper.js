@@ -6,41 +6,38 @@
  */
 
 import React from 'react';
-import TelegramApp from './TelegramApp';
 import { createMuiTheme, MuiThemeProvider } from '@material-ui/core';
+import red from '@material-ui/core/colors/red';
+import orange from '@material-ui/core/colors/orange';
+import yellow from '@material-ui/core/colors/yellow';
 import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
+import indigo from '@material-ui/core/colors/indigo';
+import deepPurple from '@material-ui/core/colors/deepPurple';
+import Cookies from 'universal-cookie';
+import TelegramApp from './TelegramApp';
 import ApplicationStore from './Stores/ApplicationStore';
-
-const lightTheme = createMuiTheme({
-    palette: {
-        type: 'light',
-        primary: blue,
-        // primary: { main: '#3B9EDB' },
-        secondary: { main: '#FF5555' }
-    },
-    typography: {
-        useNextVariants: true
-    }
-});
-
-const darkTheme = createMuiTheme({
-    palette: {
-        type: 'dark',
-        primary: green,
-        secondary: { main: '#FF5555' }
-    },
-    typography: {
-        useNextVariants: true
-    }
-});
 
 class ThemeWrapper extends React.Component {
     constructor(props) {
         super(props);
 
+        const cookies = new Cookies();
+        const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: blue };
+
+        let theme = createMuiTheme({
+            palette: {
+                type: type,
+                primary: primary,
+                secondary: { main: '#FF5555' }
+            },
+            typography: {
+                useNextVariants: true
+            }
+        });
+
         this.state = {
-            theme: darkTheme
+            theme: theme
         };
     }
 
@@ -65,6 +62,9 @@ class ThemeWrapper extends React.Component {
                 }
             }
         });
+
+        const cookies = new Cookies();
+        cookies.set('themeOptions', { type: type, primary: primary });
 
         this.setState({ theme: theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
     };

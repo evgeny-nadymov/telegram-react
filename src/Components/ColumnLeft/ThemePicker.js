@@ -84,7 +84,7 @@ class ThemePicker extends React.Component {
         this.state = {
             open: false,
             type: this.props.theme.palette.type,
-            color: 'blue'
+            color: this.getColorString(this.props.theme.palette.primary.main)
         };
     }
 
@@ -107,6 +107,27 @@ class ThemePicker extends React.Component {
         });
 
         //onThemeChange(this.state.value, this.getColor(event.target.value));
+    };
+
+    getColorString = value => {
+        switch (value) {
+            case red['500']:
+                return 'red';
+            case orange['500']:
+                return 'orange';
+            case yellow['500']:
+                return 'yellow';
+            case green['500']:
+                return 'green';
+            case blue['500']:
+                return 'blue';
+            case indigo['500']:
+                return 'indigo';
+            case deepPurple['500']:
+                return 'deepPurple';
+        }
+
+        return null;
     };
 
     getColor = value => {
@@ -146,36 +167,36 @@ class ThemePicker extends React.Component {
             <Dialog
                 open={this.state.open}
                 onClose={this.handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description">
-                <DialogTitle id="alert-dialog-title">Appearance</DialogTitle>
+                aria-labelledby='alert-dialog-title'
+                aria-describedby='alert-dialog-description'>
+                <DialogTitle id='alert-dialog-title'>Appearance</DialogTitle>
                 <DialogContent>
-                    <FormControl component="fieldset" className={classes.formControl}>
-                        <FormLabel focused component="legend">
+                    <FormControl component='fieldset' className={classes.formControl}>
+                        <FormLabel focused component='legend'>
                             Theme
                         </FormLabel>
                         <RadioGroup
-                            aria-label="theme"
-                            name="theme1"
+                            aria-label='theme'
+                            name='theme1'
                             className={classes.group}
                             value={type}
                             onChange={this.handleChange}>
-                            <FormControlLabel value="light" control={<Radio color="primary" />} label="Light" />
-                            <FormControlLabel value="dark" control={<Radio color="primary" />} label="Dark" />
+                            <FormControlLabel value='light' control={<Radio color='primary' />} label='Light' />
+                            <FormControlLabel value='dark' control={<Radio color='primary' />} label='Dark' />
                         </RadioGroup>
                     </FormControl>
-                    <FormControl component="fieldset" className={classes.formControl}>
-                        <FormLabel focused component="legend">
+                    <FormControl component='fieldset' className={classes.formControl}>
+                        <FormLabel focused component='legend'>
                             Accent
                         </FormLabel>
                         <RadioGroup
-                            aria-label="accent"
-                            name="accent1"
+                            aria-label='accent'
+                            name='accent1'
                             className={classes.group}
                             value={color}
                             onChange={this.handleAccentChange}>
                             <FormControlLabel
-                                value="red"
+                                value='red'
                                 control={
                                     <Radio
                                         classes={{
@@ -184,10 +205,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Red"
+                                label='Red'
                             />
                             <FormControlLabel
-                                value="orange"
+                                value='orange'
                                 control={
                                     <Radio
                                         classes={{
@@ -196,10 +217,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Orange"
+                                label='Orange'
                             />
                             <FormControlLabel
-                                value="yellow"
+                                value='yellow'
                                 control={
                                     <Radio
                                         classes={{
@@ -208,10 +229,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Yellow"
+                                label='Yellow'
                             />
                             <FormControlLabel
-                                value="green"
+                                value='green'
                                 control={
                                     <Radio
                                         classes={{
@@ -220,10 +241,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Green"
+                                label='Green'
                             />
                             <FormControlLabel
-                                value="blue"
+                                value='blue'
                                 control={
                                     <Radio
                                         classes={{
@@ -232,10 +253,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Blue"
+                                label='Blue'
                             />
                             <FormControlLabel
-                                value="indigo"
+                                value='indigo'
                                 control={
                                     <Radio
                                         classes={{
@@ -244,10 +265,10 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Indigo"
+                                label='Indigo'
                             />
                             <FormControlLabel
-                                value="deepPurple"
+                                value='deepPurple'
                                 control={
                                     <Radio
                                         classes={{
@@ -256,7 +277,7 @@ class ThemePicker extends React.Component {
                                         }}
                                     />
                                 }
-                                label="Deep Purple"
+                                label='Deep Purple'
                             />
                         </RadioGroup>
                     </FormControl>

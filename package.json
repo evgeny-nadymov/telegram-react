@@ -25,7 +25,8 @@
     "react-file-download": "^0.3.5",
     "react-router-dom": "^4.3.1",
     "react-scripts": "^2.1.2",
-    "sw-precache-cra": "^1.0.0-alpha.2"
+    "sw-precache-cra": "^1.0.0-alpha.2",
+    "universal-cookie": "^3.0.7"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
