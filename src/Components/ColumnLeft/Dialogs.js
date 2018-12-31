@@ -141,7 +141,7 @@ class Dialogs extends Component {
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
                 />
-                <div className="dialogs-content">
+                <div className='dialogs-content'>
                     <DialogsList ref={this.dialogsList} onSelectChat={this.handleSelectChat} />
                     {openSearch && (
                         <Search

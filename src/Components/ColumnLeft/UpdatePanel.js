@@ -11,13 +11,13 @@ import Button from '@material-ui/core/Button';
 import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = {
-    root : {
-        margin : 0,
-        padding : '24px',
-        width : '100%',
-        borderRadius : 0,
-        color : 'white',
-        maxHeight : '67px'
+    root: {
+        margin: 0,
+        padding: '24px',
+        width: '100%',
+        borderRadius: 0,
+        color: 'white',
+        maxHeight: '67px'
     }
 };
 
@@ -26,11 +26,8 @@ class UpdatePanel extends React.Component {
         super(props);
 
         this.state = {
-            newContentAvailable : false
+            newContentAvailable: false
         };
-
-        this.handleUpdate = this.handleUpdate.bind(this);
-        this.onClientUpdateNewContentAvailable = this.onClientUpdateNewContentAvailable.bind(this);
     }
 
     componentDidMount() {
@@ -41,35 +38,31 @@ class UpdatePanel extends React.Component {
         ApplicationStore.removeListener('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
     }
 
-    onClientUpdateNewContentAvailable() {
-        this.setState({ newContentAvailable : true });
-    }
+    onClientUpdateNewContentAvailable = () => {
+        this.setState({ newContentAvailable: true });
+    };
 
-    handleUpdate() {
+    handleUpdate = () => {
         if (this.handled) return;
 
         this.handled = true;
         setTimeout(() => {
             window.location.reload();
         }, 250);
-    }
+    };
 
     render() {
         const { newContentAvailable } = this.state;
         const { classes } = this.props;
 
-        const content = newContentAvailable
-            ? (<Button variant='contained' color='primary' className={classes.root}
-                       onClick={this.handleUpdate}>Update</Button>)
-            : null;
+        const content = newContentAvailable ? (
+            <Button variant='contained' color='primary' className={classes.root} onClick={this.handleUpdate}>
+                Update
+            </Button>
+        ) : null;
 
-        return (
-            <>
-                {content}
-            </>
-        );
+        return <>{content}</>;
     }
-
 }
 
 export default withStyles(styles)(UpdatePanel);

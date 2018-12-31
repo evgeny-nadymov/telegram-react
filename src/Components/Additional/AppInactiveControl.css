@@ -5,18 +5,18 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.app-inactive{
+.app-inactive {
     display: flex;
     height: 100%;
 }
 
-.app-inactive-wrapper{
+.app-inactive-wrapper {
     max-width: 420px;
     margin: auto auto;
     text-align: center;
 }
 
-.app-inactive-image{
+.app-inactive-image {
     background: url(../../Assets/Manytabs_2x.png) no-repeat;
     background-size: 341px 262px;
     display: block;
@@ -25,21 +25,20 @@
     margin: 0 auto;
 }
 
-.app-inactive-title{
+.app-inactive-title {
     font-size: 18px;
-    color: #444;
     margin-top: 20px;
     margin-bottom: 10px;
     font-weight: 500;
     line-height: 1.1;
 }
 
-.app-inactive-description{
+.app-inactive-description {
     color: #666;
     font-size: 15px;
     line-height: 150%;
 }
 
-.app-inactive-actions{
-
+.app-inactive-actions {
+    margin: 20px;
 }

@@ -204,8 +204,8 @@ class TelegramApp extends Component {
         if (inactive) {
             page = (
                 <>
-                    <div className="header-wrapper" />
-                    <div className="page">
+                    <div className='header-wrapper' />
+                    <div className={classNames(classes.page, 'page')}>
                         <AppInactiveControl />
                     </div>
                     <Footer />
@@ -245,7 +245,7 @@ class TelegramApp extends Component {
         }
 
         return (
-            <div id="app" onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
+            <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
                 {page}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
