@@ -1,16 +1,16 @@
 {
-  "main.css": "/telegram-react/static/css/main.3702c62b.chunk.css",
-  "main.js": "/telegram-react/static/js/main.b2264909.chunk.js",
-  "main.js.map": "/telegram-react/static/js/main.b2264909.chunk.js.map",
-  "static/js/1.b2ce326d.chunk.js": "/telegram-react/static/js/1.b2ce326d.chunk.js",
-  "static/js/1.b2ce326d.chunk.js.map": "/telegram-react/static/js/1.b2ce326d.chunk.js.map",
+  "main.css": "/telegram-react/static/css/main.2ee9d075.chunk.css",
+  "main.js": "/telegram-react/static/js/main.c8b0f130.chunk.js",
+  "main.js.map": "/telegram-react/static/js/main.c8b0f130.chunk.js.map",
+  "static/js/1.133d7b6a.chunk.js": "/telegram-react/static/js/1.133d7b6a.chunk.js",
+  "static/js/1.133d7b6a.chunk.js.map": "/telegram-react/static/js/1.133d7b6a.chunk.js.map",
   "runtime~main.js": "/telegram-react/static/js/runtime~main.f35f25f7.js",
   "runtime~main.js.map": "/telegram-react/static/js/runtime~main.f35f25f7.js.map",
   "static/media/Header.css": "/telegram-react/static/media/Telegram.4964c9bb.svg",
   "static/media/MessageControl.css": "/telegram-react/static/media/General_2x.5270d71c.png",
   "static/media/AppInactiveControl.css": "/telegram-react/static/media/Manytabs_2x.7a71629a.png",
-  "static/css/main.3702c62b.chunk.css.map": "/telegram-react/static/css/main.3702c62b.chunk.css.map",
+  "static/css/main.2ee9d075.chunk.css.map": "/telegram-react/static/css/main.2ee9d075.chunk.css.map",
   "index.html": "/telegram-react/index.html",
-  "precache-manifest.9e506bbcfec199cc1e7abde6da2e264b.js": "/telegram-react/precache-manifest.9e506bbcfec199cc1e7abde6da2e264b.js",
+  "precache-manifest.30db67337a3d113c27b574bdbc60bb6c.js": "/telegram-react/precache-manifest.30db67337a3d113c27b574bdbc60bb6c.js",
   "service-worker.js": "/telegram-react/service-worker.js"
 }
