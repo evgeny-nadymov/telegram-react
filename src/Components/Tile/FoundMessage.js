@@ -95,21 +95,22 @@ class FoundMessage extends React.Component {
                         { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId }
                     )}>
                     {tile}
-                    <div className="dialog-inner-wrapper">
-                        <div className="tile-first-row">
+                    <div className='dialog-inner-wrapper'>
+                        <div className='tile-first-row'>
                             {chatSearch && senderFullName ? (
-                                <div className="dialog-title">{senderFullName}</div>
+                                <div className='dialog-title'>{senderFullName}</div>
                             ) : (
                                 <DialogTitleControl chatId={chatId} />
                             )}
-                            <div className="dialog-meta-date">{date}</div>
+                            <div className='dialog-meta-date'>{date}</div>
                         </div>
-                        <div className="tile-second-row">
-                            <div className="dialog-content">
+                        <div className='tile-second-row'>
+                            <div className='dialog-content'>
                                 {
                                     <>
-                                        {!chatSearch &&
-                                            senderName && <span className="dialog-content-accent">{senderName}: </span>}
+                                        {!chatSearch && senderName && (
+                                            <span className='dialog-content-accent'>{senderName}: </span>
+                                        )}
                                         {content}
                                     </>
                                 }

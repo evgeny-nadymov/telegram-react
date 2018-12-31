@@ -111,18 +111,18 @@ class DialogBadgeControl extends React.Component {
 
         return (
             <>
-                {unreadMessageIcon && <i className="dialog-badge-unread" />}
+                {unreadMessageIcon && <i className='dialog-badge-unread' />}
                 {unreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
-                        <div className="dialog-badge-mention">@</div>
+                        <div className='dialog-badge-mention'>@</div>
                     </div>
                 )}
                 {showUnreadCount ? (
                     <div className={classNames(muteClassName, 'dialog-badge', classes.dialogBadge)}>
-                        <span className="dialog-badge-text">{unreadCount}</span>
+                        <span className='dialog-badge-text'>{unreadCount}</span>
                     </div>
                 ) : chat.is_pinned && !unreadMessageIcon ? (
-                    <i className="dialog-badge-pinned" />
+                    <i className='dialog-badge-pinned' />
                 ) : null}
             </>
         );

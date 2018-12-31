@@ -17,7 +17,7 @@
     "lint-staged": "^4.3.0",
     "localforage": "^1.7.3",
     "localforage-getitems": "^1.4.2",
-    "prettier": "^1.14.3",
+    "prettier": "^1.15.3",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-custom-scrollbars": "^4.2.1",
@@ -29,7 +29,7 @@
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
-      "prettier --jsx-single-quote --print-width 120 --tab-width 4 --single-quote --jsx-bracket-same-line --bracket-spacing --write",
+      "prettier --print-width 120 --tab-width 4 --single-quote --jsx-single-quote --jsx-bracket-same-line --bracket-spacing --write",
       "git add"
     ]
   },

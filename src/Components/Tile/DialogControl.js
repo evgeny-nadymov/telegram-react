@@ -98,14 +98,14 @@ class DialogControl extends Component {
                     isSelected ? 'dialog-active' : 'dialog'
                 )}
                 onMouseDown={this.handleSelect}>
-                <div className="dialog-wrapper">
+                <div className='dialog-wrapper'>
                     <ChatTileControl chatId={chatId} showSavedMessages={showSavedMessages} />
-                    <div className="dialog-inner-wrapper">
-                        <div className="tile-first-row">
+                    <div className='dialog-inner-wrapper'>
+                        <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />
                             <DialogMetaControl chatId={chatId} />
                         </div>
-                        <div className="tile-second-row">
+                        <div className='tile-second-row'>
                             <DialogContentControl chatId={chatId} />
                             <DialogBadgeControl chatId={chatId} />
                         </div>
