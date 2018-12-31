@@ -5,26 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.dialog-content{
+.dialog-content {
+    font-size: 14px;
     word-wrap: break-word;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex-grow: 1;
-    color: #70777B;
-    font-size: 14px;
+    color: #70777b;
 }
 
-.dialog-content-accent{
-    color: #000;
+.dialog-content-accent {
+    /*color: #000;*/
 }
 
 .dialog-active .dialog-content,
 .dialog-active .dialog-content-accent,
-.dialog-active .dialog-content-draft{
+.dialog-active .dialog-content-draft {
     color: #fff;
 }
 
-.dialog-content-draft{
+.dialog-content-draft {
     color: #c05f5a;
 }

@@ -19,15 +19,17 @@ import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './FoundMessage.css';
 
-const styles = {
+const styles = theme => ({
     listItem: {
         padding: '0px'
+    },
+    accentBackground: {
+        background: theme.palette.primary.main
     }
-};
+});
 
 class FoundMessage extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -36,30 +38,29 @@ class FoundMessage extends React.Component {
         };
     }
 
-    shouldComponentUpdate(nextProps, nextState){
+    shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId } = this.props;
 
-        if (nextState.nextChatId === chatId && nextState.nextMessageId === messageId){
+        if (nextState.nextChatId === chatId && nextState.nextMessageId === messageId) {
             return true;
         }
 
-        if (nextState.previousChatId === chatId && nextState.previousMessageId === messageId){
+        if (nextState.previousChatId === chatId && nextState.previousMessageId === messageId) {
             return true;
         }
 
         return false;
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
-    onClientUpdateChatId = (update) => {
-
+    onClientUpdateChatId = update => {
         this.setState({
             ...update
         });
@@ -78,28 +79,38 @@ class FoundMessage extends React.Component {
         const senderFullName = getMessageSenderFullName(message);
         const content = getContent(message) || '\u00A0';
 
-        const tile = sender_user_id && chatSearch
-            ? <UserTileControl userId={sender_user_id}/>
-            : <ChatTileControl chatId={chatId}/>;
+        const tile =
+            sender_user_id && chatSearch ? (
+                <UserTileControl userId={sender_user_id} />
+            ) : (
+                <ChatTileControl chatId={chatId} />
+            );
 
         return (
             <ListItem button className={classes.listItem} onClick={onClick}>
-                <div className={classNames('found-message', { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId })}>
+                <div
+                    className={classNames(
+                        'found-message',
+                        { [classes.accentBackground]: chatId === selectedChatId && messageId === selectedMessageId },
+                        { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId }
+                    )}>
                     {tile}
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            {   chatSearch && senderFullName
-                                ? <div className='dialog-title'>{senderFullName}</div>
-                                : <DialogTitleControl chatId={chatId}/>
-                            }
-                            <div className='dialog-meta-date'>{date}</div>
+                    <div className="dialog-inner-wrapper">
+                        <div className="tile-first-row">
+                            {chatSearch && senderFullName ? (
+                                <div className="dialog-title">{senderFullName}</div>
+                            ) : (
+                                <DialogTitleControl chatId={chatId} />
+                            )}
+                            <div className="dialog-meta-date">{date}</div>
                         </div>
-                        <div className='tile-second-row'>
-                            <div className='dialog-content'>
+                        <div className="tile-second-row">
+                            <div className="dialog-content">
                                 {
                                     <>
-                                        { !chatSearch && senderName && <span className='dialog-content-accent'>{senderName}: </span> }
-                                        { content }
+                                        {!chatSearch &&
+                                            senderName && <span className="dialog-content-accent">{senderName}: </span>}
+                                        {content}
                                     </>
                                 }
                             </div>
@@ -118,4 +129,4 @@ FoundMessage.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withStyles(styles)(FoundMessage);
+export default withStyles(styles, { withTheme: true })(FoundMessage);

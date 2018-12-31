@@ -7,6 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import {
     getChatMuteFor,
     getChatUnreadCount,
@@ -18,20 +19,29 @@ import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogBadgeControl.css';
 
+const styles = theme => ({
+    dialogBadge: {
+        background: theme.palette.primary.main
+    }
+});
+
 class DialogBadgeControl extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chatId !== this.props.chatId){
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
+        if (nextProps.theme !== this.props.theme) {
             return true;
         }
 
         return false;
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
@@ -42,7 +52,7 @@ class DialogBadgeControl extends React.Component {
         ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
@@ -53,11 +63,11 @@ class DialogBadgeControl extends React.Component {
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
-    onFastUpdatingComplete = (update) => {
+    onFastUpdatingComplete = update => {
         this.forceUpdate();
     };
 
-    onUpdate = (update) => {
+    onUpdate = update => {
         const { chatId } = this.props;
 
         if (update.chat_id !== chatId) return;
@@ -65,7 +75,7 @@ class DialogBadgeControl extends React.Component {
         this.forceUpdate();
     };
 
-    onUpdateScopeNotificationSettings = (update) => {
+    onUpdateScopeNotificationSettings = update => {
         const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
@@ -73,15 +83,13 @@ class DialogBadgeControl extends React.Component {
 
         switch (update.scope['@type']) {
             case 'notificationSettingsScopeGroupChats': {
-                if (chat.type['@type'] === 'chatTypeBasicGroup'
-                    || chat.type['@type'] === 'chatTypeSupergroup'){
+                if (chat.type['@type'] === 'chatTypeBasicGroup' || chat.type['@type'] === 'chatTypeSupergroup') {
                     this.forceUpdate();
                 }
                 break;
             }
-            case 'notificationSettingsScopePrivateChats':{
-                if (chat.type['@type'] === 'chatTypePrivate'
-                    || chat.type['@type'] === 'chatTypeSecret'){
+            case 'notificationSettingsScopePrivateChats': {
+                if (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') {
                     this.forceUpdate();
                 }
                 break;
@@ -90,7 +98,7 @@ class DialogBadgeControl extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { classes, chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
@@ -103,14 +111,22 @@ class DialogBadgeControl extends React.Component {
 
         return (
             <>
-                {unreadMessageIcon && <i className='dialog-badge-unread'/>}
-                {unreadMentionCount && <div className='dialog-badge'><div className='dialog-badge-mention'>@</div></div> }
-                {showUnreadCount
-                    ? <div className={classNames(muteClassName, 'dialog-badge')}><span className='dialog-badge-text'>{unreadCount}</span></div>
-                    : (chat.is_pinned && !unreadMessageIcon ? <i className='dialog-badge-pinned'/> : null) }
+                {unreadMessageIcon && <i className="dialog-badge-unread" />}
+                {unreadMentionCount && (
+                    <div className={classNames('dialog-badge', classes.dialogBadge)}>
+                        <div className="dialog-badge-mention">@</div>
+                    </div>
+                )}
+                {showUnreadCount ? (
+                    <div className={classNames(muteClassName, 'dialog-badge', classes.dialogBadge)}>
+                        <span className="dialog-badge-text">{unreadCount}</span>
+                    </div>
+                ) : chat.is_pinned && !unreadMessageIcon ? (
+                    <i className="dialog-badge-pinned" />
+                ) : null}
             </>
         );
     }
 }
 
-export default DialogBadgeControl;
+export default withStyles(styles, { withTheme: true })(DialogBadgeControl);

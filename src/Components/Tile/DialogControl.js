@@ -29,7 +29,10 @@ const styles = theme => ({
     dialog: {
         borderRadius: '8px',
         cursor: 'pointer',
-        margin: '0 12px'
+        margin: '0 12px',
+        '&:hover': {
+            backgroundColor: theme.palette.primary.main + '11'
+        }
     }
 });
 
