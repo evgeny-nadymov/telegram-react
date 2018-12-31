@@ -7,39 +7,41 @@
 
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import SignInControl from './SignInControl'
-import ConfirmCodeControl from './ConfirmCodeControl'
-import PasswordControl from './PasswordControl'
-import SignUpControl from './SignUpControl'
-import './AuthFormControl.css';
-import TdLibController from '../../Controllers/TdLibController';
+import classNames from 'classnames';
+import SignInControl from './SignInControl';
+import ConfirmCodeControl from './ConfirmCodeControl';
+import PasswordControl from './PasswordControl';
 import AuthErrorDialog from './AuthErrorDialog';
+import './AuthFormControl.css';
 
-const styles = {
+const styles = theme => ({
     button: {
-        margin: '20px',
+        margin: '20px'
     },
-};
+    authorizationFormContent: {
+        background: theme.palette.background.default,
+        color: theme.palette.text.primary
+    }
+});
 
 class AuthFormControl extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.phone = null;
 
         this.handlePhoneEnter = this.handlePhoneEnter.bind(this);
     }
-    
-    handlePhoneEnter(phone){
+
+    handlePhoneEnter(phone) {
         this.phone = phone;
     }
 
     render() {
-        const {authorizationState} = this.props;
+        const { classes, authorizationState } = this.props;
 
         let control = null;
-        switch (authorizationState['@type']){
+        switch (authorizationState['@type']) {
             case 'authorizationStateWaitPhoneNumber':
                 // control = (
                 //     <>
@@ -48,18 +50,15 @@ class AuthFormControl extends React.Component {
                 //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
                 //         <SignUpControl/>
                 //     </>);
-                control = (
-                    <SignInControl
-                        phone={this.phone}
-                        onPhoneEnter={this.handlePhoneEnter}/>
-                );
+                control = <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter} />;
                 break;
             case 'authorizationStateWaitCode':
                 control = (
                     <ConfirmCodeControl
                         termsOfService={authorizationState.terms_of_service}
                         codeInfo={authorizationState.code_info}
-                        onChangePhone={this.props.onChangePhone}/>
+                        onChangePhone={this.props.onChangePhone}
+                    />
                 );
                 break;
             case 'authorizationStateWaitPassword':
@@ -68,19 +67,20 @@ class AuthFormControl extends React.Component {
                         passwordHint={authorizationState.password_hint}
                         hasRecoveryEmailAddress={authorizationState.has_recovery_email_address}
                         recoveryEmailAddressPattern={authorizationState.recovery_email_address_pattern}
-                        onChangePhone={this.props.onChangePhone}/>
+                        onChangePhone={this.props.onChangePhone}
+                    />
                 );
                 break;
             default:
                 break;
         }
-        
+
         return (
             <div className='sign-in-wrap'>
-                <div className='authorization-form-content'>
+                <div className={classNames(classes.authorizationFormContent, 'authorization-form-content')}>
                     {control}
                 </div>
-                <AuthErrorDialog/>
+                <AuthErrorDialog />
             </div>
         );
     }

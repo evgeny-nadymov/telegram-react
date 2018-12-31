@@ -40,7 +40,7 @@ class ThemeWrapper extends React.Component {
         super(props);
 
         this.state = {
-            theme: lightTheme
+            theme: darkTheme
         };
     }
 
