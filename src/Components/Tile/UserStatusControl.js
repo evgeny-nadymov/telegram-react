@@ -7,16 +7,22 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import {
-    getUserStatus,
-    isAccentUserSubtitle
-} from '../../Utils/User';
+import { withStyles } from '@material-ui/core';
+import { getUserStatus, isAccentUserSubtitle } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import './UserStatusControl.css';
 
-class UserStatusControl extends React.Component {
+const styles = theme => ({
+    userStatusSubtitle: {
+        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+    },
+    userStatusAccentSubtitle: {
+        color: theme.palette.primary.dark + '!important'
+    }
+});
 
-    constructor(props){
+class UserStatusControl extends React.Component {
+    constructor(props) {
         super(props);
 
         const { userId } = this.props;
@@ -31,7 +37,6 @@ class UserStatusControl extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
         if (props.userId !== state.prevUserId) {
-
             const { userId } = props;
             const user = UserStore.get(userId);
 
@@ -45,28 +50,38 @@ class UserStatusControl extends React.Component {
         return null;
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.userId !== this.props.userId){
+    shouldComponentUpdate(nextProps, nextState) {
+        const { userId, theme } = this.props;
+        const { status, isAccent } = this.state;
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextState.status !== this.state.status
-            || nextState.isAccent !== this.state.isAccent){
+        if (nextProps.userId !== userId) {
+            return true;
+        }
+
+        if (nextState.status !== status) {
+            return true;
+        }
+
+        if (nextState.isAccent !== isAccent) {
             return true;
         }
 
         return false;
     }
 
-    componentDidMount(){
+    componentDidMount() {
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
     }
 
-    onUpdateUserStatus = (update) => {
+    onUpdateUserStatus = update => {
         const { userId } = this.props;
         const user = UserStore.get(userId);
 
@@ -76,14 +91,19 @@ class UserStatusControl extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
         const { status, isAccent } = this.state;
 
         return (
-            <div className={classNames('dialog-content', {'accent-color': isAccent})}>
+            <div
+                className={classNames('dialog-content', classes.userStatusSubtitle, {
+                    'accent-color': isAccent,
+                    [classes.userStatusAccentSubtitle]: isAccent
+                })}>
                 {status}
             </div>
         );
     }
 }
 
-export default UserStatusControl;
+export default withStyles(styles, { withTheme: true })(UserStatusControl);

@@ -466,15 +466,15 @@ class Search extends React.Component {
         return (
             <div ref={this.listRef} className={classNames(classes.search, 'search')} onScroll={this.handleScroll}>
                 {chat && (
-                    <div className="search-chat">
-                        <SearchCaption caption="Search messages in" />
-                        <div className="search-chat-wrapper">
-                            <div className="search-chat-control">
+                    <div className='search-chat'>
+                        <SearchCaption caption='Search messages in' />
+                        <div className='search-chat-wrapper'>
+                            <div className='search-chat-control'>
                                 <ChatControl chatId={chatId} showStatus={false} />
                             </div>
                             <IconButton
                                 className={classes.closeSearchIconButton}
-                                aria-label="Search"
+                                aria-label='Search'
                                 onMouseDown={this.handleClose}>
                                 <CloseIcon />
                             </IconButton>
@@ -482,35 +482,35 @@ class Search extends React.Component {
                     </div>
                 )}
                 {topChats.length > 0 && (
-                    <div className="search-top-chats">
-                        <SearchCaption caption="People" />
-                        <div className="search-top-chats-list" onScroll={this.handleTopChatsScroll}>
-                            <div className="search-top-chats-placeholder" />
+                    <div className='search-top-chats'>
+                        <SearchCaption caption='People' />
+                        <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
+                            <div className='search-top-chats-placeholder' />
                             {topChats}
-                            <div className="search-top-chats-placeholder" />
+                            <div className='search-top-chats-placeholder' />
                         </div>
                     </div>
                 )}
                 {recentlyFoundChats.length > 0 && (
-                    <div className="search-recently-found-chats">
-                        <SearchCaption caption="Recent" command="Clear" onClick={this.handleClearRecentlyFound} />
+                    <div className='search-recently-found-chats'>
+                        <SearchCaption caption='Recent' command='Clear' onClick={this.handleClearRecentlyFound} />
                         {recentlyFoundChats}
                     </div>
                 )}
                 {localChats.length > 0 && (
-                    <div className="search-local-chats">
-                        <SearchCaption caption="Chats and contacts" />
+                    <div className='search-local-chats'>
+                        <SearchCaption caption='Chats and contacts' />
                         {localChats}
                     </div>
                 )}
                 {globalChats.length > 0 && (
-                    <div className="search-global-chats">
-                        <SearchCaption caption="Global search" />
+                    <div className='search-global-chats'>
+                        <SearchCaption caption='Global search' />
                         {globalChats}
                     </div>
                 )}
                 {messages && (
-                    <div className="search-global-chats">
+                    <div className='search-global-chats'>
                         <SearchCaption caption={messagesCaption} />
                         {globalMessages}
                     </div>

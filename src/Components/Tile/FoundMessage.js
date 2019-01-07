@@ -21,10 +21,13 @@ import './FoundMessage.css';
 
 const styles = theme => ({
     listItem: {
-        padding: '0px'
+        padding: 0
     },
     accentBackground: {
-        background: theme.palette.primary.main
+        background: theme.palette.primary.main + '!important'
+    },
+    foundMessageSubtitle: {
+        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
     }
 });
 
@@ -39,13 +42,17 @@ class FoundMessage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, theme } = this.props;
 
         if (nextState.nextChatId === chatId && nextState.nextMessageId === messageId) {
             return true;
         }
 
         if (nextState.previousChatId === chatId && nextState.previousMessageId === messageId) {
+            return true;
+        }
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -102,10 +109,10 @@ class FoundMessage extends React.Component {
                             ) : (
                                 <DialogTitleControl chatId={chatId} />
                             )}
-                            <div className='dialog-meta-date'>{date}</div>
+                            <div className={classNames('dialog-meta-date', classes.foundMessageSubtitle)}>{date}</div>
                         </div>
                         <div className='tile-second-row'>
-                            <div className='dialog-content'>
+                            <div className={classNames('dialog-content', classes.foundMessageSubtitle)}>
                                 {
                                     <>
                                         {!chatSearch && senderName && (

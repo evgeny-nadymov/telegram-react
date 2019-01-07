@@ -11,6 +11,7 @@ import MessageStatusControl from './MessageStatusControl';
 import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
+import UnreadSeparator from './UnreadSeparator';
 import { saveOrDownload } from '../../Utils/File';
 import {
     getDate,
@@ -75,33 +76,24 @@ class MessageControl extends Component {
 
     componentWillUnmount() {
         MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
-        MessageStore.removeListener('updateMessageViews',this.handleUpdateMessageViews);
+        MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     handleUpdateMessageEdited(payload) {
-        if (
-            this.props.chatId === payload.chat_id &&
-            this.props.messageId === payload.message_id
-        ) {
+        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
             this.forceUpdate();
         }
     }
 
     handleUpdateMessageViews(payload) {
-        if (
-            this.props.chatId === payload.chat_id &&
-            this.props.messageId === payload.message_id
-        ) {
+        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
             this.forceUpdate();
         }
     }
 
     handleUpdateMessageContent(payload) {
-        if (
-            this.props.chatId === payload.chat_id &&
-            this.props.messageId === payload.message_id
-        ) {
+        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
             this.forceUpdate();
         }
     }
@@ -241,10 +233,7 @@ class MessageControl extends Component {
 
         return (
             <div className='message'>
-                {this.props.showUnreadSeparator && (
-                    <div className='message-unread-separator'>Unread messages</div>
-                )}
-
+                {this.props.showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     {this.unread && (
                         <MessageStatusControl
@@ -275,24 +264,22 @@ class MessageControl extends Component {
                                     <>
                                         <i className='message-views-icon' />
                                         <span className='message-views'>
-                      &nbsp;
+                                            &nbsp;
                                             {message.views}
                                             &nbsp;&nbsp;
-                    </span>
+                                        </span>
                                     </>
                                 )}
                                 {message.edit_date > 0 && <span>edited </span>}
                                 <span className='message-date' title={dateHint}>
-                  {date}
-                </span>
+                                    {date}
+                                </span>
                             </div>
                         </div>
-                        {reply && (
-                            <ReplyControl chatId={message.chat_id} messageId={reply} />
-                        )}
+                        {reply && <ReplyControl chatId={message.chat_id} messageId={reply} />}
                         {media}
                         <div className='message-text'>{text}</div>
-                        {webPage && <WebPage message={message}/>}
+                        {webPage && <WebPage message={message} />}
                     </div>
                 </div>
             </div>

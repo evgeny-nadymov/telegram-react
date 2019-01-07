@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+import UnreadSeparator from './UnreadSeparator';
 import { getServiceMessageContent } from '../../Utils/ServiceMessage';
 import MessageStore from '../../Stores/MessageStore';
 import './ServiceMessageControl.css';
 
 class ServiceMessageControl extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
-        if (process.env.NODE_ENV !== 'production'){
+        if (process.env.NODE_ENV !== 'production') {
             const { chatId, messageId } = this.props;
             this.state = {
                 message: MessageStore.get(chatId, messageId)
@@ -22,20 +23,20 @@ class ServiceMessageControl extends React.Component {
         }
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chatId !== this.props.chatId){
+    shouldComponentUpdate(nextProps, nextState) {
+        if (nextProps.chatId !== this.props.chatId) {
             return true;
         }
 
-        if (nextProps.messageId !== this.props.messageId){
+        if (nextProps.messageId !== this.props.messageId) {
             return true;
         }
 
-        if (nextProps.sendingState !== this.props.sendingState){
+        if (nextProps.sendingState !== this.props.sendingState) {
             return true;
         }
 
-        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator){
+        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator) {
             return true;
         }
 
@@ -44,22 +45,15 @@ class ServiceMessageControl extends React.Component {
 
     render() {
         let message = MessageStore.get(this.props.chatId, this.props.messageId);
-        if (!message) return (<div>[empty service message]</div>);
+        if (!message) return <div>[empty service message]</div>;
 
         let serviceMessageContent = getServiceMessageContent(message, this.props.onSelectUser);
 
         return (
             <div className='service-message'>
-                {
-                    this.props.showUnreadSeparator &&
-                    <div className='message-unread-separator'>
-                        Unread messages
-                    </div>
-                }
+                {this.props.showUnreadSeparator && <UnreadSeparator />}
                 <div className='service-message-wrapper'>
-                    <div className='service-message-content'>
-                    {serviceMessageContent}
-                    </div>
+                    <div className='service-message-content'>{serviceMessageContent}</div>
                 </div>
             </div>
         );

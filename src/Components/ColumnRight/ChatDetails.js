@@ -293,7 +293,7 @@ class ChatDetails extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
-                <div className="chat-details">
+                <div className='chat-details'>
                     <ChatDetailsHeaderControl />
                 </div>
             );
@@ -326,14 +326,14 @@ class ChatDetails extends React.Component {
         // const items = sortedUsers.map(user => (<div key={user.id} style={{margin: '12px', height: '50px', width: '50px', background: 'red'}}/>));
 
         return (
-            <div className="chat-details">
+            <div className='chat-details'>
                 <ChatDetailsHeaderControl
                     backButton={this.props.backButton}
                     onClose={this.props.onClose}
                     onClick={this.handleHeaderClick}
                 />
-                <div ref={this.chatDetailsListRef} className="chat-details-list">
-                    <div className="chat-details-info">
+                <div ref={this.chatDetailsListRef} className='chat-details-list'>
+                    <div className='chat-details-info'>
                         <ChatControl chatId={chatId} onTileSelect={this.handleOpenViewer} />
                     </div>
                     <List>
@@ -345,7 +345,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant="inherit" noWrap>
+                                            <Typography variant='inherit' noWrap>
                                                 {username}
                                             </Typography>
                                         }
@@ -362,12 +362,12 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id="message-id">Link copied</span>}
+                                    message={<span id='message-id'>Link copied</span>}
                                     action={
                                         <IconButton
-                                            key="close"
-                                            aria-label="Close"
-                                            color="inherit"
+                                            key='close'
+                                            aria-label='Close'
+                                            color='inherit'
                                             className={classes.close}
                                             onClick={this.handleCloseUsernameHint}>
                                             <CloseIcon />
@@ -384,7 +384,7 @@ class ChatDetails extends React.Component {
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
-                                            <Typography variant="inherit" noWrap>
+                                            <Typography variant='inherit' noWrap>
                                                 {formatPhoneNumber(phoneNumber)}
                                             </Typography>
                                         }
@@ -401,12 +401,12 @@ class ChatDetails extends React.Component {
                                     ContentProps={{
                                         'aria-describedby': 'message-id'
                                     }}
-                                    message={<span id="message-id">Phone copied</span>}
+                                    message={<span id='message-id'>Phone copied</span>}
                                     action={[
                                         <IconButton
-                                            key="close"
-                                            aria-label="Close"
-                                            color="inherit"
+                                            key='close'
+                                            aria-label='Close'
+                                            color='inherit'
                                             className={classes.close}
                                             onClick={this.handleClosePhoneHint}>
                                             <CloseIcon />
@@ -418,7 +418,7 @@ class ChatDetails extends React.Component {
                         {bio && (
                             <ListItem className={classes.listItem}>
                                 <ListItemIcon>
-                                    <ErrorOutlineIcon className="chat-details-info-icon" />
+                                    <ErrorOutlineIcon className='chat-details-info-icon' />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={bio}
@@ -440,7 +440,7 @@ class ChatDetails extends React.Component {
                             </ListItemIcon>
                             <ListItemText
                                 primary={
-                                    <Typography variant="inherit" noWrap>
+                                    <Typography variant='inherit' noWrap>
                                         Shared Media
                                     </Typography>
                                 }
@@ -451,7 +451,7 @@ class ChatDetails extends React.Component {
                                 <ListItemText
                                     inset
                                     primary={
-                                        <Typography variant="inherit" noWrap>
+                                        <Typography variant='inherit' noWrap>
                                             Groups in Common
                                         </Typography>
                                     }

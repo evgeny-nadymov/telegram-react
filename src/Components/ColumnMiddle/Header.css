@@ -5,28 +5,27 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
-.header-master{
+.header-master {
     min-height: 64px;
     display: flex;
     align-items: center;
     overflow: hidden;
 }
 
-.header-details{
+.header-details {
     min-height: 64px;
     display: flex;
     align-items: center;
     overflow: hidden;
     box-sizing: border-box;
-    border-bottom: 1px solid #E9EBED;
+    border-bottom: 1px solid #e9ebed;
 }
 
-.header-title{
+.header-title {
     padding: 15px 19px 15px;
 }
 
-.header-title-icon{
+.header-title-icon {
     width: 62px;
     height: 14px;
     display: inline-block;
@@ -35,8 +34,8 @@
     margin-top: 1px;
 }
 
-.header-status{
-    font: 22px/normal 'Product Sans', 'Roboto', sans-serif;
+.header-status {
+    font: 22px / normal 'Product Sans', 'Roboto', sans-serif;
     padding: 0 0 0 24px;
     user-select: none;
     background: transparent;
@@ -45,70 +44,67 @@
     align-items: baseline;
 }
 
-.header-status-content{
+.header-status-content {
     word-wrap: break-word;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-.header-status-title-accent{
+.header-status-title {
     font-size: 14px;
-    color: #0070C9;
+    color: #70777b;
     word-wrap: break-word;
     white-space: nowrap;
     text-overflow: ellipsis;
     margin-left: 8px;
 }
 
-.header-status-title{
-    font-size: 14px;
-    color: #70777B;
-    word-wrap: break-word;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    margin-left: 8px;
-}
-
-.header-status-tail{
+.header-status-tail {
     flex-grow: 1;
     flex-shrink: 1;
 }
 
-.cursor-pointer{
+.cursor-pointer {
     cursor: pointer;
 }
 
-.cursor-default{
+.cursor-default {
     cursor: default;
 }
 
-.grow{
+.grow {
     flex-grow: 1;
 }
 
 @keyframes blink {
-    0% { opacity: .0; }
-    20% { opacity: 1; }
-    100% { opacity: .0; }
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .header-status .header-progress {
     animation-name: blink;
-    animation-duration: 1.0s;
+    animation-duration: 1s;
     animation-iteration-count: infinite;
     animation-fill-mode: both;
 }
 
 .header-status .header-progress:nth-of-type(3) {
-    animation-delay: .15s;
+    animation-delay: 0.15s;
 }
 
 .header-status .header-progress:nth-of-type(4) {
-    animation-delay: .3s;
+    animation-delay: 0.3s;
 }
 
-.header-search-input{
+.header-search-input {
     padding: 0 0 0 24px;
     overflow: hidden;
 }
@@ -118,15 +114,14 @@
     overflow: hidden;
 }
 [contenteditable='true']#header-search-inputbox br {
-    display:none;
-
+    display: none;
 }
 [contenteditable='true']#header-search-inputbox * {
-    display:inline;
-    white-space:nowrap;
+    display: inline;
+    white-space: nowrap;
 }
 
-#header-search-inputbox{
+#header-search-inputbox {
     box-shadow: 0 0 0 0;
     padding: 22px 0 22px 0;
     white-space: pre-wrap;
@@ -134,13 +129,13 @@
 
 #header-search-inputbox:empty::before {
     content: attr(placeholder);
-    color: #8E9396;
+    color: #8e9396;
     pointer-events: none;
 }
 
 #header-search-inputbox:empty:active::before,
 #header-search-inputbox:empty:focus::before {
-    opacity: .75;
+    opacity: 0.75;
 }
 
 #header-search-inputbox:focus {

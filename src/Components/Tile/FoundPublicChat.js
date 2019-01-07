@@ -18,10 +18,13 @@ import './FoundPublicChat.css';
 
 const styles = theme => ({
     listItem: {
-        padding: '0px'
+        padding: 0
     },
     listItemSelected: {
         backgroundColor: theme.palette.primary.main + '!important'
+    },
+    foundPublicChatSubtitle: {
+        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
     }
 });
 
@@ -36,13 +39,17 @@ class FoundPublicChat extends React.PureComponent {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId } = this.props;
+        const { chatId, theme } = this.props;
 
         if (nextState.nextChatId === chatId) {
             return true;
         }
 
         if (nextState.previousChatId === chatId) {
+            return true;
+        }
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -81,25 +88,24 @@ class FoundPublicChat extends React.PureComponent {
         const membersCount = getGroupChatMembersCount(chatId);
         let subscribersString = '';
         if (membersCount > 0) {
-            subscribersString =
-                membersCount === 1 ? ', 1 subscriber' : `, ${membersCount} subscribers`;
+            subscribersString = membersCount === 1 ? ', 1 subscriber' : `, ${membersCount} subscribers`;
         }
 
         return (
             <ListItem button classes={{ root: classes.listItem }} onClick={onClick}>
                 <div
                     className={classNames('found-public-chat', {
+                        [classes.listItemSelected]: chatId === selectedChatId,
                         'accent-background': chatId === selectedChatId
                     })}
-                    onClick={this.handleClick}
-                >
+                    onClick={this.handleClick}>
                     <ChatTileControl chatId={chatId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />
                         </div>
                         <div className='tile-second-row'>
-                            <div className='dialog-content'>
+                            <div className={classNames('dialog-content', classes.foundPublicChatSubtitle)}>
                                 @{username}
                                 {subscribersString}
                             </div>
@@ -116,4 +122,4 @@ FoundPublicChat.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withStyles(styles)(FoundPublicChat);
+export default withStyles(styles, { withTheme: true })(FoundPublicChat);

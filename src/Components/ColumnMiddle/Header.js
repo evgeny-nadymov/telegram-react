@@ -36,6 +36,9 @@ const styles = theme => ({
     moreIconButton: {
         margin: '8px 12px 8px 0'
     },
+    headerStatusAccentTitle: {
+        color: theme.palette.primary.dark + '!important'
+    },
     ...borderStyle(theme)
 });
 
@@ -53,6 +56,7 @@ class Header extends Component {
         if (nextState !== this.state) {
             return true;
         }
+
         if (nextProps.theme !== this.props.theme) {
             return true;
         }
@@ -310,24 +314,27 @@ class Header extends Component {
                 <div
                     className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
                     onClick={this.openChatDetails}>
-                    <span className="header-status-content">{title}</span>
+                    <span className='header-status-content'>{title}</span>
                     {showProgressAnimation && (
                         <>
-                            <span className="header-progress">.</span>
-                            <span className="header-progress">.</span>
-                            <span className="header-progress">.</span>
+                            <span className='header-progress'>.</span>
+                            <span className='header-progress'>.</span>
+                            <span className='header-progress'>.</span>
                         </>
                     )}
-                    <span className={isAccentSubtitle ? 'header-status-title-accent' : 'header-status-title'}>
+                    <span
+                        className={classNames('header-status-title', {
+                            [classes.headerStatusAccentTitle]: isAccentSubtitle
+                        })}>
                         {subtitle}
                     </span>
-                    <span className="header-status-tail" />
+                    <span className='header-status-tail' />
                 </div>
                 {chat && (
                     <>
                         <IconButton
                             className={classes.messageSearchIconButton}
-                            aria-label="Search"
+                            aria-label='Search'
                             onClick={this.handleSearchChat}>
                             <SearchIcon />
                         </IconButton>
