@@ -8,13 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-import ThemeWrapper from './ThemeWrapper';
+import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
 
 ReactDOM.render(
     <Router>
-        <Route path="" component={ThemeWrapper} />
+        <Route path='' component={TelegramApp} />
     </Router>,
     document.getElementById('root')
 );

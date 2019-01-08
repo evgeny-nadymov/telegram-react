@@ -7,7 +7,10 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { MuiThemeProvider, createMuiTheme, withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
+import { compose } from 'recompose';
+import withLanguage from './Language';
+import withTheme from './Theme';
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
@@ -277,4 +280,10 @@ window.onpopstate = function() {
     window.history.go(1);
 };
 
-export default withStyles(styles)(TelegramApp);
+const enhance = compose(
+    withLanguage,
+    withTheme,
+    withStyles(styles)
+);
+
+export default enhance(TelegramApp);

@@ -10,6 +10,8 @@ import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
+import { withNamespaces } from 'react-i18next';
+import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
 import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
@@ -58,6 +60,10 @@ class Header extends Component {
         }
 
         if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
+        if (nextProps.lng !== this.props.lng) {
             return true;
         }
 
@@ -238,7 +244,7 @@ class Header extends Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { authorizationState, connectionState } = this.state;
         const chatId = ApplicationStore.getChatId();
         const chat = ChatStore.get(chatId);
@@ -251,7 +257,7 @@ class Header extends Component {
         if (connectionState) {
             switch (connectionState['@type']) {
                 case 'connectionStateConnecting':
-                    title = 'Connecting';
+                    title = t('Connecting');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -263,12 +269,12 @@ class Header extends Component {
                 case 'connectionStateReady':
                     break;
                 case 'connectionStateUpdating':
-                    title = 'Updating';
+                    title = t('Updating');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateWaitingForNetwork':
-                    title = 'Waiting for network';
+                    title = t('Waiting for network');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -280,7 +286,7 @@ class Header extends Component {
                 case ' authorizationStateClosing':
                     break;
                 case 'authorizationStateLoggingOut':
-                    title = 'Logging out';
+                    title = t('Logging out');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -289,7 +295,7 @@ class Header extends Component {
                 case 'authorizationStateWaitCode':
                     break;
                 case 'authorizationStateWaitEncryptionKey':
-                    title = 'Loading';
+                    title = t('Loading');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -298,13 +304,13 @@ class Header extends Component {
                 case 'authorizationStateWaitPhoneNumber':
                     break;
                 case 'authorizationStateWaitTdlibParameters':
-                    title = 'Loading';
+                    title = t('Loading');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
             }
         } else {
-            title = 'Loading';
+            title = t('Loading');
             subtitle = '';
             showProgressAnimation = true;
         }
@@ -346,4 +352,9 @@ class Header extends Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(Header);
+const enhance = compose(
+    withNamespaces(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(Header);

@@ -12,6 +12,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
 import ThemePicker from './ThemePicker';
+import LanguagePicker from './LanguagePicker';
 import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -81,6 +82,17 @@ class MainMenuButton extends React.Component {
         this.themePicker.open();
     };
 
+    handleLanguage = event => {
+        this.handleMenuClose();
+
+        this.languagePicker.open();
+    };
+
+    setRef = ref => {
+        console.log(this);
+        this.languagePicker = ref;
+    };
+
     render() {
         const { classes } = this.props;
         const { anchorEl, authorizationState } = this.state;
@@ -88,7 +100,7 @@ class MainMenuButton extends React.Component {
         const mainMenuControl = isAuthorizationReady(authorizationState) ? (
             <>
                 <Menu
-                    id="main-menu"
+                    id='main-menu'
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={this.handleMenuClose}
@@ -96,6 +108,7 @@ class MainMenuButton extends React.Component {
                     anchorOrigin={menuAnchorOrigin}>
                     <MenuItem onClick={this.handleCheckUpdates}>Check for updates</MenuItem>
                     <MenuItem onClick={this.handleAppearance}>Appearance</MenuItem>
+                    <MenuItem onClick={this.handleLanguage}>Language</MenuItem>
                     <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
                 </Menu>
             </>
@@ -105,14 +118,15 @@ class MainMenuButton extends React.Component {
             <>
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
-                    aria-haspopup="true"
+                    aria-haspopup='true'
                     className={classes.menuIconButton}
-                    aria-label="Menu"
+                    aria-label='Menu'
                     onClick={this.handleMenuOpen}>
                     <MenuIcon />
                 </IconButton>
                 {mainMenuControl}
                 <ThemePicker innerRef={ref => (this.themePicker = ref)} />
+                <LanguagePicker ref={ref => (this.languagePicker = ref)} />
             </>
         );
     }

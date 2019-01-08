@@ -95,7 +95,6 @@ class ThemePicker extends React.Component {
             type: event.target.value,
             primary: this.getColor(this.state.color)
         });
-        //onThemeChange(event.target.value, this.getColor(this.state.accent));
     };
 
     handleAccentChange = event => {
@@ -105,8 +104,6 @@ class ThemePicker extends React.Component {
             type: this.state.type,
             primary: this.getColor(event.target.value)
         });
-
-        //onThemeChange(this.state.value, this.getColor(event.target.value));
     };
 
     getColorString = value => {
