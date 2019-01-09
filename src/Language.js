@@ -23,7 +23,21 @@ i18n.use(reactI18nextModule) // passes i18n down to react-i18next
                     AppName: 'Telegram',
                     Loading: 'Loading',
                     Connecting: 'Connecting',
-                    Updating: 'Updating'
+                    Updating: 'Updating',
+                    Search: 'Search',
+                    NotEmojiFound: 'No Emoji Found',
+                    ChooseDefaultSkinTone: 'Choose your default skin tone',
+                    SearchResults: 'Search Results',
+                    Recent: 'Frequently Used',
+                    SmileysPeople: 'Smileys & People',
+                    AnimalsNature: 'Animals & Nature',
+                    FoodDrink: 'Food & Drink',
+                    Activity: 'Activity',
+                    TravelPlaces: 'Travel & Places',
+                    Objects: 'Objects',
+                    Symbols: 'Symbols',
+                    Flags: 'Flags',
+                    Custom: 'Custom'
                 }
             },
             ru: {
@@ -31,7 +45,21 @@ i18n.use(reactI18nextModule) // passes i18n down to react-i18next
                     AppName: 'Телеграм',
                     Loading: 'Загрузка',
                     Connecting: 'Соединение',
-                    Updating: 'Обновление'
+                    Updating: 'Обновление',
+                    Search: 'Поиск',
+                    NotEmojiFound: 'Емодзи не найдены',
+                    ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
+                    SearchResults: 'Результаты поиска',
+                    Recent: 'Часто используемые',
+                    SmileysPeople: 'Смайлики и люди',
+                    AnimalsNature: 'Животные и природа',
+                    FoodDrink: 'Еда и напитки',
+                    Activity: 'Активность',
+                    TravelPlaces: 'Путешествия и местности',
+                    Objects: 'Предметы',
+                    Symbols: 'Символы',
+                    Flags: 'Флаги',
+                    Custom: 'Пользовательские'
                 }
             }
         },
@@ -52,13 +80,15 @@ function withLanguage(WrappedComponent) {
             ApplicationStore.removeListener('clientUpdateLanguageChanging', this.onClientUpdateLanguageChanging);
         }
 
-        onClientUpdateLanguageChanging = update => {
+        onClientUpdateLanguageChanging = async update => {
             const { language } = update;
 
             const cookies = new Cookies();
             cookies.set('languageOptions', { language: language });
 
-            i18n.changeLanguage(language);
+            await i18n.changeLanguage(language);
+
+            ApplicationStore.emit('clientUpdateLanguageChange');
         };
 
         render() {
