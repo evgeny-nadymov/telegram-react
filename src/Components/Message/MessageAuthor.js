@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
-import { getChatTitle } from '../../Utils/Chat';
+import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import './MessageAuthor.css';
@@ -36,10 +38,15 @@ class MessageAuthor extends React.Component {
 
         const user = UserStore.get(userId);
         if (user) {
+            const tileColor = isPrivateChat(chatId)
+                ? 'message-author-color'
+                : `user_color_${(Math.abs(userId) % 8) + 1}`;
+            const className = classNames([tileColor], 'message-author');
+
             const fullName = getUserFullName(user);
 
             return onSelectUser ? (
-                <a className='message-author' onClick={this.handleSelect}>
+                <a className={className} onClick={this.handleSelect}>
                     {fullName}
                 </a>
             ) : (
@@ -49,10 +56,12 @@ class MessageAuthor extends React.Component {
 
         const chat = ChatStore.get(chatId);
         if (chat) {
+            const className = classNames('message-author-color', 'message-author');
+
             const fullName = getChatTitle(chatId, false);
 
             return onSelectChat ? (
-                <a className='message-author' onClick={this.handleSelect}>
+                <a className={className} onClick={this.handleSelect}>
                     {fullName}
                 </a>
             ) : (
@@ -63,5 +72,12 @@ class MessageAuthor extends React.Component {
         return null;
     }
 }
+
+MessageAuthor.propTypes = {
+    chatId: PropTypes.number,
+    userId: PropTypes.number,
+    onSelectUser: PropTypes.func,
+    onSelectChat: PropTypes.func
+};
 
 export default MessageAuthor;

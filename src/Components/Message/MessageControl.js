@@ -254,7 +254,7 @@ class MessageControl extends Component {
                                 />
                             )}
                             {forward && (
-                                <div className='message-author'>
+                                <div className='message-author message-author-color'>
                                     Forwarded from <a onClick={this.openForward}>{forward}</a>
                                 </div>
                             )}

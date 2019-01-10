@@ -85,14 +85,6 @@ pre code {
     align-items: baseline;
 }
 
-.message-author {
-    margin: 0 0 4px;
-    color: #3a6d99;
-    font-weight: 500;
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
 .message-text {
     white-space: pre-wrap; // /n and /r/n as line breaks
     word-wrap: break-word;
