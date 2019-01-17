@@ -718,13 +718,35 @@ function hasBasicGroupId(chatId, basicGroupId) {
     return type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === basicGroupId;
 }
 
+function isSupergroup(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    return type && type['@type'] === 'chatTypeSupergroup';
+}
+
+function getSupergroupId(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    if (type && type['@type'] === 'chatTypeSupergroup') {
+        return type.supergroup_id;
+    }
+
+    return 0;
+}
+
 function hasSupergroupId(chatId, supergroupId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
     const { type } = chat;
 
-    return type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === supergroupId;
+    return isSupergroup(chatId) && type.supergroup_id === supergroupId;
 }
 
 function hasUserId(chatId, userId) {
@@ -930,6 +952,8 @@ export {
     getChatFullInfo,
     hasBasicGroupId,
     hasSupergroupId,
+    isSupergroup,
+    getSupergroupId,
     hasUserId,
     getChatUserId,
     getPhotoFromChat,

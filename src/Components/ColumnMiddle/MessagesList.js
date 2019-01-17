@@ -16,9 +16,10 @@ import { debounce, getPhotoSize, itemsInView } from '../../Utils/Common';
 import { loadChatsContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendFiles, getChatFullInfo } from '../../Utils/Chat';
+import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { MESSAGE_SLICE_LIMIT } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
+import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -197,7 +198,7 @@ class MessagesList extends React.Component {
 
         const history = [message];
 
-        this.insertAfter(history, scrollBehavior);
+        this.insertAfter(this.filterMessages(history), scrollBehavior);
         const store = FileStore.getStore();
         loadMessageContents(store, history);
         MessagesList.viewMessages(history);
@@ -257,6 +258,7 @@ class MessagesList extends React.Component {
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
+        this.loadMigratedHistory = false;
 
         if (chat) {
             let sessionId = this.sessionId;
@@ -405,6 +407,11 @@ class MessagesList extends React.Component {
         if (!chatId) return;
         if (this.loading) return;
 
+        if (this.loadMigratedHistory) {
+            this.onLoadMigratedHistory();
+            return;
+        }
+
         let fromMessageId = 0;
         if (this.state.history && this.state.history.length > 0) {
             fromMessageId = this.state.history[0].id;
@@ -428,12 +435,75 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertBefore(result.messages);
+        this.insertBefore(this.filterMessages(result.messages), () => {
+            if (!result.messages.length) {
+                this.onLoadMigratedHistory();
+            }
+        });
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
 
         return result;
+    };
+
+    filterMessages = messages => {
+        return messages.filter(x => x.content['@type'] !== 'messageChatUpgradeTo');
+    };
+
+    onLoadMigratedHistory = async () => {
+        const { chatId } = this.props;
+
+        if (!chatId) return;
+        if (this.loading) return;
+
+        const supergroupId = getSupergroupId(chatId);
+        if (!supergroupId) return;
+
+        const fullInfo = SupergroupStore.getFullInfo(supergroupId);
+        if (!fullInfo) return;
+        if (!fullInfo.upgraded_from_basic_group_id) return;
+
+        this.loadMigratedHistory = true;
+
+        const basicGroupChat = await TdLibController.send({
+            '@type': 'createBasicGroupChat',
+            basic_group_id: fullInfo.upgraded_from_basic_group_id
+        });
+
+        if (!basicGroupChat) return;
+
+        let fromMessageId = 0;
+        if (
+            this.state.history &&
+            this.state.history.length > 0 &&
+            this.state.history[0].chat_id === basicGroupChat.id
+        ) {
+            fromMessageId = this.state.history[0].id;
+        }
+
+        this.loading = true;
+        let result = await TdLibController.send({
+            '@type': 'getChatHistory',
+            chat_id: basicGroupChat.id,
+            from_message_id: fromMessageId,
+            offset: 0,
+            limit: MESSAGE_SLICE_LIMIT
+        }).finally(() => {
+            this.loading = false;
+        });
+
+        if (this.props.chatId !== chatId) {
+            return;
+        }
+        //TODO: replace result with one-way data flow
+
+        MessageStore.setItems(result.messages);
+        result.messages.reverse();
+        this.insertBefore(this.filterMessages(result.messages));
+        const store = FileStore.getStore();
+        loadMessageContents(store, result.messages);
+        MessagesList.viewMessages(result.messages);
     };
 
     onLoadPrevious = async () => {
@@ -476,7 +546,7 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertAfter(result.messages, ScrollBehaviorEnum.NONE);
+        this.insertAfter(this.filterMessages(result.messages), ScrollBehaviorEnum.NONE);
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
@@ -492,7 +562,10 @@ class MessagesList extends React.Component {
     }
 
     insertBefore(history, callback) {
-        if (history.length === 0) return;
+        if (history.length === 0) {
+            if (callback) callback();
+            return;
+        }
 
         this.setState(
             { history: history.concat(this.state.history), scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION },
@@ -736,38 +809,37 @@ class MessagesList extends React.Component {
         const { history, separatorMessageId, dragging } = this.state;
 
         this.itemsMap.clear();
-        this.messages = history.map(
-            (x, i) =>
-                isServiceMessage(x) ? (
-                    <ServiceMessageControl
-                        key={x.id}
-                        ref={el => this.itemsMap.set(i, el)}
-                        chatId={x.chat_id}
-                        messageId={x.id}
-                        onSelectChat={onSelectChat}
-                        onSelectUser={onSelectUser}
-                        showUnreadSeparator={separatorMessageId === x.id}
-                    />
-                ) : (
-                    <MessageControl
-                        key={x.id}
-                        ref={el => this.itemsMap.set(i, el)}
-                        chatId={x.chat_id}
-                        messageId={x.id}
-                        showTitle={true}
-                        sendingState={x.sending_state}
-                        onSelectChat={onSelectChat}
-                        onSelectUser={onSelectUser}
-                        showUnreadSeparator={separatorMessageId === x.id}
-                    />
-                )
+        this.messages = history.map((x, i) =>
+            isServiceMessage(x) ? (
+                <ServiceMessageControl
+                    key={x.id}
+                    ref={el => this.itemsMap.set(i, el)}
+                    chatId={x.chat_id}
+                    messageId={x.id}
+                    onSelectChat={onSelectChat}
+                    onSelectUser={onSelectUser}
+                    showUnreadSeparator={separatorMessageId === x.id}
+                />
+            ) : (
+                <MessageControl
+                    key={x.id}
+                    ref={el => this.itemsMap.set(i, el)}
+                    chatId={x.chat_id}
+                    messageId={x.id}
+                    showTitle={true}
+                    sendingState={x.sending_state}
+                    onSelectChat={onSelectChat}
+                    onSelectUser={onSelectUser}
+                    showUnreadSeparator={separatorMessageId === x.id}
+                />
+            )
         );
 
         return (
             <div className={classNames(classes.background, 'messages-list')} onDragEnter={this.handleListDragEnter}>
-                <div ref={this.listRef} className="messages-list-wrapper" onScroll={this.handleScroll}>
-                    <div className="messages-list-top" />
-                    <div ref={this.itemsRef} className="messages-list-items">
+                <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
+                    <div className='messages-list-top' />
+                    <div ref={this.itemsRef} className='messages-list-items'>
                         {this.messages}
                     </div>
                 </div>

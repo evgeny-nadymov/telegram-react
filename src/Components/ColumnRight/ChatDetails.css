@@ -14,17 +14,16 @@
     flex-direction: column;
 }
 
-.chat-details-info{
+.chat-details-info {
     margin: 10px 22px;
 }
 
-.chat-details-list{
+.chat-details-list {
     overflow-y: scroll;
     flex-grow: 1;
     flex-shrink: 1;
-    transform: translateZ(0);
 }
 
-.chat-details-info-icon{
+.chat-details-info-icon {
     transform: rotateZ(180deg);
 }

@@ -44,69 +44,69 @@ function isServiceMessage(message) {
     return serviceMap.has(message.content['@type']) || message.ttl > 0;
 }
 
-function getTTLString(ttl){
-    if (ttl < 60){
+function getTTLString(ttl) {
+    if (ttl < 60) {
         const seconds = ttl === 1 ? 'second' : 'seconds';
         return `${ttl} ${seconds}`;
     }
-    if (ttl < 60 * 60){
+    if (ttl < 60 * 60) {
         const minutes = Math.floor(ttl / 60) === 1 ? 'minute' : 'minutes';
         return `${ttl} ${minutes}`;
     }
-    if (ttl < 24 * 60 * 60){
+    if (ttl < 24 * 60 * 60) {
         const hours = Math.floor(ttl / 60 / 60) === 1 ? 'hour' : 'hours';
         return `${ttl} ${hours}`;
     }
-    if (ttl < 7 * 24 * 60 * 60){
+    if (ttl < 7 * 24 * 60 * 60) {
         const days = Math.floor(ttl / 60 / 60 / 24) === 1 ? 'day' : 'days';
         return `${ttl} ${days}`;
     }
-    if (ttl === 7 * 24 * 60 * 60){
+    if (ttl === 7 * 24 * 60 * 60) {
         return '1 week';
     }
 
     return `${ttl} seconds`;
 }
 
-function getPassportElementTypeString(type){
+function getPassportElementTypeString(type) {
     switch (type['@type']) {
-        case 'passportElementTypeAddress' : {
+        case 'passportElementTypeAddress': {
             return 'Address';
         }
-        case 'passportElementTypeBankStatement' : {
+        case 'passportElementTypeBankStatement': {
             return 'Bank Statement';
         }
-        case 'passportElementTypeDriverLicense' : {
+        case 'passportElementTypeDriverLicense': {
             return 'Driver Licence';
         }
-        case 'passportElementTypeEmailAddress' : {
+        case 'passportElementTypeEmailAddress': {
             return 'Email';
         }
-        case 'passportElementTypeIdentityCard' : {
+        case 'passportElementTypeIdentityCard': {
             return 'Identity Card';
         }
-        case 'passportElementTypeInternalPassport' : {
+        case 'passportElementTypeInternalPassport': {
             return 'Internal Passport';
         }
-        case 'passportElementTypePassport' : {
+        case 'passportElementTypePassport': {
             return 'Passport';
         }
-        case 'passportElementTypePassportRegistration' : {
+        case 'passportElementTypePassportRegistration': {
             return 'Passport Registration';
         }
-        case 'passportElementTypePersonalDetails' : {
+        case 'passportElementTypePersonalDetails': {
             return 'Personal details';
         }
-        case 'passportElementTypePhoneNumber' : {
+        case 'passportElementTypePhoneNumber': {
             return 'Phone Number';
         }
-        case 'passportElementTypeRentalAgreement' : {
+        case 'passportElementTypeRentalAgreement': {
             return 'Tenancy Agreement';
         }
-        case 'passportElementTypeTemporaryRegistration' : {
+        case 'passportElementTypeTemporaryRegistration': {
             return 'Temporary Registration';
         }
-        case 'passportElementTypeUtilityBill' : {
+        case 'passportElementTypeUtilityBill': {
             return 'Utility Bill';
         }
     }
@@ -117,8 +117,8 @@ function getPassportElementTypeString(type){
 function getMessageAuthor(message, onSelectUser) {
     if (!message) return null;
 
-    if (message.sender_user_id !== 0){
-        return (<MessageAuthor userId={message.sender_user_id} onSelect={onSelectUser}/>);
+    if (message.sender_user_id !== 0) {
+        return <MessageAuthor userId={message.sender_user_id} onSelect={onSelectUser} />;
     }
 
     const chat = ChatStore.get(message.chat_id);
@@ -127,7 +127,7 @@ function getMessageAuthor(message, onSelectUser) {
     return chat.title;
 }
 
-function getServiceMessageContent(message, onSelectUser){
+function getServiceMessageContent(message, onSelectUser) {
     if (!message) return null;
     if (!message.content) return null;
 
@@ -136,41 +136,41 @@ function getServiceMessageContent(message, onSelectUser){
     const chat = ChatStore.get(message.chat_id);
     const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
 
-    const {content} = message;
-    if (message.ttl > 0){
+    const { content } = message;
+    if (message.ttl > 0) {
         switch (content['@type']) {
-            case 'messagePhoto' : {
+            case 'messagePhoto': {
                 if (isOutgoing) {
                     return 'You sent a self-destructing photo. Please view it on your mobile';
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                         {' sent a self-destructing photo. Please view it on your mobile'}
                     </>
                 );
             }
-            case 'messageVideo' : {
+            case 'messageVideo': {
                 if (isOutgoing) {
                     return 'You sent a self-destructing video. Please view it on your mobile';
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                         {' sent a self-destructing video. Please view it on your mobile'}
                     </>
                 );
             }
-            default : {
+            default: {
                 if (isOutgoing) {
                     return 'You sent a self-destructing message. Please view it on your mobile';
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                         {' sent a self-destructing message. Please view it on your mobile'}
                     </>
                 );
@@ -179,161 +179,151 @@ function getServiceMessageContent(message, onSelectUser){
     }
 
     switch (content['@type']) {
-        case 'messageBasicGroupChatCreate' : {
-            const {title} = ChatStore.get(message.chat_id);
+        case 'messageBasicGroupChatCreate': {
+            const { title } = ChatStore.get(message.chat_id);
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return `You created group «${title}»`;
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` created group «${title}»`}
                 </>
             );
         }
-        case 'messageChatAddMembers' : {
+        case 'messageChatAddMembers': {
             const members = content.member_user_ids
-                .map(x => <MessageAuthor userId={x} onSelectUser={onSelectUser}/>)
+                .map(x => <MessageAuthor userId={x} onSelectUser={onSelectUser} />)
                 .reduce((accumulator, current, index, array) => {
-                    const separator = index === array.length - 1 ? ' and ': ', ';
-                    return accumulator === null ? [current] : [...accumulator, separator, current]
+                    const separator = index === array.length - 1 ? ' and ' : ', ';
+                    return accumulator === null ? [current] : [...accumulator, separator, current];
                 }, null);
 
             if (isOutgoing) {
-                return me
-                && content.member_user_ids.length === 1
-                && content.member_user_ids[0] === me.id
-                    ? 'You joined the group'
-                    : (
-                        <>
-                            {'You added '}
-                            {members}
-                        </>
-                    );
-            }
-
-            return content.member_user_ids.length === 1
-            && content.member_user_ids[0] === message.sender_user_id
-                ? (
+                return me && content.member_user_ids.length === 1 && content.member_user_ids[0] === me.id ? (
+                    'You joined the group'
+                ) : (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
-                        {' joined the group'}
-                    </>
-                )
-                : (
-                    <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
-                        {' added '}
+                        {'You added '}
                         {members}
                     </>
                 );
+            }
+
+            return content.member_user_ids.length === 1 && content.member_user_ids[0] === message.sender_user_id ? (
+                <>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
+                    {' joined the group'}
+                </>
+            ) : (
+                <>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
+                    {' added '}
+                    {members}
+                </>
+            );
         }
-        case 'messageChatChangePhoto' : {
-            if (isChannel){
+        case 'messageChatChangePhoto': {
+            if (isChannel) {
                 return 'Channel photo updated';
             }
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return 'You updated group photo';
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` updated group photo`}
                 </>
             );
         }
-        case 'messageChatChangeTitle' : {
-            const {title} = content;
+        case 'messageChatChangeTitle': {
+            const { title } = content;
 
-            if (isChannel){
+            if (isChannel) {
                 return `Channel name was changed to «${title}»`;
             }
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return `You changed group name to «${title}»`;
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` changed group name to «${title}»`}
                 </>
             );
         }
-        case 'messageChatDeleteMember' : {
-
+        case 'messageChatDeleteMember': {
             if (isOutgoing) {
-                return me && content.user_id === me.id
-                    ? 'You left the group'
-                    : (
-                        <>
-                            {'You removed '}
-                            <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser}/>
-                        </>
-                    );
-            }
-
-            return content.user_id === message.sender_user_id
-                ? (
+                return me && content.user_id === me.id ? (
+                    'You left the group'
+                ) : (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
-                        {' left the group'}
-                    </>
-                )
-                : (
-                    <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
-                        {' removed '}
-                        <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser}/>
+                        {'You removed '}
+                        <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser} />
                     </>
                 );
-        }
-        case 'messageChatDeletePhoto' : {
+            }
 
-            if (isChannel){
+            return content.user_id === message.sender_user_id ? (
+                <>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
+                    {' left the group'}
+                </>
+            ) : (
+                <>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
+                    {' removed '}
+                    <MessageAuthor userId={content.user_id} onSelectUser={onSelectUser} />
+                </>
+            );
+        }
+        case 'messageChatDeletePhoto': {
+            if (isChannel) {
                 return 'Channel photo removed';
             }
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return 'You removed group photo';
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {' removed group photo'}
                 </>
             );
         }
-        case 'messageChatJoinByLink' : {
-
+        case 'messageChatJoinByLink': {
             if (isOutgoing) {
                 return 'You joined the group via invite link';
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {' joined the group via invite link'}
                 </>
             );
         }
-        case 'messageChatSetTtl' : {
-            const {ttl} = content;
+        case 'messageChatSetTtl': {
+            const { ttl } = content;
             const ttlString = getTTLString(ttl);
 
-            if (ttl <= 0){
-                if (isOutgoing){
+            if (ttl <= 0) {
+                if (isOutgoing) {
                     return 'You disabled the self-destruct timer';
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                        <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                         {' disabled the self-destruct timer'}
                     </>
                 );
@@ -345,97 +335,100 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` set the self-destruct timer to ${ttlString}`}
                 </>
             );
         }
-        case 'messageChatUpgradeFrom' : {
+        case 'messageChatUpgradeFrom': {
             return 'The group was upgraded to a supergroup';
         }
-        case 'messageChatUpgradeTo' : {
-            const supergroup = SupergroupStore.get(content.supergroup_id);
-            const title = supergroup ? supergroup.title : '';
-
-            return `Chat migrated to channel «${title}»`;
+        case 'messageChatUpgradeTo': {
+            return 'Group migrated to a supergroup';
         }
-        case 'messageContactRegistered' : {
+        case 'messageContactRegistered': {
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {' just joined Telegram'}
                 </>
             );
         }
-        case 'messageCustomServiceAction' : {
+        case 'messageCustomServiceAction': {
             return content.text;
         }
-        case 'messageGameScore' : {
+        case 'messageGameScore': {
             const messageGame = MessageStore.get(message.chat_id, content.game_message_id);
-            if (messageGame
-                && messageGame.content
-                && messageGame.content['@type'] === 'messageGame'
-                && messageGame.content.game){
+            if (
+                messageGame &&
+                messageGame.content &&
+                messageGame.content['@type'] === 'messageGame' &&
+                messageGame.content.game
+            ) {
+                const { game } = messageGame.content;
 
-                const {game} = messageGame.content;
-
-                if (isOutgoing){
+                if (isOutgoing) {
                     return `You scored ${content.score} in «${game.title}»`;
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={messageGame.sender_user_id} onSelectUser={onSelectUser}/>
+                        <MessageAuthor userId={messageGame.sender_user_id} onSelectUser={onSelectUser} />
                         {` scored ${content.score} in «${game.title}»`}
                     </>
                 );
             }
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return `You scored ${content.score}`;
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` scored ${content.score}`}
                 </>
             );
         }
-        case 'messagePassportDataReceived' : {
+        case 'messagePassportDataReceived': {
             return 'Telegram Passport data received';
         }
-        case 'messagePassportDataSent' : {
+        case 'messagePassportDataSent': {
             const chat = ChatStore.get(message.chat_id);
 
-            const passportElementTypes = content.types.map(x => getPassportElementTypeString(x))
+            const passportElementTypes = content.types
+                .map(x => getPassportElementTypeString(x))
                 .reduce((accumulator, current) => {
-                    return accumulator === null ? [current] : [...accumulator, ', ', current]
+                    return accumulator === null ? [current] : [...accumulator, ', ', current];
                 }, null);
 
             return (
                 <>
-                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser} />
                     {' received the following documents: '}
                     {passportElementTypes}
                 </>
             );
         }
-        case 'messagePaymentSuccessful' : {
+        case 'messagePaymentSuccessful': {
             const chat = ChatStore.get(message.chat_id);
 
             const messageInvoice = MessageStore.get(message.chat_id, content.invoice_message_id);
-            if (messageInvoice
-                && messageInvoice.content
-                && messageInvoice.content['@type'] === 'messageInvoice'
-                && messageInvoice.content.invoice){
-
-                const {invoice} = messageInvoice.content;
+            if (
+                messageInvoice &&
+                messageInvoice.content &&
+                messageInvoice.content['@type'] === 'messageInvoice' &&
+                messageInvoice.content.invoice
+            ) {
+                const { invoice } = messageInvoice.content;
 
                 return (
                     <>
-                        {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                        <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
+                        {`You have just successfully transferred ${Currency.getString(
+                            content.total_amount,
+                            content.currency
+                        )} to `}
+                        <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser} />
                         {` for ${invoice.title}`}
                     </>
                 );
@@ -443,18 +436,21 @@ function getServiceMessageContent(message, onSelectUser){
 
             return (
                 <>
-                    {`You have just successfully transferred ${Currency.getString(content.total_amount, content.currency)} to `}
-                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser}/>
+                    {`You have just successfully transferred ${Currency.getString(
+                        content.total_amount,
+                        content.currency
+                    )} to `}
+                    <MessageAuthor userId={chat.type.user_id} onSelectUser={onSelectUser} />
                 </>
             );
         }
-        case 'messagePaymentSuccessfulBot' : {
+        case 'messagePaymentSuccessfulBot': {
             return 'Payment successful';
         }
-        case 'messagePinMessage' : {
+        case 'messagePinMessage': {
             const author = getMessageAuthor(message, onSelectUser);
             const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
-            if (!pinnedMessage || !pinnedMessage.content){
+            if (!pinnedMessage || !pinnedMessage.content) {
                 return (
                     <>
                         {author}
@@ -464,88 +460,86 @@ function getServiceMessageContent(message, onSelectUser){
             }
 
             let pinnedContent = ' pinned a message';
-            if (isServiceMessage(pinnedMessage)){
+            if (isServiceMessage(pinnedMessage)) {
                 pinnedContent = ' pinned a service message';
-            }
-            else{
+            } else {
                 switch (pinnedMessage.content['@type']) {
-                    case 'messageAnimation' : {
+                    case 'messageAnimation': {
                         pinnedContent = ' pinned a GIF';
                         break;
                     }
-                    case 'messageAudio' : {
+                    case 'messageAudio': {
                         pinnedContent = ' pinned a track';
                         break;
                     }
-                    case 'messageCall' : {
+                    case 'messageCall': {
                         pinnedContent = ' pinned a call';
                         break;
                     }
-                    case 'messageContact' : {
+                    case 'messageContact': {
                         pinnedContent = ' pinned a contact';
                         break;
                     }
-                    case 'messageDocument' : {
+                    case 'messageDocument': {
                         pinnedContent = ' pinned a file';
                         break;
                     }
-                    case 'messageExpiredPhoto' : {
+                    case 'messageExpiredPhoto': {
                         pinnedContent = ' pinned a photo';
                         break;
                     }
-                    case 'messageExpiredVideo' : {
+                    case 'messageExpiredVideo': {
                         pinnedContent = ' pinned a video';
                         break;
                     }
-                    case 'messageGame' : {
+                    case 'messageGame': {
                         pinnedContent = ' pinned a game';
                         break;
                     }
-                    case 'messageInvoice' : {
+                    case 'messageInvoice': {
                         pinnedContent = ' pinned an invoice';
                         break;
                     }
-                    case 'messageLocation' : {
+                    case 'messageLocation': {
                         pinnedContent = ' pinned a map';
                         break;
                     }
-                    case 'messagePhoto' : {
+                    case 'messagePhoto': {
                         pinnedContent = ' pinned a photo';
                         break;
                     }
-                    case 'messageSticker' : {
+                    case 'messageSticker': {
                         pinnedContent = ' pinned a sticker';
                         break;
                     }
-                    case 'messageText' : {
+                    case 'messageText': {
                         const maxLength = 16;
                         const text = pinnedMessage.content.text.text;
-                        if (text.length <= maxLength){
+                        if (text.length <= maxLength) {
                             pinnedContent = ` pinned «${text}»`;
-                        }
-                        else{
+                        } else {
                             pinnedContent = ` pinned «${text.substring(0, maxLength)}...»`;
                         }
 
                         break;
                     }
-                    case 'messageUnsupported' : {
+                    case 'messageUnsupported': {
                         pinnedContent = ' pinned unsupported message';
                         break;
                     }
-                    case 'messageVenue' : {
+                    case 'messageVenue': {
                         pinnedContent = ' pinned a venue';
                         break;
                     }
-                    case 'messageVideo' : {
+                    case 'messageVideo': {
                         pinnedContent = ' pinned a video';
                         break;
                     }
-                    case 'messageVideoNote' : {
+                    case 'messageVideoNote': {
                         pinnedContent = ' pinned a video message';
                         break;
                     }
-                    case 'messageVoiceNote' : {
+                    case 'messageVoiceNote': {
                         pinnedContent = ' pinned a voice message';
                         break;
                     }
@@ -559,40 +553,40 @@ function getServiceMessageContent(message, onSelectUser){
                 </>
             );
         }
-        case 'messageScreenshotTaken' : {
+        case 'messageScreenshotTaken': {
             if (isOutgoing) {
                 return 'You took a screenshot!';
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {' took a screenshot!'}
                 </>
             );
         }
-        case 'messageSupergroupChatCreate' : {
-            const {title} = content;
+        case 'messageSupergroupChatCreate': {
+            const { title } = content;
 
-            if (isChannel){
+            if (isChannel) {
                 return 'Channel created';
             }
 
-            if (isOutgoing){
+            if (isOutgoing) {
                 return `You created group «${title}»`;
             }
 
             return (
                 <>
-                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser}/>
+                    <MessageAuthor userId={message.sender_user_id} onSelectUser={onSelectUser} />
                     {` created group «${title}»`}
                 </>
             );
         }
-        case 'messageUnsupported' : {
+        case 'messageUnsupported': {
             return 'Unsupported message';
         }
-        case 'messageWebsiteConnected' : {
+        case 'messageWebsiteConnected': {
             return `You allowed this bot to message you when you logged in on ${content.domain_name}.`;
         }
     }
@@ -600,7 +594,4 @@ function getServiceMessageContent(message, onSelectUser){
     return `[${message.content['@type']}]`;
 }
 
-export {
-    isServiceMessage,
-    getServiceMessageContent
-};
+export { isServiceMessage, getServiceMessageContent };

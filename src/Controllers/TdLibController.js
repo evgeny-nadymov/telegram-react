@@ -7,12 +7,7 @@
 
 import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
-import {
-    VERBOSITY_JS_MAX,
-    VERBOSITY_JS_MIN,
-    VERBOSITY_MAX,
-    VERBOSITY_MIN
-} from '../Constants';
+import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
 
 class TdLibController extends EventEmitter {
@@ -33,13 +28,7 @@ class TdLibController extends EventEmitter {
     init = location => {
         this.setParameters(location);
 
-        const {
-            verbosity,
-            jsVerbosity,
-            useTestDC,
-            readOnly,
-            fastUpdating
-        } = this.parameters;
+        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating } = this.parameters;
 
         let options = {
             verbosity: verbosity,
@@ -51,9 +40,7 @@ class TdLibController extends EventEmitter {
         };
 
         console.log(
-            `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(
-                options
-            )}`
+            `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(options)}`
         );
 
         this.client = new TdClient(options);
@@ -108,7 +95,7 @@ class TdLibController extends EventEmitter {
         return this.client.send(request);
     };
 
-    sendTdParameters = () => {
+    sendTdParameters = async () => {
         const apiId = process.env.REACT_APP_TELEGRAM_API_ID;
         const apiHash = process.env.REACT_APP_TELEGRAM_API_HASH;
 
@@ -124,6 +111,32 @@ class TdLibController extends EventEmitter {
 
         const { useTestDC } = this.parameters;
         const { version } = packageJson;
+
+        this.send({
+            '@type': 'setOption',
+            name: 'language_pack_database_path',
+            value: { '@type': 'optionValueString', value: '/tdlib/dbfs/language' }
+        });
+        this.send({
+            '@type': 'setOption',
+            name: 'localization_target',
+            value: { '@type': 'optionValueString', value: 'android' }
+        });
+        this.send({
+            '@type': 'setOption',
+            name: 'language_pack_id',
+            value: { '@type': 'optionValueString', value: 'en' }
+        });
+
+        // const result = this.send({
+        //     '@type': 'getLocalizationTargetInfo',
+        //     local: false
+        // });
+        // const result2 = this.send({
+        //     '@type': 'getLanguagePackStrings',
+        //     language_pack_id: 'ru',
+        //     keys: []
+        // });
 
         this.send({
             '@type': 'setTdlibParameters',
