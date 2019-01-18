@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
+import ActionScheduler from '../Utils/ActionScheduler';
 
 class ApplicationStore extends EventEmitter {
     constructor() {
@@ -22,11 +23,31 @@ class ApplicationStore extends EventEmitter {
         this.mediaViewerContent = null;
         this.profileMediaViewerContent = null;
         this.dragging = false;
+        this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
 
         this.addTdLibListener();
         this.addStatistics();
         this.setMaxListeners(Infinity);
     }
+
+    addScheduledAction = (key, timeout, action) => {
+        return this.actionScheduler.add(key, timeout, action);
+    };
+
+    removeScheduledAction = key => {
+        this.actionScheduler.remove(key);
+    };
+
+    handleScheduledAction = item => {
+        console.log('Invoked scheduled action', item.action);
+        if (item.action) {
+            TdLibController.send(item.action);
+        }
+    };
+
+    handleCancelScheduledAction = item => {
+        this.emit('clientUpdateCancelScheduledAction', item);
+    };
 
     onUpdate = update => {
         switch (update['@type']) {
@@ -76,10 +97,7 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'updateScopeNotificationSettings': {
-                this.setNotificationSettings(
-                    update.scope['@type'],
-                    update.notification_settings
-                );
+                this.setNotificationSettings(update.scope['@type'], update.notification_settings);
 
                 this.emit(update['@type'], update);
                 break;
@@ -205,7 +223,7 @@ class ApplicationStore extends EventEmitter {
         return this.dragging;
     };
 
-    setDragging = (value) => {
+    setDragging = value => {
         this.dragging = value;
         this.emit('clientUpdateDragging', value);
     };

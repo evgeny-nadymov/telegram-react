@@ -8,6 +8,8 @@
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import { withStyles } from '@material-ui/core/styles';
+import { withSnackbar } from 'notistack';
+import { compose } from 'recompose';
 import PhotoIcon from '@material-ui/icons/Photo';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import CallIcon from '@material-ui/icons/Call';
@@ -16,6 +18,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
+import Button from '@material-ui/core/Button';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
@@ -32,7 +35,8 @@ import {
     getChatBio,
     isGroupChat,
     getGroupChatMembers,
-    getChatFullInfo
+    getChatFullInfo,
+    isPrivateChat
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
@@ -45,6 +49,8 @@ import OptionStore from '../../Stores/OptionStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './ChatDetails.css';
+import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
+import CircularProgress from '../ColumnMiddle/MainMenuButton';
 
 const styles = theme => ({
     closeIconButton: {
@@ -112,14 +118,6 @@ class ChatDetails extends React.Component {
             return true;
         }
 
-        if (nextState.openUsernameHint !== this.state.openUsernameHint) {
-            return true;
-        }
-
-        if (nextState.openPhoneHint !== this.state.openPhoneHint) {
-            return true;
-        }
-
         return false;
     }
 
@@ -129,6 +127,7 @@ class ChatDetails extends React.Component {
             this.handleSelectChat();
         }
 
+        console.log('chatDetailsListRef', this.chatDetailsListRef);
         const list = this.chatDetailsListRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         console.log(
@@ -243,15 +242,30 @@ class ChatDetails extends React.Component {
 
         copy(usernameLink + username);
 
-        this.setState({ openUsernameHint: true, openPhoneHint: false });
+        const key = `${chatId}_copy_username`;
+        const message = 'Username copied';
+        const action = null;
+
+        this.handleScheduledAction(key, message, action);
     };
 
-    handleCloseUsernameHint = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
+    handleScheduledAction = (key, message, action) => {
+        if (!key) return;
 
-        this.setState({ openUsernameHint: false });
+        const { enqueueSnackbar, classes } = this.props;
+        if (!enqueueSnackbar) return;
+
+        const TRANSITION_DELAY = 150;
+        if (ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS, action)) {
+            enqueueSnackbar(message, {
+                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS - 2 * TRANSITION_DELAY,
+                action: [
+                    <IconButton key='close' aria-label='Close' color='inherit' className={classes.close}>
+                        <CloseIcon />
+                    </IconButton>
+                ]
+            });
+        }
     };
 
     handlePhoneHint = () => {
@@ -261,15 +275,11 @@ class ChatDetails extends React.Component {
 
         copy(formatPhoneNumber(phoneNumber));
 
-        this.setState({ openUsernameHint: false, openPhoneHint: true });
-    };
+        const key = `${chatId}_copy_phone`;
+        const message = 'Phone copied';
+        const action = null;
 
-    handleClosePhoneHint = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        this.setState({ openPhoneHint: false });
+        this.handleScheduledAction(key, message, action);
     };
 
     handleHeaderClick = () => {
@@ -287,14 +297,14 @@ class ChatDetails extends React.Component {
     };
 
     render() {
-        const { chatId, classes, openSharedMedia, openGroupsInCommon, onSelectUser } = this.props;
-        const { openUsernameHint, openPhoneHint } = this.state;
+        const { chatId, classes, openSharedMedia, openGroupsInCommon, onSelectUser, backButton, onClose } = this.props;
 
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
                 <div className='chat-details'>
-                    <ChatDetailsHeaderControl />
+                    <ChatDetailsHeaderControl onClose={onClose} />
+                    <div ref={this.chatDetailsListRef} className='chat-details-list' />
                 </div>
             );
         }
@@ -323,58 +333,28 @@ class ChatDetails extends React.Component {
                 <UserControl userId={user.id} onSelect={onSelectUser} />
             </ListItem>
         ));
-        // const items = sortedUsers.map(user => (<div key={user.id} style={{margin: '12px', height: '50px', width: '50px', background: 'red'}}/>));
 
         return (
             <div className='chat-details'>
-                <ChatDetailsHeaderControl
-                    backButton={this.props.backButton}
-                    onClose={this.props.onClose}
-                    onClick={this.handleHeaderClick}
-                />
+                <ChatDetailsHeaderControl backButton={backButton} onClose={onClose} onClick={this.handleHeaderClick} />
                 <div ref={this.chatDetailsListRef} className='chat-details-list'>
                     <div className='chat-details-info'>
                         <ChatControl chatId={chatId} onTileSelect={this.handleOpenViewer} />
                     </div>
                     <List>
                         {username && (
-                            <>
-                                <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
-                                    <ListItemIcon>
-                                        <AlternateEmailIcon />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={
-                                            <Typography variant='inherit' noWrap>
-                                                {username}
-                                            </Typography>
-                                        }
-                                    />
-                                </ListItem>
-                                <Snackbar
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left'
-                                    }}
-                                    open={openUsernameHint}
-                                    autoHideDuration={3000}
-                                    onClose={this.handleCloseUsernameHint}
-                                    ContentProps={{
-                                        'aria-describedby': 'message-id'
-                                    }}
-                                    message={<span id='message-id'>Link copied</span>}
-                                    action={
-                                        <IconButton
-                                            key='close'
-                                            aria-label='Close'
-                                            color='inherit'
-                                            className={classes.close}
-                                            onClick={this.handleCloseUsernameHint}>
-                                            <CloseIcon />
-                                        </IconButton>
+                            <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
+                                <ListItemIcon>
+                                    <AlternateEmailIcon />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={
+                                        <Typography variant='inherit' noWrap>
+                                            {username}
+                                        </Typography>
                                     }
                                 />
-                            </>
+                            </ListItem>
                         )}
                         {phoneNumber && (
                             <>
@@ -390,29 +370,6 @@ class ChatDetails extends React.Component {
                                         }
                                     />
                                 </ListItem>
-                                <Snackbar
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left'
-                                    }}
-                                    open={openPhoneHint}
-                                    autoHideDuration={3000}
-                                    onClose={this.handleClosePhoneHint}
-                                    ContentProps={{
-                                        'aria-describedby': 'message-id'
-                                    }}
-                                    message={<span id='message-id'>Phone copied</span>}
-                                    action={[
-                                        <IconButton
-                                            key='close'
-                                            aria-label='Close'
-                                            color='inherit'
-                                            className={classes.close}
-                                            onClick={this.handleClosePhoneHint}>
-                                            <CloseIcon />
-                                        </IconButton>
-                                    ]}
-                                />
                             </>
                         )}
                         {bio && (
@@ -467,4 +424,9 @@ class ChatDetails extends React.Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(ChatDetails);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withSnackbar
+);
+
+export default enhance(ChatDetails);

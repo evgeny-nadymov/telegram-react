@@ -22,6 +22,7 @@
     overflow-y: scroll;
     flex-grow: 1;
     flex-shrink: 1;
+    will-change: transform;
 }
 
 .chat-details-info-icon {

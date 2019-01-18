@@ -27,6 +27,7 @@ import ChatStore from './Stores/ChatStore';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
+import withSnackbarNotifications from './Notifications';
 
 const styles = theme => ({
     page: {
@@ -283,7 +284,8 @@ window.onpopstate = function() {
 const enhance = compose(
     withLanguage,
     withTheme,
-    withStyles(styles)
+    withStyles(styles),
+    withSnackbarNotifications
 );
 
 export default enhance(TelegramApp);

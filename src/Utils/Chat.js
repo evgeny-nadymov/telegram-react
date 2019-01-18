@@ -920,6 +920,36 @@ function getGroupChatMembersCount(chatId) {
     return 0;
 }
 
+function canClearHistory(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return true;
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup) {
+                return !Boolean(supergroup.username);
+            }
+
+            return true;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function canDeleteChat(chatId) {
+    return !isMeChat(chatId);
+}
+
 export {
     getChatDraft,
     showChatDraft,
@@ -960,5 +990,7 @@ export {
     canSendFiles,
     getChatShortTitle,
     getGroupChatMembersCount,
-    isMeChat
+    isMeChat,
+    canClearHistory,
+    canDeleteChat
 };

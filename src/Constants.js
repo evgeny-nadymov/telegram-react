@@ -28,3 +28,5 @@ export const VERBOSITY_JS_MIN = 0;
 export const VERBOSITY_MAX = 20;
 export const VERBOSITY_MIN = 0;
 export const USERNAME_LENGTH_MIN = 5;
+export const MAX_SNACK = 10;
+export const NOTIFICATION_AUTO_HIDE_DURATION_MS = 5000;

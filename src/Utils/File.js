@@ -9,7 +9,14 @@ import { getPhotoSize, getSize } from './Common';
 import { getChatUserId } from './Chat';
 import { getProfilePhotoFromPhoto } from './User';
 import { getLocationId, getVenueId } from './Message';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_BIG_SIZE, PHOTO_SIZE } from '../Constants';
+import {
+    LOCATION_HEIGHT,
+    LOCATION_SCALE,
+    LOCATION_WIDTH,
+    LOCATION_ZOOM,
+    PHOTO_BIG_SIZE,
+    PHOTO_SIZE
+} from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
@@ -254,8 +261,12 @@ function loadUserPhotos(store, userIds) {
             let [id, pid, idb_key] = getUserPhoto(user);
             if (pid) {
                 const blob = FileStore.getBlob(id);
-                if (!blob){
-                    FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+                if (!blob) {
+                    FileStore.getLocalFile(
+                        store,
+                        user.profile_photo.small,
+                        idb_key,
+                        null,
                         () => FileStore.updateUserPhotoBlob(user.id, id),
                         () => FileStore.getRemoteFile(id, 1, user)
                     );
@@ -273,7 +284,11 @@ function loadUsersContent(store, userIds) {
         const user = UserStore.get(userIds[i]);
         const [id, pid, idb_key] = getUserPhoto(user);
         if (pid) {
-            FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+            FileStore.getLocalFile(
+                store,
+                user.profile_photo.small,
+                idb_key,
+                null,
                 () => FileStore.updateUserPhotoBlob(user.id, id),
                 () => FileStore.getRemoteFile(id, 1, user)
             );
@@ -287,9 +302,15 @@ function loadChatsContent(store, chatIds) {
 
     for (let i = 0; i < chatIds.length; i++) {
         const chat = ChatStore.get(chatIds[i]);
+        if (!chat) continue;
+
         const [id, pid, idb_key] = getChatPhoto(chat);
         if (pid) {
-            FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
+            FileStore.getLocalFile(
+                store,
+                chat.photo.small,
+                idb_key,
+                null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
                 () => FileStore.getRemoteFile(id, 1, chat)
             );
@@ -317,9 +338,14 @@ function loadMessageContents(store, messages) {
                                 const blob = FileStore.getBlob(file.id);
                                 if (!blob) {
                                     let localMessage = message;
-                                    FileStore.getLocalFile(store, file, idb_key, null,
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        idb_key,
+                                        null,
                                         () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage));
+                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    );
                                 }
                             }
                         }
@@ -349,9 +375,14 @@ function loadMessageContents(store, messages) {
                                 const blob = FileStore.getBlob(file.id);
                                 if (!blob) {
                                     let localMessage = message;
-                                    FileStore.getLocalFile(store, file, idb_key, null,
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        idb_key,
+                                        null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage));
+                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    );
                                 }
                             }
                         }
@@ -364,9 +395,14 @@ function loadMessageContents(store, messages) {
                             const blob = FileStore.getBlob(file.id);
                             if (!blob) {
                                 let localMessage = message;
-                                FileStore.getLocalFile(store, file, idb_key, null,
+                                FileStore.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    null,
                                     () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
-                                    () => FileStore.getRemoteFile(id, 1, localMessage));
+                                    () => FileStore.getRemoteFile(id, 1, localMessage)
+                                );
                             }
                         }
                         break;
@@ -380,9 +416,14 @@ function loadMessageContents(store, messages) {
                                 if (pid) {
                                     let obj = user.profile_photo.small;
                                     if (!obj.blob) {
-                                        FileStore.getLocalFile(store, obj, idb_key, null,
+                                        FileStore.getLocalFile(
+                                            store,
+                                            obj,
+                                            idb_key,
+                                            null,
                                             () => FileStore.updateUserPhotoBlob(user.id, id),
-                                            () => FileStore.getRemoteFile(id, 1, user));
+                                            () => FileStore.getRemoteFile(id, 1, user)
+                                        );
                                     }
                                 }
                             }
@@ -395,8 +436,17 @@ function loadMessageContents(store, messages) {
                             const obj = message.content.document.thumbnail.photo;
                             if (!obj.blob) {
                                 const localMessage = message;
-                                FileStore.getLocalFile(store, obj, idb_key, null,
-                                    () => FileStore.updateDocumentThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () =>
+                                        FileStore.updateDocumentThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            obj.id
+                                        ),
                                     () => FileStore.getRemoteFile(id, 1, localMessage)
                                 );
                             }
@@ -404,22 +454,29 @@ function loadMessageContents(store, messages) {
                         break;
                     }
                     case 'messageLocation': {
-
                         const { location } = message.content;
                         const locationId = getLocationId(location);
-                        if (locationId){
+                        if (locationId) {
                             const file = FileStore.getLocationFile(locationId);
                             if (file) {
                                 const blob = FileStore.getBlob(file.id);
                                 if (!blob) {
                                     const localMessage = message;
-                                    FileStore.getLocalFile(store, file, file.idb_key, null,
-                                        () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, file.id),
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        file.idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateLocationBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                file.id
+                                            ),
                                         () => FileStore.getRemoteFile(file.id, 1, localMessage)
                                     );
                                 }
-                            }
-                            else {
+                            } else {
                                 const localMessage = message;
                                 TdLibController.send({
                                     '@type': 'getMapThumbnailFile',
@@ -428,45 +485,60 @@ function loadMessageContents(store, messages) {
                                     width: LOCATION_WIDTH,
                                     height: LOCATION_HEIGHT,
                                     scale: LOCATION_SCALE,
-                                    chat_id: message.chat_id})
-                                    .then(result => {
-                                        FileStore.setLocationFile(locationId, result);
+                                    chat_id: message.chat_id
+                                }).then(result => {
+                                    FileStore.setLocationFile(locationId, result);
 
-                                        if (result) {
-                                            const blob = FileStore.getBlob(result.id);
-                                            if (!blob) {
-                                                store = FileStore.getStore();
+                                    if (result) {
+                                        const blob = FileStore.getBlob(result.id);
+                                        if (!blob) {
+                                            store = FileStore.getStore();
 
-                                                FileStore.getLocalFile(store, result, result.idb_key, null,
-                                                    () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
-                                                    () => FileStore.getRemoteFile(result.id, 1, localMessage)
-                                                );
-                                            }
+                                            FileStore.getLocalFile(
+                                                store,
+                                                result,
+                                                result.idb_key,
+                                                null,
+                                                () =>
+                                                    FileStore.updateLocationBlob(
+                                                        localMessage.chat_id,
+                                                        localMessage.id,
+                                                        result.id
+                                                    ),
+                                                () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                            );
                                         }
-                                    })
-                                ;
+                                    }
+                                });
                             }
-                         }
-                         break;
+                        }
+                        break;
                     }
                     case 'messageVenue': {
-
                         const { venue } = message.content;
                         const { location } = venue;
                         const locationId = getVenueId(location);
-                        if (locationId){
+                        if (locationId) {
                             const file = FileStore.getLocationFile(locationId);
                             if (file) {
                                 const blob = FileStore.getBlob(file.id);
                                 if (!blob) {
                                     const localMessage = message;
-                                    FileStore.getLocalFile(store, file, file.idb_key, null,
-                                        () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, file.id),
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        file.idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateLocationBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                file.id
+                                            ),
                                         () => FileStore.getRemoteFile(file.id, 1, localMessage)
                                     );
                                 }
-                            }
-                            else {
+                            } else {
                                 const localMessage = message;
                                 TdLibController.send({
                                     '@type': 'getMapThumbnailFile',
@@ -475,23 +547,31 @@ function loadMessageContents(store, messages) {
                                     width: LOCATION_WIDTH,
                                     height: LOCATION_HEIGHT,
                                     scale: LOCATION_SCALE,
-                                    chat_id: message.chat_id})
-                                    .then(result => {
-                                        FileStore.setLocationFile(locationId, result);
+                                    chat_id: message.chat_id
+                                }).then(result => {
+                                    FileStore.setLocationFile(locationId, result);
 
-                                        if (result) {
-                                            const blob = FileStore.getBlob(result.id);
-                                            if (!blob) {
-                                                store = FileStore.getStore();
+                                    if (result) {
+                                        const blob = FileStore.getBlob(result.id);
+                                        if (!blob) {
+                                            store = FileStore.getStore();
 
-                                                FileStore.getLocalFile(store, result, result.idb_key, null,
-                                                    () => FileStore.updateLocationBlob(localMessage.chat_id, localMessage.id, result.id),
-                                                    () => FileStore.getRemoteFile(result.id, 1, localMessage)
-                                                );
-                                            }
+                                            FileStore.getLocalFile(
+                                                store,
+                                                result,
+                                                result.idb_key,
+                                                null,
+                                                () =>
+                                                    FileStore.updateLocationBlob(
+                                                        localMessage.chat_id,
+                                                        localMessage.id,
+                                                        result.id
+                                                    ),
+                                                () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                            );
                                         }
-                                    })
-                                ;
+                                    }
+                                });
                             }
                         }
                         break;
@@ -522,7 +602,7 @@ function saveOrDownload(file, fileName, obj) {
     }
 
     const blob = FileStore.getBlob(file.id);
-    if (blob){
+    if (blob) {
         saveBlob(blob, fileName);
         return;
     }
@@ -530,7 +610,11 @@ function saveOrDownload(file, fileName, obj) {
     if (file.idb_key) {
         let store = FileStore.getStore();
 
-        FileStore.getLocalFile(store, file, file.idb_key, null,
+        FileStore.getLocalFile(
+            store,
+            file,
+            file.idb_key,
+            null,
             () => {
                 if (file.blob) {
                     saveBlob(file.blob, fileName);
@@ -612,12 +696,7 @@ function loadMediaViewerContent(messages) {
                                     file,
                                     idb_key,
                                     null,
-                                    () =>
-                                        FileStore.updatePhotoBlob(
-                                            localMessage.chat_id,
-                                            localMessage.id,
-                                            file.id
-                                        ),
+                                    () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
                                     () => FileStore.getRemoteFile(id, 1, localMessage)
                                 );
                             }
@@ -660,7 +739,7 @@ function loadProfileMediaViewerContent(chatId, photos) {
             switch (photo['@type']) {
                 case 'userProfilePhoto': {
                     photo = getProfilePhotoFromPhoto(photo);
-                    if (photo){
+                    if (photo) {
                         const [id, pid, idb_key] = getBigPhoto(photo);
                         if (pid) {
                             const userId = getChatUserId(chatId);
@@ -670,7 +749,11 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                 let file = photo.big;
                                 let blob = file.blob || FileStore.getBlob(file.id);
                                 if (!blob) {
-                                    FileStore.getLocalFile(store, file, idb_key, null,
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        idb_key,
+                                        null,
                                         () => FileStore.updateUserPhotoBlob(user.id, file.id),
                                         () => FileStore.getRemoteFile(id, 1, user)
                                     );
@@ -691,7 +774,11 @@ function loadProfileMediaViewerContent(chatId, photos) {
                             let file = photo.big;
                             let blob = file.blob || FileStore.getBlob(file.id);
                             if (!blob) {
-                                FileStore.getLocalFile(store, file, idb_key, null,
+                                FileStore.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    null,
                                     () => FileStore.updateUserPhotoBlob(user.id, file.id),
                                     () => FileStore.getRemoteFile(id, 1, user)
                                 );
@@ -710,7 +797,11 @@ function loadProfileMediaViewerContent(chatId, photos) {
                             let file = photo.big;
                             let blob = file.blob || FileStore.getBlob(file.id);
                             if (!blob) {
-                                FileStore.getLocalFile(store, file, idb_key, null,
+                                FileStore.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    null,
                                     () => FileStore.updateChatPhotoBlob(chat.id, file.id),
                                     () => FileStore.getRemoteFile(id, 1, chat)
                                 );
@@ -742,29 +833,39 @@ function preloadProfileMediaViewerContent(chatId, index, history) {
     loadProfileMediaViewerContent(chatId, items);
 }
 
-function loadUserContent(user){
+function loadUserContent(user) {
     if (!user) return;
 
     const store = FileStore.getStore();
 
     let [id, pid, idb_key] = getUserPhoto(user);
     if (pid) {
-        FileStore.getLocalFile(store, user.profile_photo.small, idb_key, null,
+        FileStore.getLocalFile(
+            store,
+            user.profile_photo.small,
+            idb_key,
+            null,
             () => FileStore.updateUserPhotoBlob(user.id, id),
-            () => FileStore.getRemoteFile(id, 1, user));
+            () => FileStore.getRemoteFile(id, 1, user)
+        );
     }
 }
 
-function loadChatContent(chat){
+function loadChatContent(chat) {
     if (!chat) return;
 
     let store = FileStore.getStore();
 
     let [id, pid, idb_key] = getChatPhoto(chat);
     if (pid) {
-        FileStore.getLocalFile(store, chat.photo.small, idb_key, null,
+        FileStore.getLocalFile(
+            store,
+            chat.photo.small,
+            idb_key,
+            null,
             () => FileStore.updateChatPhotoBlob(chat.id, id),
-            () => FileStore.getRemoteFile(id, 1, chat));
+            () => FileStore.getRemoteFile(id, 1, chat)
+        );
     }
 }
 
