@@ -24,6 +24,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
+import CircularProgress from '../ColumnMiddle/MainMenuButton';
+import NotificationTimer from '../Additional/NotificationTimer';
 import UserControl from '../Tile/UserControl';
 import ChatControl from '../Tile/ChatControl';
 import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
@@ -41,6 +43,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
+import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
@@ -49,8 +52,6 @@ import OptionStore from '../../Stores/OptionStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './ChatDetails.css';
-import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
-import CircularProgress from '../ColumnMiddle/MainMenuButton';
 
 const styles = theme => ({
     closeIconButton: {
@@ -256,11 +257,18 @@ class ChatDetails extends React.Component {
         if (!enqueueSnackbar) return;
 
         const TRANSITION_DELAY = 150;
-        if (ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS, action)) {
+        if (
+            ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS + 2 * TRANSITION_DELAY, action)
+        ) {
             enqueueSnackbar(message, {
-                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS - 2 * TRANSITION_DELAY,
+                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
                 action: [
-                    <IconButton key='close' aria-label='Close' color='inherit' className={classes.close}>
+                    <IconButton
+                        key='close'
+                        aria-label='Close'
+                        color='inherit'
+                        className={classes.close}
+                        onClick={() => ApplicationStore.removeScheduledAction(key)}>
                         <CloseIcon />
                     </IconButton>
                 ]

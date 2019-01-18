@@ -11,21 +11,32 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';
-import { canClearHistory, canDeleteChat, isPrivateChat } from '../../Utils/Chat';
+import ChatTileControl from '../Tile/ChatTileControl';
+import NotificationTimer from '../Additional/NotificationTimer';
+import { canClearHistory, canDeleteChat, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
+import './MainMenuButton.css';
 
-const styles = {
+const styles = theme => ({
     menuIconButton: {
         margin: '8px 12px 8px 0'
+    },
+    close: {
+        padding: theme.spacing.unit / 2
     }
-};
+});
 
 const menuAnchorOrigin = {
     vertical: 'bottom',
@@ -36,6 +47,90 @@ const menuTransformOrigin = {
     vertical: 'top',
     horizontal: 'right'
 };
+
+class LeaveChatDialog extends React.Component {
+    getDeleteDialogText = chatId => {
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+        if (!chat.type) return null;
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup': {
+                return `Are you sure you want to leave group ${chat.title}?`;
+            }
+            case 'chatTypeSupergroup': {
+                const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+                if (supergroup) {
+                    return supergroup.is_channel
+                        ? `Are you sure you want to leave channel ${chat.title}?`
+                        : `Are you sure you want to leave group ${chat.title}?`;
+                }
+
+                return null;
+            }
+            case 'chatTypePrivate':
+            case 'chatTypeSecret': {
+                return `Are you sure you want to delete chat with ${getChatShortTitle(chatId)}?`;
+            }
+        }
+
+        return null;
+    };
+
+    render() {
+        const { classes, onClose, chatId, ...other } = this.props;
+
+        return (
+            <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
+                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
+                <DialogContent>
+                    <div className='delete-dialog-content'>
+                        <ChatTileControl chatId={chatId} />
+                        <DialogContentText id='delete-dialog-description'>
+                            {this.getDeleteDialogText(chatId)}
+                        </DialogContentText>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => onClose(false)} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button onClick={() => onClose(true)} color='primary' autoFocus>
+                        Ok
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        );
+    }
+}
+
+class ClearHistoryDialog extends React.Component {
+    render() {
+        const { classes, onClose, chatId, ...other } = this.props;
+
+        return (
+            <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
+                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
+                <DialogContent>
+                    <div className='delete-dialog-content'>
+                        <ChatTileControl chatId={chatId} />
+                        <DialogContentText id='delete-dialog-description'>
+                            Are you sure you want clear history?
+                        </DialogContentText>
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => onClose(false)} color='primary'>
+                        Cancel
+                    </Button>
+                    <Button onClick={() => onClose(true)} color='primary' autoFocus>
+                        Ok
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        );
+    }
+}
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -62,6 +157,14 @@ class MainMenuButton extends React.Component {
     handleClearHistory = () => {
         this.handleMenuClose();
 
+        this.setState({ openClearHistory: true });
+    };
+
+    handleClearHistoryContinue = result => {
+        this.setState({ openClearHistory: false });
+
+        if (!result) return;
+
         const chatId = ApplicationStore.getChatId();
 
         const key = `${chatId}_clear_history`;
@@ -78,10 +181,18 @@ class MainMenuButton extends React.Component {
     handleLeave = () => {
         this.handleMenuClose();
 
+        this.setState({ openDelete: true });
+    };
+
+    handleLeaveContinue = result => {
+        this.setState({ openDelete: false });
+
+        if (!result) return;
+
         const chatId = ApplicationStore.getChatId();
 
         const key = `${chatId}_leave_chat`;
-        const message = 'Left';
+        const message = this.getLeaveChatNotification(chatId);
         const action = isPrivateChat(chatId)
             ? { '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true }
             : { '@type': 'leaveChat', chat_id: chatId };
@@ -93,7 +204,7 @@ class MainMenuButton extends React.Component {
         if (!key) return;
         if (!action) return;
 
-        const { enqueueSnackbar } = this.props;
+        const { enqueueSnackbar, classes } = this.props;
         if (!enqueueSnackbar) return;
 
         const TRANSITION_DELAY = 150;
@@ -101,7 +212,9 @@ class MainMenuButton extends React.Component {
             enqueueSnackbar(message, {
                 autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS - 2 * TRANSITION_DELAY,
                 action: [
-                    <CircularProgress key='progress' size={12} />,
+                    <IconButton key='progress' color='inherit' className={classes.close}>
+                        <NotificationTimer timeout={NOTIFICATION_AUTO_HIDE_DURATION_MS} />
+                    </IconButton>,
                     <Button
                         key='undo'
                         color='primary'
@@ -140,13 +253,40 @@ class MainMenuButton extends React.Component {
         return null;
     };
 
+    getLeaveChatNotification = chatId => {
+        const chat = ChatStore.get(chatId);
+        if (!chat) return 'Chat deleted';
+        if (!chat.type) return 'Chat deleted';
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup': {
+                return 'Chat deleted';
+            }
+            case 'chatTypeSupergroup': {
+                const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+                if (supergroup) {
+                    return supergroup.is_channel ? 'Left channel' : 'Left group';
+                }
+
+                return 'Chat deleted';
+            }
+            case 'chatTypePrivate':
+            case 'chatTypeSecret': {
+                return 'Chat deleted';
+            }
+        }
+
+        return 'Chat deleted';
+    };
+
     render() {
         const { classes } = this.props;
-        const { anchorEl } = this.state;
+        const { anchorEl, openDelete, openClearHistory } = this.state;
 
-        const clearHistory = canClearHistory(ApplicationStore.getChatId());
-        const deleteChat = canDeleteChat(ApplicationStore.getChatId());
-        const leaveChatTitle = this.getLeaveChatTitle(ApplicationStore.getChatId());
+        const chatId = ApplicationStore.getChatId();
+        const clearHistory = canClearHistory(chatId);
+        const deleteChat = canDeleteChat(chatId);
+        const leaveChatTitle = this.getLeaveChatTitle(chatId);
 
         return (
             <>
@@ -170,6 +310,8 @@ class MainMenuButton extends React.Component {
                     {clearHistory && <MenuItem onClick={this.handleClearHistory}>Clear history</MenuItem>}
                     {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
                 </Menu>
+                <LeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
+                <ClearHistoryDialog chatId={chatId} open={openClearHistory} onClose={this.handleClearHistoryContinue} />
             </>
         );
     }
