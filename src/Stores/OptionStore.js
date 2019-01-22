@@ -28,12 +28,16 @@ class OptionStore extends EventEmitter {
         }
     };
 
+    onClientUpdate = update => {};
+
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
+        TdLibController.addListener('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {
         TdLibController.removeListener('update', this.onUpdate);
+        TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
 
     get(name) {

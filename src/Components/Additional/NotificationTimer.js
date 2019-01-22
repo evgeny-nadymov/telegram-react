@@ -32,7 +32,7 @@ class NotificationTimer extends React.Component {
         const now = new Date();
         const seconds = this.expire - now;
         const value = 100 - (seconds / this.props.timeout) * 100;
-        console.log(`NotificationTimer ms=${seconds} value=${value}`);
+        // console.log(`NotificationTimer ms=${seconds} value=${value}`);
         this.setState({
             seconds: seconds > 0 ? seconds : 0,
             value: value > 100 ? 100 : value

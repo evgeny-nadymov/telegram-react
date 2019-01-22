@@ -30,8 +30,8 @@ class ApplicationStore extends EventEmitter {
         this.setMaxListeners(Infinity);
     }
 
-    addScheduledAction = (key, timeout, action) => {
-        return this.actionScheduler.add(key, timeout, action);
+    addScheduledAction = (key, timeout, action, cancel) => {
+        return this.actionScheduler.add(key, timeout, action, cancel);
     };
 
     removeScheduledAction = key => {
@@ -39,14 +39,11 @@ class ApplicationStore extends EventEmitter {
     };
 
     handleScheduledAction = item => {
-        console.log('Invoked scheduled action', item.action);
-        if (item.action) {
-            TdLibController.send(item.action);
-        }
+        console.log('Invoked scheduled action key=', item.key);
     };
 
     handleCancelScheduledAction = item => {
-        this.emit('clientUpdateCancelScheduledAction', item);
+        console.log('Cancel scheduled action key=', item.key);
     };
 
     onUpdate = update => {
@@ -138,6 +135,18 @@ class ApplicationStore extends EventEmitter {
         }
     };
 
+    onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientUpdateLeaveChat': {
+                if (update.inProgress && this.chatId === update.chatId) {
+                    this.setChatId(0);
+                }
+
+                break;
+            }
+        }
+    };
+
     onUpdateStatistics = update => {
         if (!update) return;
 
@@ -152,10 +161,12 @@ class ApplicationStore extends EventEmitter {
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
+        TdLibController.addListener('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {
         TdLibController.removeListener('update', this.onUpdate);
+        TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
 
     addStatistics = () => {

@@ -23,6 +23,8 @@ class DialogsList extends React.Component {
     constructor(props) {
         super(props);
 
+        this.hiddenChats = new Map();
+
         this.listRef = React.createRef();
 
         this.state = {
@@ -50,6 +52,7 @@ class DialogsList extends React.Component {
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.on('clientUpdateLeaveChat', this.onClientUpdateLeaveChat);
     }
 
     componentWillUnmount() {
@@ -60,7 +63,18 @@ class DialogsList extends React.Component {
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.removeListener('clientUpdateLeaveChat', this.onClientUpdateLeaveChat);
     }
+
+    onClientUpdateLeaveChat = update => {
+        if (update.inProgress) {
+            this.hiddenChats.set(update.chatId, update.chatId);
+        } else {
+            this.hiddenChats.delete(update.chatId);
+        }
+
+        this.forceUpdate();
+    };
 
     onUpdateAuthorizationState = update => {
         const { authorization_state } = update;
@@ -303,32 +317,18 @@ class DialogsList extends React.Component {
         const { onSelectChat } = this.props;
         const { chats } = this.state;
 
-        const dialogs = chats.map(x => <DialogControl key={x} chatId={x} onSelect={onSelectChat} />);
+        const dialogs = chats.map(x => (
+            <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} onSelect={onSelectChat} />
+        ));
 
-        {
-            /*<Scrollbars*/
-        }
-        {
-            /*ref={this.listRef}*/
-        }
-        {
-            /*onScroll={this.handleScroll}*/
-        }
-        {
-            /*autoHide*/
-        }
-        {
-            /*autoHideTimeout={500}*/
-        }
-        {
-            /*autoHideDuration={300}>*/
-        }
-        {
-            /*{chats}*/
-        }
-        {
-            /*</Scrollbars>*/
-        }
+        /*<Scrollbars*/
+        /*ref={this.listRef}*/
+        /*onScroll={this.handleScroll}*/
+        /*autoHide*/
+        /*autoHideTimeout={500}*/
+        /*autoHideDuration={300}>*/
+        /*{chats}*/
+        /*</Scrollbars>*/
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>

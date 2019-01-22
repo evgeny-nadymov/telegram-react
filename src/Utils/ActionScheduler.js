@@ -12,7 +12,7 @@ class ActionScheduler {
         this.cancelCallback = cancelCallback;
     }
 
-    add = (key, timeout, action) => {
+    add = (key, timeout, action, cancel) => {
         if (this.actions.has(key)) {
             return false;
         }
@@ -20,7 +20,7 @@ class ActionScheduler {
         let expire = new Date();
         expire.setMilliseconds(expire.getMilliseconds() + timeout);
 
-        this.actions.set(key, { expire: expire, action: action });
+        this.actions.set(key, { expire: expire, action: action, cancel: cancel });
 
         if (this.timerId) {
             clearTimeout(this.timerId);
@@ -37,7 +37,8 @@ class ActionScheduler {
 
         this.actions.delete(key);
 
-        this.cancelCallback({ key: key, action: item.action });
+        this.cancelCallback({ key: key, action: item.action, cancel: item.cancel });
+        if (item.cancel) item.cancel();
 
         if (this.timerId) {
             clearTimeout(this.timerId);
@@ -70,7 +71,8 @@ class ActionScheduler {
 
         for (let item of expired) {
             this.actions.delete(item.key);
-            this.actionCallback({ key: item.key, action: item.value.action });
+            this.actionCallback({ key: item.key, action: item.value.action, cancel: item.value.cancel });
+            if (item.value.action) item.value.action();
         }
 
         this.setTimeout();

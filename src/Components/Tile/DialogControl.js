@@ -57,6 +57,10 @@ class DialogControl extends Component {
             return true;
         }
 
+        if (nextProps.hidden !== this.props.hidden) {
+            return true;
+        }
+
         return false;
     }
 
@@ -85,7 +89,9 @@ class DialogControl extends Component {
     };
 
     render() {
-        const { chatId, showSavedMessages, classes } = this.props;
+        const { classes, chatId, showSavedMessages, hidden } = this.props;
+
+        if (hidden) return null;
 
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
@@ -118,10 +124,12 @@ class DialogControl extends Component {
 
 DialogControl.propTypes = {
     chatId: PropTypes.number.isRequired,
+    hidden: PropTypes.bool,
     showSavedMessages: PropTypes.bool
 };
 
 DialogControl.defaultProps = {
+    hidden: false,
     showSavedMessages: true
 };
 

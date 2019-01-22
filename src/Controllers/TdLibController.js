@@ -47,6 +47,10 @@ class TdLibController extends EventEmitter {
         this.client.onUpdate = update => this.emit('update', update);
     };
 
+    clientUpdate = update => {
+        this.emit('clientUpdate', update);
+    };
+
     setParameters = location => {
         if (!location) return;
 

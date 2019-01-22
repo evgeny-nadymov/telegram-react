@@ -22,7 +22,7 @@ class ChatStore extends EventEmitter {
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate = (update) => {
+    onUpdate = update => {
         switch (update['@type']) {
             case 'updateConnectionState': {
                 if (update.state['@type'] === 'connectionStateUpdating') {
@@ -132,16 +132,16 @@ class ChatStore extends EventEmitter {
                     this.assign(chat, { photo: update.photo });
 
                     switch (chat.type['@type']) {
-                        case 'chatTypeBasicGroup' : {
+                        case 'chatTypeBasicGroup': {
                             break;
                         }
-                        case 'chatTypeSupergroup' : {
+                        case 'chatTypeSupergroup': {
                             break;
                         }
-                        case 'chatTypePrivate' :
-                        case 'chatTypeSecret' : {
+                        case 'chatTypePrivate':
+                        case 'chatTypeSecret': {
                             const user = UserStore.get(chat.type.user_id);
-                            if (user){
+                            if (user) {
                                 UserStore.assign(user, { profile_photo: update.photo });
                             }
                             break;
@@ -227,9 +227,7 @@ class ChatStore extends EventEmitter {
             case 'updateUserChatAction': {
                 let typingManager = this.getTypingManager(update.chat_id);
                 if (!typingManager) {
-                    typingManager = new InputTypingManager(update.chat_id, update =>
-                        this.emitUpdate(update)
-                    );
+                    typingManager = new InputTypingManager(update.chat_id, update => this.emitUpdate(update));
                     this.setTypingManager(update.chat_id, typingManager);
                 }
 
@@ -261,6 +259,19 @@ class ChatStore extends EventEmitter {
         }
     };
 
+    onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientUpdateClearHistory': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateLeaveChat': {
+                this.emitUpdate(update);
+                break;
+            }
+        }
+    };
+
     emitUpdate = update => {
         this.emit(update['@type'], update);
     };
@@ -276,10 +287,12 @@ class ChatStore extends EventEmitter {
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
+        TdLibController.addListener('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {
         TdLibController.removeListener('update', this.onUpdate);
+        TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
 
     assign(source1, source2) {

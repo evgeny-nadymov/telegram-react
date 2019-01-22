@@ -16,7 +16,6 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';
@@ -27,6 +26,7 @@ import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
 
 const styles = theme => ({
@@ -78,7 +78,7 @@ class LeaveChatDialog extends React.Component {
     };
 
     render() {
-        const { classes, onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, ...other } = this.props;
 
         return (
             <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
@@ -106,7 +106,7 @@ class LeaveChatDialog extends React.Component {
 
 class ClearHistoryDialog extends React.Component {
     render() {
-        const { classes, onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, ...other } = this.props;
 
         return (
             <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
@@ -166,16 +166,14 @@ class MainMenuButton extends React.Component {
         if (!result) return;
 
         const chatId = ApplicationStore.getChatId();
-
-        const key = `${chatId}_clear_history`;
         const message = 'Messages deleted';
-        const action = {
+        const request = {
             '@type': 'deleteChatHistory',
             chat_id: chatId,
             remove_from_chat_list: false
         };
 
-        this.handleScheduledAction(key, message, action);
+        this.handleScheduledAction(chatId, 'clientUpdateClearHistory', message, request);
     };
 
     handleLeave = () => {
@@ -190,25 +188,35 @@ class MainMenuButton extends React.Component {
         if (!result) return;
 
         const chatId = ApplicationStore.getChatId();
-
-        const key = `${chatId}_leave_chat`;
         const message = this.getLeaveChatNotification(chatId);
-        const action = isPrivateChat(chatId)
+        const request = isPrivateChat(chatId)
             ? { '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true }
             : { '@type': 'leaveChat', chat_id: chatId };
 
-        this.handleScheduledAction(key, message, action);
+        this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, request);
     };
 
-    handleScheduledAction = (key, message, action) => {
-        if (!key) return;
-        if (!action) return;
+    handleScheduledAction = (chatId, clientUpdateType, message, request) => {
+        if (!clientUpdateType) return;
+
+        const key = `${clientUpdateType} chatId=${chatId}`;
+        const action = async () => {
+            try {
+                await TdLibController.send(request);
+            } finally {
+                TdLibController.clientUpdate({ '@type': clientUpdateType, chatId: chatId, inProgress: false });
+            }
+        };
+        const cancel = () => {
+            TdLibController.clientUpdate({ '@type': clientUpdateType, chatId: chatId, inProgress: false });
+        };
 
         const { enqueueSnackbar, classes } = this.props;
         if (!enqueueSnackbar) return;
 
         const TRANSITION_DELAY = 150;
-        if (ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS, action)) {
+        if (ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS, action, cancel)) {
+            TdLibController.clientUpdate({ '@type': clientUpdateType, chatId: chatId, inProgress: true });
             enqueueSnackbar(message, {
                 autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS - 2 * TRANSITION_DELAY,
                 action: [
