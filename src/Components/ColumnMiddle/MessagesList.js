@@ -51,6 +51,7 @@ class MessagesList extends React.Component {
             prevChatId: 0,
             prevMessageId: null,
             history: [],
+            clearHistory: false,
             scrollBehavior: ScrollBehaviorEnum.NONE,
             separatorMessageId: 0
         };
@@ -67,6 +68,7 @@ class MessagesList extends React.Component {
             return {
                 prevChatId: props.chatId,
                 prevMessageId: props.messageId,
+                clearHistory: false,
                 scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
                 separatorMessageId: 0
             };
@@ -111,7 +113,7 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, theme } = this.props;
-        const { history, dragging } = this.state;
+        const { history, dragging, clearHistory } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -133,6 +135,10 @@ class MessagesList extends React.Component {
             return true;
         }
 
+        if (nextState.clearHistory !== clearHistory) {
+            return true;
+        }
+
         return false;
     }
 
@@ -144,6 +150,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
+        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
     }
 
     componentWillUnmount() {
@@ -151,7 +158,16 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
+        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
     }
+
+    onClientUpdateClearHistory = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chatId) {
+            this.setState({ clearHistory: update.inProgress });
+        }
+    };
 
     onUpdateMessageContent = update => {
         const { chatId } = this.props;
@@ -172,10 +188,6 @@ class MessagesList extends React.Component {
     onUpdateChatLastMessage = update => {
         const { chatId } = this.props;
         if (chatId !== update.chat_id) return;
-
-        if (!update.last_message) {
-            this.completed = false;
-        }
     };
 
     onUpdateNewMessage = update => {
@@ -250,8 +262,6 @@ class MessagesList extends React.Component {
     };
 
     async handleSelectChat(chatId, previousChatId, messageId, previousMessageId) {
-        console.log('MessagesList.handleSelectChat');
-
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
 
@@ -806,34 +816,38 @@ class MessagesList extends React.Component {
 
     render() {
         const { classes, onSelectChat, onSelectUser } = this.props;
-        const { history, separatorMessageId, dragging } = this.state;
+        const { history, separatorMessageId, clearHistory } = this.state;
+
+        console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
 
         this.itemsMap.clear();
-        this.messages = history.map((x, i) =>
-            isServiceMessage(x) ? (
-                <ServiceMessageControl
-                    key={x.id}
-                    ref={el => this.itemsMap.set(i, el)}
-                    chatId={x.chat_id}
-                    messageId={x.id}
-                    onSelectChat={onSelectChat}
-                    onSelectUser={onSelectUser}
-                    showUnreadSeparator={separatorMessageId === x.id}
-                />
-            ) : (
-                <MessageControl
-                    key={x.id}
-                    ref={el => this.itemsMap.set(i, el)}
-                    chatId={x.chat_id}
-                    messageId={x.id}
-                    showTitle={true}
-                    sendingState={x.sending_state}
-                    onSelectChat={onSelectChat}
-                    onSelectUser={onSelectUser}
-                    showUnreadSeparator={separatorMessageId === x.id}
-                />
-            )
-        );
+        this.messages = clearHistory
+            ? null
+            : history.map((x, i) =>
+                  isServiceMessage(x) ? (
+                      <ServiceMessageControl
+                          key={x.id}
+                          ref={el => this.itemsMap.set(i, el)}
+                          chatId={x.chat_id}
+                          messageId={x.id}
+                          onSelectChat={onSelectChat}
+                          onSelectUser={onSelectUser}
+                          showUnreadSeparator={separatorMessageId === x.id}
+                      />
+                  ) : (
+                      <MessageControl
+                          key={x.id}
+                          ref={el => this.itemsMap.set(i, el)}
+                          chatId={x.chat_id}
+                          messageId={x.id}
+                          showTitle={true}
+                          sendingState={x.sending_state}
+                          onSelectChat={onSelectChat}
+                          onSelectUser={onSelectUser}
+                          showUnreadSeparator={separatorMessageId === x.id}
+                      />
+                  )
+              );
 
         return (
             <div className={classNames(classes.background, 'messages-list')} onDragEnter={this.handleListDragEnter}>

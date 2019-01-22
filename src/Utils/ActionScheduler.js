@@ -31,6 +31,22 @@ class ActionScheduler {
         return true;
     };
 
+    invoke = async key => {
+        const item = this.actions.get(key);
+        if (!item) return;
+
+        this.actions.delete(key);
+
+        await this.actionCallback({ key: key, action: item.action, cancel: item.cancel });
+        if (item.action) await item.action();
+
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+        }
+
+        this.setTimeout();
+    };
+
     remove = key => {
         const item = this.actions.get(key);
         if (!item) return;

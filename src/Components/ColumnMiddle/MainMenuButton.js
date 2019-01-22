@@ -32,9 +32,6 @@ import './MainMenuButton.css';
 const styles = theme => ({
     menuIconButton: {
         margin: '8px 12px 8px 0'
-    },
-    close: {
-        padding: theme.spacing.unit / 2
     }
 });
 
@@ -220,7 +217,7 @@ class MainMenuButton extends React.Component {
             enqueueSnackbar(message, {
                 autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS - 2 * TRANSITION_DELAY,
                 action: [
-                    <IconButton key='progress' color='inherit' className={classes.close}>
+                    <IconButton key='progress' color='inherit' className='progress-button'>
                         <NotificationTimer timeout={NOTIFICATION_AUTO_HIDE_DURATION_MS} />
                     </IconButton>,
                     <Button

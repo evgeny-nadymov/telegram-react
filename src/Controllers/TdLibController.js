@@ -48,6 +48,7 @@ class TdLibController extends EventEmitter {
     };
 
     clientUpdate = update => {
+        console.log('clientUpdate', update);
         this.emit('clientUpdate', update);
     };
 

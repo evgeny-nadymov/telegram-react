@@ -30,10 +30,8 @@ class DialogContentControl extends React.Component {
     }
 
     componentDidMount() {
-        ChatStore.on(
-            'clientUpdateFastUpdatingComplete',
-            this.onFastUpdatingComplete
-        );
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
@@ -41,15 +39,22 @@ class DialogContentControl extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener(
-            'clientUpdateFastUpdatingComplete',
-            this.onFastUpdatingComplete
-        );
+        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateUserChatAction', this.onUpdate);
     }
+
+    onClientUpdateClearHistory = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chatId) {
+            this.clearHistory = update.inProgress;
+            this.forceUpdate();
+        }
+    };
 
     onFastUpdatingComplete = update => {
         this.forceUpdate();
@@ -64,17 +69,17 @@ class DialogContentControl extends React.Component {
     };
 
     render() {
+        if (this.clearHistory) return <div className='dialog-content'>{'\u00A0'}</div>;
+
         const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
-        if (!chat) return null;
+        if (!chat) return <div className='dialog-content'>{'\u00A0'}</div>;
 
         let contentControl = null;
         const typingString = getChatTypingString(chatId);
         if (typingString) {
-            contentControl = (
-                <span className='dialog-content-accent'>{typingString}</span>
-            );
+            contentControl = <span className='dialog-content-accent'>{typingString}</span>;
         }
 
         if (!contentControl) {
@@ -96,9 +101,7 @@ class DialogContentControl extends React.Component {
             const senderName = getLastMessageSenderName(chat);
             contentControl = (
                 <>
-                    {senderName && (
-                        <span className='dialog-content-accent'>{senderName}: </span>
-                    )}
+                    {senderName && <span className='dialog-content-accent'>{senderName}: </span>}
                     {content}
                 </>
             );

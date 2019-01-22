@@ -13,3 +13,8 @@
 #delete-dialog-description {
     margin-left: 12px;
 }
+
+.progress-button {
+    margin-right: 12px !important;
+    padding: 0 !important;
+}

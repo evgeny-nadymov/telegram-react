@@ -283,40 +283,35 @@ class InputBoxControl extends Component {
         }
     }
 
-    onSendInternal(content, callback) {
-        if (!this.state.currentChatId) return;
+    onSendInternal = async (content, callback) => {
+        const { currentChatId } = this.state;
+
+        if (!currentChatId) return;
         if (!content) return;
 
-        TdLibController.send({
-            '@type': 'sendMessage',
-            chat_id: this.state.currentChatId,
-            reply_to_message_id: 0,
-            input_message_content: content
-        })
-            .then(result => {
-                //MessageStore.set(result);
+        try {
+            await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
 
-                TdLibController.send({
-                    '@type': 'viewMessages',
-                    chat_id: this.state.currentChatId,
-                    message_ids: [result.id]
-                });
-
-                callback(result);
-            })
-            .catch(error => {
-                alert('sendMessage error ' + JSON.stringify(error));
+            let result = await TdLibController.send({
+                '@type': 'sendMessage',
+                chat_id: currentChatId,
+                reply_to_message_id: 0,
+                input_message_content: content
             });
 
-        /*if (this.state.selectedChat.draft_message){
-            TdLibController
-                .send({
-                    '@type': 'setChatDraftMessage',
-                    chat_id: this.state.selectedChat.id,
-                    draft_message: null
-                });
-        }*/
-    }
+            //MessageStore.set(result);
+
+            TdLibController.send({
+                '@type': 'viewMessages',
+                chat_id: currentChatId,
+                message_ids: [result.id]
+            });
+
+            callback(result);
+        } catch (error) {
+            alert('sendMessage error ' + JSON.stringify(error));
+        }
+    };
 
     handleEmojiSelect(emoji) {
         if (!emoji) return;
@@ -340,17 +335,17 @@ class InputBoxControl extends Component {
 
         return (
             <div className={classNames(classes.borderColor, 'inputbox-wrapper')}>
-                <div className="inputbox-left-column">
+                <div className='inputbox-left-column'>
                     {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
                     {/*<InsertEmoticonIcon />*/}
                     {/*</IconButton>*/}
                     <EmojiPickerButton onSelect={this.handleEmojiSelect} />
                 </div>
-                <div className="inputbox-middle-column">
+                <div className='inputbox-middle-column'>
                     <div
-                        id="inputbox-message"
+                        id='inputbox-message'
                         ref={this.newMessage}
-                        placeholder="Type a message"
+                        placeholder='Type a message'
                         key={Date()}
                         contentEditable
                         suppressContentEditableWarning
@@ -359,20 +354,20 @@ class InputBoxControl extends Component {
                         {text}
                     </div>
                 </div>
-                <div className="inputbox-right-column">
+                <div className='inputbox-right-column'>
                     <input
                         ref={this.attachDocument}
-                        className="inputbox-attach-button"
-                        type="file"
-                        multiple="multiple"
+                        className='inputbox-attach-button'
+                        type='file'
+                        multiple='multiple'
                         onChange={this.handleAttachDocumentComplete}
                     />
                     <input
                         ref={this.attachPhoto}
-                        className="inputbox-attach-button"
-                        type="file"
-                        multiple="multiple"
-                        accept="image/*"
+                        className='inputbox-attach-button'
+                        type='file'
+                        multiple='multiple'
+                        accept='image/*'
                         onChange={this.handleAttachPhotoComplete}
                     />
                     <AttachButton onAttachPhoto={this.handleAttachPhoto} onAttachDocument={this.handleAttachDocument} />
@@ -380,7 +375,7 @@ class InputBoxControl extends Component {
                     {/*<IconButton>*/}
                     {/*<KeyboardVoiceIcon />*/}
                     {/*</IconButton>*/}
-                    <IconButton className={classes.iconButton} aria-label="Send" onClick={this.handleSubmit}>
+                    <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
                         <SendIcon />
                     </IconButton>
                 </div>

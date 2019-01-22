@@ -25,6 +25,7 @@ class DialogMetaControl extends React.Component {
 
     componentDidMount() {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
@@ -34,12 +35,22 @@ class DialogMetaControl extends React.Component {
 
     componentWillUnmount() {
         ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
     }
+
+    onClientUpdateClearHistory = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chatId) {
+            this.clearHistory = update.inProgress;
+            this.forceUpdate();
+        }
+    };
 
     onFastUpdatingComplete = update => {
         this.forceUpdate();
@@ -54,6 +65,8 @@ class DialogMetaControl extends React.Component {
     };
 
     render() {
+        if (this.clearHistory) return null;
+
         const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);

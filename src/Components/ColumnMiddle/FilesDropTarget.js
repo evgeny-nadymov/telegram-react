@@ -12,32 +12,32 @@ import TdLibController from '../../Controllers/TdLibController';
 import './FilesDropTarget.css';
 
 class FilesDropTarget extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
             dragging: ApplicationStore.getDragging()
-        }
+        };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ApplicationStore.on('clientUpdateDragging', this.onClientUpdateDragging);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         ApplicationStore.removeListener('clientUpdateDragging', this.onClientUpdateDragging);
     }
 
-    onClientUpdateDragging = (update) => {
+    onClientUpdateDragging = update => {
         this.setState({ dragging: ApplicationStore.getDragging() });
     };
 
-    handleDragEnter = (event) => {
+    handleDragEnter = event => {
         event.preventDefault();
         event.stopPropagation();
     };
 
-    handleDrop = (event) => {
+    handleDrop = event => {
         event.preventDefault();
         event.stopPropagation();
         ApplicationStore.setDragging(false);
@@ -45,16 +45,16 @@ class FilesDropTarget extends React.Component {
         this.handleAttachDocumentComplete(event.dataTransfer.files);
     };
 
-    handleDragLeave = (event) => {
+    handleDragLeave = event => {
         event.preventDefault();
         event.stopPropagation();
         ApplicationStore.setDragging(false);
     };
 
-    handleAttachDocumentComplete = (files) => {
+    handleAttachDocumentComplete = files => {
         if (files.length === 0) return;
 
-        for (let i = 0; i < files.length; i++){
+        for (let i = 0; i < files.length; i++) {
             let file = files[i];
             const content = {
                 '@type': 'inputMessageDocument',
@@ -65,43 +65,34 @@ class FilesDropTarget extends React.Component {
         }
     };
 
-    onSendInternal = (content, callback) => {
-        const chatId = ApplicationStore.getChatId();
-        if (!chatId) return;
+    onSendInternal = async (content, callback) => {
+        const currentChatId = ApplicationStore.getChatId();
+
+        if (!currentChatId) return;
         if (!content) return;
 
-        TdLibController
-            .send({
+        try {
+            ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
+
+            let result = await TdLibController.send({
                 '@type': 'sendMessage',
-                chat_id: chatId,
+                chat_id: currentChatId,
                 reply_to_message_id: 0,
                 input_message_content: content
-            })
-            .then(result => {
-
-                //MessageStore.set(result);
-
-                TdLibController
-                    .send({
-                        '@type': 'viewMessages',
-                        chat_id: chatId,
-                        message_ids: [result.id]
-                    });
-
-                callback(result);
-            })
-            .catch(error => {
-                alert('sendMessage error ' + JSON.stringify(error));
             });
 
-        /*if (this.state.selectedChat.draft_message){
-            TdLibController
-                .send({
-                    '@type': 'setChatDraftMessage',
-                    chat_id: this.state.selectedChat.id,
-                    draft_message: null
-                });
-        }*/
+            //MessageStore.set(result);
+
+            TdLibController.send({
+                '@type': 'viewMessages',
+                chat_id: currentChatId,
+                message_ids: [result.id]
+            });
+
+            callback(result);
+        } catch (error) {
+            alert('sendMessage error ' + JSON.stringify(error));
+        }
     };
 
     render() {
@@ -109,7 +100,7 @@ class FilesDropTarget extends React.Component {
 
         return (
             <>
-                {   dragging &&
+                {dragging && (
                     <div
                         className='files-drop-target'
                         onDragEnter={this.handleDragEnter}
@@ -122,8 +113,9 @@ class FilesDropTarget extends React.Component {
                             </div>
                         </div>
                     </div>
-                }
-            </>);
+                )}
+            </>
+        );
     }
 }
 

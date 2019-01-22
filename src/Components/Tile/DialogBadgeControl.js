@@ -43,6 +43,7 @@ class DialogBadgeControl extends React.Component {
 
     componentDidMount() {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatNotificationSettings', this.onUpdate);
@@ -54,6 +55,7 @@ class DialogBadgeControl extends React.Component {
 
     componentWillUnmount() {
         ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.removeListener('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
@@ -62,6 +64,15 @@ class DialogBadgeControl extends React.Component {
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
+
+    onClientUpdateClearHistory = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chatId) {
+            this.clearHistory = update.inProgress;
+            this.forceUpdate();
+        }
+    };
 
     onFastUpdatingComplete = update => {
         this.forceUpdate();
@@ -98,6 +109,8 @@ class DialogBadgeControl extends React.Component {
     };
 
     render() {
+        if (this.clearHistory) return null;
+
         const { classes, chatId } = this.props;
 
         const chat = ChatStore.get(chatId);

@@ -34,6 +34,10 @@ class ApplicationStore extends EventEmitter {
         return this.actionScheduler.add(key, timeout, action, cancel);
     };
 
+    invokeScheduledAction = async key => {
+        await this.actionScheduler.invoke(key);
+    };
+
     removeScheduledAction = key => {
         this.actionScheduler.remove(key);
     };
