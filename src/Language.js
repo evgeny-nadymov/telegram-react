@@ -8,15 +8,33 @@
 import React from 'react';
 import Cookies from 'universal-cookie';
 import i18n from 'i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import { reactI18nextModule, I18nextProvider } from 'react-i18next';
 import { getDisplayName } from './Utils/HOC';
 import ApplicationStore from './Stores/ApplicationStore';
 
-const cookies = new Cookies();
-const { language } = cookies.get('languageOptions') || { language: 'en' };
+// const cookies = new Cookies();
+// const { language } = cookies.get('languageOptions') || { language: 'en' };
 
-i18n.use(reactI18nextModule) // passes i18n down to react-i18next
+const detection = {
+    // order and from where user language should be detected
+    order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
+
+    // keys or params to lookup language from
+    lookupQuerystring: 'lng',
+    lookupCookie: 'i18next',
+    lookupLocalStorage: 'i18nextLng',
+    lookupFromPathIndex: 0,
+    lookupFromSubdomainIndex: 0,
+
+    // cache user language on
+    caches: ['localStorage', 'cookie']
+};
+
+i18n.use(LanguageDetector)
+    .use(reactI18nextModule) // passes i18n down to react-i18next
     .init({
+        detection: detection,
         resources: {
             en: {
                 translation: {
@@ -63,7 +81,6 @@ i18n.use(reactI18nextModule) // passes i18n down to react-i18next
                 }
             }
         },
-        lng: language,
         fallbackLng: 'en',
         interpolation: {
             escapeValue: false
@@ -83,8 +100,8 @@ function withLanguage(WrappedComponent) {
         onClientUpdateLanguageChanging = async update => {
             const { language } = update;
 
-            const cookies = new Cookies();
-            cookies.set('languageOptions', { language: language });
+            // const cookies = new Cookies();
+            // cookies.set('languageOptions', { language: language });
 
             await i18n.changeLanguage(language);
 
