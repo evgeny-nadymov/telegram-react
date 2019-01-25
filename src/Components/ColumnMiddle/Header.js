@@ -257,24 +257,32 @@ class Header extends Component {
         if (connectionState) {
             switch (connectionState['@type']) {
                 case 'connectionStateConnecting':
-                    title = t('Connecting').replace('...', '');
+                    title = t('Connecting')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateConnectingToProxy':
-                    title = t('Connecting to proxy').replace('...', '');
+                    title = t('Connecting to proxy')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateReady':
                     break;
                 case 'connectionStateUpdating':
-                    title = t('Updating').replace('...', '');
+                    title = t('Updating')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateWaitingForNetwork':
-                    title = t('Waiting for network').replace('...', '');
+                    title = t('Waiting for network')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -286,7 +294,9 @@ class Header extends Component {
                 case ' authorizationStateClosing':
                     break;
                 case 'authorizationStateLoggingOut':
-                    title = t('Logging out').replace('...', '');
+                    title = t('Logging out')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -295,7 +305,9 @@ class Header extends Component {
                 case 'authorizationStateWaitCode':
                     break;
                 case 'authorizationStateWaitEncryptionKey':
-                    title = t('Loading').replace('...', '');
+                    title = t('Loading')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -304,13 +316,17 @@ class Header extends Component {
                 case 'authorizationStateWaitPhoneNumber':
                     break;
                 case 'authorizationStateWaitTdlibParameters':
-                    title = t('Loading').replace('...', '');
+                    title = t('Loading')
+                        .replace('...', '')
+                        .replace('…', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
             }
         } else {
-            title = t('Loading').replace('...', '');
+            title = t('Loading')
+                .replace('...', '')
+                .replace('…', '');
             subtitle = '';
             showProgressAnimation = true;
         }

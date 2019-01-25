@@ -30,6 +30,9 @@ import '../ColumnMiddle/Header.css';
 const styles = {
     headerIconButton: {
         margin: '8px 12px 8px 0'
+    },
+    dialogText: {
+        whiteSpace: 'pre-wrap'
     }
 };
 
@@ -111,16 +114,16 @@ class DialogsHeader extends React.Component {
 
         const confirmLogoutDialog = open ? (
             <Dialog open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
-                <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
+                <DialogTitle id='form-dialog-title'>{t('AppName')}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>Are you sure you want to log out?</DialogContentText>
+                    <DialogContentText className={classes.dialogText}>{t('AreYouSureLogout')}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose} color='primary'>
-                        Cancel
+                        {t('Cancel')}
                     </Button>
                     <Button onClick={this.handleDone} color='primary'>
-                        Ok
+                        {t('Ok')}
                     </Button>
                 </DialogActions>
             </Dialog>

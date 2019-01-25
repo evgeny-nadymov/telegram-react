@@ -63,7 +63,7 @@ class LanguagePicker extends React.Component {
                 key={x.id}
                 value={x.id}
                 control={<Radio color='primary' />}
-                label={`${x.name} ${x.native_name}`}
+                label={`${x.name}\xa0(${x.native_name})`}
             />
         ));
 

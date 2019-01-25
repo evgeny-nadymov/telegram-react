@@ -11,6 +11,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
+import { withNamespaces } from 'react-i18next';
+import { compose } from 'recompose';
 import ThemePicker from './ThemePicker';
 import LanguagePicker from './LanguagePicker';
 import { update } from '../../registerServiceWorker';
@@ -94,7 +96,7 @@ class MainMenuButton extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { anchorEl, authorizationState } = this.state;
 
         const mainMenuControl = isAuthorizationReady(authorizationState) ? (
@@ -106,10 +108,10 @@ class MainMenuButton extends React.Component {
                     onClose={this.handleMenuClose}
                     getContentAnchorEl={null}
                     anchorOrigin={menuAnchorOrigin}>
-                    <MenuItem onClick={this.handleCheckUpdates}>Check for updates</MenuItem>
-                    <MenuItem onClick={this.handleAppearance}>Appearance</MenuItem>
-                    <MenuItem onClick={this.handleLanguage}>Language</MenuItem>
-                    <MenuItem onClick={this.handleLogOut}>Log out</MenuItem>
+                    <MenuItem onClick={this.handleCheckUpdates}>{t('UpdateTelegram')}</MenuItem>
+                    <MenuItem onClick={this.handleAppearance}>{t('Appearance')}</MenuItem>
+                    <MenuItem onClick={this.handleLanguage}>{t('Language')}</MenuItem>
+                    <MenuItem onClick={this.handleLogOut}>{t('LogOut')}</MenuItem>
                 </Menu>
             </>
         ) : null;
@@ -132,4 +134,9 @@ class MainMenuButton extends React.Component {
     }
 }
 
-export default withStyles(styles)(MainMenuButton);
+const enhance = compose(
+    withNamespaces(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(MainMenuButton);

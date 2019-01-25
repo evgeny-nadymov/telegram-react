@@ -130,7 +130,7 @@ class TdLibController extends EventEmitter {
         this.send({
             '@type': 'setOption',
             name: 'language_pack_id',
-            value: { '@type': 'optionValueString', value: 'en' }
+            value: { '@type': 'optionValueString', value: 'de' }
         });
         this.send({
             '@type': 'getLocalizationTargetInfo',
