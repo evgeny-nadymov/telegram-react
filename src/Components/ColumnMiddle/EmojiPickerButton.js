@@ -10,11 +10,12 @@ import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import Popover from '@material-ui/core/Popover';
 import { withStyles } from '@material-ui/core/styles';
+import { withNamespaces } from 'react-i18next';
 import { compose } from 'recompose';
 import { Picker } from 'emoji-mart';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import LocalizationStore from '../../Stores/LocalizationStore';
 import './EmojiPickerButton.css';
-import { withNamespaces } from 'react-i18next';
 
 const styles = {
     iconButton: {
@@ -33,12 +34,12 @@ class EmojiPickerButton extends React.Component {
 
     componentDidMount() {
         ApplicationStore.on('clientUpdateThemeChange', this.onClientUpdateChange);
-        ApplicationStore.on('clientUpdateLanguageChange', this.onClientUpdateChange);
+        LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateChange);
     }
 
     componentWillUnmount() {
         ApplicationStore.removeListener('clientUpdateThemeChange', this.onClientUpdateChange);
-        ApplicationStore.on('clientUpdateLanguageChange', this.onClientUpdateChange);
+        LocalizationStore.removeListener('clientUpdateLanguageChange', this.onClientUpdateChange);
     }
 
     onClientUpdateChange = update => {

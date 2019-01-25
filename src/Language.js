@@ -6,109 +6,15 @@
  */
 
 import React from 'react';
-import Cookies from 'universal-cookie';
-import i18n from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
-import { reactI18nextModule, I18nextProvider } from 'react-i18next';
+import { I18nextProvider } from 'react-i18next';
 import { getDisplayName } from './Utils/HOC';
-import ApplicationStore from './Stores/ApplicationStore';
-
-// const cookies = new Cookies();
-// const { language } = cookies.get('languageOptions') || { language: 'en' };
-
-const detection = {
-    // order and from where user language should be detected
-    order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
-
-    // keys or params to lookup language from
-    lookupQuerystring: 'lng',
-    lookupCookie: 'i18next',
-    lookupLocalStorage: 'i18nextLng',
-    lookupFromPathIndex: 0,
-    lookupFromSubdomainIndex: 0,
-
-    // cache user language on
-    caches: ['localStorage', 'cookie']
-};
-
-i18n.use(LanguageDetector)
-    .use(reactI18nextModule) // passes i18n down to react-i18next
-    .init({
-        detection: detection,
-        resources: {
-            en: {
-                translation: {
-                    AppName: 'Telegram',
-                    Loading: 'Loading',
-                    Connecting: 'Connecting',
-                    Updating: 'Updating',
-                    Search: 'Search',
-                    NotEmojiFound: 'No Emoji Found',
-                    ChooseDefaultSkinTone: 'Choose your default skin tone',
-                    SearchResults: 'Search Results',
-                    Recent: 'Frequently Used',
-                    SmileysPeople: 'Smileys & People',
-                    AnimalsNature: 'Animals & Nature',
-                    FoodDrink: 'Food & Drink',
-                    Activity: 'Activity',
-                    TravelPlaces: 'Travel & Places',
-                    Objects: 'Objects',
-                    Symbols: 'Symbols',
-                    Flags: 'Flags',
-                    Custom: 'Custom'
-                }
-            },
-            ru: {
-                translation: {
-                    AppName: 'Телеграм',
-                    Loading: 'Загрузка',
-                    Connecting: 'Соединение',
-                    Updating: 'Обновление',
-                    Search: 'Поиск',
-                    NotEmojiFound: 'Емодзи не найдены',
-                    ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
-                    SearchResults: 'Результаты поиска',
-                    Recent: 'Часто используемые',
-                    SmileysPeople: 'Смайлики и люди',
-                    AnimalsNature: 'Животные и природа',
-                    FoodDrink: 'Еда и напитки',
-                    Activity: 'Активность',
-                    TravelPlaces: 'Путешествия и местности',
-                    Objects: 'Предметы',
-                    Symbols: 'Символы',
-                    Flags: 'Флаги',
-                    Custom: 'Пользовательские'
-                }
-            }
-        },
-        fallbackLng: 'en',
-        interpolation: {
-            escapeValue: false
-        }
-    });
+import LocalizationStore from './Stores/LocalizationStore';
 
 function withLanguage(WrappedComponent) {
     class LanguageWrapper extends React.Component {
-        componentDidMount() {
-            ApplicationStore.on('clientUpdateLanguageChanging', this.onClientUpdateLanguageChanging);
-        }
-
-        componentWillUnmount() {
-            ApplicationStore.removeListener('clientUpdateLanguageChanging', this.onClientUpdateLanguageChanging);
-        }
-
-        onClientUpdateLanguageChanging = async update => {
-            const { language } = update;
-
-            // const cookies = new Cookies();
-            // cookies.set('languageOptions', { language: language });
-
-            await i18n.changeLanguage(language);
-
-            ApplicationStore.emit('clientUpdateLanguageChange');
-        };
-
         render() {
+            const i18n = LocalizationStore.i18n;
+
             return (
                 <I18nextProvider i18n={i18n}>
                     <WrappedComponent {...this.props} />

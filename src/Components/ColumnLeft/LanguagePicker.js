@@ -17,7 +17,8 @@ import FormControl from '@material-ui/core/FormControl';
 import { withStyles } from '@material-ui/core/styles';
 import { withNamespaces } from 'react-i18next';
 import { compose } from 'recompose';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
+import LocalizationStore from '../../Stores/LocalizationStore';
 
 const styles = theme => ({
     formControl: {
@@ -41,9 +42,7 @@ class LanguagePicker extends React.Component {
     handleChange = event => {
         this.setState({ language: event.target.value });
 
-        ApplicationStore.emit('clientUpdateLanguageChanging', {
-            language: event.target.value
-        });
+        TdLibController.clientUpdate({ '@type': 'clientUpdateLanguageChange', language: event.target.value });
     };
 
     handleClose = () => {
@@ -55,8 +54,18 @@ class LanguagePicker extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { open, language } = this.state;
+        const info = LocalizationStore.info || { language_packs: [] };
+
+        const languages = info.language_packs.map(x => (
+            <FormControlLabel
+                key={x.id}
+                value={x.id}
+                control={<Radio color='primary' />}
+                label={`${x.name} ${x.native_name}`}
+            />
+        ));
 
         return (
             <Dialog
@@ -64,7 +73,7 @@ class LanguagePicker extends React.Component {
                 onClose={this.handleClose}
                 aria-labelledby='language-dialog-title'
                 aria-describedby='language-dialog-description'>
-                <DialogTitle id='language-dialog-title'>Language</DialogTitle>
+                <DialogTitle id='language-dialog-title'>{t('Language')}</DialogTitle>
                 <DialogContent>
                     <FormControl component='fieldset'>
                         <RadioGroup
@@ -72,8 +81,7 @@ class LanguagePicker extends React.Component {
                             name='language1'
                             value={language}
                             onChange={this.handleChange}>
-                            <FormControlLabel value='en' control={<Radio color='primary' />} label='English' />
-                            <FormControlLabel value='ru' control={<Radio color='primary' />} label='Russian' />
+                            {languages}
                         </RadioGroup>
                     </FormControl>
                 </DialogContent>

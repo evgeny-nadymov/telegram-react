@@ -132,16 +132,10 @@ class TdLibController extends EventEmitter {
             name: 'language_pack_id',
             value: { '@type': 'optionValueString', value: 'en' }
         });
-
-        // const result = this.send({
-        //     '@type': 'getLocalizationTargetInfo',
-        //     local: false
-        // });
-        // const result2 = this.send({
-        //     '@type': 'getLanguagePackStrings',
-        //     language_pack_id: 'ru',
-        //     keys: []
-        // });
+        this.send({
+            '@type': 'getLocalizationTargetInfo',
+            only_local: false
+        }).then(result => this.clientUpdate({ '@type': 'clientUpdateLocalizationTargetInfo', info: result }));
 
         this.send({
             '@type': 'setTdlibParameters',

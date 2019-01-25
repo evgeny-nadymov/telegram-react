@@ -257,24 +257,24 @@ class Header extends Component {
         if (connectionState) {
             switch (connectionState['@type']) {
                 case 'connectionStateConnecting':
-                    title = t('Connecting');
+                    title = t('Connecting').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateConnectingToProxy':
-                    title = 'Connecting to proxy';
+                    title = t('Connecting to proxy').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateReady':
                     break;
                 case 'connectionStateUpdating':
-                    title = t('Updating');
+                    title = t('Updating').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateWaitingForNetwork':
-                    title = t('Waiting for network');
+                    title = t('Waiting for network').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -286,7 +286,7 @@ class Header extends Component {
                 case ' authorizationStateClosing':
                     break;
                 case 'authorizationStateLoggingOut':
-                    title = t('Logging out');
+                    title = t('Logging out').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -295,7 +295,7 @@ class Header extends Component {
                 case 'authorizationStateWaitCode':
                     break;
                 case 'authorizationStateWaitEncryptionKey':
-                    title = t('Loading');
+                    title = t('Loading').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -304,13 +304,13 @@ class Header extends Component {
                 case 'authorizationStateWaitPhoneNumber':
                     break;
                 case 'authorizationStateWaitTdlibParameters':
-                    title = t('Loading');
+                    title = t('Loading').replace('...', '');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
             }
         } else {
-            title = t('Loading');
+            title = t('Loading').replace('...', '');
             subtitle = '';
             showProgressAnimation = true;
         }
