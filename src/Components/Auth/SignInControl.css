@@ -5,8 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.sign-in-wrapper{
+.sign-in-wrapper {
     /*display: flex;*/
     /*flex-direction: column;*/
     /*align-items: center;*/
+}
+
+.authorization-actions {
+    display: flex;
+    flex-direction: column;
 }

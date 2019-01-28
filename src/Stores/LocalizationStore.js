@@ -130,7 +130,37 @@ class LocalizationStore extends EventEmitter {
 
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                switch (update.authorization_state['@type']) {
+                    case 'authorizationStateWaitTdlibParameters':
+                        TdLibController.send({
+                            '@type': 'setOption',
+                            name: 'language_pack_database_path',
+                            value: { '@type': 'optionValueString', value: '/tdlib/dbfs/language' }
+                        });
+                        TdLibController.send({
+                            '@type': 'setOption',
+                            name: 'localization_target',
+                            value: { '@type': 'optionValueString', value: 'android' }
+                        });
+                        TdLibController.send({
+                            '@type': 'setOption',
+                            name: 'language_pack_id',
+                            value: { '@type': 'optionValueString', value: language }
+                        });
+                        TdLibController.send({
+                            '@type': 'getLocalizationTargetInfo',
+                            only_local: false
+                        }).then(result => {
+                            this.info = result;
+                        });
+                        break;
+                }
+                break;
+            }
             case 'updateLanguagePackStrings': {
+                // add/remove new strings
+
                 this.emit('updateLanguagePackStrings', update);
                 break;
             }
@@ -158,13 +188,14 @@ class LocalizationStore extends EventEmitter {
 
                     await i18n.changeLanguage(language);
 
+                    TdLibController.send({
+                        '@type': 'setOption',
+                        name: 'language_pack_id',
+                        value: { '@type': 'optionValueString', value: language }
+                    });
+
                     this.emit('clientUpdateLanguageChange', update);
                 });
-                break;
-            }
-            case 'clientUpdateLocalizationTargetInfo': {
-                this.info = update.info;
-                this.emit('clientUpdateLocalizationTargetInfo', update);
                 break;
             }
         }
@@ -194,6 +225,20 @@ class LocalizationStore extends EventEmitter {
         }
 
         return result;
+    };
+
+    loadLanguage = async language => {
+        const result = await TdLibController.send({
+            '@type': 'getLanguagePackStrings',
+            language_pack_id: language,
+            keys: []
+        });
+
+        const resources = this.processStrings(language, result);
+
+        this.cache.save(language, defaultNamespace, resources);
+
+        i18n.addResourceBundle(language, defaultNamespace, resources);
     };
 }
 

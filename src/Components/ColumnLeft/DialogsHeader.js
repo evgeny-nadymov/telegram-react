@@ -145,7 +145,7 @@ class DialogsHeader extends React.Component {
                             <div
                                 id='header-search-inputbox'
                                 ref={this.searchInput}
-                                placeholder='Search'
+                                placeholder={t('Search')}
                                 key={Date()}
                                 contentEditable
                                 suppressContentEditableWarning
@@ -156,7 +156,10 @@ class DialogsHeader extends React.Component {
                         </div>
                     </>
                 )}
-                <IconButton className={classes.headerIconButton} aria-label='Search' onMouseDown={this.handleSearch}>
+                <IconButton
+                    className={classes.headerIconButton}
+                    aria-label={t('Search')}
+                    onMouseDown={this.handleSearch}>
                     {openSearch ? <CloseIcon /> : <SearchIcon />}
                 </IconButton>
             </div>

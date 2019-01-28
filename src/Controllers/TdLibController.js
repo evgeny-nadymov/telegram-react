@@ -118,26 +118,6 @@ class TdLibController extends EventEmitter {
         const { version } = packageJson;
 
         this.send({
-            '@type': 'setOption',
-            name: 'language_pack_database_path',
-            value: { '@type': 'optionValueString', value: '/tdlib/dbfs/language' }
-        });
-        this.send({
-            '@type': 'setOption',
-            name: 'localization_target',
-            value: { '@type': 'optionValueString', value: 'android' }
-        });
-        this.send({
-            '@type': 'setOption',
-            name: 'language_pack_id',
-            value: { '@type': 'optionValueString', value: 'de' }
-        });
-        this.send({
-            '@type': 'getLocalizationTargetInfo',
-            only_local: false
-        }).then(result => this.clientUpdate({ '@type': 'clientUpdateLocalizationTargetInfo', info: result }));
-
-        this.send({
             '@type': 'setTdlibParameters',
             parameters: {
                 '@type': 'tdParameters',
