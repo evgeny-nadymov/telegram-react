@@ -87,24 +87,15 @@ class TelegramApp extends Component {
 
         this.setState({ authorizationState: authorization_state });
 
-        if (authorization_state) {
-            if (
-                authorization_state['@type'] === 'authorizationStateReady' ||
-                authorization_state['@type'] === 'authorizationStateWaitCode' ||
-                authorization_state['@type'] === 'authorizationStateWaitPassword' ||
-                authorization_state['@type'] === 'authorizationStateWaitPhoneNumber'
-            ) {
-                //registerServiceWorker();
-            }
+        if (!window.hasFocus) return;
+        if (!authorization_state) return;
+        if (authorization_state['@type'] !== 'authorizationStateReady') return;
 
-            if (authorization_state['@type'] === 'authorizationStateReady') {
-                TdLibController.send({
-                    '@type': 'setOption',
-                    name: 'online',
-                    value: { '@type': 'optionValueBoolean', value: true }
-                });
-            }
-        }
+        TdLibController.send({
+            '@type': 'setOption',
+            name: 'online',
+            value: { '@type': 'optionValueBoolean', value: true }
+        });
     };
 
     onClientUpdateChatDetailsVisibility = update => {
@@ -264,6 +255,8 @@ window.onblur = function() {
     if (!authorizationState) return;
     if (authorizationState['@type'] !== 'authorizationStateReady') return;
 
+    window.hasFocus = false;
+
     TdLibController.send({
         '@type': 'setOption',
         name: 'online',
@@ -276,6 +269,8 @@ window.onfocus = function() {
 
     if (!authorizationState) return;
     if (authorizationState['@type'] !== 'authorizationStateReady') return;
+
+    window.hasFocus = true;
 
     TdLibController.send({
         '@type': 'setOption',

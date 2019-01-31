@@ -76,6 +76,8 @@ class InputBoxControl extends Component {
 
     componentDidMount() {
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+
+        this.setInputFocus();
     }
 
     componentWillUnmount() {
@@ -92,6 +94,10 @@ class InputBoxControl extends Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         this.setChatDraftMessage(snapshot);
+
+        if (prevState.currentChatId !== this.state.currentChatId) {
+            this.setInputFocus();
+        }
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
@@ -99,6 +105,14 @@ class InputBoxControl extends Component {
 
         return this.getNewChatDraftMessage(prevState.currentChatId);
     }
+
+    setInputFocus = () => {
+        setTimeout(() => {
+            if (this.newMessage.current) {
+                this.newMessage.current.focus();
+            }
+        }, 100);
+    };
 
     setChatDraftMessage(chatDraftMessage) {
         if (!chatDraftMessage) return;
