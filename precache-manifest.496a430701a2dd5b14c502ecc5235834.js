@@ -1,11 +1,11 @@
 self.__precacheManifest = [
   {
-    "revision": "595a66da355902712958",
-    "url": "/telegram-react/static/css/main.af421a98.chunk.css"
+    "revision": "abce5d4310bef208cf4a",
+    "url": "/telegram-react/static/css/main.972f7380.chunk.css"
   },
   {
-    "revision": "595a66da355902712958",
-    "url": "/telegram-react/static/js/main.595a66da.chunk.js"
+    "revision": "abce5d4310bef208cf4a",
+    "url": "/telegram-react/static/js/main.abce5d43.chunk.js"
   },
   {
     "revision": "d485366ad0f4b0d26745",
@@ -28,7 +28,7 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/media/Manytabs_2x.7a71629a.png"
   },
   {
-    "revision": "52613152cb751d132c0088dc8a0bede2",
+    "revision": "a21b6a5426100427c45e55ea70a553f3",
     "url": "/telegram-react/index.html"
   }
 ];
