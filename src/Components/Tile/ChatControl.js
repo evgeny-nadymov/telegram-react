@@ -32,20 +32,15 @@ class ChatControl extends React.Component {
         const { chatId, onTileSelect, showStatus, showSavedMessages } = this.props;
 
         return (
-            <div className="chat" onClick={this.handleClick}>
-                <div className="chat-wrapper">
-                    <ChatTileControl
-                        chatId={chatId}
-                        onSelect={onTileSelect}
-                        showSavedMessages={showSavedMessages}
-                    />
-                    <div className="dialog-inner-wrapper">
-                        <div className="tile-first-row">
+            <div className='chat' onClick={this.handleClick}>
+                <div className='chat-wrapper'>
+                    <ChatTileControl chatId={chatId} onSelect={onTileSelect} showSavedMessages={showSavedMessages} />
+                    <div className='dialog-inner-wrapper'>
+                        <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />
                         </div>
-                        {showStatus &&
-                        !showSavedMessages && (
-                            <div className="tile-second-row">
+                        {showStatus && !showSavedMessages && (
+                            <div className='tile-second-row'>
                                 <DialogStatusControl chatId={chatId} />
                             </div>
                         )}

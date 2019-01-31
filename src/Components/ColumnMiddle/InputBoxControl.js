@@ -319,6 +319,13 @@ class InputBoxControl extends Component {
         this.newMessage.current.innerText += emoji.native;
     }
 
+    handlePaste = event => {
+        // console.log('onPaste', event.clipboardData);
+        //
+        // const plaintext = event.clipboardData.getData('text/plain');
+        // document.execCommand('inserttext', false, plaintext);
+    };
+
     render() {
         const { classes } = this.props;
         const { currentChatId, anchorEl } = this.state;
@@ -350,7 +357,8 @@ class InputBoxControl extends Component {
                         contentEditable
                         suppressContentEditableWarning
                         onKeyDown={this.handleKeyDown}
-                        onKeyUp={this.handleInputChange}>
+                        onKeyUp={this.handleInputChange}
+                        onPaste={this.handlePaste}>
                         {text}
                     </div>
                 </div>

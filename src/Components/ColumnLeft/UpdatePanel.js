@@ -17,7 +17,7 @@ const styles = {
         width: '100%',
         borderRadius: 0,
         color: 'white',
-        maxHeight: '67px'
+        maxHeight: '65px'
     }
 };
 

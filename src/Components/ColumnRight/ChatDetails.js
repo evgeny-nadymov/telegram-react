@@ -342,12 +342,14 @@ class ChatDetails extends React.Component {
             </ListItem>
         ));
 
+        const { photo } = chat;
+
         return (
             <div className='chat-details'>
                 <ChatDetailsHeaderControl backButton={backButton} onClose={onClose} onClick={this.handleHeaderClick} />
                 <div ref={this.chatDetailsListRef} className='chat-details-list'>
                     <div className='chat-details-info'>
-                        <ChatControl chatId={chatId} onTileSelect={this.handleOpenViewer} />
+                        <ChatControl chatId={chatId} onTileSelect={photo ? this.handleOpenViewer : null} />
                     </div>
                     <List>
                         {username && (

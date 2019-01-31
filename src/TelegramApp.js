@@ -258,23 +258,31 @@ class TelegramApp extends Component {
     }
 }
 
-/*window.onblur = function(){
-    TdLibController
-        .send({
-            '@type': 'setOption',
-            name: 'online',
-            value: { '@type': 'optionValueBoolean', value: false }
-        });
+window.onblur = function() {
+    const { authorizationState } = ApplicationStore;
+
+    if (!authorizationState) return;
+    if (authorizationState['@type'] !== 'authorizationStateReady') return;
+
+    TdLibController.send({
+        '@type': 'setOption',
+        name: 'online',
+        value: { '@type': 'optionValueBoolean', value: false }
+    });
 };
 
-window.onfocus = function(){
-    TdLibController
-        .send({
-            '@type': 'setOption',
-            name: 'online',
-            value: { '@type': 'optionValueBoolean', value: true }
-        });
-};*/
+window.onfocus = function() {
+    const { authorizationState } = ApplicationStore;
+
+    if (!authorizationState) return;
+    if (authorizationState['@type'] !== 'authorizationStateReady') return;
+
+    TdLibController.send({
+        '@type': 'setOption',
+        name: 'online',
+        value: { '@type': 'optionValueBoolean', value: true }
+    });
+};
 
 window.history.pushState(null, null, window.location.href);
 window.onpopstate = function() {
