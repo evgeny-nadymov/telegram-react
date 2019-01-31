@@ -38,7 +38,8 @@ import {
     isGroupChat,
     getGroupChatMembers,
     getChatFullInfo,
-    isPrivateChat
+    isPrivateChat,
+    getChatUserId
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
@@ -51,6 +52,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import OptionStore from '../../Stores/OptionStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './ChatDetails.css';
 
 const styles = theme => ({
@@ -78,14 +80,16 @@ class ChatDetails extends React.Component {
 
         this.members = new Map();
         this.state = {
-            prevChatId: chatId
+            prevChatId: chatId,
+            hasGroupsInCommon: false
         };
     }
 
     static getDerivedStateFromProps(props, state) {
         if (props.chatId !== state.prevChatId) {
             return {
-                prevChatId: props.chatId
+                prevChatId: props.chatId,
+                hasGroupsInCommon: false
             };
         }
 
@@ -116,6 +120,10 @@ class ChatDetails extends React.Component {
         }
 
         if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
+        if (nextState.hasGroupsInCommon !== this.state.hasGroupsInCommon) {
             return true;
         }
 
@@ -169,7 +177,6 @@ class ChatDetails extends React.Component {
             chat.type['@type'] === 'chatTypeBasicGroup' &&
             chat.type.basic_group_id === update.basic_group_id
         ) {
-            console.log('[ChatDetails] onUpdateBasicGroupFullInfo');
             this.handleSelectChat();
 
             this.forceUpdate(); // update bio
@@ -185,7 +192,6 @@ class ChatDetails extends React.Component {
             chat.type['@type'] === 'chatTypeSupergroup' &&
             chat.type.supergroup_id === update.supergroup_id
         ) {
-            console.log('[ChatDetails] onUpdateSupergroupFullInfo');
             this.forceUpdate(); // update bio
         }
     };
@@ -199,20 +205,20 @@ class ChatDetails extends React.Component {
             (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') &&
             chat.type.user_id === update.user_id
         ) {
-            console.log('[ChatDetails] onUpdateUserFullInfo');
             this.forceUpdate(); // update bio
         }
     };
 
     onUpdateUserStatus = update => {
         if (this.members.has(update.user_id)) {
-            console.log('[ChatDetails] onUpdateUserStatus');
             this.forceUpdate();
         }
     };
 
     handleSelectChat = () => {
         this.getFullInfo();
+
+        this.getGroupsInCommon();
 
         this.loadChatContents();
     };
@@ -231,6 +237,22 @@ class ChatDetails extends React.Component {
         const { chatId } = this.props;
 
         getChatFullInfo(chatId);
+    };
+
+    getGroupsInCommon = async () => {
+        const { chatId } = this.props;
+
+        const isGroup = isGroupChat(chatId);
+        if (isGroup) return;
+
+        const result = await TdLibController.send({
+            '@type': 'getGroupsInCommon',
+            user_id: getChatUserId(chatId),
+            offset_chat_id: 0,
+            limit: 1
+        });
+
+        this.setState({ hasGroupsInCommon: result.chat_ids.length > 0 });
     };
 
     handleUsernameHint = () => {
@@ -291,7 +313,6 @@ class ChatDetails extends React.Component {
     };
 
     handleHeaderClick = () => {
-        console.log('[ChatDetails] handleHeaderClick');
         this.chatDetailsListRef.current.scrollTop = 0;
     };
 
@@ -306,6 +327,7 @@ class ChatDetails extends React.Component {
 
     render() {
         const { chatId, classes, openSharedMedia, openGroupsInCommon, onSelectUser, backButton, onClose } = this.props;
+        const { hasGroupsInCommon } = this.state;
 
         const chat = ChatStore.get(chatId);
         if (!chat) {
@@ -413,7 +435,7 @@ class ChatDetails extends React.Component {
                                 }
                             />
                         </ListItem>
-                        {!isGroup && (
+                        {hasGroupsInCommon && (
                             <ListItem button className={classes.listItem} onClick={openGroupsInCommon}>
                                 <ListItemText
                                     inset
