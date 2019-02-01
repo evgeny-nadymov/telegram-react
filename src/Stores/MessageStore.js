@@ -205,5 +205,5 @@ class MessageStore extends EventEmitter {
 }
 
 const store = new MessageStore();
-
+window.message = store;
 export default store;
