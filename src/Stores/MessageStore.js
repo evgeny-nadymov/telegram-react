@@ -136,6 +136,10 @@ class MessageStore extends EventEmitter {
 
                 break;
             }
+            case 'clientUpdateReply': {
+                this.emit('clientUpdateReply', update);
+                break;
+            }
         }
     };
 

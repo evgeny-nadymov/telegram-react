@@ -103,7 +103,13 @@ class HeaderCommand extends React.Component {
     handleForward = () => {};
 
     handleReply = () => {
-        //TdLibController.clientUpdate({ '@type': 'clientUpdateSetReply', chatId: chatId, messageId: messageId });
+        if (MessageStore.selectedItems.size !== 1) return;
+
+        const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+
+        this.handleCancel();
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
     };
 
     render() {

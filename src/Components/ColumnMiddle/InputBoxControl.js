@@ -10,6 +10,8 @@ import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
+import CloseIcon from '@material-ui/icons/Close';
+import ReplyControl from '../Message/ReplyControl';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
@@ -25,7 +27,10 @@ import './InputBoxControl.css';
 
 const styles = theme => ({
     iconButton: {
-        margin: '8px 0px'
+        margin: '8px 0'
+    },
+    closeIconButton: {
+        margin: 0
     },
     ...borderStyle(theme)
 });
@@ -40,6 +45,7 @@ class InputBoxControl extends Component {
 
         this.state = {
             currentChatId: ApplicationStore.getChatId(),
+            replyToMessageId: 0,
             anchorEl: null
         };
 
@@ -71,25 +77,41 @@ class InputBoxControl extends Component {
             return true;
         }
 
+        if (nextState.replyToMessageId !== this.state.replyToMessageId) {
+            return true;
+        }
+
         return false;
     }
 
     componentDidMount() {
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
 
         this.setInputFocus();
     }
 
     componentWillUnmount() {
         const newChatDraftMessage = this.getNewChatDraftMessage(this.state.currentChatId);
-
         this.setChatDraftMessage(newChatDraftMessage);
 
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+        MessageStore.removeListener('clientUpdateReply', this.onClientUpdateReply);
     }
 
+    onClientUpdateReply = update => {
+        const { currentChatId } = this.state;
+        const { chatId, messageId } = update;
+
+        if (currentChatId !== chatId) {
+            return;
+        }
+
+        this.setState({ replyToMessageId: messageId });
+    };
+
     onClientUpdateChatId = update => {
-        this.setState({ currentChatId: update.nextChatId });
+        this.setState({ currentChatId: update.nextChatId, replyToMessageId: 0 });
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -298,7 +320,7 @@ class InputBoxControl extends Component {
     }
 
     onSendInternal = async (content, callback) => {
-        const { currentChatId } = this.state;
+        const { currentChatId, replyToMessageId } = this.state;
 
         if (!currentChatId) return;
         if (!content) return;
@@ -309,10 +331,11 @@ class InputBoxControl extends Component {
             let result = await TdLibController.send({
                 '@type': 'sendMessage',
                 chat_id: currentChatId,
-                reply_to_message_id: 0,
+                reply_to_message_id: replyToMessageId,
                 input_message_content: content
             });
 
+            this.setState({ replyToMessageId: 0 });
             //MessageStore.set(result);
 
             TdLibController.send({
@@ -340,9 +363,13 @@ class InputBoxControl extends Component {
         // document.execCommand('inserttext', false, plaintext);
     };
 
+    handleCloseReply = () => {
+        this.setState({ replyToMessageId: 0 });
+    };
+
     render() {
         const { classes } = this.props;
-        const { currentChatId, anchorEl } = this.state;
+        const { currentChatId, replyToMessageId, anchorEl } = this.state;
 
         const selectedChat = ChatStore.get(currentChatId);
 
@@ -355,51 +382,71 @@ class InputBoxControl extends Component {
         }
 
         return (
-            <div className={classNames(classes.borderColor, 'inputbox-wrapper')}>
-                <div className='inputbox-left-column'>
-                    {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
-                    {/*<InsertEmoticonIcon />*/}
-                    {/*</IconButton>*/}
-                    <EmojiPickerButton onSelect={this.handleEmojiSelect} />
-                </div>
-                <div className='inputbox-middle-column'>
-                    <div
-                        id='inputbox-message'
-                        ref={this.newMessage}
-                        placeholder='Type a message'
-                        key={Date()}
-                        contentEditable
-                        suppressContentEditableWarning
-                        onKeyDown={this.handleKeyDown}
-                        onKeyUp={this.handleInputChange}
-                        onPaste={this.handlePaste}>
-                        {text}
+            <div className={classNames(classes.borderColor, 'inputbox')}>
+                {replyToMessageId > 0 && (
+                    <div className='inputbox-reply-wrapper'>
+                        <div className='inputbox-left-column'>
+                            <IconButton
+                                className={classes.closeIconButton}
+                                aria-label='Close'
+                                onClick={this.handleCloseReply}>
+                                <CloseIcon />
+                            </IconButton>
+                        </div>
+                        <div className='inputbox-middle-column'>
+                            <ReplyControl chatId={currentChatId} messageId={replyToMessageId} />
+                        </div>
                     </div>
-                </div>
-                <div className='inputbox-right-column'>
-                    <input
-                        ref={this.attachDocument}
-                        className='inputbox-attach-button'
-                        type='file'
-                        multiple='multiple'
-                        onChange={this.handleAttachDocumentComplete}
-                    />
-                    <input
-                        ref={this.attachPhoto}
-                        className='inputbox-attach-button'
-                        type='file'
-                        multiple='multiple'
-                        accept='image/*'
-                        onChange={this.handleAttachPhotoComplete}
-                    />
-                    <AttachButton onAttachPhoto={this.handleAttachPhoto} onAttachDocument={this.handleAttachDocument} />
+                )}
+                <div className='inputbox-wrapper'>
+                    <div className='inputbox-left-column'>
+                        {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
+                        {/*<InsertEmoticonIcon />*/}
+                        {/*</IconButton>*/}
+                        <EmojiPickerButton onSelect={this.handleEmojiSelect} />
+                    </div>
+                    <div className='inputbox-middle-column'>
+                        <div
+                            id='inputbox-message'
+                            ref={this.newMessage}
+                            placeholder='Type a message'
+                            key={Date()}
+                            contentEditable
+                            suppressContentEditableWarning
+                            onKeyDown={this.handleKeyDown}
+                            onKeyUp={this.handleInputChange}
+                            onPaste={this.handlePaste}>
+                            {text}
+                        </div>
+                    </div>
+                    <div className='inputbox-right-column'>
+                        <input
+                            ref={this.attachDocument}
+                            className='inputbox-attach-button'
+                            type='file'
+                            multiple='multiple'
+                            onChange={this.handleAttachDocumentComplete}
+                        />
+                        <input
+                            ref={this.attachPhoto}
+                            className='inputbox-attach-button'
+                            type='file'
+                            multiple='multiple'
+                            accept='image/*'
+                            onChange={this.handleAttachPhotoComplete}
+                        />
+                        <AttachButton
+                            onAttachPhoto={this.handleAttachPhoto}
+                            onAttachDocument={this.handleAttachDocument}
+                        />
 
-                    {/*<IconButton>*/}
-                    {/*<KeyboardVoiceIcon />*/}
-                    {/*</IconButton>*/}
-                    <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
-                        <SendIcon />
-                    </IconButton>
+                        {/*<IconButton>*/}
+                        {/*<KeyboardVoiceIcon />*/}
+                        {/*</IconButton>*/}
+                        <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
+                            <SendIcon />
+                        </IconButton>
+                    </div>
                 </div>
             </div>
         );
