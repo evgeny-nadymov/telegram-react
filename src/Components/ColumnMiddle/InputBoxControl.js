@@ -11,6 +11,12 @@ import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
 import CloseIcon from '@material-ui/icons/Close';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import ReplyControl from '../Message/ReplyControl';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
 import AttachButton from './../ColumnMiddle/AttachButton';
@@ -46,6 +52,7 @@ class InputBoxControl extends Component {
         this.state = {
             currentChatId: ApplicationStore.getChatId(),
             replyToMessageId: 0,
+            openPasteDialog: false,
             anchorEl: null
         };
 
@@ -81,6 +88,10 @@ class InputBoxControl extends Component {
             return true;
         }
 
+        if (nextState.openPasteDialog !== this.state.openPasteDialog) {
+            return true;
+        }
+
         return false;
     }
 
@@ -111,7 +122,7 @@ class InputBoxControl extends Component {
     };
 
     onClientUpdateChatId = update => {
-        this.setState({ currentChatId: update.nextChatId, replyToMessageId: 0 });
+        this.setState({ currentChatId: update.nextChatId, replyToMessageId: 0, openPasteDialog: false });
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -357,10 +368,45 @@ class InputBoxControl extends Component {
     }
 
     handlePaste = event => {
-        // console.log('onPaste', event.clipboardData);
-        //
-        // const plaintext = event.clipboardData.getData('text/plain');
-        // document.execCommand('inserttext', false, plaintext);
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+        const files = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind.indexOf('file') === 0) {
+                files.push(items[i].getAsFile());
+            }
+        }
+
+        if (files.length > 0) {
+            event.preventDefault();
+
+            this.files = files;
+            this.setState({ openPasteDialog: true });
+        }
+    };
+
+    handlePasteContinue = () => {
+        this.handleClosePaste();
+
+        const files = this.files;
+        if (!files) return;
+        if (!files.length) return;
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+            const content = {
+                '@type': 'inputMessageDocument',
+                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            };
+
+            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
+        }
+
+        this.files = null;
+    };
+
+    handleClosePaste = () => {
+        this.setState({ openPasteDialog: false });
     };
 
     handleCloseReply = () => {
@@ -369,7 +415,7 @@ class InputBoxControl extends Component {
 
     render() {
         const { classes } = this.props;
-        const { currentChatId, replyToMessageId, anchorEl } = this.state;
+        const { currentChatId, replyToMessageId, openPasteDialog } = this.state;
 
         const selectedChat = ChatStore.get(currentChatId);
 
@@ -382,73 +428,93 @@ class InputBoxControl extends Component {
         }
 
         return (
-            <div className={classNames(classes.borderColor, 'inputbox')}>
-                {replyToMessageId > 0 && (
-                    <div className='inputbox-reply-wrapper'>
+            <>
+                <div className={classNames(classes.borderColor, 'inputbox')}>
+                    {replyToMessageId > 0 && (
+                        <div className='inputbox-reply-wrapper'>
+                            <div className='inputbox-left-column'>
+                                <IconButton
+                                    className={classes.closeIconButton}
+                                    aria-label='Close'
+                                    onClick={this.handleCloseReply}>
+                                    <CloseIcon />
+                                </IconButton>
+                            </div>
+                            <div className='inputbox-middle-column'>
+                                <ReplyControl chatId={currentChatId} messageId={replyToMessageId} />
+                            </div>
+                        </div>
+                    )}
+                    <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
-                            <IconButton
-                                className={classes.closeIconButton}
-                                aria-label='Close'
-                                onClick={this.handleCloseReply}>
-                                <CloseIcon />
-                            </IconButton>
+                            {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
+                            {/*<InsertEmoticonIcon />*/}
+                            {/*</IconButton>*/}
+                            <EmojiPickerButton onSelect={this.handleEmojiSelect} />
                         </div>
                         <div className='inputbox-middle-column'>
-                            <ReplyControl chatId={currentChatId} messageId={replyToMessageId} />
+                            <div
+                                id='inputbox-message'
+                                ref={this.newMessage}
+                                placeholder='Type a message'
+                                key={Date()}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onKeyDown={this.handleKeyDown}
+                                onKeyUp={this.handleInputChange}
+                                onPaste={this.handlePaste}>
+                                {text}
+                            </div>
                         </div>
-                    </div>
-                )}
-                <div className='inputbox-wrapper'>
-                    <div className='inputbox-left-column'>
-                        {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
-                        {/*<InsertEmoticonIcon />*/}
-                        {/*</IconButton>*/}
-                        <EmojiPickerButton onSelect={this.handleEmojiSelect} />
-                    </div>
-                    <div className='inputbox-middle-column'>
-                        <div
-                            id='inputbox-message'
-                            ref={this.newMessage}
-                            placeholder='Type a message'
-                            key={Date()}
-                            contentEditable
-                            suppressContentEditableWarning
-                            onKeyDown={this.handleKeyDown}
-                            onKeyUp={this.handleInputChange}
-                            onPaste={this.handlePaste}>
-                            {text}
-                        </div>
-                    </div>
-                    <div className='inputbox-right-column'>
-                        <input
-                            ref={this.attachDocument}
-                            className='inputbox-attach-button'
-                            type='file'
-                            multiple='multiple'
-                            onChange={this.handleAttachDocumentComplete}
-                        />
-                        <input
-                            ref={this.attachPhoto}
-                            className='inputbox-attach-button'
-                            type='file'
-                            multiple='multiple'
-                            accept='image/*'
-                            onChange={this.handleAttachPhotoComplete}
-                        />
-                        <AttachButton
-                            onAttachPhoto={this.handleAttachPhoto}
-                            onAttachDocument={this.handleAttachDocument}
-                        />
+                        <div className='inputbox-right-column'>
+                            <input
+                                ref={this.attachDocument}
+                                className='inputbox-attach-button'
+                                type='file'
+                                multiple='multiple'
+                                onChange={this.handleAttachDocumentComplete}
+                            />
+                            <input
+                                ref={this.attachPhoto}
+                                className='inputbox-attach-button'
+                                type='file'
+                                multiple='multiple'
+                                accept='image/*'
+                                onChange={this.handleAttachPhotoComplete}
+                            />
+                            <AttachButton
+                                onAttachPhoto={this.handleAttachPhoto}
+                                onAttachDocument={this.handleAttachDocument}
+                            />
 
-                        {/*<IconButton>*/}
-                        {/*<KeyboardVoiceIcon />*/}
-                        {/*</IconButton>*/}
-                        <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
-                            <SendIcon />
-                        </IconButton>
+                            {/*<IconButton>*/}
+                            {/*<KeyboardVoiceIcon />*/}
+                            {/*</IconButton>*/}
+                            <IconButton className={classes.iconButton} aria-label='Send' onClick={this.handleSubmit}>
+                                <SendIcon />
+                            </IconButton>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <Dialog open={openPasteDialog} onClose={this.handleClosePaste} aria-labelledby='delete-dialog-title'>
+                    <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            {this.files && this.files.length > 1
+                                ? 'Are you sure you want to send files?'
+                                : 'Are you sure you want to send file?'}
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClosePaste} color='primary'>
+                            Cancel
+                        </Button>
+                        <Button onClick={this.handlePasteContinue} color='primary'>
+                            Ok
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </>
         );
     }
 }
