@@ -172,7 +172,10 @@ class MessagesList extends React.Component {
     }
 
     onClientUpdateSelection = update => {
-        this.setState({ selectionActive: MessageStore.selectedItems.size > 0 });
+        this.setState({
+            selectionActive: MessageStore.selectedItems.size > 0,
+            scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION
+        });
     };
 
     onClientUpdateClearHistory = update => {
