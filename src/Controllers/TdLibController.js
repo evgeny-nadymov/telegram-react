@@ -147,6 +147,16 @@ class TdLibController extends EventEmitter {
             this.emit('tdlib_auth_error', error);
         });
     }
+
+    setChatId = (chatId, messageId = null) => {
+        const update = {
+            '@type': 'clientUpdateChatId',
+            chatId: chatId,
+            messageId: messageId
+        };
+
+        this.clientUpdate(update);
+    };
 }
 
 const controller = new TdLibController();

@@ -170,7 +170,7 @@ class SignInControl extends React.Component {
                     defaultValue={phone}
                 />
                 <FormHelperText id='sign-in-error-text'>{error}</FormHelperText>
-                <div className='authorization-actions'>
+                <div className='sign-in-actions'>
                     <Button
                         fullWidth
                         color='primary'

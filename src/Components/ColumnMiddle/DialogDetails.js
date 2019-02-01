@@ -20,7 +20,8 @@ class DialogDetails extends Component {
 
         this.state = {
             chatId: ApplicationStore.getChatId(),
-            messageId: ApplicationStore.getMessageId()
+            messageId: ApplicationStore.getMessageId(),
+            selectedCount: 0
         };
     }
 
@@ -29,6 +30,9 @@ class DialogDetails extends Component {
             return true;
         }
         if (nextState.messageId !== this.state.messageId) {
+            return true;
+        }
+        if (nextState.selectedCount !== this.state.selectedItems) {
             return true;
         }
 
@@ -102,7 +106,7 @@ class DialogDetails extends Component {
             return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { onSelectChat, onSelectUser } = this.props;
-        const { chatId, messageId } = this.state;
+        const { chatId, messageId, selectedCount } = this.state;
         const { isChatDetailsVisible } = ApplicationStore;
 
         return (

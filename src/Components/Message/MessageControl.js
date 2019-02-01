@@ -6,12 +6,14 @@
  */
 
 import React, { Component } from 'react';
+import classNames from 'classnames';
 import ReplyControl from './ReplyControl';
 import MessageStatusControl from './MessageStatusControl';
 import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
+import WebPage from './Media/WebPage';
 import { saveOrDownload } from '../../Utils/File';
 import {
     getDate,
@@ -29,8 +31,8 @@ import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MessageControl.css';
-import WebPage from './Media/WebPage';
 
 class MessageControl extends Component {
     constructor(props) {
@@ -42,26 +44,29 @@ class MessageControl extends Component {
                 message: MessageStore.get(chatId, messageId)
             };
         }
-
-        this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
-        this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
-        this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { selected } = this.state;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
-        if (nextProps.messageId !== this.props.messageId) {
+        if (nextProps.messageId !== messageId) {
             return true;
         }
 
-        if (nextProps.sendingState !== this.props.sendingState) {
+        if (nextProps.sendingState !== sendingState) {
             return true;
         }
 
-        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator) {
+        if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            return true;
+        }
+
+        if (nextState.selected !== selected) {
             return true;
         }
 
@@ -71,32 +76,59 @@ class MessageControl extends Component {
     componentDidMount() {
         MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     componentWillUnmount() {
         MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
+        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
     }
 
-    handleUpdateMessageEdited(payload) {
-        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
-            this.forceUpdate();
-        }
-    }
+    onClientUpdateClearSelection = update => {
+        if (!this.state.selected) return;
 
-    handleUpdateMessageViews(payload) {
-        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
-            this.forceUpdate();
-        }
-    }
+        this.setState({ selected: false });
+    };
 
-    handleUpdateMessageContent(payload) {
-        if (this.props.chatId === payload.chat_id && this.props.messageId === payload.message_id) {
+    onClientUpdateMessageSelected = update => {
+        const { chatId, messageId } = this.props;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            this.setState({ selected: update.selected });
+        }
+    };
+
+    handleUpdateMessageEdited = update => {
+        const { chat_id, message_id } = update;
+        const { chatId, messageId } = this.props;
+
+        if (chatId === chat_id && messageId === message_id) {
             this.forceUpdate();
         }
-    }
+    };
+
+    handleUpdateMessageViews = update => {
+        const { chat_id, message_id } = update;
+        const { chatId, messageId } = this.props;
+
+        if (chatId === chat_id && messageId === message_id) {
+            this.forceUpdate();
+        }
+    };
+
+    handleUpdateMessageContent = update => {
+        const { chat_id, message_id } = update;
+        const { chatId, messageId } = this.props;
+
+        if (chatId === chat_id && messageId === message_id) {
+            this.forceUpdate();
+        }
+    };
 
     openForward = () => {
         const { chatId, messageId, onSelectUser, onSelectChat } = this.props;
@@ -123,7 +155,12 @@ class MessageControl extends Component {
         }
     };
 
-    openMedia = () => {
+    openMedia = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
         const { chatId, messageId, onSelectUser } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
@@ -209,8 +246,24 @@ class MessageControl extends Component {
         onSelectChat(chat);
     };
 
+    handleSelection = () => {
+        const selection = window.getSelection().toString();
+        if (selection) return;
+
+        const { chatId, messageId } = this.props;
+
+        const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMessageSelected',
+            chatId: chatId,
+            messageId: messageId,
+            selected: selected
+        });
+    };
+
     render() {
-        const { chatId, messageId, onSelectUser, onSelectChat } = this.props;
+        const { chatId, messageId, showUnreadSeparator, onSelectUser, onSelectChat } = this.props;
+        const { selected } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -225,16 +278,19 @@ class MessageControl extends Component {
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
 
-        const tileControl = senderUserId ? (
+        const tile = senderUserId ? (
             <UserTileControl userId={senderUserId} onSelect={this.handleSelectUser} />
         ) : (
             <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
         );
 
+        const messageClassName = classNames('message', { 'message-selected': selected });
+
         return (
-            <div className='message'>
-                {this.props.showUnreadSeparator && <UnreadSeparator />}
+            <div className={messageClassName} onClick={this.handleSelection}>
+                {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
+                    <i className='message-select-tick' />
                     {this.unread && (
                         <MessageStatusControl
                             chatId={message.chat_id}
@@ -242,7 +298,7 @@ class MessageControl extends Component {
                             sendingState={message.sending_state}
                         />
                     )}
-                    {tileControl}
+                    {tile}
                     <div className='message-content'>
                         <div className='message-title'>
                             {!forward && (

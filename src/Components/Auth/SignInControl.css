@@ -11,7 +11,7 @@
     /*align-items: center;*/
 }
 
-.authorization-actions {
+.sign-in-actions {
     display: flex;
     flex-direction: column;
 }

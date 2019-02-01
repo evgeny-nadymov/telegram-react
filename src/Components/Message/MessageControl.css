@@ -62,10 +62,12 @@ pre code {
 .message {
     /*margin: 20px;
     word-wrap: break-word;*/
+    background: transparent;
+    cursor: pointer;
 }
 
 .message-wrapper {
-    max-width: 500px;
+    max-width: 460px;
     padding: 8px 15px;
     margin: 0 auto;
     display: flex;
@@ -119,4 +121,37 @@ pre code {
 
 .message-views {
     font-weight: 500;
+}
+
+.message:hover .message-select-tick {
+    opacity: 0.5;
+}
+
+.message-selected {
+    /*background: #f2f6fa;*/
+}
+
+.message-selected:hover .message-select-tick {
+    opacity: 1;
+}
+
+.message-selected .message-select-tick {
+    opacity: 1;
+}
+
+.message-select-tick {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    margin: 9px 0 0 -59px;
+    display: block;
+    background-image: url(../../Assets/Icons/IconsetW.png);
+    background-size: 42px 1171px;
+    background-repeat: no-repeat;
+    background-position: -9px -481px;
+    opacity: 0;
+}
+
+.messages-list-selection-active .message-wrapper {
+    pointer-events: none;
 }

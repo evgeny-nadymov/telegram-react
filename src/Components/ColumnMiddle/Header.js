@@ -13,12 +13,14 @@ import { withStyles } from '@material-ui/core/styles';
 import { withNamespaces } from 'react-i18next';
 import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
+import HeaderCommand from './HeaderCommand';
 import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
+import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Header.css';
 
@@ -75,6 +77,9 @@ class Header extends Component {
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
 
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
+
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
@@ -90,6 +95,9 @@ class Header extends Component {
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
 
+        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
+
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
@@ -99,6 +107,10 @@ class Header extends Component {
         BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
+
+    onClientUpdateMessageSelected = update => {
+        this.setState({ selectionCount: MessageStore.selectedItems.size });
+    };
 
     onClientUpdateChatId = update => {
         this.forceUpdate();
@@ -243,9 +255,22 @@ class Header extends Component {
         ApplicationStore.searchChat(chatId);
     };
 
+    localize = str => {
+        const { t } = this.props;
+
+        return t(str)
+            .replace('...', '')
+            .replace('…', '');
+    };
+
     render() {
-        const { classes, t } = this.props;
-        const { authorizationState, connectionState } = this.state;
+        const { classes } = this.props;
+        const { authorizationState, connectionState, selectionCount } = this.state;
+
+        if (selectionCount) {
+            return <HeaderCommand count={selectionCount} />;
+        }
+
         const chatId = ApplicationStore.getChatId();
         const chat = ChatStore.get(chatId);
 
@@ -257,32 +282,24 @@ class Header extends Component {
         if (connectionState) {
             switch (connectionState['@type']) {
                 case 'connectionStateConnecting':
-                    title = t('Connecting')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Connecting');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateConnectingToProxy':
-                    title = t('Connecting to proxy')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Connecting to proxy');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateReady':
                     break;
                 case 'connectionStateUpdating':
-                    title = t('Updating')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Updating');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
                 case 'connectionStateWaitingForNetwork':
-                    title = t('Waiting for network')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Waiting for network');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -294,9 +311,7 @@ class Header extends Component {
                 case ' authorizationStateClosing':
                     break;
                 case 'authorizationStateLoggingOut':
-                    title = t('Logging out')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Logging out');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -305,9 +320,7 @@ class Header extends Component {
                 case 'authorizationStateWaitCode':
                     break;
                 case 'authorizationStateWaitEncryptionKey':
-                    title = t('Loading')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Loading');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
@@ -316,17 +329,13 @@ class Header extends Component {
                 case 'authorizationStateWaitPhoneNumber':
                     break;
                 case 'authorizationStateWaitTdlibParameters':
-                    title = t('Loading')
-                        .replace('...', '')
-                        .replace('…', '');
+                    title = this.localize('Loading');
                     subtitle = '';
                     showProgressAnimation = true;
                     break;
             }
         } else {
-            title = t('Loading')
-                .replace('...', '')
-                .replace('…', '');
+            title = this.localize('Loading');
             subtitle = '';
             showProgressAnimation = true;
         }

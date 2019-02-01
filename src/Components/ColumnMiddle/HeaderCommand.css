@@ -1,0 +1,21 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.header-command {
+    min-height: 64px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e9ebed;
+}
+
+.header-command-space {
+    flex-grow: 1;
+    flex-shrink: 1;
+}

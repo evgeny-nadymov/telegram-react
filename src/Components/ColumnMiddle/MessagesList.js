@@ -52,6 +52,7 @@ class MessagesList extends React.Component {
             prevMessageId: null,
             history: [],
             clearHistory: false,
+            selectionActive: false,
             scrollBehavior: ScrollBehaviorEnum.NONE,
             separatorMessageId: 0
         };
@@ -69,6 +70,7 @@ class MessagesList extends React.Component {
                 prevChatId: props.chatId,
                 prevMessageId: props.messageId,
                 clearHistory: false,
+                selectionActive: false,
                 scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
                 separatorMessageId: 0
             };
@@ -113,7 +115,7 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, theme } = this.props;
-        const { history, dragging, clearHistory } = this.state;
+        const { history, dragging, clearHistory, selectionActive } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -139,6 +141,10 @@ class MessagesList extends React.Component {
             return true;
         }
 
+        if (nextState.selectionActive !== selectionActive) {
+            return true;
+        }
+
         return false;
     }
 
@@ -149,6 +155,8 @@ class MessagesList extends React.Component {
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
+        MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
     }
@@ -157,9 +165,15 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateSelection);
+        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
     }
+
+    onClientUpdateSelection = update => {
+        this.setState({ selectionActive: MessageStore.selectedItems.size > 0 });
+    };
 
     onClientUpdateClearHistory = update => {
         const { chatId } = this.props;
@@ -816,7 +830,7 @@ class MessagesList extends React.Component {
 
     render() {
         const { classes, onSelectChat, onSelectUser } = this.props;
-        const { history, separatorMessageId, clearHistory } = this.state;
+        const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
 
         console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
 
@@ -850,7 +864,11 @@ class MessagesList extends React.Component {
               );
 
         return (
-            <div className={classNames(classes.background, 'messages-list')} onDragEnter={this.handleListDragEnter}>
+            <div
+                className={classNames(classes.background, 'messages-list', {
+                    'messages-list-selection-active': selectionActive
+                })}
+                onDragEnter={this.handleListDragEnter}>
                 <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
                     <div className='messages-list-top' />
                     <div ref={this.itemsRef} className='messages-list-items'>

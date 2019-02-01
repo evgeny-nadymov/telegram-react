@@ -29,7 +29,7 @@ const styles = {
 };
 
 class MoreListItem extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         const { chatId } = this.props;
@@ -39,13 +39,12 @@ class MoreListItem extends React.Component {
         };
     }
 
-    static getDerivedStateFromProps(props, state){
-        if (props.chatId !== state.prevChatId){
-
+    static getDerivedStateFromProps(props, state) {
+        if (props.chatId !== state.prevChatId) {
             return {
                 prevChatId: props.chatId,
                 openMore: false
-            }
+            };
         }
 
         return null;
@@ -58,11 +57,10 @@ class MoreListItem extends React.Component {
     handleSendMessage = () => {
         const currentChatId = ApplicationStore.getChatId();
         const { chatId } = this.props;
-        if (currentChatId === chatId){
+        if (currentChatId === chatId) {
             //this.dialogDetails.current.scrollToBottom();
-        }
-        else{
-            ApplicationStore.setChatId(chatId);
+        } else {
+            TdLibController.setChatId(chatId);
         }
     };
 
@@ -76,11 +74,10 @@ class MoreListItem extends React.Component {
         const { user_id } = chat.type;
         if (!user_id) return;
 
-        TdLibController
-            .send({
-                '@type': isUserBlocked(user_id) ? 'unblockUser' : 'blockUser',
-                user_id: user_id
-            });
+        TdLibController.send({
+            '@type': isUserBlocked(user_id) ? 'unblockUser' : 'blockUser',
+            user_id: user_id
+        });
     };
 
     render() {
@@ -91,7 +88,7 @@ class MoreListItem extends React.Component {
 
         const isGroup = isGroupChat(chatId);
         let isBlocked = false;
-        if (!isGroup && chat.type){
+        if (!isGroup && chat.type) {
             isBlocked = isUserBlocked(chat.type.user_id);
         }
         const isMember = isChatMember(chatId);
@@ -101,36 +98,67 @@ class MoreListItem extends React.Component {
             <>
                 <ListItem button className={classes.listItem} onClick={this.handleMoreClick}>
                     <ListItemIcon>
-                        <MoreHorizIcon/>
+                        <MoreHorizIcon />
                     </ListItemIcon>
-                    <ListItemText primary={<Typography variant='inherit' noWrap>More</Typography>}/>
+                    <ListItemText
+                        primary={
+                            <Typography variant='inherit' noWrap>
+                                More
+                            </Typography>
+                        }
+                    />
                     {openMore ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
                 <Collapse in={openMore} timeout='auto' unmountOnExit>
                     <List component='div' disablePadding>
-                        {
-                            !isGroup &&
+                        {!isGroup && (
                             <>
                                 <ListItem button className={classes.listItem} onClick={this.handleSendMessage}>
-                                    <ListItemText inset primary={<Typography variant='inherit' noWrap>Send Message</Typography>}/>
+                                    <ListItemText
+                                        inset
+                                        primary={
+                                            <Typography variant='inherit' noWrap>
+                                                Send Message
+                                            </Typography>
+                                        }
+                                    />
                                 </ListItem>
                                 <ListItem button className={classes.listItem} onClick={this.handleBlock}>
-                                    <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isBlocked? 'Unblock' : 'Block' }</Typography>}/>
+                                    <ListItemText
+                                        inset
+                                        primary={
+                                            <Typography color='secondary' variant='inherit' noWrap>
+                                                {isBlocked ? 'Unblock' : 'Block'}
+                                            </Typography>
+                                        }
+                                    />
                                 </ListItem>
                             </>
-                        }
-                        {
-                            isGroup && isMember &&
+                        )}
+                        {isGroup && isMember && (
                             <ListItem button className={classes.listItem}>
-                                <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>{ isChannel? 'Leave Channel' : 'Delete and Exit' }</Typography>} />
+                                <ListItemText
+                                    inset
+                                    primary={
+                                        <Typography color='secondary' variant='inherit' noWrap>
+                                            {isChannel ? 'Leave Channel' : 'Delete and Exit'}
+                                        </Typography>
+                                    }
+                                />
                             </ListItem>
-                        }
-                        {
-                            isGroup && !isMember &&
+                        )}
+                        {isGroup && !isMember && (
                             <ListItem button className={classes.listItem}>
-                                <ListItemText inset primary={<Typography color='secondary' variant='inherit' noWrap>Report</Typography>} />
+                                <ListItemText
+                                    inset
+                                    primary={
+                                        <Typography color='secondary' variant='inherit' noWrap>
+                                            Report
+                                        </Typography>
+                                    }
+                                />
                             </ListItem>
-                        }
+                        )}
                     </List>
                 </Collapse>
             </>

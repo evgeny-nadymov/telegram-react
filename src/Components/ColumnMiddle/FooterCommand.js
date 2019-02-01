@@ -21,17 +21,13 @@ const styles = theme => ({
 });
 
 class FooterCommand extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         const { classes, command, onCommand } = this.props;
 
         return (
-            <div className={classNames(classes.borderColor, 'dialog-command-wrapper')}>
-                <div className="dialog-command-actions">
-                    <Button color="primary" className={classes.button} onClick={onCommand}>
+            <div className={classNames(classes.borderColor, 'footer-command-wrapper')}>
+                <div className='footer-command-actions'>
+                    <Button color='primary' className={classes.button} onClick={onCommand}>
                         {command}
                     </Button>
                 </div>

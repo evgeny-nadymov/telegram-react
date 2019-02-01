@@ -126,7 +126,7 @@ class DialogsList extends React.Component {
 
         // unselect deleted chat
         if (update.chat_id === ApplicationStore.getChatId()) {
-            ApplicationStore.setChatId(0);
+            TdLibController.setChatId(0);
             ApplicationStore.changeChatDetailsVisibility(false);
         }
 

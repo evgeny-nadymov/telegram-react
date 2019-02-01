@@ -13,6 +13,7 @@ class MessageStore extends EventEmitter {
         super();
 
         this.items = new Map();
+        this.selectedItems = new Map();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -105,7 +106,38 @@ class MessageStore extends EventEmitter {
         }
     };
 
-    onClientUpdate = update => {};
+    onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientUpdateMessageSelected': {
+                if (update.selected) {
+                    this.selectedItems.set(`chatId=${update.chatId}_messageId=${update.messageId}`, {
+                        chatId: update.chatId,
+                        messageId: update.messageId
+                    });
+                } else {
+                    this.selectedItems.delete(`chatId=${update.chatId}_messageId=${update.messageId}`);
+                }
+
+                this.emit('clientUpdateMessageSelected', update);
+                break;
+            }
+            case 'clientUpdateClearSelection': {
+                this.selectedItems.clear();
+
+                this.emit('clientUpdateClearSelection', update);
+                break;
+            }
+            case 'clientUpdateChatId': {
+                if (this.selectedItems.size > 0) {
+                    this.selectedItems.clear();
+
+                    this.emit('clientUpdateClearSelection', { '@type': 'clientUpdateClearSelection' });
+                }
+
+                break;
+            }
+        }
+    };
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);

@@ -132,7 +132,7 @@ class TelegramApp extends Component {
                 this.dialogDetailsRef.current.scrollToBottom();
             }
         } else {
-            ApplicationStore.setChatId(chatId, messageId);
+            TdLibController.setChatId(chatId, messageId);
         }
     };
 

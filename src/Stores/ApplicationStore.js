@@ -143,9 +143,24 @@ class ApplicationStore extends EventEmitter {
         switch (update['@type']) {
             case 'clientUpdateLeaveChat': {
                 if (update.inProgress && this.chatId === update.chatId) {
-                    this.setChatId(0);
+                    TdLibController.setChatId(0);
                 }
 
+                break;
+            }
+            case 'clientUpdateChatId': {
+                const extendedUpdate = {
+                    '@type': 'clientUpdateChatId',
+                    nextChatId: update.chatId,
+                    nextMessageId: update.messageId,
+                    previousChatId: this.chatId,
+                    previousMessageId: this.messageId
+                };
+
+                this.chatId = update.chatId;
+                this.messageId = update.messageId;
+
+                this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
         }
