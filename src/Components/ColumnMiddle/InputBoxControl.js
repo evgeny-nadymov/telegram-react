@@ -119,6 +119,10 @@ class InputBoxControl extends Component {
         }
 
         this.setState({ replyToMessageId: messageId });
+
+        if (messageId > 0) {
+            this.setInputFocus();
+        }
     };
 
     onClientUpdateChatId = update => {
@@ -382,6 +386,14 @@ class InputBoxControl extends Component {
 
             this.files = files;
             this.setState({ openPasteDialog: true });
+            return;
+        }
+
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            document.execCommand('insertHTML', false, plainText);
+            return;
         }
     };
 
