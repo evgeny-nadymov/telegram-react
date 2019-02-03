@@ -13,13 +13,6 @@
     border-top: 1px solid #e9ebed;
 }
 
-.inputbox-reply-wrapper {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    padding-top: 8px;
-}
-
 .inputbox-wrapper {
     display: flex;
     flex-direction: row;

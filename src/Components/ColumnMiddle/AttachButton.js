@@ -14,20 +14,20 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import {withStyles} from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
-    iconButton : {
-        margin: '8px 0px',
+    iconButton: {
+        margin: '8px 0px'
     }
 };
 
 class AttachButton extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
-            anchorEl : null
+            anchorEl: null
         };
 
         this.handleMenuClick = this.handleMenuClick.bind(this);
@@ -36,29 +36,29 @@ class AttachButton extends React.Component {
         this.handleAttachPhoto = this.handleAttachPhoto.bind(this);
     }
 
-    handleMenuClick(event){
-        this.setState({ anchorEl : event.currentTarget });
+    handleMenuClick(event) {
+        this.setState({ anchorEl: event.currentTarget });
     }
 
-    handleMenuClose(){
-        this.setState({ anchorEl : null });
+    handleMenuClose() {
+        this.setState({ anchorEl: null });
     }
 
-    handleAttachPhoto(){
+    handleAttachPhoto() {
         this.handleMenuClose();
 
         setTimeout(x => x.props.onAttachPhoto(), 300, this);
     }
 
-    handleAttachDocument(){
+    handleAttachDocument() {
         this.handleMenuClose();
 
         setTimeout(x => x.props.onAttachDocument(), 300, this);
     }
 
     render() {
-        const {classes} = this.props;
-        const {anchorEl} = this.state;
+        const { classes } = this.props;
+        const { anchorEl } = this.state;
 
         return (
             <>
@@ -67,20 +67,21 @@ class AttachButton extends React.Component {
                     aria-label='Attach'
                     open={Boolean(anchorEl)}
                     onClick={this.handleMenuClick}>
-                    <AttachFileIcon className='inputbox-attach-icon'/>
+                    <AttachFileIcon className='inputbox-attach-icon' />
                 </IconButton>
                 <Menu
                     id='attach-menu'
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     getContentAnchorEl={null}
+                    disableAutoFocusItem
                     anchorOrigin={{
                         vertical: 'top',
-                        horizontal: 'right',
+                        horizontal: 'right'
                     }}
                     transformOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'right',
+                        horizontal: 'right'
                     }}
                     onClose={this.handleMenuClose}>
                     <MenuItem onClick={this.handleAttachPhoto}>

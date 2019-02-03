@@ -19,6 +19,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import ReplyControl from '../Message/ReplyControl';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
+import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
@@ -84,10 +85,6 @@ class InputBoxControl extends Component {
             return true;
         }
 
-        if (nextState.replyToMessageId !== this.state.replyToMessageId) {
-            return true;
-        }
-
         if (nextState.openPasteDialog !== this.state.openPasteDialog) {
             return true;
         }
@@ -119,10 +116,6 @@ class InputBoxControl extends Component {
         }
 
         this.setState({ replyToMessageId: messageId });
-
-        if (messageId > 0) {
-            this.setInputFocus();
-        }
     };
 
     onClientUpdateChatId = update => {
@@ -421,13 +414,9 @@ class InputBoxControl extends Component {
         this.setState({ openPasteDialog: false });
     };
 
-    handleCloseReply = () => {
-        this.setState({ replyToMessageId: 0 });
-    };
-
     render() {
         const { classes } = this.props;
-        const { currentChatId, replyToMessageId, openPasteDialog } = this.state;
+        const { currentChatId, openPasteDialog } = this.state;
 
         const selectedChat = ChatStore.get(currentChatId);
 
@@ -442,21 +431,7 @@ class InputBoxControl extends Component {
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    {replyToMessageId > 0 && (
-                        <div className='inputbox-reply-wrapper'>
-                            <div className='inputbox-left-column'>
-                                <IconButton
-                                    className={classes.closeIconButton}
-                                    aria-label='Close'
-                                    onClick={this.handleCloseReply}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </div>
-                            <div className='inputbox-middle-column'>
-                                <ReplyControl chatId={currentChatId} messageId={replyToMessageId} />
-                            </div>
-                        </div>
-                    )}
+                    <InputBoxHeader chatId={currentChatId} onFocusInput={this.setInputFocus} />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
                             {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
