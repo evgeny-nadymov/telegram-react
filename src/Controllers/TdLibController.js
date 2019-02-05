@@ -81,6 +81,23 @@ class TdLibController extends EventEmitter {
             }
         }
 
+        if (params.has('tag') && params.has('tagverbosity')) {
+            let tag = params
+                .get('tag')
+                .replace('[', '')
+                .replace(']', '')
+                .split(',');
+            let tagVerbosity = params
+                .get('tagverbosity')
+                .replace('[', '')
+                .replace(']', '')
+                .split(',');
+            if (tag && tagVerbosity && tag.length === tagVerbosity.length) {
+                this.parameters.tag = tag;
+                this.parameters.tagVerbosity = tagVerbosity;
+            }
+        }
+
         if (params.has('readonly')) {
             const readOnly = parseInt(params.get('readonly'), 10);
             if (readOnly === 0 || readOnly === 1) {
@@ -140,6 +157,19 @@ class TdLibController extends EventEmitter {
             //     b: 123
             // }
         });
+
+        if (this.parameters.tag && this.parameters.tagVerbosity) {
+            for (let i = 0; i < this.parameters.tag.length; i++) {
+                let tag = this.parameters.tag[i];
+                let tagVerbosity = this.parameters.tagVerbosity[i];
+
+                this.send({
+                    '@type': 'setLogTagVerbosityLevel',
+                    tag: tag,
+                    new_verbosity_level: tagVerbosity
+                });
+            }
+        }
     };
 
     logOut() {

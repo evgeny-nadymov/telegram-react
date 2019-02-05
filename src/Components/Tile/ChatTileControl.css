@@ -52,6 +52,7 @@
     object-fit: cover;
     position: relative;
     z-index: 1;
+    user-select: none;
 }
 
 .tile-saved-messages {

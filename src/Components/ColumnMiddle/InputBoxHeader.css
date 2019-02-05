@@ -11,3 +11,18 @@
     align-items: flex-end;
     padding-top: 8px;
 }
+
+.inputbox-header-left-column {
+    margin-right: 20px;
+}
+
+.inputbox-header-middle-column {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
+.inputbox-header-right-column {
+    margin-left: 20px;
+    min-width: 48px;
+}
