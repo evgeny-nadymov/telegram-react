@@ -9,6 +9,12 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import { compose } from 'recompose';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import withLanguage from './Language';
 import withTheme from './Theme';
 import localForage from 'localforage';
@@ -47,7 +53,8 @@ class TelegramApp extends Component {
         this.state = {
             authorizationState: null,
             inactive: false,
-            mediaViewerContent: ApplicationStore.mediaViewerContent
+            mediaViewerContent: ApplicationStore.mediaViewerContent,
+            fatalError: false
         };
 
         /*this.store = localForage.createInstance({
@@ -69,6 +76,7 @@ class TelegramApp extends Component {
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
     }
 
     componentWillUnmount() {
@@ -80,7 +88,12 @@ class TelegramApp extends Component {
             this.onClientUpdateProfileMediaViewerContent
         );
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
     }
+
+    onUpdateFatalError = update => {
+        this.setState({ fatalError: true });
+    };
 
     onUpdateAuthorizationState = update => {
         const { authorization_state } = update;
@@ -169,13 +182,24 @@ class TelegramApp extends Component {
         event.stopPropagation();
     };
 
+    handleRefresh = () => {
+        this.setState({ fatalError: false });
+        window.location.reload();
+    };
+
+    handleDestroy = () => {
+        this.setState({ fatalError: false });
+        TdLibController.send({ '@type': 'destroy' });
+    };
+
     render() {
         const {
             inactive,
             authorizationState,
             isChatDetailsVisible,
             mediaViewerContent,
-            profileMediaViewerContent
+            profileMediaViewerContent,
+            fatalError
         } = this.state;
         const { classes } = this.props;
 
@@ -244,11 +268,32 @@ class TelegramApp extends Component {
                 {page}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
+                <Dialog
+                    open={fatalError}
+                    onClose={this.handleRefresh}
+                    aria-labelledby='fatal-error-dialog-title'
+                    aria-describedby='fatal-error-dialog-description'>
+                    <DialogTitle id='fatal-error-dialog-title'>Telegram</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id='fatal-error-dialog-description'>
+                            Oops! Something went wrong. We need to refresh this page.
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleDestroy} color='primary'>
+                            Log out
+                        </Button>
+                        <Button onClick={this.handleRefresh} color='primary' autoFocus>
+                            Refresh
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
 }
 
+// set offline on page lost focus
 window.onblur = function() {
     const { authorizationState } = ApplicationStore;
 
@@ -264,6 +309,7 @@ window.onblur = function() {
     });
 };
 
+// set online on page get focus
 window.onfocus = function() {
     const { authorizationState } = ApplicationStore;
 
@@ -279,6 +325,7 @@ window.onfocus = function() {
     });
 };
 
+// disable back navigation
 window.history.pushState(null, null, window.location.href);
 window.onpopstate = function() {
     window.history.go(1);

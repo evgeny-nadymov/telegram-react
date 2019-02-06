@@ -104,8 +104,7 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'updateFatalError': {
-                alert('Oops! Something went wrong. We need to refresh this page.');
-                window.location.reload();
+                this.emit(update['@type'], update);
 
                 break;
             }
