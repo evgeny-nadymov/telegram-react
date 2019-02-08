@@ -1,0 +1,47 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.forward-dialog-list {
+    width: 320px;
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+}
+
+.forward-dialog-message {
+    min-height: 48px;
+    max-height: 96px;
+}
+
+#forward-dialog-message {
+    box-shadow: 0 0 0 0;
+    max-height: 150px;
+    min-height: 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px 24px 12px 24px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+}
+
+#forward-dialog-message:empty::before {
+    content: attr(placeholder);
+    color: #8e9396;
+    pointer-events: none;
+}
+
+#forward-dialog-message:empty:active::before,
+#forward-dialog-message:empty:focus::before {
+    opacity: 0.75;
+}
+
+#forward-dialog-message:focus {
+    border: 0;
+    outline: none;
+    box-shadow: 0 0 0 0;
+}

@@ -100,7 +100,24 @@ class HeaderCommand extends React.Component {
         this.setState({ openDeleteDialog: false });
     };
 
-    handleForward = () => {};
+    handleForward = () => {
+        let id;
+        const messageIds = [];
+        for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
+            id = chatId;
+            messageIds.push(messageId);
+        }
+
+        this.handleCancel();
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateForwardMessages',
+            info: {
+                chatId: id,
+                messageIds: messageIds
+            }
+        });
+    };
 
     handleReply = () => {
         if (MessageStore.selectedItems.size !== 1) return;

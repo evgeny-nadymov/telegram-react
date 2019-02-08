@@ -1,0 +1,48 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.forward-target-chat {
+    width: 80px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+}
+
+.forward-target-chat-tile {
+    position: relative;
+}
+
+.forward-target-chat-selected .forward-target-chat-tile-wrapper {
+    transform: scaleX(0.85) scaleY(0.85);
+}
+
+.forward-target-chat-selection {
+    border: solid 2px;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+}
+
+.forward-target-chat-selected {
+}
+
+.forward-target-chat-title {
+    max-width: 80px;
+    font-size: 12px;
+    margin: 6px;
+    height: 40px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    user-select: none;
+}

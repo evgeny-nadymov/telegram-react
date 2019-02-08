@@ -34,6 +34,7 @@ import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 import withSnackbarNotifications from './Notifications';
+import ForwardDialog from './Components/ColumnMiddle/ForwardDialog';
 
 const styles = theme => ({
     page: {
@@ -54,7 +55,8 @@ class TelegramApp extends Component {
             authorizationState: null,
             inactive: false,
             mediaViewerContent: ApplicationStore.mediaViewerContent,
-            fatalError: false
+            fatalError: false,
+            forwardInfo: null
         };
 
         /*this.store = localForage.createInstance({
@@ -77,6 +79,7 @@ class TelegramApp extends Component {
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
+        ApplicationStore.on('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
     }
 
     componentWillUnmount() {
@@ -89,7 +92,14 @@ class TelegramApp extends Component {
         );
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
+        ApplicationStore.removeListener('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
     }
+
+    onClientUpdateForwardMessages = update => {
+        const { info } = update;
+
+        this.setState({ forwardInfo: info });
+    };
 
     onUpdateFatalError = update => {
         this.setState({ fatalError: true });
@@ -199,7 +209,8 @@ class TelegramApp extends Component {
             isChatDetailsVisible,
             mediaViewerContent,
             profileMediaViewerContent,
-            fatalError
+            fatalError,
+            forwardInfo
         } = this.state;
         const { classes } = this.props;
 
@@ -288,6 +299,7 @@ class TelegramApp extends Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                {forwardInfo && <ForwardDialog {...forwardInfo} />}
             </div>
         );
     }

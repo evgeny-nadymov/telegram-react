@@ -18,9 +18,9 @@ class TopChat extends React.PureComponent {
         const shortTitle = getChatShortTitle(chatId, showSavedMessages);
 
         return (
-            <div className="top-chat">
+            <div className='top-chat'>
                 <ChatTileControl chatId={chatId} onSelect={onSelect} showSavedMessages={showSavedMessages} />
-                <div className="top-chat-title">{shortTitle}</div>
+                <div className='top-chat-title'>{shortTitle}</div>
             </div>
         );
     }

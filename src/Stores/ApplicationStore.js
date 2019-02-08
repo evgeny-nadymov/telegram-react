@@ -162,6 +162,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
+            case 'clientUpdateForwardMessages': {
+                this.emit('clientUpdateForwardMessages', update);
+                break;
+            }
         }
     };
 
