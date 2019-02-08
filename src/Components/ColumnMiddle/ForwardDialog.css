@@ -17,9 +17,14 @@
     max-height: 96px;
 }
 
+.forward-dialog-message-top-border {
+    border-top: 1px solid;
+}
+
 #forward-dialog-message {
     box-shadow: 0 0 0 0;
     max-height: 150px;
+    max-width: 324px;
     min-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;

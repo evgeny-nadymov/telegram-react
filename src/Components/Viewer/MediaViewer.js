@@ -24,12 +24,7 @@ import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getSize } from '../../Utils/Common';
-import {
-    getMediaFile,
-    loadMediaViewerContent,
-    preloadMediaViewerContent,
-    saveOrDownload
-} from '../../Utils/File';
+import { getMediaFile, loadMediaViewerContent, preloadMediaViewerContent, saveOrDownload } from '../../Utils/File';
 import { filterMessages, isMediaContent } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
@@ -149,17 +144,12 @@ class MediaViewer extends React.Component {
 
         loadMediaViewerContent([message]);
 
-        const addMessage =
-            isMediaContent(new_content) && !isMediaContent(old_content);
+        const addMessage = isMediaContent(new_content) && !isMediaContent(old_content);
         if (addMessage) {
             if (
                 this.history.length >= 2 &&
                 (this.firstSliceLoaded ||
-                    between(
-                        message_id,
-                        this.history[0].id,
-                        this.history[this.history.length - 1].id
-                    ))
+                    between(message_id, this.history[0].id, this.history[this.history.length - 1].id))
             ) {
                 let inserted = false;
                 let history = [];
@@ -185,8 +175,7 @@ class MediaViewer extends React.Component {
             });
         }
 
-        const removeMessage =
-            !isMediaContent(new_content) && isMediaContent(old_content);
+        const removeMessage = !isMediaContent(new_content) && isMediaContent(old_content);
         if (removeMessage) {
             let oldHistory = this.history;
             this.history = this.history.filter(x => x.id !== message_id);
@@ -349,7 +338,17 @@ class MediaViewer extends React.Component {
         }
     };
 
-    handleForward = () => {};
+    handleForward = () => {
+        const { chatId, messageId } = this.props;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateForwardMessages',
+            info: {
+                chatId: chatId,
+                messageIds: [messageId]
+            }
+        });
+    };
 
     handleDelete = () => {
         this.handleDialogOpen();
@@ -377,14 +376,14 @@ class MediaViewer extends React.Component {
         }
     };
 
-    hasPreviousMedia = (index) => {
+    hasPreviousMedia = index => {
         if (index === -1) return false;
 
         const nextIndex = index + 1;
         return nextIndex < this.history.length;
     };
 
-    handlePrevious = (event) => {
+    handlePrevious = event => {
         if (event) {
             event.stopPropagation();
         }
@@ -429,14 +428,14 @@ class MediaViewer extends React.Component {
         });
     };
 
-    hasNextMedia = (index) => {
+    hasNextMedia = index => {
         if (index === -1) return false;
 
         const nextIndex = index - 1;
         return nextIndex >= 0;
     };
 
-    handleNext = (event) => {
+    handleNext = event => {
         if (event) {
             event.stopPropagation();
         }
@@ -550,12 +549,8 @@ class MediaViewer extends React.Component {
         const message = MessageStore.get(chatId, currentMessageId);
         if (!message) return;
 
-        const {
-            can_be_deleted_only_for_self,
-            can_be_deleted_for_all_users
-        } = message;
-        const canBeDeleted =
-            can_be_deleted_only_for_self || can_be_deleted_for_all_users;
+        const { can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
+        const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
         if (!canBeDeleted) return;
 
         TdLibController.send({
@@ -591,36 +586,24 @@ class MediaViewer extends React.Component {
         //console.log(`MediaViewer.render index=${index} currentMessageId=${currentMessageId}`, this.history);
 
         const message = MessageStore.get(chatId, currentMessageId);
-        const {
-            can_be_forwarded,
-            can_be_deleted_only_for_self,
-            can_be_deleted_for_all_users
-        } = message;
+        const { can_be_forwarded, can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
 
-        const canBeDeleted =
-            can_be_deleted_only_for_self || can_be_deleted_for_all_users;
-        const canBeForwarded = false; //can_be_forwarded;
+        const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
+        const canBeForwarded = can_be_forwarded;
 
         const deleteConfirmation = deleteConfirmationOpened ? (
             <Dialog
                 open={deleteConfirmationOpened}
                 onClose={this.handleDialogClose}
-                aria-labelledby='form-dialog-title'
-            >
+                aria-labelledby='form-dialog-title'>
                 <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        Are you sure you want to delete this media?
-                    </DialogContentText>
+                    <DialogContentText>Are you sure you want to delete this media?</DialogContentText>
                     {can_be_deleted_for_all_users && (
                         <FormControlLabel
                             label='Delete for all'
                             control={
-                                <Checkbox
-                                    color='primary'
-                                    value='deleteAll'
-                                    onChange={this.handleChangeDeleteForAll}
-                                />
+                                <Checkbox color='primary' value='deleteAll' onChange={this.handleChangeDeleteForAll} />
                             }
                             checked={deleteForAll}
                         />
@@ -637,11 +620,7 @@ class MediaViewer extends React.Component {
             </Dialog>
         ) : null;
 
-        const [width, height, file] = getMediaFile(
-            chatId,
-            currentMessageId,
-            PHOTO_BIG_SIZE
-        );
+        const [width, height, file] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
 
         const fileId = file ? file.id : 0;
 
@@ -651,11 +630,7 @@ class MediaViewer extends React.Component {
                 <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton
-                            disabled={!hasPreviousMedia}
-                            grow
-                            onClick={this.handlePrevious}
-                        >
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
                             <div className='media-viewer-previous-icon' />
                         </MediaViewerButton>
                     </div>
@@ -673,11 +648,7 @@ class MediaViewer extends React.Component {
                         <MediaViewerButton onClick={this.handleClose}>
                             <div className='media-viewer-close-icon' />
                         </MediaViewerButton>
-                        <MediaViewerButton
-                            disabled={!hasNextMedia}
-                            grow
-                            onClick={this.handleNext}
-                        >
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
                             <div className='media-viewer-next-icon' />
                         </MediaViewerButton>
                     </div>
@@ -686,27 +657,15 @@ class MediaViewer extends React.Component {
                     <MediaViewerControl chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
                         title='Photo'
-                        subtitle={
-                            maxCount && index >= 0
-                                ? `${maxCount - index} of ${maxCount}`
-                                : null
-                        }
+                        subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
                     <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>
                         <div className='media-viewer-save-icon' />
                     </MediaViewerDownloadButton>
-                    <MediaViewerFooterButton
-                        title='Forward'
-                        disabled={!canBeForwarded}
-                        onClick={this.handleForward}
-                    >
+                    <MediaViewerFooterButton title='Forward' disabled={!canBeForwarded} onClick={this.handleForward}>
                         <div className='media-viewer-forward-icon' />
                     </MediaViewerFooterButton>
-                    <MediaViewerFooterButton
-                        title='Delete'
-                        disabled={!canBeDeleted}
-                        onClick={this.handleDelete}
-                    >
+                    <MediaViewerFooterButton title='Delete' disabled={!canBeDeleted} onClick={this.handleDelete}>
                         <div className='media-viewer-delete-icon' />
                     </MediaViewerFooterButton>
                 </div>

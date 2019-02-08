@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
+import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withStyles } from '@material-ui/core';
 import { withSnackbar } from 'notistack';
@@ -21,21 +22,19 @@ import CloseIcon from '@material-ui/icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { canSendMessages, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
+import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import UserStore from '../../Stores/UserStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ForwardDialog.css';
-import { borderStyle } from '../Theme';
 
 const styles = theme => ({
     close: {
         padding: theme.spacing.unit / 2
     },
-    borderColor: {
-        borderTop: '1px solid ' + theme.palette.divider
-    }
+    ...borderStyle(theme)
 });
 
 class ForwardDialog extends React.Component {
@@ -245,7 +244,7 @@ class ForwardDialog extends React.Component {
                 <DialogContent>
                     <div className='forward-dialog-list'>{chats}</div>
                 </DialogContent>
-                <div className={classes.borderColor} />
+                <div className={classNames(classes.borderColor, 'forward-dialog-message-top-border')} />
                 {this.targetChats.size > 0 && (
                     <div
                         ref={this.messageRef}
