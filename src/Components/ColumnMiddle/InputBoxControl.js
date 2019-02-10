@@ -7,6 +7,8 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withNamespaces } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
@@ -59,10 +61,14 @@ class InputBoxControl extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme } = this.props;
+        const { theme, lng } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
         if (nextProps.theme !== theme) {
+            return true;
+        }
+
+        if (nextProps.lng !== lng) {
             return true;
         }
 
@@ -120,6 +126,8 @@ class InputBoxControl extends Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        // console.log('componentDidUpdate reply', prevProps, prevState, this.props, this.state, snapshot);
+
         this.setChatDraftMessage(snapshot);
 
         if (prevState.chatId !== this.state.chatId) {
@@ -136,12 +144,23 @@ class InputBoxControl extends Component {
     setInputFocus = () => {
         setTimeout(() => {
             if (this.newMessage.current) {
-                this.newMessage.current.focus();
+                const element = this.newMessage.current;
+
+                if (element.childNodes.length > 0) {
+                    const range = document.createRange();
+                    range.setStart(element.childNodes[0], element.childNodes[0].length);
+                    range.collapse(true);
+
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                element.focus();
             }
         }, 100);
     };
 
-    setChatDraftMessage(chatDraftMessage) {
+    setChatDraftMessage = chatDraftMessage => {
         if (!chatDraftMessage) return;
 
         const { chatId, draftMessage } = chatDraftMessage;
@@ -152,7 +171,7 @@ class InputBoxControl extends Component {
             chat_id: chatId,
             draft_message: draftMessage
         });
-    }
+    };
 
     getNewChatDraftMessage = (chatId, replyToMessageId) => {
         let chat = ChatStore.get(chatId);
@@ -222,13 +241,11 @@ class InputBoxControl extends Component {
         let files = this.attachPhoto.current.files;
         if (files.length === 0) return;
 
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-
+        files.forEach(file => {
             readImageSize(file, result => {
                 this.handleSendPhoto(result);
             });
-        }
+        });
 
         this.attachPhoto.current.value = '';
     };
@@ -241,11 +258,9 @@ class InputBoxControl extends Component {
         let files = this.attachDocument.current.files;
         if (files.length === 0) return;
 
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-
+        files.forEach(file => {
             this.handleSendDocument(file);
-        }
+        });
 
         this.attachDocument.current.value = '';
     };
@@ -354,11 +369,9 @@ class InputBoxControl extends Component {
         if (!files) return;
         if (!files.length) return;
 
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-
+        files.forEach(file => {
             this.handleSendDocument(file);
-        }
+        });
 
         this.files = null;
     };
@@ -420,7 +433,7 @@ class InputBoxControl extends Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -448,7 +461,8 @@ class InputBoxControl extends Component {
                             <div
                                 id='inputbox-message'
                                 ref={this.newMessage}
-                                placeholder='Type a message'
+                                placeholder={t('Message')}
+                                key={new Date()}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
@@ -488,7 +502,7 @@ class InputBoxControl extends Component {
                     </div>
                 </div>
                 <Dialog open={openPasteDialog} onClose={this.handleClosePaste} aria-labelledby='delete-dialog-title'>
-                    <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
+                    <DialogTitle id='delete-dialog-title'>{t('AppName')}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             {this.files && this.files.length > 1
@@ -498,10 +512,10 @@ class InputBoxControl extends Component {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleClosePaste} color='primary'>
-                            Cancel
+                            {t('Cancel')}
                         </Button>
                         <Button onClick={this.handlePasteContinue} color='primary'>
-                            Ok
+                            {t('Ok')}
                         </Button>
                     </DialogActions>
                 </Dialog>
@@ -510,4 +524,9 @@ class InputBoxControl extends Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(InputBoxControl);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withNamespaces()
+);
+
+export default enhance(InputBoxControl);

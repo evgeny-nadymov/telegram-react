@@ -42,6 +42,19 @@ class DialogsList extends React.Component {
         return false;
     }
 
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        const { current: list } = this.listRef;
+
+        return { scrollTop: list.scrollTop };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { current: list } = this.listRef;
+        const { scrollTop } = snapshot;
+
+        list.scrollTop = scrollTop;
+    }
+
     componentDidMount() {
         this.loadFirstSlice();
 

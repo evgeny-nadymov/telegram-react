@@ -6,6 +6,9 @@
  */
 
 import React from 'react';
+import { compose } from 'recompose';
+import { withNamespaces } from 'react-i18next';
+import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import PhotoIcon from '@material-ui/icons/Photo';
@@ -14,11 +17,10 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
     iconButton: {
-        margin: '8px 0px'
+        margin: '8px 0'
     }
 };
 
@@ -29,35 +31,30 @@ class AttachButton extends React.Component {
         this.state = {
             anchorEl: null
         };
-
-        this.handleMenuClick = this.handleMenuClick.bind(this);
-        this.handleMenuClose = this.handleMenuClose.bind(this);
-        this.handleAttachDocument = this.handleAttachDocument.bind(this);
-        this.handleAttachPhoto = this.handleAttachPhoto.bind(this);
     }
 
-    handleMenuClick(event) {
+    handleMenuClick = event => {
         this.setState({ anchorEl: event.currentTarget });
-    }
+    };
 
-    handleMenuClose() {
+    handleMenuClose = () => {
         this.setState({ anchorEl: null });
-    }
+    };
 
-    handleAttachPhoto() {
+    handleAttachPhoto = () => {
         this.handleMenuClose();
 
         setTimeout(x => x.props.onAttachPhoto(), 300, this);
-    }
+    };
 
-    handleAttachDocument() {
+    handleAttachDocument = () => {
         this.handleMenuClose();
 
         setTimeout(x => x.props.onAttachDocument(), 300, this);
-    }
+    };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { anchorEl } = this.state;
 
         return (
@@ -88,13 +85,13 @@ class AttachButton extends React.Component {
                         <ListItemIcon>
                             <PhotoIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary='Photo' />
+                        <ListItemText inset primary={t('AttachPhoto')} />
                     </MenuItem>
                     <MenuItem onClick={this.handleAttachDocument}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary='Document' />
+                        <ListItemText inset primary={t('AttachDocument')} />
                     </MenuItem>
                 </Menu>
             </>
@@ -102,4 +99,9 @@ class AttachButton extends React.Component {
     }
 }
 
-export default withStyles(styles)(AttachButton);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withNamespaces()
+);
+
+export default enhance(AttachButton);
