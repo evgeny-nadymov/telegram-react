@@ -9,7 +9,6 @@
     width: 320px;
     display: flex;
     flex-wrap: wrap;
-    overflow-y: scroll;
 }
 
 .forward-dialog-message {
@@ -31,7 +30,7 @@
     padding: 12px 24px 12px 24px;
     white-space: pre-wrap;
     word-wrap: break-word;
-    word-break: break-all;
+    word-break: break-word;
 }
 
 #forward-dialog-message:empty::before {

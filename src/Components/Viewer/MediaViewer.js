@@ -339,13 +339,14 @@ class MediaViewer extends React.Component {
     };
 
     handleForward = () => {
-        const { chatId, messageId } = this.props;
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateForwardMessages',
             info: {
                 chatId: chatId,
-                messageIds: [messageId]
+                messageIds: [currentMessageId]
             }
         });
     };

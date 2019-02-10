@@ -34,6 +34,9 @@ const styles = theme => ({
     close: {
         padding: theme.spacing.unit / 2
     },
+    dialog: {
+        color: theme.palette.text.primary
+    },
     ...borderStyle(theme)
 });
 
@@ -239,7 +242,8 @@ class ForwardDialog extends React.Component {
                 open={true}
                 onClose={this.handleClose}
                 aria-labelledby='forward-dialog-title'
-                aria-describedby='forward-dialog-description'>
+                aria-describedby='forward-dialog-description'
+                className={classes.dialog}>
                 <DialogTitle id='forward-dialog-title'>Share to</DialogTitle>
                 <DialogContent>
                     <div className='forward-dialog-list'>{chats}</div>

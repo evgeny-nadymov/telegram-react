@@ -12,57 +12,32 @@ import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 import ReplyControl from '../Message/ReplyControl';
-import MessageStore from '../../Stores/MessageStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';
 
-const styles = {
+const styles = theme => ({
     replyIcon: {
-        margin: 12
+        padding: 12,
+        color: theme.palette.action.active
     },
     closeIconButton: {
         margin: 0
     }
-};
+});
 
 class InputBoxHeader extends React.Component {
-    state = {
-        reply: null
-    };
-
-    componentDidMount() {
-        MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
-    }
-
-    componentWillUnmount() {
-        MessageStore.removeListener('clientUpdateReply', this.onClientUpdateReply);
-    }
-
-    onClientUpdateReply = update => {
-        const currentChatId = this.props.chatId;
-        const { chatId, messageId } = update;
-
-        if (currentChatId !== chatId) {
-            return;
-        }
-
-        if (messageId > 0) {
-            this.setState({ reply: update });
-            this.props.onFocusInput();
-        } else {
-            this.handleCloseReply();
-        }
-    };
-
-    handleCloseReply = () => {
-        this.setState({ reply: null });
+    handleClose = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateReply',
+            chatId: this.props.chatId,
+            messageId: 0
+        });
     };
 
     render() {
-        const { classes } = this.props;
-        const { reply } = this.state;
-        if (!reply) {
-            return null;
-        }
+        const { classes, chatId, messageId } = this.props;
+        if (!chatId) return null;
+        if (!messageId) return null;
 
         return (
             <div className='inputbox-header'>
@@ -70,10 +45,10 @@ class InputBoxHeader extends React.Component {
                     <ReplyIcon className={classes.replyIcon} />
                 </div>
                 <div className='inputbox-header-middle-column'>
-                    <ReplyControl chatId={reply.chatId} messageId={reply.messageId} />
+                    <ReplyControl chatId={chatId} messageId={messageId} />
                 </div>
                 <div className='inputbox-header-right-column'>
-                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleCloseReply}>
+                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
                         <CloseIcon />
                     </IconButton>
                 </div>
@@ -84,7 +59,8 @@ class InputBoxHeader extends React.Component {
 
 InputBoxHeader.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onFocusInput: PropTypes.func.isRequired
+    messageId: PropTypes.number.isRequired,
+    onClose: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(InputBoxHeader);

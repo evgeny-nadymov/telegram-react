@@ -21,6 +21,7 @@ import {
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import MainMenuButton from './MainMenuButton';
 import { debounce, isAuthorizationReady, throttle } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -160,7 +161,7 @@ class DialogsHeader extends React.Component {
                     className={classes.headerIconButton}
                     aria-label={t('Search')}
                     onMouseDown={this.handleSearch}>
-                    {openSearch ? <CloseIcon /> : <SearchIcon />}
+                    <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
                 </IconButton>
             </div>
         );

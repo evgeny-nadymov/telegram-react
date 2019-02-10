@@ -79,6 +79,10 @@ class InputBoxControl extends Component {
             return true;
         }
 
+        if (nextState.replyToMessageId !== this.state.replyToMessageId) {
+            return true;
+        }
+
         if (nextState.anchorEl !== this.state.anchorEl) {
             return true;
         }
@@ -414,7 +418,7 @@ class InputBoxControl extends Component {
 
     render() {
         const { classes } = this.props;
-        const { currentChatId, openPasteDialog } = this.state;
+        const { currentChatId, replyToMessageId, openPasteDialog } = this.state;
 
         const selectedChat = ChatStore.get(currentChatId);
 
@@ -429,7 +433,7 @@ class InputBoxControl extends Component {
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader chatId={currentChatId} onFocusInput={this.setInputFocus} />
+                    <InputBoxHeader chatId={currentChatId} messageId={replyToMessageId} />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
                             {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
