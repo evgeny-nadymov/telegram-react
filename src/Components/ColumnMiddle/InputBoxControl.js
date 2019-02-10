@@ -21,6 +21,7 @@ import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
+import { getChatDraftReplyToMessageId, isMeChat } from '../../Utils/Chat';
 import { PHOTO_SIZE } from '../../Constants';
 import { borderStyle } from '../Theme';
 import MessageStore from '../../Stores/MessageStore';
@@ -48,46 +49,32 @@ class InputBoxControl extends Component {
         this.attachPhoto = React.createRef();
         this.newMessage = React.createRef();
 
+        const chatId = ApplicationStore.getChatId();
+
         this.state = {
-            currentChatId: ApplicationStore.getChatId(),
-            replyToMessageId: 0,
-            openPasteDialog: false,
-            anchorEl: null
+            chatId: chatId,
+            replyToMessageId: getChatDraftReplyToMessageId(chatId),
+            openPasteDialog: false
         };
-
-        this.handleMenuClick = this.handleMenuClick.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleAttachDocument = this.handleAttachDocument.bind(this);
-        this.handleAttachPhoto = this.handleAttachPhoto.bind(this);
-        this.handleAttachDocumentComplete = this.handleAttachDocumentComplete.bind(this);
-        this.handleAttachPhotoComplete = this.handleAttachPhotoComplete.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.handleEmojiSelect = this.handleEmojiSelect.bind(this);
-
-        this.handleSendPhoto = this.handleSendPhoto.bind(this);
-        this.handleSendingMessage = this.handleSendingMessage.bind(this);
-        this.getNewChatDraftMessage = this.getNewChatDraftMessage.bind(this);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.theme !== this.props.theme) {
+        const { theme } = this.props;
+        const { chatId, replyToMessageId, openPasteDialog } = this.state;
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextState.currentChatId !== this.state.currentChatId) {
+        if (nextState.chatId !== chatId) {
             return true;
         }
 
-        if (nextState.replyToMessageId !== this.state.replyToMessageId) {
+        if (nextState.replyToMessageId !== replyToMessageId) {
             return true;
         }
 
-        if (nextState.anchorEl !== this.state.anchorEl) {
-            return true;
-        }
-
-        if (nextState.openPasteDialog !== this.state.openPasteDialog) {
+        if (nextState.openPasteDialog !== openPasteDialog) {
             return true;
         }
 
@@ -102,7 +89,7 @@ class InputBoxControl extends Component {
     }
 
     componentWillUnmount() {
-        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.currentChatId);
+        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.chatId, this.state.replyToMessageId);
         this.setChatDraftMessage(newChatDraftMessage);
 
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
@@ -110,7 +97,7 @@ class InputBoxControl extends Component {
     }
 
     onClientUpdateReply = update => {
-        const { currentChatId } = this.state;
+        const { chatId: currentChatId } = this.state;
         const { chatId, messageId } = update;
 
         if (currentChatId !== chatId) {
@@ -118,24 +105,32 @@ class InputBoxControl extends Component {
         }
 
         this.setState({ replyToMessageId: messageId });
+
+        if (messageId) {
+            this.setInputFocus();
+        }
     };
 
     onClientUpdateChatId = update => {
-        this.setState({ currentChatId: update.nextChatId, replyToMessageId: 0, openPasteDialog: false });
+        this.setState({
+            chatId: update.nextChatId,
+            replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
+            openPasteDialog: false
+        });
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         this.setChatDraftMessage(snapshot);
 
-        if (prevState.currentChatId !== this.state.currentChatId) {
+        if (prevState.chatId !== this.state.chatId) {
             this.setInputFocus();
         }
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
-        if (prevState.currentChatId === this.state.currentChatId) return;
+        if (prevState.chatId === this.state.chatId) return;
 
-        return this.getNewChatDraftMessage(prevState.currentChatId);
+        return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
     }
 
     setInputFocus = () => {
@@ -159,22 +154,27 @@ class InputBoxControl extends Component {
         });
     }
 
-    getNewChatDraftMessage(currentChatId) {
-        let chat = ChatStore.get(currentChatId);
+    getNewChatDraftMessage = (chatId, replyToMessageId) => {
+        let chat = ChatStore.get(chatId);
         if (!chat) return;
+        const newDraft = this.getInputText();
 
-        const { draft_message } = chat;
-
-        let newDraft = this.getInputText();
         let previousDraft = '';
+        let previousReplyToMessageId = 0;
+        const { draft_message } = chat;
         if (draft_message && draft_message.input_message_text && draft_message.input_message_text.text) {
-            previousDraft = draft_message.input_message_text.text.text;
+            const { reply_to_message_id, input_message_text } = draft_message;
+
+            previousReplyToMessageId = reply_to_message_id;
+            if (input_message_text && input_message_text.text) {
+                previousDraft = input_message_text.text.text;
+            }
         }
 
-        if (newDraft !== previousDraft) {
+        if (newDraft !== previousDraft || replyToMessageId !== previousReplyToMessageId) {
             const draftMessage = {
                 '@type': 'draftMessage',
-                reply_to_message_id: 0,
+                reply_to_message_id: replyToMessageId,
                 input_message_text: {
                     '@type': 'inputMessageText',
                     text: {
@@ -187,17 +187,13 @@ class InputBoxControl extends Component {
                 }
             };
 
-            return { chatId: currentChatId, draftMessage: draftMessage };
+            return { chatId: chatId, draftMessage: draftMessage };
         }
 
         return null;
-    }
+    };
 
-    handleMenuClick(event) {
-        this.setState({ anchorEl: event.currentTarget });
-    }
-
-    handleSubmit() {
+    handleSubmit = () => {
         let text = this.getInputText();
         this.newMessage.current.innerText = null;
         this.newMessage.current.textContent = null;
@@ -216,34 +212,13 @@ class InputBoxControl extends Component {
         };
 
         this.onSendInternal(content, result => {});
-    }
+    };
 
-    handleAttachPhoto() {
+    handleAttachPhoto = () => {
         this.attachPhoto.current.click();
-    }
+    };
 
-    handleAttachDocument() {
-        this.attachDocument.current.click();
-    }
-
-    handleAttachDocumentComplete() {
-        let files = this.attachDocument.current.files;
-        if (files.length === 0) return;
-
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-            const content = {
-                '@type': 'inputMessageDocument',
-                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
-            };
-
-            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
-        }
-
-        this.attachDocument.current.value = '';
-    }
-
-    handleAttachPhotoComplete() {
+    handleAttachPhotoComplete = () => {
         let files = this.attachPhoto.current.files;
         if (files.length === 0) return;
 
@@ -256,7 +231,24 @@ class InputBoxControl extends Component {
         }
 
         this.attachPhoto.current.value = '';
-    }
+    };
+
+    handleAttachDocument = () => {
+        this.attachDocument.current.click();
+    };
+
+    handleAttachDocumentComplete = () => {
+        let files = this.attachDocument.current.files;
+        if (files.length === 0) return;
+
+        for (let i = 0; i < files.length; i++) {
+            let file = files[i];
+
+            this.handleSendDocument(file);
+        }
+
+        this.attachDocument.current.value = '';
+    };
 
     getInputText() {
         let innerText = this.newMessage.current.innerText;
@@ -269,7 +261,14 @@ class InputBoxControl extends Component {
         return innerText;
     }
 
-    handleInputChange() {
+    handleInputChange = () => {
+        const { chatId } = this.state;
+
+        if (isMeChat(chatId)) return;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
         const innerText = this.newMessage.current.innerText;
         const innerHTML = this.newMessage.current.innerHTML;
 
@@ -277,24 +276,21 @@ class InputBoxControl extends Component {
             this.newMessage.current.innerHTML = '';
         }
 
-        if (innerText) {
-            const selectedChat = ChatStore.get(this.state.currentChatId);
-            if (!selectedChat.OutputTypingManager) {
-                selectedChat.OutputTypingManager = new OutputTypingManager(selectedChat.id);
-            }
+        if (!innerText) return;
 
-            selectedChat.OutputTypingManager.setTyping({ '@type': 'chatActionTyping' });
-        }
-    }
+        const typingManager = chat.OutputTypingManager || (chat.OutputTypingManager = new OutputTypingManager(chat.id));
 
-    handleKeyDown(e) {
+        typingManager.setTyping({ '@type': 'chatActionTyping' });
+    };
+
+    handleKeyDown = e => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             this.handleSubmit();
         }
-    }
+    };
 
-    handleSendPhoto(file) {
+    handleSendPhoto = file => {
         if (!file) return;
 
         const content = {
@@ -312,59 +308,18 @@ class InputBoxControl extends Component {
 
             FileStore.uploadFile(result.content.photo.sizes[0].photo.id, result);
         });
-    }
-
-    handleSendingMessage(message, blob) {
-        if (message && message.sending_state && message.sending_state['@type'] === 'messageSendingStatePending') {
-            if (message.content && message.content['@type'] === 'messagePhoto' && message.content.photo) {
-                let size = getSize(message.content.photo.sizes, PHOTO_SIZE);
-                if (!size) return;
-
-                let file = size.photo;
-                if (file && file.local && file.local.is_downloading_completed && !file.idb_key && !file.blob) {
-                    file.blob = blob;
-                    FileStore.updatePhotoBlob(message.chat_id, message.id, file.id);
-                }
-            }
-        }
-    }
-
-    onSendInternal = async (content, callback) => {
-        const { currentChatId, replyToMessageId } = this.state;
-
-        if (!currentChatId) return;
-        if (!content) return;
-
-        try {
-            await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
-
-            let result = await TdLibController.send({
-                '@type': 'sendMessage',
-                chat_id: currentChatId,
-                reply_to_message_id: replyToMessageId,
-                input_message_content: content
-            });
-
-            this.setState({ replyToMessageId: 0 });
-            //MessageStore.set(result);
-
-            TdLibController.send({
-                '@type': 'viewMessages',
-                chat_id: currentChatId,
-                message_ids: [result.id]
-            });
-
-            callback(result);
-        } catch (error) {
-            alert('sendMessage error ' + JSON.stringify(error));
-        }
     };
 
-    handleEmojiSelect(emoji) {
-        if (!emoji) return;
+    handleSendDocument = file => {
+        if (!file) return;
 
-        this.newMessage.current.innerText += emoji.native;
-    }
+        const content = {
+            '@type': 'inputMessageDocument',
+            document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+        };
+
+        this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
+    };
 
     handlePaste = event => {
         const items = (event.clipboardData || event.originalEvent.clipboardData).items;
@@ -401,12 +356,8 @@ class InputBoxControl extends Component {
 
         for (let i = 0; i < files.length; i++) {
             let file = files[i];
-            const content = {
-                '@type': 'inputMessageDocument',
-                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
-            };
 
-            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
+            this.handleSendDocument(file);
         }
 
         this.files = null;
@@ -416,29 +367,81 @@ class InputBoxControl extends Component {
         this.setState({ openPasteDialog: false });
     };
 
+    handleSendingMessage = (message, blob) => {
+        if (message && message.sending_state && message.sending_state['@type'] === 'messageSendingStatePending') {
+            if (message.content && message.content['@type'] === 'messagePhoto' && message.content.photo) {
+                let size = getSize(message.content.photo.sizes, PHOTO_SIZE);
+                if (!size) return;
+
+                let file = size.photo;
+                if (file && file.local && file.local.is_downloading_completed && !file.idb_key && !file.blob) {
+                    file.blob = blob;
+                    FileStore.updatePhotoBlob(message.chat_id, message.id, file.id);
+                }
+            }
+        }
+    };
+
+    onSendInternal = async (content, callback) => {
+        const { chatId, replyToMessageId } = this.state;
+
+        if (!chatId) return;
+        if (!content) return;
+
+        try {
+            await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
+
+            let result = await TdLibController.send({
+                '@type': 'sendMessage',
+                chat_id: chatId,
+                reply_to_message_id: replyToMessageId,
+                input_message_content: content
+            });
+
+            this.setState({ replyToMessageId: 0 });
+            //MessageStore.set(result);
+
+            TdLibController.send({
+                '@type': 'viewMessages',
+                chat_id: chatId,
+                message_ids: [result.id]
+            });
+
+            callback(result);
+        } catch (error) {
+            alert('sendMessage error ' + JSON.stringify(error));
+        }
+    };
+
+    handleEmojiSelect = emoji => {
+        if (!emoji) return;
+
+        this.newMessage.current.innerText += emoji.native;
+    };
+
     render() {
         const { classes } = this.props;
-        const { currentChatId, replyToMessageId, openPasteDialog } = this.state;
+        const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
-        const selectedChat = ChatStore.get(currentChatId);
+        const chat = ChatStore.get(chatId);
 
         let text = '';
-        if (selectedChat) {
-            const { draft_message } = selectedChat;
-            if (draft_message && draft_message.input_message_text && draft_message.input_message_text.text) {
-                text = draft_message.input_message_text.text.text;
+        if (chat) {
+            const { draft_message } = chat;
+            if (draft_message) {
+                const { input_message_text } = draft_message;
+                if (input_message_text && input_message_text.text) {
+                    text = draft_message.input_message_text.text.text;
+                }
             }
         }
 
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader chatId={currentChatId} messageId={replyToMessageId} />
+                    <InputBoxHeader chatId={chatId} messageId={replyToMessageId} />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
-                            {/*<IconButton className={classes.iconButton} aria-label='Emoticon'>*/}
-                            {/*<InsertEmoticonIcon />*/}
-                            {/*</IconButton>*/}
                             <EmojiPickerButton onSelect={this.handleEmojiSelect} />
                         </div>
                         <div className='inputbox-middle-column'>
@@ -446,7 +449,6 @@ class InputBoxControl extends Component {
                                 id='inputbox-message'
                                 ref={this.newMessage}
                                 placeholder='Type a message'
-                                key={Date()}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}

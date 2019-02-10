@@ -1032,6 +1032,19 @@ function canSendMessages(chatId) {
     return null;
 }
 
+function getChatDraftReplyToMessageId(chatId) {
+    let replyToMessageId = 0;
+    const chat = ChatStore.get(chatId);
+    if (chat) {
+        const { draft_message } = chat;
+        if (draft_message) {
+            replyToMessageId = draft_message.reply_to_message_id;
+        }
+    }
+
+    return replyToMessageId;
+}
+
 export {
     getChatDraft,
     showChatDraft,
@@ -1075,5 +1088,6 @@ export {
     canClearHistory,
     canDeleteChat,
     canSendFiles,
-    canSendMessages
+    canSendMessages,
+    getChatDraftReplyToMessageId
 };
