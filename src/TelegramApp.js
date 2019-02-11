@@ -40,6 +40,11 @@ const styles = theme => ({
     page: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
+    },
+    '@global': {
+        a: {
+            color: theme.palette.primary.dark
+        }
     }
 });
 

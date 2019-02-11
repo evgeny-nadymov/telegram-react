@@ -23,9 +23,9 @@ import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
-import { getChatDraftReplyToMessageId, isMeChat } from '../../Utils/Chat';
-import { PHOTO_SIZE } from '../../Constants';
+import { getChatDraft, getChatDraftReplyToMessageId, isMeChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
+import { PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -128,8 +128,6 @@ class InputBoxControl extends Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        // console.log('componentDidUpdate reply', prevProps, prevState, this.props, this.state, snapshot);
-
         this.setChatDraftMessage(snapshot);
 
         if (prevState.chatId !== this.state.chatId) {
@@ -440,20 +438,8 @@ class InputBoxControl extends Component {
         const { classes, t } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
-        const chat = ChatStore.get(chatId);
-
-        let text = this.innerHTML;
-        if (this.innerHTML === null) {
-            if (chat) {
-                const { draft_message } = chat;
-                if (draft_message) {
-                    const { input_message_text } = draft_message;
-                    if (input_message_text && input_message_text.text) {
-                        text = draft_message.input_message_text.text.text;
-                    }
-                }
-            }
-        }
+        const draft = getChatDraft(chatId);
+        const content = this.innerHTML !== null ? this.innerHTML : draft ? draft.text : null;
 
         return (
             <>
@@ -468,13 +454,12 @@ class InputBoxControl extends Component {
                                 id='inputbox-message'
                                 ref={this.newMessage}
                                 placeholder={t('Message')}
-                                key={new Date()}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
                                 onKeyUp={this.handleInputChange}
                                 onPaste={this.handlePaste}>
-                                {text}
+                                {content}
                             </div>
                         </div>
                         <div className='inputbox-right-column'>

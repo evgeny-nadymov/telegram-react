@@ -162,24 +162,6 @@ function getChatTypingString(chatId) {
     return null;
 }
 
-function showChatDraft(chat) {
-    const draft = getChatDraft(chat);
-
-    return draft && chat.unread_count === 0 && chat.unread_mention_count === 0;
-}
-
-function getChatDraft(chat) {
-    if (
-        chat &&
-        chat.draft_message &&
-        chat.draft_message.input_message_text &&
-        chat.draft_message.input_message_text.text
-    ) {
-        return chat.draft_message.input_message_text.text;
-    }
-    return null;
-}
-
 function getMessageSenderFullName(message) {
     if (!message) return null;
     if (isServiceMessage(message)) return null;
@@ -302,7 +284,7 @@ function getLastMessageDate(chat) {
     if (!chat) return null;
     if (!chat.last_message) return null;
     if (!chat.last_message.date) return null;
-    if (showChatDraft(chat)) return null;
+    if (showChatDraft(chat.id)) return null;
 
     return getMessageDate(chat.last_message);
 }
@@ -1032,6 +1014,29 @@ function canSendMessages(chatId) {
     return null;
 }
 
+function showChatDraft(chatId) {
+    const chat = ChatStore.get(chatId);
+    const draft = getChatDraft(chatId);
+
+    return draft && chat.unread_count === 0 && chat.unread_mention_count === 0;
+}
+
+function getChatDraft(chatId) {
+    const chat = ChatStore.get(chatId);
+
+    if (chat) {
+        const { draft_message } = chat;
+        if (draft_message) {
+            const { input_message_text } = draft_message;
+            if (input_message_text) {
+                return input_message_text.text;
+            }
+        }
+    }
+
+    return null;
+}
+
 function getChatDraftReplyToMessageId(chatId) {
     let replyToMessageId = 0;
     const chat = ChatStore.get(chatId);
@@ -1046,8 +1051,9 @@ function getChatDraftReplyToMessageId(chatId) {
 }
 
 export {
-    getChatDraft,
     showChatDraft,
+    getChatDraft,
+    getChatDraftReplyToMessageId,
     getChatTypingString,
     getChatUnreadMessageIcon,
     getChatUnreadCount,
@@ -1088,6 +1094,5 @@ export {
     canClearHistory,
     canDeleteChat,
     canSendFiles,
-    canSendMessages,
-    getChatDraftReplyToMessageId
+    canSendMessages
 };

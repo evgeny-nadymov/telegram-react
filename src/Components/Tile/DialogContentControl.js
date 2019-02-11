@@ -83,8 +83,8 @@ class DialogContentControl extends React.Component {
         }
 
         if (!contentControl) {
-            const draft = getChatDraft(chat);
-            if (showChatDraft(chat)) {
+            const draft = getChatDraft(chatId);
+            if (showChatDraft(chatId)) {
                 const text = draft.text || '\u00A0';
 
                 contentControl = (
