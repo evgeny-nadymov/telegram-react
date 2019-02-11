@@ -53,6 +53,7 @@ class InputBoxControl extends Component {
 
         const chatId = ApplicationStore.getChatId();
 
+        this.innerHTML = null;
         this.state = {
             chatId: chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
@@ -118,6 +119,7 @@ class InputBoxControl extends Component {
     };
 
     onClientUpdateChatId = update => {
+        this.innerHTML = null;
         this.setState({
             chatId: update.nextChatId,
             replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
@@ -287,6 +289,8 @@ class InputBoxControl extends Component {
         const innerText = this.newMessage.current.innerText;
         const innerHTML = this.newMessage.current.innerHTML;
 
+        this.innerHTML = innerHTML;
+
         if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
             this.newMessage.current.innerHTML = '';
         }
@@ -438,13 +442,15 @@ class InputBoxControl extends Component {
 
         const chat = ChatStore.get(chatId);
 
-        let text = '';
-        if (chat) {
-            const { draft_message } = chat;
-            if (draft_message) {
-                const { input_message_text } = draft_message;
-                if (input_message_text && input_message_text.text) {
-                    text = draft_message.input_message_text.text.text;
+        let text = this.innerHTML;
+        if (this.innerHTML === null) {
+            if (chat) {
+                const { draft_message } = chat;
+                if (draft_message) {
+                    const { input_message_text } = draft_message;
+                    if (input_message_text && input_message_text.text) {
+                        text = draft_message.input_message_text.text.text;
+                    }
                 }
             }
         }
