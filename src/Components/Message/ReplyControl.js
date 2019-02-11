@@ -6,33 +6,38 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withNamespaces } from 'react-i18next';
+import { withStyles } from '@material-ui/core/styles';
 import { getContent, getTitle } from '../../Utils/Message';
+import { accentStyles } from '../Theme';
 import MessageStore from '../../Stores/MessageStore';
-import './ReplyControl.css'
+import './ReplyControl.css';
+
+const styles = theme => ({
+    ...accentStyles(theme)
+});
 
 class ReplyControl extends React.Component {
-    constructor(props){
-        super(props);
-    }
-
-    componentDidMount(){
+    componentDidMount() {
         MessageStore.on('getMessageResult', this.onGetMessageResult);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         MessageStore.removeListener('getMessageResult', this.onGetMessageResult);
     }
 
-    onGetMessageResult = (result) => {
+    onGetMessageResult = result => {
         const { chatId, messageId } = this.props;
 
-        if (chatId === result.chat_id
-            && messageId === result.id){
+        if (chatId === result.chat_id && messageId === result.id) {
             this.forceUpdate();
         }
     };
 
-    getSubtitle(message){
+    getSubtitle(message) {
         if (!message) return 'Loading...';
 
         const content = message.content;
@@ -50,31 +55,40 @@ class ReplyControl extends React.Component {
         }
     }
 
-    isDeletedMessage = (message) => {
+    isDeletedMessage = message => {
         return message && message['@type'] === 'deletedMessage';
     };
 
     render() {
-        const { chatId, messageId } = this.props;
+        const { classes, t, chatId, messageId } = this.props;
 
         if (!chatId) return null;
         if (!messageId) return null;
 
         const message = MessageStore.get(chatId, messageId);
-        const title = this.isDeletedMessage(message)? null : getTitle(message);
-        const subtitle = this.isDeletedMessage(message)? 'Deleted message' : getContent(message);
+        const title = this.isDeletedMessage(message) ? null : getTitle(message);
+        const subtitle = this.isDeletedMessage(message) ? 'Deleted message' : getContent(message, t);
 
         return (
             <div className='reply'>
-                <div className='reply-border'/>
+                <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                 <div className='reply-content'>
-                    {title && <div className='reply-content-title'>{title}</div>}
+                    {title && <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>}
                     <div className='reply-content-subtitle'>{subtitle}</div>
                 </div>
             </div>
         );
     }
-
 }
 
-export default ReplyControl;
+ReplyControl.propTypes = {
+    chatId: PropTypes.number,
+    messageId: PropTypes.number
+};
+
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withNamespaces()
+);
+
+export default enhance(ReplyControl);

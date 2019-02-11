@@ -5,19 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.document{
+.document {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.document-tile{
+.document-tile {
     cursor: pointer;
     height: 48px;
     position: relative;
 }
 
-.document-progress{
+.document-progress {
     position: absolute;
     top: 0;
     left: 0;
@@ -27,7 +27,7 @@
     animation: spin 4s linear infinite;
 }
 
-.document-progress-background{
+.document-progress-background {
     position: absolute;
     top: 0;
     left: 0;
@@ -43,13 +43,13 @@
     color: #ffffff;
 }
 
-.document-content{
+.document-content {
     flex-grow: 1;
     flex-shrink: 1;
     margin-left: 12px;
 }
 
-.document-title{
+.document-title {
     word-wrap: break-word;
     white-space: nowrap;
     overflow: hidden;
@@ -57,8 +57,8 @@
     font-weight: 500;
 }
 
-.document-name{
-    color: #3a6d99;
+.document-name {
+    color: inherit;
     font-weight: 500;
     max-width: 110px;
     overflow: hidden;
@@ -66,15 +66,16 @@
     text-overflow: ellipsis;
 }
 
-.document-size{
+.document-size {
     color: #70777b;
     font-size: 14px;
 }
 
-.document-action{
-
+.document-action {
 }
 
 @keyframes spin {
-    100% { transform: rotate(360deg); }
+    100% {
+        transform: rotate(360deg);
+    }
 }

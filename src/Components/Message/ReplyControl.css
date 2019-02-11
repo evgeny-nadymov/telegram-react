@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.reply{
+.reply {
     margin-bottom: 5px;
     margin-top: 2px;
     display: flex;
@@ -13,29 +13,27 @@
     align-items: center;
 }
 
-.reply-border{
-    background: #7eaad1;
+.reply-border {
     height: 40px;
     min-width: 2px;
 }
 
-.reply-content{
+.reply-content {
     margin-left: 12px;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
 }
 
-.reply-content-title{
+.reply-content-title {
     font-weight: 500;
-    color: #3a6d99;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.reply-content-subtitle{
-    color: #70777B;
+.reply-content-subtitle {
+    color: #70777b;
     font-size: 14px;
     overflow: hidden;
     white-space: nowrap;

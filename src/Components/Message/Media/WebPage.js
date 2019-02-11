@@ -7,13 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import { getFitSize, getSize } from '../../../Utils/Common';
+import { accentStyles } from '../../Theme';
+import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
-import './WebPage.css'
+import './WebPage.css';
+
+const styles = theme => ({
+    ...accentStyles(theme)
+});
 
 class WebPage extends React.Component {
-
     componentDidMount() {
         FileStore.on('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
     }
@@ -22,7 +28,7 @@ class WebPage extends React.Component {
         FileStore.removeListener('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
     }
 
-    onClientUpdateWebPageBlob = (update) => {
+    onClientUpdateWebPageBlob = update => {
         const { message } = this.props;
         if (!message) return;
 
@@ -34,38 +40,38 @@ class WebPage extends React.Component {
         }
     };
 
-    getSiteName = (webPage) => {
+    getSiteName = webPage => {
         if (!webPage) return null;
 
         return webPage.site_name;
     };
 
-    getTitle = (webPage) => {
+    getTitle = webPage => {
         if (!webPage) return null;
 
         return webPage.title;
     };
 
-    getDescription = (webPage) => {
+    getDescription = webPage => {
         if (!webPage) return null;
 
         return webPage.description;
     };
 
-    getUrl = (webPage) => {
+    getUrl = webPage => {
         if (!webPage) return null;
 
         return webPage.url;
     };
 
-    getPhoto = (webPage) => {
+    getPhoto = webPage => {
         if (!webPage) return null;
 
         return webPage.photo;
     };
 
     render() {
-        const { message, size, displaySize, openMedia } = this.props;
+        const { classes, message, size, displaySize, openMedia } = this.props;
         if (!message) return null;
 
         const { content } = message;
@@ -85,7 +91,7 @@ class WebPage extends React.Component {
             width: 0,
             height: 0
         };
-        if (photo){
+        if (photo) {
             const photoSize = getSize(photo.sizes, size);
             if (photoSize) {
                 fitPhotoSize = getFitSize(photoSize, displaySize);
@@ -93,10 +99,9 @@ class WebPage extends React.Component {
                     const file = photoSize.photo;
                     const blob = FileStore.getBlob(file.id) || file.blob;
 
-                    try{
+                    try {
                         src = FileStore.getBlobUrl(blob);
-                    }
-                    catch(error){
+                    } catch (error) {
                         console.log(`WebPage.render photo with error ${error}`);
                     }
                 }
@@ -105,18 +110,20 @@ class WebPage extends React.Component {
 
         return (
             <div className='web-page'>
-                <div className='web-page-border'/>
+                <div className={classNames('web-page-border', classes.accentBackgroundLight)} />
                 <div className='web-page-wrapper'>
-                    {siteName && <div className='web-page-site-name'>{siteName}</div>}
+                    {siteName && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{siteName}</div>
+                    )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
-                    {photo &&
+                    {photo && (
                         <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
                             <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                                <img className='photo-img' style={fitPhotoSize} src={src} alt=''/>
+                                <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
                             </a>
                         </div>
-                    }
+                    )}
                 </div>
             </div>
         );
@@ -135,4 +142,4 @@ WebPage.defaultProps = {
     displaySize: PHOTO_DISPLAY_SIZE
 };
 
-export default WebPage;
+export default withStyles(styles)(WebPage);

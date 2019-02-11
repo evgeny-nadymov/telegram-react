@@ -11,4 +11,13 @@ const borderStyle = theme => ({
     }
 });
 
-export { borderStyle };
+const accentStyles = theme => ({
+    accentColorDark: {
+        color: theme.palette.primary.dark
+    },
+    accentBackgroundLight: {
+        background: theme.palette.primary.light
+    }
+});
+
+export { borderStyle, accentStyles };

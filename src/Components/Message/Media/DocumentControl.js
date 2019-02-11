@@ -106,10 +106,8 @@ class DocumentControl extends React.Component {
 
         let isDownloadingActive = file.local && file.local.is_downloading_active;
         let isUploadingActive = file.remote && file.remote.is_uploading_active;
-        let isDownloadingCompleted =
-            file.local && file.local.is_downloading_completed;
-        let isUploadingCompleted =
-            file.remote && file.remote.is_uploading_completed;
+        let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
+        let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
         let size = this.getSize(file);
         let progressSize = null;
@@ -158,23 +156,16 @@ class DocumentControl extends React.Component {
 
         let sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
         let action =
-            isDownloadingActive || isUploadingActive
-                ? 'Cancel'
-                : isDownloadingCompleted || file.idb_key
-                ? 'Open'
-                : '';
+            isDownloadingActive || isUploadingActive ? 'Cancel' : isDownloadingCompleted || file.idb_key ? 'Open' : '';
         return (
-            <div className="document">
-                <div className="document-tile" onClick={this.props.openMedia}>
-                    <DocumentTileControl
-                        document={document}
-                        showProgress={showProgress}
-                    />
+            <div className='document'>
+                <div className='document-tile' onClick={this.props.openMedia}>
+                    <DocumentTileControl document={document} showProgress={showProgress} />
                     {showProgress && (
-                        <div className="document-progress">
+                        <div className='document-progress'>
                             <CircularProgress
                                 classes={circleStyle}
-                                variant="static"
+                                variant='static'
                                 value={progress}
                                 size={42}
                                 thickness={3}
@@ -184,20 +175,19 @@ class DocumentControl extends React.Component {
                     {/*<CircularProgress classes={circleStyle} variant='static' value={10} size={42} thickness={3} />*/}
                 </div>
 
-                <div className="document-content">
-                    <div className="document-title">
+                <div className='document-content'>
+                    <div className='document-title'>
                         <a
-                            className="document-name"
+                            className='document-name'
                             onClick={this.props.openMedia}
                             title={document.file_name}
                             data-name={document.file_name}
-                            data-ext=".dat"
-                        >
+                            data-ext='.dat'>
                             {document.file_name}
                         </a>
                     </div>
-                    <div className="document-action">
-                        <span className="document-size">{`${sizeString} `}</span>
+                    <div className='document-action'>
+                        <span className='document-size'>{`${sizeString} `}</span>
                         {action && <a onClick={this.props.openMedia}>{action}</a>}
                     </div>
                 </div>

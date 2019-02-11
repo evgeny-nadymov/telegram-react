@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import ReplyControl from './ReplyControl';
 import MessageStatusControl from './MessageStatusControl';
 import MessageAuthor from './MessageAuthor';
@@ -34,6 +35,12 @@ import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageControl.css';
 
+const styles = theme => ({
+    messageAuthorColor: {
+        color: theme.palette.primary.dark
+    }
+});
+
 class MessageControl extends Component {
     constructor(props) {
         super(props);
@@ -52,8 +59,12 @@ class MessageControl extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { theme, chatId, messageId, sendingState, showUnreadSeparator } = this.props;
         const { selected } = this.state;
+
+        if (nextProps.theme !== theme) {
+            return true;
+        }
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -267,7 +278,7 @@ class MessageControl extends Component {
     };
 
     render() {
-        const { chatId, messageId, showUnreadSeparator, onSelectUser, onSelectChat } = this.props;
+        const { classes, chatId, messageId, showUnreadSeparator, onSelectUser, onSelectChat } = this.props;
         const { selected } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -315,8 +326,11 @@ class MessageControl extends Component {
                                 />
                             )}
                             {forward && (
-                                <div className='message-author message-author-color'>
-                                    Forwarded from <a onClick={this.openForward}>{forward}</a>
+                                <div className={classNames('message-author', classes.messageAuthorColor)}>
+                                    Forwarded from{' '}
+                                    <a className={classes.messageAuthorColor} onClick={this.openForward}>
+                                        {forward}
+                                    </a>
                                 </div>
                             )}
                             <div className='message-meta'>
@@ -348,4 +362,4 @@ class MessageControl extends Component {
     }
 }
 
-export default MessageControl;
+export default withStyles(styles, { withTheme: true })(MessageControl);
