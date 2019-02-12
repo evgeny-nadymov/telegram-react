@@ -6,19 +6,39 @@
  */
 
 .forward-dialog-list {
-    width: 320px;
-    height: 640px;
     display: flex;
     flex-wrap: wrap;
+    flex: 1 1 auto;
+    padding: 12px 24px;
+    overflow-y: scroll;
+}
+
+.forward-dialog-search-list {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    padding: 12px 24px;
+    overflow-y: scroll;
+}
+
+.forward-dialog-content {
+    width: 368px;
+    flex: 1 1 auto;
+    display: flex;
+    position: relative;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
 }
 
 .forward-dialog-message {
     min-height: 48px;
     max-height: 96px;
-}
-
-.forward-dialog-message-border {
-    border-top: 1px solid;
 }
 
 #forward-dialog-message,

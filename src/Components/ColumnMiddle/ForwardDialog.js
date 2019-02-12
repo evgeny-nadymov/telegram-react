@@ -17,7 +17,6 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '@material-ui/icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
@@ -39,7 +38,12 @@ const styles = theme => ({
         color: theme.palette.text.primary
     },
     dialogContent: {
-        padding: '6px 24px'
+        padding: 0,
+        display: 'flex',
+        position: 'relative'
+    },
+    searchList: {
+        background: theme.palette.background.paper
     },
     ...borderStyle(theme)
 });
@@ -228,9 +232,17 @@ class ForwardDialog extends React.Component {
     };
 
     handleSearch = () => {
+        const { chatIds, savedMessages } = this.state;
+
         const innerText = this.getInnerText(this.searchRef.current);
 
-        this.setState({ searchText: innerText });
+        const chatsSource = savedMessages
+            ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
+            : chatIds;
+
+        const searchResults = chatsSource.filter(x => this.hasSearchText(x, innerText));
+
+        this.setState({ searchText: innerText, searchResults: searchResults });
     };
 
     hasSearchText = (chatId, searchText) => {
@@ -258,35 +270,33 @@ class ForwardDialog extends React.Component {
 
     render() {
         const { classes, t } = this.props;
-        const { chatIds, searchText, savedMessages, publicMessageLink } = this.state;
+        const { chatIds, searchText, searchResults, savedMessages, publicMessageLink } = this.state;
 
         const chatsSource = savedMessages
             ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
             : chatIds;
 
-        const chats = searchText
-            ? chatsSource
-                  .filter(x => this.hasSearchText(x, searchText))
-                  .map(x => (
-                      <ForwardTargetChat
-                          key={x}
-                          chatId={x}
-                          selected={this.targetChats.has(x)}
-                          onSelect={() => this.handleChangeSelection(x)}
-                      />
-                  ))
-            : chatsSource.map(x => (
-                  <ForwardTargetChat
-                      key={x}
-                      chatId={x}
-                      selected={this.targetChats.has(x)}
-                      onSelect={() => this.handleChangeSelection(x)}
-                  />
-              ));
+        const chats = chatsSource.map(x => (
+            <ForwardTargetChat
+                key={x}
+                chatId={x}
+                selected={this.targetChats.has(x)}
+                onSelect={() => this.handleChangeSelection(x)}
+            />
+        ));
+
+        const foundChats = (searchResults || []).map(x => (
+            <ForwardTargetChat
+                key={x}
+                chatId={x}
+                selected={this.targetChats.has(x)}
+                onSelect={() => this.handleChangeSelection(x)}
+            />
+        ));
 
         return (
             <Dialog
-                open={true}
+                open
                 onClose={this.handleClose}
                 aria-labelledby='forward-dialog-title'
                 aria-describedby='forward-dialog-description'
@@ -300,11 +310,12 @@ class ForwardDialog extends React.Component {
                     placeholder={t('Search')}
                     onKeyUp={this.handleSearch}
                 />
-                <div className={classNames(classes.borderColor, 'forward-dialog-message-border')} />
-                <DialogContent className={classes.dialogContent}>
+                <div className={classNames(classes.borderColor, 'forward-dialog-content')}>
                     <div className='forward-dialog-list'>{chats}</div>
-                </DialogContent>
-                <div className={classNames(classes.borderColor, 'forward-dialog-message-border')} />
+                    {searchText && (
+                        <div className={classNames(classes.searchList, 'forward-dialog-search-list')}>{foundChats}</div>
+                    )}
+                </div>
                 {this.targetChats.size > 0 && (
                     <div
                         ref={this.messageRef}
