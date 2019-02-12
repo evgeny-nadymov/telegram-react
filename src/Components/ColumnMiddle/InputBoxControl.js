@@ -453,6 +453,7 @@ class InputBoxControl extends Component {
                             <div
                                 id='inputbox-message'
                                 ref={this.newMessage}
+                                key={new Date()}
                                 placeholder={t('Message')}
                                 contentEditable
                                 suppressContentEditableWarning

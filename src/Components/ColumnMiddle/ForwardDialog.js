@@ -11,6 +11,7 @@ import copy from 'copy-to-clipboard';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withStyles } from '@material-ui/core';
+import { withNamespaces } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -115,12 +116,14 @@ class ForwardDialog extends React.Component {
     };
 
     handleCopyLink = () => {
+        const { t } = this.props;
         const { publicMessageLink } = this.state;
+
         if (!publicMessageLink) return;
         if (!publicMessageLink.link) return;
 
         const key = `copy_link_${publicMessageLink.link}`;
-        const message = 'Link copied';
+        const message = t('LinkCopied');
         const action = null;
 
         copy(publicMessageLink.link);
@@ -221,7 +224,7 @@ class ForwardDialog extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { chatIds, savedMessages, publicMessageLink } = this.state;
 
         let chats = savedMessages
@@ -244,7 +247,7 @@ class ForwardDialog extends React.Component {
                 aria-labelledby='forward-dialog-title'
                 aria-describedby='forward-dialog-description'
                 className={classes.dialog}>
-                <DialogTitle id='forward-dialog-title'>Share to</DialogTitle>
+                <DialogTitle id='forward-dialog-title'>{t('ShareSendTo')}</DialogTitle>
                 <DialogContent>
                     <div className='forward-dialog-list'>{chats}</div>
                 </DialogContent>
@@ -255,21 +258,21 @@ class ForwardDialog extends React.Component {
                         id='forward-dialog-message'
                         contentEditable
                         suppressContentEditableWarning
-                        placeholder='Type a message'
+                        placeholder={t('ShareComment')}
                     />
                 )}
                 <DialogActions>
                     <Button onClick={this.handleClose} color='primary'>
-                        Cancel
+                        {t('Cancel')}
                     </Button>
                     {this.targetChats.size > 0 && (
                         <Button onClick={this.handleSend} color='primary' autoFocus>
-                            Send
+                            {t('Send')}
                         </Button>
                     )}
                     {!this.targetChats.size && publicMessageLink && (
                         <Button onClick={this.handleCopyLink} color='primary'>
-                            Copy share link
+                            {t('CopyLink')}
                         </Button>
                     )}
                 </DialogActions>
@@ -285,6 +288,7 @@ ForwardDialog.PropTypes = {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
+    withNamespaces(),
     withSnackbar
 );
 
