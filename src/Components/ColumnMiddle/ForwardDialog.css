@@ -41,8 +41,7 @@
     max-height: 96px;
 }
 
-#forward-dialog-message,
-#forward-dialog-search {
+#forward-dialog-message {
     box-shadow: 0 0 0 0;
     max-height: 150px;
     max-width: 324px;
@@ -53,6 +52,25 @@
     white-space: pre-wrap;
     word-wrap: break-word;
     word-break: break-word;
+}
+
+#forward-dialog-search {
+    box-shadow: 0 0 0 0;
+    max-height: 150px;
+    max-width: 324px;
+    min-height: 24px;
+    padding: 12px 24px 12px 24px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+[contenteditable='true']#forward-dialog-search br {
+    display: none;
+}
+
+[contenteditable='true']#forward-dialog-search * {
+    display: inline;
+    white-space: nowrap;
 }
 
 #forward-dialog-message:empty::before,
