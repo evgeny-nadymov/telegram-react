@@ -12,10 +12,12 @@
     flex-direction: column;
     align-items: center;
     cursor: pointer;
+    padding: 6px 0;
 }
 
 .forward-target-chat-tile {
     position: relative;
+    height: 48px;
 }
 
 .forward-target-chat-selected .forward-target-chat-tile-wrapper {
@@ -39,8 +41,9 @@
 .forward-target-chat-title {
     max-width: 80px;
     font-size: 12px;
-    margin: 6px;
-    height: 40px;
+    line-height: normal;
+    margin: 6px 0 0;
+    height: 32px;
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;

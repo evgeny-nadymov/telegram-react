@@ -21,7 +21,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '@material-ui/icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
-import { canSendMessages, getChatUsername, isSupergroup } from '../../Utils/Chat';
+import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
@@ -38,6 +38,9 @@ const styles = theme => ({
     dialog: {
         color: theme.palette.text.primary
     },
+    dialogContent: {
+        padding: '6px 24px'
+    },
     ...borderStyle(theme)
 });
 
@@ -50,6 +53,7 @@ class ForwardDialog extends React.Component {
             savedMessages: null
         };
 
+        this.searchRef = React.createRef();
         this.messageRef = React.createRef();
 
         this.targetChats = new Map();
@@ -164,7 +168,7 @@ class ForwardDialog extends React.Component {
         if (!chatId) return;
         if (!messageIds || !messageIds.length) return;
 
-        const message = this.getMessage();
+        const message = this.getInnerText(this.messageRef.current);
 
         this.targetChats.forEach(targetChatId => {
             if (message) {
@@ -212,33 +216,73 @@ class ForwardDialog extends React.Component {
         this.forceUpdate();
     };
 
-    getMessage = () => {
-        const innerText = this.messageRef.current.innerText;
-        const innerHTML = this.messageRef.current.innerHTML;
+    getInnerText = div => {
+        const innerText = div.innerText;
+        const innerHTML = div.innerHTML;
 
         if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.messageRef.current.innerHTML = '';
+            div.innerHTML = '';
         }
 
         return innerText;
     };
 
+    handleSearch = () => {
+        const innerText = this.getInnerText(this.searchRef.current);
+
+        this.setState({ searchText: innerText });
+    };
+
+    hasSearchText = (chatId, searchText) => {
+        const { savedMessages } = this.state;
+
+        if (savedMessages && chatId === savedMessages.id) {
+            const title = getChatTitle(chatId, true) || '';
+            if (title.toLocaleLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
+                return true;
+            }
+        }
+
+        const title1 = getChatTitle(chatId, false) || '';
+        if (title1.toLocaleLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
+            return true;
+        }
+
+        const username = getChatUsername(chatId) || '';
+        if (username.toLocaleLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
+            return true;
+        }
+
+        return false;
+    };
+
     render() {
         const { classes, t } = this.props;
-        const { chatIds, savedMessages, publicMessageLink } = this.state;
+        const { chatIds, searchText, savedMessages, publicMessageLink } = this.state;
 
-        let chats = savedMessages
+        const chatsSource = savedMessages
             ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
             : chatIds;
 
-        chats = chats.map(x => (
-            <ForwardTargetChat
-                key={x}
-                chatId={x}
-                selected={this.targetChats.has(x)}
-                onSelect={() => this.handleChangeSelection(x)}
-            />
-        ));
+        const chats = searchText
+            ? chatsSource
+                  .filter(x => this.hasSearchText(x, searchText))
+                  .map(x => (
+                      <ForwardTargetChat
+                          key={x}
+                          chatId={x}
+                          selected={this.targetChats.has(x)}
+                          onSelect={() => this.handleChangeSelection(x)}
+                      />
+                  ))
+            : chatsSource.map(x => (
+                  <ForwardTargetChat
+                      key={x}
+                      chatId={x}
+                      selected={this.targetChats.has(x)}
+                      onSelect={() => this.handleChangeSelection(x)}
+                  />
+              ));
 
         return (
             <Dialog
@@ -248,10 +292,19 @@ class ForwardDialog extends React.Component {
                 aria-describedby='forward-dialog-description'
                 className={classes.dialog}>
                 <DialogTitle id='forward-dialog-title'>{t('ShareSendTo')}</DialogTitle>
-                <DialogContent>
+                <div
+                    ref={this.searchRef}
+                    id='forward-dialog-search'
+                    contentEditable
+                    suppressContentEditableWarning
+                    placeholder={t('Search')}
+                    onKeyUp={this.handleSearch}
+                />
+                <div className={classNames(classes.borderColor, 'forward-dialog-message-border')} />
+                <DialogContent className={classes.dialogContent}>
                     <div className='forward-dialog-list'>{chats}</div>
                 </DialogContent>
-                <div className={classNames(classes.borderColor, 'forward-dialog-message-top-border')} />
+                <div className={classNames(classes.borderColor, 'forward-dialog-message-border')} />
                 {this.targetChats.size > 0 && (
                     <div
                         ref={this.messageRef}

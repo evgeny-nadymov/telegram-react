@@ -7,6 +7,7 @@
 
 .forward-dialog-list {
     width: 320px;
+    height: 640px;
     display: flex;
     flex-wrap: wrap;
 }
@@ -16,11 +17,12 @@
     max-height: 96px;
 }
 
-.forward-dialog-message-top-border {
+.forward-dialog-message-border {
     border-top: 1px solid;
 }
 
-#forward-dialog-message {
+#forward-dialog-message,
+#forward-dialog-search {
     box-shadow: 0 0 0 0;
     max-height: 150px;
     max-width: 324px;
@@ -33,18 +35,22 @@
     word-break: break-word;
 }
 
-#forward-dialog-message:empty::before {
+#forward-dialog-message:empty::before,
+#forward-dialog-search:empty::before {
     content: attr(placeholder);
     color: #8e9396;
     pointer-events: none;
 }
 
 #forward-dialog-message:empty:active::before,
-#forward-dialog-message:empty:focus::before {
+#forward-dialog-message:empty:focus::before,
+#forward-dialog-search:empty:active::before,
+#forward-dialog-search:empty:focus::before {
     opacity: 0.75;
 }
 
-#forward-dialog-message:focus {
+#forward-dialog-message:focus,
+#forward-dialog-search:focus {
     border: 0;
     outline: none;
     box-shadow: 0 0 0 0;

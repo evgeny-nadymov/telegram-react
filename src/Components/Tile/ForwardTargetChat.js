@@ -8,10 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ChatTileControl from './ChatTileControl';
-import './ForwardTargetChat.css';
-import { getChatShortTitle } from '../../Utils/Chat';
 import { withStyles } from '@material-ui/core';
+import ChatTileControl from './ChatTileControl';
+import { getChatShortTitle } from '../../Utils/Chat';
+import './ForwardTargetChat.css';
 
 const styles = theme => ({
     border: {
