@@ -6,14 +6,16 @@
  */
 
 .forward-dialog-list {
+    max-width: 336px;
     display: flex;
     flex-wrap: wrap;
     flex: 1 1 auto;
     padding: 12px 24px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .forward-dialog-search-list {
+    max-width: 336px;
     position: absolute;
     left: 0;
     right: 0;
@@ -22,18 +24,19 @@
     z-index: 2;
     display: flex;
     flex-wrap: wrap;
+    flex: 1 1 auto;
     align-content: start;
     padding: 12px 24px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .forward-dialog-content {
-    width: 368px;
     flex: 1 1 auto;
     display: flex;
     position: relative;
     border-top: 1px solid;
     border-bottom: 1px solid;
+    overflow-y: auto;
 }
 
 .forward-dialog-message {

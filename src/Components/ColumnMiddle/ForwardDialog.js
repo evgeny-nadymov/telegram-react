@@ -22,6 +22,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
+import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
 import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
@@ -65,6 +66,8 @@ class ForwardDialog extends React.Component {
 
     componentDidMount() {
         this.loadContent();
+
+        this.setSearchFocus();
     }
 
     loadContent = async () => {
@@ -234,13 +237,25 @@ class ForwardDialog extends React.Component {
     handleSearch = () => {
         const { chatIds, savedMessages } = this.state;
 
-        const innerText = this.getInnerText(this.searchRef.current);
+        const innerText = this.getInnerText(this.searchRef.current).trim();
+        if (!innerText) {
+            this.setState({ searchText: null, searchResults: [] });
+            return;
+        }
+
+        const latinText = getLatinInput(innerText);
+        const cyrillicText = getCyrillicInput(innerText);
 
         const chatsSource = savedMessages
             ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
             : chatIds;
 
-        const searchResults = chatsSource.filter(x => this.hasSearchText(x, innerText));
+        const searchResults = chatsSource.filter(
+            x =>
+                this.hasSearchText(x, innerText) ||
+                (latinText && this.hasSearchText(x, latinText)) ||
+                (cyrillicText && this.hasSearchText(x, cyrillicText))
+        );
 
         this.setState({ searchText: innerText, searchResults: searchResults });
     };
@@ -266,6 +281,16 @@ class ForwardDialog extends React.Component {
         }
 
         return false;
+    };
+
+    setSearchFocus = () => {
+        setTimeout(() => {
+            if (this.searchRef.current) {
+                const element = this.searchRef.current;
+
+                element.focus();
+            }
+        }, 100);
     };
 
     render() {

@@ -17,11 +17,15 @@
 
 .forward-target-chat-tile {
     position: relative;
+}
+
+.forward-target-chat-tile-wrapper {
     height: 48px;
+    transition: transform 0.2s cubic-bezier(0.5, 2, 0.6, 0.6);
 }
 
 .forward-target-chat-selected .forward-target-chat-tile-wrapper {
-    transform: scaleX(0.85) scaleY(0.85);
+    transform: scaleX(0.834) scaleY(0.834);
 }
 
 .forward-target-chat-selection {
