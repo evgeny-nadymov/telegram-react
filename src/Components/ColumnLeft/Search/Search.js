@@ -19,6 +19,7 @@ import FoundMessage from '../../Tile/FoundMessage';
 import SearchCaption from './SearchCaption';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterMessages } from '../../../Utils/Message';
+import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { USERNAME_LENGTH_MIN } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import FileStore from '../../../Stores/FileStore';
@@ -99,6 +100,25 @@ class Search extends React.Component {
         }
     };
 
+    concatSearchResults = results => {
+        const arr = [];
+        const map = new Map();
+
+        for (let i = 0; i < results.length; i++) {
+            let result = results[i].chat_ids;
+            if (result) {
+                for (let j = 0; j < result.length; j++) {
+                    if (!map.has(result[j])) {
+                        map.set(result[j], result[j]);
+                        arr.push(result[j]);
+                    }
+                }
+            }
+        }
+
+        return arr;
+    };
+
     searchText = async text => {
         this.sessionId = new Date();
         this.text = text;
@@ -109,11 +129,36 @@ class Search extends React.Component {
         const { savedMessages } = this.state;
 
         if (!chatId) {
-            const local = await TdLibController.send({
+            const promises = [];
+            const localPromise = TdLibController.send({
                 '@type': 'searchChats',
                 query: text,
                 limit: 100
             });
+            promises.push(localPromise);
+
+            const latinText = getLatinInput(text);
+            if (latinText) {
+                const latinLocalPromise = TdLibController.send({
+                    '@type': 'searchChats',
+                    query: latinText,
+                    limit: 100
+                });
+                promises.push(latinLocalPromise);
+            }
+
+            const cyrillicText = getCyrillicInput(text);
+            if (cyrillicText) {
+                const cyrillicLocalPromise = TdLibController.send({
+                    '@type': 'searchChats',
+                    query: cyrillicText,
+                    limit: 100
+                });
+                promises.push(cyrillicLocalPromise);
+            }
+
+            const results = await Promise.all(promises.map(x => x.catch(e => null)));
+            const local = this.concatSearchResults(results);
 
             if (sessionId !== this.sessionId) {
                 return;
@@ -121,8 +166,11 @@ class Search extends React.Component {
 
             if (savedMessages) {
                 const savedMessageString = 'SAVED MESSAGES';
-                if (savedMessageString.indexOf(text.toUpperCase()) !== -1) {
-                    local.chat_ids.splice(0, 0, savedMessages.id);
+                if (
+                    savedMessageString.indexOf(text.toUpperCase()) !== -1 ||
+                    (latinText && savedMessageString.indexOf(latinText.toUpperCase()) !== -1)
+                ) {
+                    local.splice(0, 0, savedMessages.id);
                 }
             }
 
@@ -135,13 +183,27 @@ class Search extends React.Component {
             });
 
             store = FileStore.getStore();
-            loadChatsContent(store, local.chat_ids);
+            loadChatsContent(store, local);
 
             if (text.length >= USERNAME_LENGTH_MIN) {
-                const global = await TdLibController.send({
+                const globalPromises = [];
+
+                const globalPromise = TdLibController.send({
                     '@type': 'searchPublicChats',
                     query: text
                 });
+                globalPromises.push(globalPromise);
+
+                if (latinText) {
+                    const globalLatinPromise = TdLibController.send({
+                        '@type': 'searchPublicChats',
+                        query: latinText
+                    });
+                    globalPromises.push(globalLatinPromise);
+                }
+
+                const globalResults = await Promise.all(globalPromises.map(x => x.catch(e => null)));
+                const global = this.concatSearchResults(globalResults);
 
                 if (sessionId !== this.sessionId) {
                     return;
@@ -152,7 +214,7 @@ class Search extends React.Component {
                 });
 
                 store = FileStore.getStore();
-                loadChatsContent(store, global.chat_ids);
+                loadChatsContent(store, global);
             }
         }
 
@@ -423,27 +485,21 @@ class Search extends React.Component {
                   ))
                 : [];
 
-        const localChats =
-            local && local.chat_ids
-                ? local.chat_ids.map(x => (
-                      <RecentlyFoundChat
-                          key={x}
-                          chatId={x}
-                          onClick={() => this.handleSelectMessage(x, null, true, false)}
-                      />
-                  ))
-                : [];
+        const localChats = local
+            ? local.map(x => (
+                  <RecentlyFoundChat
+                      key={x}
+                      chatId={x}
+                      onClick={() => this.handleSelectMessage(x, null, true, false)}
+                  />
+              ))
+            : [];
 
-        const globalChats =
-            global && global.chat_ids
-                ? global.chat_ids.map(x => (
-                      <FoundPublicChat
-                          key={x}
-                          chatId={x}
-                          onClick={() => this.handleSelectMessage(x, null, true, true)}
-                      />
-                  ))
-                : [];
+        const globalChats = global
+            ? global.map(x => (
+                  <FoundPublicChat key={x} chatId={x} onClick={() => this.handleSelectMessage(x, null, true, true)} />
+              ))
+            : [];
 
         const globalMessages =
             messages && messages.messages
