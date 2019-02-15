@@ -198,6 +198,25 @@ function getPhotoFile(message, size = PHOTO_SIZE) {
     return [0, '', ''];
 }
 
+function getVideoFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    if (!message.content || message.content['@type'] !== 'messageVideo') {
+        return [0, '', ''];
+    }
+
+    if (message.content.video) {
+        let file = message.content.video.video;
+        if (file && file.remote.id) {
+            return [file.id, file.remote.id, file.idb_key];
+        }
+    }
+
+    return [0, '', ''];
+}
+
 function getContactFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -460,7 +479,7 @@ function loadMessageContents(store, messages) {
                         break;
                     }
                     case 'messageVideo': {
-                        const [id, pid, idb_key] = getDocumentThumbnailFile(message);
+                        const [id, pid, idb_key] = getVideoThumbnailFile(message);
                         if (pid) {
                             const obj = message.content.video.thumbnail.photo;
                             if (!obj.blob) {
@@ -686,6 +705,26 @@ function saveOrDownload(file, fileName, obj) {
     }
 }
 
+function getMediaPreviewFile(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return [0, 0, null];
+
+    const { content } = message;
+    if (!content) return [0, 0, null];
+
+    switch (content['@type']) {
+        case 'messagePhoto': {
+            return getMediaFile(chatId, messageId, PHOTO_SIZE);
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (video.thumbnail) {
+                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+            }
+        }
+    }
+}
+
 function getMediaFile(chatId, messageId, size) {
     if (!size) return [0, 0, null];
     const message = MessageStore.get(chatId, messageId);
@@ -702,6 +741,12 @@ function getMediaFile(chatId, messageId, size) {
                 if (photoSize) {
                     return [photoSize.width, photoSize.height, photoSize.photo];
                 }
+            }
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (video) {
+                return [video.width, video.height, video.video];
             }
         }
     }
@@ -752,6 +797,29 @@ function loadMediaViewerContent(messages) {
                                     () => FileStore.getRemoteFile(id, 1, localMessage)
                                 );
                             }
+                        }
+                    }
+
+                    break;
+                }
+                case 'messageVideo': {
+                    // preview
+
+                    // video
+                    const [id, pid, idb_key] = getVideoFile(message);
+                    if (pid) {
+                        let file = message.content.video.video;
+                        let blob = file.blob || FileStore.getBlob(file.id);
+                        if (!blob) {
+                            const localMessage = message;
+                            FileStore.getLocalFile(
+                                store,
+                                file,
+                                idb_key,
+                                null,
+                                () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
+                                () => FileStore.getRemoteFile(id, 1, localMessage)
+                            );
                         }
                     }
 
@@ -930,6 +998,8 @@ export {
     getStickerFile,
     getPhotoFile,
     getPhotoPreviewFile,
+    getVideoFile,
+    getVideoThumbnailFile,
     getDocumentThumbnailFile,
     getWebPageFile,
     saveData,
@@ -945,5 +1015,6 @@ export {
     loadUserContent,
     loadChatContent,
     saveOrDownload,
-    getMediaFile
+    getMediaFile,
+    getMediaPreviewFile
 };

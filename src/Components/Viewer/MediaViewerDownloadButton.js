@@ -36,15 +36,17 @@ class MediaViewerDownloadButton extends React.Component {
         FileStore.on('clientUpdateUserBlob', this.onClientUpdateUserBlob);
         FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.on('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
         FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
     }
 
-    onClientUpdateUserBlob = (update) => {
+    onClientUpdateUserBlob = update => {
         const { fileId } = this.state;
 
         if (fileId === update.fileId) {
@@ -54,7 +56,7 @@ class MediaViewerDownloadButton extends React.Component {
         }
     };
 
-    onClientUpdateChatBlob = (update) => {
+    onClientUpdateChatBlob = update => {
         const { fileId } = this.state;
 
         if (fileId === update.fileId) {
@@ -64,7 +66,7 @@ class MediaViewerDownloadButton extends React.Component {
         }
     };
 
-    onClientUpdatePhotoBlob = (update) => {
+    onClientUpdatePhotoBlob = update => {
         const { fileId } = this.state;
 
         if (fileId === update.fileId) {
@@ -74,11 +76,21 @@ class MediaViewerDownloadButton extends React.Component {
         }
     };
 
-    static saveDisabled = (fileId) => {
+    onClientUpdateVideoBlob = update => {
+        const { fileId } = this.state;
+
+        if (fileId === update.fileId) {
+            this.setState({
+                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
+            });
+        }
+    };
+
+    static saveDisabled = fileId => {
         return !Boolean(FileStore.getBlob(fileId));
     };
 
-    handleClick = (event) => {
+    handleClick = event => {
         event.stopPropagation();
 
         const { onClick } = this.props;
@@ -92,10 +104,7 @@ class MediaViewerDownloadButton extends React.Component {
         const { disabled } = this.state;
 
         return (
-            <MediaViewerFooterButton
-                disabled={disabled}
-                title='Save'
-                onClick={this.handleClick}>
+            <MediaViewerFooterButton disabled={disabled} title='Save' onClick={this.handleClick}>
                 <div className='media-viewer-save-icon' />
             </MediaViewerFooterButton>
         );

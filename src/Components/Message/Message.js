@@ -243,6 +243,35 @@ class Message extends Component {
 
                 break;
             }
+            case 'messageVideo': {
+                const { video } = message.content;
+                if (video) {
+                    let file = video.video;
+                    if (file) {
+                        file = FileStore.get(file.id);
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            }
+                            // else {
+                            //     saveOrDownload(file, document.file_name, message);
+                            // }
+                        }
+                    }
+                }
+
+                // open media viewer
+                ApplicationStore.setMediaViewerContent({
+                    chatId: chatId,
+                    messageId: messageId
+                });
+
+                break;
+            }
         }
     };
 

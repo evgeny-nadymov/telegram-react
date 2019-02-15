@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import CloseIcon from '@material-ui/icons/Close';
-import { IconButton } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
 import ChatControl from '../../Tile/ChatControl';
 import TopChat from '../../Tile/TopChat';
@@ -117,13 +117,9 @@ class Search extends React.Component {
             }
         }
 
-        console.log('search before', arr);
-
         arr.sort((a, b) => {
             return orderCompare(ChatStore.get(b).order, ChatStore.get(a).order);
         });
-
-        console.log('search after', arr);
 
         return arr;
     };

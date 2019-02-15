@@ -4,3 +4,48 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.video {
+    border-radius: 6px;
+    transform: translateZ(0);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    color: white;
+}
+
+.video-preview {
+    background: aliceblue;
+    display: block;
+    border-radius: 6px;
+    user-select: none;
+}
+
+.video-preview-blurred {
+    filter: blur(2px);
+}
+
+.video-play {
+    width: 48px;
+    height: 48px;
+    background: #00000066;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.video-duration {
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    border-radius: 13px;
+    padding: 0 5px;
+    background: #00000066;
+    font-size: 13px;
+    line-height: normal;
+    user-select: none;
+}

@@ -19,6 +19,7 @@ import { getServiceMessageContent } from './ServiceMessage';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
+import MessageStore from '../Stores/MessageStore';
 
 function getTitle(message) {
     if (!message) return null;
@@ -465,6 +466,13 @@ function getVenueId(location) {
     return `loc=${latitude},${longitude}&size=${LOCATION_WIDTH},${LOCATION_HEIGHT}&scale=${LOCATION_SCALE}&zoom=${LOCATION_ZOOM}`;
 }
 
+function isVideoMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    return message.content['@type'] === 'messageVideo';
+}
+
 export {
     getTitle,
     getText,
@@ -479,6 +487,7 @@ export {
     getSenderUserId,
     filterMessages,
     isMediaContent,
+    isVideoMessage,
     getLocationId,
     getVenueId
 };

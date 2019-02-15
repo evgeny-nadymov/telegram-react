@@ -25,7 +25,7 @@ import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getSize } from '../../Utils/Common';
 import { getMediaFile, loadMediaViewerContent, preloadMediaViewerContent, saveOrDownload } from '../../Utils/File';
-import { filterMessages, isMediaContent } from '../../Utils/Message';
+import { filterMessages, isMediaContent, isVideoMessage } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
@@ -319,21 +319,38 @@ class MediaViewer extends React.Component {
     };
 
     handleSave = () => {
-        const { chatId, messageId } = this.props;
+        const { chatId } = this.props;
         const { currentMessageId } = this.state;
 
         const message = MessageStore.get(chatId, currentMessageId);
         if (!message) return;
-        if (!message.content) return;
 
-        const { photo } = message.content;
-        if (photo) {
-            const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-            if (photoSize) {
-                const file = photoSize.photo;
-                if (file) {
-                    saveOrDownload(file, file.id + '.jpg', message);
+        const { content } = message;
+        if (!content) return;
+
+        switch (content['@type']) {
+            case 'messagePhoto': {
+                const { photo } = content;
+                if (photo) {
+                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                    if (photoSize) {
+                        const file = photoSize.photo;
+                        if (file) {
+                            saveOrDownload(file, file.id + '.jpg', message);
+                        }
+                    }
                 }
+                break;
+            }
+            case 'messageVideo': {
+                const { video } = content;
+                if (video) {
+                    const file = video.video;
+                    if (file) {
+                        saveOrDownload(file, video.file_name || file.id + '.mp4', message);
+                    }
+                }
+                break;
             }
         }
     };
@@ -624,6 +641,7 @@ class MediaViewer extends React.Component {
         const [width, height, file] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
 
         const fileId = file ? file.id : 0;
+        const isVideo = isVideoMessage(chatId, currentMessageId);
 
         return (
             <div className='media-viewer'>
@@ -657,7 +675,7 @@ class MediaViewer extends React.Component {
                 <div className='media-viewer-footer'>
                     <MediaViewerControl chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
-                        title='Photo'
+                        title={isVideo ? 'Video' : 'Photo'}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
                     <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>

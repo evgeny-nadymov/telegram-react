@@ -200,6 +200,40 @@ class FileStore extends EventEmitter {
                                         }
                                         break;
                                     }
+                                    case 'messageVideo': {
+                                        const { video } = obj.content;
+
+                                        if (video.thumbnail) {
+                                            let source = video.thumbnail.photo;
+                                            if (source && source.id === file.id) {
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    arr,
+                                                    () => this.updateVideoThumbnailBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj)
+                                                );
+                                                break;
+                                            }
+                                        }
+
+                                        if (video.video) {
+                                            let source = video.video;
+                                            if (source && source.id === file.id) {
+                                                this.getLocalFile(
+                                                    store,
+                                                    source,
+                                                    idb_key,
+                                                    arr,
+                                                    () => this.updateVideoBlob(obj.chat_id, obj.id, file.id),
+                                                    () => this.getRemoteFile(file.id, 1, obj)
+                                                );
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                    }
                                     case 'messageDocument': {
                                         const { document } = obj.content;
 
@@ -526,6 +560,15 @@ class FileStore extends EventEmitter {
     updatePhotoBlob = (chatId, messageId, fileId) => {
         // console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdatePhotoBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateVideoBlob = (chatId, messageId, fileId) => {
+        // console.log(`clientUpdatePhotoBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
+        this.emit('clientUpdateVideoBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId

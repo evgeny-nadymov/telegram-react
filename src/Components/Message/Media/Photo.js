@@ -55,7 +55,6 @@ class Photo extends React.Component {
         const file = photoSize.photo;
         const blob = FileStore.getBlob(file.id) || file.blob;
 
-        let className = 'photo-img';
         let src = '';
         try {
             src = FileStore.getBlobUrl(blob);
@@ -82,7 +81,7 @@ class Photo extends React.Component {
 
         return (
             <div className='photo' style={fitPhotoSize} onClick={openMedia}>
-                <img className={className} style={fitPhotoSize} src={src} alt='' />
+                <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
                 <FileProgress file={file} showCancel />
             </div>
         );

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import FileProgress from '../../Viewer/FileProgress';
-import { getFitSize, getSize } from '../../../Utils/Common';
+import classNames from 'classnames';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import { getFitSize, getVideoDurationString } from '../../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Video.css';
@@ -17,43 +18,60 @@ class Video extends React.Component {
     constructor(props) {
         super(props);
 
-        const { message, size } = props;
-        const photoSize = {
-            width: message.content.video.width,
-            height: message.content.video.height
-        };
+        const { message } = props;
+        const { video } = message.content;
+
         this.state = {
-            photoSize: photoSize
+            width: video.width,
+            height: video.height,
+            duration: video.duration,
+            thumbnail: video.thumbnail
         };
     }
 
+    componentDidMount() {
+        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
+    }
+
+    componentWillUnmount() {
+        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
+    }
+
+    onClientUpdateVideoBlob = update => {
+        const { thumbnail } = this.state;
+        const { fileId } = update;
+
+        if (!thumbnail) return;
+
+        if (thumbnail.photo && thumbnail.photo.id === fileId) {
+            this.forceUpdate();
+        }
+    };
+
     render() {
-        const { displaySize, message, openMedia } = this.props;
-        const { photoSize } = this.state;
+        const { displaySize, openMedia } = this.props;
+        const { thumbnail, duration } = this.state;
 
-        if (!photoSize) return null;
-
-        const fitPhotoSize = getFitSize(photoSize, displaySize);
+        const fitPhotoSize = getFitSize(thumbnail, displaySize);
         if (!fitPhotoSize) return null;
-
-        const { video } = message.content;
-        const { thumbnail } = video;
 
         const file = thumbnail ? thumbnail.photo : null;
         const blob = FileStore.getBlob(file.id) || file.blob;
-
-        let className = 'photo-img';
-        let src = '';
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(`Video.render photo with error ${error}`);
-        }
+        const src = FileStore.getBlobUrl(blob);
+        const isBlurred = thumbnail && Math.max(thumbnail.width, thumbnail.height) < 320;
 
         return (
-            <div className='photo' style={fitPhotoSize} onClick={openMedia}>
-                <img className={className} style={fitPhotoSize} src={src} alt='' />
-                <FileProgress file={file} showCancel />
+            <div className='video' style={fitPhotoSize} onClick={openMedia}>
+                <img
+                    className={classNames('video-preview', { 'video-preview-blurred': isBlurred })}
+                    style={fitPhotoSize}
+                    src={src}
+                    alt=''
+                />
+                <div className='video-play'>
+                    <PlayArrowIcon />
+                </div>
+                <div className='video-duration'>{getVideoDurationString(duration)}</div>
             </div>
         );
     }

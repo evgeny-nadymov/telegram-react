@@ -5,10 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {PHOTO_SIZE} from '../Constants';
+import { PHOTO_SIZE } from '../Constants';
 import { formatNumber } from 'libphonenumber-js';
 
-function orderCompare(order1, order2){
+function orderCompare(order1, order2) {
     let diff = order1.length - order2.length;
     if (diff !== 0) return diff < 0 ? -1 : 1;
     if (order1 === order2) return 0;
@@ -16,7 +16,7 @@ function orderCompare(order1, order2){
     return order1 > order2 ? 1 : -1;
 }
 
-function getPhotoSize(sizes){
+function getPhotoSize(sizes) {
     return getSize(sizes, PHOTO_SIZE);
 }
 
@@ -32,13 +32,13 @@ function getSize(sizes, dimension) {
     let useWidth = sizes[0].width >= sizes[0].height;
     let diff = Math.abs(dimension - (useWidth ? sizes[0].width : sizes[0].height));
     let index = 0;
-    for (let i = 1; i < sizes.length; i++){
-        if (sizes[i].type === 'i' && !sizes[i].photo.idb_key){
+    for (let i = 1; i < sizes.length; i++) {
+        if (sizes[i].type === 'i' && !sizes[i].photo.idb_key) {
             continue;
         }
 
         let currDiff = Math.abs(dimension - (useWidth ? sizes[i].width : sizes[i].height));
-        if (currDiff < diff){
+        if (currDiff < diff) {
             index = i;
             currDiff = diff;
         }
@@ -50,25 +50,26 @@ function getSize(sizes, dimension) {
 function getFitSize(size, max) {
     if (!size) return { width: 0, height: 0 };
 
-    if (size.width > size.height){
-        return {width: max, height: Math.floor(size.height * max / size.width)};
+    if (size.width > size.height) {
+        return { width: max, height: Math.floor((size.height * max) / size.width) };
     }
 
-    return {width: Math.floor(size.width * max / size.height), height: max};
+    return { width: Math.floor((size.width * max) / size.height), height: max };
 }
 
-function itemsInView(scrollContainerRef, itemsContainerRef){
+function itemsInView(scrollContainerRef, itemsContainerRef) {
     let scrollContainer = scrollContainerRef.current; //ReactDOM.findDOMNode(scrollContainerRef);
-    let itemsContainer =
-        itemsContainerRef ?
-            itemsContainerRef.current : //ReactDOM.findDOMNode(itemsContainerRef) :
-            scrollContainer;
+    let itemsContainer = itemsContainerRef
+        ? itemsContainerRef.current //ReactDOM.findDOMNode(itemsContainerRef) :
+        : scrollContainer;
 
     let items = [];
-    for(let i = 0; i < itemsContainer.children.length; i++){
+    for (let i = 0; i < itemsContainer.children.length; i++) {
         let child = itemsContainer.children[i];
-        if (child.offsetTop + child.offsetHeight >= scrollContainer.scrollTop
-            && child.offsetTop <= scrollContainer.scrollTop + scrollContainer.offsetHeight) {
+        if (
+            child.offsetTop + child.offsetHeight >= scrollContainer.scrollTop &&
+            child.offsetTop <= scrollContainer.scrollTop + scrollContainer.offsetHeight
+        ) {
             items.push(i);
         }
     }
@@ -120,7 +121,8 @@ function throttle(func, wait, options) {
 function debounce(func, wait, immediate) {
     var timeout;
     return function() {
-        var context = this, args = arguments;
+        var context = this,
+            args = arguments;
         var later = function() {
             timeout = null;
             if (!immediate) {
@@ -136,13 +138,12 @@ function debounce(func, wait, immediate) {
     };
 }
 
-function getFirstLetter(str){
+function getFirstLetter(str) {
     if (!str) return '';
-    for (let i = 0; i < str.length; i++){
+    for (let i = 0; i < str.length; i++) {
         if (str[i].toUpperCase() !== str[i].toLowerCase()) {
             return str[i];
-        }
-        else if (str[i] >= '0' && str[i] <= '9'){
+        } else if (str[i] >= '0' && str[i] <= '9') {
             return str[i];
         }
     }
@@ -150,30 +151,26 @@ function getFirstLetter(str){
     return '';
 }
 
-function getLetters(title){
+function getLetters(title) {
     if (!title) return null;
     if (title.length === 0) return null;
 
     let split = title.split(' ');
-    if (split.length > 1){
-        return getFirstLetter(split[0]) + getFirstLetter(split[1])
+    if (split.length > 1) {
+        return getFirstLetter(split[0]) + getFirstLetter(split[1]);
     }
 
     return null;
 }
 
-
-
-function readImageSize (file, callback) {
-
+function readImageSize(file, callback) {
     let useBlob = false;
     // Create a new FileReader instance
     // https://developer.mozilla.org/en/docs/Web/API/FileReader
     var reader = new FileReader();
 
     // Once a file is successfully readed:
-    reader.addEventListener("load", function () {
-
+    reader.addEventListener('load', function() {
         // At this point `reader.result` contains already the Base64 Data-URL
         // and we've could immediately show an image using
         // `elPreview.insertAdjacentHTML("beforeend", "<img src='"+ reader.result +"'>");`
@@ -181,9 +178,8 @@ function readImageSize (file, callback) {
         // Since the File Object does not hold the size of an image
         // we need to create a new image and assign it's src, so when
         // the image is loaded we can calculate it's width and height:
-        var image  = new Image();
-        image.addEventListener("load", function () {
-
+        var image = new Image();
+        image.addEventListener('load', function() {
             // Concatenate our HTML image info
             // var imageInfo = file.name    +' '+ // get the value of `name` from the `file` Obj
             //     image.width  +'×'+ // But get the width from our `image`
@@ -212,14 +208,13 @@ function readImageSize (file, callback) {
         });
 
         image.src = useBlob ? window.URL.createObjectURL(file) : reader.result;
-
     });
 
     // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
     reader.readAsDataURL(file);
 }
 
-function formatPhoneNumber(number){
+function formatPhoneNumber(number) {
     const unformattedNumber = number && number.startsWith('+') ? number : '+' + number;
     const formattedNumber = formatNumber(unformattedNumber, 'International');
     return formattedNumber || unformattedNumber;
@@ -233,8 +228,11 @@ function formatPhoneNumber(number){
  * @param {String} str the encoded string
  * @returns {String} the URL friendly encoded String
  */
-function Base64EncodeUrl(str){
-    return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/\=+$/, '');
+function Base64EncodeUrl(str) {
+    return str
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/\=+$/, '');
 }
 
 /**
@@ -245,22 +243,22 @@ function Base64EncodeUrl(str){
  * @param {String} str the encoded string
  * @returns {String} the URL friendly encoded String
  */
-function Base64DecodeUrl(str){
+function Base64DecodeUrl(str) {
     str = (str + '===').slice(0, str.length + (str.length % 4));
     return str.replace(/-/g, '+').replace(/_/g, '/');
 }
 
-function arrayBufferToBase64( buffer ) {
+function arrayBufferToBase64(buffer) {
     var binary = '';
-    var bytes = new Uint8Array( buffer );
+    var bytes = new Uint8Array(buffer);
     var len = bytes.byteLength;
     for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode( bytes[ i ] );
+        binary += String.fromCharCode(bytes[i]);
     }
     return Base64EncodeUrl(window.btoa(binary));
 }
 
-function isAuthorizationReady(state){
+function isAuthorizationReady(state) {
     if (!state) return false;
 
     return state['@type'] === 'authorizationStateReady';
@@ -268,6 +266,21 @@ function isAuthorizationReady(state){
 
 function between(item, first, last) {
     return item > first && item < last;
+}
+
+function getVideoDurationString(secondsTotal) {
+    let hours = Math.floor(secondsTotal / 3600);
+    let minutes = Math.floor((secondsTotal - hours * 3600) / 60);
+    let seconds = secondsTotal - hours * 3600 - minutes * 60;
+
+    if (hours > 0 && minutes < 10) {
+        minutes = '0' + minutes;
+    }
+    if (seconds < 10) {
+        seconds = '0' + seconds;
+    }
+
+    return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds;
 }
 
 export {
@@ -283,5 +296,6 @@ export {
     formatPhoneNumber,
     arrayBufferToBase64,
     isAuthorizationReady,
-    between
+    between,
+    getVideoDurationString
 };
