@@ -5,16 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.venue{
+.venue {
     display: flex;
     flex-direction: column;
 }
 
-.venue-content{
+.venue-content {
     margin-top: 6px;
 }
 
-.venue-title{
+.venue-title {
     color: #3a6d99;
     display: inline-block;
     max-width: 300px;
@@ -24,6 +24,5 @@
     text-overflow: ellipsis;
 }
 
-.venue-subtitle{
-
+.venue-subtitle {
 }

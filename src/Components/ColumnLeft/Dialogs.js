@@ -93,7 +93,7 @@ class Dialogs extends Component {
         });
     };
 
-    handleSelectChat = (chatId, openSearch) => {
+    handleSelectChat = (chatId, openSearch = false) => {
         this.handleSelectMessage(chatId, null, openSearch);
     };
 
@@ -158,7 +158,7 @@ class Dialogs extends Component {
     }
 }
 
-Search.propTypes = {
+Dialogs.propTypes = {
     onSelectChat: PropTypes.func.isRequired
 };
 

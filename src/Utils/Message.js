@@ -7,12 +7,13 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import PhotoControl from '../Components/Message/Media/PhotoControl';
-import StickerControl from '../Components/Message/Media/StickerControl';
-import LocationControl from '../Components/Message/Media/LocationControl';
-import VenueControl from '../Components/Message/Media/VenueControl';
-import ContactControl from '../Components/Message/Media/ContactControl';
-import DocumentControl from '../Components/Message/Media/DocumentControl';
+import Photo from '../Components/Message/Media/Photo';
+import Video from '../Components/Message/Media/Video';
+import Sticker from '../Components/Message/Media/Sticker';
+import Location from '../Components/Message/Media/Location';
+import Venue from '../Components/Message/Media/Venue';
+import Contact from '../Components/Message/Media/Contact';
+import Document from '../Components/Message/Media/Document';
 import { getUserFullName } from './User';
 import { getServiceMessageContent } from './ServiceMessage';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
@@ -229,17 +230,19 @@ function getMedia(message, openMedia) {
         case 'messageText':
             return null;
         case 'messagePhoto':
-            return <PhotoControl message={message} openMedia={openMedia} />;
+            return <Photo message={message} openMedia={openMedia} />;
+        case 'messageVideo':
+            return <Video message={message} openMedia={openMedia} />;
         case 'messageSticker':
-            return <StickerControl message={message} openMedia={openMedia} />;
+            return <Sticker message={message} openMedia={openMedia} />;
         case 'messageLocation':
-            return <LocationControl message={message} openMedia={openMedia} />;
+            return <Location message={message} openMedia={openMedia} />;
         case 'messageVenue':
-            return <VenueControl message={message} openMedia={openMedia} />;
+            return <Venue message={message} openMedia={openMedia} />;
         case 'messageContact':
-            return <ContactControl message={message} openMedia={openMedia} />;
+            return <Contact message={message} openMedia={openMedia} />;
         case 'messageDocument':
-            return <DocumentControl message={message} openMedia={openMedia} />;
+            return <Document message={message} openMedia={openMedia} />;
         default:
             return '[' + message.content['@type'] + ']';
     }

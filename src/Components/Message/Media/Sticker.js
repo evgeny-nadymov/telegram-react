@@ -7,12 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {getFitSize} from '../../../Utils/Common';
+import { getFitSize } from '../../../Utils/Common';
 import FileStore from '../../../Stores/FileStore';
-import './StickerControl.css';
+import './Sticker.css';
 
-class StickerControl extends React.Component {
-    constructor(props){
+class Sticker extends React.Component {
+    constructor(props) {
         super(props);
     }
 
@@ -24,21 +24,20 @@ class StickerControl extends React.Component {
         return false;
     }*/
 
-    componentDidMount(){
+    componentDidMount() {
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
-    onClientUpdateStickerBlob = (update) => {
+    onClientUpdateStickerBlob = update => {
         const { message } = this.props;
         if (!message) return;
         const { chatId, messageId } = update;
 
-        if (message.chat_id === chatId
-            && message.id === messageId) {
+        if (message.chat_id === chatId && message.id === messageId) {
             this.forceUpdate();
         }
     };
@@ -63,22 +62,19 @@ class StickerControl extends React.Component {
 
         let fitSize = getFitSize(size, 192);
         let src = '';
-        try{
+        try {
             src = FileStore.getBlobUrl(blob);
-        }
-        catch(error){
-            console.log(`StickerControl.render sticker with error ${error}`);
+        } catch (error) {
+            console.log(`Sticker.render sticker with error ${error}`);
         }
 
-        return (
-            <img className='sticker-img' width={fitSize.width} height={fitSize.height} src={src} alt=''/>
-        );
+        return <img className='sticker-img' width={fitSize.width} height={fitSize.height} src={src} alt='' />;
     }
 }
 
-StickerControl.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func.isRequired
+Sticker.propTypes = {
+    message: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired
 };
 
-export default StickerControl;
+export default Sticker;

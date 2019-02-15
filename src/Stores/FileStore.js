@@ -548,6 +548,14 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updateVideoThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVideoThumbnailBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updateDocumentThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateDocumentThumbnailBlob', {
             chatId: chatId,

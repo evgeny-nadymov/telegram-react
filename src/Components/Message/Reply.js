@@ -14,13 +14,13 @@ import { withStyles } from '@material-ui/core/styles';
 import { getContent, getTitle } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
 import MessageStore from '../../Stores/MessageStore';
-import './ReplyControl.css';
+import './Reply.css';
 
 const styles = theme => ({
     ...accentStyles(theme)
 });
 
-class ReplyControl extends React.Component {
+class Reply extends React.Component {
     componentDidMount() {
         MessageStore.on('getMessageResult', this.onGetMessageResult);
     }
@@ -81,7 +81,7 @@ class ReplyControl extends React.Component {
     }
 }
 
-ReplyControl.propTypes = {
+Reply.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number
 };
@@ -91,4 +91,4 @@ const enhance = compose(
     withNamespaces()
 );
 
-export default enhance(ReplyControl);
+export default enhance(Reply);

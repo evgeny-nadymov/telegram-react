@@ -20,10 +20,6 @@ const styles = {
 };
 
 class RecentlyFoundChat extends React.PureComponent {
-    shouldComponentUpdate(nextProps, nextState) {
-        return false;
-    }
-
     render() {
         const { chatId, onClick, classes } = this.props;
 

@@ -9,8 +9,8 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
-import ServiceMessageControl from '../Message/ServiceMessageControl';
-import MessageControl from '../Message/MessageControl';
+import ServiceMessage from '../Message/ServiceMessage';
+import Message from '../Message/Message';
 import FilesDropTarget from './FilesDropTarget';
 import { debounce, getPhotoSize, itemsInView } from '../../Utils/Common';
 import { loadChatsContent, loadMessageContents } from '../../Utils/File';
@@ -248,9 +248,9 @@ class MessagesList extends React.Component {
         let messages = [];
         let items = itemsInView(this.listRef, this.itemsRef);
         for (let i = 0; i < items.length; i++) {
-            let messageControl = this.messages[items[i]];
-            if (messageControl) {
-                messages.push(messageControl.props.message);
+            let message = this.messages[items[i]];
+            if (message) {
+                messages.push(message.props.message);
             }
         }
 
@@ -842,7 +842,7 @@ class MessagesList extends React.Component {
             ? null
             : history.map((x, i) =>
                   isServiceMessage(x) ? (
-                      <ServiceMessageControl
+                      <ServiceMessage
                           key={x.id}
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
@@ -852,7 +852,7 @@ class MessagesList extends React.Component {
                           showUnreadSeparator={separatorMessageId === x.id}
                       />
                   ) : (
-                      <MessageControl
+                      <Message
                           key={x.id}
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}

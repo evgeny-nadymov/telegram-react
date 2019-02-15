@@ -74,6 +74,35 @@ function getStickerFile(message) {
     return [0, '', ''];
 }
 
+function getVideoThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    if (!message.content || message.content['@type'] !== 'messageVideo') {
+        return [0, '', ''];
+    }
+
+    const { video } = message.content;
+    if (!video) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = video;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    if (thumbnail.photo) {
+        let file = thumbnail.photo;
+        if (file && file.remote.id) {
+            return [file.id, file.remote.id, file.idb_key];
+        }
+    }
+
+    return [0, '', ''];
+}
+
 function getDocumentThumbnailFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -83,12 +112,12 @@ function getDocumentThumbnailFile(message) {
         return [0, '', ''];
     }
 
-    let document = message.content.document;
+    const { document } = message.content;
     if (!document) {
         return [0, '', ''];
     }
 
-    let thumbnail = document.thumbnail;
+    const { thumbnail } = document;
     if (!thumbnail) {
         return [0, '', ''];
     }
@@ -426,6 +455,29 @@ function loadMessageContents(store, messages) {
                                         );
                                     }
                                 }
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageVideo': {
+                        const [id, pid, idb_key] = getDocumentThumbnailFile(message);
+                        if (pid) {
+                            const obj = message.content.video.thumbnail.photo;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () =>
+                                        FileStore.updateVideoThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            obj.id
+                                        ),
+                                    () => FileStore.getRemoteFile(id, 1, localMessage)
+                                );
                             }
                         }
                         break;

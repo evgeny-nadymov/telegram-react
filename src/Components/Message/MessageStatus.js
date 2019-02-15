@@ -9,9 +9,9 @@ import React from 'react';
 import classNames from 'classnames';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
-import './MessageStatusControl.css';
+import './MessageStatus.css';
 
-class MessageStatusControl extends React.Component {
+class MessageStatus extends React.Component {
     constructor(props) {
         super(props);
         this.handleUpdateMessageSend = this.handleUpdateMessageSend.bind(this);
@@ -40,8 +40,7 @@ class MessageStatusControl extends React.Component {
     handleUpdateChatReadOutbox(payload) {
         if (
             this.props.chatId === payload.chat_id &&
-            ((this.props.newMessageId &&
-                this.props.newMessageId <= payload.last_read_outbox_message_id) ||
+            ((this.props.newMessageId && this.props.newMessageId <= payload.last_read_outbox_message_id) ||
                 this.props.messageId <= payload.last_read_outbox_message_id)
         ) {
             this.setState({ sendingState: null, unread: false });
@@ -64,12 +63,8 @@ class MessageStatusControl extends React.Component {
                     : 'messagestatus-pending';
         }
 
-        return (
-            this.state.unread && (
-                <i className={classNames('messagestatus-icon', stateClassName)} />
-            )
-        );
+        return this.state.unread && <i className={classNames('messagestatus-icon', stateClassName)} />;
     }
 }
 
-export default MessageStatusControl;
+export default MessageStatus;

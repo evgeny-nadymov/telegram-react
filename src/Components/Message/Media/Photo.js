@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import FileProgress from '../../Viewer/FileProgress';
 import { getSize, getFitSize } from '../../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
-import './PhotoControl.css';
+import './Photo.css';
 
-class PhotoControl extends React.Component {
-    constructor(props){
+class Photo extends React.Component {
+    constructor(props) {
         super(props);
 
         const { message, size } = props;
@@ -24,14 +24,6 @@ class PhotoControl extends React.Component {
         };
     }
 
-    /*shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chat !== this.props.chat){
-            return true;
-        }
-
-        return false;
-    }*/
-
     componentDidMount() {
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
@@ -40,7 +32,7 @@ class PhotoControl extends React.Component {
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
-    onClientUpdatePhotoBlob = (update) => {
+    onClientUpdatePhotoBlob = update => {
         const { photoSize } = this.state;
         const { fileId } = update;
 
@@ -65,11 +57,10 @@ class PhotoControl extends React.Component {
 
         let className = 'photo-img';
         let src = '';
-        try{
+        try {
             src = FileStore.getBlobUrl(blob);
-        }
-        catch(error){
-            console.log(`PhotoControl.render photo with error ${error}`);
+        } catch (error) {
+            console.log(`Photo.render photo with error ${error}`);
         }
 
         // if (!blob && this.props.message.content.photo.sizes.length > 0)
@@ -83,7 +74,7 @@ class PhotoControl extends React.Component {
         //                 src = FileStore.getBlobUrl(previewFile.blob);
         //             }
         //             catch(error){
-        //                 console.log(`PhotoControl.render photo with error ${error}`);
+        //                 console.log(`Photo.render photo with error ${error}`);
         //             }
         //         }
         //     }
@@ -91,23 +82,23 @@ class PhotoControl extends React.Component {
 
         return (
             <div className='photo' style={fitPhotoSize} onClick={openMedia}>
-                <img className={className} style={fitPhotoSize} src={src} alt=''/>
-                <FileProgress file={file} showCancel/>
+                <img className={className} style={fitPhotoSize} src={src} alt='' />
+                <FileProgress file={file} showCancel />
             </div>
         );
     }
 }
 
-PhotoControl.propTypes = {
+Photo.propTypes = {
     message: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired,
     size: PropTypes.number,
     displaySize: PropTypes.number
 };
 
-PhotoControl.defaultProps = {
+Photo.defaultProps = {
     size: PHOTO_SIZE,
     displaySize: PHOTO_DISPLAY_SIZE
 };
 
-export default PhotoControl;
+export default Photo;

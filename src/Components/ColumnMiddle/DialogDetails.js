@@ -103,7 +103,7 @@ class DialogDetails extends Component {
         }
 
         this.groups = groups.map(x => {
-            return (<MessageGroupControl key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
+            return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { onSelectChat, onSelectUser } = this.props;
         const { chatId, messageId, selectedCount } = this.state;

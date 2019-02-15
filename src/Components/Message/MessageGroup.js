@@ -6,22 +6,15 @@
  */
 
 import React, { Component } from 'react';
-import MessageControl from './../Message/MessageControl';
+import Message from './../Message/Message';
 import UserTileControl from './../Tile/UserTileControl';
-import {
-    getTitle,
-    getDate,
-    getText,
-    getMedia,
-    getReply,
-    getForward
-} from '../../Utils/Message';
+import { getTitle, getDate, getText, getMedia, getReply, getForward } from '../../Utils/Message';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './MessageGroupControl.css';
+import './MessageGroup.css';
 
-class MessageGroupControl extends Component {
+class MessageGroup extends Component {
     constructor(props) {
         super(props);
 
@@ -108,7 +101,7 @@ class MessageGroupControl extends Component {
         let user = UserStore.get(this.props.messages[0].sender_user_id);
 
         const groupContent = this.props.messages.map(x => (
-            <MessageControl
+            <Message
                 key={x.id}
                 showTitle={x.id === this.props.messages[0].id}
                 sendingState={x.sending_state}
@@ -118,18 +111,18 @@ class MessageGroupControl extends Component {
         ));
 
         return (
-            <div className="group-wrapper">
+            <div className='group-wrapper'>
                 {user && (
-                    <div className="group-sender">
-                        <div className="group-tile">
+                    <div className='group-sender'>
+                        <div className='group-tile'>
                             <UserTileControl user={user} />
                         </div>
                     </div>
                 )}
-                <div className="group-content">{groupContent}</div>
+                <div className='group-content'>{groupContent}</div>
             </div>
         );
     }
 }
 
-export default MessageGroupControl;
+export default MessageGroup;

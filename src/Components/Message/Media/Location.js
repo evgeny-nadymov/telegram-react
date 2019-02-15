@@ -10,10 +10,9 @@ import PropTypes from 'prop-types';
 import RoomIcon from '@material-ui/icons/Room';
 import { getLocationId } from '../../../Utils/Message';
 import FileStore from '../../../Stores/FileStore';
-import './LocationControl.css';
+import './Location.css';
 
-class LocationControl extends React.Component {
-
+class Location extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
     }
@@ -22,7 +21,7 @@ class LocationControl extends React.Component {
         FileStore.removeListener('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
     }
 
-    onClientUpdateLocationBlob = (update) => {
+    onClientUpdateLocationBlob = update => {
         const { message } = this.props;
         if (!message) return;
         const { chatId, messageId } = update;
@@ -46,9 +45,8 @@ class LocationControl extends React.Component {
         let src = '';
         try {
             src = FileStore.getBlobUrl(blob);
-        }
-        catch (error) {
-            console.log(`LocationControl.render photo with error ${error}`);
+        } catch (error) {
+            console.log(`Location.render photo with error ${error}`);
         }
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
         //let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=300x150&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
@@ -58,9 +56,9 @@ class LocationControl extends React.Component {
         return (
             <a href={source} target='_blank' rel='noopener noreferrer'>
                 <div className='location-wrapper'>
-                    <img className='location-image' alt={alt} src={src}/>
+                    <img className='location-image' alt={alt} src={src} />
                     <div className='location-icon'>
-                        <RoomIcon fontSize='large' color='primary'/>
+                        <RoomIcon fontSize='large' color='primary' />
                     </div>
                 </div>
             </a>
@@ -68,9 +66,9 @@ class LocationControl extends React.Component {
     }
 }
 
-LocationControl.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func.isRequired
+Location.propTypes = {
+    message: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired
 };
 
-export default LocationControl;
+export default Location;

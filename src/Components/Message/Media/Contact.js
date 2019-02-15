@@ -10,16 +10,16 @@ import PropTypes from 'prop-types';
 import UserTileControl from '../../Tile/UserTileControl';
 import { formatPhoneNumber } from '../../../Utils/Common';
 import UserStore from '../../../Stores/UserStore';
-import './ContactControl.css';
+import './Contact.css';
 
-class ContactControl extends React.Component {
-    constructor(props){
+class Contact extends React.Component {
+    constructor(props) {
         super(props);
     }
 
     render() {
         let message = this.props.message;
-        if (typeof message === 'undefined'){
+        if (typeof message === 'undefined') {
             console.log('undefined');
         }
         if (!message) return null;
@@ -28,7 +28,11 @@ class ContactControl extends React.Component {
         let contact = message.content.contact;
         if (!contact) return null;
 
-        let user = UserStore.get(contact.user_id) || { 'id': contact.user_id, 'first_name' : contact.first_name, 'last_name': contact.last_name };
+        let user = UserStore.get(contact.user_id) || {
+            id: contact.user_id,
+            first_name: contact.first_name,
+            last_name: contact.last_name
+        };
         let fullName = `${contact.first_name} ${contact.last_name}`;
         let number = formatPhoneNumber(contact.phone_number);
         let containsUserId = contact.user_id && contact.user_id > 0;
@@ -36,15 +40,11 @@ class ContactControl extends React.Component {
         return (
             <div className='contact'>
                 <div className='contact-tile'>
-                    <UserTileControl userId={user.id}/>
+                    <UserTileControl userId={user.id} />
                 </div>
                 <div className='contact-content'>
                     <div className='contact-name'>
-                        {
-                            containsUserId
-                                ? (<a onClick={this.props.openMedia}>{fullName}</a>)
-                                : (<span>{fullName}</span>)
-                        }
+                        {containsUserId ? <a onClick={this.props.openMedia}>{fullName}</a> : <span>{fullName}</span>}
                     </div>
                     <div className='contact-phone'>{number}</div>
                 </div>
@@ -53,9 +53,9 @@ class ContactControl extends React.Component {
     }
 }
 
-ContactControl.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func.isRequired
+Contact.propTypes = {
+    message: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired
 };
 
-export default ContactControl;
+export default Contact;

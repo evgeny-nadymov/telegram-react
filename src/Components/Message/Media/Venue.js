@@ -10,10 +10,9 @@ import PropTypes from 'prop-types';
 import RoomIcon from '@material-ui/icons/Room';
 import { getVenueId } from '../../../Utils/Message';
 import FileStore from '../../../Stores/FileStore';
-import './VenueControl.css';
+import './Venue.css';
 
-class VenueControl extends React.Component {
-
+class Venue extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
     }
@@ -22,7 +21,7 @@ class VenueControl extends React.Component {
         FileStore.removeListener('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
     }
 
-    onClientUpdateLocationBlob = (update) => {
+    onClientUpdateLocationBlob = update => {
         const { message } = this.props;
         if (!message) return;
         const { chatId, messageId } = update;
@@ -49,9 +48,8 @@ class VenueControl extends React.Component {
         let src = '';
         try {
             src = FileStore.getBlobUrl(blob);
-        }
-        catch (error) {
-            console.log(`VenueControl.render photo with error ${error}`);
+        } catch (error) {
+            console.log(`Venue.render photo with error ${error}`);
         }
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
         //let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=100x100&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
@@ -62,14 +60,16 @@ class VenueControl extends React.Component {
             <div className='venue'>
                 <a href={source} target='_blank' rel='noopener noreferrer'>
                     <div className='location-wrapper'>
-                        <img className='location-image' alt={alt} src={src}/>
+                        <img className='location-image' alt={alt} src={src} />
                         <div className='location-icon'>
-                            <RoomIcon fontSize='large' color='primary'/>
+                            <RoomIcon fontSize='large' color='primary' />
                         </div>
                     </div>
                 </a>
                 <div className='venue-content'>
-                    <a href={source} target='_blank' rel='noopener noreferrer'><div className='venue-title'>{title}</div></a>
+                    <a href={source} target='_blank' rel='noopener noreferrer'>
+                        <div className='venue-title'>{title}</div>
+                    </a>
                     <div className='venue-subtitle'>{address}</div>
                 </div>
             </div>
@@ -77,9 +77,9 @@ class VenueControl extends React.Component {
     }
 }
 
-VenueControl.propTypes = {
-    message : PropTypes.object.isRequired,
-    openMedia : PropTypes.func.isRequired
+Venue.propTypes = {
+    message: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired
 };
 
-export default VenueControl;
+export default Venue;

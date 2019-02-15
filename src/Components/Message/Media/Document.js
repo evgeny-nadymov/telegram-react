@@ -10,11 +10,11 @@ import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DocumentTileControl from '../../Tile/DocumentTileControl';
 import FileStore from '../../../Stores/FileStore';
-import './DocumentControl.css';
+import './Document.css';
 
 const circleStyle = { circle: 'document-progress-circle' };
 
-class DocumentControl extends React.Component {
+class Document extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -196,9 +196,9 @@ class DocumentControl extends React.Component {
     }
 }
 
-DocumentControl.propTypes = {
+Document.propTypes = {
     message: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired
 };
 
-export default DocumentControl;
+export default Document;

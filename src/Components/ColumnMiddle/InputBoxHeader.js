@@ -11,7 +11,7 @@ import ReplyIcon from '@material-ui/icons/Reply';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import { withStyles } from '@material-ui/core/styles';
-import ReplyControl from '../Message/ReplyControl';
+import Reply from '../Message/Reply';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';
 
@@ -45,7 +45,7 @@ class InputBoxHeader extends React.Component {
                     <ReplyIcon className={classes.replyIcon} />
                 </div>
                 <div className='inputbox-header-middle-column'>
-                    <ReplyControl chatId={chatId} messageId={messageId} />
+                    <Reply chatId={chatId} messageId={messageId} />
                 </div>
                 <div className='inputbox-header-right-column'>
                     <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
@@ -59,8 +59,7 @@ class InputBoxHeader extends React.Component {
 
 InputBoxHeader.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
-    onClose: PropTypes.func.isRequired
+    messageId: PropTypes.number.isRequired
 };
 
 export default withStyles(styles)(InputBoxHeader);

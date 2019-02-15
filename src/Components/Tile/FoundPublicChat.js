@@ -28,7 +28,7 @@ const styles = theme => ({
     }
 });
 
-class FoundPublicChat extends React.PureComponent {
+class FoundPublicChat extends React.Component {
     constructor(props) {
         super(props);
 

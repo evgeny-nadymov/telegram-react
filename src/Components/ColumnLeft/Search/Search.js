@@ -28,6 +28,7 @@ import UserStore from '../../../Stores/UserStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
+import { orderCompare } from '../../../Utils/Common';
 
 const styles = theme => ({
     closeSearchIconButton: {
@@ -115,6 +116,14 @@ class Search extends React.Component {
                 }
             }
         }
+
+        console.log('search before', arr);
+
+        arr.sort((a, b) => {
+            return orderCompare(ChatStore.get(b).order, ChatStore.get(a).order);
+        });
+
+        console.log('search after', arr);
 
         return arr;
     };

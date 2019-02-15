@@ -134,7 +134,9 @@ class MainMenuButton extends React.Component {
         super(props);
 
         this.state = {
-            anchorEl: null
+            anchorEl: null,
+            openDelete: false,
+            openClearHistory: false
         };
     }
 

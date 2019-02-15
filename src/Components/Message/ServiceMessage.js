@@ -9,9 +9,9 @@ import React from 'react';
 import UnreadSeparator from './UnreadSeparator';
 import { getServiceMessageContent } from '../../Utils/ServiceMessage';
 import MessageStore from '../../Stores/MessageStore';
-import './ServiceMessageControl.css';
+import './ServiceMessage.css';
 
-class ServiceMessageControl extends React.Component {
+class ServiceMessage extends React.Component {
     constructor(props) {
         super(props);
 
@@ -60,4 +60,4 @@ class ServiceMessageControl extends React.Component {
     }
 }
 
-export default ServiceMessageControl;
+export default ServiceMessage;

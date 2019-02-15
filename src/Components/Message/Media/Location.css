@@ -5,13 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.location-wrapper{
+.location-wrapper {
     position: relative;
     width: 300px;
     height: 150px;
 }
 
-.location-image{
+.location-image {
     background: aliceblue;
     display: block;
     border-radius: 6px;
@@ -19,7 +19,7 @@
     height: 100%;
 }
 
-.location-icon{
+.location-icon {
     position: absolute;
     left: 50%;
     top: 50%;

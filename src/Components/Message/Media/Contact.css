@@ -5,23 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.contact{
+.contact {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.contact-name{
+.contact-name {
     font-weight: 500;
     white-space: nowrap;
 }
 
-.contact-phone{
+.contact-phone {
     color: #70777b;
     font-size: 14px;
 }
 
-.contact-content{
+.contact-content {
     flex-grow: 1;
     flex-shrink: 1;
     margin-left: 12px;

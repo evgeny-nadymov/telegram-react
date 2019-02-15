@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.messagestatus-icon{
+.messagestatus-icon {
     pointer-events: none;
     border: 0;
     display: block;
@@ -15,17 +15,17 @@
     position: absolute;
     margin-left: -26px;
     margin-top: 16px;
-    opacity: 1.0;
+    opacity: 1;
 }
 
-.messagestatus-failed{
+.messagestatus-failed {
     background: indianred;
-    opacity: 1.0;
+    opacity: 1;
 }
 
-.messagestatus-succeded{
+.messagestatus-succeded {
     background: #4eabf1;
-    opacity: 1.0;
+    opacity: 1;
 }
 
 .messagestatus-pending {

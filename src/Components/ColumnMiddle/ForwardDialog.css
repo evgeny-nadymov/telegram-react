@@ -65,6 +65,7 @@
     padding: 12px 24px 12px 24px;
     white-space: nowrap;
     overflow: hidden;
+    flex: 1 1 auto;
 }
 
 [contenteditable='true']#forward-dialog-search br {

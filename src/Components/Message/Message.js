@@ -8,8 +8,8 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import ReplyControl from './ReplyControl';
-import MessageStatusControl from './MessageStatusControl';
+import Reply from './Reply';
+import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
@@ -33,7 +33,7 @@ import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './MessageControl.css';
+import './Message.css';
 
 const styles = theme => ({
     messageAuthorColor: {
@@ -41,7 +41,7 @@ const styles = theme => ({
     }
 });
 
-class MessageControl extends Component {
+class Message extends Component {
     constructor(props) {
         super(props);
 
@@ -308,7 +308,7 @@ class MessageControl extends Component {
                 <div className='message-wrapper'>
                     <i className='message-select-tick' />
                     {this.unread && (
-                        <MessageStatusControl
+                        <MessageStatus
                             chatId={message.chat_id}
                             messageId={message.id}
                             sendingState={message.sending_state}
@@ -351,7 +351,7 @@ class MessageControl extends Component {
                                 </span>
                             </div>
                         </div>
-                        {reply && <ReplyControl chatId={message.chat_id} messageId={reply} />}
+                        {reply && <Reply chatId={message.chat_id} messageId={reply} />}
                         {media}
                         <div className='message-text'>{text}</div>
                         {webPage && <WebPage message={message} />}
@@ -362,4 +362,4 @@ class MessageControl extends Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(MessageControl);
+export default withStyles(styles, { withTheme: true })(Message);

@@ -5,25 +5,25 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.photo{
+.photo {
     border-radius: 6px;
     transform: translateZ(0);
     overflow: hidden;
     cursor: pointer;
 }
 
-.photo-img{
+.photo-img {
     background: aliceblue;
     /*background: black;*/
     display: block;
     border-radius: 6px;
 }
 
-.photo-img-blur{
+.photo-img-blur {
     filter: blur(10px);
 }
 
-.photo-progress{
+.photo-progress {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -46,7 +46,7 @@
     opacity: 0.3;
 }
 
-.photo-tile-cancel{
+.photo-tile-cancel {
     height: 18px;
     width: 18px;
     stroke: #ffffff;
@@ -59,7 +59,7 @@
     margin-top: -9px;
 }
 
-.photo-tile-circle{
+.photo-tile-circle {
     height: 44px;
     width: 44px;
     opacity: 0.5;
