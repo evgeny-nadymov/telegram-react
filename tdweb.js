@@ -1455,16 +1455,51 @@ var sleep = function sleep(ms) {
   });
 };
 
+/**
+ * TDLib in browser
+ *
+ * TDLib can be used from javascript through the [JSON](https://github.com/tdlib/td#using-json) interface.
+ * This is a convenient wrapper around it.
+ * Internally it uses TDLib built with emscripten as asm.js or WebAssembly. All work happens in a WebWorker.
+ * TdClient itself just sends queries to WebWorker, receive updates and results from WebWorker.
+ *
+ * <br><br>
+ * Differences from TDLib API<br>
+ * 1. updateFatalError error:string = Update; <br>
+ * 3. file <..as in td_api..> idb_key:string = File; <br>
+ * 2. setJsLogVerbosityLevel new_verbosity_level:string = Ok;
+ * 3. inputFileBlob blob:<javascript blob> = InputFile;<br>
+ * 4. readFilePart path:string offset:int64 size:int64 = FilePart;<br>
+ *    filePart data:blob = FilePart;<br>
+ * <br>
+ */
+
 var TdClient = function () {
+  /**
+   * @callback updateCallback
+   * @param {Object} update
+   */
+
+  /**
+   * Create TdClient
+   * @param {Object} options - Options
+   * @param {updateCallback} options.onUpdate - Callback for all updates. Could also be set explicitly right after TdClient construction.
+   * @param {number} [options.jsLogVerbosityLevel='info'] - Verbosity level for javascript part of the code (error, warning, info, log, debug)
+   * @param {number} [options.logVerbosityLevel=2] - Verbosity level for tdlib
+   * @param {string} [options.prefix=tdlib] Currently only one instance of TdClient per a prefix is allowed. All but one created instances will be automatically closed. Usually, the newest instance is kept alive.
+   * @param {boolean} [options.isBackground=false] - When choosing which instance to keep alive, we prefer instance with isBackground=false
+   * @param {string} [options.mode=wasm] - Type of tdlib build to use. 'asmjs' for asm.js and 'wasm' for WebAssembly.
+   * @param {boolean} [options.readOnly=false] - Open tdlib in read-only mode. Changes to tdlib database won't be persisted. For debug only.
+   */
   function TdClient(options) {
     (0, _classCallCheck3.default)(this, TdClient);
 
-    _logger2.default.setVerbosity(options.jsVerbosity);
+    _logger2.default.setVerbosity(options.jsLogVerbosityLevel);
     this.worker = new _worker2.default();
     var self = this;
     this.worker.onmessage = function (e) {
       var response = e.data;
-      _logger2.default.info('receive from worker: ', JSON.parse((0, _stringify2.default)(response, function (key, value) {
+      _logger2.default.debug('receive from worker: ', JSON.parse((0, _stringify2.default)(response, function (key, value) {
         if (key === 'arr') {
           return undefined;
         }
@@ -1502,11 +1537,55 @@ var TdClient = function () {
     };
     this.query_id = 0;
     this.query_callbacks = new _map2.default();
+    if ('onUpdate' in options) {
+      this.onUpdate = options.onUpdate;
+      delete options.onUpdate;
+    }
     this.worker.postMessage({ '@type': 'init', options: options });
     this.closeOtherClients(options);
   }
 
+  /**
+   * Send query to tdlib.
+   *
+   * If query contains an '@extra' field, the same field will be added into the result.
+   * '@extra' may contain any js object, it won't be sent to web worker.
+   *
+   * @param {Object} query - Query for tdlib.
+   * @returns {Promise} Promise represents the result of the query.
+   */
+
+
   (0, _createClass3.default)(TdClient, [{
+    key: 'send',
+    value: function send(query) {
+      var _this = this;
+
+      this.query_id++;
+      if (query['@extra']) {
+        query['@extra'] = {
+          '@old_extra': JSON.parse((0, _stringify2.default)(query.extra)),
+          query_id: this.query_id
+        };
+      } else {
+        query['@extra'] = {
+          query_id: this.query_id
+        };
+      }
+      if (query['@type'] === 'setJsLogVerbosityLevel') {
+        _logger2.default.setVerbosity(query.new_verbosity_level);
+      }
+
+      _logger2.default.debug('send to worker: ', query);
+      this.worker.postMessage(query);
+      return new _promise2.default(function (resolve, reject) {
+        _this.query_callbacks.set(_this.query_id, [resolve, reject]);
+      });
+    }
+
+    /** @private */
+
+  }, {
     key: 'onBroadcastMessage',
     value: function onBroadcastMessage(e) {
       var message = e.data;
@@ -1531,6 +1610,9 @@ var TdClient = function () {
         }
       }
     }
+
+    /** @private */
+
   }, {
     key: 'postState',
     value: function postState() {
@@ -1543,23 +1625,35 @@ var TdClient = function () {
       _logger2.default.info('Post state: ', state);
       this.channel.postMessage(state);
     }
+
+    /** @private */
+
   }, {
     key: 'onWaitSetEmpty',
-    value: function onWaitSetEmpty() {
-      // nop
-    }
+    value: function onWaitSetEmpty() {}
+    // nop
+
+
+    /** @private */
+
   }, {
     key: 'onInited',
     value: function onInited() {
       this.isInited = true;
       this.doSendStart();
     }
+
+    /** @private */
+
   }, {
     key: 'sendStart',
     value: function sendStart() {
       this.wantSendStart = true;
       this.doSendStart();
     }
+
+    /** @private */
+
   }, {
     key: 'doSendStart',
     value: function doSendStart() {
@@ -1572,6 +1666,9 @@ var TdClient = function () {
       _logger2.default.info('send to worker: ', query);
       this.worker.postMessage(query);
     }
+
+    /** @private */
+
   }, {
     key: 'onClosed',
     value: function onClosed() {
@@ -1581,6 +1678,9 @@ var TdClient = function () {
       this.state = 'closed';
       this.postState();
     }
+
+    /** @private */
+
   }, {
     key: 'close',
     value: function close() {
@@ -1609,6 +1709,9 @@ var TdClient = function () {
       this.state = 'closing';
       this.postState();
     }
+
+    /** @private */
+
   }, {
     key: 'closeOtherClients',
     value: function () {
@@ -1668,37 +1771,14 @@ var TdClient = function () {
 
       return closeOtherClients;
     }()
+
+    /** @private */
+
   }, {
     key: 'onUpdate',
     value: function onUpdate(response) {
       _logger2.default.info('ignore onUpdate');
       //nop
-    }
-  }, {
-    key: 'send',
-    value: function send(query) {
-      var _this = this;
-
-      this.query_id++;
-      if (query['@extra']) {
-        query['@extra'] = {
-          '@old_extra': JSON.parse((0, _stringify2.default)(query.extra)),
-          query_id: this.query_id
-        };
-      } else {
-        query['@extra'] = {
-          query_id: this.query_id
-        };
-      }
-      if (query['@type'] === 'setJsVerbosity') {
-        _logger2.default.setVerbosity(query.verbosity);
-      }
-
-      _logger2.default.info('send to worker: ', query);
-      this.worker.postMessage(query);
-      return new _promise2.default(function (resolve, reject) {
-        _this.query_callbacks.set(_this.query_id, [resolve, reject]);
-      });
     }
   }]);
   return TdClient;
@@ -3696,7 +3776,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "5e49f04c1338e43be715.worker.js");
+  return new Worker(__webpack_require__.p + "5a7066c422a17f8c6d1a.worker.js");
 };
 
 /***/ }),
