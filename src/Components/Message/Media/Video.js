@@ -56,7 +56,7 @@ class Video extends React.Component {
         if (!fitPhotoSize) return null;
 
         const file = thumbnail ? thumbnail.photo : null;
-        const blob = FileStore.getBlob(file.id) || file.blob;
+        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
         const src = FileStore.getBlobUrl(blob);
         const isBlurred = thumbnail && Math.max(thumbnail.width, thumbnail.height) < 320;
 

@@ -43,6 +43,9 @@ const styles = theme => ({
     },
     '@global': {
         a: {
+            color: theme.palette.primary.main
+        },
+        code: {
             color: theme.palette.primary.dark
         }
     }

@@ -214,8 +214,10 @@ class InputBoxControl extends Component {
 
     handleSubmit = () => {
         let text = this.getInputText();
+
         this.newMessage.current.innerText = null;
         this.newMessage.current.textContent = null;
+        this.innerHTML = null;
 
         if (!text) return;
 
@@ -287,8 +289,6 @@ class InputBoxControl extends Component {
         const innerText = this.newMessage.current.innerText;
         const innerHTML = this.newMessage.current.innerHTML;
 
-        this.innerHTML = innerHTML;
-
         if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
             this.newMessage.current.innerHTML = '';
         }
@@ -301,6 +301,10 @@ class InputBoxControl extends Component {
     };
 
     handleKeyDown = e => {
+        const innerText = this.newMessage.current.innerText;
+        const innerHTML = this.newMessage.current.innerHTML;
+        this.innerHTML = innerHTML;
+
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             this.handleSubmit();

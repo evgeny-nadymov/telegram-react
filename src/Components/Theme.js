@@ -13,7 +13,7 @@ const borderStyle = theme => ({
 
 const accentStyles = theme => ({
     accentColorDark: {
-        color: theme.palette.primary.dark
+        color: theme.palette.primary.main
     },
     accentBackgroundLight: {
         background: theme.palette.primary.light

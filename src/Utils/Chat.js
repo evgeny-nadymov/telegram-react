@@ -792,7 +792,7 @@ function canSendFiles(chatId) {
                         return true;
                     }
                     case 'chatMemberStatusRestricted': {
-                        if (basicGroup.status.is_member) {
+                        if (basicGroup.status.can_send_media_messages) {
                             return true;
                         } else {
                             return false;
@@ -833,7 +833,7 @@ function canSendFiles(chatId) {
                         }
                     }
                     case 'chatMemberStatusRestricted': {
-                        if (supergroup.status.is_member) {
+                        if (supergroup.status.can_send_media_messages) {
                             return true;
                         } else {
                             return false;
@@ -959,7 +959,7 @@ function canSendMessages(chatId) {
                         return true;
                     }
                     case 'chatMemberStatusRestricted': {
-                        if (basicGroup.status.is_member) {
+                        if (basicGroup.status.can_send_messages) {
                             return true;
                         } else {
                             return false;
@@ -1000,7 +1000,7 @@ function canSendMessages(chatId) {
                         }
                     }
                     case 'chatMemberStatusRestricted': {
-                        if (supergroup.status.is_member) {
+                        if (supergroup.status.can_send_messages) {
                             return true;
                         } else {
                             return false;

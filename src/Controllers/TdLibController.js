@@ -31,12 +31,13 @@ class TdLibController extends EventEmitter {
         const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating } = this.parameters;
 
         let options = {
-            verbosity: verbosity,
-            jsVerbosity: jsVerbosity,
+            logVerbosityLevel: verbosity,
+            jsLogVerbosityLevel: jsVerbosity,
             mode: 'wasm', // 'wasm-streaming'/'wasm'/'asmjs'
             prefix: useTestDC ? 'tdlib_test' : 'tdlib',
             readOnly: readOnly,
             isBackground: false
+            // onUpdate: update => this.emit('update', update)
         };
 
         console.log(
@@ -44,7 +45,10 @@ class TdLibController extends EventEmitter {
         );
 
         this.client = new TdClient(options);
-        this.client.onUpdate = update => this.emit('update', update);
+        this.client.onUpdate = update => {
+            console.log('received', update);
+            this.emit('update', update);
+        };
     };
 
     clientUpdate = update => {
