@@ -15,13 +15,41 @@ import {
     LOCATION_WIDTH,
     LOCATION_ZOOM,
     PHOTO_BIG_SIZE,
-    PHOTO_SIZE
+    PHOTO_SIZE,
+    PRELOAD_VIDEO_SIZE
 } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
+
+function getSizeString(size) {
+    if (!size) return `0 B`;
+
+    if (size < 1024) {
+        return `${size} B`;
+    }
+
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KB`;
+    }
+
+    if (size < 1024 * 1024 * 1024) {
+        return `${(size / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    return `${(size / 1024 / 1024 / 1024).toFixed(1)} GB`;
+}
+
+function getFileSize(file) {
+    if (!file) return null;
+
+    let size = file.size;
+    if (!size) return null;
+
+    return getSizeString(size);
+}
 
 function getChatPhoto(chat) {
     if (chat['@type'] !== 'chat') {
@@ -215,6 +243,27 @@ function getVideoFile(message) {
     }
 
     return [0, '', ''];
+}
+
+function getVideoFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVideo') {
+        return 0;
+    }
+
+    const { video } = content;
+    if (video) {
+        const file = video.video;
+        if (file) {
+            return file.size;
+        }
+    }
+
+    return 0;
 }
 
 function getContactFile(message) {
@@ -754,7 +803,9 @@ function getMediaFile(chatId, messageId, size) {
     return [0, 0, null];
 }
 
-function loadMediaViewerContent(messages) {
+function loadMediaViewerContent(messages, useSizeLimit = false) {
+    //console.log('loadMediaViewerContent userSizeLimit=' + useSizeLimit, messages.map(x => x.id));
+
     if (!messages) return;
     if (!messages.length) return;
 
@@ -821,6 +872,11 @@ function loadMediaViewerContent(messages) {
                     }
 
                     // video
+                    const videoFileSize = getVideoFileSize(message);
+                    if (useSizeLimit && videoFileSize && videoFileSize > PRELOAD_VIDEO_SIZE) {
+                        break;
+                    }
+
                     const [id, pid, idb_key] = getVideoFile(message);
                     if (pid) {
                         let file = message.content.video.video;
@@ -855,11 +911,9 @@ function preloadMediaViewerContent(index, history) {
     if (index < history.length - 1) {
         messages.push(history[index + 1]);
     }
-    if (index >= 0 && index < history.length) {
-        messages.push(history[index]);
-    }
 
-    loadMediaViewerContent(messages);
+    loadMediaViewerContent([history[index]], false);
+    loadMediaViewerContent(messages, true);
 }
 
 function loadProfileMediaViewerContent(chatId, photos) {
@@ -1005,6 +1059,8 @@ function loadChatContent(chat) {
 }
 
 export {
+    getFileSize,
+    getSizeString,
     getBigPhoto,
     getSmallPhoto,
     getUserPhoto,
@@ -1014,6 +1070,7 @@ export {
     getPhotoFile,
     getPhotoPreviewFile,
     getVideoFile,
+    getVideoFileSize,
     getVideoThumbnailFile,
     getDocumentThumbnailFile,
     getWebPageFile,

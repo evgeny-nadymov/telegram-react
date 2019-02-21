@@ -100,10 +100,6 @@ class MediaViewer extends React.Component {
     }
 
     componentDidMount() {
-        const { chatId, messageId } = this.props;
-        const message = MessageStore.get(chatId, messageId);
-        loadMediaViewerContent([message]);
-
         this.loadHistory();
 
         document.addEventListener('keydown', this.onKeyDown, false);

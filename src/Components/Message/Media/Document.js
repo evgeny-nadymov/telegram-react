@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import DocumentTileControl from '../../Tile/DocumentTileControl';
+import { getFileSize, getSizeString } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './Document.css';
 
@@ -51,39 +52,12 @@ class Document extends React.Component {
         this.forceUpdate();
     };
 
-    getSizeString(size) {
-        if (!size) return `0 B`;
-
-        if (size < 1024) {
-            return `${size} B`;
-        }
-
-        if (size < 1024 * 1024) {
-            return `${(size / 1024).toFixed(1)} KB`;
-        }
-
-        if (size < 1024 * 1024 * 1024) {
-            return `${(size / 1024 / 1024).toFixed(1)} MB`;
-        }
-
-        return `${(size / 1024 / 1024 / 1024).toFixed(1)} GB`;
-    }
-
-    getSize(file) {
-        if (!file) return null;
-
-        let size = file.size;
-        if (!size) return null;
-
-        return this.getSizeString(size);
-    }
-
     getDownloadedSize(file) {
         if (!file) return '0';
         if (!file.local) return '0';
         if (!file.local.is_downloading_active) return '0';
 
-        return this.getSizeString(file.local.downloaded_size);
+        return getSizeString(file.local.downloaded_size);
     }
 
     getUploadedSize(file) {
@@ -91,7 +65,7 @@ class Document extends React.Component {
         if (!file.remote) return '0';
         if (!file.remote.is_uploading_active) return '0';
 
-        return this.getSizeString(file.remote.uploaded_size);
+        return getSizeString(file.remote.uploaded_size);
     }
 
     render() {
@@ -109,7 +83,7 @@ class Document extends React.Component {
         let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
-        let size = this.getSize(file);
+        let size = getFileSize(file);
         let progressSize = null;
         if (isDownloadingActive) {
             progressSize = this.getDownloadedSize(file);

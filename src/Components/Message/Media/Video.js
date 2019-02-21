@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import { getFitSize, getVideoDurationString } from '../../../Utils/Common';
+import { getFileSize } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Video.css';
@@ -71,7 +72,9 @@ class Video extends React.Component {
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
-                <div className='video-duration'>{getVideoDurationString(duration)}</div>
+                <div className='video-duration'>
+                    {getVideoDurationString(duration) + ' ' + getFileSize(this.props.message.content.video.video)}
+                </div>
             </div>
         );
     }
