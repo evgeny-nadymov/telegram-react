@@ -17,6 +17,8 @@ html {
 }
 
 body {
+    margin: 0;
+    padding: 0;
     height: 100%;
     width: 100%;
     color: #000;
@@ -25,20 +27,20 @@ body {
     overflow: hidden;
 }
 
-#root{
+#root {
     height: 100%;
     width: 100%;
     overflow: hidden;
 }
 
-#app{
+#app {
     height: 100%;
     width: 100%;
     overflow: hidden;
     background: transparent;
 }
 
-.page{
+.page {
     height: calc(100% - 23px);
     background: #fff;
     max-width: 1010px;
@@ -52,19 +54,18 @@ body {
     border-radius: 0 0 8px 8px;
 }
 
-.page-third-column{
+.page-third-column {
     max-width: 1440px;
 }
 
-.accent-color{
-    color: #0070C9 !important;
+.accent-color {
+    color: #0070c9 !important;
 }
 
-.accent-background{
-    background: #3B9EDB !important;
+.accent-background {
+    background: #3b9edb !important;
 }
 
-.pointer{
+.pointer {
     cursor: pointer;
 }
-

@@ -76,12 +76,14 @@ class MediaViewerContent extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
         FileStore.on('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
+        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
         FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
+        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
@@ -111,6 +113,19 @@ class MediaViewerContent extends React.Component {
         }
     };
 
+    onClientUpdateVideoThumbnailBlob = update => {
+        const { chatId, messageId } = this.props;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const [width, height, file] = getMediaPreviewFile(chatId, messageId);
+            this.setState({
+                previewWidth: width,
+                previewHeight: height,
+                previewFile: file
+            });
+        }
+    };
+
     onUpdateMessageContent = update => {
         const { chatId, messageId, size } = this.props;
         const { chat_id, message_id } = update;
@@ -131,7 +146,7 @@ class MediaViewerContent extends React.Component {
     handleContentClick = event => {
         if (event) event.stopPropagation();
 
-        this.props.onClick(event);
+        //this.props.onClick(event);
     };
 
     render() {
@@ -140,7 +155,7 @@ class MediaViewerContent extends React.Component {
         if (!file) return null;
 
         const blob = FileStore.getBlob(file.id) || file.blob;
-        const src = FileStore.getBlobUrl(blob);
+        const src = FileStore.getBlobUrl(blob) || '';
 
         const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
         const previewSrc = FileStore.getBlobUrl(previewBlob);

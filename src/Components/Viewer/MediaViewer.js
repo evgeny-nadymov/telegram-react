@@ -262,7 +262,7 @@ class MediaViewer extends React.Component {
             from_message_id: messageId,
             offset: -MEDIA_SLICE_LIMIT,
             limit: 2 * MEDIA_SLICE_LIMIT,
-            filter: { '@type': 'searchMessagesFilterPhoto' }
+            filter: { '@type': 'searchMessagesFilterPhotoAndVideo' }
         });
 
         filterMessages(result, this.history);

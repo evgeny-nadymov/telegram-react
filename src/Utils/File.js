@@ -804,6 +804,21 @@ function loadMediaViewerContent(messages) {
                 }
                 case 'messageVideo': {
                     // preview
+                    const [previewId, previewPid, previewIdbKey] = getVideoThumbnailFile(message);
+                    if (previewPid) {
+                        const obj = message.content.video.thumbnail.photo;
+                        if (!obj.blob) {
+                            const localMessage = message;
+                            FileStore.getLocalFile(
+                                store,
+                                obj,
+                                previewIdbKey,
+                                null,
+                                () => FileStore.updateVideoThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                () => FileStore.getRemoteFile(id, 1, localMessage)
+                            );
+                        }
+                    }
 
                     // video
                     const [id, pid, idb_key] = getVideoFile(message);
@@ -817,7 +832,7 @@ function loadMediaViewerContent(messages) {
                                 file,
                                 idb_key,
                                 null,
-                                () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
+                                () => FileStore.updateVideoBlob(localMessage.chat_id, localMessage.id, file.id),
                                 () => FileStore.getRemoteFile(id, 1, localMessage)
                             );
                         }
