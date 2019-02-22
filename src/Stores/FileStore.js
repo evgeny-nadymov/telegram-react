@@ -438,7 +438,7 @@ class FileStore extends EventEmitter {
 
     getRemoteFile(fileId, priority, obj) {
         if (this.downloads.has(fileId)) {
-            let items = this.downloads.get(fileId);
+            const items = this.downloads.get(fileId);
 
             for (let i = 0; i < items.length; i++) {
                 if (items[i] === obj) {
@@ -461,7 +461,9 @@ class FileStore extends EventEmitter {
 
     cancelGetRemoteFile(fileId, obj) {
         if (this.downloads.has(fileId)) {
-            //this.downloads.delete(fileId);
+            const items = this.downloads.get(fileId).filter(x => x !== obj);
+            this.downloads.set(fileId, items);
+
             console.log('cancel_download_message id=' + obj.id);
             TdLibController.send({
                 '@type': 'cancelDownloadFile',
