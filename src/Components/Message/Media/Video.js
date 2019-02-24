@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import { getFitSize, getVideoDurationString } from '../../../Utils/Common';
 import { getFileSize } from '../../../Utils/File';
+import { isBlurredThumbnail } from '../../../Utils/Media';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Video.css';
@@ -31,14 +32,14 @@ class Video extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
+        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
+        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
     }
 
-    onClientUpdateVideoBlob = update => {
+    onClientUpdateVideoThumbnailBlob = update => {
         const { thumbnail } = this.state;
         const { fileId } = update;
 
@@ -50,7 +51,7 @@ class Video extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia } = this.props;
+        const { displaySize, openMedia, message } = this.props;
         const { thumbnail, duration } = this.state;
 
         const fitPhotoSize = getFitSize(thumbnail, displaySize);
@@ -59,7 +60,7 @@ class Video extends React.Component {
         const file = thumbnail ? thumbnail.photo : null;
         const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
         const src = FileStore.getBlobUrl(blob);
-        const isBlurred = thumbnail && Math.max(thumbnail.width, thumbnail.height) < 320;
+        const isBlurred = isBlurredThumbnail(thumbnail);
 
         return (
             <div className='video' style={fitPhotoSize} onClick={openMedia}>
@@ -72,8 +73,8 @@ class Video extends React.Component {
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
-                <div className='video-duration'>
-                    {getVideoDurationString(duration) + ' ' + getFileSize(this.props.message.content.video.video)}
+                <div className='video-meta'>
+                    {getVideoDurationString(duration) + ' ' + getFileSize(message.content.video.video)}
                 </div>
             </div>
         );

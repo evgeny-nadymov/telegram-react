@@ -9,6 +9,7 @@ import React from 'react';
 import dateFormat from 'dateformat';
 import Photo from '../Components/Message/Media/Photo';
 import Video from '../Components/Message/Media/Video';
+import Animation from '../Components/Message/Media/Animation';
 import Sticker from '../Components/Message/Media/Sticker';
 import Location from '../Components/Message/Media/Location';
 import Venue from '../Components/Message/Media/Venue';
@@ -234,6 +235,8 @@ function getMedia(message, openMedia) {
             return <Photo message={message} openMedia={openMedia} />;
         case 'messageVideo':
             return <Video message={message} openMedia={openMedia} />;
+        case 'messageAnimation':
+            return <Animation message={message} openMedia={openMedia} />;
         case 'messageSticker':
             return <Sticker message={message} openMedia={openMedia} />;
         case 'messageLocation':

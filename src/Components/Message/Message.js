@@ -15,7 +15,7 @@ import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import { saveOrDownload } from '../../Utils/File';
+import { download, saveOrDownload } from '../../Utils/File';
 import {
     getDate,
     getDateHint,
@@ -239,6 +239,35 @@ class Message extends Component {
                 ApplicationStore.setMediaViewerContent({
                     chatId: chatId,
                     messageId: messageId
+                });
+
+                break;
+            }
+            case 'messageAnimation': {
+                const { animation } = message.content;
+                if (animation) {
+                    let file = animation.animation;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                //FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+                }
+
+                // set active animation
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateActiveAnimation',
+                    chatId: message.chat_id,
+                    messageId: message.id
                 });
 
                 break;

@@ -857,7 +857,7 @@ class MessagesList extends React.Component {
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
                           messageId={x.id}
-                          showTitle={true}
+                          showTitle
                           sendingState={x.sending_state}
                           onSelectChat={onSelectChat}
                           onSelectUser={onSelectUser}

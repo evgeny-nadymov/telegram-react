@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.video {
+.animation {
     border-radius: 6px;
     transform: translateZ(0);
     overflow: hidden;
@@ -14,18 +14,18 @@
     color: white;
 }
 
-.video-preview {
+.animation-preview {
     background: aliceblue;
     display: block;
     border-radius: 6px;
     user-select: none;
 }
 
-.video-preview-blurred {
+.animation-preview-blurred {
     filter: blur(2px);
 }
 
-.video-play {
+.animation-play {
     width: 48px;
     height: 48px;
     background: #00000066;
@@ -36,9 +36,12 @@
     transform: translate(-50%, -50%);
     padding: 12px;
     box-sizing: border-box;
+    line-height: 24px;
+    text-align: center;
+    user-select: none;
 }
 
-.video-meta {
+.animation-meta {
     position: absolute;
     left: 6px;
     top: 6px;

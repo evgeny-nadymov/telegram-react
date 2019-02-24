@@ -30,4 +30,6 @@ export const VERBOSITY_MIN = 0;
 export const USERNAME_LENGTH_MIN = 5;
 export const MAX_SNACK = 10;
 export const NOTIFICATION_AUTO_HIDE_DURATION_MS = 5000;
+export const THUMBNAIL_BLURRED_SIZE = 320;
 export const PRELOAD_VIDEO_SIZE = 10 * 1024 * 1024;
+export const PRELOAD_GIF_SIZE = 200 * 1024; //10 * 1024 * 1024;

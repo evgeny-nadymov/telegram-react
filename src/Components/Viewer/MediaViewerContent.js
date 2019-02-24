@@ -158,7 +158,7 @@ class MediaViewerContent extends React.Component {
         const src = FileStore.getBlobUrl(blob) || '';
 
         const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
-        const previewSrc = FileStore.getBlobUrl(previewBlob);
+        const previewSrc = src ? '' : FileStore.getBlobUrl(previewBlob);
         const isVideo = isVideoMessage(chatId, messageId);
         let videoWidth = width;
         let videoHeight = height;
