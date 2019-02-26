@@ -1203,6 +1203,10 @@ function loadChatContent(chat) {
     }
 }
 
+function isGifMimeType(mimeType) {
+    return mimeType && mimeType.toLowerCase() === 'image/gif';
+}
+
 export {
     getFileSize,
     getSizeString,
@@ -1237,5 +1241,6 @@ export {
     saveOrDownload,
     download,
     getMediaFile,
-    getMediaPreviewFile
+    getMediaPreviewFile,
+    isGifMimeType
 };

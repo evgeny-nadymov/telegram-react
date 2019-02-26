@@ -12,7 +12,7 @@ import { withNamespaces } from 'react-i18next';
 import FileProgress from '../../Viewer/FileProgress';
 import { getFitSize } from '../../../Utils/Common';
 import { isBlurredThumbnail } from '../../../Utils/Media';
-import { getFileSize } from '../../../Utils/File';
+import { getFileSize, isGifMimeType } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Animation.css';
@@ -29,6 +29,7 @@ class Animation extends React.Component {
             height: animation.height,
             thumbnail: animation.thumbnail,
             animation: animation.animation,
+            mimeType: animation.mimeType,
             active: true
         };
     }
@@ -98,7 +99,7 @@ class Animation extends React.Component {
 
     render() {
         const { displaySize, openMedia, message, t } = this.props;
-        const { thumbnail, animation, active } = this.state;
+        const { thumbnail, animation, mimeType, active } = this.state;
 
         const fitPhotoSize = getFitSize(thumbnail, displaySize);
         if (!fitPhotoSize) return null;
@@ -106,20 +107,32 @@ class Animation extends React.Component {
         const thumbnailSrc = this.getSrc(thumbnail ? thumbnail.photo : null);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
+        const isGif = isGifMimeType(mimeType);
         const animationSrc = this.getSrc(animation);
 
         return (
             <div className='animation' style={fitPhotoSize} onClick={openMedia}>
                 {animationSrc && active ? (
-                    <video
-                        className='media-viewer-content-image'
-                        src={animationSrc}
-                        poster={thumbnailSrc}
-                        autoPlay
-                        loop
-                        width={fitPhotoSize.width}
-                        height={fitPhotoSize.height}
-                    />
+                    isGif ? (
+                        <img
+                            className='media-viewer-content-image'
+                            style={fitPhotoSize}
+                            src={animationSrc}
+                            alt=''
+                            width={fitPhotoSize.width}
+                            height={fitPhotoSize.height}
+                        />
+                    ) : (
+                        <video
+                            className='media-viewer-content-image'
+                            src={animationSrc}
+                            poster={thumbnailSrc}
+                            autoPlay
+                            loop
+                            width={fitPhotoSize.width}
+                            height={fitPhotoSize.height}
+                        />
+                    )
                 ) : (
                     <>
                         <img
