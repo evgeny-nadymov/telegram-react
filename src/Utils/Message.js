@@ -236,7 +236,14 @@ function getMedia(message, openMedia) {
         case 'messageVideo':
             return <Video message={message} openMedia={openMedia} />;
         case 'messageAnimation':
-            return <Animation message={message} openMedia={openMedia} />;
+            return (
+                <Animation
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    animation={message.content.animation}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageSticker':
             return <Sticker message={message} openMedia={openMedia} />;
         case 'messageLocation':

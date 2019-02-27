@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
+import Animation from './Animation';
 import { getFitSize, getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
@@ -40,36 +41,6 @@ class WebPage extends React.Component {
         }
     };
 
-    getSiteName = webPage => {
-        if (!webPage) return null;
-
-        return webPage.site_name;
-    };
-
-    getTitle = webPage => {
-        if (!webPage) return null;
-
-        return webPage.title;
-    };
-
-    getDescription = webPage => {
-        if (!webPage) return null;
-
-        return webPage.description;
-    };
-
-    getUrl = webPage => {
-        if (!webPage) return null;
-
-        return webPage.url;
-    };
-
-    getPhoto = webPage => {
-        if (!webPage) return null;
-
-        return webPage.photo;
-    };
-
     render() {
         const { classes, message, size, displaySize, openMedia } = this.props;
         if (!message) return null;
@@ -80,18 +51,24 @@ class WebPage extends React.Component {
         const { web_page } = content;
         if (!web_page) return null;
 
-        const siteName = this.getSiteName(web_page);
-        const title = this.getTitle(web_page);
-        const description = this.getDescription(web_page);
-        const photo = this.getPhoto(web_page);
-        const url = this.getUrl(web_page);
+        const { site_name, title, description, url, photo, animation } = web_page;
 
-        let src = '';
-        let fitPhotoSize = {
-            width: 0,
-            height: 0
-        };
-        if (photo) {
+        let webPageContent = null;
+        if (animation) {
+            webPageContent = (
+                <Animation
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    animation={animation}
+                    openMedia={openMedia}
+                />
+            );
+        } else if (photo) {
+            let src = '';
+            let fitPhotoSize = {
+                width: 0,
+                height: 0
+            };
             const photoSize = getSize(photo.sizes, size);
             if (photoSize) {
                 fitPhotoSize = getFitSize(photoSize, displaySize);
@@ -106,24 +83,26 @@ class WebPage extends React.Component {
                     }
                 }
             }
+
+            webPageContent = (
+                <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
+                    <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
+                        <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
+                    </a>
+                </div>
+            );
         }
 
         return (
             <div className='web-page'>
                 <div className={classNames('web-page-border', classes.accentBackgroundLight)} />
                 <div className='web-page-wrapper'>
-                    {siteName && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{siteName}</div>
+                    {site_name && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
-                    {photo && (
-                        <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
-                            <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                                <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
-                            </a>
-                        </div>
-                    )}
+                    {webPageContent}
                 </div>
             </div>
         );

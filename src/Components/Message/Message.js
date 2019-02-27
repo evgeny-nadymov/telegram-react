@@ -243,6 +243,38 @@ class Message extends Component {
 
                 break;
             }
+            case 'messageText': {
+                const { web_page } = message.content;
+                if (web_page) {
+                    const { animation } = web_page;
+                    if (animation) {
+                        let file = animation.animation;
+                        if (file) {
+                            file = FileStore.get(file.id) || file;
+                            if (file) {
+                                if (file.local.is_downloading_active) {
+                                    //FileStore.cancelGetRemoteFile(file.id, message);
+                                    return;
+                                } else if (file.remote.is_uploading_active) {
+                                    FileStore.cancelUploadFile(file.id, message);
+                                    return;
+                                } else {
+                                    download(file, message);
+                                }
+                            }
+                        }
+                    }
+
+                    // set active animation
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateActiveAnimation',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
+
+                break;
+            }
             case 'messageAnimation': {
                 const { animation } = message.content;
                 if (animation) {
@@ -412,7 +444,7 @@ class Message extends Component {
                         {reply && <Reply chatId={message.chat_id} messageId={reply} />}
                         {media}
                         <div className='message-text'>{text}</div>
-                        {webPage && <WebPage message={message} />}
+                        {webPage && <WebPage message={message} openMedia={this.openMedia} />}
                     </div>
                 </div>
             </div>

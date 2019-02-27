@@ -18,22 +18,6 @@ import FileStore from '../../../Stores/FileStore';
 import './Animation.css';
 
 class Animation extends React.Component {
-    constructor(props) {
-        super(props);
-
-        const { message } = props;
-        const { animation } = message.content;
-
-        this.state = {
-            width: animation.width,
-            height: animation.height,
-            thumbnail: animation.thumbnail,
-            animation: animation.animation,
-            mimeType: animation.mimeType,
-            active: true
-        };
-    }
-
     componentDidMount() {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
@@ -49,24 +33,21 @@ class Animation extends React.Component {
     onClientUpdateActiveAnimation = update => {
         const { message } = this.props;
         const { chatId, messageId } = update;
-
-        const active = message && chatId === message.chat_id && message.id === messageId;
     };
 
     onClientUpdateAnimationBlob = update => {
-        const { animation } = this.state;
+        const { animation } = this.props.animation;
         const { fileId } = update;
 
         if (!animation) return;
 
         if (animation.id === fileId) {
-            this.setState({ active: true });
-            //this.forceUpdate();
+            this.forceUpdate();
         }
     };
 
     onClientUpdateAnimationThumbnailBlob = update => {
-        const { thumbnail } = this.state;
+        const { thumbnail } = this.props.animation;
         const { fileId } = update;
 
         if (!thumbnail) return;
@@ -82,24 +63,9 @@ class Animation extends React.Component {
         return FileStore.getBlobUrl(blob) || '';
     };
 
-    handleStopAnimation = e => {
-        e.stopPropagation();
-
-        this.setState({ active: !this.state.active });
-    };
-
-    handleStartAnimation = e => {
-        //e.stopPropagation();
-
-        const { animation } = this.state;
-
-        const animationSrc = this.getSrc(animation);
-        this.setState({ active: Boolean(animationSrc) });
-    };
-
     render() {
-        const { displaySize, openMedia, message, t } = this.props;
-        const { thumbnail, animation, mimeType, active } = this.state;
+        const { displaySize, openMedia, t } = this.props;
+        const { thumbnail, animation, mime_type } = this.props.animation;
 
         const fitPhotoSize = getFitSize(thumbnail, displaySize);
         if (!fitPhotoSize) return null;
@@ -107,21 +73,14 @@ class Animation extends React.Component {
         const thumbnailSrc = this.getSrc(thumbnail ? thumbnail.photo : null);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
-        const isGif = isGifMimeType(mimeType);
+        const isGif = isGifMimeType(mime_type);
         const animationSrc = this.getSrc(animation);
 
         return (
             <div className='animation' style={fitPhotoSize} onClick={openMedia}>
-                {animationSrc && active ? (
+                {animationSrc ? (
                     isGif ? (
-                        <img
-                            className='media-viewer-content-image'
-                            style={fitPhotoSize}
-                            src={animationSrc}
-                            alt=''
-                            width={fitPhotoSize.width}
-                            height={fitPhotoSize.height}
-                        />
+                        <img className='media-viewer-content-image' style={fitPhotoSize} src={animationSrc} alt='' />
                     ) : (
                         <video
                             className='media-viewer-content-image'
@@ -129,6 +88,7 @@ class Animation extends React.Component {
                             poster={thumbnailSrc}
                             autoPlay
                             loop
+                            playsInline
                             width={fitPhotoSize.width}
                             height={fitPhotoSize.height}
                         />
@@ -140,10 +100,9 @@ class Animation extends React.Component {
                             style={fitPhotoSize}
                             src={thumbnailSrc}
                             alt=''
-                            onClick={this.handleStartAnimation}
                         />
                         <div className='animation-play'>{t('AttachGif')}</div>
-                        <div className='animation-meta'>{getFileSize(message.content.animation.animation)}</div>
+                        <div className='animation-meta'>{getFileSize(animation)}</div>
                     </>
                 )}
             </div>
@@ -152,7 +111,9 @@ class Animation extends React.Component {
 }
 
 Animation.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    animation: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired,
     size: PropTypes.number,
     displaySize: PropTypes.number

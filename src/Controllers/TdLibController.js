@@ -118,6 +118,7 @@ class TdLibController extends EventEmitter {
     };
 
     send = request => {
+        console.log('send', request);
         return this.client.send(request);
     };
 

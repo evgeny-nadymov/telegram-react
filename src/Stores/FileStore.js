@@ -122,22 +122,36 @@ class FileStore extends EventEmitter {
                                 switch (obj.content['@type']) {
                                     case 'messageText': {
                                         const { web_page } = obj.content;
-
-                                        for (let i = 0; i < web_page.photo.sizes.length; i++) {
-                                            let photoSize = web_page.photo.sizes[i];
-                                            if (photoSize) {
-                                                let source = photoSize.photo;
-                                                if (source && source.id === file.id) {
-                                                    this.getLocalFile(
-                                                        store,
-                                                        source,
-                                                        idb_key,
-                                                        arr,
-                                                        () => this.updateWebPageBlob(obj.chat_id, obj.id, file.id),
-                                                        () => this.getRemoteFile(file.id, 1, obj)
-                                                    );
-                                                    break;
+                                        if (web_page) {
+                                            const { photo } = web_page;
+                                            if (photo) {
+                                                for (let i = 0; i < photo.sizes.length; i++) {
+                                                    const photoSize = photo.sizes[i];
+                                                    if (photoSize) {
+                                                        let source = photoSize.photo;
+                                                        if (source && source.id === file.id) {
+                                                            this.getLocalFile(
+                                                                store,
+                                                                source,
+                                                                idb_key,
+                                                                arr,
+                                                                () =>
+                                                                    this.updateWebPageBlob(
+                                                                        obj.chat_id,
+                                                                        obj.id,
+                                                                        file.id
+                                                                    ),
+                                                                () => this.getRemoteFile(file.id, 1, obj)
+                                                            );
+                                                            break;
+                                                        }
+                                                    }
                                                 }
+                                            }
+
+                                            const { animation } = web_page;
+                                            if (animation) {
+                                                this.handleAnimation(animation, file, idb_key, arr, obj);
                                             }
                                         }
 
@@ -203,36 +217,7 @@ class FileStore extends EventEmitter {
                                     case 'messageAnimation': {
                                         const { animation } = obj.content;
 
-                                        if (animation.thumbnail) {
-                                            let source = animation.thumbnail.photo;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () =>
-                                                        this.updateAnimationThumbnailBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
-
-                                        if (animation.animation) {
-                                            let source = animation.animation;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateAnimationBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
+                                        this.handleAnimation(animation, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVideo': {
@@ -357,6 +342,36 @@ class FileStore extends EventEmitter {
                 //this.emit('file_upload_update', file);
             } else {
                 //this.emit('file_upload_update', file);
+            }
+        }
+    };
+
+    handleAnimation = (animation, file, idb_key, arr, obj) => {
+        if (animation.thumbnail) {
+            const source = animation.thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateAnimationThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, 1, obj)
+                );
+            }
+        }
+
+        if (animation.animation) {
+            const source = animation.animation;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateAnimationBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, 1, obj)
+                );
             }
         }
     };
