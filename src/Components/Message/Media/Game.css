@@ -1,0 +1,41 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.game {
+    display: flex;
+    flex-direction: row;
+    margin-top: 6px;
+}
+
+.game-wrapper {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 12px;
+    overflow: hidden;
+}
+
+.game-border {
+    min-width: 2px;
+}
+
+.game-title {
+}
+
+.game-text {
+    font-weight: bold;
+}
+
+.game-description {
+}
+
+.game-photo {
+    margin-top: 6px;
+    border-radius: 6px;
+    transform: translateZ(0);
+    overflow: hidden;
+    cursor: pointer;
+}

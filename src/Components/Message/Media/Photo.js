@@ -54,13 +54,7 @@ class Photo extends React.Component {
 
         const file = photoSize.photo;
         const blob = FileStore.getBlob(file.id) || file.blob;
-
-        let src = '';
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(`Photo.render photo with error ${error}`);
-        }
+        const src = FileStore.getBlobUrl(blob);
 
         // if (!blob && this.props.message.content.photo.sizes.length > 0)
         // {

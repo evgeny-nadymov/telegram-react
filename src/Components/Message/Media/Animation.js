@@ -48,9 +48,9 @@ class Animation extends React.Component {
 
     onClientUpdateAnimationThumbnailBlob = update => {
         const { thumbnail } = this.props.animation;
-        const { fileId } = update;
-
         if (!thumbnail) return;
+
+        const { fileId } = update;
 
         if (thumbnail.photo && thumbnail.photo.id === fileId) {
             this.forceUpdate();

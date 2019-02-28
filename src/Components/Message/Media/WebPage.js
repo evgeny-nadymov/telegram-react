@@ -41,8 +41,9 @@ class WebPage extends React.Component {
         }
     };
 
-    render() {
-        const { classes, message, size, displaySize, openMedia } = this.props;
+    getContent = () => {
+        const { message, size, displaySize, openMedia } = this.props;
+
         if (!message) return null;
 
         const { content } = message;
@@ -51,11 +52,10 @@ class WebPage extends React.Component {
         const { web_page } = content;
         if (!web_page) return null;
 
-        const { site_name, title, description, url, photo, animation } = web_page;
+        const { url, photo, animation } = web_page;
 
-        let webPageContent = null;
         if (animation) {
-            webPageContent = (
+            return (
                 <Animation
                     chatId={message.chat_id}
                     messageId={message.id}
@@ -75,16 +75,11 @@ class WebPage extends React.Component {
                 if (fitPhotoSize) {
                     const file = photoSize.photo;
                     const blob = FileStore.getBlob(file.id) || file.blob;
-
-                    try {
-                        src = FileStore.getBlobUrl(blob);
-                    } catch (error) {
-                        console.log(`WebPage.render photo with error ${error}`);
-                    }
+                    src = FileStore.getBlobUrl(blob);
                 }
             }
 
-            webPageContent = (
+            return (
                 <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
                     <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
                         <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
@@ -92,6 +87,21 @@ class WebPage extends React.Component {
                 </div>
             );
         }
+
+        return null;
+    };
+
+    render() {
+        const { classes, message } = this.props;
+        if (!message) return null;
+
+        const { content } = message;
+        if (!content) return null;
+
+        const { web_page } = content;
+        if (!web_page) return null;
+
+        const { site_name, title, description } = web_page;
 
         return (
             <div className='web-page'>
@@ -102,7 +112,7 @@ class WebPage extends React.Component {
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
-                    {webPageContent}
+                    {this.getContent()}
                 </div>
             </div>
         );

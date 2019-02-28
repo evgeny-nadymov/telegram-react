@@ -243,6 +243,38 @@ class Message extends Component {
 
                 break;
             }
+            case 'messageGame': {
+                const { game } = message.content;
+                if (game) {
+                    const { animation } = game;
+                    if (animation) {
+                        let file = animation.animation;
+                        if (file) {
+                            file = FileStore.get(file.id) || file;
+                            if (file) {
+                                if (file.local.is_downloading_active) {
+                                    //FileStore.cancelGetRemoteFile(file.id, message);
+                                    return;
+                                } else if (file.remote.is_uploading_active) {
+                                    FileStore.cancelUploadFile(file.id, message);
+                                    return;
+                                } else {
+                                    download(file, message);
+                                }
+                            }
+                        }
+                    }
+
+                    // set active animation
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateActiveAnimation',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
+
+                break;
+            }
             case 'messageText': {
                 const { web_page } = message.content;
                 if (web_page) {

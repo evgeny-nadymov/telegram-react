@@ -9,6 +9,7 @@ import React from 'react';
 import dateFormat from 'dateformat';
 import Photo from '../Components/Message/Media/Photo';
 import Video from '../Components/Message/Media/Video';
+import Game from '../Components/Message/Media/Game';
 import Animation from '../Components/Message/Media/Animation';
 import Sticker from '../Components/Message/Media/Sticker';
 import Location from '../Components/Message/Media/Location';
@@ -244,6 +245,8 @@ function getMedia(message, openMedia) {
                     openMedia={openMedia}
                 />
             );
+        case 'messageGame':
+            return <Game chatId={message.chat_id} messageId={message.id} openMedia={openMedia} />;
         case 'messageSticker':
             return <Sticker message={message} openMedia={openMedia} />;
         case 'messageLocation':
@@ -486,6 +489,7 @@ function isVideoMessage(chatId, messageId) {
 export {
     getTitle,
     getText,
+    getFormattedText,
     getWebPage,
     getContent,
     getDate,

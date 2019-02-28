@@ -120,6 +120,38 @@ class FileStore extends EventEmitter {
                             }
                             case 'message':
                                 switch (obj.content['@type']) {
+                                    case 'messageGame': {
+                                        const { game } = obj.content;
+                                        if (game) {
+                                            const { photo } = game;
+                                            if (photo) {
+                                                for (let i = 0; i < photo.sizes.length; i++) {
+                                                    const photoSize = photo.sizes[i];
+                                                    if (photoSize) {
+                                                        let source = photoSize.photo;
+                                                        if (source && source.id === file.id) {
+                                                            this.getLocalFile(
+                                                                store,
+                                                                source,
+                                                                idb_key,
+                                                                arr,
+                                                                () => this.updateGameBlob(obj.chat_id, obj.id, file.id),
+                                                                () => this.getRemoteFile(file.id, 1, obj)
+                                                            );
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            const { animation } = game;
+                                            if (animation) {
+                                                this.handleAnimation(animation, file, idb_key, arr, obj);
+                                            }
+                                        }
+
+                                        break;
+                                    }
                                     case 'messageText': {
                                         const { web_page } = obj.content;
                                         if (web_page) {
@@ -600,8 +632,15 @@ class FileStore extends EventEmitter {
         }
     };
 
+    updateGameBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateGameBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updateWebPageBlob = (chatId, messageId, fileId) => {
-        // console.log(`clientUpdateWebPageBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
         this.emit('clientUpdateWebPageBlob', {
             chatId: chatId,
             messageId: messageId,
