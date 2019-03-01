@@ -243,7 +243,7 @@ class InputBoxControl extends Component {
         let files = this.attachPhoto.current.files;
         if (files.length === 0) return;
 
-        files.forEach(file => {
+        Array.from(files).forEach(file => {
             readImageSize(file, result => {
                 this.handleSendPhoto(result);
             });
@@ -260,7 +260,7 @@ class InputBoxControl extends Component {
         let files = this.attachDocument.current.files;
         if (files.length === 0) return;
 
-        files.forEach(file => {
+        Array.from(files).forEach(file => {
             this.handleSendDocument(file);
         });
 

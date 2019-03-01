@@ -12,7 +12,7 @@ import { withNamespaces } from 'react-i18next';
 import FileProgress from '../../Viewer/FileProgress';
 import { getFitSize } from '../../../Utils/Common';
 import { isBlurredThumbnail } from '../../../Utils/Media';
-import { getFileSize, isGifMimeType } from '../../../Utils/File';
+import { getFileSize, getSrc, isGifMimeType } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Animation.css';
@@ -57,12 +57,6 @@ class Animation extends React.Component {
         }
     };
 
-    getSrc = file => {
-        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
-
-        return FileStore.getBlobUrl(blob) || '';
-    };
-
     render() {
         const { displaySize, openMedia, t } = this.props;
         const { thumbnail, animation, mime_type } = this.props.animation;
@@ -70,11 +64,11 @@ class Animation extends React.Component {
         const fitPhotoSize = getFitSize(thumbnail, displaySize);
         if (!fitPhotoSize) return null;
 
-        const thumbnailSrc = this.getSrc(thumbnail ? thumbnail.photo : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         const isGif = isGifMimeType(mime_type);
-        const animationSrc = this.getSrc(animation);
+        const animationSrc = getSrc(animation);
 
         return (
             <div className='animation' style={fitPhotoSize} onClick={openMedia}>

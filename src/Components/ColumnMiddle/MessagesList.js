@@ -227,6 +227,7 @@ class MessagesList extends React.Component {
 
         const history = [message];
 
+        console.log('SCROLL MessagesList.onUpdateNewMessage scrollBehavior=' + scrollBehavior);
         this.insertAfter(this.filterMessages(history), scrollBehavior);
         const store = FileStore.getStore();
         loadMessageContents(store, history);
@@ -573,6 +574,7 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
+        console.log('SCROLL MessagesList.onLoadPrevious scrollBehavior=NONE');
         this.insertAfter(this.filterMessages(result.messages), ScrollBehaviorEnum.NONE);
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);

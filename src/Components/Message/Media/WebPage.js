@@ -12,8 +12,10 @@ import { withStyles } from '@material-ui/core/styles';
 import Animation from './Animation';
 import { getFitSize, getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
+import { getSrc } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
+import MessageStore from '../../../Stores/MessageStore';
 import './WebPage.css';
 
 const styles = theme => ({
@@ -30,20 +32,17 @@ class WebPage extends React.Component {
     }
 
     onClientUpdateWebPageBlob = update => {
-        const { message } = this.props;
-        if (!message) return;
+        const { chatId, messageId } = this.props;
 
-        const { chatId, messageId } = update;
-        const { chat_id, id } = message;
-
-        if (chat_id === chatId && id === messageId) {
+        if (chatId === update.chatId && messageId === update.messageId) {
             this.forceUpdate();
         }
     };
 
     getContent = () => {
-        const { message, size, displaySize, openMedia } = this.props;
+        const { chatId, messageId, size, displaySize, openMedia } = this.props;
 
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
         const { content } = message;
@@ -55,15 +54,13 @@ class WebPage extends React.Component {
         const { url, photo, animation } = web_page;
 
         if (animation) {
-            return (
-                <Animation
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    animation={animation}
-                    openMedia={openMedia}
-                />
-            );
-        } else if (photo) {
+            const animationSrc = getSrc(animation.animation);
+            if (animationSrc || animation.thumbnail) {
+                return <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
+            }
+        }
+
+        if (photo) {
             let src = '';
             let fitPhotoSize = {
                 width: 0,
@@ -92,7 +89,9 @@ class WebPage extends React.Component {
     };
 
     render() {
-        const { classes, message } = this.props;
+        const { classes, chatId, messageId } = this.props;
+
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
         const { content } = message;
@@ -120,7 +119,8 @@ class WebPage extends React.Component {
 }
 
 WebPage.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
     size: PropTypes.number,
     displaySize: PropTypes.number,
     openMedia: PropTypes.func

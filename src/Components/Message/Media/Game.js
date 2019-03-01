@@ -13,6 +13,7 @@ import Animation from './Animation';
 import { accentStyles } from '../../Theme';
 import { getFormattedText } from '../../../Utils/Message';
 import { getFitSize, getSize } from '../../../Utils/Common';
+import { getSrc } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -54,8 +55,13 @@ class Game extends React.Component {
         const { photo, animation } = game;
 
         if (animation) {
-            return <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
-        } else if (photo) {
+            const animationSrc = getSrc(animation.animation);
+            if (animationSrc || animation.thumbnail) {
+                return <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
+            }
+        }
+
+        if (photo) {
             let src = '';
             let fitPhotoSize = {
                 width: 0,

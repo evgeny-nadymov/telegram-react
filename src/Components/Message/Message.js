@@ -476,7 +476,9 @@ class Message extends Component {
                         {reply && <Reply chatId={message.chat_id} messageId={reply} />}
                         {media}
                         <div className='message-text'>{text}</div>
-                        {webPage && <WebPage message={message} openMedia={this.openMedia} />}
+                        {webPage && (
+                            <WebPage chatId={message.chat_id} messageId={message.id} openMedia={this.openMedia} />
+                        )}
                     </div>
                 </div>
             </div>
