@@ -11,7 +11,6 @@ import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isVideoMessage } from '../../Utils/Message';
-import { PHOTO_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
@@ -25,8 +24,8 @@ class MediaViewerContent extends React.Component {
         let [width, height, file] = getMediaFile(chatId, messageId, size);
         file = FileStore.get(file.id) || file;
 
-        let [previewWidth, previewHeight, previewFile] = getMediaPreviewFile(chatId, messageId);
-        previewFile = FileStore.get(previewFile.id) || previewFile;
+        let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
+        thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
         const message = MessageStore.get(chatId, messageId);
         const text = getText(message);
@@ -34,13 +33,14 @@ class MediaViewerContent extends React.Component {
         this.state = {
             prevChatId: chatId,
             prevMessageId: messageId,
+            isPlaying: false,
             width: width,
             height: height,
             file: file,
             text: text,
-            previewWidth: previewWidth,
-            previewHeight: previewHeight,
-            previewFile: previewFile
+            thumbnailWidth: thumbnailWidth,
+            thumbnailHeight: thumbnailHeight,
+            thumbnail: thumbnail
         };
     }
 
@@ -51,8 +51,8 @@ class MediaViewerContent extends React.Component {
             let [width, height, file] = getMediaFile(chatId, messageId, size);
             file = FileStore.get(file.id) || file;
 
-            let [previewWidth, previewHeight, previewFile] = getMediaPreviewFile(chatId, messageId);
-            previewFile = FileStore.get(previewFile.id) || previewFile;
+            let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
+            thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message);
@@ -60,13 +60,14 @@ class MediaViewerContent extends React.Component {
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
+                isPlaying: false,
                 width: width,
                 height: height,
                 file: file,
                 text: text,
-                previewWidth: previewWidth,
-                previewHeight: previewHeight,
-                previewFile: previewFile
+                thumbnailWidth: thumbnailWidth,
+                thumbnailHeight: thumbnailHeight,
+                thumbnail: thumbnail
             };
         }
 
@@ -119,9 +120,9 @@ class MediaViewerContent extends React.Component {
         if (chatId === update.chatId && messageId === update.messageId) {
             const [width, height, file] = getMediaPreviewFile(chatId, messageId);
             this.setState({
-                previewWidth: width,
-                previewHeight: height,
-                previewFile: file
+                thumbnailWidth: width,
+                thumbnailHeight: height,
+                thumbnail: file
             });
         }
     };
@@ -145,20 +146,19 @@ class MediaViewerContent extends React.Component {
 
     handleContentClick = event => {
         if (event) event.stopPropagation();
-
-        //this.props.onClick(event);
     };
 
     render() {
         const { chatId, messageId } = this.props;
-        const { width, height, file, text, previewFile } = this.state;
+        const { width, height, file, text, thumbnail, isPlaying } = this.state;
         if (!file) return null;
 
         const blob = FileStore.getBlob(file.id) || file.blob;
         const src = FileStore.getBlobUrl(blob) || '';
 
-        const previewBlob = FileStore.getBlob(previewFile.id) || previewFile.blob;
-        const previewSrc = src ? '' : FileStore.getBlobUrl(previewBlob);
+        const thumbnailBlob = thumbnail ? FileStore.getBlob(thumbnail.id) || thumbnail.blob : null;
+        const thumbnailSrc = FileStore.getBlobUrl(thumbnailBlob);
+
         const isVideo = isVideoMessage(chatId, messageId);
         let videoWidth = width;
         let videoHeight = height;
@@ -171,21 +171,50 @@ class MediaViewerContent extends React.Component {
         return (
             <div className='media-viewer-content'>
                 {isVideo ? (
-                    <video
-                        className='media-viewer-content-image'
-                        src={src}
-                        poster={previewSrc}
-                        onClick={this.handleContentClick}
-                        controls
-                        autoPlay
-                        width={videoWidth}
-                        height={videoHeight}
-                    />
+                    <div className='media-viewer-content-video'>
+                        <video
+                            className='media-viewer-content-video-player'
+                            src={src}
+                            onClick={this.handleContentClick}
+                            controls
+                            autoPlay
+                            width={videoWidth}
+                            height={videoHeight}
+                            onPlay={() => {
+                                this.setState({ isPlaying: true });
+                            }}
+                        />
+                        {!isPlaying && (
+                            <div
+                                className='media-viewer-content-video-thumbnail'
+                                style={{
+                                    width: { videoWidth },
+                                    height: { videoHeight }
+                                }}
+                            />
+                        )}
+                    </div>
                 ) : (
-                    <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
+                    <div className='media-viewer-content-image' onClick={this.handleContentClick}>
+                        <img
+                            className='media-viewer-content-image-main'
+                            src={src}
+                            width={width}
+                            height={height}
+                            alt=''
+                        />
+                        {!src && (
+                            <img
+                                className='media-viewer-content-image-thumbnail'
+                                src={thumbnailSrc}
+                                width={width}
+                                height={height}
+                                alt=''
+                            />
+                        )}
+                    </div>
                 )}
-                {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileProgress file={file} showDownload={false} />
+                <FileProgress file={file} showDownload={false} zIndex={1} />
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
         );

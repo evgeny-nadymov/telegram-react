@@ -10,6 +10,7 @@ import dateFormat from 'dateformat';
 import Photo from '../Components/Message/Media/Photo';
 import Video from '../Components/Message/Media/Video';
 import Game from '../Components/Message/Media/Game';
+import VideoNote from '../Components/Message/Media/VideoNote';
 import Animation from '../Components/Message/Media/Animation';
 import Sticker from '../Components/Message/Media/Sticker';
 import Location from '../Components/Message/Media/Location';
@@ -236,6 +237,15 @@ function getMedia(message, openMedia) {
             return <Photo message={message} openMedia={openMedia} />;
         case 'messageVideo':
             return <Video message={message} openMedia={openMedia} />;
+        case 'messageVideoNote':
+            return (
+                <VideoNote
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    videoNote={message.content.video_note}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageAnimation':
             return (
                 <Animation

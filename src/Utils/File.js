@@ -16,8 +16,9 @@ import {
     LOCATION_ZOOM,
     PHOTO_BIG_SIZE,
     PHOTO_SIZE,
-    PRELOAD_GIF_SIZE,
+    PRELOAD_ANIMATION_SIZE,
     PRELOAD_VIDEO_SIZE,
+    PRELOAD_VIDEONOTE_SIZE,
     THUMBNAIL_PRIORITY
 } from '../Constants';
 import UserStore from '../Stores/UserStore';
@@ -162,6 +163,34 @@ function getWebPageAnimationThumbnailFile(message) {
     }
 
     const { thumbnail } = animation;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getVideoNoteThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVideoNote') {
+        return [0, '', ''];
+    }
+
+    const { video_note } = content;
+    if (!video_note) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = video_note;
     if (!thumbnail) {
         return [0, '', ''];
     }
@@ -482,6 +511,52 @@ function getPhotoFile(message, size = PHOTO_SIZE) {
     return [0, '', ''];
 }
 
+function getVideoNoteFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVideoNote') {
+        return [0, '', ''];
+    }
+
+    const { video_note } = content;
+    if (!video_note) {
+        return [0, '', ''];
+    }
+
+    const file = video_note.video;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getVideoNoteFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVideoNote') {
+        return 0;
+    }
+
+    const { video_note } = content;
+    if (!video_note) {
+        return 0;
+    }
+
+    const file = video_note.video;
+    if (file) {
+        return file.size;
+    }
+
+    return 0;
+}
+
 function getAnimationFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -769,7 +844,7 @@ function loadMessageContents(store, messages) {
                         }
 
                         const fileSize = getGameAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_GIF_SIZE) {
+                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
                             const [id, pid, idb_key] = getGameAnimationFile(message);
                             if (pid) {
                                 const obj = message.content.game.animation.animation;
@@ -847,7 +922,7 @@ function loadMessageContents(store, messages) {
                         }
 
                         const fileSize = getWebPageAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_GIF_SIZE) {
+                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
                             const [id, pid, idb_key] = getWebPageAnimationFile(message);
                             if (pid) {
                                 const obj = animation.animation;
@@ -970,9 +1045,56 @@ function loadMessageContents(store, messages) {
                         }
                         break;
                     }
+                    case 'messageVideoNote': {
+                        const fileSize = getVideoNoteFileSize(message);
+                        if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
+                            const [id, pid, idb_key] = getVideoNoteFile(message);
+                            if (pid) {
+                                const obj = message.content.video_note.video;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateVideoNoteBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    );
+                                }
+                            }
+                        }
+
+                        const [previewId, previewPid, previewIdbKey] = getVideoNoteThumbnailFile(message);
+                        if (previewPid) {
+                            const obj = message.content.video_note.thumbnail.photo;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    previewIdbKey,
+                                    null,
+                                    () =>
+                                        FileStore.updateVideoNoteThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            obj.id
+                                        ),
+                                    () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                );
+                            }
+                        }
+                        break;
+                    }
                     case 'messageAnimation': {
                         const fileSize = getAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_GIF_SIZE) {
+                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
                             const [id, pid, idb_key] = getAnimationFile(message);
                             if (pid) {
                                 const obj = message.content.animation.animation;
@@ -1286,6 +1408,8 @@ function getMediaPreviewFile(chatId, messageId) {
             }
         }
     }
+
+    return [0, 0, null];
 }
 
 function getMediaFile(chatId, messageId, size) {
@@ -1305,12 +1429,16 @@ function getMediaFile(chatId, messageId, size) {
                     return [photoSize.width, photoSize.height, photoSize.photo];
                 }
             }
+            break;
         }
         case 'messageVideo': {
             const { video } = content;
             if (video) {
                 return [video.width, video.height, video.video];
             }
+            break;
+        }
+        default: {
         }
     }
 
@@ -1593,6 +1721,9 @@ export {
     getStickerFile,
     getPhotoFile,
     getPhotoPreviewFile,
+    getVideoNoteFile,
+    getVideoNoteFileSize,
+    getVideoNoteThumbnailFile,
     getAnimationFile,
     getAnimationFileSize,
     getAnimationThumbnailFile,

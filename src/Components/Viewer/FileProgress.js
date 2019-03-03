@@ -44,10 +44,7 @@ class FileProgress extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         const { showDownload, showUpload } = this.props;
 
-        if (
-            this.isDownloading(nextState.file, nextState.prevFile) &&
-            showDownload
-        ) {
+        if (this.isDownloading(nextState.file, nextState.prevFile) && showDownload) {
             return false;
         }
 
@@ -60,17 +57,10 @@ class FileProgress extends React.Component {
         const prevLocal = this.state.prevFile ? this.state.prevFile.local : null;
         const prevIdbKey = this.state.prevFile ? this.state.prevFile.idb_key : null;
         const isDownloadingCompleted =
-            prevLocal &&
-            nextLocal &&
-            !prevLocal.is_downloading_completed &&
-            nextLocal.is_downloading_completed;
+            prevLocal && nextLocal && !prevLocal.is_downloading_completed && nextLocal.is_downloading_completed;
         const receiveIdbKey = nextIdbKey && !prevIdbKey;
 
-        if (
-            nextState.file.id === this.state.file.id &&
-            isDownloadingCompleted &&
-            receiveIdbKey
-        ) {
+        if (nextState.file.id === this.state.file.id && isDownloadingCompleted && receiveIdbKey) {
             return false;
         }
 
@@ -107,8 +97,7 @@ class FileProgress extends React.Component {
     isDownloading = (file, prevFile) => {
         if (this.props.showDownload) return;
 
-        const wasActive =
-            prevFile && prevFile.local && prevFile.local.is_downloading_active;
+        const wasActive = prevFile && prevFile.local && prevFile.local.is_downloading_active;
         const isActive = file && file.local && file.local.is_downloading_active;
 
         return wasActive || isActive;
@@ -117,8 +106,7 @@ class FileProgress extends React.Component {
     isUploading = (file, prevFile) => {
         if (this.props.showUpload) return;
 
-        const wasActive =
-            prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
+        const wasActive = prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
         const isActive = file && file.remote && file.remote.is_uploading_active;
 
         return wasActive || isActive;
@@ -133,16 +121,14 @@ class FileProgress extends React.Component {
         let progressSize = 0;
         let size = 0;
         if (this.isDownloading(file, prevFile)) {
-            wasActive =
-                prevFile && prevFile.local && prevFile.local.is_downloading_active;
+            wasActive = prevFile && prevFile.local && prevFile.local.is_downloading_active;
             isActive = local.is_downloading_active;
             isCompleted = local.is_downloading_completed;
             progressSize = local.downloaded_size;
             size = file.size;
             // console.log(`FileProgress.getProgressParams isDownloading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
         } else if (this.isUploading(file, prevFile)) {
-            wasActive =
-                prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
+            wasActive = prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
             isActive = remote.is_uploading_active;
             isCompleted = remote.is_uploading_completed;
             progressSize = remote.uploaded_size;
@@ -156,23 +142,16 @@ class FileProgress extends React.Component {
     };
 
     render() {
-        let { showCancel } = this.props;
+        let { showCancel, zIndex } = this.props;
         const { file, prevFile } = this.state;
         if (!file) return null;
 
-        const [
-            wasActive,
-            isActive,
-            isCompleted,
-            progressSize,
-            size
-        ] = this.getProgressParams(file, prevFile);
+        const [wasActive, isActive, isCompleted, progressSize, size] = this.getProgressParams(file, prevFile);
 
         let showProgress = isActive;
         let progress = 0;
         if (isActive) {
-            progress =
-                progressSize && size ? 100 - ((size - progressSize) / size) * 100 : 1;
+            progress = progressSize && size ? 100 - ((size - progressSize) / size) * 100 : 1;
         }
 
         const startCompleteAnimation = wasActive && !isActive;
@@ -186,12 +165,14 @@ class FileProgress extends React.Component {
             }, ANIMATION_COMPLETE_PROGRESS_MS);
         }
 
+        let style = zIndex ? { zIndex: zIndex } : {};
+
         // console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`, file, prevFile);
         // showCancel = true;
         // showProgress = true;
         return (
             showProgress && (
-                <div className='file-progress'>
+                <div className='file-progress' style={style}>
                     <div className='file-progress-background' />
                     <div className='file-progress-indicator'>
                         <CircularProgress
@@ -220,7 +201,8 @@ FileProgress.propTypes = {
     file: PropTypes.object.isRequired,
     showCancel: PropTypes.bool,
     showDownload: PropTypes.bool,
-    showUpload: PropTypes.bool
+    showUpload: PropTypes.bool,
+    zIndex: PropTypes.number
 };
 
 FileProgress.defaultProps = {

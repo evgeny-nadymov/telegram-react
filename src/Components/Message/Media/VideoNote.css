@@ -1,0 +1,20 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.video-note {
+    border-radius: 6px;
+    transform: translateZ(0);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    color: white;
+}
+
+.video-note-round {
+    border-radius: 50%;
+    overflow: hidden;
+}

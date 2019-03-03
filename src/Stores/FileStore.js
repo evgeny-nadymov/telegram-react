@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
 import { getLocationId } from '../Utils/Message';
+import { THUMBNAIL_PRIORITY } from '../Constants';
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -185,6 +186,11 @@ class FileStore extends EventEmitter {
                                             if (animation) {
                                                 this.handleAnimation(animation, file, idb_key, arr, obj);
                                             }
+
+                                            const { video_note } = web_page;
+                                            if (video_note) {
+                                                this.handleVideoNote(video_note, file, idb_key, arr, obj);
+                                            }
                                         }
 
                                         break;
@@ -244,6 +250,12 @@ class FileStore extends EventEmitter {
                                                 break;
                                             }
                                         }
+                                        break;
+                                    }
+                                    case 'messageVideoNote': {
+                                        const { video_note } = obj.content;
+
+                                        this.handleVideoNote(video_note, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageAnimation': {
@@ -378,6 +390,36 @@ class FileStore extends EventEmitter {
         }
     };
 
+    handleVideoNote = (videoNote, file, idb_key, arr, obj) => {
+        if (videoNote.thumbnail) {
+            const source = videoNote.thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateVideoNoteThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
+                );
+            }
+        }
+
+        if (videoNote.video) {
+            const source = videoNote.video;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateVideoNoteBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, 1, obj)
+                );
+            }
+        }
+    };
+
     handleAnimation = (animation, file, idb_key, arr, obj) => {
         if (animation.thumbnail) {
             const source = animation.thumbnail.photo;
@@ -388,7 +430,7 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateAnimationThumbnailBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, 1, obj)
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
                 );
             }
         }
@@ -656,6 +698,14 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updateVideoNoteBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVideoNoteBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updateAnimationBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateAnimationBlob', {
             chatId: chatId,
@@ -682,6 +732,14 @@ class FileStore extends EventEmitter {
 
     updateStickerBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateStickerBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateVideoNoteThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVideoNoteThumbnailBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId

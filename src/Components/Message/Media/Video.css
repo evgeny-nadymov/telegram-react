@@ -21,7 +21,7 @@
     user-select: none;
 }
 
-.video-preview-blurred {
+.media-blurred {
     filter: blur(2px);
 }
 

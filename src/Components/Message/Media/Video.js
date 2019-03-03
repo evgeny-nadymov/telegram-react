@@ -65,7 +65,7 @@ class Video extends React.Component {
         return (
             <div className='video' style={fitPhotoSize} onClick={openMedia}>
                 <img
-                    className={classNames('video-preview', { 'video-preview-blurred': isBlurred })}
+                    className={classNames('video-preview', { 'media-blurred': isBlurred })}
                     style={fitPhotoSize}
                     src={src}
                     alt=''

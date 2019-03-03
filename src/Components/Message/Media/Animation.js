@@ -65,21 +65,22 @@ class Animation extends React.Component {
         if (!fitPhotoSize) return null;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const src = getSrc(animation);
 
+        const isBlurred = isBlurredThumbnail(thumbnail);
         const isGif = isGifMimeType(mime_type);
-        const animationSrc = getSrc(animation);
 
         return (
             <div className='animation' style={fitPhotoSize} onClick={openMedia}>
-                {animationSrc ? (
+                {src ? (
                     isGif ? (
-                        <img className='media-viewer-content-image' style={fitPhotoSize} src={animationSrc} alt='' />
+                        <img className='media-viewer-content-image' style={fitPhotoSize} src={src} alt='' />
                     ) : (
                         <video
                             className='media-viewer-content-image'
-                            src={animationSrc}
+                            src={src}
                             poster={thumbnailSrc}
+                            muted
                             autoPlay
                             loop
                             playsInline
