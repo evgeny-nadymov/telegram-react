@@ -373,8 +373,8 @@ class Message extends Component {
                         file = FileStore.get(file.id);
                         if (file) {
                             if (file.local.is_downloading_active) {
-                                FileStore.cancelGetRemoteFile(file.id, message);
-                                return;
+                                //FileStore.cancelGetRemoteFile(file.id, message);
+                                //return;
                             } else if (file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;

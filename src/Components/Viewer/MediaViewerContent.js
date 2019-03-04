@@ -170,50 +170,52 @@ class MediaViewerContent extends React.Component {
 
         return (
             <div className='media-viewer-content'>
-                {isVideo ? (
-                    <div className='media-viewer-content-video'>
-                        <video
-                            className='media-viewer-content-video-player'
-                            src={src}
-                            onClick={this.handleContentClick}
-                            controls
-                            autoPlay
-                            width={videoWidth}
-                            height={videoHeight}
-                            onPlay={() => {
-                                this.setState({ isPlaying: true });
-                            }}
-                        />
-                        {!isPlaying && (
-                            <div
-                                className='media-viewer-content-video-thumbnail'
-                                style={{
-                                    width: { videoWidth },
-                                    height: { videoHeight }
+                <div className='media-viewer-content-wrapper' onClick={this.handleContentClick}>
+                    {isVideo ? (
+                        <>
+                            <video
+                                className='media-viewer-content-video-player'
+                                src={src}
+                                onClick={this.handleContentClick}
+                                controls
+                                autoPlay
+                                width={videoWidth}
+                                height={videoHeight}
+                                onPlay={() => {
+                                    this.setState({ isPlaying: true });
                                 }}
                             />
-                        )}
-                    </div>
-                ) : (
-                    <div className='media-viewer-content-image' onClick={this.handleContentClick}>
-                        <img
-                            className='media-viewer-content-image-main'
-                            src={src}
-                            width={width}
-                            height={height}
-                            alt=''
-                        />
-                        {!src && (
+                            {!isPlaying && (
+                                <div
+                                    className='media-viewer-content-video-thumbnail'
+                                    style={{
+                                        width: videoWidth,
+                                        height: videoHeight
+                                    }}
+                                />
+                            )}
+                        </>
+                    ) : (
+                        <>
                             <img
-                                className='media-viewer-content-image-thumbnail'
-                                src={thumbnailSrc}
+                                className='media-viewer-content-image-main'
+                                src={src}
                                 width={width}
                                 height={height}
                                 alt=''
                             />
-                        )}
-                    </div>
-                )}
+                            {!src && (
+                                <img
+                                    className='media-viewer-content-image-thumbnail'
+                                    src={thumbnailSrc}
+                                    width={width}
+                                    height={height}
+                                    alt=''
+                                />
+                            )}
+                        </>
+                    )}
+                </div>
                 <FileProgress file={file} showDownload={false} zIndex={1} />
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>

@@ -869,7 +869,7 @@ function loadMessageContents(store, messages) {
 
                         const [previewId, previewPid, previewIdbKey] = getGameAnimationThumbnailFile(message);
                         if (previewPid) {
-                            const obj = animation.thumbnail;
+                            const obj = animation.thumbnail.photo;
                             if (!obj.blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
@@ -947,7 +947,7 @@ function loadMessageContents(store, messages) {
 
                         const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
                         if (previewPid) {
-                            const obj = animation.thumbnail;
+                            const obj = animation.thumbnail.photo;
                             if (!obj.blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
