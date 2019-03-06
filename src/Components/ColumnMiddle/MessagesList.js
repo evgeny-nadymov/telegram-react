@@ -288,6 +288,7 @@ class MessagesList extends React.Component {
         this.completed = false;
         this.loadMigratedHistory = false;
 
+        this.suppressHandleScrollOnSelectChat = true;
         if (chat) {
             let sessionId = this.sessionId;
 
@@ -349,7 +350,12 @@ class MessagesList extends React.Component {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_UNREAD;
             }
 
-            this.replace(separatorMessageId, result.messages, scrollBehavior);
+            this.replace(
+                separatorMessageId,
+                result.messages,
+                scrollBehavior,
+                () => (this.suppressHandleScrollOnSelectChat = false)
+            );
 
             // load files
             const store = FileStore.getStore();
@@ -363,7 +369,12 @@ class MessagesList extends React.Component {
             // load full info
             getChatFullInfo(chat.id);
         } else {
-            this.replace(0, [], ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+            this.replace(
+                0,
+                [],
+                ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
+                () => (this.suppressHandleScrollOnSelectChat = false)
+            );
         }
 
         if (previousChat) {
@@ -625,7 +636,13 @@ class MessagesList extends React.Component {
         //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
 
         if (this.suppressHandleScroll) {
+            console.log('SCROLL HANDLESCROLL suppressHandleScroll');
             this.suppressHandleScroll = false;
+            return;
+        }
+
+        if (this.suppressHandleScrollOnSelectChat) {
+            console.log('SCROLL HANDLESCROLL suppressHandleScrollOnSelectChat');
             return;
         }
 

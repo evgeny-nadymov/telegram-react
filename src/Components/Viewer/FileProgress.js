@@ -126,16 +126,34 @@ class FileProgress extends React.Component {
             isCompleted = local.is_downloading_completed;
             progressSize = local.downloaded_size;
             size = file.size;
-            // console.log(`FileProgress.getProgressParams isDownloading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            console.log(
+                `FileProgress.getProgressParams isDownloading id=${
+                    file.id
+                } was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`,
+                file,
+                prevFile
+            );
         } else if (this.isUploading(file, prevFile)) {
             wasActive = prevFile && prevFile.remote && prevFile.remote.is_uploading_active;
             isActive = remote.is_uploading_active;
             isCompleted = remote.is_uploading_completed;
             progressSize = remote.uploaded_size;
             size = file.size;
-            // console.log(`FileProgress.getProgressParams isUploading id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            console.log(
+                `FileProgress.getProgressParams isUploading id=${
+                    file.id
+                } was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`,
+                file,
+                prevFile
+            );
         } else {
-            // console.log(`FileProgress.getProgressParams none id=${file.id} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`);
+            console.log(
+                `FileProgress.getProgressParams none id=${file.id} showDownload=${this.props.showDownload} showUpload=${
+                    this.props.showUpload
+                } was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`,
+                file,
+                prevFile
+            );
         }
 
         return [wasActive, isActive, isCompleted, progressSize, size];
@@ -167,7 +185,13 @@ class FileProgress extends React.Component {
 
         let style = zIndex ? { zIndex: zIndex } : {};
 
-        // console.log(`FileProgress.render id=${file.id} showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`, file, prevFile);
+        console.log(
+            `FileProgress.render id=${
+                file.id
+            } showProgress=${showProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`,
+            file,
+            prevFile
+        );
         // showCancel = true;
         // showProgress = true;
         return (

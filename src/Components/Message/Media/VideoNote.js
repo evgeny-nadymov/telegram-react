@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import FileProgress from '../../Viewer/FileProgress';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getVideoDurationString } from '../../../Utils/Common';
@@ -81,7 +82,7 @@ class VideoNote extends React.Component {
                         muted
                         autoPlay
                         loop
-                        playsinline
+                        playsInline
                         width={fitPhotoSize.width}
                         height={fitPhotoSize.height}
                     />
@@ -100,6 +101,7 @@ class VideoNote extends React.Component {
                         </div>
                     </>
                 )}
+                <FileProgress file={video} showDownload={false} showCancel />
             </div>
         );
     }
