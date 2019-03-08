@@ -1394,6 +1394,30 @@ function getMediaPreviewFile(chatId, messageId) {
             if (video.thumbnail) {
                 return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
             }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, video } = web_page;
+                if (animation && animation.thumbnail) {
+                    return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
+                }
+                if (video && video.thumbnail) {
+                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                }
+            }
+            break;
+        }
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation && animation.thumbnail) {
+                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
+            }
+            break;
+        }
+        default: {
+            return [0, 0, null];
         }
     }
 
@@ -1423,6 +1447,26 @@ function getMediaFile(chatId, messageId, size) {
             const { video } = content;
             if (video) {
                 return [video.width, video.height, video.video];
+            }
+            break;
+        }
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation) {
+                return [animation.width, animation.height, animation.animation];
+            }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, video } = web_page;
+                if (animation) {
+                    return [animation.width, animation.height, animation.animation];
+                }
+                if (video) {
+                    return [video.width, video.height, video.video];
+                }
             }
             break;
         }

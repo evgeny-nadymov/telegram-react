@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
-import { getText, isVideoMessage } from '../../Utils/Message';
+import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -77,20 +77,24 @@ class MediaViewerContent extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.on('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
-        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoBlob);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
-    onClientUpdatePhotoBlob = update => {
+    onClientUpdateMediaBlob = update => {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
@@ -103,20 +107,7 @@ class MediaViewerContent extends React.Component {
         }
     };
 
-    onClientUpdateVideoBlob = update => {
-        const { chatId, messageId, size } = this.props;
-
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file] = getMediaFile(chatId, messageId, size);
-            this.setState({
-                width: width,
-                height: height,
-                file: file
-            });
-        }
-    };
-
-    onClientUpdateVideoThumbnailBlob = update => {
+    onClientUpdateMediaThumbnailBlob = update => {
         const { chatId, messageId } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
@@ -163,6 +154,7 @@ class MediaViewerContent extends React.Component {
         const isBlurred = isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight });
 
         const isVideo = isVideoMessage(chatId, messageId);
+        const isAnimation = isAnimationMessage(chatId, messageId);
         let videoWidth = width;
         let videoHeight = height;
         if (Math.max(videoWidth, videoHeight) > 640) {
@@ -171,46 +163,88 @@ class MediaViewerContent extends React.Component {
             videoHeight = videoHeight > videoWidth ? 640 : Math.floor(videoHeight * scale);
         }
 
+        let content = null;
+        if (isVideo) {
+            content = (
+                <div className='media-viewer-content-wrapper'>
+                    <video
+                        className='media-viewer-content-video-player'
+                        src={src}
+                        onClick={this.handleContentClick}
+                        controls
+                        autoPlay
+                        width={videoWidth}
+                        height={videoHeight}
+                        onPlay={() => {
+                            this.setState({ isPlaying: true });
+                        }}
+                    />
+                    {!isPlaying &&
+                        (!src && thumbnailSrc ? (
+                            <img
+                                className={classNames('media-viewer-content-video-thumbnail', {
+                                    'media-blurred': isBlurred
+                                })}
+                                src={thumbnailSrc}
+                                alt=''
+                                width={videoWidth}
+                                height={videoHeight}
+                            />
+                        ) : (
+                            <div
+                                className='media-viewer-content-video-thumbnail'
+                                style={{
+                                    width: videoWidth,
+                                    height: videoHeight
+                                }}
+                            />
+                        ))}
+                </div>
+            );
+        } else if (isAnimation) {
+            content = (
+                <div className='media-viewer-content-wrapper'>
+                    <video
+                        className='media-viewer-content-video-player'
+                        src={src}
+                        onClick={this.handleContentClick}
+                        loop
+                        autoPlay
+                        width={videoWidth}
+                        height={videoHeight}
+                        onPlay={() => {
+                            this.setState({ isPlaying: true });
+                        }}
+                    />
+                    {!isPlaying &&
+                        (!src && thumbnailSrc ? (
+                            <img
+                                className={classNames('media-viewer-content-video-thumbnail', {
+                                    'media-blurred': isBlurred
+                                })}
+                                src={thumbnailSrc}
+                                alt=''
+                                width={videoWidth}
+                                height={videoHeight}
+                            />
+                        ) : (
+                            <div
+                                className='media-viewer-content-video-thumbnail'
+                                style={{
+                                    width: videoWidth,
+                                    height: videoHeight
+                                }}
+                            />
+                        ))}
+                </div>
+            );
+        } else {
+            content = <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />;
+        }
+
         return (
             <div className='media-viewer-content'>
-                {isVideo ? (
-                    <div className='media-viewer-content-wrapper'>
-                        <video
-                            className='media-viewer-content-video-player'
-                            src={src}
-                            onClick={this.handleContentClick}
-                            controls
-                            autoPlay
-                            width={videoWidth}
-                            height={videoHeight}
-                            onPlay={() => {
-                                this.setState({ isPlaying: true });
-                            }}
-                        />
-                        {!isPlaying &&
-                            (!src && thumbnailSrc ? (
-                                <img
-                                    className={classNames('media-viewer-content-video-thumbnail', {
-                                        'media-blurred': isBlurred
-                                    })}
-                                    src={thumbnailSrc}
-                                    alt=''
-                                    width={videoWidth}
-                                    height={videoHeight}
-                                />
-                            ) : (
-                                <div
-                                    className='media-viewer-content-video-thumbnail'
-                                    style={{
-                                        width: videoWidth,
-                                        height: videoHeight
-                                    }}
-                                />
-                            ))}
-                    </div>
-                ) : (
-                    <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
-                )}
+                {content}
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
                 <FileProgress file={file} zIndex={2} />
                 {text && text.length > 0 && <MediaCaption text={text} />}

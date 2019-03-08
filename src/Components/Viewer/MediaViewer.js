@@ -31,7 +31,7 @@ import {
     preloadMediaViewerContent,
     saveOrDownload
 } from '../../Utils/File';
-import { filterMessages, isMediaContent, isVideoMessage } from '../../Utils/Message';
+import { filterMessages, isAnimationMessage, isMediaContent, isVideoMessage } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
@@ -281,38 +281,43 @@ class MediaViewer extends React.Component {
             hasPreviousMedia: this.hasPreviousMedia(index)
         });
 
-        preloadMediaViewerContent(index, this.history);
+        if (index === -1) {
+            this.history = [MessageStore.get(chatId, currentMessageId)];
+            preloadMediaViewerContent(0, this.history);
+        } else {
+            preloadMediaViewerContent(index, this.history);
 
-        const maxCount = 1500;
-        let count = 0;
-        while (!this.firstSliceLoaded && count < maxCount) {
-            result = await TdLibController.send({
-                '@type': 'searchChatMessages',
-                chat_id: chatId,
-                query: '',
-                sender_user_id: 0,
-                from_message_id: this.history.length > 0 ? this.history[0].id : 0,
-                offset: -99,
-                limit: 99 + 1,
-                filter: { '@type': 'searchMessagesFilterPhoto' }
-            });
-            count += result.messages.length;
+            const maxCount = 1500;
+            let count = 0;
+            while (!this.firstSliceLoaded && count < maxCount) {
+                result = await TdLibController.send({
+                    '@type': 'searchChatMessages',
+                    chat_id: chatId,
+                    query: '',
+                    sender_user_id: 0,
+                    from_message_id: this.history.length > 0 ? this.history[0].id : 0,
+                    offset: -99,
+                    limit: 99 + 1,
+                    filter: { '@type': 'searchMessagesFilterPhoto' }
+                });
+                count += result.messages.length;
 
-            filterMessages(result, this.history);
-            MessageStore.setItems(result.messages);
+                filterMessages(result, this.history);
+                MessageStore.setItems(result.messages);
 
-            this.history = result.messages.concat(this.history);
-            this.firstSliceLoaded = result.messages.length === 0;
+                this.history = result.messages.concat(this.history);
+                this.firstSliceLoaded = result.messages.length === 0;
 
-            const { currentMessageId } = this.state;
-            const index = this.history.findIndex(x => x.id === currentMessageId);
+                const { currentMessageId } = this.state;
+                const index = this.history.findIndex(x => x.id === currentMessageId);
 
-            this.setState({
-                hasNextMedia: this.hasNextMedia(index),
-                hasPreviousMedia: this.hasPreviousMedia(index),
-                firstSliceLoaded: this.firstSliceLoaded,
-                totalCount: result.total_count
-            });
+                this.setState({
+                    hasNextMedia: this.hasNextMedia(index),
+                    hasPreviousMedia: this.hasPreviousMedia(index),
+                    firstSliceLoaded: this.firstSliceLoaded,
+                    totalCount: result.total_count
+                });
+            }
         }
     };
 
@@ -356,6 +361,29 @@ class MediaViewer extends React.Component {
                     const file = video.video;
                     if (file) {
                         saveOrDownload(file, video.file_name || file.id + '.mp4', message);
+                    }
+                }
+                break;
+            }
+            case 'messageText': {
+                const { web_page } = content;
+                if (web_page) {
+                    const { animation } = web_page;
+                    if (animation) {
+                        const file = animation.animation;
+                        if (file) {
+                            saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
+                        }
+                    }
+                }
+                break;
+            }
+            case 'messageAnimation': {
+                const { animation } = content;
+                if (animation) {
+                    const file = animation.animation;
+                    if (file) {
+                        saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
                     }
                 }
                 break;
@@ -649,7 +677,12 @@ class MediaViewer extends React.Component {
         const [width, height, file] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
 
         const fileId = file ? file.id : 0;
-        const isVideo = isVideoMessage(chatId, currentMessageId);
+        let title = 'Photo';
+        if (isVideoMessage(chatId, currentMessageId)) {
+            title = 'Video';
+        } else if (isAnimationMessage(chatId, currentMessageId)) {
+            title = 'GIF';
+        }
 
         return (
             <div className='media-viewer'>
@@ -683,7 +716,7 @@ class MediaViewer extends React.Component {
                 <div className='media-viewer-footer'>
                     <MediaViewerControl chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
-                        title={isVideo ? 'Video' : 'Photo'}
+                        title={title}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
                     <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>

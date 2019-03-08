@@ -253,7 +253,7 @@ class Message extends Component {
                             file = FileStore.get(file.id) || file;
                             if (file) {
                                 if (file.local.is_downloading_active) {
-                                    //FileStore.cancelGetRemoteFile(file.id, message);
+                                    FileStore.cancelGetRemoteFile(file.id, message);
                                     return;
                                 } else if (file.remote.is_uploading_active) {
                                     FileStore.cancelUploadFile(file.id, message);
@@ -285,7 +285,7 @@ class Message extends Component {
                             file = FileStore.get(file.id) || file;
                             if (file) {
                                 if (file.local.is_downloading_active) {
-                                    //FileStore.cancelGetRemoteFile(file.id, message);
+                                    FileStore.cancelGetRemoteFile(file.id, message);
                                     return;
                                 } else if (file.remote.is_uploading_active) {
                                     FileStore.cancelUploadFile(file.id, message);
@@ -295,14 +295,20 @@ class Message extends Component {
                                 }
                             }
                         }
-                    }
 
-                    // set active animation
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateActiveAnimation',
-                        chatId: message.chat_id,
-                        messageId: message.id
-                    });
+                        // set active animation
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateActiveAnimation',
+                            chatId: message.chat_id,
+                            messageId: message.id
+                        });
+
+                        // open media viewer
+                        ApplicationStore.setMediaViewerContent({
+                            chatId: chatId,
+                            messageId: messageId
+                        });
+                    }
                 }
 
                 break;
@@ -315,7 +321,7 @@ class Message extends Component {
                         file = FileStore.get(file.id) || file;
                         if (file) {
                             if (file.local.is_downloading_active) {
-                                //FileStore.cancelGetRemoteFile(file.id, message);
+                                FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
                             } else if (file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
@@ -344,7 +350,7 @@ class Message extends Component {
                         file = FileStore.get(file.id) || file;
                         if (file) {
                             if (file.local.is_downloading_active) {
-                                //FileStore.cancelGetRemoteFile(file.id, message);
+                                FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
                             } else if (file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
@@ -361,6 +367,12 @@ class Message extends Component {
                     '@type': 'clientUpdateActiveAnimation',
                     chatId: message.chat_id,
                     messageId: message.id
+                });
+
+                // open media viewer
+                ApplicationStore.setMediaViewerContent({
+                    chatId: chatId,
+                    messageId: messageId
                 });
 
                 break;

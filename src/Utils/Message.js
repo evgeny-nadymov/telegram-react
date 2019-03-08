@@ -496,6 +496,27 @@ function isVideoMessage(chatId, messageId) {
     return message.content['@type'] === 'messageVideo';
 }
 
+function isAnimationMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            return true;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            return Boolean(web_page.animation);
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 export {
     getTitle,
     getText,
@@ -512,6 +533,7 @@ export {
     filterMessages,
     isMediaContent,
     isVideoMessage,
+    isAnimationMessage,
     getLocationId,
     getVenueId
 };
