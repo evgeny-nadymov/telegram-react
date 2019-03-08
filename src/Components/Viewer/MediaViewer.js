@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withNamespaces } from 'react-i18next';
 import {
     Button,
     Checkbox,
@@ -620,7 +621,7 @@ class MediaViewer extends React.Component {
     };
 
     render() {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, t } = this.props;
         const {
             currentMessageId,
             hasNextMedia,
@@ -645,17 +646,25 @@ class MediaViewer extends React.Component {
         const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
         const canBeForwarded = can_be_forwarded;
 
+        let deleteConfirmationContent = '';
+        if (isVideoMessage(chatId, currentMessageId)) {
+            deleteConfirmationContent = t('AreYouSureDeleteVideo');
+        } else if (isAnimationMessage(chatId, currentMessageId)) {
+            deleteConfirmationContent = t('AreYouSureDeleteGIF');
+        } else {
+            deleteConfirmationContent = t('AreYouSureDeletePhoto');
+        }
         const deleteConfirmation = deleteConfirmationOpened ? (
             <Dialog
                 open={deleteConfirmationOpened}
                 onClose={this.handleDialogClose}
                 aria-labelledby='form-dialog-title'>
-                <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
+                <DialogTitle id='form-dialog-title'>{t('AppName')}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>Are you sure you want to delete this media?</DialogContentText>
+                    <DialogContentText>{deleteConfirmationContent}</DialogContentText>
                     {can_be_deleted_for_all_users && (
                         <FormControlLabel
-                            label='Delete for all'
+                            label={t('DeleteForAll')}
                             control={
                                 <Checkbox color='primary' value='deleteAll' onChange={this.handleChangeDeleteForAll} />
                             }
@@ -665,10 +674,10 @@ class MediaViewer extends React.Component {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleDialogClose} color='primary'>
-                        Cancel
+                        {t('Cancel')}
                     </Button>
                     <Button onClick={this.handleDone} color='primary'>
-                        Ok
+                        {t('Ok')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -677,11 +686,11 @@ class MediaViewer extends React.Component {
         const [width, height, file] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
 
         const fileId = file ? file.id : 0;
-        let title = 'Photo';
+        let title = t('AttachPhoto');
         if (isVideoMessage(chatId, currentMessageId)) {
-            title = 'Video';
+            title = t('AttachVideo');
         } else if (isAnimationMessage(chatId, currentMessageId)) {
-            title = 'GIF';
+            title = t('AttachGif');
         }
 
         return (
@@ -739,4 +748,4 @@ MediaViewer.propTypes = {
     messageId: PropTypes.number.isRequired
 };
 
-export default MediaViewer;
+export default withNamespaces()(MediaViewer);
