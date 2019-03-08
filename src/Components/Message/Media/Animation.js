@@ -96,10 +96,12 @@ class Animation extends React.Component {
                             src={thumbnailSrc}
                             alt=''
                         />
-                        <div className='animation-play'>{t('AttachGif')}</div>
                         <div className='animation-meta'>{getFileSize(animation)}</div>
                     </>
                 )}
+                <FileProgress file={animation}>
+                    <div className='animation-play'>{t('AttachGif')}</div>
+                </FileProgress>
             </div>
         );
     }

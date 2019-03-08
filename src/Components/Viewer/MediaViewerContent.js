@@ -7,10 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isVideoMessage } from '../../Utils/Message';
+import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
@@ -150,7 +152,7 @@ class MediaViewerContent extends React.Component {
 
     render() {
         const { chatId, messageId } = this.props;
-        const { width, height, file, text, thumbnail, isPlaying } = this.state;
+        const { width, height, thumbnailWidth, thumbnailHeight, file, text, thumbnail, isPlaying } = this.state;
         if (!file) return null;
 
         const blob = FileStore.getBlob(file.id) || file.blob;
@@ -158,6 +160,7 @@ class MediaViewerContent extends React.Component {
 
         const thumbnailBlob = thumbnail ? FileStore.getBlob(thumbnail.id) || thumbnail.blob : null;
         const thumbnailSrc = FileStore.getBlobUrl(thumbnailBlob);
+        const isBlurred = isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight });
 
         const isVideo = isVideoMessage(chatId, messageId);
         let videoWidth = width;
@@ -170,22 +173,32 @@ class MediaViewerContent extends React.Component {
 
         return (
             <div className='media-viewer-content'>
-                <div className='media-viewer-content-wrapper' onClick={this.handleContentClick}>
-                    {isVideo ? (
-                        <>
-                            <video
-                                className='media-viewer-content-video-player'
-                                src={src}
-                                onClick={this.handleContentClick}
-                                controls
-                                autoPlay
-                                width={videoWidth}
-                                height={videoHeight}
-                                onPlay={() => {
-                                    this.setState({ isPlaying: true });
-                                }}
-                            />
-                            {!isPlaying && (
+                {isVideo ? (
+                    <div className='media-viewer-content-wrapper'>
+                        <video
+                            className='media-viewer-content-video-player'
+                            src={src}
+                            onClick={this.handleContentClick}
+                            controls
+                            autoPlay
+                            width={videoWidth}
+                            height={videoHeight}
+                            onPlay={() => {
+                                this.setState({ isPlaying: true });
+                            }}
+                        />
+                        {!isPlaying &&
+                            (!src && thumbnailSrc ? (
+                                <img
+                                    className={classNames('media-viewer-content-video-thumbnail', {
+                                        'media-blurred': isBlurred
+                                    })}
+                                    src={thumbnailSrc}
+                                    alt=''
+                                    width={videoWidth}
+                                    height={videoHeight}
+                                />
+                            ) : (
                                 <div
                                     className='media-viewer-content-video-thumbnail'
                                     style={{
@@ -193,30 +206,13 @@ class MediaViewerContent extends React.Component {
                                         height: videoHeight
                                     }}
                                 />
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <img
-                                className='media-viewer-content-image-main'
-                                src={src}
-                                width={width}
-                                height={height}
-                                alt=''
-                            />
-                            {!src && (
-                                <img
-                                    className='media-viewer-content-image-thumbnail'
-                                    src={thumbnailSrc}
-                                    width={width}
-                                    height={height}
-                                    alt=''
-                                />
-                            )}
-                        </>
-                    )}
-                </div>
-                <FileProgress file={file} showDownload={false} zIndex={1} />
+                            ))}
+                    </div>
+                ) : (
+                    <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
+                )}
+                {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
+                <FileProgress file={file} zIndex={2} />
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
         );

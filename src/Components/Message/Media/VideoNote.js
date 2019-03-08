@@ -101,7 +101,7 @@ class VideoNote extends React.Component {
                         </div>
                     </>
                 )}
-                <FileProgress file={video} showDownload={false} showCancel />
+                <FileProgress file={video} cancelButton />
             </div>
         );
     }

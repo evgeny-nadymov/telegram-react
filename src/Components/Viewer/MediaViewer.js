@@ -24,7 +24,13 @@ import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getSize } from '../../Utils/Common';
-import { getMediaFile, loadMediaViewerContent, preloadMediaViewerContent, saveOrDownload } from '../../Utils/File';
+import {
+    cancelPreloadMediaViewerContent,
+    getMediaFile,
+    loadMediaViewerContent,
+    preloadMediaViewerContent,
+    saveOrDownload
+} from '../../Utils/File';
 import { filterMessages, isMediaContent, isVideoMessage } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
@@ -312,6 +318,12 @@ class MediaViewer extends React.Component {
 
     handleClose = () => {
         ApplicationStore.setMediaViewerContent(null);
+
+        const { currentMessageId } = this.state;
+        const index = this.history.findIndex(x => x.id === currentMessageId);
+        if (index !== -1) {
+            cancelPreloadMediaViewerContent(index, this.history);
+        }
     };
 
     handleSave = () => {

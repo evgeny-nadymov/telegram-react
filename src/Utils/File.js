@@ -843,27 +843,24 @@ function loadMessageContents(store, messages) {
                             }
                         }
 
-                        const fileSize = getGameAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                            const [id, pid, idb_key] = getGameAnimationFile(message);
-                            if (pid) {
-                                const obj = message.content.game.animation.animation;
-                                if (!obj.blob) {
-                                    const localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        obj,
-                                        idb_key,
-                                        null,
-                                        () =>
-                                            FileStore.updateAnimationBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
-                                    );
-                                }
+                        const [id, pid, idb_key] = getGameAnimationFile(message);
+                        if (pid) {
+                            const obj = message.content.game.animation.animation;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getGameAnimationFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
                             }
                         }
 
@@ -921,27 +918,24 @@ function loadMessageContents(store, messages) {
                             }
                         }
 
-                        const fileSize = getWebPageAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                            const [id, pid, idb_key] = getWebPageAnimationFile(message);
-                            if (pid) {
-                                const obj = animation.animation;
-                                if (!obj.blob) {
-                                    const localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        obj,
-                                        idb_key,
-                                        null,
-                                        () =>
-                                            FileStore.updateAnimationBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
-                                    );
-                                }
+                        const [id, pid, idb_key] = getWebPageAnimationFile(message);
+                        if (pid) {
+                            const obj = animation.animation;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getWebPageAnimationFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
                             }
                         }
 
@@ -1046,27 +1040,24 @@ function loadMessageContents(store, messages) {
                         break;
                     }
                     case 'messageVideoNote': {
-                        const fileSize = getVideoNoteFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
-                            const [id, pid, idb_key] = getVideoNoteFile(message);
-                            if (pid) {
-                                const obj = message.content.video_note.video;
-                                if (!obj.blob) {
-                                    const localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        obj,
-                                        idb_key,
-                                        null,
-                                        () =>
-                                            FileStore.updateVideoNoteBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
-                                    );
-                                }
+                        const [id, pid, idb_key] = getVideoNoteFile(message);
+                        if (pid) {
+                            const obj = message.content.video_note.video;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateVideoNoteBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getVideoNoteFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
                             }
                         }
 
@@ -1093,27 +1084,24 @@ function loadMessageContents(store, messages) {
                         break;
                     }
                     case 'messageAnimation': {
-                        const fileSize = getAnimationFileSize(message);
-                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                            const [id, pid, idb_key] = getAnimationFile(message);
-                            if (pid) {
-                                const obj = message.content.animation.animation;
-                                if (!obj.blob) {
-                                    const localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        obj,
-                                        idb_key,
-                                        null,
-                                        () =>
-                                            FileStore.updateAnimationBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
-                                    );
-                                }
+                        const [id, pid, idb_key] = getAnimationFile(message);
+                        if (pid) {
+                            const obj = message.content.animation.animation;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getAnimationFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
                             }
                         }
 
@@ -1445,6 +1433,84 @@ function getMediaFile(chatId, messageId, size) {
     return [0, 0, null];
 }
 
+function cancelLoadMediaViewerContent(messages) {
+    if (!messages) return;
+    if (!messages.length) return;
+
+    for (let i = 0; i < messages.length; i++) {
+        let message = messages[i];
+        const { content } = message;
+        if (content) {
+            switch (content['@type']) {
+                case 'messagePhoto': {
+                    // preview
+                    /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
+                                        if (previewPid) {
+                                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                                            if (!preview.blob){
+                                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
+                                                    () => MessageStore.updateMessagePhoto(message.id),
+                                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                                    'load_contents_preview_',
+                                                    message.id);
+
+                                            }
+                                        }*/
+
+                    const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
+                    if (pid) {
+                        const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
+                        if (photoSize) {
+                            const file = photoSize.photo;
+                            const blob = file.blob || FileStore.getBlob(file.id);
+                            if (!blob) {
+                                TdLibController.send({
+                                    '@type': 'cancelDownloadFile',
+                                    file_id: file.id,
+                                    only_if_pending: false
+                                });
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                case 'messageVideo': {
+                    // preview
+                    const [previewId, previewPid, previewIdbKey] = getVideoThumbnailFile(message);
+                    if (previewPid) {
+                        const file = message.content.video.thumbnail.photo;
+                        const blob = file.blob || FileStore.getBlob(file.id);
+                        if (!blob) {
+                            TdLibController.send({
+                                '@type': 'cancelDownloadFile',
+                                file_id: file.id,
+                                only_if_pending: false
+                            });
+                        }
+                    }
+
+                    // video
+                    const [id, pid, idb_key] = getVideoFile(message);
+                    if (pid) {
+                        const file = message.content.video.video;
+                        const blob = file.blob || FileStore.getBlob(file.id);
+                        if (!blob) {
+                            TdLibController.send({
+                                '@type': 'cancelDownloadFile',
+                                file_id: file.id,
+                                only_if_pending: false
+                            });
+                        }
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+}
+
 function loadMediaViewerContent(messages, useSizeLimit = false) {
     //console.log('loadMediaViewerContent userSizeLimit=' + useSizeLimit, messages.map(x => x.id));
 
@@ -1514,11 +1580,6 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     }
 
                     // video
-                    const videoFileSize = getVideoFileSize(message);
-                    if (useSizeLimit && videoFileSize && videoFileSize > PRELOAD_VIDEO_SIZE) {
-                        break;
-                    }
-
                     const [id, pid, idb_key] = getVideoFile(message);
                     if (pid) {
                         let file = message.content.video.video;
@@ -1531,7 +1592,12 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                 idb_key,
                                 null,
                                 () => FileStore.updateVideoBlob(localMessage.chat_id, localMessage.id, file.id),
-                                () => FileStore.getRemoteFile(id, 1, localMessage)
+                                () => {
+                                    const videoFileSize = getVideoFileSize(message);
+                                    if (!useSizeLimit || (videoFileSize && videoFileSize <= PRELOAD_VIDEO_SIZE)) {
+                                        FileStore.getRemoteFile(id, 1, localMessage);
+                                    }
+                                }
                             );
                         }
                     }
@@ -1541,6 +1607,21 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
             }
         }
     }
+}
+
+function cancelPreloadMediaViewerContent(index, history) {
+    if (!history.length) return;
+
+    const messages = [];
+    if (index > 0) {
+        messages.push(history[index - 1]);
+    }
+    if (index < history.length - 1) {
+        messages.push(history[index + 1]);
+    }
+
+    cancelLoadMediaViewerContent([history[index]]);
+    cancelLoadMediaViewerContent(messages);
 }
 
 function preloadMediaViewerContent(index, history) {
@@ -1740,6 +1821,8 @@ export {
     loadMessageContents,
     loadMediaViewerContent,
     preloadMediaViewerContent,
+    cancelLoadMediaViewerContent,
+    cancelPreloadMediaViewerContent,
     loadProfileMediaViewerContent,
     preloadProfileMediaViewerContent,
     loadUserContent,

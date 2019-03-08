@@ -50,7 +50,7 @@ class ProfileMediaViewerContent extends React.Component {
         FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
     }
 
-    onClientUpdateChatBlob = (update) => {
+    onClientUpdateChatBlob = update => {
         const { chatId, photo } = this.props;
 
         if (chatId === update.chatId && photo.big.id === update.fileId) {
@@ -61,7 +61,7 @@ class ProfileMediaViewerContent extends React.Component {
         }
     };
 
-    onClientUpdateUserBlob = (update) => {
+    onClientUpdateUserBlob = update => {
         const { chatId, photo } = this.props;
         const userId = getChatUserId(chatId);
 
@@ -88,14 +88,9 @@ class ProfileMediaViewerContent extends React.Component {
 
         return (
             <div className='media-viewer-content'>
-                <img
-                    className='media-viewer-content-image'
-                    src={src}
-                    alt=''
-                    onClick={this.handleContentClick}
-                />
+                <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                <FileProgress file={file} showDownload={false}/>
+                <FileProgress file={file} />
             </div>
         );
     }
