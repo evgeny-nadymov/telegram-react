@@ -70,6 +70,16 @@
     margin-top: -22px;
 }
 
+.photo-src-indicator {
+    width: 25px;
+    height: 25px;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    position: absolute;
+    background: red;
+}
+
 /*.photo-img-wrapper:before, .photo-img-wrapper:after{
     content: ' ';
     display: table;

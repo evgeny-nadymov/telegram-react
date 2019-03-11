@@ -278,7 +278,7 @@ class Message extends Component {
             case 'messageText': {
                 const { web_page } = message.content;
                 if (web_page) {
-                    const { animation } = web_page;
+                    const { photo, animation } = web_page;
                     if (animation) {
                         let file = animation.animation;
                         if (file) {
@@ -302,6 +302,34 @@ class Message extends Component {
                             chatId: message.chat_id,
                             messageId: message.id
                         });
+
+                        // open media viewer
+                        ApplicationStore.setMediaViewerContent({
+                            chatId: chatId,
+                            messageId: messageId
+                        });
+                    }
+
+                    if (photo) {
+                        const photoSize = getPhotoSize(photo.sizes);
+                        if (photoSize) {
+                            let file = photoSize.photo;
+                            if (file) {
+                                file = FileStore.get(file.id);
+                                if (file) {
+                                    if (file.local.is_downloading_active) {
+                                        FileStore.cancelGetRemoteFile(file.id, message);
+                                        return;
+                                    } else if (file.remote.is_uploading_active) {
+                                        FileStore.cancelUploadFile(file.id, message);
+                                        return;
+                                    }
+                                    // else {
+                                    //     saveOrDownload(file, document.file_name, message);
+                                    // }
+                                }
+                            }
+                        }
 
                         // open media viewer
                         ApplicationStore.setMediaViewerContent({

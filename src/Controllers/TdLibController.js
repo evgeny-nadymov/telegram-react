@@ -46,7 +46,11 @@ class TdLibController extends EventEmitter {
 
         this.client = new TdClient(options);
         this.client.onUpdate = update => {
-            console.log('received', update);
+            if (update['@type'] === 'updateFile') {
+                console.log('received file_id=' + update.file.id, update);
+            } else {
+                console.log('received', update);
+            }
             this.emit('update', update);
         };
     };

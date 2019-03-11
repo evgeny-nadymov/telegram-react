@@ -77,7 +77,7 @@ class FileStore extends EventEmitter {
         if (!file) return;
 
         const arr = file.arr;
-        delete file.arr;
+        //delete file.arr;
 
         if (this.downloads.has(file.id)) {
             if (file.local.is_downloading_completed) {
@@ -340,7 +340,7 @@ class FileStore extends EventEmitter {
                                                     store,
                                                     source,
                                                     idb_key,
-                                                    null,
+                                                    arr,
                                                     () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -360,7 +360,7 @@ class FileStore extends EventEmitter {
                                                     store,
                                                     source,
                                                     idb_key,
-                                                    null,
+                                                    arr,
                                                     () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
                                                     () => this.getRemoteFile(file.id, 1, obj)
                                                 );
@@ -543,10 +543,12 @@ class FileStore extends EventEmitter {
         //     return;
         // }
 
+        //console.time('store.get file_id=' + file.id);
         const request = store.get(idb_key);
         request.onsuccess = event => {
             const blob = event.target.result;
 
+            //console.timeEnd('store.get file_id=' + file.id);
             if (blob) {
                 file.blob = blob;
                 this.setBlob(file.id, file.blob);

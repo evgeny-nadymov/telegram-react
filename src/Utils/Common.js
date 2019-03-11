@@ -47,8 +47,14 @@ function getSize(sizes, dimension) {
     return sizes[index];
 }
 
-function getFitSize(size, max) {
+function getFitSize(size, max, increaseToMax = true) {
     if (!size) return { width: 0, height: 0 };
+
+    if (!increaseToMax) {
+        if (size.width < max && size.height < max) {
+            return size;
+        }
+    }
 
     if (size.width > size.height) {
         return { width: max, height: Math.floor((size.height * max) / size.width) };

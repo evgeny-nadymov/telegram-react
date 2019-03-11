@@ -12,14 +12,11 @@ import MessageStore from '../../Stores/MessageStore';
 import './MediaCaption.css';
 
 class MediaCaption extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
-
-
     }
 
-    handleClick = (event) => {
+    handleClick = event => {
         event.stopPropagation();
     };
 
@@ -28,16 +25,14 @@ class MediaCaption extends React.Component {
 
         return (
             <div className='media-caption' onClick={this.handleClick}>
-                <div className='media-caption-text'>
-                    {text}
-                </div>
+                <div className='media-caption-text'>{text}</div>
             </div>
         );
     }
 }
 
 MediaCaption.propTypes = {
-    text: PropTypes.object
+    text: PropTypes.array
 };
 
 MediaCaption.defaultProps = {};

@@ -77,6 +77,7 @@ class Photo extends React.Component {
             <div className='photo' style={fitPhotoSize} onClick={openMedia}>
                 <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
                 <FileProgress file={file} cancelButton />
+                {/*{src && <div className='photo-src-indicator'/>}*/}
             </div>
         );
     }

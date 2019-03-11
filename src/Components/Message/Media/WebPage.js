@@ -68,7 +68,7 @@ class WebPage extends React.Component {
             };
             const photoSize = getSize(photo.sizes, size);
             if (photoSize) {
-                fitPhotoSize = getFitSize(photoSize, displaySize);
+                fitPhotoSize = getFitSize(photoSize, displaySize, false);
                 if (fitPhotoSize) {
                     const file = photoSize.photo;
                     const blob = FileStore.getBlob(file.id) || file.blob;

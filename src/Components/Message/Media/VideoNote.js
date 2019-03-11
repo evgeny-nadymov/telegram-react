@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from '../../Viewer/FileProgress';
+import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getVideoDurationString } from '../../../Utils/Common';
@@ -98,6 +99,9 @@ class VideoNote extends React.Component {
                         </div>
                         <div className='animation-meta'>
                             {getVideoDurationString(duration) + ' ' + getFileSize(video)}
+                        </div>
+                        <div className='video-note-muted'>
+                            <VolumeOffIcon />
                         </div>
                     </>
                 )}

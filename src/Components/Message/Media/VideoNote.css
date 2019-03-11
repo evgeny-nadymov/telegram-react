@@ -18,3 +18,16 @@
     border-radius: 50%;
     overflow: hidden;
 }
+
+.video-note-muted {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -6px);
+    bottom: 0;
+    width: 36px;
+    height: 36px;
+    background: #00000066;
+    border-radius: 50%;
+    padding: 6px;
+    box-sizing: border-box;
+}

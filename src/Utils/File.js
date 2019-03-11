@@ -1399,12 +1399,15 @@ function getMediaPreviewFile(chatId, messageId) {
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { animation, video } = web_page;
+                const { animation, video, photo } = web_page;
                 if (animation && animation.thumbnail) {
                     return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
                 }
                 if (video && video.thumbnail) {
                     return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                }
+                if (photo) {
+                    return getMediaFile(chatId, messageId, PHOTO_SIZE);
                 }
             }
             break;
@@ -1460,12 +1463,19 @@ function getMediaFile(chatId, messageId, size) {
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { animation, video } = web_page;
+                const { animation, video, photo } = web_page;
                 if (animation) {
                     return [animation.width, animation.height, animation.animation];
                 }
                 if (video) {
                     return [video.width, video.height, video.video];
+                }
+                if (photo) {
+                    const photoSize = getSize(photo.sizes, size);
+                    if (photoSize) {
+                        return [photoSize.width, photoSize.height, photoSize.photo];
+                    }
+                    break;
                 }
             }
             break;
@@ -1568,6 +1578,81 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
         const { content } = message;
         if (content) {
             switch (content['@type']) {
+                case 'messageText': {
+                    const { web_page } = message.content;
+                    if (!web_page) {
+                        break;
+                    }
+
+                    const { photo, animation } = web_page;
+                    const loadPhoto = !animation || !animation.thumbnail;
+
+                    if (loadPhoto) {
+                        const [id, pid, idb_key] = getWebPagePhotoFile(message, PHOTO_BIG_SIZE);
+                        if (pid) {
+                            const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                            if (photoSize) {
+                                const file = photoSize.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    let localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        idb_key,
+                                        null,
+                                        () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
+                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    );
+                                }
+                            }
+                        }
+                    }
+
+                    const [id, pid, idb_key] = getWebPageAnimationFile(message);
+                    if (pid) {
+                        const obj = animation.animation;
+                        if (!obj.blob) {
+                            const localMessage = message;
+                            FileStore.getLocalFile(
+                                store,
+                                obj,
+                                idb_key,
+                                null,
+                                () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                () => {
+                                    const fileSize = getWebPageAnimationFileSize(message);
+                                    if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                        FileStore.getRemoteFile(id, 1, localMessage);
+                                    }
+                                }
+                            );
+                        }
+                    }
+
+                    const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
+                    if (previewPid) {
+                        const obj = animation.thumbnail.photo;
+                        if (!obj.blob) {
+                            const localMessage = message;
+                            FileStore.getLocalFile(
+                                store,
+                                obj,
+                                previewIdbKey,
+                                null,
+                                () =>
+                                    FileStore.updateAnimationThumbnailBlob(
+                                        localMessage.chat_id,
+                                        localMessage.id,
+                                        obj.id
+                                    ),
+                                () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                            );
+                        }
+                    }
+
+                    break;
+                }
                 case 'messagePhoto': {
                     // preview
                     /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);

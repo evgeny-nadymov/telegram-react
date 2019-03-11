@@ -32,6 +32,9 @@ class MediaViewerContent extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         const text = getText(message);
 
+        //console.log('mediaViewer file', file);
+        //console.log('mediaViewer thumbnail', thumbnail);
+
         this.state = {
             prevChatId: chatId,
             prevMessageId: messageId,
@@ -80,6 +83,7 @@ class MediaViewerContent extends React.Component {
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateWebPageBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
@@ -89,6 +93,7 @@ class MediaViewerContent extends React.Component {
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateWebPageBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
