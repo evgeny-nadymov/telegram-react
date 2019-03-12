@@ -18,6 +18,7 @@ export const MUTED_VALUE_MIN = 0;
 export const NOTIFICATIONS_DEBOUNCE_DELAY_MS = 500;
 export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;
+export const PHOTO_DISPLAY_SMALL_SIZE = 65;
 export const PHOTO_SIZE = 320;
 export const PROFILE_PHOTO_BIG_SIZE = 640;
 export const PROFILE_PHOTO_SMALL_SIZE = 160;

@@ -370,12 +370,20 @@ class MediaViewer extends React.Component {
             case 'messageText': {
                 const { web_page } = content;
                 if (web_page) {
-                    const { animation, photo } = web_page;
+                    const { animation, video, photo } = web_page;
+
                     if (animation) {
                         const file = animation.animation;
                         if (file) {
                             saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
                             return;
+                        }
+                    }
+
+                    if (video) {
+                        const file = video.video;
+                        if (file) {
+                            saveOrDownload(file, video.file_name || file.id + '.mp4', message);
                         }
                     }
 
