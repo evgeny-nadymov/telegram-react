@@ -28,6 +28,7 @@ import { getSize } from '../../Utils/Common';
 import {
     cancelPreloadMediaViewerContent,
     getMediaFile,
+    getWebPagePhotoFile,
     loadMediaViewerContent,
     preloadMediaViewerContent,
     saveOrDownload
@@ -369,11 +370,23 @@ class MediaViewer extends React.Component {
             case 'messageText': {
                 const { web_page } = content;
                 if (web_page) {
-                    const { animation } = web_page;
+                    const { animation, photo } = web_page;
                     if (animation) {
                         const file = animation.animation;
                         if (file) {
                             saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
+                            return;
+                        }
+                    }
+
+                    if (photo) {
+                        const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                        if (photoSize) {
+                            const file = photoSize.photo;
+                            if (file) {
+                                saveOrDownload(file, file.id + '.jpg', message);
+                                return;
+                            }
                         }
                     }
                 }
