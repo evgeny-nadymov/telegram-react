@@ -17,20 +17,6 @@ import FileStore from '../../../Stores/FileStore';
 import './Video.css';
 
 class Video extends React.Component {
-    constructor(props) {
-        super(props);
-
-        const { message } = props;
-        const { video } = message.content;
-
-        this.state = {
-            width: video.width,
-            height: video.height,
-            duration: video.duration,
-            thumbnail: video.thumbnail
-        };
-    }
-
     componentDidMount() {
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
     }
@@ -40,7 +26,7 @@ class Video extends React.Component {
     }
 
     onClientUpdateVideoThumbnailBlob = update => {
-        const { thumbnail } = this.state;
+        const { thumbnail } = this.props.video;
         const { fileId } = update;
 
         if (!thumbnail) return;
@@ -51,10 +37,10 @@ class Video extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, message } = this.props;
-        const { thumbnail, duration } = this.state;
+        const { displaySize, openMedia } = this.props;
+        const { thumbnail, video, width, height, duration } = this.props.video;
 
-        const fitPhotoSize = getFitSize(thumbnail, displaySize);
+        const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
 
         const file = thumbnail ? thumbnail.photo : null;
@@ -73,16 +59,16 @@ class Video extends React.Component {
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
-                <div className='video-meta'>
-                    {getVideoDurationString(duration) + ' ' + getFileSize(message.content.video.video)}
-                </div>
+                <div className='video-meta'>{getVideoDurationString(duration) + ' ' + getFileSize(video)}</div>
             </div>
         );
     }
 }
 
 Video.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    video: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired,
     size: PropTypes.number,
     displaySize: PropTypes.number

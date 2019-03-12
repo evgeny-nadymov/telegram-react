@@ -182,6 +182,11 @@ class FileStore extends EventEmitter {
                                                 }
                                             }
 
+                                            const { video } = web_page;
+                                            if (video) {
+                                                this.handleVideo(video, file, idb_key, arr, obj);
+                                            }
+
                                             const { animation } = web_page;
                                             if (animation) {
                                                 this.handleAnimation(animation, file, idb_key, arr, obj);
@@ -267,35 +272,7 @@ class FileStore extends EventEmitter {
                                     case 'messageVideo': {
                                         const { video } = obj.content;
 
-                                        if (video.thumbnail) {
-                                            let source = video.thumbnail.photo;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateVideoThumbnailBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
-
-                                        if (video.video) {
-                                            let source = video.video;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateVideoBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
+                                        this.handleVideo(video, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageDocument': {
@@ -414,6 +391,36 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateVideoNoteBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, 1, obj)
+                );
+            }
+        }
+    };
+
+    handleVideo = (video, file, idb_key, arr, obj) => {
+        if (video.thumbnail) {
+            const source = video.thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateVideoThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
+                );
+            }
+        }
+
+        if (video.video) {
+            const source = video.video;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateVideoBlob(obj.chat_id, obj.id, file.id),
                     () => this.getRemoteFile(file.id, 1, obj)
                 );
             }

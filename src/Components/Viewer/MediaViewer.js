@@ -28,7 +28,6 @@ import { getSize } from '../../Utils/Common';
 import {
     cancelPreloadMediaViewerContent,
     getMediaFile,
-    getWebPagePhotoFile,
     loadMediaViewerContent,
     preloadMediaViewerContent,
     saveOrDownload

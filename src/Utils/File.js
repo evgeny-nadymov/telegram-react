@@ -142,6 +142,39 @@ function getGameAnimationThumbnailFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageVideoThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { video } = web_page;
+    if (!video) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = video;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
 function getWebPageAnimationThumbnailFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -432,6 +465,62 @@ function getWebPagePhotoFile(message, size = PHOTO_SIZE) {
     return [0, '', ''];
 }
 
+function getWebPageVideoFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { video } = web_page;
+    if (!video) {
+        return [0, '', ''];
+    }
+
+    const file = video.video;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getWebPageVideoFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return 0;
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return 0;
+    }
+
+    const { video } = web_page;
+    if (!video) {
+        return 0;
+    }
+
+    const file = video.video;
+    if (file) {
+        return file.size;
+    }
+
+    return 0;
+}
+
 function getWebPageAnimationFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -475,7 +564,12 @@ function getWebPageAnimationFileSize(message) {
         return 0;
     }
 
-    const file = web_page.animation;
+    const { animation } = web_page;
+    if (!animation) {
+        return 0;
+    }
+
+    const file = animation.animation;
     if (file) {
         return file.size;
     }
@@ -892,8 +986,82 @@ function loadMessageContents(store, messages) {
                             break;
                         }
 
-                        const { photo, animation } = web_page;
-                        const loadPhoto = !animation || !animation.thumbnail;
+                        const { photo, animation, video } = web_page;
+                        let loadPhoto = true;
+
+                        if (video) {
+                            const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);
+                            if (previewPid) {
+                                loadPhoto = false;
+                                const obj = video.thumbnail.photo;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updateVideoThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
+
+                        if (animation) {
+                            const [id, pid, idb_key] = getWebPageAnimationFile(message);
+                            if (pid) {
+                                const obj = animation.animation;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateAnimationBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => {
+                                            const fileSize = getWebPageAnimationFileSize(message);
+                                            if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                                FileStore.getRemoteFile(id, 1, localMessage);
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+
+                            const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
+                            if (previewPid) {
+                                loadPhoto = false;
+                                const obj = animation.thumbnail.photo;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updateAnimationThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
 
                         if (loadPhoto) {
                             const [id, pid, idb_key] = getWebPagePhotoFile(message);
@@ -915,48 +1083,6 @@ function loadMessageContents(store, messages) {
                                         );
                                     }
                                 }
-                            }
-                        }
-
-                        const [id, pid, idb_key] = getWebPageAnimationFile(message);
-                        if (pid) {
-                            const obj = animation.animation;
-                            if (!obj.blob) {
-                                const localMessage = message;
-                                FileStore.getLocalFile(
-                                    store,
-                                    obj,
-                                    idb_key,
-                                    null,
-                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
-                                    () => {
-                                        const fileSize = getWebPageAnimationFileSize(message);
-                                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
-                                        }
-                                    }
-                                );
-                            }
-                        }
-
-                        const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
-                        if (previewPid) {
-                            const obj = animation.thumbnail.photo;
-                            if (!obj.blob) {
-                                const localMessage = message;
-                                FileStore.getLocalFile(
-                                    store,
-                                    obj,
-                                    previewIdbKey,
-                                    null,
-                                    () =>
-                                        FileStore.updateAnimationThumbnailBlob(
-                                            localMessage.chat_id,
-                                            localMessage.id,
-                                            obj.id
-                                        ),
-                                    () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
-                                );
                             }
                         }
                         break;
@@ -1544,7 +1670,7 @@ function cancelLoadMediaViewerContent(messages) {
                         }
                     }
 
-                    // video
+                    // file
                     const [id, pid, idb_key] = getVideoFile(message);
                     if (pid) {
                         const file = message.content.video.video;
@@ -1555,6 +1681,44 @@ function cancelLoadMediaViewerContent(messages) {
                                 file_id: file.id,
                                 only_if_pending: false
                             });
+                        }
+                    }
+
+                    break;
+                }
+                case 'messageText': {
+                    const { web_page } = message.content;
+                    if (web_page) {
+                        const { video } = web_page;
+
+                        if (video) {
+                            // preview
+                            const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);
+                            if (previewPid) {
+                                const file = video.thumbnail.photo;
+                                const blob = file.blob || FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    TdLibController.send({
+                                        '@type': 'cancelDownloadFile',
+                                        file_id: file.id,
+                                        only_if_pending: false
+                                    });
+                                }
+                            }
+
+                            // file
+                            const [id, pid, idb_key] = getWebPageVideoFile(message);
+                            if (pid) {
+                                const file = video.video;
+                                const blob = file.blob || FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    TdLibController.send({
+                                        '@type': 'cancelDownloadFile',
+                                        file_id: file.id,
+                                        only_if_pending: false
+                                    });
+                                }
+                            }
                         }
                     }
 
@@ -1584,8 +1748,98 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                         break;
                     }
 
-                    const { photo, animation } = web_page;
-                    const loadPhoto = !animation || !animation.thumbnail;
+                    const { photo, animation, video } = web_page;
+                    let loadPhoto = true;
+
+                    if (video) {
+                        const [id, pid, idb_key] = getWebPageVideoFile(message);
+                        if (pid) {
+                            const obj = video.video;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateVideoBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getWebPageVideoFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_VIDEO_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
+                            }
+                        }
+
+                        const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);
+                        if (previewPid) {
+                            loadPhoto = false;
+                            const obj = video.thumbnail.photo;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    previewIdbKey,
+                                    null,
+                                    () =>
+                                        FileStore.updateVideoThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            obj.id
+                                        ),
+                                    () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                );
+                            }
+                        }
+                    }
+
+                    if (animation) {
+                        const [id, pid, idb_key] = getWebPageAnimationFile(message);
+                        if (pid) {
+                            const obj = animation.animation;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => {
+                                        const fileSize = getWebPageAnimationFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
+                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                        }
+                                    }
+                                );
+                            }
+                        }
+
+                        const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
+                        if (previewPid) {
+                            loadPhoto = false;
+                            const obj = animation.thumbnail.photo;
+                            if (!obj.blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    obj,
+                                    previewIdbKey,
+                                    null,
+                                    () =>
+                                        FileStore.updateAnimationThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            obj.id
+                                        ),
+                                    () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                );
+                            }
+                        }
+                    }
 
                     if (loadPhoto) {
                         const [id, pid, idb_key] = getWebPagePhotoFile(message, PHOTO_BIG_SIZE);
@@ -1606,48 +1860,6 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                     );
                                 }
                             }
-                        }
-                    }
-
-                    const [id, pid, idb_key] = getWebPageAnimationFile(message);
-                    if (pid) {
-                        const obj = animation.animation;
-                        if (!obj.blob) {
-                            const localMessage = message;
-                            FileStore.getLocalFile(
-                                store,
-                                obj,
-                                idb_key,
-                                null,
-                                () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
-                                () => {
-                                    const fileSize = getWebPageAnimationFileSize(message);
-                                    if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                        FileStore.getRemoteFile(id, 1, localMessage);
-                                    }
-                                }
-                            );
-                        }
-                    }
-
-                    const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
-                    if (previewPid) {
-                        const obj = animation.thumbnail.photo;
-                        if (!obj.blob) {
-                            const localMessage = message;
-                            FileStore.getLocalFile(
-                                store,
-                                obj,
-                                previewIdbKey,
-                                null,
-                                () =>
-                                    FileStore.updateAnimationThumbnailBlob(
-                                        localMessage.chat_id,
-                                        localMessage.id,
-                                        obj.id
-                                    ),
-                                () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
-                            );
                         }
                     }
 

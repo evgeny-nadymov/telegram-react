@@ -236,7 +236,14 @@ function getMedia(message, openMedia) {
         case 'messagePhoto':
             return <Photo message={message} openMedia={openMedia} />;
         case 'messageVideo':
-            return <Video message={message} openMedia={openMedia} />;
+            return (
+                <Video
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    video={message.content.video}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageVideoNote':
             return (
                 <VideoNote
@@ -493,7 +500,21 @@ function isVideoMessage(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
-    return message.content['@type'] === 'messageVideo';
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageVideo': {
+            return true;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            return Boolean(web_page.video);
+        }
+        default: {
+            return false;
+        }
+    }
 }
 
 function isAnimationMessage(chatId, messageId) {
