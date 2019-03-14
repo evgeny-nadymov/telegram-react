@@ -196,8 +196,9 @@ class Message extends Component {
             case 'messageDocument': {
                 const { document } = content;
                 if (document) {
-                    const file = document.document;
+                    let file = document.document;
                     if (file) {
+                        file = FileStore.get(file.id) || file;
                         if (file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
                         } else if (file.remote.is_uploading_active) {

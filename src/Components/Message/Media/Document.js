@@ -7,163 +7,48 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import DocumentTileControl from '../../Tile/DocumentTileControl';
-import { getFileSize, getSizeString } from '../../../Utils/File';
-import FileStore from '../../../Stores/FileStore';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import DocumentTile from '../../Tile/DocumentTile';
+import DocumentAction from './DocumentAction';
+import FileProgress from '../../Viewer/FileProgress';
 import './Document.css';
 
-const circleStyle = { circle: 'document-progress-circle' };
-
 class Document extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    componentDidMount() {
-        this.mount = true;
-        FileStore.on('updateFile', this.onProgressUpdated);
-        FileStore.on('file_upload_update', this.onProgressUpdated);
-    }
-
-    componentWillUnmount() {
-        FileStore.removeListener('file_upload_update', this.onProgressUpdated);
-        FileStore.removeListener('updateFile', this.onProgressUpdated);
-        this.mount = false;
-    }
-
-    onProgressUpdated = update => {
-        const { file } = update;
-        const { message } = this.props;
-        if (!message) return;
-
-        const { content } = message;
-        if (!content) return;
-
-        const { document } = content;
-        if (!document) return;
-
-        const currentFile = document.document;
-        if (!currentFile) return;
-        if (currentFile.id !== file.id) return;
-
-        document.document = file;
-        this.payload = file;
-        this.forceUpdate();
-    };
-
-    getDownloadedSize(file) {
-        if (!file) return '0';
-        if (!file.local) return '0';
-        if (!file.local.is_downloading_active) return '0';
-
-        return getSizeString(file.local.downloaded_size);
-    }
-
-    getUploadedSize(file) {
-        if (!file) return '0';
-        if (!file.remote) return '0';
-        if (!file.remote.is_uploading_active) return '0';
-
-        return getSizeString(file.remote.uploaded_size);
-    }
-
     render() {
-        let message = this.props.message;
-        if (!message) return null;
-
-        let document = message.content.document;
+        const { document, openMedia } = this.props;
         if (!document) return null;
 
-        let file = document.document;
-        if (!file) return null;
+        const { thumbnail, file_name } = document;
+        const file = document.document;
 
-        let isDownloadingActive = file.local && file.local.is_downloading_active;
-        let isUploadingActive = file.remote && file.remote.is_uploading_active;
-        let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
-        let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
-
-        let size = getFileSize(file);
-        let progressSize = null;
-        if (isDownloadingActive) {
-            progressSize = this.getDownloadedSize(file);
-        } else if (isUploadingActive) {
-            progressSize = this.getUploadedSize(file);
-        }
-
-        let progress = 0;
-        if (isDownloadingActive) {
-            progress =
-                file.local.downloaded_size && file.size && this.isDownloadingActive
-                    ? 100 - ((file.size - file.local.downloaded_size) / file.size) * 100
-                    : 1;
-        } else if (isUploadingActive) {
-            progress =
-                file.remote.uploaded_size && file.size && this.isUploadingActive
-                    ? 100 - ((file.size - file.remote.uploaded_size) / file.size) * 100
-                    : 1;
-        }
-
-        let showProgress = isDownloadingActive || isUploadingActive;
-
-        let timeToCompleteAnimation = 300;
-        if (this.isDownloadingActive && !isDownloadingActive) {
-            progress = isDownloadingCompleted ? 100 : 0;
-            showProgress = true;
-            setTimeout(() => {
-                if (!this.mount) return;
-
-                this.forceUpdate();
-            }, timeToCompleteAnimation);
-        } else if (this.isUploadingActive && !isUploadingActive) {
-            progress = isUploadingCompleted ? 100 : 0;
-            showProgress = true;
-            setTimeout(() => {
-                if (!this.mount) return;
-
-                this.forceUpdate();
-            }, timeToCompleteAnimation);
-        }
-
-        this.isDownloadingActive = isDownloadingActive;
-        this.isUploadingActive = isUploadingActive;
-
-        let sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
-        let action =
-            isDownloadingActive || isUploadingActive ? 'Cancel' : isDownloadingCompleted || file.idb_key ? 'Open' : '';
         return (
             <div className='document'>
-                <div className='document-tile' onClick={this.props.openMedia}>
-                    <DocumentTileControl document={document} showProgress={showProgress} />
-                    {showProgress && (
-                        <div className='document-progress'>
-                            <CircularProgress
-                                classes={circleStyle}
-                                variant='static'
-                                value={progress}
-                                size={42}
-                                thickness={3}
-                            />
-                        </div>
-                    )}
-                    {/*<CircularProgress classes={circleStyle} variant='static' value={10} size={42} thickness={3} />*/}
+                <div className='document-tile' onClick={openMedia}>
+                    <DocumentTile thumbnail={thumbnail} />
+                    <FileProgress
+                        file={file}
+                        download
+                        upload
+                        cancelButton
+                        zIndex={1}
+                        icon={<ArrowDownwardIcon />}
+                        completeIcon={<InsertDriveFileIcon />}
+                    />
                 </div>
 
                 <div className='document-content'>
                     <div className='document-title'>
                         <a
                             className='document-name'
-                            onClick={this.props.openMedia}
-                            title={document.file_name}
-                            data-name={document.file_name}
+                            onClick={openMedia}
+                            title={file_name}
+                            data-name={file_name}
                             data-ext='.dat'>
-                            {document.file_name}
+                            {file_name}
                         </a>
                     </div>
-                    <div className='document-action'>
-                        <span className='document-size'>{`${sizeString} `}</span>
-                        {action && <a onClick={this.props.openMedia}>{action}</a>}
-                    </div>
+                    <DocumentAction file={file} openMedia={openMedia} />
                 </div>
             </div>
         );
@@ -171,7 +56,9 @@ class Document extends React.Component {
 }
 
 Document.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    document: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired
 };
 

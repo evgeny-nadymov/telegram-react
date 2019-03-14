@@ -19,6 +19,7 @@ import {
     PRELOAD_ANIMATION_SIZE,
     PRELOAD_VIDEO_SIZE,
     PRELOAD_VIDEONOTE_SIZE,
+    FILE_PRIORITY,
     THUMBNAIL_PRIORITY
 } from '../Constants';
 import UserStore from '../Stores/UserStore';
@@ -868,7 +869,7 @@ function loadUsersContent(store, userIds) {
                 idb_key,
                 null,
                 () => FileStore.updateUserPhotoBlob(user.id, id),
-                () => FileStore.getRemoteFile(id, 1, user)
+                () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
             );
         }
     }
@@ -890,7 +891,7 @@ function loadChatsContent(store, chatIds) {
                 idb_key,
                 null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
-                () => FileStore.getRemoteFile(id, 1, chat)
+                () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
             );
         }
     }
@@ -930,7 +931,7 @@ function loadMessageContents(store, messages) {
                                             idb_key,
                                             null,
                                             () => FileStore.updateGameBlob(localMessage.chat_id, localMessage.id, id),
-                                            () => FileStore.getRemoteFile(id, 1, localMessage)
+                                            () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                         );
                                     }
                                 }
@@ -951,7 +952,7 @@ function loadMessageContents(store, messages) {
                                     () => {
                                         const fileSize = getGameAnimationFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
                                     }
                                 );
@@ -974,7 +975,7 @@ function loadMessageContents(store, messages) {
                                             localMessage.id,
                                             obj.id
                                         ),
-                                    () => FileStore.getRemoteFile(previewId, 1, localMessage)
+                                    () => FileStore.getRemoteFile(previewId, FILE_PRIORITY, localMessage)
                                 );
                             }
                         }
@@ -1033,7 +1034,7 @@ function loadMessageContents(store, messages) {
                                         () => {
                                             const fileSize = getWebPageAnimationFileSize(message);
                                             if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                                FileStore.getRemoteFile(id, 1, localMessage);
+                                                FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                             }
                                         }
                                     );
@@ -1079,7 +1080,7 @@ function loadMessageContents(store, messages) {
                                             null,
                                             () =>
                                                 FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
-                                            () => FileStore.getRemoteFile(id, 1, localMessage)
+                                            () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                         );
                                     }
                                 }
@@ -1116,7 +1117,7 @@ function loadMessageContents(store, messages) {
                                         idb_key,
                                         null,
                                         () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                     );
                                 }
                             }
@@ -1136,7 +1137,7 @@ function loadMessageContents(store, messages) {
                                     idb_key,
                                     null,
                                     () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
-                                    () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                 );
                             }
                         }
@@ -1157,7 +1158,7 @@ function loadMessageContents(store, messages) {
                                             idb_key,
                                             null,
                                             () => FileStore.updateUserPhotoBlob(user.id, id),
-                                            () => FileStore.getRemoteFile(id, 1, user)
+                                            () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
                                         );
                                     }
                                 }
@@ -1180,7 +1181,7 @@ function loadMessageContents(store, messages) {
                                     () => {
                                         const fileSize = getVideoNoteFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
                                     }
                                 );
@@ -1224,7 +1225,7 @@ function loadMessageContents(store, messages) {
                                     () => {
                                         const fileSize = getAnimationFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
                                     }
                                 );
@@ -1270,7 +1271,7 @@ function loadMessageContents(store, messages) {
                                             localMessage.id,
                                             obj.id
                                         ),
-                                    () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                 );
                             }
                         }
@@ -1319,7 +1320,7 @@ function loadMessageContents(store, messages) {
                                                 localMessage.id,
                                                 file.id
                                             ),
-                                        () => FileStore.getRemoteFile(file.id, 1, localMessage)
+                                        () => FileStore.getRemoteFile(file.id, FILE_PRIORITY, localMessage)
                                     );
                                 }
                             } else {
@@ -1351,7 +1352,7 @@ function loadMessageContents(store, messages) {
                                                         localMessage.id,
                                                         result.id
                                                     ),
-                                                () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                                () => FileStore.getRemoteFile(result.id, FILE_PRIORITY, localMessage)
                                             );
                                         }
                                     }
@@ -1381,7 +1382,7 @@ function loadMessageContents(store, messages) {
                                                 localMessage.id,
                                                 file.id
                                             ),
-                                        () => FileStore.getRemoteFile(file.id, 1, localMessage)
+                                        () => FileStore.getRemoteFile(file.id, FILE_PRIORITY, localMessage)
                                     );
                                 }
                             } else {
@@ -1413,7 +1414,7 @@ function loadMessageContents(store, messages) {
                                                         localMessage.id,
                                                         result.id
                                                     ),
-                                                () => FileStore.getRemoteFile(result.id, 1, localMessage)
+                                                () => FileStore.getRemoteFile(result.id, FILE_PRIORITY, localMessage)
                                             );
                                         }
                                     }
@@ -1468,7 +1469,7 @@ function saveOrDownload(file, fileName, obj) {
             },
             () => {
                 if (file.local.can_be_downloaded) {
-                    FileStore.getRemoteFile(file.id, 1, obj);
+                    FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
                 }
             }
         );
@@ -1476,7 +1477,7 @@ function saveOrDownload(file, fileName, obj) {
     }
 
     if (file.local.can_be_downloaded) {
-        FileStore.getRemoteFile(file.id, 1, obj);
+        FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
     }
 }
 
@@ -1492,7 +1493,7 @@ function download(file, obj) {
             () => {},
             () => {
                 if (file.local.can_be_downloaded) {
-                    FileStore.getRemoteFile(file.id, 1, obj);
+                    FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
                 }
             }
         );
@@ -1500,7 +1501,7 @@ function download(file, obj) {
     }
 
     if (file.local.can_be_downloaded) {
-        FileStore.getRemoteFile(file.id, 1, obj);
+        FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
     }
 }
 
@@ -1766,7 +1767,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                     () => {
                                         const fileSize = getWebPageVideoFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_VIDEO_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
                                     }
                                 );
@@ -1811,7 +1812,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                     () => {
                                         const fileSize = getWebPageAnimationFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
-                                            FileStore.getRemoteFile(id, 1, localMessage);
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
                                     }
                                 );
@@ -1856,7 +1857,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                         idb_key,
                                         null,
                                         () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileStore.getRemoteFile(id, 1, localMessage)
+                                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                     );
                                 }
                             }
@@ -1894,7 +1895,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                     idb_key,
                                     null,
                                     () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
-                                    () => FileStore.getRemoteFile(id, 1, localMessage)
+                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                 );
                             }
                         }
@@ -1915,7 +1916,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                 previewIdbKey,
                                 null,
                                 () => FileStore.updateVideoThumbnailBlob(localMessage.chat_id, localMessage.id, obj.id),
-                                () => FileStore.getRemoteFile(id, 1, localMessage)
+                                () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                             );
                         }
                     }
@@ -1936,7 +1937,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                 () => {
                                     const videoFileSize = getVideoFileSize(message);
                                     if (!useSizeLimit || (videoFileSize && videoFileSize <= PRELOAD_VIDEO_SIZE)) {
-                                        FileStore.getRemoteFile(id, 1, localMessage);
+                                        FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                     }
                                 }
                             );
@@ -2008,7 +2009,7 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                         idb_key,
                                         null,
                                         () => FileStore.updateUserPhotoBlob(user.id, file.id),
-                                        () => FileStore.getRemoteFile(id, 1, user)
+                                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
                                     );
                                 }
                             }
@@ -2033,7 +2034,7 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                     idb_key,
                                     null,
                                     () => FileStore.updateUserPhotoBlob(user.id, file.id),
-                                    () => FileStore.getRemoteFile(id, 1, user)
+                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
                                 );
                             }
                         }
@@ -2056,7 +2057,7 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                     idb_key,
                                     null,
                                     () => FileStore.updateChatPhotoBlob(chat.id, file.id),
-                                    () => FileStore.getRemoteFile(id, 1, chat)
+                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
                                 );
                             }
                         }
@@ -2099,7 +2100,7 @@ function loadUserContent(user) {
             idb_key,
             null,
             () => FileStore.updateUserPhotoBlob(user.id, id),
-            () => FileStore.getRemoteFile(id, 1, user)
+            () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
         );
     }
 }
@@ -2117,7 +2118,7 @@ function loadChatContent(chat) {
             idb_key,
             null,
             () => FileStore.updateChatPhotoBlob(chat.id, id),
-            () => FileStore.getRemoteFile(id, 1, chat)
+            () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
         );
     }
 }
@@ -2130,6 +2131,22 @@ function getSrc(file) {
     const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
 
     return FileStore.getBlobUrl(blob) || '';
+}
+
+function getDownloadedSize(file) {
+    if (!file) return '0';
+    if (!file.local) return '0';
+    if (!file.local.is_downloading_active) return '0';
+
+    return getSizeString(file.local.downloaded_size);
+}
+
+function getUploadedSize(file) {
+    if (!file) return '0';
+    if (!file.remote) return '0';
+    if (!file.remote.is_uploading_active) return '0';
+
+    return getSizeString(file.remote.uploaded_size);
 }
 
 export {
@@ -2173,5 +2190,7 @@ export {
     getMediaFile,
     getMediaPreviewFile,
     isGifMimeType,
-    getSrc
+    getSrc,
+    getDownloadedSize,
+    getUploadedSize
 };

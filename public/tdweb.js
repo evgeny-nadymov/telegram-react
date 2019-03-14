@@ -1500,9 +1500,9 @@ var TdClient = function () {
     this.worker.onmessage = function (e) {
       var response = e.data;
       _logger2.default.debug('receive from worker: ', JSON.parse((0, _stringify2.default)(response, function (key, value) {
-        if (key === 'arr') {
-          return undefined;
-        }
+        //if (key === 'arr') {
+        //return undefined;
+        //}
         return value;
       })));
       if ('@extra' in response) {
@@ -3776,7 +3776,7 @@ $export($export.S + $export.F * !__webpack_require__(7), 'Object', { definePrope
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "cecea2045437f57a0c3e.worker.js");
+  return new Worker(__webpack_require__.p + "fe1dda0a5f69a6a1f11d.worker.js");
 };
 
 /***/ }),

@@ -4,16 +4,23 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-.file-progress{
+.file-progress {
     position: absolute;
     width: 48px;
     height: 48px;
     left: 50%;
     top: 50%;
     margin: -24px 0 0 -24px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
 }
 
-.file-progress-indicator{
+.file-progress-icon {
+    margin: 12px;
+    color: white;
+}
+
+.file-progress-indicator {
     position: absolute;
     width: 42px;
     height: 42px;
@@ -21,12 +28,12 @@
     animation: spin 4s linear infinite;
 }
 
-.file-progress-background{
+.file-progress-background {
     position: absolute;
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: rgba(26, 26, 26, 0.7);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 .file-progress-circle {
@@ -34,11 +41,11 @@
     color: #ffffff;
 }
 
-.file-progress-cancel-button{
+.file-progress-cancel-button {
     height: 18px;
     width: 18px;
     stroke: #ffffff;
-    stroke-width: 3px;
+    stroke-width: 2px;
     stroke-linecap: round;
     position: absolute;
     top: 50%;

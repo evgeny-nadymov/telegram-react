@@ -28,7 +28,7 @@
 .video-play {
     width: 48px;
     height: 48px;
-    background: #00000066;
+    background: rgba(0, 0, 0, 0.25);
     border-radius: 50%;
     position: absolute;
     top: 50%;
@@ -44,7 +44,7 @@
     top: 6px;
     border-radius: 13px;
     padding: 0 5px;
-    background: #00000066;
+    background: rgba(0, 0, 0, 0.25);
     font-size: 13px;
     line-height: normal;
     user-select: none;

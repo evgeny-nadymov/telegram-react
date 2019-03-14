@@ -273,7 +273,14 @@ function getMedia(message, openMedia) {
         case 'messageContact':
             return <Contact message={message} openMedia={openMedia} />;
         case 'messageDocument':
-            return <Document message={message} openMedia={openMedia} />;
+            return (
+                <Document
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    document={message.content.document}
+                    openMedia={openMedia}
+                />
+            );
         default:
             return '[' + message.content['@type'] + ']';
     }

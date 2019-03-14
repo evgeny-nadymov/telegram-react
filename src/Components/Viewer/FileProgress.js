@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import CloseIcon from '@material-ui/icons/Close';
 import { ANIMATION_COMPLETE_PROGRESS_MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import './FileProgress.css';
@@ -160,7 +161,7 @@ class FileProgress extends React.Component {
     };
 
     render() {
-        let { cancelButton, zIndex } = this.props;
+        let { cancelButton, zIndex, icon, completeIcon } = this.props;
         const { file, prevFile } = this.state;
         if (!file) return null;
 
@@ -183,7 +184,7 @@ class FileProgress extends React.Component {
             }, ANIMATION_COMPLETE_PROGRESS_MS);
         }
 
-        let style = zIndex ? { zIndex: zIndex } : {};
+        const style = zIndex ? { zIndex: zIndex } : {};
 
         // console.log(
         //     `FileProgress.render id=${
@@ -194,30 +195,48 @@ class FileProgress extends React.Component {
         // );
         //cancelButton = true;
         //inProgress = true;
-        return (
-            (inProgress && (
+
+        const isDownloadingCompleted =
+            file && file.local && (file.local.is_downloading_completed || file.idb_key) && !isActive;
+
+        if (isDownloadingCompleted && completeIcon) {
+            return (
                 <div className='file-progress' style={style}>
-                    <div className='file-progress-background' />
+                    <div className='file-progress-icon'>{completeIcon}</div>
+                </div>
+            );
+        }
+
+        if (inProgress) {
+            return (
+                <div className='file-progress' style={style}>
                     <div className='file-progress-indicator'>
                         <CircularProgress
                             classes={circleStyle}
                             variant='static'
                             value={progress}
                             size={42}
-                            thickness={3}
+                            thickness={2}
                         />
                     </div>
                     {cancelButton && (
-                        <>
-                            <svg className='file-progress-cancel-button'>
-                                <line x1='2' y1='2' x2='16' y2='16' />
-                                <line x1='2' y1='16' x2='16' y2='2' />
-                            </svg>
-                        </>
+                        <div className='file-progress-icon'>
+                            <CloseIcon />
+                        </div>
                     )}
                 </div>
-            ) /*: !(file && file.local && file.local.is_downloading_completed)? this.props.children : null*/)
-        );
+            );
+        }
+
+        if (icon) {
+            return (
+                <div className='file-progress' style={style}>
+                    <div className='file-progress-icon'>{icon}</div>
+                </div>
+            );
+        }
+
+        return null;
     }
 }
 
@@ -226,7 +245,10 @@ FileProgress.propTypes = {
     cancelButton: PropTypes.bool,
     download: PropTypes.bool,
     upload: PropTypes.bool,
-    zIndex: PropTypes.number
+    zIndex: PropTypes.number,
+
+    icon: PropTypes.node,
+    completeIcon: PropTypes.node
 };
 
 FileProgress.defaultProps = {
