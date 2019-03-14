@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import Animation from './Animation';
 import Video from './Video';
+import Document from './Document';
 import { getFitSize, getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
 import { getSrc } from '../../../Utils/File';
@@ -52,7 +53,20 @@ class WebPage extends React.Component {
         const { web_page } = content;
         if (!web_page) return null;
 
-        const { site_name, title, description, url, photo, animation, video, type } = web_page;
+        const { site_name, title, description, url, photo, animation, video, document, type } = web_page;
+
+        if (document) {
+            return (
+                <>
+                    {site_name && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                    )}
+                    {title && <div className='web-page-title'>{title}</div>}
+                    {description && <div className='web-page-description'>{description}</div>}
+                    <Document chatId={chatId} messageId={messageId} document={document} openMedia={openMedia} />
+                </>
+            );
+        }
 
         if (animation) {
             const animationSrc = getSrc(animation.animation);
@@ -93,7 +107,10 @@ class WebPage extends React.Component {
             };
             const photoSize = getSize(photo.sizes, size);
             const smallPhoto =
-                (type === 'article' || type === 'photo') && photoSize && photoSize.width === photoSize.height;
+                (type === 'article' || type === 'photo') &&
+                (site_name || title || description) &&
+                photoSize &&
+                photoSize.width === photoSize.height;
 
             if (photoSize) {
                 fitPhotoSize = getFitSize(photoSize, smallPhoto ? displaySmallSize : displaySize, false);

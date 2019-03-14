@@ -143,6 +143,39 @@ function getGameAnimationThumbnailFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageDocumentThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { document } = web_page;
+    if (!document) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = document;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
 function getWebPageVideoThumbnailFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -987,8 +1020,32 @@ function loadMessageContents(store, messages) {
                             break;
                         }
 
-                        const { photo, animation, video } = web_page;
+                        const { photo, animation, video, document } = web_page;
                         let loadPhoto = true;
+
+                        if (document) {
+                            const [previewId, previewPid, previewIdbKey] = getWebPageDocumentThumbnailFile(message);
+                            if (previewPid) {
+                                loadPhoto = false;
+                                const obj = document.thumbnail.photo;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updateDocumentThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
 
                         if (video) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);

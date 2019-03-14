@@ -279,7 +279,21 @@ class Message extends Component {
             case 'messageText': {
                 const { web_page } = message.content;
                 if (web_page) {
-                    const { photo, animation } = web_page;
+                    const { photo, animation, document } = web_page;
+                    if (document) {
+                        let file = document.document;
+                        if (file) {
+                            file = FileStore.get(file.id) || file;
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                            } else {
+                                saveOrDownload(file, document.file_name, message);
+                            }
+                        }
+                    }
+
                     if (animation) {
                         let file = animation.animation;
                         if (file) {
@@ -316,7 +330,7 @@ class Message extends Component {
                         if (photoSize) {
                             let file = photoSize.photo;
                             if (file) {
-                                file = FileStore.get(file.id);
+                                file = FileStore.get(file.id) || file;
                                 if (file) {
                                     if (file.local.is_downloading_active) {
                                         FileStore.cancelGetRemoteFile(file.id, message);
@@ -411,7 +425,7 @@ class Message extends Component {
                 if (video) {
                     let file = video.video;
                     if (file) {
-                        file = FileStore.get(file.id);
+                        file = FileStore.get(file.id) || file;
                         if (file) {
                             if (file.local.is_downloading_active) {
                                 //FileStore.cancelGetRemoteFile(file.id, message);
