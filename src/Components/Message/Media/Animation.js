@@ -99,9 +99,13 @@ class Animation extends React.Component {
                         <div className='animation-meta'>{getFileSize(animation)}</div>
                     </>
                 )}
-                <FileProgress file={animation}>
-                    <div className='animation-play'>{t('AttachGif')}</div>
-                </FileProgress>
+                <FileProgress
+                    file={animation}
+                    download
+                    upload
+                    cancelButton
+                    icon={<div className='animation-play'>{t('AttachGif')}</div>}
+                />
             </div>
         );
     }

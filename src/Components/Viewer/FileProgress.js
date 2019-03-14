@@ -19,6 +19,7 @@ class FileProgress extends React.Component {
     constructor(props) {
         super(props);
 
+        this.completeAnimation = false;
         const { file } = this.props;
         this.state = {
             prevPropsFile: file,
@@ -190,16 +191,6 @@ class FileProgress extends React.Component {
 
         const style = zIndex ? { zIndex: zIndex } : {};
 
-        // console.log(
-        //     `FileProgress.render id=${
-        //         file.id
-        //     } showProgress=${inProgress} progress=${progress} was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} progress_size=${progressSize} size=${size}`,
-        //     file,
-        //     prevFile
-        // );
-        //cancelButton = true;
-        //inProgress = true;
-
         const isDownloadingCompleted =
             file &&
             file.local &&
@@ -207,16 +198,34 @@ class FileProgress extends React.Component {
             !this.completeAnimation &&
             !isActive;
 
-        if (isDownloadingCompleted && completeIcon) {
-            // console.log('FileProgress.render completeIcon');
-            return (
-                <div className='file-progress' style={style}>
-                    <div className='file-progress-icon'>{completeIcon}</div>
-                </div>
-            );
+        console.log(
+            `FileProgress.render \\
+            id=${file.id} showProgress=${inProgress} progress=${progress} \\
+            was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} \\
+            progress_size=${progressSize} size=${size} complete_animation=${this.completeAnimation} \\
+            is_downloading_completed=${isDownloadingCompleted}
+            completeIcon=${completeIcon}`,
+            file,
+            prevFile
+        );
+        //cancelButton = true;
+        //inProgress = true;
+
+        if (isDownloadingCompleted) {
+            //console.log('FileProgress.render completeIcon');
+            if (completeIcon) {
+                return (
+                    <div className='file-progress' style={style}>
+                        <div className='file-progress-icon'>{completeIcon}</div>
+                    </div>
+                );
+            }
+
+            return null;
         }
 
         if (inProgress || this.completeAnimation) {
+            //console.log('FileProgress.render inProgressIcon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-indicator'>
@@ -238,7 +247,7 @@ class FileProgress extends React.Component {
         }
 
         if (icon) {
-            // console.log('FileProgress.render icon');
+            //console.log('FileProgress.render icon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-icon'>{icon}</div>
