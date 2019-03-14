@@ -175,10 +175,14 @@ class FileProgress extends React.Component {
 
         const startCompleteAnimation = wasActive && !isActive;
         if (startCompleteAnimation) {
+            this.completeAnimation = true;
+            // console.log('FileProgress.render animationComplete=true');
             progress = isCompleted ? 100 : 0;
             inProgress = true;
             setTimeout(() => {
+                this.completeAnimation = false;
                 if (!this.mount) return;
+                // console.log('FileProgress.render animationComplete=false');
 
                 this.setState({ prevFile: null });
             }, ANIMATION_COMPLETE_PROGRESS_MS);
@@ -197,9 +201,14 @@ class FileProgress extends React.Component {
         //inProgress = true;
 
         const isDownloadingCompleted =
-            file && file.local && (file.local.is_downloading_completed || file.idb_key) && !isActive;
+            file &&
+            file.local &&
+            (file.local.is_downloading_completed || file.idb_key || file.local.is_uploading_completed) &&
+            !this.completeAnimation &&
+            !isActive;
 
         if (isDownloadingCompleted && completeIcon) {
+            // console.log('FileProgress.render completeIcon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-icon'>{completeIcon}</div>
@@ -207,7 +216,7 @@ class FileProgress extends React.Component {
             );
         }
 
-        if (inProgress) {
+        if (inProgress || this.completeAnimation) {
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-indicator'>
@@ -229,6 +238,7 @@ class FileProgress extends React.Component {
         }
 
         if (icon) {
+            // console.log('FileProgress.render icon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-icon'>{icon}</div>
