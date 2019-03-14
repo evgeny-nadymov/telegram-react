@@ -35,6 +35,7 @@ import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 import withSnackbarNotifications from './Notifications';
 import ForwardDialog from './Components/ColumnMiddle/ForwardDialog';
+import UserStore from './Stores/UserStore';
 
 const styles = theme => ({
     page: {
@@ -210,6 +211,10 @@ class TelegramApp extends Component {
         TdLibController.send({ '@type': 'destroy' });
     };
 
+    handleKeyDown = event => {
+        console.log('KeyDown', event);
+    };
+
     render() {
         const {
             inactive,
@@ -283,7 +288,7 @@ class TelegramApp extends Component {
         }
 
         return (
-            <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop}>
+            <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>
                 {page}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
@@ -312,6 +317,93 @@ class TelegramApp extends Component {
         );
     }
 }
+
+const keyMap = new Map();
+
+async function openPinnedChat(index) {
+    const chats = await TdLibController.send({
+        '@type': 'getChats',
+        offset_order: '9223372036854775807',
+        offset_chat_id: 0,
+        limit: 5
+    });
+
+    if (chats && chats.chat_ids.length > index) {
+        const chat = ChatStore.get(chats.chat_ids[index]);
+        if (chat && chat.is_pinned) {
+            TdLibController.setChatId(chat.id);
+        }
+    }
+}
+
+document.addEventListener('keyup', event => {
+    keyMap.delete(event.key);
+});
+
+document.addEventListener('keydown', async event => {
+    keyMap.set(event.key, event.key);
+
+    const { authorizationState } = ApplicationStore;
+    if (!authorizationState) return;
+    if (authorizationState['@type'] !== 'authorizationStateReady') return;
+    if (keyMap.size > 2) return;
+
+    if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+            case '0': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const me = UserStore.getMe();
+                const chat = await TdLibController.send({
+                    '@type': 'createPrivateChat',
+                    user_id: me.id,
+                    force: true
+                });
+
+                if (chat) {
+                    TdLibController.setChatId(chat.id);
+                }
+                break;
+            }
+            case '1': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                openPinnedChat(0);
+                break;
+            }
+            case '2': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                openPinnedChat(1);
+                break;
+            }
+            case '3': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                openPinnedChat(2);
+                break;
+            }
+            case '4': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                openPinnedChat(3);
+                break;
+            }
+            case '5': {
+                event.preventDefault();
+                event.stopPropagation();
+
+                openPinnedChat(4);
+                break;
+            }
+        }
+    }
+});
 
 // set offline on page lost focus
 window.onblur = function() {
