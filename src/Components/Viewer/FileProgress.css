@@ -39,6 +39,7 @@
 .file-progress-circle {
     stroke-linecap: round;
     color: #ffffff;
+    transition: stroke-dashoffset 300ms linear 0ms !important;
 }
 
 .file-progress-cancel-button {

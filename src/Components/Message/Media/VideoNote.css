@@ -19,6 +19,19 @@
     overflow: hidden;
 }
 
+.video-note-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.video-note-progress-circle {
+    stroke-linecap: round;
+    stroke-opacity: 0.75;
+    color: #ffffff;
+    transition: stroke-dashoffset 300ms linear 0ms !important;
+}
+
 .video-note-muted {
     position: absolute;
     left: 50%;

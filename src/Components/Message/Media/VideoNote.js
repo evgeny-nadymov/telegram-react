@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import FileProgress from '../../Viewer/FileProgress';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getVideoDurationString } from '../../../Utils/Common';
@@ -20,6 +21,10 @@ import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import './VideoNote.css';
 
+const circleStyle = {
+    circle: 'video-note-progress-circle'
+};
+
 class VideoNote extends React.Component {
     constructor(props) {
         super(props);
@@ -28,7 +33,8 @@ class VideoNote extends React.Component {
 
         this.state = {
             active: false,
-            currentTime: 0
+            currentTime: 0,
+            videoDuration: 0
         };
     }
 
@@ -67,14 +73,16 @@ class VideoNote extends React.Component {
                         if (!player) return;
 
                         player.volume = 0.25;
-                        player.currentTime = 30.0;
+                        player.currentTime = 0.0;
                         player.play();
                     }
                 );
             }
         } else if (this.state.active) {
             this.setState({
-                active: false
+                active: false,
+                currentTime: 0,
+                videoDuration: 0
             });
         }
     };
@@ -106,7 +114,8 @@ class VideoNote extends React.Component {
         if (!active) return;
 
         this.setState({
-            currentTime: this.videoRef.current.currentTime
+            currentTime: this.videoRef.current.currentTime,
+            videoDuration: this.videoRef.current.duration
         });
     };
 
@@ -116,7 +125,9 @@ class VideoNote extends React.Component {
 
         this.setState(
             {
-                active: false
+                active: false,
+                currentTime: this.videoRef.current.duration,
+                videoDuration: this.videoRef.current.duration
             },
             () => {
                 this.videoRef.current.play();
@@ -126,7 +137,7 @@ class VideoNote extends React.Component {
 
     render() {
         const { displaySize, chatId, messageId, openMedia } = this.props;
-        const { active, currentTime } = this.state;
+        const { active, currentTime, videoDuration } = this.state;
         const { thumbnail, video, duration } = this.props.videoNote;
 
         const message = MessageStore.get(chatId, messageId);
@@ -139,6 +150,8 @@ class VideoNote extends React.Component {
         const src = getSrc(video);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
+        const progress = (currentTime / (videoDuration || duration)) * 100;
+
         return (
             <div className='video-note' style={fitPhotoSize} onClick={openMedia}>
                 {src ? (
@@ -149,14 +162,25 @@ class VideoNote extends React.Component {
                             src={src}
                             poster={thumbnailSrc}
                             muted={!active}
-                            autoPlay={!active}
                             loop={!active}
+                            autoPlay
                             playsInline
                             width={fitPhotoSize.width}
                             height={fitPhotoSize.height}
                             onTimeUpdate={this.handleTimeUpdate}
                             onEnded={this.handleEnded}
                         />
+                        {active && (
+                            <div className='video-note-progress'>
+                                <CircularProgress
+                                    classes={circleStyle}
+                                    variant='static'
+                                    value={progress}
+                                    size={200}
+                                    thickness={1}
+                                />
+                            </div>
+                        )}
                         <div className='animation-meta'>
                             {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
                         </div>
