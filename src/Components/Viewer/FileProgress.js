@@ -198,21 +198,21 @@ class FileProgress extends React.Component {
             !this.completeAnimation &&
             !isActive;
 
-        console.log(
-            `FileProgress.render \\
-            id=${file.id} showProgress=${inProgress} progress=${progress} \\
-            was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} \\
-            progress_size=${progressSize} size=${size} complete_animation=${this.completeAnimation} \\
-            is_downloading_completed=${isDownloadingCompleted}
-            completeIcon=${completeIcon}`,
-            file,
-            prevFile
-        );
+        // console.log(
+        //     `FileProgress.render \\
+        //     id=${file.id} showProgress=${inProgress} progress=${progress} \\
+        //     was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} \\
+        //     progress_size=${progressSize} size=${size} complete_animation=${this.completeAnimation} \\
+        //     is_downloading_completed=${isDownloadingCompleted}
+        //     completeIcon=${completeIcon}`,
+        //     file,
+        //     prevFile
+        // );
         //cancelButton = true;
         //inProgress = true;
 
         if (isDownloadingCompleted) {
-            //console.log('FileProgress.render completeIcon');
+            // console.log('FileProgress.render completeIcon');
             if (completeIcon) {
                 return (
                     <div className='file-progress' style={style}>
@@ -225,7 +225,7 @@ class FileProgress extends React.Component {
         }
 
         if (inProgress || this.completeAnimation) {
-            //console.log('FileProgress.render inProgressIcon');
+            // console.log('FileProgress.render inProgressIcon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-indicator'>
@@ -247,7 +247,7 @@ class FileProgress extends React.Component {
         }
 
         if (icon) {
-            //console.log('FileProgress.render icon');
+            // console.log('FileProgress.render icon');
             return (
                 <div className='file-progress' style={style}>
                     <div className='file-progress-icon'>{icon}</div>

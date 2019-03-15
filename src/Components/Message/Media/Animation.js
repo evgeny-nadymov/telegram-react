@@ -21,19 +21,12 @@ class Animation extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
-        FileStore.on('clientUpdateActiveAnimation', this.onClientUpdateActiveAnimation);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
-        FileStore.removeListener('clientUpdateActiveAnimation', this.onClientUpdateActiveAnimation);
     }
-
-    onClientUpdateActiveAnimation = update => {
-        const { message } = this.props;
-        const { chatId, messageId } = update;
-    };
 
     onClientUpdateAnimationBlob = update => {
         const { animation } = this.props.animation;

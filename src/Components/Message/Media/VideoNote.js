@@ -10,30 +10,73 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from '../../Viewer/FileProgress';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getVideoDurationString } from '../../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
+import ApplicationStore from '../../../Stores/ApplicationStore';
 import './VideoNote.css';
 
 class VideoNote extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.videoRef = React.createRef();
+
+        this.state = {
+            active: false,
+            currentTime: 0
+        };
+    }
+
     componentDidMount() {
         FileStore.on('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        FileStore.on('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
+        ApplicationStore.on('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        FileStore.removeListener('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
+        ApplicationStore.removeListener('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
     }
 
     onClientUpdateActiveVideoNote = update => {
-        const { message } = this.props;
-        const { chatId, messageId } = update;
+        const { chatId, messageId } = this.props;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            if (this.state.active) {
+                const player = this.videoRef.current;
+                if (!player) return;
+
+                if (!player.paused) {
+                    player.pause();
+                } else {
+                    player.play();
+                }
+            } else {
+                this.setState(
+                    {
+                        active: true
+                    },
+                    () => {
+                        const player = this.videoRef.current;
+                        if (!player) return;
+
+                        player.volume = 0.25;
+                        player.currentTime = 30.0;
+                        player.play();
+                    }
+                );
+            }
+        } else if (this.state.active) {
+            this.setState({
+                active: false
+            });
+        }
     };
 
     onClientUpdateVideoNoteBlob = update => {
@@ -58,8 +101,32 @@ class VideoNote extends React.Component {
         }
     };
 
+    handleTimeUpdate = () => {
+        const { active } = this.state;
+        if (!active) return;
+
+        this.setState({
+            currentTime: this.videoRef.current.currentTime
+        });
+    };
+
+    handleEnded = () => {
+        const { active } = this.state;
+        if (!active) return;
+
+        this.setState(
+            {
+                active: false
+            },
+            () => {
+                this.videoRef.current.play();
+            }
+        );
+    };
+
     render() {
         const { displaySize, chatId, messageId, openMedia } = this.props;
+        const { active, currentTime } = this.state;
         const { thumbnail, video, duration } = this.props.videoNote;
 
         const message = MessageStore.get(chatId, messageId);
@@ -70,23 +137,35 @@ class VideoNote extends React.Component {
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(video);
-
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         return (
             <div className='video-note' style={fitPhotoSize} onClick={openMedia}>
                 {src ? (
-                    <video
-                        className={classNames('media-viewer-content-image', 'video-note-round')}
-                        src={src}
-                        poster={thumbnailSrc}
-                        muted
-                        autoPlay
-                        loop
-                        playsInline
-                        width={fitPhotoSize.width}
-                        height={fitPhotoSize.height}
-                    />
+                    <>
+                        <video
+                            ref={this.videoRef}
+                            className={classNames('media-viewer-content-image', 'video-note-round')}
+                            src={src}
+                            poster={thumbnailSrc}
+                            muted={!active}
+                            autoPlay={!active}
+                            loop={!active}
+                            playsInline
+                            width={fitPhotoSize.width}
+                            height={fitPhotoSize.height}
+                            onTimeUpdate={this.handleTimeUpdate}
+                            onEnded={this.handleEnded}
+                        />
+                        <div className='animation-meta'>
+                            {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
+                        </div>
+                        {!active && (
+                            <div className='video-note-muted'>
+                                <VolumeOffIcon />
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <>
                         <div className='video-note-round'>
@@ -105,7 +184,7 @@ class VideoNote extends React.Component {
                         </div>
                     </>
                 )}
-                <FileProgress file={video} cancelButton />
+                <FileProgress file={video} download upload cancelButton icon={<ArrowDownwardIcon />} />
             </div>
         );
     }
