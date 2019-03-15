@@ -12,6 +12,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Animation from './Animation';
 import Video from './Video';
 import Document from './Document';
+import VideoNote from './VideoNote';
 import { getFitSize, getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
 import { getSrc } from '../../../Utils/File';
@@ -53,7 +54,20 @@ class WebPage extends React.Component {
         const { web_page } = content;
         if (!web_page) return null;
 
-        const { site_name, title, description, url, photo, animation, video, document, type } = web_page;
+        const { site_name, title, description, url, photo, animation, video, document, video_note, type } = web_page;
+
+        if (video_note) {
+            return (
+                <>
+                    {site_name && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                    )}
+                    {title && <div className='web-page-title'>{title}</div>}
+                    {description && <div className='web-page-description'>{description}</div>}
+                    <VideoNote chatId={chatId} messageId={messageId} videoNote={video_note} openMedia={openMedia} />
+                </>
+            );
+        }
 
         if (document) {
             return (

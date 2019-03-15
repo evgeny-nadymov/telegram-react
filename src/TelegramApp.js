@@ -212,7 +212,7 @@ class TelegramApp extends Component {
     };
 
     handleKeyDown = event => {
-        console.log('KeyDown', event);
+        //console.log('KeyDown', event);
     };
 
     render() {
@@ -338,10 +338,12 @@ async function openPinnedChat(index) {
 
 document.addEventListener('keyup', event => {
     keyMap.delete(event.key);
+    //console.log('keyup key=' + event.key, keyMap);
 });
 
 document.addEventListener('keydown', async event => {
     keyMap.set(event.key, event.key);
+    //console.log('keydown key=' + event.key, keyMap);
 
     const { authorizationState } = ApplicationStore;
     if (!authorizationState) return;
@@ -407,6 +409,9 @@ document.addEventListener('keydown', async event => {
 
 // set offline on page lost focus
 window.onblur = function() {
+    keyMap.clear();
+    //console.log('window.blur key', keyMap);
+
     const { authorizationState } = ApplicationStore;
 
     if (!authorizationState) return;
@@ -423,6 +428,8 @@ window.onblur = function() {
 
 // set online on page get focus
 window.onfocus = function() {
+    keyMap.clear();
+    //console.log('window.focus key', keyMap);
     const { authorizationState } = ApplicationStore;
 
     if (!authorizationState) return;

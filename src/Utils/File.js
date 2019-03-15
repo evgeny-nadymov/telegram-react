@@ -143,6 +143,39 @@ function getGameAnimationThumbnailFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageVideoNoteThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { video_note } = web_page;
+    if (!video_note) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = video_note;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
 function getWebPageDocumentThumbnailFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -548,6 +581,62 @@ function getWebPageVideoFileSize(message) {
     }
 
     const file = video.video;
+    if (file) {
+        return file.size;
+    }
+
+    return 0;
+}
+
+function getWebPageVideoNoteFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { video_note } = web_page;
+    if (!video_note) {
+        return [0, '', ''];
+    }
+
+    const file = video_note.video;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getWebPageVideoNoteFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return 0;
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return 0;
+    }
+
+    const { video_note } = web_page;
+    if (!video_note) {
+        return 0;
+    }
+
+    const file = video_note.video;
     if (file) {
         return file.size;
     }
@@ -1020,8 +1109,58 @@ function loadMessageContents(store, messages) {
                             break;
                         }
 
-                        const { photo, animation, video, document } = web_page;
+                        const { photo, animation, video, document, video_note } = web_page;
                         let loadPhoto = true;
+
+                        if (video_note) {
+                            const [id, pid, idb_key] = getWebPageVideoNoteFile(message);
+                            if (pid) {
+                                const obj = video_note.video;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateVideoNoteBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => {
+                                            const fileSize = getWebPageVideoNoteFileSize(message);
+                                            if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
+                                                FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+
+                            const [previewId, previewPid, previewIdbKey] = getWebPageVideoNoteThumbnailFile(message);
+                            if (previewPid) {
+                                loadPhoto = false;
+                                const obj = video_note.thumbnail.photo;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updateVideoNoteThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
 
                         if (document) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageDocumentThumbnailFile(message);

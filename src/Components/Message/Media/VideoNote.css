@@ -14,6 +14,15 @@
     color: white;
 }
 
+.video-note-player {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateZ(0);
+}
+
 .video-note-round {
     border-radius: 50%;
     overflow: hidden;
@@ -37,10 +46,10 @@
     left: 50%;
     transform: translate(-50%, -6px);
     bottom: 0;
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     background: rgba(0, 0, 0, 0.25);
     border-radius: 50%;
-    padding: 6px;
+    padding: 3px;
     box-sizing: border-box;
 }

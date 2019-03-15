@@ -126,7 +126,7 @@ class VideoNote extends React.Component {
         this.setState(
             {
                 active: false,
-                currentTime: this.videoRef.current.duration,
+                currentTime: 0,
                 videoDuration: this.videoRef.current.duration
             },
             () => {
@@ -170,25 +170,27 @@ class VideoNote extends React.Component {
                             onTimeUpdate={this.handleTimeUpdate}
                             onEnded={this.handleEnded}
                         />
-                        {active && (
-                            <div className='video-note-progress'>
-                                <CircularProgress
-                                    classes={circleStyle}
-                                    variant='static'
-                                    value={progress}
-                                    size={200}
-                                    thickness={1}
-                                />
+                        <div className='video-note-player'>
+                            {active && (
+                                <div className='video-note-progress'>
+                                    <CircularProgress
+                                        classes={circleStyle}
+                                        variant='static'
+                                        value={progress}
+                                        size={200}
+                                        thickness={1}
+                                    />
+                                </div>
+                            )}
+                            <div className='animation-meta'>
+                                {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
                             </div>
-                        )}
-                        <div className='animation-meta'>
-                            {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
+                            {!active && (
+                                <div className='video-note-muted'>
+                                    <VolumeOffIcon />
+                                </div>
+                            )}
                         </div>
-                        {!active && (
-                            <div className='video-note-muted'>
-                                <VolumeOffIcon />
-                            </div>
-                        )}
                     </>
                 ) : (
                     <>

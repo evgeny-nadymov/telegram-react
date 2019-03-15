@@ -279,7 +279,33 @@ class Message extends Component {
             case 'messageText': {
                 const { web_page } = message.content;
                 if (web_page) {
-                    const { photo, animation, document } = web_page;
+                    const { photo, animation, document, video_note } = web_page;
+
+                    if (video_note) {
+                        let file = video_note.video;
+                        if (file) {
+                            file = FileStore.get(file.id) || file;
+                            if (file) {
+                                if (file.local.is_downloading_active) {
+                                    FileStore.cancelGetRemoteFile(file.id, message);
+                                    return;
+                                } else if (file.remote.is_uploading_active) {
+                                    FileStore.cancelUploadFile(file.id, message);
+                                    return;
+                                } else {
+                                    download(file, message);
+                                }
+                            }
+                        }
+
+                        // set active video note
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateActiveVideoNote',
+                            chatId: message.chat_id,
+                            messageId: message.id
+                        });
+                    }
+
                     if (document) {
                         let file = document.document;
                         if (file) {
@@ -374,14 +400,14 @@ class Message extends Component {
                             }
                         }
                     }
-                }
 
-                // set active video note
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateActiveVideoNote',
-                    chatId: message.chat_id,
-                    messageId: message.id
-                });
+                    // set active video note
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateActiveVideoNote',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
 
                 break;
             }
