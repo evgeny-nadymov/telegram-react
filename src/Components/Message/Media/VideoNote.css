@@ -38,7 +38,7 @@
     stroke-linecap: round;
     stroke-opacity: 0.75;
     color: #ffffff;
-    transition: stroke-dashoffset 300ms linear 0ms !important;
+    transition: stroke-dashoffset 250ms linear 0ms !important;
 }
 
 .video-note-muted {

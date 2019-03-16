@@ -343,14 +343,14 @@ document.addEventListener('keyup', event => {
 
 document.addEventListener('keydown', async event => {
     keyMap.set(event.key, event.key);
-    //console.log('keydown key=' + event.key, keyMap);
+    console.log('keydown key=' + event.key, event.altKey, event.ctrlKey, keyMap);
 
     const { authorizationState } = ApplicationStore;
     if (!authorizationState) return;
     if (authorizationState['@type'] !== 'authorizationStateReady') return;
-    if (keyMap.size > 2) return;
+    if (keyMap.size > 3) return;
 
-    if (event.ctrlKey || event.metaKey) {
+    if (event.altKey && event.ctrlKey) {
         switch (event.key) {
             case '0': {
                 event.preventDefault();

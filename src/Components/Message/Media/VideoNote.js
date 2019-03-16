@@ -79,11 +79,21 @@ class VideoNote extends React.Component {
                 );
             }
         } else if (this.state.active) {
-            this.setState({
-                active: false,
-                currentTime: 0,
-                videoDuration: 0
-            });
+            this.setState(
+                {
+                    active: false,
+                    currentTime: 0,
+                    videoDuration: 0
+                },
+                () => {
+                    const player = this.videoRef.current;
+                    if (!player) return;
+
+                    if (player.paused) {
+                        player.play();
+                    }
+                }
+            );
         }
     };
 
@@ -151,6 +161,7 @@ class VideoNote extends React.Component {
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         const progress = (currentTime / (videoDuration || duration)) * 100;
+        console.log('VideoNote.render', currentTime, videoDuration, progress);
 
         return (
             <div className='video-note' style={fitPhotoSize} onClick={openMedia}>
