@@ -57,6 +57,11 @@ class Animation extends React.Component {
         const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
 
+        const style = {
+            width: fitPhotoSize.width,
+            height: fitPhotoSize.height
+        };
+
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(animation);
 
@@ -64,10 +69,10 @@ class Animation extends React.Component {
         const isGif = isGifMimeType(mime_type);
 
         return (
-            <div className='animation' style={fitPhotoSize} onClick={openMedia}>
+            <div className='animation' style={style} onClick={openMedia}>
                 {src ? (
                     isGif ? (
-                        <img className='media-viewer-content-image' style={fitPhotoSize} src={src} alt='' />
+                        <img className='media-viewer-content-image' style={style} src={src} alt='' />
                     ) : (
                         <video
                             className='media-viewer-content-image'
@@ -77,15 +82,15 @@ class Animation extends React.Component {
                             autoPlay
                             loop
                             playsInline
-                            width={fitPhotoSize.width}
-                            height={fitPhotoSize.height}
+                            width={style.width}
+                            height={style.height}
                         />
                     )
                 ) : (
                     <>
                         <img
                             className={classNames('animation-preview', { 'animation-preview-blurred': isBlurred })}
-                            style={fitPhotoSize}
+                            style={style}
                             src={thumbnailSrc}
                             alt=''
                         />

@@ -153,18 +153,18 @@ class VideoNote extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
-        const fitPhotoSize = { width: 200, height: 200 };
-        if (!fitPhotoSize) return null;
+        const style = { width: 200, height: 200 };
+        if (!style) return null;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(video);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         const progress = (currentTime / (videoDuration || duration)) * 100;
-        console.log('VideoNote.render', currentTime, videoDuration, progress);
+        //console.log('VideoNote.render', currentTime, videoDuration, progress);
 
         return (
-            <div className='video-note' style={fitPhotoSize} onClick={openMedia}>
+            <div className='video-note' style={style} onClick={openMedia}>
                 {src ? (
                     <>
                         <video
@@ -176,8 +176,8 @@ class VideoNote extends React.Component {
                             loop={!active}
                             autoPlay
                             playsInline
-                            width={fitPhotoSize.width}
-                            height={fitPhotoSize.height}
+                            width={style.width}
+                            height={style.height}
                             onTimeUpdate={this.handleTimeUpdate}
                             onEnded={this.handleEnded}
                         />
@@ -208,7 +208,7 @@ class VideoNote extends React.Component {
                         <div className='video-note-round'>
                             <img
                                 className={classNames('animation-preview', { 'animation-preview-blurred': isBlurred })}
-                                style={fitPhotoSize}
+                                style={style}
                                 src={thumbnailSrc}
                                 alt=''
                             />

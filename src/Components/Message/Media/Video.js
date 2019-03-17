@@ -43,16 +43,21 @@ class Video extends React.Component {
         const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
 
+        const style = {
+            width: fitPhotoSize.width,
+            height: fitPhotoSize.height
+        };
+
         const file = thumbnail ? thumbnail.photo : null;
         const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
         const src = FileStore.getBlobUrl(blob);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         return (
-            <div className='video' style={fitPhotoSize} onClick={openMedia}>
+            <div className='video' style={style} onClick={openMedia}>
                 <img
                     className={classNames('video-preview', { 'media-blurred': isBlurred })}
-                    style={fitPhotoSize}
+                    style={style}
                     src={src}
                     alt=''
                 />

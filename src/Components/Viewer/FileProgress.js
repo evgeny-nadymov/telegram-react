@@ -161,6 +161,10 @@ class FileProgress extends React.Component {
         return [wasActive, isActive, isCompleted, progressSize, size];
     };
 
+    handleTransitionEnd = () => {
+        console.log('handleTransitionEnd');
+    };
+
     render() {
         let { cancelButton, zIndex, icon, completeIcon } = this.props;
         const { file, prevFile } = this.state;
@@ -235,6 +239,7 @@ class FileProgress extends React.Component {
                             value={progress}
                             size={42}
                             thickness={2}
+                            onTransitionEnd={this.handleTransitionEnd}
                         />
                     </div>
                     {cancelButton && (

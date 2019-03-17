@@ -63,23 +63,26 @@ class Game extends React.Component {
 
         if (photo) {
             let src = '';
-            let fitPhotoSize = {
+            let style = {
                 width: 0,
                 height: 0
             };
             const photoSize = getSize(photo.sizes, size);
             if (photoSize) {
-                fitPhotoSize = getFitSize(photoSize, displaySize);
+                const fitPhotoSize = getFitSize(photoSize, displaySize);
                 if (fitPhotoSize) {
                     const file = photoSize.photo;
                     const blob = FileStore.getBlob(file.id) || file.blob;
                     src = FileStore.getBlobUrl(blob);
+
+                    style.width = fitPhotoSize.width;
+                    style.height = fitPhotoSize.height;
                 }
             }
 
             return (
-                <div className='game-photo' style={fitPhotoSize} onClick={openMedia}>
-                    <img className='photo-img' style={fitPhotoSize} src={src} alt='' />
+                <div className='game-photo' style={style} onClick={openMedia}>
+                    <img className='photo-img' style={style} src={src} alt='' />
                 </div>
             );
         }

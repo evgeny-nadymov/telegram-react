@@ -343,7 +343,7 @@ document.addEventListener('keyup', event => {
 
 document.addEventListener('keydown', async event => {
     keyMap.set(event.key, event.key);
-    console.log('keydown key=' + event.key, event.altKey, event.ctrlKey, keyMap);
+    console.log('keydown key=' + event.key, event.altKey, event.ctrlKey, event, keyMap);
 
     const { authorizationState } = ApplicationStore;
     if (!authorizationState) return;

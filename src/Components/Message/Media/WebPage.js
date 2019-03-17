@@ -115,7 +115,7 @@ class WebPage extends React.Component {
 
         if (photo) {
             let src = '';
-            let fitPhotoSize = {
+            let style = {
                 width: 0,
                 height: 0
             };
@@ -127,23 +127,26 @@ class WebPage extends React.Component {
                 photoSize.width === photoSize.height;
 
             if (photoSize) {
-                fitPhotoSize = getFitSize(photoSize, smallPhoto ? displaySmallSize : displaySize, false);
+                const fitPhotoSize = getFitSize(photoSize, smallPhoto ? displaySmallSize : displaySize, false);
                 if (fitPhotoSize) {
                     const file = photoSize.photo;
                     const blob = FileStore.getBlob(file.id) || file.blob;
                     src = FileStore.getBlobUrl(blob);
+
+                    style.width = fitPhotoSize.width;
+                    style.height = fitPhotoSize.height;
                 }
                 if (smallPhoto) {
-                    fitPhotoSize.float = 'right';
-                    fitPhotoSize.marginLeft = 6;
-                    fitPhotoSize.marginBottom = 6;
+                    style.float = 'right';
+                    style.marginLeft = 6;
+                    style.marginBottom = 6;
                 }
             }
 
             return (
                 <>
                     {smallPhoto && (
-                        <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
+                        <div className='web-page-photo' style={style} onClick={openMedia}>
                             <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
                                 <img className='photo-img' src={src} alt='' />
                             </a>
@@ -155,7 +158,7 @@ class WebPage extends React.Component {
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
                     {!smallPhoto && (
-                        <div className='web-page-photo' style={fitPhotoSize} onClick={openMedia}>
+                        <div className='web-page-photo' style={style} onClick={openMedia}>
                             <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
                                 <img className='photo-img' src={src} alt='' />
                             </a>
