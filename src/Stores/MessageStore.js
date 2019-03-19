@@ -29,9 +29,9 @@ class MessageStore extends EventEmitter {
                 this.emit('updateDeleteMessages', update);
                 break;
             case 'updateMessageEdited': {
-                let chat = this.items.get(update.chat_id);
+                const chat = this.items.get(update.chat_id);
                 if (chat) {
-                    let message = chat.get(update.message_id);
+                    const message = chat.get(update.message_id);
                     if (message) {
                         message.reply_markup = update.reply_markup;
                         message.edit_date = update.edit_date;
@@ -41,9 +41,9 @@ class MessageStore extends EventEmitter {
                 break;
             }
             case 'updateMessageViews': {
-                let chat = this.items.get(update.chat_id);
+                const chat = this.items.get(update.chat_id);
                 if (chat) {
-                    let message = chat.get(update.message_id);
+                    const message = chat.get(update.message_id);
                     if (message && update.views > message.views) {
                         message.views = update.views;
                     }
@@ -52,22 +52,42 @@ class MessageStore extends EventEmitter {
                 break;
             }
             case 'updateMessageContent': {
-                let chat = this.items.get(update.chat_id);
+                const chat = this.items.get(update.chat_id);
                 if (chat) {
-                    let message = chat.get(update.message_id);
+                    const message = chat.get(update.message_id);
                     if (message) {
-                        const oldContent = message.content;
-                        update.old_content = oldContent;
+                        update.old_content = message.content;
                         message.content = update.new_content;
                     }
                 }
                 this.emit('updateMessageContent', update);
                 break;
             }
+            case 'updateMessageContentOpened': {
+                const { chat_id, message_id } = update;
+
+                const message = this.get(chat_id, message_id);
+                if (message) {
+                    const { content } = message;
+                    switch (content['@type']) {
+                        case 'messageVoiceNote': {
+                            message.content.is_listened = true;
+                            break;
+                        }
+                        case 'messageVideoNote': {
+                            message.content.is_viewed = true;
+                            break;
+                        }
+                    }
+                }
+
+                this.emit('updateMessageContentOpened', update);
+                break;
+            }
             case 'updateMessageSendSucceeded': {
-                let chat = this.items.get(update.message.chat_id);
+                const chat = this.items.get(update.message.chat_id);
                 if (chat) {
-                    let message = chat.get(update.old_message_id);
+                    const message = chat.get(update.old_message_id);
                     if (message) {
                         message.sending_state = update.message.sending_state;
                     }
@@ -84,9 +104,9 @@ class MessageStore extends EventEmitter {
                     update.message.sending_state.error_message = update.error_message;
                 }
 
-                let chat = this.items.get(update.message.chat_id);
+                const chat = this.items.get(update.message.chat_id);
                 if (chat) {
-                    let message = chat.get(update.old_message_id);
+                    const message = chat.get(update.old_message_id);
                     if (message) {
                         message.sending_state = update.message.sending_state;
                         if (message.sending_state) {

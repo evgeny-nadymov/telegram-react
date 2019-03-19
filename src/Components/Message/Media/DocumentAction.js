@@ -23,6 +23,7 @@ class DocumentAction extends React.Component {
             file: FileStore.get(file.id) || file
         };
     }
+
     componentDidMount() {
         FileStore.on('updateFile', this.onUpdateFile);
     }

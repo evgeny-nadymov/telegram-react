@@ -12,18 +12,6 @@ import FileStore from '../../../Stores/FileStore';
 import './Sticker.css';
 
 class Sticker extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    /*shouldComponentUpdate(nextProps, nextState){
-        if (nextProps.chat !== this.props.chat){
-            return true;
-        }
-
-        return false;
-    }*/
-
     componentDidMount() {
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }

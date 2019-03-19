@@ -8,10 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import FileProgress from '../../Viewer/FileProgress';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import FileProgress from '../../Viewer/FileProgress';
+import MediaStatus from './MediaStatus';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getVideoDurationString } from '../../../Utils/Common';
@@ -195,6 +196,7 @@ class VideoNote extends React.Component {
                             )}
                             <div className='animation-meta'>
                                 {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
+                                <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
                             </div>
                             {!active && (
                                 <div className='video-note-muted'>
@@ -215,6 +217,7 @@ class VideoNote extends React.Component {
                         </div>
                         <div className='animation-meta'>
                             {getVideoDurationString(duration) + ' ' + getFileSize(video)}
+                            <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
                         </div>
                         <div className='video-note-muted'>
                             <VolumeOffIcon />

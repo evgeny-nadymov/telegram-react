@@ -188,8 +188,14 @@ class Message extends Component {
         switch (content['@type']) {
             case 'messageContact': {
                 const { contact } = content;
-                if (contact && onSelectUser) {
-                    onSelectUser(contact.user_id);
+                if (contact) {
+                    if (onSelectUser) onSelectUser(contact.user_id);
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
                 }
                 break;
             }
@@ -204,7 +210,13 @@ class Message extends Component {
                         } else if (file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                         } else {
-                            saveOrDownload(file, document.file_name, message);
+                            saveOrDownload(file, document.file_name, message, () => {
+                                TdLibController.send({
+                                    '@type': 'openMessageContent',
+                                    chat_id: message.chat_id,
+                                    message_id: message.id
+                                });
+                            });
                         }
                     }
                 }
@@ -227,20 +239,25 @@ class Message extends Component {
                                 } else if (file.remote.is_uploading_active) {
                                     FileStore.cancelUploadFile(file.id, message);
                                     return;
+                                } else {
+                                    download(file, message);
                                 }
-                                // else {
-                                //     saveOrDownload(file, document.file_name, message);
-                                // }
                             }
                         }
                     }
-                }
 
-                // open media viewer
-                ApplicationStore.setMediaViewerContent({
-                    chatId: chatId,
-                    messageId: messageId
-                });
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // open media viewer
+                    ApplicationStore.setMediaViewerContent({
+                        chatId: chatId,
+                        messageId: messageId
+                    });
+                }
 
                 break;
             }
@@ -265,6 +282,12 @@ class Message extends Component {
                             }
                         }
                     }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
 
                     // set active animation
                     TdLibController.clientUpdate({
@@ -298,6 +321,12 @@ class Message extends Component {
                             }
                         }
 
+                        TdLibController.send({
+                            '@type': 'openMessageContent',
+                            chat_id: message.chat_id,
+                            message_id: message.id
+                        });
+
                         // set active video note
                         TdLibController.clientUpdate({
                             '@type': 'clientUpdateActiveVideoNote',
@@ -315,7 +344,13 @@ class Message extends Component {
                             } else if (file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                             } else {
-                                saveOrDownload(file, document.file_name, message);
+                                saveOrDownload(file, document.file_name, message, () => {
+                                    TdLibController.send({
+                                        '@type': 'openMessageContent',
+                                        chat_id: message.chat_id,
+                                        message_id: message.id
+                                    });
+                                });
                             }
                         }
                     }
@@ -337,11 +372,16 @@ class Message extends Component {
                             }
                         }
 
-                        // set active animation
                         TdLibController.clientUpdate({
                             '@type': 'clientUpdateActiveAnimation',
                             chatId: message.chat_id,
                             messageId: message.id
+                        });
+
+                        TdLibController.send({
+                            '@type': 'openMessageContent',
+                            chat_id: message.chat_id,
+                            message_id: message.id
                         });
 
                         // open media viewer
@@ -372,6 +412,12 @@ class Message extends Component {
                             }
                         }
 
+                        TdLibController.send({
+                            '@type': 'openMessageContent',
+                            chat_id: message.chat_id,
+                            message_id: message.id
+                        });
+
                         // open media viewer
                         ApplicationStore.setMediaViewerContent({
                             chatId: chatId,
@@ -400,6 +446,12 @@ class Message extends Component {
                             }
                         }
                     }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
 
                     // set active video note
                     TdLibController.clientUpdate({
@@ -438,6 +490,12 @@ class Message extends Component {
                     messageId: message.id
                 });
 
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+
                 // open media viewer
                 ApplicationStore.setMediaViewerContent({
                     chatId: chatId,
@@ -454,8 +512,8 @@ class Message extends Component {
                         file = FileStore.get(file.id) || file;
                         if (file) {
                             if (file.local.is_downloading_active) {
-                                //FileStore.cancelGetRemoteFile(file.id, message);
-                                //return;
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
                             } else if (file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;
@@ -465,13 +523,19 @@ class Message extends Component {
                             // }
                         }
                     }
-                }
 
-                // open media viewer
-                ApplicationStore.setMediaViewerContent({
-                    chatId: chatId,
-                    messageId: messageId
-                });
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // open media viewer
+                    ApplicationStore.setMediaViewerContent({
+                        chatId: chatId,
+                        messageId: messageId
+                    });
+                }
 
                 break;
             }

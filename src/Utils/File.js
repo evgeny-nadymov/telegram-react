@@ -1630,23 +1630,26 @@ function loadMessageContents(store, messages) {
     loadUserPhotos(store, [...users.keys()]);
 }
 
-function saveOrDownload(file, fileName, obj) {
+function saveOrDownload(file, fileName, obj, onDownload) {
     if (!file) return;
     if (!fileName) return;
 
     if (file.arr) {
         saveData(file.arr, fileName);
+        if (onDownload) onDownload();
         return;
     }
 
     if (file.blob) {
         saveBlob(file.blob, fileName);
+        if (onDownload) onDownload();
         return;
     }
 
     const blob = FileStore.getBlob(file.id);
     if (blob) {
         saveBlob(blob, fileName);
+        if (onDownload) onDownload();
         return;
     }
 
@@ -1661,6 +1664,7 @@ function saveOrDownload(file, fileName, obj) {
             () => {
                 if (file.blob) {
                     saveBlob(file.blob, fileName);
+                    if (onDownload) onDownload();
                 }
             },
             () => {

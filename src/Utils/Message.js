@@ -545,6 +545,26 @@ function isAnimationMessage(chatId, messageId) {
     }
 }
 
+function isContentOpened(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageVoiceNote': {
+            return content.is_listened;
+        }
+        case 'messageVideoNote': {
+            return content.is_viewed;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 export {
     getTitle,
     getText,
@@ -563,5 +583,6 @@ export {
     isVideoMessage,
     isAnimationMessage,
     getLocationId,
-    getVenueId
+    getVenueId,
+    isContentOpened
 };
