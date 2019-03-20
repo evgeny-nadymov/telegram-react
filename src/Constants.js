@@ -20,6 +20,7 @@ export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;
 export const PHOTO_DISPLAY_SMALL_SIZE = 65;
 export const PHOTO_SIZE = 320;
+export const STICKER_DISPLAY_SIZE = 192;
 export const PROFILE_PHOTO_BIG_SIZE = 640;
 export const PROFILE_PHOTO_SMALL_SIZE = 160;
 export const TYPING_INPUT_INTERVAL_S = 8;

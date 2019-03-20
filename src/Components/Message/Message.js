@@ -224,7 +224,6 @@ class Message extends Component {
                 break;
             }
             case 'messagePhoto': {
-                // cancel download/upload
                 const { photo } = message.content;
                 if (photo) {
                     const photoSize = getPhotoSize(photo.sizes);

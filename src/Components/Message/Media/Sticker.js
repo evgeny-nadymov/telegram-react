@@ -7,61 +7,75 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFitSize } from '../../../Utils/Common';
+import { getSrc } from '../../../Utils/File';
+import { STICKER_DISPLAY_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Sticker.css';
 
 class Sticker extends React.Component {
     componentDidMount() {
+        FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
     componentWillUnmount() {
+        FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
     }
 
     onClientUpdateStickerBlob = update => {
-        const { message } = this.props;
-        if (!message) return;
-        const { chatId, messageId } = update;
+        const { sticker } = this.props.sticker;
+        const { fileId } = update;
 
-        if (message.chat_id === chatId && message.id === messageId) {
+        if (!sticker) return;
+
+        if (sticker.id === fileId) {
+            this.forceUpdate();
+        }
+    };
+
+    onClientUpdateStickerThumbnailBlob = update => {
+        const { thumbnail } = this.props.sticker;
+        if (!thumbnail) return;
+
+        const { fileId } = update;
+
+        if (thumbnail.photo && thumbnail.photo.id === fileId) {
             this.forceUpdate();
         }
     };
 
     render() {
-        const { message } = this.props;
-        if (!message) return null;
+        const { thumbnail, sticker, width, height } = this.props.sticker;
 
-        const { content } = message;
-        if (!content) return null;
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const src = getSrc(sticker);
+        const isBlurred = isBlurredThumbnail(thumbnail);
 
-        const { sticker } = content;
-        if (!sticker) return null;
+        const fitSize = getFitSize({ width: width, height: height }, STICKER_DISPLAY_SIZE);
 
-        const file = sticker.sticker;
-        const blob = FileStore.getBlob(file.id) || file.blob;
-
-        let size = {
-            width: sticker.width,
-            height: sticker.height
-        };
-
-        let fitSize = getFitSize(size, 192);
-        let src = '';
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(`Sticker.render sticker with error ${error}`);
-        }
-
-        return <img className='sticker-img' width={fitSize.width} height={fitSize.height} src={src} alt='' />;
+        return src ? (
+            <img className='sticker' draggable={false} width={fitSize.width} height={fitSize.height} src={src} alt='' />
+        ) : (
+            <img
+                className={classNames('sticker', { 'media-blurred': isBlurred })}
+                draggable={false}
+                width={fitSize.width}
+                height={fitSize.height}
+                src={thumbnailSrc}
+                alt=''
+            />
+        );
     }
 }
 
 Sticker.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    sticker: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired
 };
 

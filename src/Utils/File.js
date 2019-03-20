@@ -87,6 +87,34 @@ function getBigPhoto(photo) {
     return [0, '', ''];
 }
 
+function getStickerThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageSticker') {
+        return [0, '', ''];
+    }
+
+    const { sticker } = content;
+    if (!sticker) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = sticker;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
 function getStickerFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -1334,6 +1362,28 @@ function loadMessageContents(store, messages) {
                                     null,
                                     () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
                                     () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
+                                );
+                            }
+                        }
+
+                        const [previewId, previewPid, previewIdbKey] = getStickerThumbnailFile(message);
+                        if (previewPid) {
+                            const file = message.content.sticker.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    file,
+                                    previewIdbKey,
+                                    null,
+                                    () =>
+                                        FileStore.updateStickerThumbnailBlob(
+                                            localMessage.chat_id,
+                                            localMessage.id,
+                                            file.id
+                                        ),
+                                    () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                 );
                             }
                         }

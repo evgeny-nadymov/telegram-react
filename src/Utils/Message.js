@@ -265,7 +265,14 @@ function getMedia(message, openMedia) {
         case 'messageGame':
             return <Game chatId={message.chat_id} messageId={message.id} openMedia={openMedia} />;
         case 'messageSticker':
-            return <Sticker message={message} openMedia={openMedia} />;
+            return (
+                <Sticker
+                    chatId={message.chat_id}
+                    messageId={message.id}
+                    sticker={message.content.sticker}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageLocation':
             return <Location message={message} openMedia={openMedia} />;
         case 'messageVenue':
@@ -547,10 +554,10 @@ function isAnimationMessage(chatId, messageId) {
 
 function isContentOpened(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
+    if (!message) return true;
 
     const { content } = message;
-    if (!content) return false;
+    if (!content) return true;
 
     switch (content['@type']) {
         case 'messageVoiceNote': {
@@ -560,7 +567,7 @@ function isContentOpened(chatId, messageId) {
             return content.is_viewed;
         }
         default: {
-            return false;
+            return true;
         }
     }
 }

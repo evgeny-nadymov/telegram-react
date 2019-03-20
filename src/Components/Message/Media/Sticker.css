@@ -5,9 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.sticker-img {
-    /*background: aliceblue;*/
+.sticker {
     display: block;
     border-radius: 8px;
+    user-select: none;
     /*transform: translateZ(0);*/
 }
