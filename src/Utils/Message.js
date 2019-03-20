@@ -228,51 +228,25 @@ function getDateHint(message) {
 
 function getMedia(message, openMedia) {
     if (!message) return null;
-    if (!message.content) return null;
 
-    switch (message.content['@type']) {
+    const { chat_id, id, content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
         case 'messageText':
             return null;
         case 'messagePhoto':
-            return <Photo message={message} openMedia={openMedia} />;
+            return <Photo chatId={chat_id} messageId={id} photo={content.photo} openMedia={openMedia} />;
         case 'messageVideo':
-            return (
-                <Video
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    video={message.content.video}
-                    openMedia={openMedia}
-                />
-            );
+            return <Video chatId={chat_id} messageId={id} video={content.video} openMedia={openMedia} />;
         case 'messageVideoNote':
-            return (
-                <VideoNote
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    videoNote={message.content.video_note}
-                    openMedia={openMedia}
-                />
-            );
+            return <VideoNote chatId={chat_id} messageId={id} videoNote={content.video_note} openMedia={openMedia} />;
         case 'messageAnimation':
-            return (
-                <Animation
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    animation={message.content.animation}
-                    openMedia={openMedia}
-                />
-            );
+            return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
         case 'messageGame':
-            return <Game chatId={message.chat_id} messageId={message.id} openMedia={openMedia} />;
+            return <Game chatId={chat_id} messageId={id} openMedia={openMedia} />;
         case 'messageSticker':
-            return (
-                <Sticker
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    sticker={message.content.sticker}
-                    openMedia={openMedia}
-                />
-            );
+            return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
         case 'messageLocation':
             return <Location message={message} openMedia={openMedia} />;
         case 'messageVenue':
@@ -280,16 +254,9 @@ function getMedia(message, openMedia) {
         case 'messageContact':
             return <Contact message={message} openMedia={openMedia} />;
         case 'messageDocument':
-            return (
-                <Document
-                    chatId={message.chat_id}
-                    messageId={message.id}
-                    document={message.content.document}
-                    openMedia={openMedia}
-                />
-            );
+            return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
         default:
-            return '[' + message.content['@type'] + ']';
+            return '[' + content['@type'] + ']';
     }
 }
 

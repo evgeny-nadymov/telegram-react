@@ -7,28 +7,36 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import FileProgress from '../../Viewer/FileProgress';
 import { getSize, getFitSize } from '../../../Utils/Common';
-import { PHOTO_SIZE, PHOTO_DISPLAY_SIZE } from '../../../Constants';
+import { getSrc } from '../../../Utils/File';
+import { PHOTO_SIZE, PHOTO_DISPLAY_SIZE, PHOTO_THUMBNAIL_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Photo.css';
+import { isBlurredThumbnail } from '../../../Utils/Media';
 
 class Photo extends React.Component {
     constructor(props) {
         super(props);
 
-        const { message, size } = props;
-        const photoSize = getSize(message.content.photo.sizes, size);
+        const { photo, size, thumbnailSize } = props;
+        const photoSize = getSize(photo.sizes, size);
+        const thumbnail = getSize(photo.sizes, thumbnailSize);
+
         this.state = {
-            photoSize: photoSize
+            photoSize: photoSize,
+            thumbnail: thumbnail
         };
     }
 
     componentDidMount() {
+        FileStore.on('clientUpdatePhotoThumbnailBlob', this.onClientUpdatePhotoThumbnailBlob);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     componentWillUnmount() {
+        FileStore.removeListener('clientUpdatePhotoThumbnailBlob', this.onClientUpdatePhotoThumbnailBlob);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
@@ -43,11 +51,26 @@ class Photo extends React.Component {
         }
     };
 
+    onClientUpdatePhotoThumbnailBlob = update => {
+        const { thumbnail } = this.state;
+        const { fileId } = update;
+
+        if (!thumbnail) return;
+
+        if (thumbnail.photo.id === fileId) {
+            this.forceUpdate();
+        }
+    };
+
     render() {
         const { displaySize, openMedia } = this.props;
-        const { photoSize } = this.state;
+        const { thumbnail, photoSize } = this.state;
 
         if (!photoSize) return null;
+
+        const src = getSrc(photoSize.photo);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const isBlurred = isBlurredThumbnail(thumbnail);
 
         const fitPhotoSize = getFitSize(photoSize, displaySize);
         if (!fitPhotoSize) return null;
@@ -57,46 +80,39 @@ class Photo extends React.Component {
             height: fitPhotoSize.height
         };
 
-        const file = photoSize.photo;
-        const blob = FileStore.getBlob(file.id) || file.blob;
-        const src = FileStore.getBlobUrl(blob);
-
-        // if (!blob && this.props.message.content.photo.sizes.length > 0)
-        // {
-        //     let previewSize = this.props.message.content.photo.sizes[0];
-        //     if (previewSize){
-        //         let previewFile = previewSize.photo;
-        //         if (previewFile && previewFile.blob){
-        //             className += ' photo-img-blur';
-        //             try{
-        //                 src = FileStore.getBlobUrl(previewFile.blob);
-        //             }
-        //             catch(error){
-        //                 console.log(`Photo.render photo with error ${error}`);
-        //             }
-        //         }
-        //     }
-        // }
-
         return (
             <div className='photo' style={style} onClick={openMedia}>
-                <img className='photo-img' style={style} src={src} alt='' />
-                <FileProgress file={file} cancelButton />
-                {/*{src && <div className='photo-src-indicator'/>}*/}
+                {src ? (
+                    <img className='photo-img' draggable={false} style={style} src={src} alt='' />
+                ) : (
+                    <img
+                        className={classNames('photo-img', { 'media-blurred': isBlurred })}
+                        draggable={false}
+                        style={style}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                )}
+                <FileProgress file={photoSize.photo} cancelButton />
             </div>
         );
     }
 }
 
 Photo.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    photo: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired,
+
     size: PropTypes.number,
+    thumbnailSize: PropTypes.number,
     displaySize: PropTypes.number
 };
 
 Photo.defaultProps = {
     size: PHOTO_SIZE,
+    thumbnailSize: PHOTO_THUMBNAIL_SIZE,
     displaySize: PHOTO_DISPLAY_SIZE
 };
 

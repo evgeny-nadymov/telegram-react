@@ -8,7 +8,7 @@
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
 import { getLocationId } from '../Utils/Message';
-import { THUMBNAIL_PRIORITY } from '../Constants';
+import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -147,7 +147,7 @@ class FileStore extends EventEmitter {
 
                                             const { animation } = game;
                                             if (animation) {
-                                                this.handleAnimation(animation, file, idb_key, arr, obj);
+                                                this.handleAnimation(store, animation, file, idb_key, arr, obj);
                                             }
                                         }
 
@@ -182,24 +182,29 @@ class FileStore extends EventEmitter {
                                                 }
                                             }
 
-                                            const { video } = web_page;
-                                            if (video) {
-                                                this.handleVideo(video, file, idb_key, arr, obj);
-                                            }
-
                                             const { animation } = web_page;
                                             if (animation) {
-                                                this.handleAnimation(animation, file, idb_key, arr, obj);
+                                                this.handleAnimation(store, animation, file, idb_key, arr, obj);
                                             }
 
-                                            const { video_note } = web_page;
-                                            if (video_note) {
-                                                this.handleVideoNote(video_note, file, idb_key, arr, obj);
+                                            const { document } = web_page;
+                                            if (document) {
+                                                this.handleDocument(store, document, file, idb_key, arr, obj);
                                             }
 
                                             const { sticker } = web_page;
                                             if (sticker) {
-                                                this.handleSticker(sticker, file, idb_key, arr, obj);
+                                                this.handleSticker(store, sticker, file, idb_key, arr, obj);
+                                            }
+
+                                            const { video } = web_page;
+                                            if (video) {
+                                                this.handleVideo(store, video, file, idb_key, arr, obj);
+                                            }
+
+                                            const { video_note } = web_page;
+                                            if (video_note) {
+                                                this.handleVideoNote(store, video_note, file, idb_key, arr, obj);
                                             }
                                         }
 
@@ -219,7 +224,7 @@ class FileStore extends EventEmitter {
                                                         idb_key,
                                                         arr,
                                                         () => this.updatePhotoBlob(obj.chat_id, obj.id, file.id),
-                                                        () => this.getRemoteFile(file.id, 1, obj)
+                                                        () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                                                     );
                                                     break;
                                                 }
@@ -231,95 +236,44 @@ class FileStore extends EventEmitter {
                                     case 'messageSticker': {
                                         const { sticker } = obj.content;
 
-                                        this.handleSticker(sticker, file, idb_key, arr, obj);
+                                        this.handleSticker(store, sticker, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVideoNote': {
                                         const { video_note } = obj.content;
 
-                                        this.handleVideoNote(video_note, file, idb_key, arr, obj);
+                                        this.handleVideoNote(store, video_note, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageAnimation': {
                                         const { animation } = obj.content;
 
-                                        this.handleAnimation(animation, file, idb_key, arr, obj);
+                                        this.handleAnimation(store, animation, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVideo': {
                                         const { video } = obj.content;
 
-                                        this.handleVideo(video, file, idb_key, arr, obj);
+                                        this.handleVideo(store, video, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageDocument': {
                                         const { document } = obj.content;
 
-                                        if (document.thumbnail) {
-                                            let source = document.thumbnail.photo;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () =>
-                                                        this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
-
-                                        if (document.document) {
-                                            let source = document.document;
-                                            if (source && source.id === file.id) {
-                                                //this.emit('file_update', file);
-                                                break;
-                                                // this.getLocalFile(store, source, idb_key, arr,
-                                                //     () => this.emit('file_update', file),
-                                                //     () => this.getRemoteFile(file.id, 1, obj));
-                                            }
-                                        }
+                                        this.handleDocument(store, document, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageLocation': {
                                         const { location } = obj.content;
 
-                                        const locationId = getLocationId(location);
-                                        if (locationId) {
-                                            const source = this.getLocationFile(locationId);
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                            }
-                                        }
+                                        this.handleLocation(store, location, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVenue': {
                                         const { venue } = obj.content;
                                         const { location } = venue;
 
-                                        const locationId = getLocationId(location);
-                                        if (locationId) {
-                                            const source = this.getLocationFile(locationId);
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                            }
-                                        }
+                                        this.handleLocation(store, location, file, idb_key, arr, obj);
                                         break;
                                     }
                                     default:
@@ -344,7 +298,50 @@ class FileStore extends EventEmitter {
         }
     };
 
-    handleSticker = (sticker, file, idb_key, arr, obj) => {
+    handleDocument = (store, document, file, idb_key, arr, obj) => {
+        if (document.thumbnail) {
+            let source = document.thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                );
+            }
+        }
+
+        if (document.document) {
+            let source = document.document;
+            if (source && source.id === file.id) {
+                //this.emit('file_update', file);
+                // this.getLocalFile(store, source, idb_key, arr,
+                //     () => this.emit('file_update', file),
+                //     () => this.getRemoteFile(file.id, 1, obj));
+            }
+        }
+    };
+
+    handleLocation = (store, location, file, idb_key, arr, obj) => {
+        const locationId = getLocationId(location);
+        if (locationId) {
+            const source = this.getLocationFile(locationId);
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                );
+            }
+        }
+    };
+
+    handleSticker = (store, sticker, file, idb_key, arr, obj) => {
         if (sticker.thumbnail) {
             const source = sticker.thumbnail.photo;
             if (source && source.id === file.id) {
@@ -368,13 +365,13 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, 1, obj)
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                 );
             }
         }
     };
 
-    handleVideoNote = (videoNote, file, idb_key, arr, obj) => {
+    handleVideoNote = (store, videoNote, file, idb_key, arr, obj) => {
         if (videoNote.thumbnail) {
             const source = videoNote.thumbnail.photo;
             if (source && source.id === file.id) {
@@ -398,13 +395,13 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateVideoNoteBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, 1, obj)
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                 );
             }
         }
     };
 
-    handleVideo = (video, file, idb_key, arr, obj) => {
+    handleVideo = (store, video, file, idb_key, arr, obj) => {
         if (video.thumbnail) {
             const source = video.thumbnail.photo;
             if (source && source.id === file.id) {
@@ -428,13 +425,13 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateVideoBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, 1, obj)
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                 );
             }
         }
     };
 
-    handleAnimation = (animation, file, idb_key, arr, obj) => {
+    handleAnimation = (store, animation, file, idb_key, arr, obj) => {
         if (animation.thumbnail) {
             const source = animation.thumbnail.photo;
             if (source && source.id === file.id) {
@@ -458,7 +455,7 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateAnimationBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, 1, obj)
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                 );
             }
         }
@@ -706,6 +703,14 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updatePhotoThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdatePhotoThumbnailBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updatePhotoBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdatePhotoBlob', {
             chatId: chatId,
@@ -787,8 +792,6 @@ class FileStore extends EventEmitter {
     };
 
     updateLocationBlob = (chatId, messageId, fileId) => {
-        // console.log(`clientUpdateLocationBlob chat_id=${chatId} message_id=${messageId} file_id=${fileId}`);
-
         this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
             messageId: messageId,

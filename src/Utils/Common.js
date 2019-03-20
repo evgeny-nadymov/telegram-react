@@ -5,8 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { PHOTO_SIZE } from '../Constants';
 import { formatNumber } from 'libphonenumber-js';
+import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
 function orderCompare(order1, order2) {
     let diff = order1.length - order2.length;
@@ -14,6 +14,10 @@ function orderCompare(order1, order2) {
     if (order1 === order2) return 0;
 
     return order1 > order2 ? 1 : -1;
+}
+
+function getPhotoThumbnailSize(sizes) {
+    return getSize(sizes, PHOTO_THUMBNAIL_SIZE);
 }
 
 function getPhotoSize(sizes) {
@@ -292,6 +296,7 @@ function getVideoDurationString(secondsTotal) {
 export {
     orderCompare,
     getSize,
+    getPhotoThumbnailSize,
     getPhotoSize,
     getFitSize,
     itemsInView,

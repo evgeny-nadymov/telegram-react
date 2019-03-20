@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getPhotoSize, getSize } from './Common';
+import { getPhotoSize, getPhotoThumbnailSize, getSize } from './Common';
 import { getChatUserId } from './Chat';
 import { getProfilePhotoFromPhoto } from './User';
 import { getLocationId, getVenueId } from './Message';
@@ -20,7 +20,8 @@ import {
     PRELOAD_VIDEO_SIZE,
     PRELOAD_VIDEONOTE_SIZE,
     FILE_PRIORITY,
-    THUMBNAIL_PRIORITY
+    THUMBNAIL_PRIORITY,
+    PHOTO_THUMBNAIL_SIZE
 } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
@@ -1417,19 +1418,30 @@ function loadMessageContents(store, messages) {
                         break;
                     }
                     case 'messagePhoto': {
-                        // preview
-                        /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                                                if (previewPid) {
-                                                    let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                                                    if (!preview.blob){
-                                                        FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                                            () => MessageStore.updateMessagePhoto(message.id),
-                                                            () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                                            'load_contents_preview_',
-                                                            message.id);
-
-                                                    }
-                                                }*/
+                        const [previewId, previewPid, previewIdbKey] = getPhotoFile(message, PHOTO_THUMBNAIL_SIZE);
+                        if (previewPid) {
+                            const photoSize = getPhotoThumbnailSize(message.content.photo.sizes);
+                            if (photoSize) {
+                                const file = photoSize.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updatePhotoThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                file.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
 
                         const [id, pid, idb_key] = getPhotoFile(message);
                         if (pid) {
