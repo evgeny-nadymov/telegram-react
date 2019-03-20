@@ -196,6 +196,11 @@ class FileStore extends EventEmitter {
                                             if (video_note) {
                                                 this.handleVideoNote(video_note, file, idb_key, arr, obj);
                                             }
+
+                                            const { sticker } = web_page;
+                                            if (sticker) {
+                                                this.handleSticker(sticker, file, idb_key, arr, obj);
+                                            }
                                         }
 
                                         break;
@@ -226,35 +231,7 @@ class FileStore extends EventEmitter {
                                     case 'messageSticker': {
                                         const { sticker } = obj.content;
 
-                                        if (sticker.thumbnail) {
-                                            let source = sticker.thumbnail.photo;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateStickerThumbnailBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
-
-                                        if (sticker.sticker) {
-                                            let source = sticker.sticker;
-                                            if (source && source.id === file.id) {
-                                                this.getLocalFile(
-                                                    store,
-                                                    source,
-                                                    idb_key,
-                                                    arr,
-                                                    () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
-                                                    () => this.getRemoteFile(file.id, 1, obj)
-                                                );
-                                                break;
-                                            }
-                                        }
+                                        this.handleSticker(sticker, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVideoNote': {
@@ -363,6 +340,36 @@ class FileStore extends EventEmitter {
                 //this.emit('file_upload_update', file);
             } else {
                 //this.emit('file_upload_update', file);
+            }
+        }
+    };
+
+    handleSticker = (sticker, file, idb_key, arr, obj) => {
+        if (sticker.thumbnail) {
+            const source = sticker.thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateStickerThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
+                );
+            }
+        }
+
+        if (sticker.sticker) {
+            const source = sticker.sticker;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, 1, obj)
+                );
             }
         }
     };

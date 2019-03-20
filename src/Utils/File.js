@@ -171,6 +171,39 @@ function getGameAnimationThumbnailFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageStickerThumbnailFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { sticker } = web_page;
+    if (!sticker) {
+        return [0, '', ''];
+    }
+
+    const { thumbnail } = sticker;
+    if (!thumbnail) {
+        return [0, '', ''];
+    }
+
+    const file = thumbnail.photo;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
 function getWebPageVideoNoteThumbnailFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -614,6 +647,34 @@ function getWebPageVideoFileSize(message) {
     }
 
     return 0;
+}
+
+function getWebPageStickerFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { sticker } = web_page;
+    if (!sticker) {
+        return [0, '', ''];
+    }
+
+    const file = sticker.sticker;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
 }
 
 function getWebPageVideoNoteFile(message) {
@@ -1137,8 +1198,51 @@ function loadMessageContents(store, messages) {
                             break;
                         }
 
-                        const { photo, animation, video, document, video_note } = web_page;
+                        const { photo, animation, video, document, video_note, sticker } = web_page;
                         let loadPhoto = true;
+
+                        if (sticker) {
+                            const [id, pid, idb_key] = getWebPageStickerFile(message);
+                            if (pid) {
+                                loadPhoto = false;
+                                const obj = sticker.sticker;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        idb_key,
+                                        null,
+                                        () =>
+                                            FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                        () => {
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
+                                        }
+                                    );
+                                }
+                            }
+
+                            const [previewId, previewPid, previewIdbKey] = getWebPageStickerThumbnailFile(message);
+                            if (previewPid) {
+                                const obj = sticker.thumbnail.photo;
+                                if (!obj.blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        obj,
+                                        previewIdbKey,
+                                        null,
+                                        () =>
+                                            FileStore.updateStickerThumbnailBlob(
+                                                localMessage.chat_id,
+                                                localMessage.id,
+                                                obj.id
+                                            ),
+                                        () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
 
                         if (video_note) {
                             const [id, pid, idb_key] = getWebPageVideoNoteFile(message);
