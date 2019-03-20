@@ -326,13 +326,21 @@ async function openPinnedChat(index) {
         '@type': 'getChats',
         offset_order: '9223372036854775807',
         offset_chat_id: 0,
-        limit: 5
+        limit: 10
     });
 
-    if (chats && chats.chat_ids.length > index) {
-        const chat = ChatStore.get(chats.chat_ids[index]);
-        if (chat && chat.is_pinned) {
-            TdLibController.setChatId(chat.id);
+    if (chats) {
+        let pinnedIndex = -1;
+        for (let i = 0; i < chats.chat_ids.length; i++) {
+            const chat = ChatStore.get(chats.chat_ids[i]);
+            if (chat && chat.is_pinned) {
+                pinnedIndex++;
+            }
+
+            if (pinnedIndex === index) {
+                TdLibController.setChatId(chat.id);
+                return;
+            }
         }
     }
 }
