@@ -532,10 +532,7 @@ class FileStore extends EventEmitter {
     };
 
     getLocalFile(store, file, idb_key, arr, callback, faultCallback) {
-        if (
-            !idb_key
-            //&& !arr
-        ) {
+        if (!idb_key && !arr) {
             faultCallback();
             return;
         }
