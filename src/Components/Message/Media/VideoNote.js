@@ -43,13 +43,30 @@ class VideoNote extends React.Component {
         FileStore.on('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         ApplicationStore.on('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
+        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         ApplicationStore.removeListener('clientUpdateActiveVideoNote', this.onClientUpdateActiveVideoNote);
+        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
     }
+
+    onClientUpdateFocusWindow = update => {
+        const player = this.videoRef.current;
+        if (player) {
+            if (this.state.active) {
+                return;
+            }
+
+            if (update.focused) {
+                player.play();
+            } else {
+                player.pause();
+            }
+        }
+    };
 
     onClientUpdateActiveVideoNote = update => {
         const { chatId, messageId } = this.props;
@@ -141,7 +158,9 @@ class VideoNote extends React.Component {
                 videoDuration: this.videoRef.current.duration
             },
             () => {
-                this.videoRef.current.play();
+                if (window.hasFocus) {
+                    this.videoRef.current.play();
+                }
             }
         );
     };

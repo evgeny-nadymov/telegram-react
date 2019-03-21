@@ -244,7 +244,7 @@ function getMedia(message, openMedia) {
         case 'messageAnimation':
             return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
         case 'messageGame':
-            return <Game chatId={chat_id} messageId={id} openMedia={openMedia} />;
+            return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
         case 'messageSticker':
             return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
         case 'messageLocation':

@@ -140,6 +140,16 @@ class ApplicationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateFocusWindow': {
+                TdLibController.send({
+                    '@type': 'setOption',
+                    name: 'online',
+                    value: { '@type': 'optionValueBoolean', value: update.focused }
+                });
+
+                this.emit('clientUpdateFocusWindow', update);
+                break;
+            }
             case 'clientUpdateLeaveChat': {
                 if (update.inProgress && this.chatId === update.chatId) {
                     TdLibController.setChatId(0);

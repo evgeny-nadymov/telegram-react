@@ -428,10 +428,9 @@ window.onblur = function() {
 
     window.hasFocus = false;
 
-    TdLibController.send({
-        '@type': 'setOption',
-        name: 'online',
-        value: { '@type': 'optionValueBoolean', value: false }
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateFocusWindow',
+        focused: false
     });
 };
 
@@ -446,10 +445,9 @@ window.onfocus = function() {
 
     window.hasFocus = true;
 
-    TdLibController.send({
-        '@type': 'setOption',
-        name: 'online',
-        value: { '@type': 'optionValueBoolean', value: true }
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateFocusWindow',
+        focused: true
     });
 };
 

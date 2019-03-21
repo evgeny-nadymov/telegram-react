@@ -16,7 +16,6 @@ import { getFitSize, getSize } from '../../../Utils/Common';
 import { getSrc } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
-import MessageStore from '../../../Stores/MessageStore';
 import './Game.css';
 
 const styles = theme => ({
@@ -41,15 +40,7 @@ class Game extends React.Component {
     };
 
     getContent = () => {
-        const { chatId, messageId, size, displaySize, openMedia } = this.props;
-
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return null;
-
-        const { content } = message;
-        if (!content) return null;
-
-        const { game } = content;
+        const { chatId, messageId, game, size, displaySize, openMedia } = this.props;
         if (!game) return null;
 
         const { photo, animation } = game;
@@ -91,15 +82,7 @@ class Game extends React.Component {
     };
 
     render() {
-        const { classes, chatId, messageId } = this.props;
-
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return null;
-
-        const { content } = message;
-        if (!content) return null;
-
-        const { game } = content;
+        const { classes, game } = this.props;
         if (!game) return null;
 
         const { title, text, description } = game;
@@ -122,9 +105,11 @@ class Game extends React.Component {
 Game.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
+    game: PropTypes.object.isRequired,
+    openMedia: PropTypes.func.isRequired,
+
     size: PropTypes.number,
-    displaySize: PropTypes.number,
-    openMedia: PropTypes.func
+    displaySize: PropTypes.number
 };
 
 Game.defaultProps = {

@@ -15,18 +15,38 @@ import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFileSize, getSrc, isGifMimeType } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
+import ApplicationStore from '../../../Stores/ApplicationStore';
 import './Animation.css';
 
 class Animation extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.videoRef = React.createRef();
+    }
+
     componentDidMount() {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
+        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
+        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
     }
+
+    onClientUpdateFocusWindow = update => {
+        const player = this.videoRef.current;
+        if (player) {
+            if (update.focused) {
+                player.play();
+            } else {
+                player.pause();
+            }
+        }
+    };
 
     onClientUpdateAnimationBlob = update => {
         const { animation } = this.props.animation;
@@ -75,6 +95,7 @@ class Animation extends React.Component {
                         <img className='media-viewer-content-image' style={style} src={src} alt='' />
                     ) : (
                         <video
+                            ref={this.videoRef}
                             className='media-viewer-content-image'
                             src={src}
                             poster={thumbnailSrc}
