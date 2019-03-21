@@ -248,7 +248,7 @@ function getMedia(message, openMedia) {
         case 'messageSticker':
             return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
         case 'messageLocation':
-            return <Location message={message} openMedia={openMedia} />;
+            return <Location chatId={chat_id} messageId={id} location={content.location} openMedia={openMedia} />;
         case 'messageVenue':
             return <Venue message={message} openMedia={openMedia} />;
         case 'messageContact':
