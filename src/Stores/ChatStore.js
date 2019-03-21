@@ -16,6 +16,7 @@ class ChatStore extends EventEmitter {
 
         this.items = new Map();
         this.typingManagers = new Map();
+        this.onlineMemberCount = new Map();
         this.skippedUpdates = [];
 
         this.addTdLibListener();
@@ -47,8 +48,14 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
+            case 'updateChatOnlineMemberCount': {
+                this.setOnlineMemberCount(update.chat_id, update.online_member_count);
+
+                this.emitFastUpdate(update);
+                break;
+            }
             case 'updateChatDraftMessage': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         order: update.order === '0' ? chat.order : update.order,
@@ -60,7 +67,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatIsMarkedAsUnread': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         is_marked_as_unread: update.is_marked_as_unread
@@ -71,7 +78,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatIsPinned': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         order: update.order === '0' ? chat.order : update.order,
@@ -83,7 +90,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatIsSponsored': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         order: update.order === '0' ? chat.order : update.order,
@@ -95,7 +102,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatLastMessage': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         order: update.order === '0' ? chat.order : update.order,
@@ -107,7 +114,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatNotificationSettings': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         notification_settings: update.notification_settings
@@ -118,7 +125,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatOrder': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, { order: update.order });
                 }
@@ -153,7 +160,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatReadInbox': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         last_read_inbox_message_id: update.last_read_inbox_message_id,
@@ -165,7 +172,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatReadOutbox': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         last_read_outbox_message_id: update.last_read_outbox_message_id
@@ -176,7 +183,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatReplyMarkup': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         reply_markup_message_id: update.reply_markup_message_id
@@ -187,7 +194,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatTitle': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, { title: update.title });
                 }
@@ -196,7 +203,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatUnreadMentionCount': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         unread_mention_count: update.unread_mention_count
@@ -231,7 +238,7 @@ class ChatStore extends EventEmitter {
                     this.setTypingManager(update.chat_id, typingManager);
                 }
 
-                let key = update.user_id;
+                const key = update.user_id;
                 if (update.action['@type'] === 'chatActionCancel') {
                     typingManager.clearAction(key);
                 } else {
@@ -242,7 +249,7 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateMessageMentionRead': {
-                let chat = this.get(update.chat_id);
+                const chat = this.get(update.chat_id);
                 if (chat) {
                     this.assign(chat, {
                         unread_mention_count: update.unread_mention_count
@@ -306,6 +313,14 @@ class ChatStore extends EventEmitter {
 
     set(chat) {
         this.items.set(chat.id, chat);
+    }
+
+    setOnlineMemberCount(chatId, onlineMemberCount) {
+        this.onlineMemberCount.set(chatId, onlineMemberCount);
+    }
+
+    getOnlineMemberCount(chatId) {
+        return this.onlineMemberCount.get(chatId) || 0;
     }
 
     getTypingManager(chatId) {

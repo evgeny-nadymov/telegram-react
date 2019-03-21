@@ -80,6 +80,7 @@ class Header extends Component {
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
 
+        ChatStore.on('updateChatOnlineMemberCount', this.onUpdateChatOnlineMemberCount);
         ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.on('updateUserChatAction', this.onUpdateUserChatAction);
@@ -98,6 +99,7 @@ class Header extends Component {
         MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
 
+        ChatStore.removeListener('updateChatOnlineMemberCount', this.onUpdateChatOnlineMemberCount);
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
         UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
         ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
@@ -107,6 +109,14 @@ class Header extends Component {
         BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
         SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
     }
+
+    onUpdateChatOnlineMemberCount = update => {
+        const chat = ChatStore.get(ApplicationStore.getChatId());
+        if (!chat) return;
+        if (chat.id !== update.chat_id) return;
+
+        this.forceUpdate();
+    };
 
     onClientUpdateMessageSelected = update => {
         this.setState({ selectionCount: MessageStore.selectedItems.size });

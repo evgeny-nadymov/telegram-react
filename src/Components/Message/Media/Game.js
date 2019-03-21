@@ -25,14 +25,14 @@ const styles = theme => ({
 
 class Game extends React.Component {
     componentDidMount() {
-        FileStore.on('clientUpdateGameBlob', this.onClientUpdateGameBlob);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateGameBlob', this.onClientUpdateGameBlob);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
-    onClientUpdateGameBlob = update => {
+    onClientUpdatePhotoBlob = update => {
         const { chatId, messageId } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {

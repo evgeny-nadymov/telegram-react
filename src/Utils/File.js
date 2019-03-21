@@ -1407,8 +1407,7 @@ function loadMessageContents(store, messages) {
                                             file,
                                             idb_key,
                                             null,
-                                            () =>
-                                                FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
+                                            () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
                                             () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                         );
                                     }
@@ -1431,12 +1430,7 @@ function loadMessageContents(store, messages) {
                                         file,
                                         previewIdbKey,
                                         null,
-                                        () =>
-                                            FileStore.updatePhotoThumbnailBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                file.id
-                                            ),
+                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
                                 }
@@ -2222,7 +2216,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                                         file,
                                         idb_key,
                                         null,
-                                        () => FileStore.updateWebPageBlob(localMessage.chat_id, localMessage.id, id),
+                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
                                         () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                     );
                                 }

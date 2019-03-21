@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import Animation from './Animation';
+import Photo from './Photo';
 import Video from './Video';
 import Document from './Document';
 import VideoNote from './VideoNote';
@@ -28,14 +29,14 @@ const styles = theme => ({
 
 class WebPage extends React.Component {
     componentDidMount() {
-        FileStore.on('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateWebPageBlob', this.onClientUpdateWebPageBlob);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
-    onClientUpdateWebPageBlob = update => {
+    onClientUpdatePhotoBlob = update => {
         const { chatId, messageId } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
@@ -140,11 +141,6 @@ class WebPage extends React.Component {
         }
 
         if (photo) {
-            let src = '';
-            let style = {
-                width: 0,
-                height: 0
-            };
             const photoSize = getSize(photo.sizes, size);
             const smallPhoto =
                 (type === 'article' || type === 'photo') &&
@@ -152,44 +148,31 @@ class WebPage extends React.Component {
                 photoSize &&
                 photoSize.width === photoSize.height;
 
-            if (photoSize) {
-                const fitPhotoSize = getFitSize(photoSize, smallPhoto ? displaySmallSize : displaySize, false);
-                if (fitPhotoSize) {
-                    const file = photoSize.photo;
-                    const blob = FileStore.getBlob(file.id) || file.blob;
-                    src = FileStore.getBlobUrl(blob);
-
-                    style.width = fitPhotoSize.width;
-                    style.height = fitPhotoSize.height;
-                }
-                if (smallPhoto) {
-                    style.float = 'right';
-                    style.marginLeft = 6;
-                    style.marginBottom = 6;
-                }
-            }
-
+            const style = smallPhoto
+                ? {
+                      float: 'right',
+                      marginLeft: 6,
+                      marginBottom: 6
+                  }
+                : {};
             return (
                 <>
                     {smallPhoto && (
-                        <div className='web-page-photo' style={style} onClick={openMedia}>
-                            <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                                <img className='photo-img' src={src} alt='' />
-                            </a>
-                        </div>
+                        <Photo
+                            displaySize={displaySmallSize}
+                            style={style}
+                            chatId={chatId}
+                            messageId={messageId}
+                            photo={photo}
+                            openMedia={openMedia}
+                        />
                     )}
                     {site_name && (
                         <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
-                    {!smallPhoto && (
-                        <div className='web-page-photo' style={style} onClick={openMedia}>
-                            <a href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                                <img className='photo-img' src={src} alt='' />
-                            </a>
-                        </div>
-                    )}
+                    {!smallPhoto && <Photo chatId={chatId} messageId={messageId} photo={photo} openMedia={openMedia} />}
                 </>
             );
         }

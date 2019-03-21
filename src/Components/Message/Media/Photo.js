@@ -31,12 +31,10 @@ class Photo extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdatePhotoThumbnailBlob', this.onClientUpdatePhotoThumbnailBlob);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoThumbnailBlob', this.onClientUpdatePhotoThumbnailBlob);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
@@ -51,19 +49,8 @@ class Photo extends React.Component {
         }
     };
 
-    onClientUpdatePhotoThumbnailBlob = update => {
-        const { thumbnail } = this.state;
-        const { fileId } = update;
-
-        if (!thumbnail) return;
-
-        if (thumbnail.photo.id === fileId) {
-            this.forceUpdate();
-        }
-    };
-
     render() {
-        const { displaySize, openMedia } = this.props;
+        const { displaySize, openMedia, style } = this.props;
         const { thumbnail, photoSize } = this.state;
 
         if (!photoSize) return null;
@@ -75,25 +62,25 @@ class Photo extends React.Component {
         const fitPhotoSize = getFitSize(photoSize, displaySize);
         if (!fitPhotoSize) return null;
 
-        const style = {
+        const photoStyle = {
             width: fitPhotoSize.width,
-            height: fitPhotoSize.height
+            height: fitPhotoSize.height,
+            ...style
         };
 
         return (
-            <div className='photo' style={style} onClick={openMedia}>
+            <div className='photo' style={photoStyle} onClick={openMedia}>
                 {src ? (
-                    <img className='photo-img' draggable={false} style={style} src={src} alt='' />
+                    <img className='photo-img' draggable={false} src={src} alt='' />
                 ) : (
                     <img
                         className={classNames('photo-img', { 'media-blurred': isBlurred })}
                         draggable={false}
-                        style={style}
                         src={thumbnailSrc}
                         alt=''
                     />
                 )}
-                <FileProgress file={photoSize.photo} cancelButton />
+                <FileProgress file={photoSize.photo} download upload cancelButton />
             </div>
         );
     }
@@ -107,7 +94,8 @@ Photo.propTypes = {
 
     size: PropTypes.number,
     thumbnailSize: PropTypes.number,
-    displaySize: PropTypes.number
+    displaySize: PropTypes.number,
+    style: PropTypes.object
 };
 
 Photo.defaultProps = {

@@ -292,19 +292,22 @@ function getLastMessageDate(chat) {
 function getChatSubtitleWithoutTyping(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
-    if (!chat.type) return null;
 
-    switch (chat.type['@type']) {
+    const { type } = chat;
+    if (!type) return null;
+
+    switch (type['@type']) {
         case 'chatTypeBasicGroup': {
-            const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
+            const basicGroup = BasicGroupStore.get(type.basic_group_id);
             if (basicGroup) {
-                return getBasicGroupStatus(basicGroup);
+                return getBasicGroupStatus(basicGroup, chatId);
             }
+
             break;
         }
         case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            const user = UserStore.get(chat.type.user_id);
+            const user = UserStore.get(type.user_id);
             if (user) {
                 return getUserStatus(user);
             }
@@ -312,10 +315,11 @@ function getChatSubtitleWithoutTyping(chatId) {
             break;
         }
         case 'chatTypeSupergroup': {
-            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            const supergroup = SupergroupStore.get(type.supergroup_id);
             if (supergroup) {
-                return getSupergroupStatus(supergroup);
+                return getSupergroupStatus(supergroup, chatId);
             }
+
             break;
         }
     }
