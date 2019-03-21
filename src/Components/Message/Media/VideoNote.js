@@ -34,7 +34,7 @@ class VideoNote extends React.Component {
 
         this.state = {
             active: false,
-            currentTime: 0,
+            currentTime: null,
             videoDuration: 0
         };
     }
@@ -84,7 +84,8 @@ class VideoNote extends React.Component {
             } else {
                 this.setState(
                     {
-                        active: true
+                        active: true,
+                        currentTime: null
                     },
                     () => {
                         const player = this.videoRef.current;
@@ -93,6 +94,7 @@ class VideoNote extends React.Component {
                         player.volume = 0.25;
                         player.currentTime = 0.0;
                         player.play();
+                        //console.log(`VideoNote.play current_time=${this.videoRef.current.currentTime} duration=${this.videoRef.current.duration}`);
                     }
                 );
             }
@@ -141,6 +143,8 @@ class VideoNote extends React.Component {
         const { active } = this.state;
         if (!active) return;
 
+        //console.log(`VideoNote.handleTimeUpdate current_time=${this.videoRef.current.currentTime} duration=${this.videoRef.current.duration}`);
+
         this.setState({
             currentTime: this.videoRef.current.currentTime,
             videoDuration: this.videoRef.current.duration
@@ -180,8 +184,12 @@ class VideoNote extends React.Component {
         const src = getSrc(video);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
-        const progress = (currentTime / (videoDuration || duration)) * 100;
-        //console.log('VideoNote.render', currentTime, videoDuration, progress);
+        let progress = 0;
+        if (videoDuration && currentTime) {
+            const time = currentTime + 0.25;
+            progress = (time / videoDuration) * 100;
+        }
+        //console.log('VideoNote.render active=' + active, currentTime, videoDuration, duration, progress);
 
         return (
             <div className='video-note' style={style} onClick={openMedia}>
