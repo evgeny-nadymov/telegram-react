@@ -250,7 +250,7 @@ function getMedia(message, openMedia) {
         case 'messageLocation':
             return <Location chatId={chat_id} messageId={id} location={content.location} openMedia={openMedia} />;
         case 'messageVenue':
-            return <Venue message={message} openMedia={openMedia} />;
+            return <Venue chatId={chat_id} messageId={id} venue={content.venue} openMedia={openMedia} />;
         case 'messageContact':
             return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
         case 'messageDocument':

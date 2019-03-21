@@ -7,65 +7,23 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import RoomIcon from '@material-ui/icons/Room';
-import { getVenueId } from '../../../Utils/Message';
-import FileStore from '../../../Stores/FileStore';
+import Location from './Location';
 import './Venue.css';
 
 class Venue extends React.Component {
-    componentDidMount() {
-        FileStore.on('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
-    }
-
-    componentWillUnmount() {
-        FileStore.removeListener('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
-    }
-
-    onClientUpdateLocationBlob = update => {
-        const { message } = this.props;
-        if (!message) return;
-        const { chatId, messageId } = update;
-
-        if (message.chat_id === chatId && message.id === messageId) {
-            this.forceUpdate();
-        }
-    };
-
     render() {
-        const { message } = this.props;
-        if (!message) return null;
-
-        const { venue } = message.content;
+        const { chatId, messageId, venue, openMedia } = this.props;
         if (!venue) return null;
 
         const { title, address, location } = venue;
         if (!location) return null;
 
         const { longitude, latitude } = location;
-        const locationId = getVenueId(location);
-        const file = FileStore.getLocationFile(locationId);
-        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
-        let src = '';
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(`Venue.render photo with error ${error}`);
-        }
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
-        //let staticSource = `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=16&size=100x100&sensor=true&format=jpg&scale=2&language=en&markers=color:red|${latitude},${longitude}`;
-        //const staticSource = `https://static-maps.yandex.ru/1.x/?ll=${longitude},${latitude}&size=600,300&z=16&l=map&scale=2.0&lang=en_US&pt=${longitude},${latitude},pm2rdm`;
-        const alt = `${source}`;
 
         return (
             <div className='venue'>
-                <a href={source} target='_blank' rel='noopener noreferrer'>
-                    <div className='location-wrapper'>
-                        <img className='location-image' alt={alt} src={src} />
-                        <div className='location-icon'>
-                            <RoomIcon fontSize='large' color='primary' />
-                        </div>
-                    </div>
-                </a>
+                <Location chatId={chatId} messageId={messageId} location={location} openMedia={openMedia} />
                 <div className='venue-content'>
                     <a href={source} target='_blank' rel='noopener noreferrer'>
                         <div className='venue-title'>{title}</div>
@@ -78,7 +36,9 @@ class Venue extends React.Component {
 }
 
 Venue.propTypes = {
-    message: PropTypes.object.isRequired,
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    venue: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired
 };
 
