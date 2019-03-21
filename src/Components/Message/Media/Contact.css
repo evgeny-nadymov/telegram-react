@@ -9,6 +9,12 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    height: 48px;
+}
+
+.contact-tile {
+    height: 48px;
+    margin-right: 12px;
 }
 
 .contact-name {
@@ -24,5 +30,4 @@
 .contact-content {
     flex-grow: 1;
     flex-shrink: 1;
-    margin-left: 12px;
 }

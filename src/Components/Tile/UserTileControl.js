@@ -42,7 +42,7 @@ class UserTileControl extends Component {
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
     }
 
-    onClientUpdateUserBlob = (update) => {
+    onClientUpdateUserBlob = update => {
         const { userId } = this.props;
 
         if (userId === update.userId) {
@@ -51,7 +51,7 @@ class UserTileControl extends Component {
         }
     };
 
-    onClientUpdateChatBlob = (update) => {
+    onClientUpdateChatBlob = update => {
         const { userId } = this.props;
 
         const chat = ChatStore.get(update.chatId);
@@ -73,7 +73,7 @@ class UserTileControl extends Component {
         }
     };
 
-    onUpdateChatPhoto = (update) => {
+    onUpdateChatPhoto = update => {
         const { userId } = this.props;
 
         const chat = ChatStore.get(update.chat_id);
@@ -88,12 +88,11 @@ class UserTileControl extends Component {
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
                 if (chat.type.user_id === userId) {
-                    if (!update.photo){
+                    if (!update.photo) {
                         //console.log('UserTileControl.onUpdateChatPhoto user_id=' + userId);
                         this.forceUpdate();
-                    }
-                    else{
-                        loadChatContent(chat)
+                    } else {
+                        loadChatContent(chat);
                     }
                 }
             }
@@ -131,17 +130,16 @@ class UserTileControl extends Component {
 
     render() {
         const { userId, onSelect } = this.props;
-        if (!userId) return null;
+        let { user } = this.props;
+        if (!userId && !user) return null;
 
-        const user = UserStore.get(userId);
+        user = UserStore.get(userId) || user;
         if (!user) return null;
 
         const { profile_photo } = user;
 
         const letters = getUserLetters(user);
-        const blob = profile_photo && profile_photo.small?
-            FileStore.getBlob(profile_photo.small.id) :
-            null;
+        const blob = profile_photo && profile_photo.small ? FileStore.getBlob(profile_photo.small.id) : null;
 
         let src;
         try {
@@ -151,19 +149,10 @@ class UserTileControl extends Component {
         }
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
-        const className = classNames(
-            'tile-photo',
-            { [tileColor]: !blob },
-            { pointer: onSelect }
-        );
+        const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
 
         return src ? (
-            <img
-                className={className}
-                src={src}
-                draggable={false}
-                alt=''
-                onClick={this.handleSelect}/>
+            <img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect} />
         ) : (
             <div className={className} onClick={this.handleSelect}>
                 <span className='tile-text'>{letters}</span>
@@ -174,6 +163,7 @@ class UserTileControl extends Component {
 
 UserTileControl.propTypes = {
     userId: PropTypes.number.isRequired,
+    user: PropTypes.object,
     onSelect: PropTypes.func
 };
 

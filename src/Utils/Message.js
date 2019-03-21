@@ -252,7 +252,7 @@ function getMedia(message, openMedia) {
         case 'messageVenue':
             return <Venue message={message} openMedia={openMedia} />;
         case 'messageContact':
-            return <Contact message={message} openMedia={openMedia} />;
+            return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
         case 'messageDocument':
             return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
         default:
