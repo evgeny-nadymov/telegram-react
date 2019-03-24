@@ -416,6 +416,8 @@ document.addEventListener('keydown', async event => {
     }
 });
 
+window.hasFocus = true;
+
 // set offline on page lost focus
 window.onblur = function() {
     keyMap.clear();

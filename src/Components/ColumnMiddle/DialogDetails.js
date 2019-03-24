@@ -13,6 +13,7 @@ import MessagesList from './MessagesList';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogDetails.css';
+import HeaderPlayer from '../Player/HeaderPlayer';
 
 class DialogDetails extends Component {
     constructor(props) {
@@ -111,6 +112,7 @@ class DialogDetails extends Component {
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
+                {/*<HeaderPlayer/>*/}
                 <Header chatId={chatId} />
                 <MessagesList
                     innerRef={ref => (this.messagesList = ref)}

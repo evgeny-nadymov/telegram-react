@@ -186,13 +186,16 @@ class VideoNote extends React.Component {
 
         let progress = 0;
         if (videoDuration && currentTime) {
-            const time = currentTime + 0.25;
-            progress = (time / videoDuration) * 100;
+            const progressTime = currentTime + 0.25;
+            progress = (progressTime / videoDuration) * 100;
         }
         //console.log('VideoNote.render active=' + active, currentTime, videoDuration, duration, progress);
 
         return (
-            <div className='video-note' style={style} onClick={openMedia}>
+            <div
+                className={classNames('video-note', { 'video-note-playing': active })}
+                style={style}
+                onClick={openMedia}>
                 {src ? (
                     <>
                         <video
@@ -210,26 +213,22 @@ class VideoNote extends React.Component {
                             onEnded={this.handleEnded}
                         />
                         <div className='video-note-player'>
-                            {active && (
-                                <div className='video-note-progress'>
-                                    <CircularProgress
-                                        classes={circleStyle}
-                                        variant='static'
-                                        value={progress}
-                                        size={200}
-                                        thickness={1}
-                                    />
-                                </div>
-                            )}
+                            <div className='video-note-progress'>
+                                <CircularProgress
+                                    classes={circleStyle}
+                                    variant='static'
+                                    value={progress}
+                                    size={200}
+                                    thickness={1}
+                                />
+                            </div>
                             <div className='animation-meta'>
                                 {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
                                 <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
                             </div>
-                            {!active && (
-                                <div className='video-note-muted'>
-                                    <VolumeOffIcon />
-                                </div>
-                            )}
+                            <div className='video-note-muted'>
+                                <VolumeOffIcon />
+                            </div>
                         </div>
                     </>
                 ) : (

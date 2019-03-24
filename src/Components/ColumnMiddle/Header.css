@@ -6,14 +6,14 @@
  */
 
 .header-master {
-    min-height: 64px;
+    min-height: 65px;
     display: flex;
     align-items: center;
     overflow: hidden;
 }
 
 .header-details {
-    min-height: 64px;
+    min-height: 65px;
     display: flex;
     align-items: center;
     overflow: hidden;

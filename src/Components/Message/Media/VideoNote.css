@@ -28,7 +28,14 @@
     overflow: hidden;
 }
 
+.video-note-playing .video-note-progress {
+    opacity: 1;
+    visibility: visible;
+}
+
 .video-note-progress {
+    opacity: 0;
+    visibility: hidden;
     position: absolute;
     left: 0;
     top: 0;
@@ -44,7 +51,8 @@
 .video-note-muted {
     position: absolute;
     left: 50%;
-    transform: translate(-50%, -6px);
+    margin-left: -15px;
+    margin-bottom: 6px;
     bottom: 0;
     width: 30px;
     height: 30px;
@@ -52,4 +60,11 @@
     border-radius: 50%;
     padding: 3px;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.video-note-playing .video-note-muted {
+    transform: scale3d(0, 0, 0);
+    visibility: hidden;
+    opacity: 0;
 }

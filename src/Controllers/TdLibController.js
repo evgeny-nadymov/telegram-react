@@ -22,6 +22,8 @@ class TdLibController extends EventEmitter {
             fastUpdating: true
         };
 
+        this.disableLog = false;
+
         this.setMaxListeners(Infinity);
     }
 
@@ -46,17 +48,21 @@ class TdLibController extends EventEmitter {
 
         this.client = new TdClient(options);
         this.client.onUpdate = update => {
-            if (update['@type'] === 'updateFile') {
-                console.log('received file_id=' + update.file.id, update);
-            } else {
-                console.log('received', update);
+            if (!this.disableLog) {
+                if (update['@type'] === 'updateFile') {
+                    console.log('receive updateFile file_id=' + update.file.id, update);
+                } else {
+                    console.log('receive update', update);
+                }
             }
             this.emit('update', update);
         };
     };
 
     clientUpdate = update => {
-        console.log('clientUpdate', update);
+        if (!this.disableLog) {
+            console.log('clientUpdate', update);
+        }
         this.emit('clientUpdate', update);
     };
 
@@ -122,8 +128,15 @@ class TdLibController extends EventEmitter {
     };
 
     send = request => {
-        console.log('send', request);
-        return this.client.send(request);
+        if (!this.disableLog) {
+            console.log('send', request);
+            return this.client.send(request).then(result => {
+                console.log('receive', result);
+                return result;
+            });
+        } else {
+            return this.client.send(request);
+        }
     };
 
     sendTdParameters = async () => {
