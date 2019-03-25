@@ -153,6 +153,11 @@ class LocalizationStore extends EventEmitter {
                             only_local: false
                         }).then(result => {
                             this.info = result;
+
+                            TdLibController.clientUpdate({
+                                '@type': 'clientUpdateLanguageChange',
+                                language: language
+                            });
                         });
                         break;
                 }
