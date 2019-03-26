@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import {
     Dialog,
@@ -176,7 +176,7 @@ DialogsHeader.propTypes = {
 };
 
 const enhance = compose(
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles)
 );
 

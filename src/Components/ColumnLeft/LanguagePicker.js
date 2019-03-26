@@ -15,7 +15,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { withStyles } from '@material-ui/core/styles';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import TdLibController from '../../Controllers/TdLibController';
 import LocalizationStore from '../../Stores/LocalizationStore';
@@ -112,7 +112,7 @@ function withRestoreRef() {
 
 const enhance = compose(
     withSaveRef(),
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles, { withTheme: true }),
     withRestoreRef()
 );

@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withStyles } from '@material-ui/core';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -379,7 +379,7 @@ class ForwardDialog extends React.Component {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
-    withNamespaces(),
+    withTranslation(),
     withSnackbar
 );
 

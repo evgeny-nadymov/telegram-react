@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { getDownloadedSize, getUploadedSize, getFileSize } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './DocumentAction.css';
@@ -108,4 +108,4 @@ DocumentAction.propTypes = {
     openMedia: PropTypes.func.isRequired
 };
 
-export default withNamespaces()(DocumentAction);
+export default withTranslation()(DocumentAction);

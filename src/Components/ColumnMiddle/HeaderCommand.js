@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -225,7 +225,7 @@ HeaderCommand.propTypes = {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
-    withNamespaces()
+    withTranslation()
 );
 
 export default enhance(HeaderCommand);

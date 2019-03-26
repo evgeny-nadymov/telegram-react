@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
@@ -63,7 +63,7 @@ class HeaderPlayer extends React.Component {
 HeaderPlayer.propTypes = {};
 
 const enhance = compose(
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles, { withTheme: true })
 );
 

@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import { withStyles } from '@material-ui/core/styles';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
 import HeaderCommand from './HeaderCommand';
@@ -388,7 +388,7 @@ class Header extends Component {
 }
 
 const enhance = compose(
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles, { withTheme: true })
 );
 

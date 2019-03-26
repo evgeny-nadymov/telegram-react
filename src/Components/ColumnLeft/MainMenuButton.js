@@ -11,7 +11,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { withStyles } from '@material-ui/core/styles';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import ThemePicker from './ThemePicker';
 import LanguagePicker from './LanguagePicker';
@@ -136,7 +136,7 @@ class MainMenuButton extends React.Component {
 }
 
 const enhance = compose(
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles, { withTheme: true })
 );
 

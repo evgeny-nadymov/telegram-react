@@ -10,7 +10,7 @@ import Cookies from 'universal-cookie';
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import LocalStorageBackend from 'i18next-localstorage-backend';
-import { reactI18nextModule } from 'react-i18next';
+import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
 
 const defaultLanguage = 'en';
@@ -33,7 +33,7 @@ const language = cookies.get('i18next') || defaultLanguage;
 //     caches: ['localStorage', 'cookie']
 // };
 
-i18n.use(reactI18nextModule) //.use(LanguageDetector) // passes i18n down to react-i18next
+i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react-i18next
     .init({
         //detection: detection,
         resources: {

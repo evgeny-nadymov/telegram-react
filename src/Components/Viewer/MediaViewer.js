@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import {
     Button,
     Checkbox,
@@ -768,4 +768,4 @@ MediaViewer.propTypes = {
     messageId: PropTypes.number.isRequired
 };
 
-export default withNamespaces()(MediaViewer);
+export default withTranslation()(MediaViewer);

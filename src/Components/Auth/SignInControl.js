@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -212,7 +212,7 @@ class SignInControl extends React.Component {
 }
 
 const enhance = compose(
-    withNamespaces(),
+    withTranslation(),
     withStyles(styles, { withTheme: true })
 );
 

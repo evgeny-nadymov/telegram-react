@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
@@ -522,7 +522,7 @@ class InputBoxControl extends Component {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
-    withNamespaces()
+    withTranslation()
 );
 
 export default enhance(InputBoxControl);

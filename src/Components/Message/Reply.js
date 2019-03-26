@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import { getContent, getTitle } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
@@ -88,7 +88,7 @@ Reply.propTypes = {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
-    withNamespaces()
+    withTranslation()
 );
 
 export default enhance(Reply);

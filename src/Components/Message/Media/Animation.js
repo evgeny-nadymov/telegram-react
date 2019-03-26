@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { withNamespaces } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import FileProgress from '../../Viewer/FileProgress';
 import { getFitSize } from '../../../Utils/Common';
 import { isBlurredThumbnail } from '../../../Utils/Media';
@@ -144,4 +144,4 @@ Animation.defaultProps = {
     displaySize: PHOTO_DISPLAY_SIZE
 };
 
-export default withNamespaces()(Animation);
+export default withTranslation()(Animation);
