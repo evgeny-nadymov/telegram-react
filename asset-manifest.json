@@ -1,16 +1,16 @@
 {
-  "main.css": "/telegram-react/static/css/main.7efe47b8.chunk.css",
-  "main.js": "/telegram-react/static/js/main.795865d3.chunk.js",
-  "main.js.map": "/telegram-react/static/js/main.795865d3.chunk.js.map",
-  "static/js/1.38fb0e9b.chunk.js": "/telegram-react/static/js/1.38fb0e9b.chunk.js",
-  "static/js/1.38fb0e9b.chunk.js.map": "/telegram-react/static/js/1.38fb0e9b.chunk.js.map",
-  "runtime~main.js": "/telegram-react/static/js/runtime~main.f35f25f7.js",
-  "runtime~main.js.map": "/telegram-react/static/js/runtime~main.f35f25f7.js.map",
-  "static/media/Header.css": "/telegram-react/static/media/Telegram.4964c9bb.svg",
+  "main.css": "/telegram-react/static/css/main.eddee3d5.chunk.css",
+  "main.js": "/telegram-react/static/js/main.0302a3bc.chunk.js",
+  "main.js.map": "/telegram-react/static/js/main.0302a3bc.chunk.js.map",
+  "runtime~main.js": "/telegram-react/static/js/runtime~main.d23f7ed6.js",
+  "runtime~main.js.map": "/telegram-react/static/js/runtime~main.d23f7ed6.js.map",
+  "static/js/2.c993a0e1.chunk.js": "/telegram-react/static/js/2.c993a0e1.chunk.js",
+  "static/js/2.c993a0e1.chunk.js.map": "/telegram-react/static/js/2.c993a0e1.chunk.js.map",
+  "index.html": "/telegram-react/index.html",
+  "precache-manifest.26637712f666d2da40dbe161899507e5.js": "/telegram-react/precache-manifest.26637712f666d2da40dbe161899507e5.js",
+  "service-worker.js": "/telegram-react/service-worker.js",
+  "static/css/main.eddee3d5.chunk.css.map": "/telegram-react/static/css/main.eddee3d5.chunk.css.map",
   "static/media/Message.css": "/telegram-react/static/media/IconsetW_2x.f01cec9b.png",
   "static/media/AppInactiveControl.css": "/telegram-react/static/media/Manytabs_2x.7a71629a.png",
-  "static/css/main.7efe47b8.chunk.css.map": "/telegram-react/static/css/main.7efe47b8.chunk.css.map",
-  "index.html": "/telegram-react/index.html",
-  "precache-manifest.11f59b92f03b07a64b908fc21bb99949.js": "/telegram-react/precache-manifest.11f59b92f03b07a64b908fc21bb99949.js",
-  "service-worker.js": "/telegram-react/service-worker.js"
+  "static/media/Header.css": "/telegram-react/static/media/Telegram.4964c9bb.svg"
 }
