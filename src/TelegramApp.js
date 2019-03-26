@@ -7,19 +7,22 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
+import Cookies from 'universal-cookie';
 import { compose } from 'recompose';
+import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import withLanguage from './Language';
-import withTheme from './Theme';
 import localForage from 'localforage';
 import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
+import withLanguage from './Language';
+import withTheme from './Theme';
+import withSnackbarNotifications from './Notifications';
+import ForwardDialog from './Components/ColumnMiddle/ForwardDialog';
 import DialogInfo from './Components/ColumnRight/DialogInfo';
 import Dialogs from './Components/ColumnLeft/Dialogs';
 import DialogDetails from './Components/ColumnMiddle/DialogDetails';
@@ -29,13 +32,12 @@ import MediaViewer from './Components/Viewer/MediaViewer';
 import ProfileMediaViewer from './Components/Viewer/ProfileMediaViewer';
 import AppInactiveControl from './Components/Additional/AppInactiveControl';
 import registerServiceWorker from './registerServiceWorker';
+import { FIRST_START_OPTIMIZATIONS } from './Constants';
 import ChatStore from './Stores/ChatStore';
+import UserStore from './Stores/UserStore';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
-import withSnackbarNotifications from './Notifications';
-import ForwardDialog from './Components/ColumnMiddle/ForwardDialog';
-import UserStore from './Stores/UserStore';
 
 const styles = theme => ({
     page: {
@@ -82,6 +84,8 @@ class TelegramApp extends Component {
     }
 
     componentDidMount() {
+        TdLibController.addListener('update', this.onUpdate);
+
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
@@ -92,6 +96,7 @@ class TelegramApp extends Component {
     }
 
     componentWillUnmount() {
+        TdLibController.removeListener('update', this.onUpdate);
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
@@ -103,6 +108,21 @@ class TelegramApp extends Component {
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
         ApplicationStore.removeListener('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
     }
+
+    onUpdate = update => {
+        if (FIRST_START_OPTIMIZATIONS) {
+            if (!this.checkServiceWorker) {
+                this.checkServiceWorker = true;
+
+                const cookies = new Cookies();
+                const register = cookies.get('register');
+
+                if (!register) {
+                    registerServiceWorker();
+                }
+            }
+        }
+    };
 
     onClientUpdateForwardMessages = update => {
         const { info } = update;

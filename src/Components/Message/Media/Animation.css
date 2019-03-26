@@ -21,10 +21,6 @@
     user-select: none;
 }
 
-.animation-preview-blurred {
-    filter: blur(2px);
-}
-
 .animation-play {
     width: 48px;
     height: 48px;

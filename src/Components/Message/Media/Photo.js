@@ -71,10 +71,10 @@ class Photo extends React.Component {
         return (
             <div className='photo' style={photoStyle} onClick={openMedia}>
                 {src ? (
-                    <img className='photo-img' draggable={false} src={src} alt='' />
+                    <img className='photo-image' draggable={false} src={src} alt='' />
                 ) : (
                     <img
-                        className={classNames('photo-img', { 'media-blurred': isBlurred })}
+                        className={classNames('photo-image', { 'media-blurred': isBlurred })}
                         draggable={false}
                         src={thumbnailSrc}
                         alt=''

@@ -6,6 +6,8 @@
  */
 
 import { arrayBufferToBase64 } from './Utils/Common';
+import Cookies from 'universal-cookie';
+import { FIRST_START_OPTIMIZATIONS } from './Constants';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 
@@ -21,16 +23,19 @@ import TdLibController from './Controllers/TdLibController';
 
 const isLocalhost = Boolean(
     window.location.hostname === 'localhost' ||
-    // [::1] is the IPv6 localhost address.
-    window.location.hostname === '[::1]' ||
-    // 127.0.0.1/8 is considered localhost for IPv4.
-    window.location.hostname.match(
-        /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-    )
+        // [::1] is the IPv6 localhost address.
+        window.location.hostname === '[::1]' ||
+        // 127.0.0.1/8 is considered localhost for IPv4.
+        window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
 );
 
 export default async function register() {
     console.log('[SW] Register');
+
+    if (FIRST_START_OPTIMIZATIONS) {
+        const cookies = new Cookies();
+        cookies.set('register', true);
+    }
 
     if ('serviceWorker' in navigator) {
         // The URL constructor is available in all browsers that support SW.
@@ -42,7 +47,8 @@ export default async function register() {
             return;
         }
 
-        const serviceWorkerName = process.env.NODE_ENV === 'production'? 'service-worker.js' : 'custom-service-worker.js';
+        const serviceWorkerName =
+            process.env.NODE_ENV === 'production' ? 'service-worker.js' : 'custom-service-worker.js';
         const swUrl = `${process.env.PUBLIC_URL}/${serviceWorkerName}`;
         console.log(`[SW] Service worker url: ${swUrl}`);
 
@@ -58,7 +64,7 @@ export default async function register() {
 
 async function registerValidSW(swUrl) {
     console.log('[SW] RegisterValidSW');
-    try{
+    try {
         const registration = await navigator.serviceWorker.register(swUrl);
         registration.onupdatefound = () => {
             const installingWorker = registration.installing;
@@ -83,14 +89,13 @@ async function registerValidSW(swUrl) {
         };
 
         await subscribeNotifications(registration);
-    }
-    catch (error) {
+    } catch (error) {
         console.error('[SW] Error during service worker registration: ', error);
     }
 }
 
-async function subscribeNotifications(registration){
-    try{
+async function subscribeNotifications(registration) {
+    try {
         let pushSubscription = await registration.pushManager.getSubscription();
         if (pushSubscription) await pushSubscription.unsubscribe();
 
@@ -101,9 +106,9 @@ async function subscribeNotifications(registration){
         const p256dh_base64url = arrayBufferToBase64(pushSubscription.getKey('p256dh'));
         const auth_base64url = arrayBufferToBase64(pushSubscription.getKey('auth'));
 
-        if (endpoint && p256dh_base64url && auth_base64url){
+        if (endpoint && p256dh_base64url && auth_base64url) {
             const { authorizationState } = ApplicationStore;
-            if (authorizationState && authorizationState['@type'] === 'authorizationStateReady'){
+            if (authorizationState && authorizationState['@type'] === 'authorizationStateReady') {
                 await TdLibController.send({
                     '@type': 'registerDevice',
                     device_token: {
@@ -116,8 +121,7 @@ async function subscribeNotifications(registration){
                 });
             }
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.error('[SW] Error during service worker push subscription: ', error);
     }
 }
@@ -129,20 +133,17 @@ async function checkValidServiceWorker(swUrl) {
         const response = await fetch(swUrl);
 
         // Ensure service worker exists, and that we really are getting a JS file.
-        if (response.status === 404
-            || response.headers.get('content-type').indexOf('javascript') === -1) {
+        if (response.status === 404 || response.headers.get('content-type').indexOf('javascript') === -1) {
             // No service worker found. Probably a different app. Reload the page.
             const registration = await navigator.serviceWorker.ready;
             await registration.unregister();
 
             window.location.reload();
-        }
-        else {
+        } else {
             // Service worker found. Proceed as normal.
             await registerValidSW(swUrl);
         }
-    }
-    catch (error) {
+    } catch (error) {
         console.log('[SW] No internet connection found. App is running in offline mode.');
     }
 }

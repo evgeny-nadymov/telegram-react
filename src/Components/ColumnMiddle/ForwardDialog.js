@@ -372,10 +372,10 @@ class ForwardDialog extends React.Component {
     }
 }
 
-// ForwardDialog.PropTypes = {
-//     chatId: PropTypes.number.isRequired,
-//     messageIds: PropTypes.array.isRequired
-// };
+ForwardDialog.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageIds: PropTypes.array.isRequired
+};
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),

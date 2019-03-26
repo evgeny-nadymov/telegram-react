@@ -235,7 +235,7 @@ class VideoNote extends React.Component {
                     <>
                         <div className='video-note-round'>
                             <img
-                                className={classNames('animation-preview', { 'animation-preview-blurred': isBlurred })}
+                                className={classNames('animation-preview', { 'media-blurred': isBlurred })}
                                 style={style}
                                 src={thumbnailSrc}
                                 alt=''

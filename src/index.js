@@ -10,6 +10,8 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
+import Cookies from 'universal-cookie';
+import { FIRST_START_OPTIMIZATIONS } from './Constants';
 import './index.css';
 
 ReactDOM.render(
@@ -19,4 +21,13 @@ ReactDOM.render(
     document.getElementById('root')
 );
 
-registerServiceWorker();
+if (FIRST_START_OPTIMIZATIONS) {
+    const cookies = new Cookies();
+    const register = cookies.get('register');
+
+    if (register) {
+        registerServiceWorker();
+    }
+} else {
+    registerServiceWorker();
+}

@@ -73,7 +73,7 @@ class Game extends React.Component {
 
             return (
                 <div className='game-photo' style={style} onClick={openMedia}>
-                    <img className='photo-img' style={style} src={src} alt='' />
+                    <img className='photo-image' draggable={false} style={style} src={src} alt='' />
                 </div>
             );
         }
