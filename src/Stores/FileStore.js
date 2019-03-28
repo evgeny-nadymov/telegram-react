@@ -6,9 +6,9 @@
  */
 
 import { EventEmitter } from 'events';
-import TdLibController from '../Controllers/TdLibController';
 import { getLocationId } from '../Utils/Message';
 import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
+import TdLibController from '../Controllers/TdLibController';
 
 class FileStore extends EventEmitter {
     constructor() {

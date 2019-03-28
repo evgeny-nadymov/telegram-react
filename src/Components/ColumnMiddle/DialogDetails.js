@@ -112,7 +112,7 @@ class DialogDetails extends Component {
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
-                {/*<HeaderPlayer/>*/}
+                <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList
                     innerRef={ref => (this.messagesList = ref)}

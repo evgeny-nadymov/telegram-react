@@ -1152,15 +1152,16 @@ function loadMessageContents(store, messages) {
 
                         const [id, pid, idb_key] = getGameAnimationFile(message);
                         if (pid) {
-                            const obj = message.content.game.animation.animation;
-                            if (!obj.blob) {
+                            const file = message.content.game.animation.animation;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     idb_key,
                                     null,
-                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, id),
                                     () => {
                                         const fileSize = getGameAnimationFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
@@ -1173,19 +1174,20 @@ function loadMessageContents(store, messages) {
 
                         const [previewId, previewPid, previewIdbKey] = getGameAnimationThumbnailFile(message);
                         if (previewPid) {
-                            const obj = animation.thumbnail.photo;
-                            if (!obj.blob) {
+                            const file = animation.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     previewIdbKey,
                                     null,
                                     () =>
                                         FileStore.updateAnimationThumbnailBlob(
                                             localMessage.chat_id,
                                             localMessage.id,
-                                            obj.id
+                                            previewId
                                         ),
                                     () => FileStore.getRemoteFile(previewId, FILE_PRIORITY, localMessage)
                                 );
@@ -1206,16 +1208,16 @@ function loadMessageContents(store, messages) {
                             const [id, pid, idb_key] = getWebPageStickerFile(message);
                             if (pid) {
                                 loadPhoto = false;
-                                const obj = sticker.sticker;
-                                if (!obj.blob) {
+                                const file = sticker.sticker;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         idb_key,
                                         null,
-                                        () =>
-                                            FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                        () => FileStore.updateStickerBlob(localMessage.chat_id, localMessage.id, id),
                                         () => {
                                             FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
                                         }
@@ -1225,19 +1227,20 @@ function loadMessageContents(store, messages) {
 
                             const [previewId, previewPid, previewIdbKey] = getWebPageStickerThumbnailFile(message);
                             if (previewPid) {
-                                const obj = sticker.thumbnail.photo;
-                                if (!obj.blob) {
+                                const file = sticker.thumbnail.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         previewIdbKey,
                                         null,
                                         () =>
                                             FileStore.updateStickerThumbnailBlob(
                                                 localMessage.chat_id,
                                                 localMessage.id,
-                                                obj.id
+                                                previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
@@ -1248,20 +1251,16 @@ function loadMessageContents(store, messages) {
                         if (video_note) {
                             const [id, pid, idb_key] = getWebPageVideoNoteFile(message);
                             if (pid) {
-                                const obj = video_note.video;
-                                if (!obj.blob) {
+                                const file = video_note.video;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         idb_key,
                                         null,
-                                        () =>
-                                            FileStore.updateVideoNoteBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
+                                        () => FileStore.updateVideoNoteBlob(localMessage.chat_id, localMessage.id, id),
                                         () => {
                                             const fileSize = getWebPageVideoNoteFileSize(message);
                                             if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
@@ -1275,19 +1274,20 @@ function loadMessageContents(store, messages) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageVideoNoteThumbnailFile(message);
                             if (previewPid) {
                                 loadPhoto = false;
-                                const obj = video_note.thumbnail.photo;
-                                if (!obj.blob) {
+                                const file = video_note.thumbnail.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         previewIdbKey,
                                         null,
                                         () =>
                                             FileStore.updateVideoNoteThumbnailBlob(
                                                 localMessage.chat_id,
                                                 localMessage.id,
-                                                obj.id
+                                                previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
@@ -1299,19 +1299,20 @@ function loadMessageContents(store, messages) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageDocumentThumbnailFile(message);
                             if (previewPid) {
                                 loadPhoto = false;
-                                const obj = document.thumbnail.photo;
-                                if (!obj.blob) {
+                                const file = document.thumbnail.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         previewIdbKey,
                                         null,
                                         () =>
                                             FileStore.updateDocumentThumbnailBlob(
                                                 localMessage.chat_id,
                                                 localMessage.id,
-                                                obj.id
+                                                previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
@@ -1323,19 +1324,20 @@ function loadMessageContents(store, messages) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);
                             if (previewPid) {
                                 loadPhoto = false;
-                                const obj = video.thumbnail.photo;
-                                if (!obj.blob) {
+                                const file = video.thumbnail.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         previewIdbKey,
                                         null,
                                         () =>
                                             FileStore.updateVideoThumbnailBlob(
                                                 localMessage.chat_id,
                                                 localMessage.id,
-                                                obj.id
+                                                previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
@@ -1346,20 +1348,16 @@ function loadMessageContents(store, messages) {
                         if (animation) {
                             const [id, pid, idb_key] = getWebPageAnimationFile(message);
                             if (pid) {
-                                const obj = animation.animation;
-                                if (!obj.blob) {
+                                const file = animation.animation;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         idb_key,
                                         null,
-                                        () =>
-                                            FileStore.updateAnimationBlob(
-                                                localMessage.chat_id,
-                                                localMessage.id,
-                                                obj.id
-                                            ),
+                                        () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, id),
                                         () => {
                                             const fileSize = getWebPageAnimationFileSize(message);
                                             if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
@@ -1373,19 +1371,20 @@ function loadMessageContents(store, messages) {
                             const [previewId, previewPid, previewIdbKey] = getWebPageAnimationThumbnailFile(message);
                             if (previewPid) {
                                 loadPhoto = false;
-                                const obj = animation.thumbnail.photo;
-                                if (!obj.blob) {
+                                const file = animation.thumbnail.photo;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
                                     const localMessage = message;
                                     FileStore.getLocalFile(
                                         store,
-                                        obj,
+                                        file,
                                         previewIdbKey,
                                         null,
                                         () =>
                                             FileStore.updateAnimationThumbnailBlob(
                                                 localMessage.chat_id,
                                                 localMessage.id,
-                                                obj.id
+                                                previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
@@ -1430,7 +1429,8 @@ function loadMessageContents(store, messages) {
                                         file,
                                         previewIdbKey,
                                         null,
-                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
+                                        () =>
+                                            FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, previewId),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                     );
                                 }
@@ -1506,11 +1506,12 @@ function loadMessageContents(store, messages) {
                             if (user) {
                                 let [id, pid, idb_key] = getContactFile(message);
                                 if (pid) {
-                                    let obj = user.profile_photo.small;
-                                    if (!obj.blob) {
+                                    const file = user.profile_photo.small;
+                                    const blob = FileStore.getBlob(file.id);
+                                    if (!blob) {
                                         FileStore.getLocalFile(
                                             store,
-                                            obj,
+                                            file,
                                             idb_key,
                                             null,
                                             () => FileStore.updateUserPhotoBlob(user.id, id),
@@ -1525,15 +1526,16 @@ function loadMessageContents(store, messages) {
                     case 'messageVideoNote': {
                         const [id, pid, idb_key] = getVideoNoteFile(message);
                         if (pid) {
-                            const obj = message.content.video_note.video;
-                            if (!obj.blob) {
+                            const file = message.content.video_note.video;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     idb_key,
                                     null,
-                                    () => FileStore.updateVideoNoteBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => FileStore.updateVideoNoteBlob(localMessage.chat_id, localMessage.id, id),
                                     () => {
                                         const fileSize = getVideoNoteFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_VIDEONOTE_SIZE) {
@@ -1546,19 +1548,20 @@ function loadMessageContents(store, messages) {
 
                         const [previewId, previewPid, previewIdbKey] = getVideoNoteThumbnailFile(message);
                         if (previewPid) {
-                            const obj = message.content.video_note.thumbnail.photo;
-                            if (!obj.blob) {
+                            const file = message.content.video_note.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     previewIdbKey,
                                     null,
                                     () =>
                                         FileStore.updateVideoNoteThumbnailBlob(
                                             localMessage.chat_id,
                                             localMessage.id,
-                                            obj.id
+                                            previewId
                                         ),
                                     () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                 );
@@ -1569,15 +1572,16 @@ function loadMessageContents(store, messages) {
                     case 'messageAnimation': {
                         const [id, pid, idb_key] = getAnimationFile(message);
                         if (pid) {
-                            const obj = message.content.animation.animation;
-                            if (!obj.blob) {
+                            const file = message.content.animation.animation;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     idb_key,
                                     null,
-                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, obj.id),
+                                    () => FileStore.updateAnimationBlob(localMessage.chat_id, localMessage.id, id),
                                     () => {
                                         const fileSize = getAnimationFileSize(message);
                                         if (fileSize && fileSize < PRELOAD_ANIMATION_SIZE) {
@@ -1590,19 +1594,20 @@ function loadMessageContents(store, messages) {
 
                         const [previewId, previewPid, previewIdbKey] = getAnimationThumbnailFile(message);
                         if (previewPid) {
-                            const obj = message.content.animation.thumbnail.photo;
-                            if (!obj.blob) {
+                            const file = message.content.animation.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     previewIdbKey,
                                     null,
                                     () =>
                                         FileStore.updateAnimationThumbnailBlob(
                                             localMessage.chat_id,
                                             localMessage.id,
-                                            obj.id
+                                            previewId
                                         ),
                                     () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
                                 );
@@ -1613,20 +1618,16 @@ function loadMessageContents(store, messages) {
                     case 'messageVideo': {
                         const [id, pid, idb_key] = getVideoThumbnailFile(message);
                         if (pid) {
-                            const obj = message.content.video.thumbnail.photo;
-                            if (!obj.blob) {
+                            const file = message.content.video.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     idb_key,
                                     null,
-                                    () =>
-                                        FileStore.updateVideoThumbnailBlob(
-                                            localMessage.chat_id,
-                                            localMessage.id,
-                                            obj.id
-                                        ),
+                                    () => FileStore.updateVideoThumbnailBlob(localMessage.chat_id, localMessage.id, id),
                                     () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
                                 );
                             }
@@ -1636,19 +1637,20 @@ function loadMessageContents(store, messages) {
                     case 'messageDocument': {
                         const [id, pid, idb_key] = getDocumentThumbnailFile(message);
                         if (pid) {
-                            const obj = message.content.document.thumbnail.photo;
-                            if (!obj.blob) {
+                            const file = message.content.document.thumbnail.photo;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
                                 const localMessage = message;
                                 FileStore.getLocalFile(
                                     store,
-                                    obj,
+                                    file,
                                     idb_key,
                                     null,
                                     () =>
                                         FileStore.updateDocumentThumbnailBlob(
                                             localMessage.chat_id,
                                             localMessage.id,
-                                            obj.id
+                                            id
                                         ),
                                     () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, localMessage)
                                 );
@@ -1842,6 +1844,11 @@ function saveOrDownload(file, fileName, obj, onDownload) {
 }
 
 function download(file, obj) {
+    const blob = FileStore.getBlob(file.id);
+    if (blob) {
+        return;
+    }
+
     if (file.idb_key) {
         let store = FileStore.getStore();
 
