@@ -70,22 +70,22 @@ class HeaderPlayer extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.on('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
-        PlayerStore.on('clientUpdatePlayMedia', this.onClientUpdatePlayMedia);
-        PlayerStore.on('clientUpdatePauseMedia', this.onClientUpdatePauseMedia);
-        PlayerStore.on('clientUpdateEndMedia', this.onClientUpdateEndMedia);
-        PlayerStore.on('clientUpdateStopMedia', this.onClientUpdateStopMedia);
+        //PlayerStore.on('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
+        //PlayerStore.on('clientUpdateMediaPause', this.onclientUpdateMediaPause);
+        //PlayerStore.on('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
+        //PlayerStore.on('clientUpdateMediaStop', this.onclientUpdateMediaStop);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.removeListener('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
-        PlayerStore.removeListener('clientUpdatePlayMedia', this.onClientUpdatePlayMedia);
-        PlayerStore.removeListener('clientUpdatePauseMedia', this.onClientUpdatePauseMedia);
-        PlayerStore.removeListener('clientUpdateEndMedia', this.onClientUpdateEndMedia);
-        PlayerStore.removeListener('clientUpdateStopMedia', this.onClientUpdateStopMedia);
+        // PlayerStore.removeListener('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
+        // PlayerStore.removeListener('clientUpdateMediaPause', this.onclientUpdateMediaPause);
+        // PlayerStore.removeListener('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
+        // PlayerStore.removeListener('clientUpdateMediaStop', this.onclientUpdateMediaStop);
     }
 
-    onClientUpdateEndMedia = update => {};
+    onclientUpdateMediaEnd = update => {};
 
     onClientUpdateVideoNoteBlob = update => {
         const { chatId, messageId } = update;
@@ -110,18 +110,16 @@ class HeaderPlayer extends React.Component {
                             if (!player.paused) return;
 
                             if (player) {
-                                console.log('clientUpdate set currentTime=' + this.startTime);
-
                                 player.volume = this.startVolume;
                                 player.currentTime = this.startTime;
+                                player.play();
                             }
-
-                            TdLibController.clientUpdate({
-                                '@type': 'clientUpdatePlayMedia',
-                                chatId: chat_id,
-                                messageId: id,
-                                currentTime: player.currentTime
-                            });
+                            // TdLibController.clientUpdate({
+                            //     '@type': 'clientUpdateMediaPlay',
+                            //     chatId: chat_id,
+                            //     messageId: id,
+                            //     currentTime: player.currentTime
+                            // });
                         }
                     }
                 }
@@ -143,18 +141,22 @@ class HeaderPlayer extends React.Component {
                 const player = this.videoRef.current;
                 if (player) {
                     if (player.paused) {
-                        TdLibController.clientUpdate({
-                            '@type': 'clientUpdatePlayMedia',
-                            chatId: chatId,
-                            messageId: messageId,
-                            currentTime: player.currentTime
-                        });
+                        player.play();
+
+                        // TdLibController.clientUpdate({
+                        //     '@type': 'clientUpdateMediaPlay',
+                        //     chatId: chatId,
+                        //     messageId: messageId,
+                        //     currentTime: player.currentTime
+                        // });
                     } else {
-                        TdLibController.clientUpdate({
-                            '@type': 'clientUpdatePauseMedia',
-                            chatId: chatId,
-                            messageId: messageId
-                        });
+                        player.pause();
+
+                        // TdLibController.clientUpdate({
+                        //     '@type': 'clientUpdateMediaPause',
+                        //     chatId: chatId,
+                        //     messageId: messageId
+                        // });
                     }
                 }
             }
@@ -172,25 +174,27 @@ class HeaderPlayer extends React.Component {
 
                     const src = this.getMediaSrc(PlayerStore.message);
                     if (src) {
-                        TdLibController.clientUpdate({
-                            '@type': 'clientUpdatePlayMedia',
-                            chatId: chatId,
-                            messageId: messageId,
-                            currentTime: player.currentTime
-                        });
+                        player.play();
+
+                        // TdLibController.clientUpdate({
+                        //     '@type': 'clientUpdateMediaPlay',
+                        //     chatId: chatId,
+                        //     messageId: messageId,
+                        //     currentTime: player.currentTime
+                        // });
                     }
                 }
             );
         }
     };
 
-    onClientUpdateStopMedia = update => {
+    onclientUpdateMediaStop = update => {
         this.setState({
             message: null
         });
     };
 
-    onClientUpdatePlayMedia = update => {
+    onclientUpdateMediaPlay = update => {
         this.setState({ playing: true }, () => {
             const player = this.videoRef.current;
             if (player) {
@@ -199,7 +203,7 @@ class HeaderPlayer extends React.Component {
         });
     };
 
-    onClientUpdatePauseMedia = update => {
+    onclientUpdateMediaPause = update => {
         this.setState({ playing: false }, () => {
             const player = this.videoRef.current;
             if (player) {
@@ -210,7 +214,7 @@ class HeaderPlayer extends React.Component {
 
     handlePrev = () => {
         TdLibController.clientUpdate({
-            '@type': 'clientUpdatePrevMedia'
+            '@type': 'clientUpdateMediaPrev'
         });
     };
 
@@ -227,7 +231,7 @@ class HeaderPlayer extends React.Component {
 
     handleNext = () => {
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateNextMedia'
+            '@type': 'clientUpdateMediaNext'
         });
     };
 
@@ -236,7 +240,7 @@ class HeaderPlayer extends React.Component {
         if (!message) return;
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateStopMedia',
+            '@type': 'clientUpdateMediaStop',
             chatId: message.chat_id,
             messageId: message.id
         });
@@ -263,14 +267,14 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
         if (!message) return;
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateEndMedia',
-            chatId: message.chat_id,
-            messageId: message.id
-        });
-
         this.setState({
             playing: false
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaEnd',
+            chatId: message.chat_id,
+            messageId: message.id
         });
     };
 
@@ -291,6 +295,60 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handleCanPlay = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaCaptureStream',
+            chatId: message.chat_id,
+            messageId: message.id,
+            stream: player.captureStream()
+        });
+    };
+
+    handleVideoPlay = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        this.setState({
+            playing: true
+        });
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaPlay',
+            chatId: message.chat_id,
+            messageId: message.id,
+            currentTime: player.currentTime,
+            duration: player.duration,
+            timestamp: Date.now()
+        });
+    };
+
+    handleVideoPause = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        this.setState({
+            playing: false
+        });
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaPause',
+            chatId: message.chat_id,
+            messageId: message.id
+        });
+    };
+
     render() {
         const { classes } = this.props;
         const { playing, message } = this.state;
@@ -307,7 +365,10 @@ class HeaderPlayer extends React.Component {
                     height={48}
                     controls={false}
                     onTimeUpdate={this.handleTimeUpdate}
+                    onPlay={this.handleVideoPlay}
+                    onPause={this.handleVideoPause}
                     onEnded={this.handleEnded}
+                    onCanPlay={this.handleCanPlay}
                 />
                 {/*<IconButton className={classes.skipPreviousIconButton}>*/}
                 {/*<SkipPreviousIcon />*/}

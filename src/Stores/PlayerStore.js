@@ -16,6 +16,7 @@ class PlayerStore extends EventEmitter {
         this.playlist = [];
         this.message = null;
         this.time = null;
+        this.videoStream = null;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -53,38 +54,44 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdatePlayMedia': {
+            case 'clientUpdateMediaPlay': {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdatePauseMedia': {
+            case 'clientUpdateMediaPause': {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdateStopMedia': {
+            case 'clientUpdateMediaStop': {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdateNextMedia': {
+            case 'clientUpdateMediaNext': {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdatePrevMedia': {
+            case 'clientUpdateMediaPrev': {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdateEndMedia': {
+            case 'clientUpdateMediaEnd': {
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateMediaTimeUpdate': {
-                const { duration, currentTime } = update;
+                const { duration, currentTime, timestamp } = update;
 
                 this.time = {
-                    currentTime: update.currentTime,
-                    duration: update.duration,
-                    timestamp: update.timestamp
+                    currentTime: currentTime,
+                    duration: duration,
+                    timestamp: timestamp
                 };
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaCaptureStream': {
+                this.videoStream = update.stream;
 
                 this.emit(update['@type'], update);
                 break;

@@ -32,21 +32,19 @@ class VideoNote extends React.Component {
         super(props);
 
         this.videoRef = React.createRef();
+        this.captureVideoRef = React.createRef();
 
-        const { chatId, messageId } = props;
+        const { chatId, messageId, videoStream } = props;
 
         const { time, message } = PlayerStore;
         const active = message && message.chat_id === chatId && message.id === messageId;
-
-        if (active && time) {
-            console.log('clientUpdate diff=' + (Date.now() - time.timestamp) / 1000);
-        }
 
         this.state = {
             active: active,
             syncTime: false,
             currentTime: active && time ? time.currentTime + (Date.now() - time.timestamp) / 1000 : 0.0,
-            videoDuration: active && time ? time.duration : 0.0
+            videoDuration: active && time ? time.duration : 0.0,
+            stream: active ? videoStream : null
         };
     }
 
@@ -57,10 +55,11 @@ class VideoNote extends React.Component {
         ApplicationStore.on('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
-        PlayerStore.on('clientUpdatePlayMedia', this.onClientUpdatePlayMedia);
-        PlayerStore.on('clientUpdatePauseMedia', this.onClientUpdatePauseMedia);
+        PlayerStore.on('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
+        PlayerStore.on('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
+        PlayerStore.on('clientUpdateMediaPause', this.onclientUpdateMediaPause);
         PlayerStore.on('clientUpdateMediaTimeUpdate', this.onClientUpdateMediaTimeUpdate);
-        PlayerStore.on('clientUpdateEndMedia', this.onClientUpdateEndMedia);
+        PlayerStore.on('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
     }
 
     componentWillUnmount() {
@@ -70,11 +69,44 @@ class VideoNote extends React.Component {
         ApplicationStore.removeListener('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
-        PlayerStore.removeListener('clientUpdatePlayMedia', this.onClientUpdatePlayMedia);
-        PlayerStore.removeListener('clientUpdatePauseMedia', this.onClientUpdatePauseMedia);
+        PlayerStore.removeListener('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
+        PlayerStore.removeListener('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
+        PlayerStore.removeListener('clientUpdateMediaPause', this.onclientUpdateMediaPause);
         PlayerStore.removeListener('clientUpdateMediaTimeUpdate', this.onClientUpdateMediaTimeUpdate);
-        PlayerStore.removeListener('clientUpdateEndMedia', this.onClientUpdateEndMedia);
+        PlayerStore.removeListener('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
     }
+
+    onClientUpdateMediaCaptureStream = update => {
+        const { chatId, messageId } = this.props;
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const player = this.captureVideoRef.current;
+            if (player) {
+                player.srcObject = update.stream;
+                player.play();
+            }
+        }
+    };
+
+    onclientUpdateMediaPlay = update => {
+        const { chatId, messageId } = this.props;
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const player = this.videoRef.current;
+            if (player) {
+                player.currentTime = update.currentTime;
+                player.play();
+            }
+        }
+    };
+
+    onclientUpdateMediaPause = update => {
+        const { chatId, messageId } = this.props;
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const player = this.videoRef.current;
+            if (player) {
+                player.pause();
+            }
+        }
+    };
 
     onClientUpdateMediaTimeUpdate = update => {
         const { chatId, messageId } = this.props;
@@ -109,24 +141,24 @@ class VideoNote extends React.Component {
         }
     };
 
-    onClientUpdatePauseMedia = update => {
+    onclientUpdateMediaEnd = update => {
         const { chatId, messageId } = this.props;
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const player = this.videoRef.current;
-            if (player) {
-                player.pause();
-            }
-        }
-    };
 
-    onClientUpdatePlayMedia = update => {
-        const { chatId, messageId } = this.props;
         if (chatId === update.chatId && messageId === update.messageId) {
             const player = this.videoRef.current;
-            if (player) {
-                player.currentTime = update.currentTime;
-                player.play();
-            }
+
+            this.setState(
+                {
+                    active: false,
+                    currentTime: 0,
+                    videoDuration: player.duration
+                },
+                () => {
+                    if (window.hasFocus) {
+                        player.play();
+                    }
+                }
+            );
         }
     };
 
@@ -151,22 +183,11 @@ class VideoNote extends React.Component {
         if (chatId === update.chatId && messageId === update.messageId) {
             if (this.state.active) {
             } else {
-                this.setState(
-                    {
-                        active: true,
-                        syncTime: false,
-                        currentTime: null
-                    },
-                    () => {
-                        const player = this.videoRef.current;
-                        if (!player) return;
-
-                        //player.volume = 0.25;
-                        //player.currentTime = 0.0;
-                        //player.play();
-                        //console.log(`VideoNote.play current_time=${this.videoRef.current.currentTime} duration=${this.videoRef.current.duration}`);
-                    }
-                );
+                this.setState({
+                    active: true,
+                    syncTime: false,
+                    currentTime: null
+                });
             }
         } else if (this.state.active) {
             // stop playing
@@ -210,27 +231,6 @@ class VideoNote extends React.Component {
         }
     };
 
-    onClientUpdateEndMedia = update => {
-        const { chatId, messageId } = this.props;
-
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const player = this.videoRef.current;
-
-            this.setState(
-                {
-                    active: false,
-                    currentTime: 0,
-                    videoDuration: player.duration
-                },
-                () => {
-                    if (window.hasFocus) {
-                        player.play();
-                    }
-                }
-            );
-        }
-    };
-
     handleLoadedMetadata = () => {
         const { chatId, messageId } = this.props;
         const { active } = this.state;
@@ -241,16 +241,6 @@ class VideoNote extends React.Component {
         if (player) {
             player.currentTime = this.state.currentTime;
         }
-    };
-
-    handleTimeUpdate = () => {
-        const { active } = this.state;
-
-        if (!active) return;
-
-        const player = this.videoRef.current;
-
-        console.log('clientUpdateMediaTimeUpdate handleTimeUpdate currentTime', player.currentTime);
     };
 
     render() {
@@ -294,7 +284,6 @@ class VideoNote extends React.Component {
                             width={style.width}
                             height={style.height}
                             onLoadedMetadata={this.handleLoadedMetadata}
-                            onTimeUpdate={this.handleTimeUpdate}
                         />
                         <div className='video-note-player'>
                             <div className='video-note-progress'>
@@ -314,6 +303,14 @@ class VideoNote extends React.Component {
                                 <VolumeOffIcon />
                             </div>
                         </div>
+
+                        <video
+                            ref={this.captureVideoRef}
+                            muted
+                            width={48}
+                            height={48}
+                            style={{ position: 'absolute', left: 0, top: 0 }}
+                        />
                     </>
                 ) : (
                     <>
