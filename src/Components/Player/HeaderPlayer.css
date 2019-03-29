@@ -13,6 +13,11 @@
     box-sizing: border-box;
     border-bottom: 1px solid #e9ebed;
     padding: 0 12px;
+
+    /*position: absolute;*/
+    /*left: 0;*/
+    /*right: 0;*/
+    /*top: 65px;*/
 }
 
 .header-player-video {

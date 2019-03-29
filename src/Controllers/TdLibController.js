@@ -209,6 +209,13 @@ class TdLibController extends EventEmitter {
 
         this.clientUpdate(update);
     };
+
+    setMediaViewerContent(content) {
+        this.clientUpdate({
+            '@type': 'clientUpdateMediaViewerContent',
+            content: content
+        });
+    }
 }
 
 const controller = new TdLibController();

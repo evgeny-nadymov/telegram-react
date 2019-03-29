@@ -19,7 +19,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getVideoDurationString } from '../../Utils/Common';
-import { getDate, getDateHint, getTitle } from '../../Utils/Message';
+import { getAuthor, getDate, getDateHint, getTitle } from '../../Utils/Message';
 import {
     PLAYER_PLAYBACKRATE_FAST,
     PLAYER_PLAYBACKRATE_NORMAL,
@@ -96,7 +96,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
 
-        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
     componentWillUnmount() {
@@ -106,11 +106,11 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
 
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
-    onClientUpdateProfileMediaViewerContent = update => {
-        this.playingMediaViewer = false;
+    onClientUpdateMediaViewerContent = update => {
+        this.playingMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
     };
 
     onClientUpdateMediaViewerEnded = update => {
@@ -170,7 +170,7 @@ class HeaderPlayer extends React.Component {
 
     onClientUpdateMediaActive = update => {
         const { chatId, messageId } = update;
-        const { message, src, playbackRate } = this.state;
+        const { message, src } = this.state;
 
         if (message && message.chat_id === chatId && message.id === messageId) {
             if (src) {
@@ -372,7 +372,7 @@ class HeaderPlayer extends React.Component {
         const { classes } = this.props;
         const { playing, message, src, currentTime, playbackRate } = this.state;
 
-        const title = getTitle(message);
+        const author = getAuthor(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
 
@@ -409,7 +409,7 @@ class HeaderPlayer extends React.Component {
                         {/*</IconButton>*/}
                         <div className='header-player-content'>
                             <div className='header-player-title'>
-                                <span>{title}</span>
+                                <span>{author}</span>
                                 <span title={dateHint} style={{ paddingLeft: 8 }}>
                                     {date}
                                 </span>

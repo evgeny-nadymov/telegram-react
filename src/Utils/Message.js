@@ -24,22 +24,55 @@ import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 
+function getAuthor(message) {
+    if (!message) return null;
+
+    const { forward_info } = message;
+
+    if (forward_info) {
+        switch (forward_info['@type']) {
+            case 'messageForwardedFromUser': {
+                if (forward_info.sender_user_id > 0) {
+                    const user = UserStore.get(forward_info.sender_user_id);
+                    if (user) {
+                        return getUserFullName(user);
+                    }
+                }
+                break;
+            }
+            case 'messageForwardedPost': {
+                const chat = ChatStore.get(forward_info.chat_id);
+                if (chat) {
+                    return chat.title;
+                }
+                break;
+            }
+        }
+    }
+
+    return getTitle(message);
+}
+
 function getTitle(message) {
     if (!message) return null;
 
-    let from = null;
-    let title = null;
-    if (message.sender_user_id && message.sender_user_id !== 0) {
-        from = UserStore.get(message.sender_user_id);
-        if (from) {
-            title = getUserFullName(from);
+    const { sender_user_id, chat_id } = message;
+
+    if (sender_user_id) {
+        const user = UserStore.get(sender_user_id);
+        if (user) {
+            return getUserFullName(user);
         }
-    } else if (message.chat_id) {
-        from = ChatStore.get(message.chat_id);
-        if (from) title = from.title;
     }
 
-    return title;
+    if (chat_id) {
+        const chat = ChatStore.get(chat_id);
+        if (chat) {
+            return chat.title;
+        }
+    }
+
+    return null;
 }
 
 function substring(text, start, end) {
@@ -540,6 +573,7 @@ function isContentOpened(chatId, messageId) {
 }
 
 export {
+    getAuthor,
     getTitle,
     getText,
     getFormattedText,
