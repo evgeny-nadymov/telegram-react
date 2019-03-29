@@ -2495,9 +2495,13 @@ function isGifMimeType(mimeType) {
 }
 
 function getSrc(file) {
-    const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
+    const blob = getBlob(file);
 
     return FileStore.getBlobUrl(blob) || '';
+}
+
+function getBlob(file) {
+    return file ? FileStore.getBlob(file.id) || file.blob : null;
 }
 
 function getDownloadedSize(file) {
@@ -2558,6 +2562,7 @@ export {
     getMediaPreviewFile,
     isGifMimeType,
     getSrc,
+    getBlob,
     getDownloadedSize,
     getUploadedSize
 };

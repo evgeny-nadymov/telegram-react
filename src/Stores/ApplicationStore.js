@@ -176,10 +176,6 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateForwardMessages', update);
                 break;
             }
-            case 'clientUpdateActiveMedia': {
-                this.emit('clientUpdateActiveMedia', update);
-                break;
-            }
         }
     };
 

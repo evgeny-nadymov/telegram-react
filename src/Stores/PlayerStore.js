@@ -6,6 +6,8 @@
  */
 
 import { EventEmitter } from 'events';
+import Cookies from 'universal-cookie';
+import { PLAYER_PLAYBACKRATE_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -13,10 +15,14 @@ class PlayerStore extends EventEmitter {
     constructor() {
         super();
 
+        const cookies = new Cookies();
+        const playbackRate = Number(cookies.get('playbackRate')) || PLAYER_PLAYBACKRATE_NORMAL;
+
         this.playlist = [];
         this.message = null;
         this.time = null;
         this.videoStream = null;
+        this.playbackRate = playbackRate;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -41,7 +47,7 @@ class PlayerStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-            case 'clientUpdateActiveMedia': {
+            case 'clientUpdateMediaActive': {
                 const { chatId, messageId } = update;
 
                 const message = MessageStore.get(chatId, messageId);
@@ -50,6 +56,15 @@ class PlayerStore extends EventEmitter {
                 this.message = message;
 
                 this.getPlaylist();
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaPlaybackRate': {
+                this.playbackRate = update.playbackRate;
+
+                const cookies = new Cookies();
+                cookies.set('playbackRate', update.playbackRate);
 
                 this.emit(update['@type'], update);
                 break;
@@ -75,6 +90,10 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaEnd': {
+                this.message = null;
+                this.time = null;
+                this.videoStream = null;
+
                 this.emit(update['@type'], update);
                 break;
             }

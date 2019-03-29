@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
@@ -18,24 +17,23 @@ import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import { borderStyle } from '../Theme';
+import { getSrc } from '../../Utils/File';
+import { getVideoDurationString } from '../../Utils/Common';
+import { getDate, getDateHint, getTitle } from '../../Utils/Message';
+import {
+    PLAYER_PLAYBACKRATE_FAST,
+    PLAYER_PLAYBACKRATE_NORMAL,
+    PLAYER_STARTTIME,
+    PLAYER_VOLUME_NORMAL
+} from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
-import { getSrc } from '../../Utils/File';
-import FileStore from '../../Stores/FileStore';
 
 const styles = theme => ({
-    skipPreviousIconButton: {
-        margin: '8px 0 8px 12px'
-    },
-    playIconButton: {
-        margin: '8px 0 8px 0'
-    },
-    skipNextIconButton: {
-        margin: '8px 12px 8px 0'
-    },
-    closeIconButton: {
-        margin: '8px 12px 8px 12px'
+    iconButton: {
+        padding: 8
     },
     ...borderStyle(theme)
 });
@@ -46,21 +44,46 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        this.startVolume = 0.1;
-        this.startTime = 0.0;
+        const { playbackRate, message } = PlayerStore;
+
+        this.startVolume = PLAYER_VOLUME_NORMAL;
+        this.startTime = PLAYER_STARTTIME;
+
+        console.log('clientUpdateMediaPlaybackRate ctor', playbackRate, PlayerStore);
 
         this.state = {
-            message: PlayerStore.message,
-            playing: false
+            playbackRate: playbackRate,
+            message: message,
+            playing: false,
+            src: this.getMediaSrc(message)
         };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        if (this.state.message !== nextState.message) {
+        const { theme } = this.props;
+        const { message, src, playing, currentTime, playbackRate } = this.state;
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (this.state.playing !== nextState.playing) {
+        if (nextState.playbackRate !== playbackRate) {
+            return true;
+        }
+
+        if (nextState.message !== message) {
+            return true;
+        }
+
+        if (nextState.src !== src) {
+            return true;
+        }
+
+        if (nextState.playing !== playing) {
+            return true;
+        }
+
+        if (nextState.currentTime !== currentTime) {
             return true;
         }
 
@@ -69,27 +92,17 @@ class HeaderPlayer extends React.Component {
 
     componentDidMount() {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        PlayerStore.on('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
-        //PlayerStore.on('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
-        //PlayerStore.on('clientUpdateMediaPause', this.onclientUpdateMediaPause);
-        //PlayerStore.on('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
-        //PlayerStore.on('clientUpdateMediaStop', this.onclientUpdateMediaStop);
+        PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        PlayerStore.removeListener('clientUpdateActiveMedia', this.onClientUpdateActiveMedia);
-        // PlayerStore.removeListener('clientUpdateMediaPlay', this.onclientUpdateMediaPlay);
-        // PlayerStore.removeListener('clientUpdateMediaPause', this.onclientUpdateMediaPause);
-        // PlayerStore.removeListener('clientUpdateMediaEnd', this.onclientUpdateMediaEnd);
-        // PlayerStore.removeListener('clientUpdateMediaStop', this.onclientUpdateMediaStop);
+        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
     }
-
-    onclientUpdateMediaEnd = update => {};
 
     onClientUpdateVideoNoteBlob = update => {
         const { chatId, messageId } = update;
-        const { message } = this.state;
+        const { message, playbackRate } = this.state;
 
         if (!message) return;
 
@@ -103,24 +116,20 @@ class HeaderPlayer extends React.Component {
                 if (video_note) {
                     const { video } = video_note;
                     if (video) {
-                        const src = getSrc(video);
-                        if (src) {
-                            const player = this.videoRef.current;
-
-                            if (!player.paused) return;
-
-                            if (player) {
-                                player.volume = this.startVolume;
-                                player.currentTime = this.startTime;
-                                player.play();
+                        this.setState(
+                            {
+                                src: this.getMediaSrc(message)
+                            },
+                            () => {
+                                const player = this.videoRef.current;
+                                if (player) {
+                                    //player.volume = this.startVolume;
+                                    //player.playbackRate = playbackRate;
+                                    player.currentTime = this.startTime;
+                                    //player.play();
+                                }
                             }
-                            // TdLibController.clientUpdate({
-                            //     '@type': 'clientUpdateMediaPlay',
-                            //     chatId: chat_id,
-                            //     messageId: id,
-                            //     currentTime: player.currentTime
-                            // });
-                        }
+                        );
                     }
                 }
 
@@ -129,87 +138,38 @@ class HeaderPlayer extends React.Component {
         }
     };
 
-    onClientUpdateActiveMedia = update => {
+    onClientUpdateMediaActive = update => {
         const { chatId, messageId } = update;
-        const { message } = this.state;
-
-        const nextMessage = PlayerStore.message;
+        const { message, src, playbackRate } = this.state;
 
         if (message && message.chat_id === chatId && message.id === messageId) {
-            const src = this.getMediaSrc(message);
             if (src) {
                 const player = this.videoRef.current;
                 if (player) {
                     if (player.paused) {
                         player.play();
-
-                        // TdLibController.clientUpdate({
-                        //     '@type': 'clientUpdateMediaPlay',
-                        //     chatId: chatId,
-                        //     messageId: messageId,
-                        //     currentTime: player.currentTime
-                        // });
                     } else {
                         player.pause();
-
-                        // TdLibController.clientUpdate({
-                        //     '@type': 'clientUpdateMediaPause',
-                        //     chatId: chatId,
-                        //     messageId: messageId
-                        // });
                     }
                 }
             }
         } else {
             this.setState(
                 {
-                    message: PlayerStore.message
+                    message: PlayerStore.message,
+                    src: this.getMediaSrc(PlayerStore.message)
                 },
                 () => {
                     const player = this.videoRef.current;
                     if (player) {
-                        player.volume = this.startVolume;
+                        //player.volume = this.startVolume;
+                        //player.playbackRate = playbackRate;
                         player.currentTime = this.startTime;
-                    }
-
-                    const src = this.getMediaSrc(PlayerStore.message);
-                    if (src) {
-                        player.play();
-
-                        // TdLibController.clientUpdate({
-                        //     '@type': 'clientUpdateMediaPlay',
-                        //     chatId: chatId,
-                        //     messageId: messageId,
-                        //     currentTime: player.currentTime
-                        // });
+                        //player.play();
                     }
                 }
             );
         }
-    };
-
-    onclientUpdateMediaStop = update => {
-        this.setState({
-            message: null
-        });
-    };
-
-    onclientUpdateMediaPlay = update => {
-        this.setState({ playing: true }, () => {
-            const player = this.videoRef.current;
-            if (player) {
-                player.play();
-            }
-        });
-    };
-
-    onclientUpdateMediaPause = update => {
-        this.setState({ playing: false }, () => {
-            const player = this.videoRef.current;
-            if (player) {
-                player.pause();
-            }
-        });
     };
 
     handlePrev = () => {
@@ -223,7 +183,7 @@ class HeaderPlayer extends React.Component {
         if (!message) return;
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateActiveMedia',
+            '@type': 'clientUpdateMediaActive',
             chatId: message.chat_id,
             messageId: message.id
         });
@@ -232,17 +192,6 @@ class HeaderPlayer extends React.Component {
     handleNext = () => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaNext'
-        });
-    };
-
-    handleClose = () => {
-        const { message } = this.state;
-        if (!message) return;
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaStop',
-            chatId: message.chat_id,
-            messageId: message.id
         });
     };
 
@@ -268,7 +217,9 @@ class HeaderPlayer extends React.Component {
         if (!message) return;
 
         this.setState({
-            playing: false
+            playing: false,
+            message: null,
+            src: null
         });
 
         TdLibController.clientUpdate({
@@ -278,12 +229,23 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handleClose = () => {
+        const player = this.videoRef.current;
+        if (player) {
+            player.pause();
+        }
+
+        this.handleEnded();
+    };
+
     handleTimeUpdate = () => {
         const { message } = this.state;
         if (!message) return;
 
         const player = this.videoRef.current;
         if (!player) return;
+
+        this.setState({ currentTime: player.currentTime });
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaTimeUpdate',
@@ -296,11 +258,15 @@ class HeaderPlayer extends React.Component {
     };
 
     handleCanPlay = () => {
-        const { message } = this.state;
+        const { message, playbackRate } = this.state;
         if (!message) return;
 
         const player = this.videoRef.current;
         if (!player) return;
+
+        console.log('clientUpdateMediaPlaybackRate handleCanPlay', playbackRate);
+        player.playbackRate = playbackRate;
+        player.volume = this.startVolume;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaCaptureStream',
@@ -349,43 +315,98 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handlePlaybackRate = () => {
+        const { playbackRate } = this.state;
+
+        const nextPlaybackRate =
+            playbackRate === PLAYER_PLAYBACKRATE_NORMAL ? PLAYER_PLAYBACKRATE_FAST : PLAYER_PLAYBACKRATE_NORMAL;
+
+        this.setState(
+            {
+                playbackRate: nextPlaybackRate
+            },
+            () => {
+                const player = this.videoRef.current;
+                if (!player) return;
+
+                player.playbackRate = nextPlaybackRate;
+            }
+        );
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaPlaybackRate',
+            playbackRate: nextPlaybackRate
+        });
+    };
+
     render() {
         const { classes } = this.props;
-        const { playing, message } = this.state;
+        const { playing, message, src, currentTime, playbackRate } = this.state;
 
-        const src = this.getMediaSrc(message);
+        const title = getTitle(message);
+        const dateHint = getDateHint(message);
+        const date = getDate(message);
+
+        console.log(
+            'clientUpdateMediaPlaybackRate render playbackRate',
+            playbackRate,
+            playbackRate === PLAYER_PLAYBACKRATE_NORMAL ? 'default' : 'primary'
+        );
 
         return (
-            <div className={classNames(classes.borderColor, 'header-player')}>
+            <>
                 <video
+                    className='header-player-video'
                     ref={this.videoRef}
                     src={src}
                     autoPlay
                     width={48}
                     height={48}
                     controls={false}
-                    onTimeUpdate={this.handleTimeUpdate}
+                    onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}
+                    onTimeUpdate={this.handleTimeUpdate}
                     onEnded={this.handleEnded}
-                    onCanPlay={this.handleCanPlay}
                 />
-                {/*<IconButton className={classes.skipPreviousIconButton}>*/}
-                {/*<SkipPreviousIcon />*/}
-                {/*</IconButton>*/}
-                <IconButton className={classes.playIconButton} onClick={this.handlePlay}>
-                    {playing ? <PauseIcon /> : <PlayArrowIcon />}
-                </IconButton>
-                {/*<IconButton className={classes.skipNextIconButton}>*/}
-                {/*<SkipNextIcon />*/}
-                {/*</IconButton>*/}
-                <div className='header-player-content'>
-                    {message ? `video chat_id=${message.chat_id} message_id=${message.id}` : null}
-                </div>
-                <IconButton className={classes.closeIconButton} onClick={this.handleClose}>
-                    <CloseIcon />
-                </IconButton>
-            </div>
+                {message && (
+                    <div className={classNames(classes.borderColor, 'header-player')}>
+                        {/*<IconButton className={classes.skipPreviousIconButton}>*/}
+                        {/*<SkipPreviousIcon />*/}
+                        {/*</IconButton>*/}
+                        <IconButton
+                            className={classes.iconButton}
+                            color='primary'
+                            disabled={!src}
+                            onClick={this.handlePlay}>
+                            {playing ? <PauseIcon fontSize='small' /> : <PlayArrowIcon fontSize='small' />}
+                        </IconButton>
+                        {/*<IconButton className={classes.skipNextIconButton}>*/}
+                        {/*<SkipNextIcon />*/}
+                        {/*</IconButton>*/}
+                        <div className='header-player-content'>
+                            <div className='header-player-title'>
+                                <span>{title}</span>
+                                <span title={dateHint} style={{ paddingLeft: 8 }}>
+                                    {date}
+                                </span>
+                            </div>
+                            <div className='header-player-meta'>
+                                {getVideoDurationString(Math.floor(currentTime || 0))}
+                            </div>
+                        </div>
+                        <IconButton
+                            className={classes.iconButton}
+                            color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
+                            onClick={this.handlePlaybackRate}>
+                            <div className='header-player-playback-icon'>2X</div>
+                        </IconButton>
+                        <IconButton className={classes.iconButton} onClick={this.handleClose}>
+                            <CloseIcon fontSize='small' />
+                        </IconButton>
+                    </div>
+                )}
+            </>
         );
     }
 }

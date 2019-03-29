@@ -328,7 +328,7 @@ class Message extends Component {
 
                         // set active video note
                         TdLibController.clientUpdate({
-                            '@type': 'clientUpdateActiveMedia',
+                            '@type': 'clientUpdateMediaActive',
                             chatId: message.chat_id,
                             messageId: message.id
                         });
@@ -454,7 +454,7 @@ class Message extends Component {
 
                     // set active video note
                     TdLibController.clientUpdate({
-                        '@type': 'clientUpdateActiveMedia',
+                        '@type': 'clientUpdateMediaActive',
                         chatId: message.chat_id,
                         messageId: message.id
                     });

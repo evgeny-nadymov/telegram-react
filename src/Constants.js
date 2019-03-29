@@ -40,3 +40,7 @@ export const PRELOAD_VIDEONOTE_SIZE = 200 * 1024; //10 * 1024 * 1024;
 export const THUMBNAIL_PRIORITY = 32;
 export const FILE_PRIORITY = 1;
 export const FIRST_START_OPTIMIZATIONS = true;
+export const PLAYER_VOLUME_NORMAL = 0.25;
+export const PLAYER_STARTTIME = 0.0;
+export const PLAYER_PLAYBACKRATE_NORMAL = 1.0;
+export const PLAYER_PLAYBACKRATE_FAST = 1.75;

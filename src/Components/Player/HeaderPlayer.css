@@ -6,14 +6,43 @@
  */
 
 .header-player {
-    min-height: 65px;
+    min-height: 45px;
     display: flex;
     align-items: center;
     overflow: hidden;
     box-sizing: border-box;
     border-bottom: 1px solid #e9ebed;
+    padding: 0 12px;
+}
+
+.header-player-video {
+    visibility: hidden;
+    position: absolute;
 }
 
 .header-player-content {
     flex: 1 1 auto;
+    display: flex;
+    padding: 0 8px;
+    user-select: none;
+    font-size: 16px;
+}
+
+.header-player-title {
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.header-player-meta {
+    padding-left: 8px;
+}
+
+.header-player-playback-icon {
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 16px;
 }
