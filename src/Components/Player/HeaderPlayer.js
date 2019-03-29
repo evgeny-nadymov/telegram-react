@@ -30,6 +30,7 @@ import PlayerStore from '../../Stores/PlayerStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
+import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
     iconButton: {
@@ -92,15 +93,37 @@ class HeaderPlayer extends React.Component {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
+        PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
+        PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
+
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
+        PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
+        PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
+
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
     }
 
+    onClientUpdateProfileMediaViewerContent = update => {
+        this.playingMediaViewer = false;
+    };
+
+    onClientUpdateMediaViewerEnded = update => {
+        this.playingMediaViewer = false;
+    };
+
+    onClientUpdateMediaViewerPause = update => {
+        this.playingMediaViewer = false;
+    };
+
     onClientUpdateMediaViewerPlay = update => {
+        this.playingMediaViewer = true;
+
         const player = this.videoRef.current;
         if (!player) return;
 
@@ -130,10 +153,10 @@ class HeaderPlayer extends React.Component {
                             () => {
                                 const player = this.videoRef.current;
                                 if (player) {
-                                    //player.volume = this.startVolume;
-                                    //player.playbackRate = playbackRate;
                                     player.currentTime = this.startTime;
-                                    //player.play();
+                                    if (this.playingMediaViewer) {
+                                        player.pause();
+                                    }
                                 }
                             }
                         );
@@ -169,10 +192,10 @@ class HeaderPlayer extends React.Component {
                 () => {
                     const player = this.videoRef.current;
                     if (player) {
-                        //player.volume = this.startVolume;
-                        //player.playbackRate = playbackRate;
                         player.currentTime = this.startTime;
-                        //player.play();
+                        if (this.playingMediaViewer) {
+                            player.pause();
+                        }
                     }
                 }
             );

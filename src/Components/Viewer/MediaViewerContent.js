@@ -185,6 +185,16 @@ class MediaViewerContent extends React.Component {
                                 '@type': 'clientUpdateMediaViewerPlay'
                             });
                         }}
+                        onPause={() => {
+                            TdLibController.clientUpdate({
+                                '@type': 'clientUpdateMediaViewerPause'
+                            });
+                        }}
+                        onEnded={() => {
+                            TdLibController.clientUpdate({
+                                '@type': 'clientUpdateMediaViewerEnded'
+                            });
+                        }}
                     />
                     {!isPlaying &&
                         (!src && thumbnailSrc ? (
