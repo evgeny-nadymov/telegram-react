@@ -49,8 +49,6 @@ class HeaderPlayer extends React.Component {
         this.startVolume = PLAYER_VOLUME_NORMAL;
         this.startTime = PLAYER_STARTTIME;
 
-        console.log('clientUpdateMediaPlaybackRate ctor', playbackRate, PlayerStore);
-
         this.state = {
             playbackRate: playbackRate,
             message: message,
@@ -93,12 +91,21 @@ class HeaderPlayer extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
     }
+
+    onClientUpdateMediaViewerPlay = update => {
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        player.pause();
+    };
 
     onClientUpdateVideoNoteBlob = update => {
         const { chatId, messageId } = update;
@@ -264,7 +271,6 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
 
-        console.log('clientUpdateMediaPlaybackRate handleCanPlay', playbackRate);
         player.playbackRate = playbackRate;
         player.volume = this.startVolume;
 
@@ -346,12 +352,6 @@ class HeaderPlayer extends React.Component {
         const title = getTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
-
-        console.log(
-            'clientUpdateMediaPlaybackRate render playbackRate',
-            playbackRate,
-            playbackRate === PLAYER_PLAYBACKRATE_NORMAL ? 'default' : 'primary'
-        );
 
         return (
             <>

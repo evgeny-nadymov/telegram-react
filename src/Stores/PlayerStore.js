@@ -115,6 +115,10 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaViewerPlay': {
+                this.emit(update['@type'], update);
+                break;
+            }
             default:
                 break;
         }

@@ -15,6 +15,7 @@ import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
 class MediaViewerContent extends React.Component {
@@ -180,6 +181,9 @@ class MediaViewerContent extends React.Component {
                         height={videoHeight}
                         onPlay={() => {
                             this.setState({ isPlaying: true });
+                            TdLibController.clientUpdate({
+                                '@type': 'clientUpdateMediaViewerPlay'
+                            });
                         }}
                     />
                     {!isPlaying &&
