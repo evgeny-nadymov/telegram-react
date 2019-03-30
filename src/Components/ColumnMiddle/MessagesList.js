@@ -23,6 +23,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
 
@@ -50,6 +51,7 @@ class MessagesList extends React.Component {
         this.state = {
             prevChatId: 0,
             prevMessageId: null,
+            playerOpened: false,
             history: [],
             clearHistory: false,
             selectionActive: false,
@@ -59,6 +61,8 @@ class MessagesList extends React.Component {
 
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
+        this.playerRef = React.createRef();
+
         this.itemsMap = new Map();
 
         this.updateItemsInView = debounce(this.updateItemsInView, 250);
@@ -115,7 +119,7 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, theme } = this.props;
-        const { history, dragging, clearHistory, selectionActive } = this.state;
+        const { playerOpened, history, dragging, clearHistory, selectionActive } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -126,6 +130,10 @@ class MessagesList extends React.Component {
         }
 
         if (nextProps.messageId !== messageId) {
+            return true;
+        }
+
+        if (nextState.playerOpened !== playerOpened) {
             return true;
         }
 
@@ -159,6 +167,9 @@ class MessagesList extends React.Component {
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+
+        PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
     componentWillUnmount() {
@@ -169,7 +180,34 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+
+        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateMediaActive = update => {
+        const list = this.listRef.current;
+
+        const prevOffsetHeight = list.offsetHeight;
+        const prevScrollTop = list.scrollTop;
+        this.setState({ playerOpened: true }, () => {
+            if (list.scrollTop === prevScrollTop) {
+                list.scrollTop += Math.abs(prevOffsetHeight - list.offsetHeight);
+            }
+        });
+    };
+
+    onClientUpdateMediaEnd = udpate => {
+        const list = this.listRef.current;
+
+        const prevOffsetHeight = list.offsetHeight;
+        const prevScrollTop = list.scrollTop;
+        this.setState({ playerOpened: true }, () => {
+            if (list.scrollTop === prevScrollTop) {
+                list.scrollTop -= Math.abs(prevOffsetHeight - list.offsetHeight);
+            }
+        });
+    };
 
     onClientUpdateSelection = update => {
         this.setState({
