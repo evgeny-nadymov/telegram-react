@@ -12,7 +12,7 @@ import classNames from 'classnames';
 import ServiceMessage from '../Message/ServiceMessage';
 import Message from '../Message/Message';
 import FilesDropTarget from './FilesDropTarget';
-import { debounce, getPhotoSize, itemsInView } from '../../Utils/Common';
+import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
 import { loadChatsContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
@@ -65,7 +65,8 @@ class MessagesList extends React.Component {
 
         this.itemsMap = new Map();
 
-        this.updateItemsInView = debounce(this.updateItemsInView, 250);
+        this.updateItemsInView = throttle(this.updateItemsInView, 500);
+        //debounce(this.updateItemsInView, 250);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -284,14 +285,22 @@ class MessagesList extends React.Component {
     updateItemsInView = () => {
         if (!this.messages) return;
 
-        let messages = [];
-        let items = itemsInView(this.listRef, this.itemsRef);
+        const messages = new Map();
+        const items = itemsInView(this.listRef, this.itemsRef);
         for (let i = 0; i < items.length; i++) {
-            let message = this.messages[items[i]];
+            const message = this.messages[items[i]];
             if (message) {
-                messages.push(message.props.message);
+                const { chatId, messageId } = message.props;
+                const key = `${chatId}_${messageId}`;
+                messages.set(key, key);
             }
         }
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMessagesInView',
+            messages: messages
+        });
+        return;
 
         if (!messages.length) return;
 
@@ -670,6 +679,8 @@ class MessagesList extends React.Component {
     }
 
     handleScroll = () => {
+        this.updateItemsInView();
+
         const list = this.listRef.current;
         //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
 
@@ -692,7 +703,6 @@ class MessagesList extends React.Component {
             this.onLoadPrevious();
         } else {
             //console.log('SCROLL HANDLESCROLL updateItemsInView');
-            //this.updateItemsInView();
         }
     };
 

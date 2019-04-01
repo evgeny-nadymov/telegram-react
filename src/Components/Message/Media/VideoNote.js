@@ -72,6 +72,8 @@ class VideoNote extends React.Component {
         FileStore.on('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
 
+        MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -84,6 +86,8 @@ class VideoNote extends React.Component {
         FileStore.removeListener('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdateVideoNoteThumbnailBlob);
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
 
+        MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -91,6 +95,22 @@ class VideoNote extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaTimeUpdate', this.onClientUpdateMediaTimeUpdate);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateMessagesInView = update => {
+        const player = this.videoRef.current;
+        if (player) {
+            const { chatId, messageId } = this.props;
+            const key = `${chatId}_${messageId}`;
+
+            if (update.messages.has(key)) {
+                //console.log('clientUpdateMessagesInView play message_id=' + messageId);
+                player.play();
+            } else {
+                //console.log('clientUpdateMessagesInView pause message_id=' + messageId);
+                player.pause();
+            }
+        }
+    };
 
     onClientUpdateMediaCaptureStream = update => {
         const { chatId, messageId } = this.props;

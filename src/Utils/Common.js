@@ -68,12 +68,10 @@ function getFitSize(size, max, increaseToMax = true) {
 }
 
 function itemsInView(scrollContainerRef, itemsContainerRef) {
-    let scrollContainer = scrollContainerRef.current; //ReactDOM.findDOMNode(scrollContainerRef);
-    let itemsContainer = itemsContainerRef
-        ? itemsContainerRef.current //ReactDOM.findDOMNode(itemsContainerRef) :
-        : scrollContainer;
+    let scrollContainer = scrollContainerRef.current;
+    let itemsContainer = itemsContainerRef ? itemsContainerRef.current : scrollContainer;
 
-    let items = [];
+    const items = [];
     for (let i = 0; i < itemsContainer.children.length; i++) {
         let child = itemsContainer.children[i];
         if (

@@ -15,6 +15,7 @@ import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFileSize, getSrc, isGifMimeType } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
+import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import './Animation.css';
 
@@ -29,13 +30,31 @@ class Animation extends React.Component {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
     }
+
+    onClientUpdateMessagesInView = update => {
+        const player = this.videoRef.current;
+        if (player) {
+            const { chatId, messageId } = this.props;
+            const key = `${chatId}_${messageId}`;
+
+            if (update.messages.has(key)) {
+                //console.log('clientUpdateMessagesInView play message_id=' + messageId);
+                player.play();
+            } else {
+                //console.log('clientUpdateMessagesInView pause message_id=' + messageId);
+                player.pause();
+            }
+        }
+    };
 
     onClientUpdateFocusWindow = update => {
         const player = this.videoRef.current;

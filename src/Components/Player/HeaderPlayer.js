@@ -153,7 +153,7 @@ class HeaderPlayer extends React.Component {
                             () => {
                                 const player = this.videoRef.current;
                                 if (player) {
-                                    player.currentTime = this.startTime;
+                                    //player.currentTime = this.startTime;
                                     if (this.playingMediaViewer) {
                                         player.pause();
                                     }
@@ -297,11 +297,24 @@ class HeaderPlayer extends React.Component {
         player.playbackRate = playbackRate;
         player.volume = this.startVolume;
 
+        return;
+
+        let stream = null;
+        if ('captureStream' in player) {
+            stream = player.captureStream();
+        } else if ('mozCaptureStream' in player) {
+            stream = player.mozCaptureStream();
+        }
+
+        if (!stream) {
+            return;
+        }
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaCaptureStream',
             chatId: message.chat_id,
             messageId: message.id,
-            stream: player.captureStream()
+            stream: stream
         });
     };
 
@@ -382,9 +395,9 @@ class HeaderPlayer extends React.Component {
                     className='header-player-video'
                     ref={this.videoRef}
                     src={src}
-                    autoPlay
-                    width={48}
-                    height={48}
+                    autoPlay={true}
+                    width={44}
+                    height={44}
                     controls={false}
                     onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}
