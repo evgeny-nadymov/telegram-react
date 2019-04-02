@@ -184,10 +184,13 @@ class HeaderPlayer extends React.Component {
                 }
             }
         } else {
+            const src = this.getMediaSrc(PlayerStore.message);
+            const playing = Boolean(src);
             this.setState(
                 {
                     message: PlayerStore.message,
-                    src: this.getMediaSrc(PlayerStore.message)
+                    playing: playing,
+                    src: src
                 },
                 () => {
                     const player = this.videoRef.current;
@@ -229,17 +232,25 @@ class HeaderPlayer extends React.Component {
         if (message) {
             const { content } = message;
             if (content) {
-                const { video_note } = content;
+                const { video_note, web_page } = content;
                 if (video_note) {
                     const { video } = video_note;
                     if (video) {
                         return getSrc(video);
                     }
                 }
+                if (web_page) {
+                    if (web_page.video_note) {
+                        const { video } = web_page.video_note;
+                        if (video) {
+                            return getSrc(video);
+                        }
+                    }
+                }
             }
         }
 
-        return null;
+        return '';
     };
 
     handleEnded = () => {
@@ -296,8 +307,9 @@ class HeaderPlayer extends React.Component {
 
         player.playbackRate = playbackRate;
         player.volume = this.startVolume;
+        player.muted = false;
 
-        return;
+        //return;
 
         let stream = null;
         if ('captureStream' in player) {
@@ -396,9 +408,9 @@ class HeaderPlayer extends React.Component {
                     ref={this.videoRef}
                     src={src}
                     autoPlay={true}
+                    controls={true}
                     width={44}
                     height={44}
-                    controls={false}
                     onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}

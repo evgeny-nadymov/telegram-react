@@ -642,7 +642,7 @@ class Message extends Component {
                                 )}
                                 {message.edit_date > 0 && <span>edited </span>}
                                 <span className='message-date' title={dateHint}>
-                                    {date + ' ' + messageId}
+                                    {date}
                                 </span>
                             </div>
                         </div>

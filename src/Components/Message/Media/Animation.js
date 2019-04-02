@@ -24,12 +24,19 @@ class Animation extends React.Component {
         super(props);
 
         this.videoRef = React.createRef();
+
+        this.focused = window.hasFocus;
+        this.inView = false;
+        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
+        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
     }
 
     componentDidMount() {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
     }
 
@@ -37,34 +44,52 @@ class Animation extends React.Component {
         FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.removeListener(
+            'clientUpdateProfileMediaViewerContent',
+            this.onClientUpdateProfileMediaViewerContent
+        );
         MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
     }
 
-    onClientUpdateMessagesInView = update => {
+    startStopPlayer = () => {
         const player = this.videoRef.current;
         if (player) {
-            const { chatId, messageId } = this.props;
-            const key = `${chatId}_${messageId}`;
-
-            if (update.messages.has(key)) {
-                //console.log('clientUpdateMessagesInView play message_id=' + messageId);
+            if (this.inView && this.focused && !this.openMediaViewer && !this.openProfileMediaViewer) {
+                //console.log('clientUpdate player play message_id=' + this.props.messageId);
                 player.play();
             } else {
-                //console.log('clientUpdateMessagesInView pause message_id=' + messageId);
+                //console.log('clientUpdate player pause message_id=' + this.props.messageId);
                 player.pause();
             }
         }
     };
 
+    onClientUpdateProfileMediaViewerContent = update => {
+        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+
+        this.startStopPlayer();
+    };
+
+    onClientUpdateMediaViewerContent = update => {
+        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
+
+        this.startStopPlayer();
+    };
+
     onClientUpdateFocusWindow = update => {
-        const player = this.videoRef.current;
-        if (player) {
-            if (update.focused) {
-                player.play();
-            } else {
-                player.pause();
-            }
-        }
+        this.focused = update.focused;
+
+        this.startStopPlayer();
+    };
+
+    onClientUpdateMessagesInView = update => {
+        const { chatId, messageId } = this.props;
+        const key = `${chatId}_${messageId}`;
+
+        this.inView = update.messages.has(key);
+
+        this.startStopPlayer();
     };
 
     onClientUpdateAnimationBlob = update => {
