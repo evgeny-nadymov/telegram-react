@@ -60,15 +60,29 @@ class VideoNote extends React.Component {
         if (!player) return;
 
         if (srcObject) {
-            player.scr = null;
+            //player.scr = null;
             player.srcObject = srcObject;
-            //player.play();
             return;
         }
 
-        player.srcObject = null;
-        player.src = src;
-        //player.play();
+        const stream = player.srcObject;
+        if (stream) {
+            //console.log('clientUpdate release srcObject');
+            const tracks = stream.getTracks();
+
+            tracks.forEach(track => {
+                //console.log('clientUpdate release track');
+                track.stop();
+            });
+        }
+
+        if (player.srcObject) {
+            //console.log('clientUpdate release video.srcObject');
+            player.srcObject = null;
+        }
+        if (player.src !== src) {
+            player.src = src;
+        }
     }
 
     componentDidMount() {

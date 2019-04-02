@@ -408,7 +408,7 @@ class HeaderPlayer extends React.Component {
                     ref={this.videoRef}
                     src={src}
                     autoPlay={true}
-                    controls={true}
+                    controls={false}
                     width={44}
                     height={44}
                     onCanPlay={this.handleCanPlay}
