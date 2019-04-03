@@ -84,6 +84,7 @@ class EmojiPickerButton extends React.Component {
                 <Picker
                     set='apple'
                     showPreview={false}
+                    showSkinTones={false}
                     onSelect={this.props.onSelect}
                     color={theme.palette.primary.dark}
                     i18n={i18n}
