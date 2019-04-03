@@ -15,10 +15,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
     font-size: 16px;
     display: inline-block;
-    color: #222427;
-    border: 1px solid #d9d9d9;
-    border-radius: 5px;
-    background: #fff;
+    color: #ffffff;
 }
 
 .emoji-mart .emoji-mart-emoji {
@@ -26,7 +23,7 @@
 }
 
 .emoji-mart-bar {
-    border: 0 solid #d9d9d9;
+    border: 0 solid rgba(255, 255, 255, 0.12);
 }
 .emoji-mart-bar:first-child {
     border-bottom-width: 1px;
@@ -49,6 +46,7 @@
 }
 
 .emoji-mart-anchor {
+    color: inherit;
     position: relative;
     display: block;
     flex: 1 1 auto;
@@ -63,7 +61,7 @@
 }
 .emoji-mart-anchor:hover,
 .emoji-mart-anchor-selected {
-    color: #464646;
+    color: #d9d9d9;
 }
 
 .emoji-mart-anchor-selected .emoji-mart-anchor-bar {
@@ -85,7 +83,7 @@
 
 .emoji-mart-anchors svg,
 .emoji-mart-anchors img {
-    fill: #858585;
+    fill: currentColor;
     height: 18px;
     width: 18px;
 }
@@ -98,7 +96,7 @@
 }
 
 .emoji-mart-search {
-    margin-top: 6px;
+    margin: 6px 0;
     padding: 0 6px;
     position: relative;
 }
@@ -125,10 +123,10 @@
 
 .emoji-mart-search-icon {
     position: absolute;
-    top: 7px;
-    right: 11px;
+    top: 9px;
+    right: 16px;
     z-index: 2;
-    padding: 2px 5px 1px;
+    padding: 0;
     border: none;
     background: none;
 }
@@ -146,7 +144,7 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background-color: #f4f4f4;
+    background-color: #303030;
     border-radius: 100%;
 }
 
@@ -163,8 +161,7 @@
     width: 100%;
     font-weight: 500;
     padding: 5px 6px;
-    background-color: #fff;
-    background-color: rgba(255, 255, 255, .95);
+    background-color: #424242;
 }
 
 .emoji-mart-category-list {
@@ -366,7 +363,7 @@
 }
 
 .emoji-mart-skin-swatches.custom .emoji-mart-skin-swatch.custom:hover {
-    background-color: #f4f4f4;
+    background-color: #303030;
     border-radius: 10%;
 }
 

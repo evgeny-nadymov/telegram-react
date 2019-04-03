@@ -16,9 +16,6 @@
     font-size: 16px;
     display: inline-block;
     color: #222427;
-    border: 1px solid #d9d9d9;
-    border-radius: 5px;
-    background: #fff;
 }
 
 .emoji-mart .emoji-mart-emoji {
@@ -26,7 +23,7 @@
 }
 
 .emoji-mart-bar {
-    border: 0 solid #d9d9d9;
+    border: 0 solid rgba(0, 0, 0, 0.12);
 }
 .emoji-mart-bar:first-child {
     border-bottom-width: 1px;
@@ -49,6 +46,7 @@
 }
 
 .emoji-mart-anchor {
+    color: inherit;
     position: relative;
     display: block;
     flex: 1 1 auto;
@@ -85,7 +83,7 @@
 
 .emoji-mart-anchors svg,
 .emoji-mart-anchors img {
-    fill: #858585;
+    fill: currentColor;
     height: 18px;
     width: 18px;
 }
@@ -98,7 +96,7 @@
 }
 
 .emoji-mart-search {
-    margin-top: 6px;
+    margin: 6px 0;
     padding: 0 6px;
     position: relative;
 }
@@ -125,10 +123,10 @@
 
 .emoji-mart-search-icon {
     position: absolute;
-    top: 7px;
-    right: 11px;
+    top: 9px;
+    right: 16px;
     z-index: 2;
-    padding: 2px 5px 1px;
+    padding: 0;
     border: none;
     background: none;
 }
