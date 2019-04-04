@@ -12,6 +12,7 @@ import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
+import FourKIcon from '@material-ui/icons/FourK';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
@@ -19,7 +20,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getVideoDurationString } from '../../Utils/Common';
-import { getAuthor, getDate, getDateHint, getTitle } from '../../Utils/Message';
+import { getDate, getDateHint, getMediaTitle, showMediaDate } from '../../Utils/Message';
 import {
     PLAYER_PLAYBACKRATE_FAST,
     PLAYER_PLAYBACKRATE_NORMAL,
@@ -28,9 +29,9 @@ import {
 } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import FileStore from '../../Stores/FileStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
-import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
     iconButton: {
@@ -91,6 +92,7 @@ class HeaderPlayer extends React.Component {
 
     componentDidMount() {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
+        FileStore.on('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
@@ -101,6 +103,7 @@ class HeaderPlayer extends React.Component {
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
+        FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
@@ -141,6 +144,78 @@ class HeaderPlayer extends React.Component {
         if (chatId !== chat_id || messageId !== id) return;
 
         switch (content['@type']) {
+            case 'messageText': {
+                const { web_page } = content;
+                if (web_page) {
+                    const { audio, video_note } = web_page;
+
+                    if (audio) {
+                        const file = audio.audio;
+                        if (file) {
+                            this.setState(
+                                {
+                                    src: this.getMediaSrc(message)
+                                },
+                                () => {
+                                    const player = this.videoRef.current;
+                                    if (player) {
+                                        //player.currentTime = this.startTime;
+                                        if (this.playingMediaViewer) {
+                                            player.pause();
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                    }
+
+                    if (video_note) {
+                        const { video } = video_note;
+                        if (video) {
+                            this.setState(
+                                {
+                                    src: this.getMediaSrc(message)
+                                },
+                                () => {
+                                    const player = this.videoRef.current;
+                                    if (player) {
+                                        //player.currentTime = this.startTime;
+                                        if (this.playingMediaViewer) {
+                                            player.pause();
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                    }
+                }
+
+                break;
+            }
+            case 'messageAudio': {
+                const { audio } = content;
+                if (audio) {
+                    const file = audio.audio;
+                    if (file) {
+                        this.setState(
+                            {
+                                src: this.getMediaSrc(message)
+                            },
+                            () => {
+                                const player = this.videoRef.current;
+                                if (player) {
+                                    //player.currentTime = this.startTime;
+                                    if (this.playingMediaViewer) {
+                                        player.pause();
+                                    }
+                                }
+                            }
+                        );
+                    }
+                }
+
+                break;
+            }
             case 'messageVideoNote': {
                 const { video_note } = content;
                 if (video_note) {
@@ -198,6 +273,8 @@ class HeaderPlayer extends React.Component {
                         player.currentTime = this.startTime;
                         if (this.playingMediaViewer) {
                             player.pause();
+
+                            //this.handleVideoPause();
                         }
                     }
                 }
@@ -232,7 +309,13 @@ class HeaderPlayer extends React.Component {
         if (message) {
             const { content } = message;
             if (content) {
-                const { video_note, web_page } = content;
+                const { audio, video_note, web_page } = content;
+                if (audio) {
+                    const file = audio.audio;
+                    if (file) {
+                        return getSrc(file);
+                    }
+                }
                 if (video_note) {
                     const { video } = video_note;
                     if (video) {
@@ -240,6 +323,12 @@ class HeaderPlayer extends React.Component {
                     }
                 }
                 if (web_page) {
+                    if (web_page.audio) {
+                        const file = web_page.audio.audio;
+                        if (file) {
+                            return getSrc(file);
+                        }
+                    }
                     if (web_page.video_note) {
                         const { video } = web_page.video_note;
                         if (video) {
@@ -397,9 +486,10 @@ class HeaderPlayer extends React.Component {
         const { classes } = this.props;
         const { playing, message, src, currentTime, playbackRate } = this.state;
 
-        const author = getAuthor(message);
+        const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
+        const showDate = showMediaDate(message);
 
         return (
             <>
@@ -434,10 +524,12 @@ class HeaderPlayer extends React.Component {
                         {/*</IconButton>*/}
                         <div className='header-player-content'>
                             <div className='header-player-title'>
-                                <span>{author}</span>
-                                <span title={dateHint} style={{ paddingLeft: 8 }}>
-                                    {date}
-                                </span>
+                                <span>{title}</span>
+                                {showDate && (
+                                    <span title={dateHint} style={{ paddingLeft: 8 }}>
+                                        {date}
+                                    </span>
+                                )}
                             </div>
                             <div className='header-player-meta'>
                                 {getVideoDurationString(Math.floor(currentTime || 0))}

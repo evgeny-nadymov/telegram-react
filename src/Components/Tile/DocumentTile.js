@@ -25,10 +25,12 @@ const styles = theme => ({
 class DocumentTile extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.on('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.removeListener('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     onClientUpdateDocumentThumbnailBlob = update => {

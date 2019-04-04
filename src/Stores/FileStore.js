@@ -133,6 +133,11 @@ class FileStore extends EventEmitter {
                                                 this.handleAnimation(store, animation, file, idb_key, arr, obj);
                                             }
 
+                                            const { audio } = web_page;
+                                            if (audio) {
+                                                this.handleAudio(store, audio, file, idb_key, arr, obj);
+                                            }
+
                                             const { document } = web_page;
                                             if (document) {
                                                 this.handleDocument(store, document, file, idb_key, arr, obj);
@@ -190,6 +195,12 @@ class FileStore extends EventEmitter {
                                         const { video } = obj.content;
 
                                         this.handleVideo(store, video, file, idb_key, arr, obj);
+                                        break;
+                                    }
+                                    case 'messageAudio': {
+                                        const { audio } = obj.content;
+
+                                        this.handleAudio(store, audio, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageDocument': {
@@ -265,6 +276,36 @@ class FileStore extends EventEmitter {
                         break;
                     }
                 }
+            }
+        }
+    };
+
+    handleAudio = (store, audio, file, idb_key, arr, obj) => {
+        if (audio.album_cover_thumbnail) {
+            const source = audio.album_cover_thumbnail.photo;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateAudioThumbnailBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
+                );
+            }
+        }
+
+        if (audio.audio) {
+            const source = audio.audio;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateAudioBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                );
             }
         }
     };
@@ -704,6 +745,14 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updateAudioBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateAudioBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updateVideoNoteThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVideoNoteThumbnailBlob', {
             chatId: chatId,
@@ -757,6 +806,14 @@ class FileStore extends EventEmitter {
             fileId: fileId
         });
     }
+
+    updateAudioThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateAudioThumbnailBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
 }
 
 const store = new FileStore();

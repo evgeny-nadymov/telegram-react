@@ -70,10 +70,14 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaPlay': {
+                this.playing = true;
+
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateMediaPause': {
+                this.playing = false;
+
                 this.emit(update['@type'], update);
                 break;
             }

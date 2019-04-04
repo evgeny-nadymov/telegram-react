@@ -37,6 +37,7 @@ export const THUMBNAIL_BLURRED_SIZE = 320;
 export const PRELOAD_VIDEO_SIZE = 10 * 1024 * 1024;
 export const PRELOAD_ANIMATION_SIZE = 200 * 1024; //10 * 1024 * 1024;
 export const PRELOAD_VIDEONOTE_SIZE = 200 * 1024; //10 * 1024 * 1024;
+export const PRELOAD_AUDIO_SIZE = 200 * 1024; //10 * 1024 * 1024;
 export const THUMBNAIL_PRIORITY = 32;
 export const FILE_PRIORITY = 1;
 export const FIRST_START_OPTIMIZATIONS = true;

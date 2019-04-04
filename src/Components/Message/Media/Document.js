@@ -12,6 +12,7 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DocumentTile from '../../Tile/DocumentTile';
 import DocumentAction from './DocumentAction';
 import FileProgress from '../../Viewer/FileProgress';
+import { getExtension } from '../../../Utils/File';
 import './Document.css';
 
 class Document extends React.Component {
@@ -44,7 +45,7 @@ class Document extends React.Component {
                             onClick={openMedia}
                             title={file_name}
                             data-name={file_name}
-                            data-ext='.dat'>
+                            data-ext={'.' + getExtension(file_name)}>
                             {file_name}
                         </a>
                     </div>

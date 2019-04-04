@@ -13,4 +13,12 @@ function isBlurredThumbnail(thumbnail) {
     return Math.max(thumbnail.width, thumbnail.height) < THUMBNAIL_BLURRED_SIZE;
 }
 
-export { isBlurredThumbnail };
+function getAudioTitle(audio) {
+    if (!audio) return null;
+
+    const { file_name, title, performer } = audio;
+
+    return title || performer ? `${performer || 'Unknown Artist'} — ${title || 'Unknown Track'}` : file_name;
+}
+
+export { isBlurredThumbnail, getAudioTitle };

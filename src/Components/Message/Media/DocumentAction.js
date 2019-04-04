@@ -91,7 +91,7 @@ class DocumentAction extends React.Component {
             isDownloadingActive || isUploadingActive
                 ? t('Cancel')
                 : isDownloadingCompleted || file.idb_key
-                ? t('Open')
+                ? t('Save')
                 : '';
 
         return (

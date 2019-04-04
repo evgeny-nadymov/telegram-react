@@ -44,7 +44,11 @@ class FileProgress extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { download, upload } = this.props;
+        const { download, upload, icon } = this.props;
+
+        if (nextProps.icon !== icon) {
+            return true;
+        }
 
         if (this.isDownloading(nextState.file, nextState.prevFile) && !download) {
             return false;

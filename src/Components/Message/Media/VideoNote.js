@@ -199,7 +199,7 @@ class VideoNote extends React.Component {
                 {
                     active: false,
                     srcObject: null,
-                    currentTime: 0.0
+                    currentTime: 0
                 },
                 () => {
                     const player = this.videoRef.current;

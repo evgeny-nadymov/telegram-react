@@ -12,6 +12,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Animation from './Animation';
 import Photo from './Photo';
 import Video from './Video';
+import Audio from './Audio';
 import Document from './Document';
 import VideoNote from './VideoNote';
 import Sticker from './Sticker';
@@ -64,6 +65,7 @@ class WebPage extends React.Component {
             photo,
             animation,
             video,
+            audio,
             document,
             video_note,
             sticker,
@@ -92,6 +94,19 @@ class WebPage extends React.Component {
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
                     <VideoNote chatId={chatId} messageId={messageId} videoNote={video_note} openMedia={openMedia} />
+                </>
+            );
+        }
+
+        if (audio) {
+            return (
+                <>
+                    {site_name && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                    )}
+                    {title && <div className='web-page-title'>{title}</div>}
+                    {description && <div className='web-page-description'>{description}</div>}
+                    <Audio chatId={chatId} messageId={messageId} audio={audio} openMedia={openMedia} />
                 </>
             );
         }

@@ -17,12 +17,14 @@ import Location from '../Components/Message/Media/Location';
 import Venue from '../Components/Message/Media/Venue';
 import Contact from '../Components/Message/Media/Contact';
 import Document from '../Components/Message/Media/Document';
+import Audio from '../Components/Message/Media/Audio';
 import { getUserFullName } from './User';
 import { getServiceMessageContent } from './ServiceMessage';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
+import { getAudioTitle } from './Media';
 
 function getAuthor(message) {
     if (!message) return null;
@@ -286,6 +288,8 @@ function getMedia(message, openMedia) {
             return <Venue chatId={chat_id} messageId={id} venue={content.venue} openMedia={openMedia} />;
         case 'messageContact':
             return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
+        case 'messageAudio':
+            return <Audio chatId={chat_id} messageId={id} audio={content.audio} openMedia={openMedia} />;
         case 'messageDocument':
             return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
         default:
@@ -572,6 +576,64 @@ function isContentOpened(chatId, messageId) {
     }
 }
 
+function getMediaTitle(message) {
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAudio': {
+            const { audio } = content;
+            if (audio) {
+                return getAudioTitle(audio);
+            }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { audio } = web_page;
+                if (audio) {
+                    return getAudioTitle(audio);
+                }
+                break;
+            }
+        }
+    }
+
+    return getAuthor(message);
+}
+
+function showMediaDate(message) {
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageAudio': {
+            const { audio } = content;
+            if (audio) {
+                return false;
+            }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { audio } = web_page;
+                if (audio) {
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+
+    return true;
+}
+
 export {
     getAuthor,
     getTitle,
@@ -592,5 +654,7 @@ export {
     isAnimationMessage,
     getLocationId,
     getVenueId,
-    isContentOpened
+    isContentOpened,
+    getMediaTitle,
+    showMediaDate
 };
