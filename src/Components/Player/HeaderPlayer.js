@@ -55,6 +55,8 @@ class HeaderPlayer extends React.Component {
 
         this.state = {
             playbackRate: playbackRate,
+            currentTime: 0,
+            currentTimeString: getDurationString(0),
             volume: volume,
             message: message,
             playing: false,
@@ -64,7 +66,7 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { message, src, playing, currentTime, playbackRate } = this.state;
+        const { message, src, playing, currentTimeString, playbackRate } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -86,7 +88,7 @@ class HeaderPlayer extends React.Component {
             return true;
         }
 
-        if (nextState.currentTime !== currentTime) {
+        if (nextState.currentTimeString !== currentTimeString) {
             return true;
         }
 
@@ -391,7 +393,10 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
 
-        this.setState({ currentTime: player.currentTime });
+        this.setState({
+            currentTime: player.currentTime,
+            currentTimeString: getDurationString(Math.floor(player.currentTime || 0))
+        });
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaTime',
@@ -500,7 +505,7 @@ class HeaderPlayer extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { playing, message, src, currentTime, playbackRate } = this.state;
+        const { playing, message, src, currentTimeString, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
@@ -548,7 +553,7 @@ class HeaderPlayer extends React.Component {
                                     </span>
                                 )}
                             </div>
-                            <div className='header-player-meta'>{getDurationString(Math.floor(currentTime || 0))}</div>
+                            <div className='header-player-meta'>{currentTimeString}</div>
                         </div>
                         <VolumeButton />
                         {showPlaybackRate && (

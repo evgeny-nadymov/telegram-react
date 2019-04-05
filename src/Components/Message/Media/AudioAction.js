@@ -18,17 +18,17 @@ class AudioAction extends React.Component {
         super(props);
 
         const { message, time } = PlayerStore;
-        const { chatId, messageId, file } = this.props;
+        const { chatId, messageId, duration, file } = this.props;
 
         const active = message && message.chat_id === chatId && message.id === messageId;
         const currentTime = active && time ? time.currentTime : 0;
-        const duration = active && time ? time.duration : 0;
+        const audioDuration = active && time && time.duration ? time.duration : duration;
         const currentFile = FileStore.get(file.id) || file;
 
         this.state = {
             active: active,
             currentTime: currentTime,
-            duration: duration,
+            duration: audioDuration,
             timeString: this.getTimeString(currentTime, duration, active, currentFile),
 
             prevFile: null,
