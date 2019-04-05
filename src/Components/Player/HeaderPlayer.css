@@ -9,7 +9,7 @@
     min-height: 45px;
     display: flex;
     align-items: center;
-    overflow: hidden;
+    /*overflow: hidden;*/
     box-sizing: border-box;
     border-bottom: 1px solid #e9ebed;
     padding: 0 12px;

@@ -12,11 +12,14 @@ import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
-import FourKIcon from '@material-ui/icons/FourK';
+import RepeatIcon from '@material-ui/icons/Repeat';
+import RepeatOneIcon from '@material-ui/icons/RepeatOne';
+import ShuffleIcon from '@material-ui/icons/Shuffle';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
+import VolumeButton from '../Player/VolumeButton';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getVideoDurationString } from '../../Utils/Common';
@@ -35,7 +38,7 @@ import './HeaderPlayer.css';
 
 const styles = theme => ({
     iconButton: {
-        padding: 8
+        padding: 4
     },
     ...borderStyle(theme)
 });
@@ -46,13 +49,13 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { playbackRate, message } = PlayerStore;
+        const { playbackRate, volume, message } = PlayerStore;
 
-        this.startVolume = PLAYER_VOLUME_NORMAL;
         this.startTime = PLAYER_STARTTIME;
 
         this.state = {
             playbackRate: playbackRate,
+            volume: volume,
             message: message,
             playing: false,
             src: this.getMediaSrc(message)
@@ -97,6 +100,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
+        PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
 
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -108,9 +112,21 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
+        PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
 
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
+
+    onClientUpdateMediaVolume = update => {
+        const { volume } = update;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        player.volume = volume;
+
+        this.setState({ volume });
+    };
 
     onClientUpdateMediaViewerContent = update => {
         this.playingMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
@@ -388,14 +404,14 @@ class HeaderPlayer extends React.Component {
     };
 
     handleCanPlay = () => {
-        const { message, playbackRate } = this.state;
+        const { message, playbackRate, volume } = this.state;
         if (!message) return;
 
         const player = this.videoRef.current;
         if (!player) return;
 
         player.playbackRate = playbackRate;
-        player.volume = this.startVolume;
+        player.volume = volume;
         player.muted = false;
 
         //return;
@@ -509,9 +525,9 @@ class HeaderPlayer extends React.Component {
                 />
                 {message && (
                     <div className={classNames(classes.borderColor, 'header-player')}>
-                        {/*<IconButton className={classes.skipPreviousIconButton}>*/}
-                        {/*<SkipPreviousIcon />*/}
-                        {/*</IconButton>*/}
+                        <IconButton className={classes.iconButton} color='primary' disabled>
+                            <SkipPreviousIcon />
+                        </IconButton>
                         <IconButton
                             className={classes.iconButton}
                             color='primary'
@@ -519,12 +535,12 @@ class HeaderPlayer extends React.Component {
                             onClick={this.handlePlay}>
                             {playing ? <PauseIcon fontSize='small' /> : <PlayArrowIcon fontSize='small' />}
                         </IconButton>
-                        {/*<IconButton className={classes.skipNextIconButton}>*/}
-                        {/*<SkipNextIcon />*/}
-                        {/*</IconButton>*/}
+                        <IconButton className={classes.iconButton} color='primary' disabled>
+                            <SkipNextIcon />
+                        </IconButton>
                         <div className='header-player-content'>
                             <div className='header-player-title'>
-                                <span>{title}</span>
+                                <span title={title}>{title}</span>
                                 {showDate && (
                                     <span title={dateHint} style={{ paddingLeft: 8 }}>
                                         {date}
@@ -535,6 +551,7 @@ class HeaderPlayer extends React.Component {
                                 {getVideoDurationString(Math.floor(currentTime || 0))}
                             </div>
                         </div>
+                        <VolumeButton />
                         <IconButton
                             className={classes.iconButton}
                             color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
@@ -550,8 +567,6 @@ class HeaderPlayer extends React.Component {
         );
     }
 }
-
-HeaderPlayer.propTypes = {};
 
 const enhance = compose(
     withTranslation(),

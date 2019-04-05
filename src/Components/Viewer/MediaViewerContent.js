@@ -13,9 +13,9 @@ import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
-import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
+import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
@@ -192,7 +192,7 @@ class MediaViewerContent extends React.Component {
                         onCanPlay={() => {
                             const player = this.videoRef.current;
                             if (player) {
-                                player.volume = PLAYER_VOLUME_NORMAL;
+                                player.volume = PlayerStore.volume;
                             }
                         }}
                         onPause={() => {
@@ -204,6 +204,15 @@ class MediaViewerContent extends React.Component {
                             TdLibController.clientUpdate({
                                 '@type': 'clientUpdateMediaViewerEnded'
                             });
+                        }}
+                        onVolumeChange={() => {
+                            const player = this.videoRef.current;
+                            if (player) {
+                                TdLibController.clientUpdate({
+                                    '@type': 'clientUpdateMediaVolume',
+                                    volume: player.volume
+                                });
+                            }
                         }}
                     />
                     {!isPlaying &&

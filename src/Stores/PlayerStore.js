@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import Cookies from 'universal-cookie';
-import { PLAYER_PLAYBACKRATE_NORMAL } from '../Constants';
+import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -16,13 +16,20 @@ class PlayerStore extends EventEmitter {
         super();
 
         const cookies = new Cookies();
-        const playbackRate = Number(cookies.get('playbackRate')) || PLAYER_PLAYBACKRATE_NORMAL;
+        let playbackRate = cookies.get('playbackRate');
+        let volume = cookies.get('volume');
+        playbackRate =
+            playbackRate && Number(playbackRate) >= 1 && Number(playbackRate) <= 2
+                ? Number(playbackRate)
+                : PLAYER_PLAYBACKRATE_NORMAL;
+        volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
 
         this.playlist = [];
         this.message = null;
         this.time = null;
         this.videoStream = null;
         this.playbackRate = playbackRate;
+        this.volume = volume;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -60,11 +67,24 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'clientUpdateMediaPlaybackRate': {
-                this.playbackRate = update.playbackRate;
+            case 'clientUpdateMediaVolume': {
+                const { volume } = update;
+
+                this.volume = volume;
 
                 const cookies = new Cookies();
-                cookies.set('playbackRate', update.playbackRate);
+                cookies.set('volume', volume);
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaPlaybackRate': {
+                const { playbackRate } = update;
+
+                this.playbackRate = playbackRate;
+
+                const cookies = new Cookies();
+                cookies.set('playbackRate', playbackRate);
 
                 this.emit(update['@type'], update);
                 break;
