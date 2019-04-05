@@ -21,24 +21,29 @@ class AudioAction extends React.Component {
         const { chatId, messageId, file } = this.props;
 
         const active = message && message.chat_id === chatId && message.id === messageId;
+        const currentTime = active && time ? time.currentTime : 0;
+        const duration = active && time ? time.duration : 0;
+        const currentFile = FileStore.get(file.id) || file;
 
         this.state = {
             active: active,
-            currentTime: active && time ? time.currentTime : 0,
-            duration: active && time ? time.duration : 0,
+            currentTime: currentTime,
+            duration: duration,
+            timeString: this.getTimeString(currentTime, duration, active, currentFile),
+
             prevFile: null,
-            file: FileStore.get(file.id) || file
+            file: currentFile
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { active, currentTime, file, prevFile } = this.state;
+        const { active, timeString, file, prevFile } = this.state;
 
-        if (nextState.active !== active) {
+        if (nextState.timeString !== timeString) {
             return true;
         }
 
-        if (nextState.currentTime !== currentTime) {
+        if (nextState.active !== active) {
             return true;
         }
 
@@ -70,42 +75,49 @@ class AudioAction extends React.Component {
     }
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, duration } = this.props;
+        const { active, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({
                 active: false,
-                currentTime: 0
+                currentTime: 0,
+                timeString: this.getTimeString(0, duration, active, file)
             });
         }
     };
 
     onClientUpdateMediaTime = update => {
         const { chatId, messageId } = this.props;
+        const { active, file } = this.state;
+
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({
                 currentTime: update.currentTime,
-                duration: update.duration
+                duration: update.duration,
+                timeString: this.getTimeString(update.currentTime, update.duration, active, file)
             });
         }
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = this.props;
-        const { active } = this.state;
+        const { chatId, messageId, duration } = this.props;
+        const { active, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             if (active) {
             } else {
                 this.setState({
                     active: true,
-                    currentTime: 0
+                    currentTime: 0,
+                    timeString: this.getTimeString(0, duration, active, file)
                 });
             }
         } else if (active) {
             this.setState({
                 active: false,
-                currentTime: 0
+                currentTime: 0,
+                timeString: this.getTimeString(0, duration, active, file)
             });
         }
     };
@@ -119,9 +131,22 @@ class AudioAction extends React.Component {
         }
     };
 
+    getTimeString = (currentTime, duration, active, file) => {
+        const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
+        const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
+
+        const hasLocalPath = isDownloadingCompleted || file.idb_key;
+
+        const durationString = getDurationString(Math.floor(duration || 0));
+        const currentTimeString = getDurationString(Math.floor(currentTime || 0));
+
+        return active && hasLocalPath ? `${currentTimeString}/${durationString}` : `${durationString}`;
+    };
+
     render() {
-        const { duration } = this.props;
-        const { file, active, currentTime } = this.state;
+        console.log('AudioAction.render');
+
+        const { file, timeString } = this.state;
         if (!file) return null;
 
         const isDownloadingActive = file.local && file.local.is_downloading_active;
@@ -129,7 +154,7 @@ class AudioAction extends React.Component {
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
-        const downloaded = isDownloadingCompleted || file.idb_key;
+        const hasLocalPath = isDownloadingCompleted || file.idb_key;
 
         const size = getFileSize(file);
         let progressSize = null;
@@ -140,13 +165,9 @@ class AudioAction extends React.Component {
         }
         const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
 
-        const durationString = getDurationString(Math.floor(duration || 0));
-        const currentTimeString = getDurationString(Math.floor(currentTime || 0));
-        const timeString = active && downloaded ? `${currentTimeString}/${durationString}` : `${durationString}`;
-
         return (
             <div className='audio-action'>
-                {!downloaded && <span>{`${sizeString}, `}</span>}
+                {!hasLocalPath && <span>{`${sizeString}, `}</span>}
                 <span>{timeString}</span>
             </div>
         );
