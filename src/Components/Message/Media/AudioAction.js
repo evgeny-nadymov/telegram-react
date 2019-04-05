@@ -88,14 +88,14 @@ class AudioAction extends React.Component {
     };
 
     onClientUpdateMediaTime = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, duration } = this.props;
         const { active, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({
                 currentTime: update.currentTime,
-                duration: update.duration,
-                timeString: this.getTimeString(update.currentTime, update.duration, active, file)
+                duration: update.duration || duration,
+                timeString: this.getTimeString(update.currentTime, update.duration || duration, active, file)
             });
         }
     };

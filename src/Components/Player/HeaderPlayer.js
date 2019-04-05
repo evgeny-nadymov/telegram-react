@@ -419,7 +419,9 @@ class HeaderPlayer extends React.Component {
         player.volume = volume;
         player.muted = false;
 
-        //return;
+        if (hasAudio(message)) {
+            return;
+        }
 
         let stream = null;
         if ('captureStream' in player) {
