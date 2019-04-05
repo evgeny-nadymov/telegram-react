@@ -276,7 +276,7 @@ function between(item, first, last) {
     return item > first && item < last;
 }
 
-function getVideoDurationString(secondsTotal) {
+function getDurationString(secondsTotal) {
     let hours = Math.floor(secondsTotal / 3600);
     let minutes = Math.floor((secondsTotal - hours * 3600) / 60);
     let seconds = secondsTotal - hours * 3600 - minutes * 60;
@@ -306,5 +306,5 @@ export {
     arrayBufferToBase64,
     isAuthorizationReady,
     between,
-    getVideoDurationString
+    getDurationString
 };

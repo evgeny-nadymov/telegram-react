@@ -18,8 +18,6 @@ import { borderStyle } from '../Theme';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './VolumeButton.css';
-import FileStore from '../../Stores/FileStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
     iconButton: {
@@ -28,7 +26,8 @@ const styles = theme => ({
     root: {
         display: 'flex',
         height: 100,
-        padding: '13px 0'
+        padding: '13px 0',
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
     },
     slider: {
         padding: '0 13px'
@@ -193,7 +192,6 @@ class VolumeButton extends React.Component {
                         className={classNames(classes.borderColor, classes.root)}
                         style={{
                             marginTop: 8,
-                            background: 'white',
                             borderWidth: 1,
                             borderStyle: 'solid'
                         }}>

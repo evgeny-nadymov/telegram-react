@@ -12,14 +12,12 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import DocumentTile from '../../Tile/DocumentTile';
-import DocumentAction from './DocumentAction';
+import AudioAction from './AudioAction';
 import FileProgress from '../../Viewer/FileProgress';
 import { getExtension, getSrc } from '../../../Utils/File';
 import { getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
-import FileStore from '../../../Stores/FileStore';
-import MessageStore from '../../../Stores/MessageStore';
 import './Audio.css';
 
 class Audio extends React.Component {
@@ -41,6 +39,28 @@ class Audio extends React.Component {
 
         this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
         this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { active, playing, currentTime, duration } = this.state;
+
+        if (nextState.active !== active) {
+            return true;
+        }
+
+        if (nextState.playing !== playing) {
+            return true;
+        }
+
+        if (nextState.currentTime !== currentTime) {
+            return true;
+        }
+
+        if (nextState.duration !== duration) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
@@ -70,7 +90,7 @@ class Audio extends React.Component {
     };
 
     onClientUpdateMediaPlay = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, playing } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({ playing: true });
@@ -108,11 +128,11 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { audio, openMedia } = this.props;
+        const { chatId, messageId, audio, openMedia } = this.props;
         const { playing } = this.state;
         if (!audio) return null;
 
-        const { album_cover_thumbnail } = audio;
+        const { album_cover_thumbnail, duration } = audio;
         const file = audio.audio;
 
         const title = getAudioTitle(audio);
@@ -138,7 +158,7 @@ class Audio extends React.Component {
                             {title}
                         </a>
                     </div>
-                    <DocumentAction file={file} openMedia={openMedia} />
+                    <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
                 </div>
             </div>
         );

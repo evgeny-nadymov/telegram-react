@@ -15,7 +15,7 @@ import FileProgress from '../../Viewer/FileProgress';
 import MediaStatus from './MediaStatus';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
-import { getVideoDurationString } from '../../../Utils/Common';
+import { getDurationString } from '../../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
 import FileStore from '../../../Stores/FileStore';
@@ -99,7 +99,7 @@ class VideoNote extends React.Component {
 
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
-        PlayerStore.on('clientUpdateMediaTimeUpdate', this.onClientUpdateMediaTimeUpdate);
+        PlayerStore.on('clientUpdateMediaTime', this.onClientUpdateMediaTime);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
@@ -118,7 +118,7 @@ class VideoNote extends React.Component {
 
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
-        PlayerStore.removeListener('clientUpdateMediaTimeUpdate', this.onClientUpdateMediaTimeUpdate);
+        PlayerStore.removeListener('clientUpdateMediaTime', this.onClientUpdateMediaTime);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
@@ -178,7 +178,7 @@ class VideoNote extends React.Component {
         }
     };
 
-    onClientUpdateMediaTimeUpdate = update => {
+    onClientUpdateMediaTime = update => {
         const { chatId, messageId } = this.props;
         if (chatId === update.chatId && messageId === update.messageId) {
             const player = this.videoRef.current;
@@ -340,7 +340,7 @@ class VideoNote extends React.Component {
                                 />
                             </div>
                             <div className='animation-meta'>
-                                {getVideoDurationString(active ? Math.floor(currentTime) : duration)}
+                                {getDurationString(active ? Math.floor(currentTime) : duration)}
                                 <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
                             </div>
                             <div className='video-note-muted'>
@@ -359,7 +359,7 @@ class VideoNote extends React.Component {
                             />
                         </div>
                         <div className='animation-meta'>
-                            {getVideoDurationString(duration) + ' ' + getFileSize(video)}
+                            {getDurationString(duration) + ' ' + getFileSize(video)}
                             <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
                         </div>
                         <div className='video-note-muted'>

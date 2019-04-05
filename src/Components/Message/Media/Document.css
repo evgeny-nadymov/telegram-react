@@ -67,14 +67,6 @@
     text-overflow: ellipsis;
 }
 
-.document-size {
-    color: #70777b;
-    font-size: 14px;
-}
-
-.document-action {
-}
-
 @keyframes spin {
     100% {
         transform: rotate(360deg);

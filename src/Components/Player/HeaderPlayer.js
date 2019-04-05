@@ -22,8 +22,8 @@ import IconButton from '@material-ui/core/IconButton';
 import VolumeButton from '../Player/VolumeButton';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
-import { getVideoDurationString } from '../../Utils/Common';
-import { getDate, getDateHint, getMediaTitle, showMediaDate } from '../../Utils/Message';
+import { getDurationString } from '../../Utils/Common';
+import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
 import {
     PLAYER_PLAYBACKRATE_FAST,
     PLAYER_PLAYBACKRATE_NORMAL,
@@ -394,7 +394,7 @@ class HeaderPlayer extends React.Component {
         this.setState({ currentTime: player.currentTime });
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaTimeUpdate',
+            '@type': 'clientUpdateMediaTime',
             chatId: message.chat_id,
             messageId: message.id,
             duration: player.duration,
@@ -410,7 +410,7 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
 
-        player.playbackRate = playbackRate;
+        player.playbackRate = hasAudio(message) ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate;
         player.volume = volume;
         player.muted = false;
 
@@ -505,7 +505,8 @@ class HeaderPlayer extends React.Component {
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
-        const showDate = showMediaDate(message);
+        const showDate = !hasAudio(message);
+        const showPlaybackRate = !hasAudio(message);
 
         return (
             <>
@@ -547,17 +548,17 @@ class HeaderPlayer extends React.Component {
                                     </span>
                                 )}
                             </div>
-                            <div className='header-player-meta'>
-                                {getVideoDurationString(Math.floor(currentTime || 0))}
-                            </div>
+                            <div className='header-player-meta'>{getDurationString(Math.floor(currentTime || 0))}</div>
                         </div>
                         <VolumeButton />
-                        <IconButton
-                            className={classes.iconButton}
-                            color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
-                            onClick={this.handlePlaybackRate}>
-                            <div className='header-player-playback-icon'>2X</div>
-                        </IconButton>
+                        {showPlaybackRate && (
+                            <IconButton
+                                className={classes.iconButton}
+                                color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
+                                onClick={this.handlePlaybackRate}>
+                                <div className='header-player-playback-icon'>2X</div>
+                            </IconButton>
+                        )}
                         <IconButton className={classes.iconButton} onClick={this.handleClose}>
                             <CloseIcon fontSize='small' />
                         </IconButton>

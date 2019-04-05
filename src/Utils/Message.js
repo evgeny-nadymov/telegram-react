@@ -605,7 +605,7 @@ function getMediaTitle(message) {
     return getAuthor(message);
 }
 
-function showMediaDate(message) {
+function hasAudio(message) {
     if (!message) return false;
 
     const { content } = message;
@@ -615,7 +615,7 @@ function showMediaDate(message) {
         case 'messageAudio': {
             const { audio } = content;
             if (audio) {
-                return false;
+                return true;
             }
             break;
         }
@@ -624,14 +624,14 @@ function showMediaDate(message) {
             if (web_page) {
                 const { audio } = web_page;
                 if (audio) {
-                    return false;
+                    return true;
                 }
                 break;
             }
         }
     }
 
-    return true;
+    return false;
 }
 
 export {
@@ -656,5 +656,5 @@ export {
     getVenueId,
     isContentOpened,
     getMediaTitle,
-    showMediaDate
+    hasAudio
 };

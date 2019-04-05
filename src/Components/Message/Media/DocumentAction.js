@@ -7,7 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withTranslation } from 'react-i18next';
 import { getDownloadedSize, getUploadedSize, getFileSize } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './DocumentAction.css';
@@ -57,11 +56,13 @@ class DocumentAction extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextState.file !== this.state.file) {
+        const { file, prevFile } = this.state;
+
+        if (nextState.file !== file) {
             return true;
         }
 
-        if (nextState.prevFile !== this.state.prevFile) {
+        if (nextState.prevFile !== prevFile) {
             return true;
         }
 
@@ -69,16 +70,13 @@ class DocumentAction extends React.Component {
     }
 
     render() {
-        const { t, openMedia } = this.props;
         const { file } = this.state;
         if (!file) return null;
 
-        let isDownloadingActive = file.local && file.local.is_downloading_active;
-        let isUploadingActive = file.remote && file.remote.is_uploading_active;
-        let isDownloadingCompleted = file.local && file.local.is_downloading_completed;
-        let isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
+        const isDownloadingActive = file.local && file.local.is_downloading_active;
+        const isUploadingActive = file.remote && file.remote.is_uploading_active;
 
-        let size = getFileSize(file);
+        const size = getFileSize(file);
         let progressSize = null;
         if (isDownloadingActive) {
             progressSize = getDownloadedSize(file);
@@ -86,26 +84,18 @@ class DocumentAction extends React.Component {
             progressSize = getUploadedSize(file);
         }
 
-        let sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
-        let action =
-            isDownloadingActive || isUploadingActive
-                ? t('Cancel')
-                : isDownloadingCompleted || file.idb_key
-                ? t('Save')
-                : '';
+        const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
 
         return (
             <div className='document-action'>
-                <span className='document-size'>{`${sizeString} `}</span>
-                {action && <a onClick={openMedia}>{action}</a>}
+                <span>{sizeString}</span>
             </div>
         );
     }
 }
 
 DocumentAction.propTypes = {
-    file: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    file: PropTypes.object.isRequired
 };
 
-export default withTranslation()(DocumentAction);
+export default DocumentAction;

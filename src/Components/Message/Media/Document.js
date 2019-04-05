@@ -49,7 +49,7 @@ class Document extends React.Component {
                             {file_name}
                         </a>
                     </div>
-                    <DocumentAction file={file} openMedia={openMedia} />
+                    <DocumentAction file={file} />
                 </div>
             </div>
         );
