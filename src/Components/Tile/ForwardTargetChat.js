@@ -36,6 +36,8 @@ class ForwardTargetChat extends React.Component {
                         <ChatTileControl chatId={chatId} showSavedMessages />
                     </div>
                     {selected && <div className={classNames('forward-target-chat-selection', classes.border)} />}
+                    <div className={classNames('forward-target-chat-mark', { [classes.border]: selected })} />
+                    <div className='forward-target-chat-mark-icon' />
                 </div>
                 <div className='forward-target-chat-title'>{shortTitle}</div>
             </div>

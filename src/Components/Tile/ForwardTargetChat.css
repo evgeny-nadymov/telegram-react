@@ -39,6 +39,45 @@
     z-index: 2;
 }
 
+.forward-target-chat-mark {
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: transparent solid 0;
+    transition: border 0.3s;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.forward-target-chat-mark-icon {
+    pointer-events: none;
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: 10px;
+    height: 10px;
+    background-image: url(../../Assets/Icons/check.svg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    transform: scale(0.1);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+    z-index: 2;
+}
+
+.forward-target-chat-selected .forward-target-chat-mark-icon {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.forward-target-chat-selected .forward-target-chat-mark {
+    border-width: 10px;
+}
+
 .forward-target-chat-selected {
 }
 
