@@ -634,6 +634,54 @@ function hasAudio(message) {
     return false;
 }
 
+function getSearchMessagesFilter(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAudio': {
+            const { audio } = content;
+            if (audio) {
+                return {
+                    '@type': 'searchMessagesFilterAudio'
+                };
+            }
+            break;
+        }
+        case 'messageVideoNote': {
+            const { audio } = content;
+            if (audio) {
+                return {
+                    '@type': 'searchMessagesFilterVideoNote'
+                };
+            }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { audio, video_note } = web_page;
+                if (audio) {
+                    return {
+                        '@type': 'searchMessagesFilterAudio'
+                    };
+                }
+                if (video_note) {
+                    return {
+                        '@type': 'searchMessagesFilterVideoNote'
+                    };
+                }
+                break;
+            }
+        }
+    }
+
+    return null;
+}
+
 export {
     getAuthor,
     getTitle,
@@ -656,5 +704,6 @@ export {
     getVenueId,
     isContentOpened,
     getMediaTitle,
-    hasAudio
+    hasAudio,
+    getSearchMessagesFilter
 };

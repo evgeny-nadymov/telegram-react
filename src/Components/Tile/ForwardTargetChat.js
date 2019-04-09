@@ -16,6 +16,14 @@ import './ForwardTargetChat.css';
 const styles = theme => ({
     border: {
         borderColor: theme.palette.primary.main
+    },
+    markSelected: {
+        boxShadow: 'inset 0 0 0 10px ' + theme.palette.primary.main,
+        border: '2px solid ' + theme.palette.background.paper
+    },
+    markUnselected: {
+        boxShadow: 'inset 0 0 0 0 ' + theme.palette.primary.main,
+        border: '2px solid transparent'
     }
 });
 
@@ -25,18 +33,21 @@ class ForwardTargetChat extends React.Component {
 
         const shortTitle = getChatShortTitle(chatId, true);
 
-        const forwardTargetChatClassName = classNames('forward-target-chat', {
-            'forward-target-chat-selected': selected
-        });
-
         return (
-            <div className={forwardTargetChatClassName} onClick={onSelect}>
+            <div
+                className={classNames('forward-target-chat', { 'forward-target-chat-selected': selected })}
+                onClick={onSelect}>
                 <div className='forward-target-chat-tile'>
                     <div className='forward-target-chat-tile-wrapper'>
                         <ChatTileControl chatId={chatId} showSavedMessages />
                     </div>
                     {selected && <div className={classNames('forward-target-chat-selection', classes.border)} />}
-                    <div className={classNames('forward-target-chat-mark', { [classes.border]: selected })} />
+                    <div
+                        className={classNames(
+                            'forward-target-chat-mark',
+                            selected ? classes.markSelected : classes.markUnselected
+                        )}
+                    />
                     <div className='forward-target-chat-mark-icon' />
                 </div>
                 <div className='forward-target-chat-title'>{shortTitle}</div>

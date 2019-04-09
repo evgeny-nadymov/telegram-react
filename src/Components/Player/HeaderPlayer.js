@@ -49,7 +49,7 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { playbackRate, volume, message } = PlayerStore;
+        const { playbackRate, volume, message, playlist } = PlayerStore;
 
         this.startTime = PLAYER_STARTTIME;
 
@@ -59,6 +59,7 @@ class HeaderPlayer extends React.Component {
             currentTimeString: getDurationString(0),
             volume: volume,
             message: message,
+            playlist: playlist,
             playing: false,
             src: this.getMediaSrc(message)
         };
@@ -66,7 +67,7 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { message, src, playing, currentTimeString, playbackRate } = this.state;
+        const { message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -77,6 +78,10 @@ class HeaderPlayer extends React.Component {
         }
 
         if (nextState.message !== message) {
+            return true;
+        }
+
+        if (nextState.playlist !== playlist) {
             return true;
         }
 
@@ -99,6 +104,7 @@ class HeaderPlayer extends React.Component {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         FileStore.on('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.on('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
@@ -111,6 +117,7 @@ class HeaderPlayer extends React.Component {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
         FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
@@ -261,6 +268,17 @@ class HeaderPlayer extends React.Component {
         }
     };
 
+    onClientUpdateMediaPlaylist = update => {
+        const { playlist } = update;
+        const { chatId, messageId } = playlist;
+        const { message } = this.state;
+
+        if (message && message.chat_id === chatId && message.id === messageId) {
+            console.log('clientUpdateMediaPlaylist set', playlist);
+            this.setState({ playlist: playlist });
+        }
+    };
+
     onClientUpdateMediaActive = update => {
         const { chatId, messageId } = update;
         const { message, src } = this.state;
@@ -279,9 +297,11 @@ class HeaderPlayer extends React.Component {
         } else {
             const src = this.getMediaSrc(PlayerStore.message);
             const playing = Boolean(src);
+            const playlist = PlayerStore.playlist;
             this.setState(
                 {
                     message: PlayerStore.message,
+                    playlist: PlayerStore.playlist,
                     playing: playing,
                     src: src
                 },
@@ -505,15 +525,41 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    hasPrev = (message, playlist) => {
+        if (!message) return false;
+        if (!playlist || !playlist.messages.length) return false;
+
+        const { chat_id, id } = message;
+
+        const index = playlist.messages.findIndex(x => x.chat_id === chat_id && x.id === id);
+        if (index === -1) return false;
+
+        return index + 1 < playlist.messages.length;
+    };
+
+    hasNext = (message, playlist) => {
+        if (!message) return false;
+        if (!playlist || !playlist.messages.length) return false;
+
+        const { chat_id, id } = message;
+
+        const index = playlist.messages.findIndex(x => x.chat_id === chat_id && x.id === id);
+        if (index === -1) return false;
+
+        return index - 1 >= 0;
+    };
+
     render() {
         const { classes } = this.props;
-        const { playing, message, src, currentTimeString, playbackRate } = this.state;
+        const { playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
         const showDate = !hasAudio(message);
         const showPlaybackRate = !hasAudio(message);
+        const hasPrev = this.hasPrev(message, playlist);
+        const hasNext = this.hasNext(message, playlist);
 
         return (
             <>
@@ -533,7 +579,7 @@ class HeaderPlayer extends React.Component {
                 />
                 {message && (
                     <div className={classNames(classes.borderColor, 'header-player')}>
-                        <IconButton className={classes.iconButton} color='primary' disabled>
+                        <IconButton disabled={!hasPrev} className={classes.iconButton} color='primary'>
                             <SkipPreviousIcon />
                         </IconButton>
                         <IconButton
@@ -543,7 +589,7 @@ class HeaderPlayer extends React.Component {
                             onClick={this.handlePlay}>
                             {playing ? <PauseIcon fontSize='small' /> : <PlayArrowIcon fontSize='small' />}
                         </IconButton>
-                        <IconButton className={classes.iconButton} color='primary' disabled>
+                        <IconButton disabled={!hasNext} className={classes.iconButton} color='primary'>
                             <SkipNextIcon />
                         </IconButton>
                         <div className='header-player-content'>

@@ -82,7 +82,7 @@ class AudioAction extends React.Component {
             this.setState({
                 active: false,
                 currentTime: 0,
-                timeString: this.getTimeString(0, duration, active, file)
+                timeString: this.getTimeString(0, duration, false, file)
             });
         }
     };
@@ -144,8 +144,6 @@ class AudioAction extends React.Component {
     };
 
     render() {
-        console.log('AudioAction.render');
-
         const { file, timeString } = this.state;
         if (!file) return null;
 

@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import Cookies from 'universal-cookie';
+import { getSearchMessagesFilter } from '../Utils/Message';
 import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -24,7 +25,7 @@ class PlayerStore extends EventEmitter {
                 : PLAYER_PLAYBACKRATE_NORMAL;
         volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
 
-        this.playlist = [];
+        this.playlist = null;
         this.message = null;
         this.time = null;
         this.videoStream = null;
@@ -60,9 +61,9 @@ class PlayerStore extends EventEmitter {
                 const message = MessageStore.get(chatId, messageId);
                 if (!message) return;
 
-                this.message = message;
+                this.getPlaylist(chatId, messageId);
 
-                this.getPlaylist();
+                this.message = message;
 
                 this.emit(update['@type'], update);
                 break;
@@ -151,12 +152,48 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaPlaylist': {
+                this.emit(update['@type'], update);
+                break;
+            }
             default:
                 break;
         }
     };
 
-    getPlaylist = () => {};
+    getPlaylist = async (chatId, messageId) => {
+        if (this.message && this.message.chat_id === chatId && this.message.id === messageId) {
+            return;
+        }
+
+        const filter = getSearchMessagesFilter(chatId, messageId);
+        if (!filter) return;
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: messageId,
+            offset: -50,
+            limit: 100,
+            filter: filter
+        });
+
+        const { total_count, messages } = result;
+
+        this.playlist = {
+            chatId: chatId,
+            messageId: messageId,
+            totalCount: total_count,
+            messages: messages
+        };
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaPlaylist',
+            playlist: this.playlist
+        });
+    };
 }
 
 const store = new PlayerStore();
