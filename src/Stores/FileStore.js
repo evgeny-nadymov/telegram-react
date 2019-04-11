@@ -746,6 +746,7 @@ class FileStore extends EventEmitter {
     };
 
     updateAudioBlob = (chatId, messageId, fileId) => {
+        console.log('clientUpdateAudioBlob');
         this.emit('clientUpdateAudioBlob', {
             chatId: chatId,
             messageId: messageId,

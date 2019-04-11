@@ -375,7 +375,7 @@ function getContent(message, t = key => key) {
             return t('AttachGif') + caption;
         }
         case 'messageAudio': {
-            return t('AttachAudio') + caption;
+            return t('AttachMusic') + caption;
         }
         case 'messageBasicGroupChatCreate': {
             return getServiceMessageContent(message);

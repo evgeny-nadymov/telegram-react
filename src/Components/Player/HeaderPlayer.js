@@ -158,6 +158,30 @@ class HeaderPlayer extends React.Component {
         player.pause();
     };
 
+    startPlayingFile = (file, message) => {
+        const { chat_id, id } = message;
+
+        this.setState(
+            {
+                src: this.getMediaSrc(message)
+            },
+            () => {
+                const player = this.videoRef.current;
+                if (player) {
+                    if (this.playingMediaViewer) {
+                        player.pause();
+
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateMediaPause',
+                            chatId: chat_id,
+                            messageId: id
+                        });
+                    }
+                }
+            }
+        );
+    };
+
     onClientUpdateVideoNoteBlob = update => {
         const { chatId, messageId } = update;
         const { message, playbackRate } = this.state;
@@ -177,40 +201,14 @@ class HeaderPlayer extends React.Component {
                     if (audio) {
                         const file = audio.audio;
                         if (file) {
-                            this.setState(
-                                {
-                                    src: this.getMediaSrc(message)
-                                },
-                                () => {
-                                    const player = this.videoRef.current;
-                                    if (player) {
-                                        //player.currentTime = this.startTime;
-                                        if (this.playingMediaViewer) {
-                                            player.pause();
-                                        }
-                                    }
-                                }
-                            );
+                            this.startPlayingFile(file, message);
                         }
                     }
 
                     if (video_note) {
                         const { video } = video_note;
                         if (video) {
-                            this.setState(
-                                {
-                                    src: this.getMediaSrc(message)
-                                },
-                                () => {
-                                    const player = this.videoRef.current;
-                                    if (player) {
-                                        //player.currentTime = this.startTime;
-                                        if (this.playingMediaViewer) {
-                                            player.pause();
-                                        }
-                                    }
-                                }
-                            );
+                            this.startPlayingFile(video, message);
                         }
                     }
                 }
@@ -222,20 +220,7 @@ class HeaderPlayer extends React.Component {
                 if (audio) {
                     const file = audio.audio;
                     if (file) {
-                        this.setState(
-                            {
-                                src: this.getMediaSrc(message)
-                            },
-                            () => {
-                                const player = this.videoRef.current;
-                                if (player) {
-                                    //player.currentTime = this.startTime;
-                                    if (this.playingMediaViewer) {
-                                        player.pause();
-                                    }
-                                }
-                            }
-                        );
+                        this.startPlayingFile(file, message);
                     }
                 }
 
@@ -246,20 +231,7 @@ class HeaderPlayer extends React.Component {
                 if (video_note) {
                     const { video } = video_note;
                     if (video) {
-                        this.setState(
-                            {
-                                src: this.getMediaSrc(message)
-                            },
-                            () => {
-                                const player = this.videoRef.current;
-                                if (player) {
-                                    //player.currentTime = this.startTime;
-                                    if (this.playingMediaViewer) {
-                                        player.pause();
-                                    }
-                                }
-                            }
-                        );
+                        this.startPlayingFile(video, message);
                     }
                 }
 
