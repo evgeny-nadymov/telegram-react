@@ -20,11 +20,16 @@ import Document from '../Components/Message/Media/Document';
 import Audio from '../Components/Message/Media/Audio';
 import { getUserFullName } from './User';
 import { getServiceMessageContent } from './ServiceMessage';
+import { getAudioTitle } from './Media';
+import { download, saveOrDownload } from './File';
+import { getPhotoSize } from './Common';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
-import { getAudioTitle } from './Media';
+import FileStore from '../Stores/FileStore';
+import ApplicationStore from '../Stores/ApplicationStore';
+import TdLibController from '../Controllers/TdLibController';
 
 function getAuthor(message) {
     if (!message) return null;
@@ -682,6 +687,431 @@ function getSearchMessagesFilter(chatId, messageId) {
     return null;
 }
 
+function openMedia(chatId, messageId, onSelectUser) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageContact': {
+            const { contact } = content;
+            if (contact) {
+                if (onSelectUser) onSelectUser(contact.user_id);
+
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+            }
+            break;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (document) {
+                let file = document.document;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (file.local.is_downloading_active) {
+                        FileStore.cancelGetRemoteFile(file.id, message);
+                    } else if (file.remote.is_uploading_active) {
+                        FileStore.cancelUploadFile(file.id, message);
+                    } else {
+                        saveOrDownload(file, document.file_name, message, () => {
+                            TdLibController.send({
+                                '@type': 'openMessageContent',
+                                chat_id: message.chat_id,
+                                message_id: message.id
+                            });
+                        });
+                    }
+                }
+            }
+
+            break;
+        }
+        case 'messageAudio': {
+            const { audio } = content;
+            if (audio) {
+                let file = audio.audio;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (file.local.is_downloading_active) {
+                        FileStore.cancelGetRemoteFile(file.id, message);
+                        return;
+                    } else if (file.remote.is_uploading_active) {
+                        FileStore.cancelUploadFile(file.id, message);
+                        return;
+                    } else {
+                        download(file, message);
+                    }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // set active video note
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateMediaActive',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
+            }
+
+            break;
+        }
+        case 'messagePhoto': {
+            const { photo } = message.content;
+            if (photo) {
+                const photoSize = getPhotoSize(photo.sizes);
+                if (photoSize) {
+                    let file = photoSize.photo;
+                    if (file) {
+                        file = FileStore.get(file.id);
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+                }
+
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+
+                // open media viewer
+                ApplicationStore.setMediaViewerContent({
+                    chatId: chatId,
+                    messageId: messageId
+                });
+            }
+
+            break;
+        }
+        case 'messageGame': {
+            const { game } = message.content;
+            if (game) {
+                const { animation } = game;
+                if (animation) {
+                    let file = animation.animation;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+                }
+
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+
+                // set active animation
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateActiveAnimation',
+                    chatId: message.chat_id,
+                    messageId: message.id
+                });
+            }
+
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = message.content;
+            if (web_page) {
+                const { photo, animation, document, audio, video_note } = web_page;
+
+                if (audio) {
+                    let file = audio.audio;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file.local.is_downloading_active) {
+                            FileStore.cancelGetRemoteFile(file.id, message);
+                            return;
+                        } else if (file.remote.is_uploading_active) {
+                            FileStore.cancelUploadFile(file.id, message);
+                            return;
+                        } else {
+                            download(file, audio.file_name, message);
+                        }
+
+                        TdLibController.send({
+                            '@type': 'openMessageContent',
+                            chat_id: message.chat_id,
+                            message_id: message.id
+                        });
+
+                        // set active video note
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateMediaActive',
+                            chatId: message.chat_id,
+                            messageId: message.id
+                        });
+                    }
+                }
+
+                if (video_note) {
+                    let file = video_note.video;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // set active video note
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateMediaActive',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
+
+                if (document) {
+                    let file = document.document;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file.local.is_downloading_active) {
+                            FileStore.cancelGetRemoteFile(file.id, message);
+                        } else if (file.remote.is_uploading_active) {
+                            FileStore.cancelUploadFile(file.id, message);
+                        } else {
+                            saveOrDownload(file, document.file_name, message, () => {
+                                TdLibController.send({
+                                    '@type': 'openMessageContent',
+                                    chat_id: message.chat_id,
+                                    message_id: message.id
+                                });
+                            });
+                        }
+                    }
+                }
+
+                if (animation) {
+                    let file = animation.animation;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file) {
+                            if (file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateActiveAnimation',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // open media viewer
+                    ApplicationStore.setMediaViewerContent({
+                        chatId: chatId,
+                        messageId: messageId
+                    });
+                }
+
+                if (photo) {
+                    const photoSize = getPhotoSize(photo.sizes);
+                    if (photoSize) {
+                        let file = photoSize.photo;
+                        if (file) {
+                            file = FileStore.get(file.id) || file;
+                            if (file) {
+                                if (file.local.is_downloading_active) {
+                                    FileStore.cancelGetRemoteFile(file.id, message);
+                                    return;
+                                } else if (file.remote.is_uploading_active) {
+                                    FileStore.cancelUploadFile(file.id, message);
+                                    return;
+                                }
+                                // else {
+                                //     saveOrDownload(file, document.file_name, message);
+                                // }
+                            }
+                        }
+                    }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // open media viewer
+                    ApplicationStore.setMediaViewerContent({
+                        chatId: chatId,
+                        messageId: messageId
+                    });
+                }
+            }
+
+            break;
+        }
+        case 'messageVideoNote': {
+            const { video_note } = message.content;
+            if (video_note) {
+                let file = video_note.video;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (file) {
+                        if (file.local.is_downloading_active) {
+                            FileStore.cancelGetRemoteFile(file.id, message);
+                            return;
+                        } else if (file.remote.is_uploading_active) {
+                            FileStore.cancelUploadFile(file.id, message);
+                            return;
+                        } else {
+                            download(file, message);
+                        }
+                    }
+                }
+
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+
+                // set active video note
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateMediaActive',
+                    chatId: message.chat_id,
+                    messageId: message.id
+                });
+            }
+
+            break;
+        }
+        case 'messageAnimation': {
+            const { animation } = message.content;
+            if (animation) {
+                let file = animation.animation;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (file) {
+                        if (file.local.is_downloading_active) {
+                            FileStore.cancelGetRemoteFile(file.id, message);
+                            return;
+                        } else if (file.remote.is_uploading_active) {
+                            FileStore.cancelUploadFile(file.id, message);
+                            return;
+                        } else {
+                            download(file, message);
+                        }
+                    }
+                }
+            }
+
+            // set active animation
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateActiveAnimation',
+                chatId: message.chat_id,
+                messageId: message.id
+            });
+
+            TdLibController.send({
+                '@type': 'openMessageContent',
+                chat_id: message.chat_id,
+                message_id: message.id
+            });
+
+            // open media viewer
+            ApplicationStore.setMediaViewerContent({
+                chatId: chatId,
+                messageId: messageId
+            });
+
+            break;
+        }
+        case 'messageVideo': {
+            const { video } = message.content;
+            if (video) {
+                let file = video.video;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (file) {
+                        if (file.local.is_downloading_active) {
+                            FileStore.cancelGetRemoteFile(file.id, message);
+                            return;
+                        } else if (file.remote.is_uploading_active) {
+                            FileStore.cancelUploadFile(file.id, message);
+                            return;
+                        }
+                        // else {
+                        //     saveOrDownload(file, document.file_name, message);
+                        // }
+                    }
+                }
+
+                TdLibController.send({
+                    '@type': 'openMessageContent',
+                    chat_id: message.chat_id,
+                    message_id: message.id
+                });
+
+                // open media viewer
+                ApplicationStore.setMediaViewerContent({
+                    chatId: chatId,
+                    messageId: messageId
+                });
+            }
+
+            break;
+        }
+    }
+}
+
 export {
     getAuthor,
     getTitle,
@@ -705,5 +1135,6 @@ export {
     isContentOpened,
     getMediaTitle,
     hasAudio,
-    getSearchMessagesFilter
+    getSearchMessagesFilter,
+    openMedia
 };

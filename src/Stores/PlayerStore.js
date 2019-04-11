@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import Cookies from 'universal-cookie';
-import { getSearchMessagesFilter } from '../Utils/Message';
+import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
 import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -108,18 +108,26 @@ class PlayerStore extends EventEmitter {
             }
             case 'clientUpdateMediaNext': {
                 this.emit(update['@type'], update);
+
+                this.moveToNextMedia();
                 break;
             }
             case 'clientUpdateMediaPrev': {
                 this.emit(update['@type'], update);
+
+                this.moveToPrevMedia();
                 break;
             }
             case 'clientUpdateMediaEnd': {
-                this.message = null;
-                this.time = null;
-                this.videoStream = null;
-
                 this.emit(update['@type'], update);
+
+                if (this.moveToNextMedia()) {
+                } else {
+                    this.playlist = null;
+                    this.message = null;
+                    this.time = null;
+                    this.videoStream = null;
+                }
                 break;
             }
             case 'clientUpdateMediaTime': {
@@ -159,6 +167,41 @@ class PlayerStore extends EventEmitter {
             default:
                 break;
         }
+    };
+
+    moveToPrevMedia = () => {
+        if (!this.playlist) return;
+
+        const { chatId, messageId, messages } = this.playlist;
+        if (!messages) return;
+
+        const index = messages.findIndex(x => x.chat_id === chatId && x.id === messageId);
+        if (index === -1) return;
+
+        if (index + 1 < messages.length) {
+            const message = messages[index + 1];
+
+            openMedia(message.chat_id, message.id, null);
+        }
+    };
+
+    moveToNextMedia = () => {
+        if (!this.playlist) return false;
+
+        const { chatId, messageId, messages } = this.playlist;
+        if (!messages) return false;
+
+        const index = messages.findIndex(x => x.chat_id === chatId && x.id === messageId);
+        if (index === -1) return false;
+
+        if (index - 1 >= 0) {
+            const message = messages[index - 1];
+
+            openMedia(message.chat_id, message.id, null);
+            return true;
+        }
+
+        return false;
     };
 
     getPlaylist = async (chatId, messageId) => {
