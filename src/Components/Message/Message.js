@@ -27,6 +27,7 @@ import {
     getSenderUserId,
     getWebPage
 } from '../../Utils/Message';
+import { canSendMessages } from '../../Utils/Chat';
 import { getPhotoSize } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -640,7 +641,28 @@ class Message extends Component {
 
         const { chatId, messageId } = this.props;
 
-        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
+        const message = MessageStore.get(chatId, messageId);
+
+        const canBeReplied = canSendMessages(chatId);
+        if (canBeReplied) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateReply',
+                chatId: chatId,
+                messageId: messageId
+            });
+            return;
+        }
+
+        const canBeForwarded = message && message.can_be_forwarded;
+        if (canBeForwarded) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateForwardMessages',
+                info: {
+                    chatId: chatId,
+                    messageIds: [messageId]
+                }
+            });
+        }
     };
 
     render() {
