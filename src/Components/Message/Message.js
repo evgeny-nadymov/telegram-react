@@ -634,6 +634,15 @@ class Message extends Component {
         });
     };
 
+    handleDateClick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const { chatId, messageId } = this.props;
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
+    };
+
     render() {
         const { classes, chatId, messageId, showUnreadSeparator, onSelectUser, onSelectChat } = this.props;
         const { selected } = this.state;
@@ -698,14 +707,14 @@ class Message extends Component {
                                         <span className='message-views'>
                                             &nbsp;
                                             {message.views}
-                                            &nbsp;&nbsp;
+                                            &nbsp; &nbsp;
                                         </span>
                                     </>
                                 )}
-                                {message.edit_date > 0 && <span>edited </span>}
-                                <span className='message-date' title={dateHint}>
-                                    {date}
-                                </span>
+                                {message.edit_date > 0 && <span>edited&nbsp;</span>}
+                                <a className='message-date' onClick={this.handleDateClick}>
+                                    <span title={dateHint}>{date}</span>
+                                </a>
                             </div>
                         </div>
                         {reply && <Reply chatId={message.chat_id} messageId={reply} />}
