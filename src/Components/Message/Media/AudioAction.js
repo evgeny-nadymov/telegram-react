@@ -110,14 +110,14 @@ class AudioAction extends React.Component {
                 this.setState({
                     active: true,
                     currentTime: 0,
-                    timeString: this.getTimeString(0, duration, active, file)
+                    timeString: this.getTimeString(0, duration, true, file)
                 });
             }
         } else if (active) {
             this.setState({
                 active: false,
                 currentTime: 0,
-                timeString: this.getTimeString(0, duration, active, file)
+                timeString: this.getTimeString(0, duration, false, file)
             });
         }
     };
