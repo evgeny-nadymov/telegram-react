@@ -105,11 +105,14 @@ class MessagesList extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId } = this.props;
-        console.log(
-            `MessagesList.componentDidUpdate chat_id=${chatId} message_id=${messageId} prev_chat_id=${
-                prevProps.chatId
-            } prev_message_id=${prevProps.messageId}`
-        );
+
+        // const list = this.listRef.current;
+        // console.log(
+        //     `MessagesList.componentDidUpdate chat_id=${chatId} \\
+        //     message_id=${messageId} prev_chat_id=${prevProps.chatId} prev_message_id=${prevProps.messageId} \\
+        //     list.scrollTop=${list.scrollTop} list.scrollHeight=${list.scrollHeight} \\
+        //     list.offsetHeight=${list.offsetHeight}`
+        // );
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
@@ -170,6 +173,7 @@ class MessagesList extends React.Component {
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.on('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
@@ -183,6 +187,7 @@ class MessagesList extends React.Component {
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.removeListener('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
@@ -198,14 +203,22 @@ class MessagesList extends React.Component {
         });
     };
 
+    onClientUpdateMediaEnding = udpate => {
+        const list = this.listRef.current;
+
+        this.prevOffsetHeight = list.offsetHeight;
+        this.prevScrollTop = list.scrollTop;
+    };
+
     onClientUpdateMediaEnd = udpate => {
         const list = this.listRef.current;
 
-        const prevOffsetHeight = list.offsetHeight;
-        const prevScrollTop = list.scrollTop;
-        this.setState({ playerOpened: true }, () => {
-            if (list.scrollTop === prevScrollTop) {
-                list.scrollTop -= Math.abs(prevOffsetHeight - list.offsetHeight);
+        //const prevOffsetHeight = list.offsetHeight;
+        //const prevScrollTop = list.scrollTop;
+
+        this.setState({ playerOpened: false }, () => {
+            if (list.scrollTop === this.prevScrollTop) {
+                list.scrollTop -= Math.abs(this.prevOffsetHeight - list.offsetHeight);
             }
         });
     };

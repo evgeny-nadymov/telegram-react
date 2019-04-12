@@ -377,6 +377,13 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
         if (!message) return;
 
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaEnding',
+            chatId: message.chat_id,
+            messageId: message.id,
+            moveNext: moveNext
+        });
+
         this.setState(
             {
                 playing: false,

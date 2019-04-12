@@ -34,14 +34,12 @@ class PlayerStore extends EventEmitter {
                 : PLAYER_PLAYBACKRATE_NORMAL;
         volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
 
-        this.playlist = null;
-        this.message = null;
-        this.time = null;
-        this.videoStream = null;
         this.playbackRate = playbackRate;
         this.volume = volume;
         this.repeat = RepeatEnum.NONE;
         this.shuffle = false;
+
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -62,6 +60,13 @@ class PlayerStore extends EventEmitter {
             default:
                 break;
         }
+    };
+
+    reset = () => {
+        this.playlist = null;
+        this.message = null;
+        this.time = null;
+        this.videoStream = null;
     };
 
     onClientUpdate = update => {
@@ -136,7 +141,7 @@ class PlayerStore extends EventEmitter {
             case 'clientUpdateMediaNext': {
                 this.emit(update['@type'], update);
 
-                this.moveToNextMedia();
+                this.moveToNextMedia(false);
                 break;
             }
             case 'clientUpdateMediaPrev': {
@@ -145,42 +150,20 @@ class PlayerStore extends EventEmitter {
                 this.moveToPrevMedia();
                 break;
             }
+            case 'clientUpdateMediaEnding': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaEnd': {
                 this.emit(update['@type'], update);
 
                 if (update.moveNext) {
-                    switch (this.repeat) {
-                        case RepeatEnum.NONE: {
-                            if (this.moveToNextMedia()) {
-                            } else {
-                                this.playlist = null;
-                                this.message = null;
-                                this.time = null;
-                                this.videoStream = null;
-                            }
-                            break;
-                        }
-                        case RepeatEnum.REPEAT: {
-                            if (this.moveToNextMedia()) {
-                            } else {
-                                this.playlist = null;
-                                this.message = null;
-                                this.time = null;
-                                this.videoStream = null;
-                            }
-                            break;
-                        }
-                        case RepeatEnum.REPEAT_ONE: {
-                            if (this.moveToNextMedia()) {
-                            } else {
-                                this.playlist = null;
-                                this.message = null;
-                                this.time = null;
-                                this.videoStream = null;
-                            }
-                            break;
-                        }
+                    if (this.moveToNextMedia(true)) {
+                    } else {
+                        this.reset();
                     }
+                } else {
+                    this.reset();
                 }
                 break;
             }
@@ -239,7 +222,7 @@ class PlayerStore extends EventEmitter {
         }
     };
 
-    moveToNextMedia = () => {
+    moveToNextMedia = useRepeatShuffle => {
         if (!this.playlist) return false;
 
         const { chatId, messageId, messages } = this.playlist;
@@ -249,26 +232,30 @@ class PlayerStore extends EventEmitter {
         if (index === -1) return false;
 
         let nextIndex = -1;
-        switch (this.repeat) {
-            case RepeatEnum.NONE: {
-                if (this.shuffle) {
-                    nextIndex = getRandomInt(0, messages.length);
-                } else {
-                    nextIndex = index - 1;
+        if (!useRepeatShuffle) {
+            nextIndex = index - 1;
+        } else {
+            switch (this.repeat) {
+                case RepeatEnum.NONE: {
+                    if (this.shuffle) {
+                        nextIndex = getRandomInt(0, messages.length);
+                    } else {
+                        nextIndex = index - 1;
+                    }
+                    break;
                 }
-                break;
-            }
-            case RepeatEnum.REPEAT_ONE: {
-                nextIndex = index;
-                break;
-            }
-            case RepeatEnum.REPEAT: {
-                if (this.shuffle) {
-                    nextIndex = getRandomInt(0, messages.length);
-                } else {
-                    nextIndex = index - 1 >= 0 ? index - 1 : messages.length - 1;
+                case RepeatEnum.REPEAT_ONE: {
+                    nextIndex = index;
+                    break;
                 }
-                break;
+                case RepeatEnum.REPEAT: {
+                    if (this.shuffle) {
+                        nextIndex = getRandomInt(0, messages.length);
+                    } else {
+                        nextIndex = index - 1 >= 0 ? index - 1 : messages.length - 1;
+                    }
+                    break;
+                }
             }
         }
 
