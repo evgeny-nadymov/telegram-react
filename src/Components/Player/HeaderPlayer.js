@@ -352,7 +352,7 @@ class HeaderPlayer extends React.Component {
         return '';
     };
 
-    handleEnded = () => {
+    handleEnded = (moveNext = true) => {
         const { message } = this.state;
         if (!message) return;
 
@@ -365,7 +365,8 @@ class HeaderPlayer extends React.Component {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaEnd',
             chatId: message.chat_id,
-            messageId: message.id
+            messageId: message.id,
+            moveNext: moveNext
         });
     };
 
@@ -375,7 +376,7 @@ class HeaderPlayer extends React.Component {
             player.pause();
         }
 
-        this.handleEnded();
+        this.handleEnded(false);
     };
 
     handleTimeUpdate = () => {

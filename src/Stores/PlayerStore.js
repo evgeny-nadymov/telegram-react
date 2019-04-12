@@ -121,7 +121,7 @@ class PlayerStore extends EventEmitter {
             case 'clientUpdateMediaEnd': {
                 this.emit(update['@type'], update);
 
-                if (this.moveToNextMedia()) {
+                if (update.moveNext && this.moveToNextMedia()) {
                 } else {
                     this.playlist = null;
                     this.message = null;
