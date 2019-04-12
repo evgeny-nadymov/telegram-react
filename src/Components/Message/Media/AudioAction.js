@@ -102,17 +102,14 @@ class AudioAction extends React.Component {
 
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, duration } = this.props;
-        const { active, file } = this.state;
+        const { active, currentTime, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            if (active) {
-            } else {
-                this.setState({
-                    active: true,
-                    currentTime: 0,
-                    timeString: this.getTimeString(0, duration, true, file)
-                });
-            }
+            this.setState({
+                active: true,
+                currentTime: active ? currentTime : 0,
+                timeString: this.getTimeString(active ? currentTime : 0, duration, true, file)
+            });
         } else if (active) {
             this.setState({
                 active: false,
@@ -132,6 +129,7 @@ class AudioAction extends React.Component {
     };
 
     getTimeString = (currentTime, duration, active, file) => {
+        console.log('clientUpdate getTimeString', currentTime, duration, active);
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 

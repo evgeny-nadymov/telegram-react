@@ -24,12 +24,7 @@ import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
-import {
-    PLAYER_PLAYBACKRATE_FAST,
-    PLAYER_PLAYBACKRATE_NORMAL,
-    PLAYER_STARTTIME,
-    PLAYER_VOLUME_NORMAL
-} from '../../Constants';
+import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
 import PlayerStore, { RepeatEnum } from '../../Stores/PlayerStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -49,12 +44,13 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { repeat, playbackRate, volume, message, playlist } = PlayerStore;
+        const { repeat, shuffle, playbackRate, volume, message, playlist } = PlayerStore;
 
         this.startTime = PLAYER_STARTTIME;
 
         this.state = {
             repeat: repeat,
+            shuffle: shuffle,
             playbackRate: playbackRate,
             currentTime: 0,
             currentTimeString: getDurationString(0),
@@ -68,9 +64,13 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { repeat, message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
+        const { repeat, shuffle, message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
 
         if (nextProps.theme !== theme) {
+            return true;
+        }
+
+        if (nextState.shuffle !== shuffle) {
             return true;
         }
 
@@ -115,6 +115,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.on('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
+        PlayerStore.on('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
 
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -129,9 +130,16 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.removeListener('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
+        PlayerStore.removeListener('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
 
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
+
+    onClientUpdateMediaShuffle = update => {
+        const { shuffle } = update;
+
+        this.setState({ shuffle });
+    };
 
     onClientUpdateMediaRepeat = update => {
         const { repeat } = update;
@@ -386,6 +394,10 @@ class HeaderPlayer extends React.Component {
         );
     };
 
+    handleVideoEnded = () => {
+        this.handleEnded(true);
+    };
+
     handleClose = () => {
         const player = this.videoRef.current;
         if (player) {
@@ -563,15 +575,26 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handleShuffle = () => {
+        const { shuffle } = this.state;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaShuffle',
+            shuffle: !shuffle
+        });
+    };
+
     render() {
         const { classes } = this.props;
-        const { repeat, playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
+        const { repeat, shuffle, playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
         const showDate = !hasAudio(message);
         const showPlaybackRate = !hasAudio(message);
+        const showRepeat = hasAudio(message);
+        const showShuffle = hasAudio(message);
         const hasPrev = this.hasPrev(message, playlist);
         const hasNext = this.hasNext(message, playlist);
 
@@ -589,7 +612,7 @@ class HeaderPlayer extends React.Component {
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}
                     onTimeUpdate={this.handleTimeUpdate}
-                    onEnded={this.handleEnded}
+                    onEnded={this.handleVideoEnded}
                 />
                 {message && (
                     <div className={classNames(classes.borderColor, 'header-player')}>
@@ -638,15 +661,25 @@ class HeaderPlayer extends React.Component {
                                 <div className='header-player-playback-icon'>2X</div>
                             </IconButton>
                         )}
-                        <IconButton
-                            className={classes.iconButton}
-                            color={repeat === RepeatEnum.NONE ? 'default' : 'primary'}
-                            onClick={this.handleRepeat}>
-                            {(repeat === RepeatEnum.NONE || repeat === RepeatEnum.REPEAT) && (
-                                <RepeatIcon fontSize='small' />
-                            )}
-                            {repeat === RepeatEnum.REPEAT_ONE && <RepeatOneIcon fontSize='small' />}
-                        </IconButton>
+                        {showRepeat && (
+                            <IconButton
+                                className={classes.iconButton}
+                                color={repeat === RepeatEnum.NONE ? 'default' : 'primary'}
+                                onClick={this.handleRepeat}>
+                                {(repeat === RepeatEnum.NONE || repeat === RepeatEnum.REPEAT) && (
+                                    <RepeatIcon fontSize='small' />
+                                )}
+                                {repeat === RepeatEnum.REPEAT_ONE && <RepeatOneIcon fontSize='small' />}
+                            </IconButton>
+                        )}
+                        {showShuffle && (
+                            <IconButton
+                                className={classes.iconButton}
+                                color={!shuffle ? 'default' : 'primary'}
+                                onClick={this.handleShuffle}>
+                                <ShuffleIcon fontSize='small' />
+                            </IconButton>
+                        )}
                         <IconButton className={classes.iconButton} onClick={this.handleClose}>
                             <CloseIcon fontSize='small' />
                         </IconButton>

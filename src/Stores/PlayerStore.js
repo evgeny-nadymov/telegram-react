@@ -11,6 +11,7 @@ import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
 import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
+import { getRandomInt } from '../Utils/Common';
 
 const RepeatEnum = Object.freeze({
     NONE: 'NONE',
@@ -40,6 +41,7 @@ class PlayerStore extends EventEmitter {
         this.playbackRate = playbackRate;
         this.volume = volume;
         this.repeat = RepeatEnum.NONE;
+        this.shuffle = false;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -92,6 +94,14 @@ class PlayerStore extends EventEmitter {
                 const { repeat } = update;
 
                 this.repeat = repeat;
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaShuffle': {
+                const { shuffle } = update;
+
+                this.shuffle = shuffle;
 
                 this.emit(update['@type'], update);
                 break;
@@ -241,7 +251,11 @@ class PlayerStore extends EventEmitter {
         let nextIndex = -1;
         switch (this.repeat) {
             case RepeatEnum.NONE: {
-                nextIndex = index - 1;
+                if (this.shuffle) {
+                    nextIndex = getRandomInt(0, messages.length);
+                } else {
+                    nextIndex = index - 1;
+                }
                 break;
             }
             case RepeatEnum.REPEAT_ONE: {
@@ -249,7 +263,11 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case RepeatEnum.REPEAT: {
-                nextIndex = index - 1 >= 0 ? index - 1 : messages.length - 1;
+                if (this.shuffle) {
+                    nextIndex = getRandomInt(0, messages.length);
+                } else {
+                    nextIndex = index - 1 >= 0 ? index - 1 : messages.length - 1;
+                }
                 break;
             }
         }
