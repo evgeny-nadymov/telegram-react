@@ -30,7 +30,7 @@ import {
     PLAYER_STARTTIME,
     PLAYER_VOLUME_NORMAL
 } from '../../Constants';
-import PlayerStore from '../../Stores/PlayerStore';
+import PlayerStore, { RepeatEnum } from '../../Stores/PlayerStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -49,11 +49,12 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { playbackRate, volume, message, playlist } = PlayerStore;
+        const { repeat, playbackRate, volume, message, playlist } = PlayerStore;
 
         this.startTime = PLAYER_STARTTIME;
 
         this.state = {
+            repeat: repeat,
             playbackRate: playbackRate,
             currentTime: 0,
             currentTimeString: getDurationString(0),
@@ -67,9 +68,13 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
+        const { repeat, message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
 
         if (nextProps.theme !== theme) {
+            return true;
+        }
+
+        if (nextState.repeat !== repeat) {
             return true;
         }
 
@@ -109,6 +114,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.on('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
 
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -122,9 +128,16 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.removeListener('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
 
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
+
+    onClientUpdateMediaRepeat = update => {
+        const { repeat } = update;
+
+        this.setState({ repeat });
+    };
 
     onClientUpdateMediaVolume = update => {
         const { volume } = update;
@@ -356,18 +369,21 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
         if (!message) return;
 
-        this.setState({
-            playing: false,
-            message: null,
-            src: null
-        });
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaEnd',
-            chatId: message.chat_id,
-            messageId: message.id,
-            moveNext: moveNext
-        });
+        this.setState(
+            {
+                playing: false,
+                message: null,
+                src: null
+            },
+            () => {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateMediaEnd',
+                    chatId: message.chat_id,
+                    messageId: message.id,
+                    moveNext: moveNext
+                });
+            }
+        );
     };
 
     handleClose = () => {
@@ -522,9 +538,34 @@ class HeaderPlayer extends React.Component {
         return index - 1 >= 0;
     };
 
+    handleRepeat = () => {
+        const { repeat } = this.state;
+
+        let nextRepeat = repeat;
+        switch (repeat) {
+            case RepeatEnum.NONE: {
+                nextRepeat = RepeatEnum.REPEAT;
+                break;
+            }
+            case RepeatEnum.REPEAT: {
+                nextRepeat = RepeatEnum.REPEAT_ONE;
+                break;
+            }
+            case RepeatEnum.REPEAT_ONE: {
+                nextRepeat = RepeatEnum.NONE;
+                break;
+            }
+        }
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaRepeat',
+            repeat: nextRepeat
+        });
+    };
+
     render() {
         const { classes } = this.props;
-        const { playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
+        const { repeat, playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
@@ -564,7 +605,11 @@ class HeaderPlayer extends React.Component {
                             color='primary'
                             disabled={!src}
                             onClick={this.handlePlay}>
-                            {playing ? <PauseIcon fontSize='small' /> : <PlayArrowIcon fontSize='small' />}
+                            {playing ? (
+                                <PauseIcon className='header-player-play-icon' fontSize='small' />
+                            ) : (
+                                <PlayArrowIcon className='header-player-play-icon' fontSize='small' />
+                            )}
                         </IconButton>
                         <IconButton
                             disabled={!hasNext}
@@ -593,6 +638,15 @@ class HeaderPlayer extends React.Component {
                                 <div className='header-player-playback-icon'>2X</div>
                             </IconButton>
                         )}
+                        <IconButton
+                            className={classes.iconButton}
+                            color={repeat === RepeatEnum.NONE ? 'default' : 'primary'}
+                            onClick={this.handleRepeat}>
+                            {(repeat === RepeatEnum.NONE || repeat === RepeatEnum.REPEAT) && (
+                                <RepeatIcon fontSize='small' />
+                            )}
+                            {repeat === RepeatEnum.REPEAT_ONE && <RepeatOneIcon fontSize='small' />}
+                        </IconButton>
                         <IconButton className={classes.iconButton} onClick={this.handleClose}>
                             <CloseIcon fontSize='small' />
                         </IconButton>

@@ -12,6 +12,14 @@ import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 
+const RepeatEnum = Object.freeze({
+    NONE: 'NONE',
+    REPEAT: 'REPEAT',
+    REPEAT_ONE: 'REPEAT_ONE'
+});
+
+export { RepeatEnum };
+
 class PlayerStore extends EventEmitter {
     constructor() {
         super();
@@ -31,6 +39,7 @@ class PlayerStore extends EventEmitter {
         this.videoStream = null;
         this.playbackRate = playbackRate;
         this.volume = volume;
+        this.repeat = RepeatEnum.NONE;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -79,6 +88,14 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaRepeat': {
+                const { repeat } = update;
+
+                this.repeat = repeat;
+
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaPlaybackRate': {
                 const { playbackRate } = update;
 
@@ -121,12 +138,39 @@ class PlayerStore extends EventEmitter {
             case 'clientUpdateMediaEnd': {
                 this.emit(update['@type'], update);
 
-                if (update.moveNext && this.moveToNextMedia()) {
-                } else {
-                    this.playlist = null;
-                    this.message = null;
-                    this.time = null;
-                    this.videoStream = null;
+                if (update.moveNext) {
+                    switch (this.repeat) {
+                        case RepeatEnum.NONE: {
+                            if (this.moveToNextMedia()) {
+                            } else {
+                                this.playlist = null;
+                                this.message = null;
+                                this.time = null;
+                                this.videoStream = null;
+                            }
+                            break;
+                        }
+                        case RepeatEnum.REPEAT: {
+                            if (this.moveToNextMedia()) {
+                            } else {
+                                this.playlist = null;
+                                this.message = null;
+                                this.time = null;
+                                this.videoStream = null;
+                            }
+                            break;
+                        }
+                        case RepeatEnum.REPEAT_ONE: {
+                            if (this.moveToNextMedia()) {
+                            } else {
+                                this.playlist = null;
+                                this.message = null;
+                                this.time = null;
+                                this.videoStream = null;
+                            }
+                            break;
+                        }
+                    }
                 }
                 break;
             }
@@ -194,8 +238,24 @@ class PlayerStore extends EventEmitter {
         const index = messages.findIndex(x => x.chat_id === chatId && x.id === messageId);
         if (index === -1) return false;
 
-        if (index - 1 >= 0) {
-            const message = messages[index - 1];
+        let nextIndex = -1;
+        switch (this.repeat) {
+            case RepeatEnum.NONE: {
+                nextIndex = index - 1;
+                break;
+            }
+            case RepeatEnum.REPEAT_ONE: {
+                nextIndex = index;
+                break;
+            }
+            case RepeatEnum.REPEAT: {
+                nextIndex = index - 1 >= 0 ? index - 1 : messages.length - 1;
+                break;
+            }
+        }
+
+        if (nextIndex >= 0) {
+            const message = messages[nextIndex];
 
             openMedia(message.chat_id, message.id, null);
             return true;
