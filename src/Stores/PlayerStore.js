@@ -288,6 +288,8 @@ class PlayerStore extends EventEmitter {
             filter: filter
         });
 
+        MessageStore.setItems(result.messages);
+
         const { total_count, messages } = result;
 
         this.playlist = {

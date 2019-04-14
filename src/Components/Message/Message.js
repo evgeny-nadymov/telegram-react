@@ -302,6 +302,7 @@ class Message extends Component {
                                 </div>
                             )}
                             <div className='message-meta'>
+                                {/*message.id*/}
                                 <span>&nbsp;</span>
                                 {message.views > 0 && (
                                     <>

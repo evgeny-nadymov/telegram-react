@@ -129,7 +129,6 @@ class AudioAction extends React.Component {
     };
 
     getTimeString = (currentTime, duration, active, file) => {
-        console.log('clientUpdate getTimeString', currentTime, duration, active);
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
