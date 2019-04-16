@@ -20,6 +20,7 @@ import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import VolumeButton from '../Player/VolumeButton';
+import Time from '../Player/Time';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getDurationString } from '../../Utils/Common';
@@ -95,10 +96,6 @@ class HeaderPlayer extends React.Component {
         }
 
         if (nextState.playing !== playing) {
-            return true;
-        }
-
-        if (nextState.currentTimeString !== currentTimeString) {
             return true;
         }
 
@@ -593,7 +590,7 @@ class HeaderPlayer extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { repeat, shuffle, playing, message, playlist, src, currentTimeString, playbackRate } = this.state;
+        const { repeat, shuffle, playing, message, playlist, src, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
@@ -657,7 +654,9 @@ class HeaderPlayer extends React.Component {
                                     </span>
                                 )}
                             </div>
-                            <div className='header-player-meta'>{currentTimeString}</div>
+                            <div className='header-player-meta'>
+                                <Time />
+                            </div>
                         </div>
                         <VolumeButton />
                         {showPlaybackRate && (

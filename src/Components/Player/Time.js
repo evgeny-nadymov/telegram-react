@@ -6,21 +6,36 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { getDurationString } from '../../Utils/Common';
+import PlayerStore from '../../Stores/PlayerStore';
 
 class Time extends React.Component {
     constructor(props) {
         super(props);
 
-        const { currentTime, duration } = props;
-
         this.state = {
-            currentTime: currentTime,
-            duration: duration,
-            timeString: this.getTimeString(currentTime, duration)
+            currentTime: 0,
+            duration: 0,
+            timeString: this.getTimeString(0, 0)
         };
     }
+
+    componentDidMount() {
+        PlayerStore.on('clientUpdateMediaTime', this.onClientUpdateMediaTime);
+    }
+
+    componentWillUnmount() {
+        PlayerStore.removeListener('clientUpdateMediaTime', this.onClientUpdateMediaTime);
+    }
+
+    onClientUpdateMediaTime = update => {
+        const { currentTime } = update;
+
+        this.setState({
+            currentTime: currentTime,
+            currentTimeString: getDurationString(Math.floor(currentTime || 0))
+        });
+    };
 
     getTimeString = (currentTime, duration) => {
         const type = 0;
@@ -28,17 +43,16 @@ class Time extends React.Component {
         const durationString = getDurationString(Math.floor(duration || 0));
         const currentTimeString = getDurationString(Math.floor(currentTime || 0));
 
-        return type === 0 ? `${currentTimeString}/${durationString}` : `${durationString}`;
+        //return type === 0 ? `${currentTimeString}/${durationString}` : `${durationString}`;
+
+        return currentTimeString;
     };
 
-    render() {}
-}
+    render() {
+        const { currentTimeString } = this.state;
 
-Time.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
-    currentTime: PropTypes.number.isRequired,
-    duration: PropTypes.number.isRequired
-};
+        return <>{currentTimeString}</>;
+    }
+}
 
 export default Time;
