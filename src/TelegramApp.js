@@ -313,6 +313,7 @@ class TelegramApp extends Component {
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
                 <Dialog
+                    transitionDuration={0}
                     open={fatalError}
                     onClose={this.handleRefresh}
                     aria-labelledby='fatal-error-dialog-title'

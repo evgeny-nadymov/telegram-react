@@ -497,7 +497,11 @@ class InputBoxControl extends Component {
                         </div>
                     </div>
                 </div>
-                <Dialog open={openPasteDialog} onClose={this.handleClosePaste} aria-labelledby='delete-dialog-title'>
+                <Dialog
+                    transitionDuration={0}
+                    open={openPasteDialog}
+                    onClose={this.handleClosePaste}
+                    aria-labelledby='delete-dialog-title'>
                     <DialogTitle id='delete-dialog-title'>{t('AppName')}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>

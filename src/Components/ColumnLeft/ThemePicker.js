@@ -162,6 +162,7 @@ class ThemePicker extends React.Component {
 
         return (
             <Dialog
+                transitionDuration={0}
                 open={this.state.open}
                 onClose={this.handleClose}
                 aria-labelledby='alert-dialog-title'

@@ -676,6 +676,7 @@ class MediaViewer extends React.Component {
         }
         const deleteConfirmation = deleteConfirmationOpened ? (
             <Dialog
+                transitionDuration={0}
                 open={deleteConfirmationOpened}
                 onClose={this.handleDialogClose}
                 aria-labelledby='form-dialog-title'>

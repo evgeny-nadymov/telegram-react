@@ -186,6 +186,7 @@ class SignInControl extends React.Component {
                     </Typography>
                 </div>
                 <Dialog
+                    transitionDuration={0}
                     open={openConfirmation}
                     onClose={this.handleClose}
                     onKeyPress={this.handleDialogKeyPress}

@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { DialogActions, DialogContent, DialogContentText, DialogTitle} from '@material-ui/core';
+import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import Button from '@material-ui/core/Button';
 import TdLibController from '../../Controllers/TdLibController';
 
 class AuthErrorDialog extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -25,29 +25,29 @@ class AuthErrorDialog extends React.Component {
         this.handleKeyDown = this.handleKeyDown.bind(this);
     }
 
-    componentDidMount(){
+    componentDidMount() {
         TdLibController.on('tdlib_auth_error', this.handleAuthError);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         TdLibController.removeListener('tdlib_auth_error', this.handleAuthError);
     }
 
-    handleAuthError(error){
+    handleAuthError(error) {
         this.setState({
             open: true,
             error: error
         });
     }
 
-    handleClose(){
+    handleClose() {
         this.setState({
             open: false
         });
     }
 
-    handleKeyDown(e){
-        if (e.key === 'Enter'){
+    handleKeyDown(e) {
+        if (e.key === 'Enter') {
             e.preventDefault();
             this.handleClose();
         }
@@ -55,29 +55,25 @@ class AuthErrorDialog extends React.Component {
 
     render() {
         let errorString = null;
-        if (this.state.error
-            && this.state.error['@type'] === 'error'
-            && this.state.error.message){
+        if (this.state.error && this.state.error['@type'] === 'error' && this.state.error.message) {
             errorString = this.state.error.message;
-        }
-        else{
+        } else {
             errorString = JSON.stringify(this.state.error);
         }
 
         return (
             <Dialog
+                transitionDuration={0}
                 open={this.state.open}
                 onKeyDown={this.handleKeyDown}
                 onClose={this.handleClose}
-                aria-labelledby="form-dialog-title">
-                <DialogTitle id="form-dialog-title">Error</DialogTitle>
+                aria-labelledby='form-dialog-title'>
+                <DialogTitle id='form-dialog-title'>Error</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>
-                        {errorString}
-                    </DialogContentText>
+                    <DialogContentText>{errorString}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={this.handleClose} color="primary">
+                    <Button onClick={this.handleClose} color='primary'>
                         Ok
                     </Button>
                 </DialogActions>

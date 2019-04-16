@@ -628,7 +628,7 @@ class HeaderPlayer extends React.Component {
                             className={classes.iconButton}
                             color='primary'
                             onClick={this.handlePrev}>
-                            <SkipPreviousIcon />
+                            <SkipPreviousIcon fontSize='small' />
                         </IconButton>
                         <IconButton
                             className={classes.iconButton}
@@ -636,9 +636,9 @@ class HeaderPlayer extends React.Component {
                             disabled={!src}
                             onClick={this.handlePlay}>
                             {playing ? (
-                                <PauseIcon className='header-player-play-icon' fontSize='small' />
+                                <PauseIcon className='header-player-play-icon' />
                             ) : (
-                                <PlayArrowIcon className='header-player-play-icon' fontSize='small' />
+                                <PlayArrowIcon className='header-player-play-icon' />
                             )}
                         </IconButton>
                         <IconButton
@@ -646,7 +646,7 @@ class HeaderPlayer extends React.Component {
                             className={classes.iconButton}
                             color='primary'
                             onClick={this.handleNext}>
-                            <SkipNextIcon />
+                            <SkipNextIcon fontSize='small' />
                         </IconButton>
                         <div className='header-player-content'>
                             <div className='header-player-title'>

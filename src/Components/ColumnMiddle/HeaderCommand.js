@@ -186,7 +186,11 @@ class HeaderCommand extends React.Component {
                         {t('Cancel')}
                     </Button>
                 </div>
-                <Dialog open={openDeleteDialog} onClose={this.handleCloseDelete} aria-labelledby='delete-dialog-title'>
+                <Dialog
+                    transitionDuration={0}
+                    open={openDeleteDialog}
+                    onClose={this.handleCloseDelete}
+                    aria-labelledby='delete-dialog-title'>
                     <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
                     <DialogContent>
                         <DialogContentText>

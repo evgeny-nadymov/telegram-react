@@ -78,7 +78,11 @@ class LeaveChatDialog extends React.Component {
         const { onClose, chatId, ...other } = this.props;
 
         return (
-            <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
+            <Dialog
+                transitionDuration={0}
+                onClose={() => onClose(false)}
+                aria-labelledby='delete-dialog-title'
+                {...other}>
                 <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>
@@ -106,7 +110,11 @@ class ClearHistoryDialog extends React.Component {
         const { onClose, chatId, ...other } = this.props;
 
         return (
-            <Dialog onClose={() => onClose(false)} aria-labelledby='delete-dialog-title' {...other}>
+            <Dialog
+                transitionDuration={0}
+                onClose={() => onClose(false)}
+                aria-labelledby='delete-dialog-title'
+                {...other}>
                 <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>

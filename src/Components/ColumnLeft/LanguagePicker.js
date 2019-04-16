@@ -69,6 +69,7 @@ class LanguagePicker extends React.Component {
 
         return (
             <Dialog
+                transitionDuration={0}
                 open={open}
                 onClose={this.handleClose}
                 aria-labelledby='language-dialog-title'
