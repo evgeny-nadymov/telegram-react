@@ -107,6 +107,7 @@ class HeaderPlayer extends React.Component {
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.on('clientUpdateMediaClose', this.onClientUpdateMediaClose);
         PlayerStore.on('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
@@ -122,6 +123,7 @@ class HeaderPlayer extends React.Component {
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.removeListener('clientUpdateMediaClose', this.onClientUpdateMediaClose);
         PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
@@ -269,6 +271,15 @@ class HeaderPlayer extends React.Component {
         }
     };
 
+    onClientUpdateMediaClose = update => {
+        this.setState({
+            message: null,
+            playlist: null,
+            playing: false,
+            src: null
+        });
+    };
+
     onClientUpdateMediaActive = update => {
         const { chatId, messageId } = update;
         const { message, src } = this.state;
@@ -383,9 +394,9 @@ class HeaderPlayer extends React.Component {
 
         this.setState(
             {
-                playing: false,
-                message: null,
-                src: null
+                //playing: false,
+                //message: null,
+                //src: null
             },
             () => {
                 TdLibController.clientUpdate({

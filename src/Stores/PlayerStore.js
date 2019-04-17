@@ -39,7 +39,10 @@ class PlayerStore extends EventEmitter {
         this.repeat = RepeatEnum.NONE;
         this.shuffle = false;
 
-        this.reset();
+        this.playlist = null;
+        this.message = null;
+        this.time = null;
+        this.videoStream = null;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -62,15 +65,23 @@ class PlayerStore extends EventEmitter {
         }
     };
 
-    reset = () => {
-        this.playlist = null;
-        this.message = null;
-        this.time = null;
-        this.videoStream = null;
+    close = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaClose'
+        });
     };
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateMediaClose': {
+                this.playlist = null;
+                this.message = null;
+                this.time = null;
+                this.videoStream = null;
+
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaActive': {
                 const { chatId, messageId } = update;
 
@@ -164,10 +175,10 @@ class PlayerStore extends EventEmitter {
                 if (update.moveNext) {
                     if (this.moveToNextMedia(true)) {
                     } else {
-                        this.reset();
+                        this.close();
                     }
                 } else {
-                    this.reset();
+                    this.close();
                 }
                 break;
             }
