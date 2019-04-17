@@ -661,21 +661,21 @@ class HeaderPlayer extends React.Component {
                             <SkipNextIcon fontSize='small' />
                         </IconButton>
                         <Playlist />
-                        <div className='header-player-content'>
-                            <div
-                                className='header-player-title'
-                                onMouseEnter={this.handleTitleMouseEnter}
-                                onMouseLeave={this.handleTitleMouseLeave}>
-                                <span title={title}>{title}</span>
+                        <div
+                            className='header-player-content'
+                            onMouseEnter={this.handleTitleMouseEnter}
+                            onMouseLeave={this.handleTitleMouseLeave}>
+                            <div className='header-player-title'>
+                                {title}
                                 {showDate && (
-                                    <span title={dateHint} style={{ paddingLeft: 8 }}>
+                                    <span title={dateHint}>
+                                        &nbsp;
                                         {date}
                                     </span>
                                 )}
                             </div>
-                            <div className='header-player-meta'>
-                                <Time />
-                            </div>
+                            &nbsp;
+                            <Time />
                         </div>
                         <VolumeButton />
                         {showPlaybackRate && (

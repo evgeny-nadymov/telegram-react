@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getMedia, openMedia } from '../../Utils/Message';
 import { borderStyle } from '../Theme';
@@ -27,12 +26,13 @@ class Playlist extends React.Component {
 
         const { message, playlist } = PlayerStore;
 
+        this.chatId = message ? message.chat_id : 0;
+        this.messageId = message ? message.id : 0;
+
         this.state = {
             open: false,
             titleMouseOver: false,
             playlistMouseOver: false,
-            chatId: message ? message.chat_id : 0,
-            messageId: message ? message.id : 0,
             playlist: playlist
         };
     }
@@ -40,12 +40,14 @@ class Playlist extends React.Component {
     componentDidMount() {
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
+        PlayerStore.on('clientUpdateMediaPlaylistLoading', this.onClientUpdateMediaPlaylistLoading);
         PlayerStore.on('clientUpdateMediaTitleMouseOver', this.onClientUpdateMediaTitleMouseOver);
     }
 
     componentWillUnmount() {
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
+        PlayerStore.removeListener('clientUpdateMediaPlaylistLoading', this.onClientUpdateMediaPlaylistLoading);
         PlayerStore.removeListener('clientUpdateMediaTitleMouseOver', this.onClientUpdateMediaTitleMouseOver);
     }
 
@@ -76,15 +78,23 @@ class Playlist extends React.Component {
     onClientUpdateMediaActive = update => {
         const { chatId, messageId } = update;
 
-        this.setState({
-            chatId: chatId,
-            messageId: messageId
-        });
+        this.chatId = chatId;
+        this.messageId = messageId;
+    };
+
+    onClientUpdateMediaPlaylistLoading = update => {
+        const { chatId, messageId } = this;
+
+        if (update.chatId === chatId && update.messageId === messageId) {
+            this.setState({
+                playlist: null
+            });
+        }
     };
 
     onClientUpdateMediaPlaylist = update => {
+        const { chatId, messageId } = this;
         const { playlist } = update;
-        const { chatId, messageId } = this.state;
 
         if (chatId === playlist.chatId && messageId === playlist.messageId) {
             this.setState({
@@ -139,8 +149,10 @@ class Playlist extends React.Component {
         const { open, playlist } = this.state;
         if (!open) return null;
         if (!playlist) return null;
-        if (!playlist.messages) return null;
-        if (!playlist.messages.length) return null;
+
+        const { messages } = playlist;
+        if (!messages) return null;
+        if (messages.length <= 1) return null;
 
         return (
             <div className='playlist'>
@@ -156,11 +168,5 @@ class Playlist extends React.Component {
         );
     }
 }
-
-Playlist.propTypes = {
-    open: PropTypes.bool.isRequired,
-    onClose: PropTypes.func,
-    onTryClose: PropTypes.func
-};
 
 export default withStyles(styles)(Playlist);

@@ -657,8 +657,10 @@ function getSearchMessagesFilter(chatId, messageId) {
             break;
         }
         case 'messageVideoNote': {
-            const { audio } = content;
-            if (audio) {
+            const { video_note } = content;
+            if (video_note) {
+                return null;
+
                 return {
                     '@type': 'searchMessagesFilterVideoNote'
                 };
@@ -675,6 +677,8 @@ function getSearchMessagesFilter(chatId, messageId) {
                     };
                 }
                 if (video_note) {
+                    return null;
+
                     return {
                         '@type': 'searchMessagesFilterVideoNote'
                     };

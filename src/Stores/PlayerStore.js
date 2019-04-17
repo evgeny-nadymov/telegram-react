@@ -77,11 +77,11 @@ class PlayerStore extends EventEmitter {
                 const message = MessageStore.get(chatId, messageId);
                 if (!message) return;
 
-                this.getPlaylist(chatId, messageId);
-
                 this.message = message;
 
                 this.emit(update['@type'], update);
+
+                this.getPlaylist(chatId, messageId);
                 break;
             }
             case 'clientUpdateMediaVolume': {
@@ -201,6 +201,10 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaPlaylistLoading': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaPlaylist': {
                 this.emit(update['@type'], update);
                 break;
@@ -228,11 +232,13 @@ class PlayerStore extends EventEmitter {
 
     moveToNextMedia = useRepeatShuffle => {
         if (!this.playlist) return false;
+        if (!this.message) return false;
 
-        const { chatId, messageId, messages } = this.playlist;
+        const { chat_id, id } = this.message;
+        const { messages } = this.playlist;
         if (!messages) return false;
 
-        const index = messages.findIndex(x => x.chat_id === chatId && x.id === messageId);
+        const index = messages.findIndex(x => x.chat_id === chat_id && x.id === id);
         if (index === -1) return false;
 
         let nextIndex = -1;
@@ -274,12 +280,37 @@ class PlayerStore extends EventEmitter {
     };
 
     getPlaylist = async (chatId, messageId) => {
-        if (this.message && this.message.chat_id === chatId && this.message.id === messageId) {
-            return;
+        const { playlist: currentPlaylist } = this;
+
+        if (currentPlaylist) {
+            const { messages } = currentPlaylist;
+            if (messages && messages.findIndex(x => x.chat_id === chatId && x.id === messageId) !== -1) {
+                return;
+            }
         }
 
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaPlaylistLoading',
+            chatId: chatId,
+            messageId: messageId
+        });
+
         const filter = getSearchMessagesFilter(chatId, messageId);
-        if (!filter) return;
+        if (!filter) {
+            this.playlist = {
+                chatId: chatId,
+                messageId: messageId,
+                totalCount: 1,
+                messages: [MessageStore.get(chatId, messageId)]
+            };
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaPlaylist',
+                playlist: this.playlist
+            });
+
+            return;
+        }
 
         const result = await TdLibController.send({
             '@type': 'searchChatMessages',

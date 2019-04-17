@@ -28,10 +28,11 @@
 .header-player-content {
     flex: 1 1 auto;
     display: flex;
-    padding: 0 12px;
+    padding: 4px 12px;
     user-select: none;
     font-size: 16px;
     overflow: hidden;
+    background: transparent;
 }
 
 .header-player-title {
@@ -40,11 +41,6 @@
     white-space: nowrap;
     overflow: hidden;
     word-wrap: break-word;
-    background: transparent;
-}
-
-.header-player-meta {
-    padding-left: 8px;
 }
 
 .header-player-playback-icon {
