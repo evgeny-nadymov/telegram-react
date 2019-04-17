@@ -128,6 +128,10 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaTitleMouseOver': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaPause': {
                 this.playing = false;
 

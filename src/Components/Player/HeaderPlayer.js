@@ -21,6 +21,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import VolumeButton from '../Player/VolumeButton';
 import Time from '../Player/Time';
+import Playlist from '../Player/Playlist';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { getDurationString } from '../../Utils/Common';
@@ -588,6 +589,20 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handleTitleMouseEnter = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaTitleMouseOver',
+            over: true
+        });
+    };
+
+    handleTitleMouseLeave = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaTitleMouseOver',
+            over: false
+        });
+    };
+
     render() {
         const { classes } = this.props;
         const { repeat, shuffle, playing, message, playlist, src, playbackRate } = this.state;
@@ -645,8 +660,12 @@ class HeaderPlayer extends React.Component {
                             onClick={this.handleNext}>
                             <SkipNextIcon fontSize='small' />
                         </IconButton>
+                        <Playlist />
                         <div className='header-player-content'>
-                            <div className='header-player-title'>
+                            <div
+                                className='header-player-title'
+                                onMouseEnter={this.handleTitleMouseEnter}
+                                onMouseLeave={this.handleTitleMouseLeave}>
                                 <span title={title}>{title}</span>
                                 {showDate && (
                                     <span title={dateHint} style={{ paddingLeft: 8 }}>

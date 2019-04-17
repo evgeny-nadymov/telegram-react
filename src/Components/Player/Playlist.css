@@ -4,3 +4,25 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.playlist {
+    position: relative;
+    top: 22px;
+}
+
+.playlist-items {
+    padding: 0 12px;
+    position: absolute;
+    background: white;
+    max-height: 300px;
+    width: 300px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    z-index: 2;
+    border: 1px solid transparent;
+    box-sizing: border-box;
+}
+
+.playlist-item {
+    padding: 6px 0;
+}

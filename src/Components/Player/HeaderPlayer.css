@@ -28,7 +28,7 @@
 .header-player-content {
     flex: 1 1 auto;
     display: flex;
-    padding: 0 8px;
+    padding: 0 12px;
     user-select: none;
     font-size: 16px;
     overflow: hidden;
@@ -40,6 +40,7 @@
     white-space: nowrap;
     overflow: hidden;
     word-wrap: break-word;
+    background: transparent;
 }
 
 .header-player-meta {
