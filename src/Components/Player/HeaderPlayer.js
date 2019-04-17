@@ -48,7 +48,7 @@ class HeaderPlayer extends React.Component {
 
         const { repeat, shuffle, playbackRate, volume, message, playlist } = PlayerStore;
 
-        this.startTime = PLAYER_STARTTIME;
+        this.startTime = 90; //PLAYER_STARTTIME;
 
         this.state = {
             repeat: repeat,
@@ -104,8 +104,8 @@ class HeaderPlayer extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        FileStore.on('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
+        FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.on('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
@@ -119,8 +119,8 @@ class HeaderPlayer extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateVideoNoteBlob);
-        FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateVideoNoteBlob);
+        FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
         PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
@@ -201,9 +201,9 @@ class HeaderPlayer extends React.Component {
         );
     };
 
-    onClientUpdateVideoNoteBlob = update => {
+    onClientUpdateMediaBlob = update => {
         const { chatId, messageId } = update;
-        const { message, playbackRate } = this.state;
+        const { message } = this.state;
 
         if (!message) return;
 
@@ -265,7 +265,6 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
 
         if (message && message.chat_id === chatId && message.id === messageId) {
-            console.log('clientUpdateMediaPlaylist set', playlist);
             this.setState({ playlist: playlist });
         }
     };

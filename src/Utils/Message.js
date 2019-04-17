@@ -672,6 +672,8 @@ function getSearchMessagesFilter(chatId, messageId) {
             if (web_page) {
                 const { audio, video_note } = web_page;
                 if (audio) {
+                    return null;
+
                     return {
                         '@type': 'searchMessagesFilterAudio'
                     };
@@ -860,7 +862,7 @@ function openMedia(chatId, messageId, onSelectUser) {
                             FileStore.cancelUploadFile(file.id, message);
                             return;
                         } else {
-                            download(file, audio.file_name, message);
+                            download(file, message);
                         }
 
                         TdLibController.send({

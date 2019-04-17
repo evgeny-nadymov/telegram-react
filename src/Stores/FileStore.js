@@ -83,7 +83,7 @@ class FileStore extends EventEmitter {
                 }
 
                 const { arr, idb_key } = file;
-                delete file.arr;
+                //delete file.arr;
 
                 let items = this.downloads.get(file.id);
                 if (items) {
@@ -746,7 +746,6 @@ class FileStore extends EventEmitter {
     };
 
     updateAudioBlob = (chatId, messageId, fileId) => {
-        console.log('clientUpdateAudioBlob');
         this.emit('clientUpdateAudioBlob', {
             chatId: chatId,
             messageId: messageId,
