@@ -48,7 +48,7 @@ class HeaderPlayer extends React.Component {
 
         const { repeat, shuffle, playbackRate, volume, message, playlist } = PlayerStore;
 
-        this.startTime = 90; //PLAYER_STARTTIME;
+        this.startTime = PLAYER_STARTTIME;
 
         this.state = {
             repeat: repeat,

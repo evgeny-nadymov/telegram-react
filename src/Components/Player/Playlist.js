@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { getMedia, openMedia } from '../../Utils/Message';
 import { borderStyle } from '../Theme';
@@ -24,6 +25,9 @@ class Playlist extends React.Component {
     constructor(props) {
         super(props);
 
+        this.listRef = React.createRef();
+        this.itemRefMap = new Map();
+
         const { message, playlist } = PlayerStore;
 
         this.chatId = message ? message.chat_id : 0;
@@ -36,6 +40,30 @@ class Playlist extends React.Component {
             playlist: playlist
         };
     }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { open } = this.state;
+
+        if (!prevState.open && open) {
+            this.scrollToActive();
+        }
+    }
+
+    scrollToActive = () => {
+        const list = this.listRef.current;
+        if (!list) return;
+
+        const { messageId } = this;
+        if (!messageId) return;
+
+        const item = this.itemRefMap.get(messageId);
+        if (!item) return;
+
+        const node = ReactDOM.findDOMNode(item);
+        if (!node) return;
+
+        list.scrollTop = node.offsetTop;
+    };
 
     componentDidMount() {
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -154,14 +182,19 @@ class Playlist extends React.Component {
         if (!messages) return null;
         if (messages.length <= 1) return null;
 
+        this.itemRefMap.clear();
+
         return (
             <div className='playlist'>
                 <div
+                    ref={this.listRef}
                     className={classNames('playlist-items', classes.root, classes.borderColor)}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}>
                     {playlist.messages.map(x => (
-                        <div className='playlist-item'>{getMedia(x, () => openMedia(x.chat_id, x.id))}</div>
+                        <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
+                            {getMedia(x, () => openMedia(x.chat_id, x.id))}
+                        </div>
                     ))}
                 </div>
             </div>

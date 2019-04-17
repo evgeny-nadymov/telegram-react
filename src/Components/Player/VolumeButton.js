@@ -18,6 +18,7 @@ import { borderStyle } from '../Theme';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './VolumeButton.css';
+import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 
 const styles = theme => ({
     iconButton: {
@@ -99,7 +100,7 @@ class VolumeButton extends React.Component {
 
     handleVoiceClick = () => {
         const { value, prevValue } = this.state;
-        const nextValue = value > 0 ? 0 : prevValue;
+        const nextValue = value > 0 ? 0 : prevValue || PLAYER_VOLUME_NORMAL;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaVolume',
