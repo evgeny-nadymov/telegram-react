@@ -10,27 +10,32 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
 import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
+import { openUser as openUserCommand, openChat as openChatCommand } from '../../Utils/Commands';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import './MessageAuthor.css';
 
 class MessageAuthor extends React.Component {
-    handleSelect = () => {
-        const { chatId, userId, onSelectUser, onSelectChat } = this.props;
+    handleSelect = event => {
+        const { chatId, userId, openUser, openChat } = this.props;
 
-        if (onSelectUser) {
-            onSelectUser(userId);
+        if (openUser && userId) {
+            event.stopPropagation();
+
+            openUserCommand(userId);
             return;
         }
 
-        if (onSelectChat) {
-            onSelectChat(chatId);
+        if (openChat && chatId) {
+            event.stopPropagation();
+
+            openChatCommand(chatId);
             return;
         }
     };
 
     render() {
-        const { chatId, userId, onSelectUser, onSelectChat } = this.props;
+        const { chatId, userId, openUser, openChat } = this.props;
 
         const user = UserStore.get(userId);
         if (user) {
@@ -41,7 +46,7 @@ class MessageAuthor extends React.Component {
 
             const fullName = getUserFullName(user);
 
-            return onSelectUser ? (
+            return openUser ? (
                 <a className={className} onClick={this.handleSelect}>
                     {fullName}
                 </a>
@@ -56,7 +61,7 @@ class MessageAuthor extends React.Component {
 
             const fullName = getChatTitle(chatId, false);
 
-            return onSelectChat ? (
+            return openChat ? (
                 <a className={className} onClick={this.handleSelect}>
                     {fullName}
                 </a>
@@ -72,8 +77,13 @@ class MessageAuthor extends React.Component {
 MessageAuthor.propTypes = {
     chatId: PropTypes.number,
     userId: PropTypes.number,
-    onSelectUser: PropTypes.func,
-    onSelectChat: PropTypes.func
+    openUser: PropTypes.bool,
+    openChat: PropTypes.bool
+};
+
+MessageAuthor.defaultProps = {
+    openUser: false,
+    openChat: false
 };
 
 export default MessageAuthor;

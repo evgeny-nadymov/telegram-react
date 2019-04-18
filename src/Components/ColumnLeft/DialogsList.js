@@ -327,12 +327,9 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { onSelectChat } = this.props;
         const { chats } = this.state;
 
-        const dialogs = chats.map(x => (
-            <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} onSelect={onSelectChat} />
-        ));
+        const dialogs = chats.map(x => <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
 
         /*<Scrollbars*/
         /*ref={this.listRef}*/

@@ -106,7 +106,6 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
-        const { onSelectChat, onSelectUser } = this.props;
         const { chatId, messageId, selectedCount } = this.state;
         const { isChatDetailsVisible } = ApplicationStore;
 
@@ -114,13 +113,7 @@ class DialogDetails extends Component {
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
-                <MessagesList
-                    innerRef={ref => (this.messagesList = ref)}
-                    chatId={chatId}
-                    messageId={messageId}
-                    onSelectChat={onSelectChat}
-                    onSelectUser={onSelectUser}
-                />
+                <MessagesList innerRef={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
                 <Footer chatId={chatId} />
             </div>
         );

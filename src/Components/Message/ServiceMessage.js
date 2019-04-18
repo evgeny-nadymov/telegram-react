@@ -24,19 +24,21 @@ class ServiceMessage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
-        if (nextProps.messageId !== this.props.messageId) {
+        if (nextProps.messageId !== messageId) {
             return true;
         }
 
-        if (nextProps.sendingState !== this.props.sendingState) {
+        if (nextProps.sendingState !== sendingState) {
             return true;
         }
 
-        if (nextProps.showUnreadSeparator !== this.props.showUnreadSeparator) {
+        if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
             return true;
         }
 
@@ -44,16 +46,18 @@ class ServiceMessage extends React.Component {
     }
 
     render() {
-        let message = MessageStore.get(this.props.chatId, this.props.messageId);
+        const { chatId, messageId, showUnreadSeparator } = this.props;
+
+        const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty service message]</div>;
 
-        let serviceMessageContent = getServiceMessageContent(message, this.props.onSelectUser);
+        const content = getServiceMessageContent(message);
 
         return (
             <div className='service-message'>
-                {this.props.showUnreadSeparator && <UnreadSeparator />}
+                {showUnreadSeparator && <UnreadSeparator />}
                 <div className='service-message-wrapper'>
-                    <div className='service-message-content'>{serviceMessageContent}</div>
+                    <div className='service-message-content'>{content}</div>
                 </div>
             </div>
         );

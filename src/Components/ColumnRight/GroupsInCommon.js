@@ -12,13 +12,13 @@ import ChatControl from '../Tile/ChatControl';
 import GroupsInCommonHeader from './GroupsInCommonHeader';
 import { getChatUserId } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
+import { openChat } from '../../Utils/Commands';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './GroupsInCommon.css';
 
 class GroupsInCommon extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
@@ -32,27 +32,21 @@ class GroupsInCommon extends React.Component {
         const userId = getChatUserId(chatId);
         if (!userId) return;
 
-        TdLibController
-            .send({
-                '@type': 'getGroupsInCommon',
-                user_id: userId,
-                offset_chat_id: 0,
-                limit: 100
-            })
-            .then(result => {
+        TdLibController.send({
+            '@type': 'getGroupsInCommon',
+            user_id: userId,
+            offset_chat_id: 0,
+            limit: 100
+        }).then(result => {
+            const store = FileStore.getStore();
+            loadChatsContent(store, result.chat_ids);
 
-                const store = FileStore.getStore();
-                loadChatsContent(store, result.chat_ids);
+            this.setState({ chatIds: result.chat_ids });
+        });
+    }
 
-                this.setState({ chatIds: result.chat_ids });
-            });
-    };
-
-    handleSelect = (chat) => {
-        const { onSelectChat } = this.props;
-        if (!onSelectChat) return;
-
-        onSelectChat(chat);
+    handleSelect = chat => {
+        openChat(chat.id);
     };
 
     render() {
@@ -61,16 +55,14 @@ class GroupsInCommon extends React.Component {
 
         const chats = chatIds.map(x => (
             <ListItem button key={x}>
-                <ChatControl chatId={x} onSelect={this.handleSelect}/>
+                <ChatControl chatId={x} onSelect={this.handleSelect} />
             </ListItem>
         ));
 
         return (
             <div className='groups-in-common'>
-                <GroupsInCommonHeader onClose={onClose}/>
-                <div className='groups-in-common-list'>
-                {chats}
-                </div>
+                <GroupsInCommonHeader onClose={onClose} />
+                <div className='groups-in-common-list'>{chats}</div>
             </div>
         );
     }
@@ -78,8 +70,7 @@ class GroupsInCommon extends React.Component {
 
 GroupsInCommon.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onClose: PropTypes.func.isRequired,
-    onSelectChat: PropTypes.func
+    onClose: PropTypes.func.isRequired
 };
 
 export default GroupsInCommon;

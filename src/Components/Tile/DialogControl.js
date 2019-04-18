@@ -14,6 +14,7 @@ import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
 import DialogTitleControl from './DialogTitleControl';
 import DialogMetaControl from './DialogMetaControl';
+import { openChat } from '../../Utils/Commands';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogControl.css';
@@ -81,11 +82,7 @@ class DialogControl extends Component {
     };
 
     handleSelect = () => {
-        const { chatId, onSelect } = this.props;
-        if (!chatId) return;
-        if (!onSelect) return;
-
-        onSelect(chatId);
+        openChat(this.props.chatId);
     };
 
     render() {

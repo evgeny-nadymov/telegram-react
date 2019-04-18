@@ -89,12 +89,6 @@ class DialogInfo extends React.Component {
         this.setState({ userChatId: chat.id });
     };
 
-    handleSelectChat = chat => {
-        if (!chat) return;
-
-        this.props.onSelectChat(chat.id);
-    };
-
     render() {
         const { classes } = this.props;
         const { currentChatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
@@ -107,13 +101,7 @@ class DialogInfo extends React.Component {
         } else if (openGroupsInCommon) {
             const chatId = userChatId || currentChatId;
 
-            content = (
-                <GroupsInCommon
-                    chatId={chatId}
-                    onClose={this.handleCloseGroupsInCommon}
-                    onSelectChat={this.handleSelectChat}
-                />
-            );
+            content = <GroupsInCommon chatId={chatId} onClose={this.handleCloseGroupsInCommon} />;
         } else {
             const chatId = userChatId || currentChatId;
             const backButton = userChatId === chatId;
@@ -125,8 +113,6 @@ class DialogInfo extends React.Component {
                     openSharedMedia={this.handelOpenSharedMedia}
                     openGroupsInCommon={this.handleOpenGroupsInCommon}
                     onClose={this.handleCloseChatDetails}
-                    onSelectUser={this.handleSelectUser}
-                    onSelectChat={this.handleSelectChat}
                 />
             );
         }

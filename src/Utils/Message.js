@@ -23,6 +23,7 @@ import { getServiceMessageContent } from './ServiceMessage';
 import { getAudioTitle } from './Media';
 import { download, saveOrDownload } from './File';
 import { getPhotoSize } from './Common';
+import { openUser } from './Commands';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
@@ -710,10 +711,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                     message_id: message.id
                 });
 
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateOpenUser',
-                    userId: contact.user_id
-                });
+                openUser(contact.userId);
             }
             break;
         }

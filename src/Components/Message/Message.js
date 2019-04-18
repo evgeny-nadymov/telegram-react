@@ -15,7 +15,6 @@ import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import { download, saveOrDownload } from '../../Utils/File';
 import {
     getDate,
     getDateHint,
@@ -29,11 +28,8 @@ import {
     openMedia
 } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
-import { getPhotoSize } from '../../Utils/Common';
-import ChatStore from '../../Stores/ChatStore';
+import { openUser, openChat } from '../../Utils/Commands';
 import MessageStore from '../../Stores/MessageStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
-import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
 
@@ -149,7 +145,7 @@ class Message extends Component {
     };
 
     openForward = () => {
-        const { chatId, messageId, onSelectUser, onSelectChat } = this.props;
+        const { chatId, messageId } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return;
@@ -157,36 +153,26 @@ class Message extends Component {
         const { forward_info } = message;
         if (!forward_info) return null;
 
+        const { sender_user_id, chat_id } = forward_info;
+
         switch (forward_info['@type']) {
             case 'messageForwardedFromUser': {
-                if (onSelectUser) {
-                    onSelectUser(forward_info.sender_user_id);
-                }
+                this.handleSelectUser(sender_user_id);
                 break;
             }
             case 'messageForwardedPost': {
-                if (onSelectChat) {
-                    onSelectChat(forward_info.chat_id);
-                }
+                this.handleSelectChat(chat_id);
                 break;
             }
         }
     };
 
     handleSelectUser = userId => {
-        const { onSelectUser } = this.props;
-        if (!onSelectUser) return;
-
-        onSelectUser(userId);
+        openUser(userId);
     };
 
-    handleSelectChat = () => {
-        const { chatId, onSelectChat } = this.props;
-
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-
-        onSelectChat(chat);
+    handleSelectChat = chatId => {
+        openChat(chatId);
     };
 
     handleSelection = () => {
@@ -246,7 +232,7 @@ class Message extends Component {
     };
 
     render() {
-        const { classes, chatId, messageId, showUnreadSeparator, onSelectUser, onSelectChat } = this.props;
+        const { classes, chatId, messageId, showUnreadSeparator } = this.props;
         const { selected } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -285,14 +271,7 @@ class Message extends Component {
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward && (
-                                <MessageAuthor
-                                    chatId={chatId}
-                                    onSelectChat={onSelectChat}
-                                    userId={senderUserId}
-                                    onSelectUser={onSelectUser}
-                                />
-                            )}
+                            {!forward && <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />}
                             {forward && (
                                 <div className={classNames('message-author', classes.messageAuthorColor)}>
                                     Forwarded from{' '}

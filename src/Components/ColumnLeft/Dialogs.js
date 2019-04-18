@@ -14,6 +14,7 @@ import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import { borderStyle } from '../Theme';
+import { openChat } from '../../Utils/Commands';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Dialogs.css';
 
@@ -93,12 +94,10 @@ class Dialogs extends Component {
         });
     };
 
-    handleSelectChat = (chatId, openSearch = false) => {
-        this.handleSelectMessage(chatId, null, openSearch);
-    };
-
     handleSelectMessage = (chatId, messageId, openSearch) => {
         const { onSelectChat } = this.props;
+
+        openChat(chatId, messageId);
 
         onSelectChat(chatId, messageId);
 
@@ -142,7 +141,7 @@ class Dialogs extends Component {
                     onSearchTextChange={this.handleSearchTextChange}
                 />
                 <div className='dialogs-content'>
-                    <DialogsList ref={this.dialogsList} onSelectChat={this.handleSelectChat} />
+                    <DialogsList ref={this.dialogsList} />
                     {openSearch && (
                         <Search
                             chatId={searchChatId}

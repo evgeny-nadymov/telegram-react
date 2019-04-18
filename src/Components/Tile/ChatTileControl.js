@@ -7,9 +7,8 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import classNames from 'classnames';
-import DialogTitleControl from './DialogTitleControl';
+import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import { getChatLetters, isMeChat } from '../../Utils/Chat';
 import { loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
@@ -17,10 +16,6 @@ import FileStore from '../../Stores/FileStore';
 import './ChatTileControl.css';
 
 class ChatTileControl extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -43,11 +38,11 @@ class ChatTileControl extends Component {
         ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
     }
 
-    onFastUpdatingComplete = (update) => {
+    onFastUpdatingComplete = update => {
         this.forceUpdate();
     };
 
-    onClientUpdateChatBlob = (update) => {
+    onClientUpdateChatBlob = update => {
         const { chatId } = this.props;
 
         if (chatId === update.chatId) {
@@ -55,19 +50,18 @@ class ChatTileControl extends Component {
         }
     };
 
-    onUpdateChatPhoto = (update) => {
+    onUpdateChatPhoto = update => {
         const { chatId } = this.props;
 
         if (!update.chat_id) return;
         if (update.chat_id !== chatId) return;
 
-        const chat = ChatStore.get(chatId);
         if (!update.photo) {
             this.forceUpdate();
         }
     };
 
-    onUpdateChatTitle = (update) => {
+    onUpdateChatTitle = update => {
         const { chatId } = this.props;
 
         if (!update.chat_id) return;
@@ -81,7 +75,7 @@ class ChatTileControl extends Component {
         }
     };
 
-    handleSelect = (event) => {
+    handleSelect = event => {
         const { chatId, onSelect } = this.props;
         if (!onSelect) return;
 
@@ -94,9 +88,7 @@ class ChatTileControl extends Component {
         const { chatId, showSavedMessages, onSelect } = this.props;
 
         if (isMeChat(chatId) && showSavedMessages) {
-            const className = classNames('tile-photo', 'tile_color_4', {
-                pointer: onSelect
-            });
+            const className = classNames('tile-photo', 'tile_color_4', { pointer: onSelect });
             return (
                 <div className={className} onClick={this.handleSelect}>
                     <div className='tile-saved-messages'>
@@ -112,33 +104,14 @@ class ChatTileControl extends Component {
         const { photo } = chat;
 
         const letters = getChatLetters(chat);
-        const blob =
-            photo && photo.small ? FileStore.getBlob(photo.small.id) : null;
-
-        let src;
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(
-                `[ChatTileControl] render chat_id=${chat.id} with error ${error}`
-            );
-        }
+        const blob = photo && photo.small ? FileStore.getBlob(photo.small.id) : null;
+        const src = FileStore.getBlobUrl(blob);
 
         const tileColor = `tile_color_${(Math.abs(chatId) % 8) + 1}`;
-        const className = classNames(
-            'tile-photo',
-            { [tileColor]: !blob },
-            { pointer: onSelect }
-        );
+        const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
 
         return src ? (
-            <img
-                className={className}
-                src={src}
-                draggable={false}
-                alt=''
-                onClick={this.handleSelect}
-            />
+            <img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect} />
         ) : (
             <div className={className} onClick={this.handleSelect}>
                 <span className='tile-text'>{letters}</span>
@@ -153,7 +126,7 @@ ChatTileControl.propTypes = {
     showSavedMessages: PropTypes.bool
 };
 
-DialogTitleControl.defaultProps = {
+ChatTileControl.defaultProps = {
     showSavedMessages: true
 };
 

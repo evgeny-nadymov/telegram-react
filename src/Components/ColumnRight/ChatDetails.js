@@ -44,6 +44,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
+import { openUser } from '../../Utils/Commands';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
@@ -325,8 +326,12 @@ class ChatDetails extends React.Component {
         ApplicationStore.setProfileMediaViewerContent({ chatId: chatId });
     };
 
+    handleSelectUser = user => {
+        openUser(user.id);
+    };
+
     render() {
-        const { chatId, classes, openSharedMedia, openGroupsInCommon, onSelectUser, backButton, onClose } = this.props;
+        const { chatId, classes, openSharedMedia, openGroupsInCommon, backButton, onClose } = this.props;
         const { hasGroupsInCommon } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -360,7 +365,7 @@ class ChatDetails extends React.Component {
         });
         const items = sortedUsers.map(user => (
             <ListItem button className={classes.listItem} key={user.id}>
-                <UserControl userId={user.id} onSelect={onSelectUser} />
+                <UserControl userId={user.id} onSelect={this.handleSelectUser} />
             </ListItem>
         ));
 

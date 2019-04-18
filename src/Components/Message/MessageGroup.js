@@ -106,7 +106,6 @@ class MessageGroup extends Component {
                 showTitle={x.id === this.props.messages[0].id}
                 sendingState={x.sending_state}
                 message={x}
-                onSelectChat={this.props.onSelectChat}
             />
         ));
 

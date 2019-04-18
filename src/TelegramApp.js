@@ -270,14 +270,8 @@ class TelegramApp extends Component {
             <>
                 <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
                     <Dialogs onClearCache={this.clearCache} onSelectChat={this.handleSelectChat} />
-                    <DialogDetails
-                        ref={this.dialogDetailsRef}
-                        onSelectChat={this.handleSelectChat}
-                        onSelectUser={this.handleSelectUser}
-                    />
-                    {isChatDetailsVisible && (
-                        <DialogInfo onSelectChat={this.handleSelectChat} onSelectUser={this.handleSelectUser} />
-                    )}
+                    <DialogDetails ref={this.dialogDetailsRef} />
+                    {isChatDetailsVisible && <DialogInfo />}
                 </div>
                 <Footer />
             </>

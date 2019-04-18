@@ -16,10 +16,6 @@ import FileStore from '../../Stores/FileStore';
 import './UserTileControl.css';
 
 class UserTileControl extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.userId !== this.props.userId) {
             return true;
@@ -46,7 +42,6 @@ class UserTileControl extends Component {
         const { userId } = this.props;
 
         if (userId === update.userId) {
-            //console.log('UserTileControl.onClientUpdateUserBlob user_id=' + userId);
             this.forceUpdate();
         }
     };
@@ -140,14 +135,7 @@ class UserTileControl extends Component {
 
         const letters = getUserLetters(user);
         const blob = profile_photo && profile_photo.small ? FileStore.getBlob(profile_photo.small.id) : null;
-
-        let src;
-        try {
-            src = FileStore.getBlobUrl(blob);
-        } catch (error) {
-            console.log(`[UserTileControl] render user_id=${userId} with error ${error}`);
-        }
-
+        const src = FileStore.getBlobUrl(blob);
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
         const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
 

@@ -61,7 +61,6 @@ class MessagesList extends React.Component {
 
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
-        this.playerRef = React.createRef();
 
         this.itemsMap = new Map();
 
@@ -912,7 +911,7 @@ class MessagesList extends React.Component {
     };
 
     render() {
-        const { classes, onSelectChat, onSelectUser } = this.props;
+        const { classes } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
 
         console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
@@ -927,8 +926,6 @@ class MessagesList extends React.Component {
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
                           messageId={x.id}
-                          onSelectChat={onSelectChat}
-                          onSelectUser={onSelectUser}
                           showUnreadSeparator={separatorMessageId === x.id}
                       />
                   ) : (
@@ -939,8 +936,6 @@ class MessagesList extends React.Component {
                           messageId={x.id}
                           showTitle
                           sendingState={x.sending_state}
-                          onSelectChat={onSelectChat}
-                          onSelectUser={onSelectUser}
                           showUnreadSeparator={separatorMessageId === x.id}
                       />
                   )
