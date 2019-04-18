@@ -12,6 +12,7 @@ import { getMedia, openMedia } from '../../Utils/Message';
 import { borderStyle } from '../Theme';
 import { withStyles } from '@material-ui/core';
 import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './Playlist.css';
 
 const styles = theme => ({
@@ -171,6 +172,21 @@ class Playlist extends React.Component {
         );
     };
 
+    handleScroll = () => {
+        const list = this.listRef.current;
+        if (!list) return;
+
+        if (list.scrollTop === 0) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaPlaylistNext'
+            });
+        } else if (list.scrollHeight === list.scrollTop + list.offsetHeight) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaPlaylistPrev'
+            });
+        }
+    };
+
     render() {
         const { classes } = this.props;
 
@@ -186,19 +202,22 @@ class Playlist extends React.Component {
 
         return (
             <div className='playlist'>
-                <div
-                    ref={this.listRef}
-                    className={classNames('playlist-items', classes.root, classes.borderColor)}
-                    onMouseEnter={this.handleMouseEnter}
-                    onMouseLeave={this.handleMouseLeave}>
-                    {playlist.messages
-                        .slice(0)
-                        .reverse()
-                        .map(x => (
-                            <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
-                                {getMedia(x, () => openMedia(x.chat_id, x.id))}
-                            </div>
-                        ))}
+                <div className={classNames('playlist-wrapper', classes.root, classes.borderColor)}>
+                    <div
+                        ref={this.listRef}
+                        className='playlist-items'
+                        onMouseEnter={this.handleMouseEnter}
+                        onMouseLeave={this.handleMouseLeave}
+                        onScroll={this.handleScroll}>
+                        {playlist.messages
+                            .slice(0)
+                            .reverse()
+                            .map(x => (
+                                <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
+                                    {getMedia(x, () => openMedia(x.chat_id, x.id))}
+                                </div>
+                            ))}
+                    </div>
                 </div>
             </div>
         );

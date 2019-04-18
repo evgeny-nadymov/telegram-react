@@ -12,12 +12,12 @@ import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
-import ShuffleIcon from '@material-ui/icons/Shuffle';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import RepeatButton from '../Player/RepeatButton';
+import ShuffleButton from '../Player/ShuffleButton';
 import VolumeButton from '../Player/VolumeButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
@@ -45,12 +45,11 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { shuffle, playbackRate, volume, message, playlist } = PlayerStore;
+        const { playbackRate, volume, message, playlist } = PlayerStore;
 
         this.startTime = PLAYER_STARTTIME;
 
         this.state = {
-            shuffle: shuffle,
             playbackRate: playbackRate,
             currentTime: 0,
             currentTimeString: getDurationString(0),
@@ -64,13 +63,9 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { shuffle, message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
+        const { message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
 
         if (nextProps.theme !== theme) {
-            return true;
-        }
-
-        if (nextState.shuffle !== shuffle) {
             return true;
         }
 
@@ -107,7 +102,6 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
-        PlayerStore.on('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
 
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -122,16 +116,9 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
-        PlayerStore.removeListener('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
 
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
-
-    onClientUpdateMediaShuffle = update => {
-        const { shuffle } = update;
-
-        this.setState({ shuffle });
-    };
 
     onClientUpdateMediaVolume = update => {
         const { volume } = update;
@@ -551,15 +538,6 @@ class HeaderPlayer extends React.Component {
         return index - 1 >= 0;
     };
 
-    handleShuffle = () => {
-        const { shuffle } = this.state;
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaShuffle',
-            shuffle: !shuffle
-        });
-    };
-
     handleTitleMouseEnter = () => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaTitleMouseOver',
@@ -576,7 +554,7 @@ class HeaderPlayer extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { shuffle, playing, message, playlist, src, playbackRate } = this.state;
+        const { playing, message, playlist, src, playbackRate } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
@@ -654,14 +632,7 @@ class HeaderPlayer extends React.Component {
                             </IconButton>
                         )}
                         {showRepeat && <RepeatButton />}
-                        {showShuffle && (
-                            <IconButton
-                                className={classes.iconButton}
-                                color={!shuffle ? 'default' : 'primary'}
-                                onClick={this.handleShuffle}>
-                                <ShuffleIcon fontSize='small' />
-                            </IconButton>
-                        )}
+                        {showShuffle && <ShuffleButton />}
                         <IconButton className={classes.iconButton} onClick={this.handleClose}>
                             <CloseIcon fontSize='small' />
                         </IconButton>

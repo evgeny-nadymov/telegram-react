@@ -8,19 +8,22 @@
 .playlist {
     position: relative;
     top: 22px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.playlist-wrapper {
+    border: 1px solid transparent;
+    position: absolute;
 }
 
 .playlist-items {
-    padding: 0 12px;
-    position: absolute;
-    background: white;
-    max-height: 330px;
     width: 300px;
+    max-height: 330px;
+    padding: 0 12px;
     overflow-x: hidden;
     overflow-y: auto;
-    z-index: 2;
-    border: 1px solid transparent;
-    /*box-sizing: border-box;*/
+    box-sizing: border-box;
 }
 
 .playlist-item {

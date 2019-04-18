@@ -69,7 +69,7 @@ class RepeatButton extends React.Component {
         });
     };
 
-    getRepeatIcon = repeat => {
+    getIcon = repeat => {
         switch (repeat) {
             case RepeatEnum.NONE: {
                 return <RepeatIcon fontSize='small' />;
@@ -95,7 +95,7 @@ class RepeatButton extends React.Component {
                 className={classes.iconButton}
                 color={repeat === RepeatEnum.NONE ? 'default' : 'primary'}
                 onClick={this.handleRepeat}>
-                {this.getRepeatIcon(repeat)}
+                {this.getIcon(repeat)}
             </IconButton>
         );
     }

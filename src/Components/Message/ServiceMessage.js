@@ -51,7 +51,7 @@ class ServiceMessage extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty service message]</div>;
 
-        const content = getServiceMessageContent(message);
+        const content = getServiceMessageContent(message, true);
 
         return (
             <div className='service-message'>
