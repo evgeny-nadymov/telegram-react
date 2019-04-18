@@ -14,13 +14,13 @@
     padding: 0 12px;
     position: absolute;
     background: white;
-    max-height: 300px;
+    max-height: 330px;
     width: 300px;
     overflow-x: hidden;
     overflow-y: auto;
     z-index: 2;
     border: 1px solid transparent;
-    box-sizing: border-box;
+    /*box-sizing: border-box;*/
 }
 
 .playlist-item {

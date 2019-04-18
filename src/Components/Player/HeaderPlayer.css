@@ -55,5 +55,8 @@
 }
 
 .header-player-play-icon {
+    width: 24px;
+    height: 24px;
+    background: red;
     /*transform: scale(1.5);*/
 }

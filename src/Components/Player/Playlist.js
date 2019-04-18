@@ -62,7 +62,7 @@ class Playlist extends React.Component {
         const node = ReactDOM.findDOMNode(item);
         if (!node) return;
 
-        list.scrollTop = node.offsetTop;
+        list.scrollTop = node.offsetTop - 15;
     };
 
     componentDidMount() {
@@ -191,11 +191,14 @@ class Playlist extends React.Component {
                     className={classNames('playlist-items', classes.root, classes.borderColor)}
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}>
-                    {playlist.messages.map(x => (
-                        <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
-                            {getMedia(x, () => openMedia(x.chat_id, x.id))}
-                        </div>
-                    ))}
+                    {playlist.messages
+                        .slice(0)
+                        .reverse()
+                        .map(x => (
+                            <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
+                                {getMedia(x, () => openMedia(x.chat_id, x.id))}
+                            </div>
+                        ))}
                 </div>
             </div>
         );

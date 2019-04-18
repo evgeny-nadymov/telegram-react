@@ -7,18 +7,18 @@
 
 import React from 'react';
 import classNames from 'classnames';
+import { withStyles } from '@material-ui/core';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import IconButton from '@material-ui/core/IconButton';
 import Slider from '@material-ui/lab/Slider';
-import { withStyles } from '@material-ui/core';
 import { borderStyle } from '../Theme';
+import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './VolumeButton.css';
-import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 
 const styles = theme => ({
     iconButton: {

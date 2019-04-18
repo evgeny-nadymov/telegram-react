@@ -240,9 +240,9 @@ class Message extends Component {
             event.stopPropagation();
         }
 
-        const { chatId, messageId, onSelectUser } = this.props;
+        const { chatId, messageId } = this.props;
 
-        openMedia(chatId, messageId, onSelectUser);
+        openMedia(chatId, messageId);
     };
 
     render() {

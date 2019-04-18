@@ -86,6 +86,9 @@ class TelegramApp extends Component {
     componentDidMount() {
         TdLibController.addListener('update', this.onUpdate);
 
+        UserStore.on('clientUpdateOpenUser', this.onClientUpdateOpenUser);
+        ChatStore.on('clientUpdateOpenChat', this.onClientUpdateOpenChat);
+
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
@@ -97,6 +100,10 @@ class TelegramApp extends Component {
 
     componentWillUnmount() {
         TdLibController.removeListener('update', this.onUpdate);
+
+        UserStore.removeListener('clientUpdateOpenUser', this.onClientUpdateOpenUser);
+        ChatStore.removeListener('clientUpdateOpenChat', this.onClientUpdateOpenChat);
+
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
@@ -108,6 +115,18 @@ class TelegramApp extends Component {
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
         ApplicationStore.removeListener('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
     }
+
+    onClientUpdateOpenChat = update => {
+        const { chatId, messageId } = update;
+
+        this.handleSelectChat(chatId, messageId);
+    };
+
+    onClientUpdateOpenUser = update => {
+        const { userId } = update;
+
+        this.handleSelectUser(userId);
+    };
 
     onUpdate = update => {
         if (FIRST_START_OPTIMIZATIONS) {

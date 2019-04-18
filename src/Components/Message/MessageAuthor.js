@@ -15,10 +15,6 @@ import ChatStore from '../../Stores/ChatStore';
 import './MessageAuthor.css';
 
 class MessageAuthor extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     handleSelect = () => {
         const { chatId, userId, onSelectUser, onSelectChat } = this.props;
 

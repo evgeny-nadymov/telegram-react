@@ -227,17 +227,19 @@ class PlayerStore extends EventEmitter {
 
     moveToPrevMedia = () => {
         if (!this.playlist) return;
+        if (!this.message) return;
 
-        const { chatId, messageId, messages } = this.playlist;
+        const { chat_id, id } = this.message;
+        const { messages } = this.playlist;
         if (!messages) return;
 
-        const index = messages.findIndex(x => x.chat_id === chatId && x.id === messageId);
+        const index = messages.findIndex(x => x.chat_id === chat_id && x.id === id);
         if (index === -1) return;
 
         if (index + 1 < messages.length) {
             const message = messages[index + 1];
 
-            openMedia(message.chat_id, message.id, null);
+            openMedia(message.chat_id, message.id, false);
         }
     };
 
@@ -283,7 +285,7 @@ class PlayerStore extends EventEmitter {
         if (nextIndex >= 0) {
             const message = messages[nextIndex];
 
-            openMedia(message.chat_id, message.id, null);
+            openMedia(message.chat_id, message.id, false);
             return true;
         }
 

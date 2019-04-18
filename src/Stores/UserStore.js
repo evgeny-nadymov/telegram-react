@@ -47,7 +47,16 @@ class UserStore extends EventEmitter {
         }
     };
 
-    onClientUpdate = update => {};
+    onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientUpdateOpenUser': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            default:
+                break;
+        }
+    };
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);

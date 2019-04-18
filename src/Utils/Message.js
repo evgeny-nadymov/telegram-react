@@ -693,7 +693,7 @@ function getSearchMessagesFilter(chatId, messageId) {
     return null;
 }
 
-function openMedia(chatId, messageId, onSelectUser) {
+function openMedia(chatId, messageId, fileCancel = true) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;
 
@@ -704,12 +704,15 @@ function openMedia(chatId, messageId, onSelectUser) {
         case 'messageContact': {
             const { contact } = content;
             if (contact) {
-                if (onSelectUser) onSelectUser(contact.user_id);
-
                 TdLibController.send({
                     '@type': 'openMessageContent',
                     chat_id: message.chat_id,
                     message_id: message.id
+                });
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateOpenUser',
+                    userId: contact.user_id
                 });
             }
             break;
@@ -720,9 +723,9 @@ function openMedia(chatId, messageId, onSelectUser) {
                 let file = document.document;
                 if (file) {
                     file = FileStore.get(file.id) || file;
-                    if (file.local.is_downloading_active) {
+                    if (fileCancel && file.local.is_downloading_active) {
                         FileStore.cancelGetRemoteFile(file.id, message);
-                    } else if (file.remote.is_uploading_active) {
+                    } else if (fileCancel && file.remote.is_uploading_active) {
                         FileStore.cancelUploadFile(file.id, message);
                     } else {
                         saveOrDownload(file, document.file_name, message, () => {
@@ -744,10 +747,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                 let file = audio.audio;
                 if (file) {
                     file = FileStore.get(file.id) || file;
-                    if (file.local.is_downloading_active) {
+                    if (fileCancel && file.local.is_downloading_active) {
                         FileStore.cancelGetRemoteFile(file.id, message);
                         return;
-                    } else if (file.remote.is_uploading_active) {
+                    } else if (fileCancel && file.remote.is_uploading_active) {
                         FileStore.cancelUploadFile(file.id, message);
                         return;
                     } else {
@@ -780,10 +783,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                     if (file) {
                         file = FileStore.get(file.id);
                         if (file) {
-                            if (file.local.is_downloading_active) {
+                            if (fileCancel && file.local.is_downloading_active) {
                                 FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
-                            } else if (file.remote.is_uploading_active) {
+                            } else if (fileCancel && file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;
                             } else {
@@ -817,10 +820,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
-                            if (file.local.is_downloading_active) {
+                            if (fileCancel && file.local.is_downloading_active) {
                                 FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
-                            } else if (file.remote.is_uploading_active) {
+                            } else if (fileCancel && file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;
                             } else {
@@ -855,10 +858,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                     let file = audio.audio;
                     if (file) {
                         file = FileStore.get(file.id) || file;
-                        if (file.local.is_downloading_active) {
+                        if (fileCancel && file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
                             return;
-                        } else if (file.remote.is_uploading_active) {
+                        } else if (fileCancel && file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                             return;
                         } else {
@@ -885,10 +888,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
-                            if (file.local.is_downloading_active) {
+                            if (fileCancel && file.local.is_downloading_active) {
                                 FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
-                            } else if (file.remote.is_uploading_active) {
+                            } else if (fileCancel && file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;
                             } else {
@@ -915,9 +918,9 @@ function openMedia(chatId, messageId, onSelectUser) {
                     let file = document.document;
                     if (file) {
                         file = FileStore.get(file.id) || file;
-                        if (file.local.is_downloading_active) {
+                        if (fileCancel && file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
-                        } else if (file.remote.is_uploading_active) {
+                        } else if (fileCancel && file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                         } else {
                             saveOrDownload(file, document.file_name, message, () => {
@@ -936,10 +939,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
-                            if (file.local.is_downloading_active) {
+                            if (fileCancel && file.local.is_downloading_active) {
                                 FileStore.cancelGetRemoteFile(file.id, message);
                                 return;
-                            } else if (file.remote.is_uploading_active) {
+                            } else if (fileCancel && file.remote.is_uploading_active) {
                                 FileStore.cancelUploadFile(file.id, message);
                                 return;
                             } else {
@@ -974,10 +977,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                         if (file) {
                             file = FileStore.get(file.id) || file;
                             if (file) {
-                                if (file.local.is_downloading_active) {
+                                if (fileCancel && file.local.is_downloading_active) {
                                     FileStore.cancelGetRemoteFile(file.id, message);
                                     return;
-                                } else if (file.remote.is_uploading_active) {
+                                } else if (fileCancel && file.remote.is_uploading_active) {
                                     FileStore.cancelUploadFile(file.id, message);
                                     return;
                                 }
@@ -1011,10 +1014,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {
-                        if (file.local.is_downloading_active) {
+                        if (fileCancel && file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
                             return;
-                        } else if (file.remote.is_uploading_active) {
+                        } else if (fileCancel && file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                             return;
                         } else {
@@ -1046,10 +1049,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {
-                        if (file.local.is_downloading_active) {
+                        if (fileCancel && file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
                             return;
-                        } else if (file.remote.is_uploading_active) {
+                        } else if (fileCancel && file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                             return;
                         } else {
@@ -1087,10 +1090,10 @@ function openMedia(chatId, messageId, onSelectUser) {
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {
-                        if (file.local.is_downloading_active) {
+                        if (fileCancel && file.local.is_downloading_active) {
                             FileStore.cancelGetRemoteFile(file.id, message);
                             return;
-                        } else if (file.remote.is_uploading_active) {
+                        } else if (fileCancel && file.remote.is_uploading_active) {
                             FileStore.cancelUploadFile(file.id, message);
                             return;
                         }
