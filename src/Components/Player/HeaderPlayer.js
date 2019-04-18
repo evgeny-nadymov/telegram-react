@@ -16,9 +16,10 @@ import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
+import VolumeButton from '../Player/VolumeButton';
 import RepeatButton from '../Player/RepeatButton';
 import ShuffleButton from '../Player/ShuffleButton';
-import VolumeButton from '../Player/VolumeButton';
+import PlaybackRateButton from './PlaybackRateButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
 import { borderStyle } from '../Theme';
@@ -45,15 +46,13 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { playbackRate, volume, message, playlist } = PlayerStore;
+        const { message, playlist } = PlayerStore;
 
         this.startTime = PLAYER_STARTTIME;
 
         this.state = {
-            playbackRate: playbackRate,
             currentTime: 0,
             currentTimeString: getDurationString(0),
-            volume: volume,
             message: message,
             playlist: playlist,
             playing: false,
@@ -63,13 +62,9 @@ class HeaderPlayer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { theme } = this.props;
-        const { message, playlist, src, playing, currentTimeString, playbackRate } = this.state;
+        const { message, playlist, src, playing } = this.state;
 
         if (nextProps.theme !== theme) {
-            return true;
-        }
-
-        if (nextState.playbackRate !== playbackRate) {
             return true;
         }
 
@@ -102,6 +97,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.on('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
 
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -116,9 +112,19 @@ class HeaderPlayer extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
         PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.removeListener('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
 
         ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
+
+    onClientUpdateMediaPlaybackRate = update => {
+        const { playbackRate } = update;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        player.playbackRate = playbackRate;
+    };
 
     onClientUpdateMediaVolume = update => {
         const { volume } = update;
@@ -127,8 +133,6 @@ class HeaderPlayer extends React.Component {
         if (!player) return;
 
         player.volume = volume;
-
-        this.setState({ volume });
     };
 
     onClientUpdateMediaViewerContent = update => {
@@ -418,11 +422,13 @@ class HeaderPlayer extends React.Component {
     };
 
     handleCanPlay = () => {
-        const { message, playbackRate, volume } = this.state;
+        const { message } = this.state;
         if (!message) return;
 
         const player = this.videoRef.current;
         if (!player) return;
+
+        const { playbackRate, volume } = PlayerStore;
 
         player.playbackRate = hasAudio(message) ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate;
         player.volume = volume;
@@ -623,14 +629,7 @@ class HeaderPlayer extends React.Component {
                             <Time />
                         </div>
                         <VolumeButton />
-                        {showPlaybackRate && (
-                            <IconButton
-                                className={classes.iconButton}
-                                color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
-                                onClick={this.handlePlaybackRate}>
-                                <div className='header-player-playback-icon'>2X</div>
-                            </IconButton>
-                        )}
+                        {showPlaybackRate && <PlaybackRateButton />}
                         {showRepeat && <RepeatButton />}
                         {showShuffle && <ShuffleButton />}
                         <IconButton className={classes.iconButton} onClick={this.handleClose}>
