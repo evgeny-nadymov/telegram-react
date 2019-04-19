@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import {
     getChatTypingString,
     getChatDraft,
@@ -71,7 +72,7 @@ class DialogContentControl extends React.Component {
     render() {
         if (this.clearHistory) return <div className='dialog-content'>{'\u00A0'}</div>;
 
-        const { chatId } = this.props;
+        const { chatId, t } = this.props;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return <div className='dialog-content'>{'\u00A0'}</div>;
@@ -97,7 +98,7 @@ class DialogContentControl extends React.Component {
         }
 
         if (!contentControl) {
-            const content = getLastMessageContent(chat) || '\u00A0';
+            const content = getLastMessageContent(chat, t) || '\u00A0';
             const senderName = getLastMessageSenderName(chat);
             contentControl = (
                 <>
@@ -111,4 +112,4 @@ class DialogContentControl extends React.Component {
     }
 }
 
-export default DialogContentControl;
+export default withTranslation()(DialogContentControl);

@@ -191,13 +191,13 @@ function getLastMessageSenderName(chat) {
     return getMessageSenderName(chat.last_message);
 }
 
-function getLastMessageContent(chat) {
-    if (!chat) return '[chat undefined]';
+function getLastMessageContent(chat, t = key => key) {
+    if (!chat) return null;
 
     const { last_message } = chat;
     if (!last_message) return null;
 
-    return getContent(last_message);
+    return getContent(last_message, t);
 }
 
 function getChatUnreadMessageIcon(chat) {

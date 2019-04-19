@@ -8,8 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ListItem from '@material-ui/core/ListItem';
 import { withStyles } from '@material-ui/core/styles';
+import { withTranslation } from 'react-i18next';
+import { compose } from 'recompose';
+import ListItem from '@material-ui/core/ListItem';
 import ChatTileControl from './ChatTileControl';
 import UserTileControl from './UserTileControl';
 import DialogTitleControl from './DialogTitleControl';
@@ -74,7 +76,7 @@ class FoundMessage extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, chatSearch, onClick, classes } = this.props;
+        const { chatId, messageId, chatSearch, onClick, classes, t } = this.props;
         const selectedChatId = this.state.nextChatId;
         const selectedMessageId = this.state.nextMessageId;
         const message = MessageStore.get(chatId, messageId);
@@ -84,7 +86,7 @@ class FoundMessage extends React.Component {
         const date = getMessageDate(message);
         const senderName = getMessageSenderName(message);
         const senderFullName = getMessageSenderFullName(message);
-        const content = getContent(message) || '\u00A0';
+        const content = getContent(message, t) || '\u00A0';
 
         const tile =
             sender_user_id && chatSearch ? (
@@ -137,4 +139,9 @@ FoundMessage.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withStyles(styles, { withTheme: true })(FoundMessage);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withTranslation()
+);
+
+export default enhance(FoundMessage);
