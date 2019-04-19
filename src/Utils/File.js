@@ -18,6 +18,7 @@ import {
     PHOTO_SIZE,
     PRELOAD_ANIMATION_SIZE,
     PRELOAD_VIDEO_SIZE,
+    PRELOAD_VOICENOTE_SIZE,
     PRELOAD_VIDEONOTE_SIZE,
     FILE_PRIORITY,
     THUMBNAIL_PRIORITY,
@@ -740,6 +741,62 @@ function getWebPageStickerFile(message) {
     return [0, '', ''];
 }
 
+function getWebPageVoiceNoteFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return [0, '', ''];
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return [0, '', ''];
+    }
+
+    const { voice_note } = web_page;
+    if (!voice_note) {
+        return [0, '', ''];
+    }
+
+    const file = voice_note.voice;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getWebPageVoiceNoteFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageText') {
+        return 0;
+    }
+
+    const { web_page } = content;
+    if (!web_page) {
+        return 0;
+    }
+
+    const { voice_note } = web_page;
+    if (!voice_note) {
+        return 0;
+    }
+
+    const file = voice_note.voice;
+    if (file) {
+        return file.size;
+    }
+
+    return 0;
+}
+
 function getWebPageVideoNoteFile(message) {
     if (message['@type'] !== 'message') {
         return [0, '', ''];
@@ -934,6 +991,52 @@ function getPhotoFile(message, size = PHOTO_SIZE) {
     }
 
     return [0, '', ''];
+}
+
+function getVoiceNoteFile(message) {
+    if (message['@type'] !== 'message') {
+        return [0, '', ''];
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVoiceNote') {
+        return [0, '', ''];
+    }
+
+    const { voice_note } = content;
+    if (!voice_note) {
+        return [0, '', ''];
+    }
+
+    const file = voice_note.voice;
+    if (file && file.remote.id) {
+        return [file.id, file.remote.id, file.idb_key];
+    }
+
+    return [0, '', ''];
+}
+
+function getVoiceNoteFileSize(message) {
+    if (message['@type'] !== 'message') {
+        return 0;
+    }
+
+    const { content } = message;
+    if (!content || content['@type'] !== 'messageVoiceNote') {
+        return 0;
+    }
+
+    const { voice_note } = content;
+    if (!voice_note) {
+        return 0;
+    }
+
+    const file = voice_note.voice;
+    if (file) {
+        return file.size;
+    }
+
+    return 0;
 }
 
 function getVideoNoteFile(message) {
@@ -1365,7 +1468,7 @@ function loadMessageContents(store, messages) {
                             break;
                         }
 
-                        const { photo, animation, video, audio, document, video_note, sticker } = web_page;
+                        const { photo, animation, video, audio, document, voice_note, video_note, sticker } = web_page;
                         let loadPhoto = true;
 
                         if (sticker) {
@@ -1407,6 +1510,30 @@ function loadMessageContents(store, messages) {
                                                 previewId
                                             ),
                                         () => FileStore.getRemoteFile(previewId, THUMBNAIL_PRIORITY, localMessage)
+                                    );
+                                }
+                            }
+                        }
+
+                        if (voice_note) {
+                            const [id, pid, idb_key] = getWebPageVoiceNoteFile(message);
+                            if (pid) {
+                                const file = voice_note.voice;
+                                const blob = FileStore.getBlob(file.id);
+                                if (!blob) {
+                                    const localMessage = message;
+                                    FileStore.getLocalFile(
+                                        store,
+                                        file,
+                                        idb_key,
+                                        null,
+                                        () => FileStore.updateVoiceNoteBlob(localMessage.chat_id, localMessage.id, id),
+                                        () => {
+                                            const fileSize = getWebPageVoiceNoteFileSize(message);
+                                            if (fileSize && fileSize < PRELOAD_VOICENOTE_SIZE) {
+                                                FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
+                                            }
+                                        }
                                     );
                                 }
                             }
@@ -1730,6 +1857,30 @@ function loadMessageContents(store, messages) {
                                         );
                                     }
                                 }
+                            }
+                        }
+                        break;
+                    }
+                    case 'messageVoiceNote': {
+                        const [id, pid, idb_key] = getVoiceNoteFile(message);
+                        if (pid) {
+                            const file = message.content.voice_note.voice;
+                            const blob = FileStore.getBlob(file.id);
+                            if (!blob) {
+                                const localMessage = message;
+                                FileStore.getLocalFile(
+                                    store,
+                                    file,
+                                    idb_key,
+                                    null,
+                                    () => FileStore.updateVoiceNoteBlob(localMessage.chat_id, localMessage.id, id),
+                                    () => {
+                                        const fileSize = getVoiceNoteFileSize(message);
+                                        if (fileSize && fileSize < PRELOAD_VOICENOTE_SIZE) {
+                                            FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage);
+                                        }
+                                    }
+                                );
                             }
                         }
                         break;

@@ -10,6 +10,7 @@ import dateFormat from 'dateformat';
 import Photo from '../Components/Message/Media/Photo';
 import Video from '../Components/Message/Media/Video';
 import Game from '../Components/Message/Media/Game';
+import VoiceNote from '../Components/Message/Media/VoiceNote';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import Animation from '../Components/Message/Media/Animation';
 import Sticker from '../Components/Message/Media/Sticker';
@@ -282,6 +283,8 @@ function getMedia(message, openMedia) {
             return <Video chatId={chat_id} messageId={id} video={content.video} openMedia={openMedia} />;
         case 'messageVideoNote':
             return <VideoNote chatId={chat_id} messageId={id} videoNote={content.video_note} openMedia={openMedia} />;
+        case 'messageVoiceNote':
+            return <VoiceNote chatId={chat_id} messageId={id} voiceNote={content.voice_note} openMedia={openMedia} />;
         case 'messageAnimation':
             return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
         case 'messageGame':
@@ -657,6 +660,15 @@ function getSearchMessagesFilter(chatId, messageId) {
             }
             break;
         }
+        case 'messageVoiceNote': {
+            const { voice_note } = content;
+            if (voice_note) {
+                return {
+                    '@type': 'searchMessagesFilterVoiceNote'
+                };
+            }
+            break;
+        }
         case 'messageVideoNote': {
             const { video_note } = content;
             if (video_note) {
@@ -671,7 +683,7 @@ function getSearchMessagesFilter(chatId, messageId) {
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { audio, video_note } = web_page;
+                const { audio, voice_note, video_note } = web_page;
                 if (audio) {
                     return null;
 
@@ -679,6 +691,15 @@ function getSearchMessagesFilter(chatId, messageId) {
                         '@type': 'searchMessagesFilterAudio'
                     };
                 }
+
+                if (voice_note) {
+                    return null;
+
+                    return {
+                        '@type': 'searchMessagesFilterVoiceNote'
+                    };
+                }
+
                 if (video_note) {
                     return null;
 
@@ -718,7 +739,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
         case 'messageDocument': {
             const { document } = content;
             if (document) {
-                let file = document.document;
+                let { document: file } = document;
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (fileCancel && file.local.is_downloading_active) {
@@ -739,10 +760,43 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
+        case 'messageVoiceNote': {
+            const { voice_note } = content;
+            if (voice_note) {
+                let { voice: file } = voice_note;
+                if (file) {
+                    file = FileStore.get(file.id) || file;
+                    if (fileCancel && file.local.is_downloading_active) {
+                        FileStore.cancelGetRemoteFile(file.id, message);
+                        return;
+                    } else if (fileCancel && file.remote.is_uploading_active) {
+                        FileStore.cancelUploadFile(file.id, message);
+                        return;
+                    } else {
+                        download(file, message);
+                    }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // set active video note
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateMediaActive',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+                }
+            }
+
+            break;
+        }
         case 'messageAudio': {
             const { audio } = content;
             if (audio) {
-                let file = audio.audio;
+                let { audio: file } = audio;
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (fileCancel && file.local.is_downloading_active) {
@@ -777,9 +831,9 @@ function openMedia(chatId, messageId, fileCancel = true) {
             if (photo) {
                 const photoSize = getPhotoSize(photo.sizes);
                 if (photoSize) {
-                    let file = photoSize.photo;
+                    let { photo: file } = photoSize;
                     if (file) {
-                        file = FileStore.get(file.id);
+                        file = FileStore.get(file.id) || file;
                         if (file) {
                             if (fileCancel && file.local.is_downloading_active) {
                                 FileStore.cancelGetRemoteFile(file.id, message);
@@ -814,7 +868,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
             if (game) {
                 const { animation } = game;
                 if (animation) {
-                    let file = animation.animation;
+                    let { animation: file } = animation;
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
@@ -853,7 +907,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                 const { photo, animation, document, audio, video_note } = web_page;
 
                 if (audio) {
-                    let file = audio.audio;
+                    let { audio: file } = audio;
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (fileCancel && file.local.is_downloading_active) {
@@ -882,7 +936,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                 }
 
                 if (video_note) {
-                    let file = video_note.video;
+                    let { video: file } = video_note;
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
@@ -913,7 +967,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                 }
 
                 if (document) {
-                    let file = document.document;
+                    let { document: file } = document;
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (fileCancel && file.local.is_downloading_active) {
@@ -933,7 +987,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                 }
 
                 if (animation) {
-                    let file = animation.animation;
+                    let { animation: file } = animation;
                     if (file) {
                         file = FileStore.get(file.id) || file;
                         if (file) {
@@ -971,7 +1025,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
                 if (photo) {
                     const photoSize = getPhotoSize(photo.sizes);
                     if (photoSize) {
-                        let file = photoSize.photo;
+                        let { photo: file } = photoSize;
                         if (file) {
                             file = FileStore.get(file.id) || file;
                             if (file) {
@@ -1008,7 +1062,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
         case 'messageVideoNote': {
             const { video_note } = message.content;
             if (video_note) {
-                let file = video_note.video;
+                let { video: file } = video_note;
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {
@@ -1043,7 +1097,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
         case 'messageAnimation': {
             const { animation } = message.content;
             if (animation) {
-                let file = animation.animation;
+                let { animation: file } = animation;
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {
@@ -1084,7 +1138,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
         case 'messageVideo': {
             const { video } = message.content;
             if (video) {
-                let file = video.video;
+                let { video: file } = video;
                 if (file) {
                     file = FileStore.get(file.id) || file;
                     if (file) {

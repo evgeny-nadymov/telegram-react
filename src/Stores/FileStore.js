@@ -153,6 +153,11 @@ class FileStore extends EventEmitter {
                                                 this.handleVideo(store, video, file, idb_key, arr, obj);
                                             }
 
+                                            const { voice_note } = web_page;
+                                            if (voice_note) {
+                                                this.handleVoiceNote(store, voice_note, file, idb_key, arr, obj);
+                                            }
+
                                             const { video_note } = web_page;
                                             if (video_note) {
                                                 this.handleVideoNote(store, video_note, file, idb_key, arr, obj);
@@ -177,6 +182,12 @@ class FileStore extends EventEmitter {
                                         const { sticker } = obj.content;
 
                                         this.handleSticker(store, sticker, file, idb_key, arr, obj);
+                                        break;
+                                    }
+                                    case 'messageVoiceNote': {
+                                        const { voice_note } = obj.content;
+
+                                        this.handleVoiceNote(store, voice_note, file, idb_key, arr, obj);
                                         break;
                                     }
                                     case 'messageVideoNote': {
@@ -377,6 +388,22 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                );
+            }
+        }
+    };
+
+    handleVoiceNote = (store, voiceNote, file, idb_key, arr, obj) => {
+        if (voiceNote.voice) {
+            const source = voiceNote.voice;
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateVoiceNoteBlob(obj.chat_id, obj.id, file.id),
                     () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
                 );
             }
@@ -699,6 +726,14 @@ class FileStore extends EventEmitter {
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdatePhotoBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateVoiceNoteBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVoiceNoteBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId

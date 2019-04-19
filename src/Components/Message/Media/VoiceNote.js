@@ -7,17 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
+import Slider from '@material-ui/lab/Slider';
 import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
+import VoiceNoteSlider from './VoiceNoteSlider';
 import FileProgress from '../../Viewer/FileProgress';
 import { getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
-import './Audio.css';
+import './VoiceNote.css';
 
-class Audio extends React.Component {
+class VoiceNote extends React.Component {
     constructor(props) {
         super(props);
 
@@ -121,18 +124,18 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, audio, openMedia } = this.props;
+        const { chatId, messageId, voiceNote, openMedia, classes } = this.props;
         const { playing } = this.state;
-        if (!audio) return null;
+        if (!voiceNote) return null;
 
-        const { album_cover_thumbnail, duration, audio: file } = audio;
+        const { duration, voice: file } = voiceNote;
 
-        const title = getAudioTitle(audio);
+        //const title = getAudioTitle(audio);
 
         return (
             <div className='document'>
                 <div className='document-tile' onClick={openMedia}>
-                    <DocumentTile thumbnail={album_cover_thumbnail} />
+                    <DocumentTile thumbnail={null} />
                     <FileProgress
                         file={file}
                         download
@@ -144,12 +147,8 @@ class Audio extends React.Component {
                     />
                 </div>
 
-                <div className='document-content'>
-                    <div className='document-title'>
-                        <a className='document-name' onClick={openMedia} title={title}>
-                            {title}
-                        </a>
-                    </div>
+                <div className='voice-note-content'>
+                    <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />
                     <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
                 </div>
             </div>
@@ -157,11 +156,11 @@ class Audio extends React.Component {
     }
 }
 
-Audio.propTypes = {
+VoiceNote.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    audio: PropTypes.object.isRequired,
+    voiceNote: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired
 };
 
-export default Audio;
+export default VoiceNote;

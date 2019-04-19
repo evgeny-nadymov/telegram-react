@@ -88,6 +88,7 @@ class HeaderPlayer extends React.Component {
     }
 
     componentDidMount() {
+        FileStore.on('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -103,6 +104,7 @@ class HeaderPlayer extends React.Component {
     }
 
     componentWillUnmount() {
+        FileStore.removeListener('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -194,12 +196,19 @@ class HeaderPlayer extends React.Component {
             case 'messageText': {
                 const { web_page } = content;
                 if (web_page) {
-                    const { audio, video_note } = web_page;
+                    const { audio, voice_note, video_note } = web_page;
 
                     if (audio) {
                         const file = audio.audio;
                         if (file) {
                             this.startPlayingFile(file, message);
+                        }
+                    }
+
+                    if (voice_note) {
+                        const { voice } = voice_note;
+                        if (voice) {
+                            this.startPlayingFile(voice, message);
                         }
                     }
 
@@ -219,6 +228,17 @@ class HeaderPlayer extends React.Component {
                     const file = audio.audio;
                     if (file) {
                         this.startPlayingFile(file, message);
+                    }
+                }
+
+                break;
+            }
+            case 'messageVoiceNote': {
+                const { voice_note } = content;
+                if (voice_note) {
+                    const { voice } = voice_note;
+                    if (voice) {
+                        this.startPlayingFile(voice, message);
                     }
                 }
 
@@ -325,19 +345,29 @@ class HeaderPlayer extends React.Component {
         if (message) {
             const { content } = message;
             if (content) {
-                const { audio, video_note, web_page } = content;
+                const { audio, voice_note, video_note, web_page } = content;
+
                 if (audio) {
                     const file = audio.audio;
                     if (file) {
                         return getSrc(file);
                     }
                 }
+
+                if (voice_note) {
+                    const { voice } = voice_note;
+                    if (voice) {
+                        return getSrc(voice);
+                    }
+                }
+
                 if (video_note) {
                     const { video } = video_note;
                     if (video) {
                         return getSrc(video);
                     }
                 }
+
                 if (web_page) {
                     if (web_page.audio) {
                         const file = web_page.audio.audio;
@@ -345,6 +375,14 @@ class HeaderPlayer extends React.Component {
                             return getSrc(file);
                         }
                     }
+
+                    if (web_page.voice_note) {
+                        const { voice } = web_page.voice_note;
+                        if (voice) {
+                            return getSrc(voice);
+                        }
+                    }
+
                     if (web_page.video_note) {
                         const { video } = web_page.video_note;
                         if (video) {
