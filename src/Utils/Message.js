@@ -904,7 +904,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
         case 'messageText': {
             const { web_page } = message.content;
             if (web_page) {
-                const { photo, animation, document, audio, video_note } = web_page;
+                const { photo, animation, document, audio, voice_note, video_note } = web_page;
 
                 if (audio) {
                     let { audio: file } = audio;
@@ -933,6 +933,37 @@ function openMedia(chatId, messageId, fileCancel = true) {
                             messageId: message.id
                         });
                     }
+                }
+
+                if (voice_note) {
+                    let { voice: file } = voice_note;
+                    if (file) {
+                        file = FileStore.get(file.id) || file;
+                        if (file) {
+                            if (fileCancel && file.local.is_downloading_active) {
+                                FileStore.cancelGetRemoteFile(file.id, message);
+                                return;
+                            } else if (fileCancel && file.remote.is_uploading_active) {
+                                FileStore.cancelUploadFile(file.id, message);
+                                return;
+                            } else {
+                                download(file, message);
+                            }
+                        }
+                    }
+
+                    TdLibController.send({
+                        '@type': 'openMessageContent',
+                        chat_id: message.chat_id,
+                        message_id: message.id
+                    });
+
+                    // set active video note
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateMediaActive',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
                 }
 
                 if (video_note) {

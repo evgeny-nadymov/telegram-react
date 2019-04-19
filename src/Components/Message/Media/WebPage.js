@@ -14,6 +14,7 @@ import Photo from './Photo';
 import Video from './Video';
 import Audio from './Audio';
 import Document from './Document';
+import VoiceNote from './VoiceNote';
 import VideoNote from './VideoNote';
 import Sticker from './Sticker';
 import { getFitSize, getSize } from '../../../Utils/Common';
@@ -67,6 +68,7 @@ class WebPage extends React.Component {
             video,
             audio,
             document,
+            voice_note,
             video_note,
             sticker,
             type
@@ -81,6 +83,19 @@ class WebPage extends React.Component {
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
                     <Sticker chatId={chatId} messageId={messageId} sticker={sticker} openMedia={openMedia} />
+                </>
+            );
+        }
+
+        if (voice_note) {
+            return (
+                <>
+                    {site_name && (
+                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                    )}
+                    {title && <div className='web-page-title'>{title}</div>}
+                    {description && <div className='web-page-description'>{description}</div>}
+                    <VoiceNote chatId={chatId} messageId={messageId} voiceNote={voice_note} openMedia={openMedia} />
                 </>
             );
         }
