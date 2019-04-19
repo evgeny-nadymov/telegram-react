@@ -15,7 +15,7 @@ import './VoiceNoteSlider.css';
 
 const styles = {
     slider: {
-        maxWidth: 150
+        maxWidth: 216
     },
     track: {
         transition: 'width 0ms linear 0ms, height 0ms linear 0ms, transform 0ms linear 0ms'

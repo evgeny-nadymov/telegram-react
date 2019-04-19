@@ -7,16 +7,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
-import Slider from '@material-ui/lab/Slider';
 import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
+import MediaStatus from './MediaStatus';
 import VoiceNoteSlider from './VoiceNoteSlider';
 import FileProgress from '../../Viewer/FileProgress';
-import { getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './VoiceNote.css';
 
@@ -149,7 +147,10 @@ class VoiceNote extends React.Component {
 
                 <div className='voice-note-content'>
                     <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />
-                    <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
+                    <div className='voice-note-meta'>
+                        <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
+                        <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
+                    </div>
                 </div>
             </div>
         );

@@ -341,7 +341,7 @@ class VideoNote extends React.Component {
                             </div>
                             <div className='animation-meta'>
                                 {getDurationString(active ? Math.floor(currentTime) : duration)}
-                                <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
+                                <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
                             </div>
                             <div className='video-note-muted'>
                                 <VolumeOffIcon />
@@ -360,7 +360,7 @@ class VideoNote extends React.Component {
                         </div>
                         <div className='animation-meta'>
                             {getDurationString(duration) + ' ' + getFileSize(video)}
-                            <MediaStatus chatId={chatId} messageId={messageId} icon={' •'} />
+                            <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
                         </div>
                         <div className='video-note-muted'>
                             <VolumeOffIcon />
