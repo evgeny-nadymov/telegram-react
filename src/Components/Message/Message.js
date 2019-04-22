@@ -144,7 +144,7 @@ class Message extends Component {
         }
     };
 
-    openForward = () => {
+    openForward = event => {
         const { chatId, messageId } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
@@ -157,10 +157,14 @@ class Message extends Component {
 
         switch (forward_info['@type']) {
             case 'messageForwardedFromUser': {
+                event.stopPropagation();
+
                 this.handleSelectUser(sender_user_id);
                 break;
             }
             case 'messageForwardedPost': {
+                event.stopPropagation();
+
                 this.handleSelectChat(chat_id);
                 break;
             }

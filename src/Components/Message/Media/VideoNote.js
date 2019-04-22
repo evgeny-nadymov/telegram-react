@@ -322,8 +322,8 @@ class VideoNote extends React.Component {
                             className={classNames('media-viewer-content-image', 'video-note-round')}
                             poster={thumbnailSrc}
                             muted
-                            loop
                             autoPlay
+                            loop
                             playsInline
                             width={style.width}
                             height={style.height}
