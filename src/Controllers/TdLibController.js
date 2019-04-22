@@ -19,7 +19,8 @@ class TdLibController extends EventEmitter {
             readOnly: false,
             verbosity: 1,
             jsVerbosity: 3,
-            fastUpdating: true
+            fastUpdating: true,
+            noDb: false
         };
 
         this.disableLog = false;
@@ -30,7 +31,7 @@ class TdLibController extends EventEmitter {
     init = location => {
         this.setParameters(location);
 
-        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating } = this.parameters;
+        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, noDb } = this.parameters;
 
         let options = {
             logVerbosityLevel: verbosity,
@@ -38,7 +39,8 @@ class TdLibController extends EventEmitter {
             mode: 'wasm', // 'wasm-streaming'/'wasm'/'asmjs'
             prefix: useTestDC ? 'tdlib_test' : 'tdlib',
             readOnly: readOnly,
-            isBackground: false
+            isBackground: false,
+            noDb: noDb
             // onUpdate: update => this.emit('update', update)
         };
 
@@ -123,6 +125,13 @@ class TdLibController extends EventEmitter {
             const fastUpdating = parseInt(params.get('fastupdating'), 10);
             if (fastUpdating === 0 || fastUpdating === 1) {
                 this.parameters.fastUpdating = fastUpdating === 1;
+            }
+        }
+
+        if (params.has('nodb')) {
+            const noDb = parseInt(params.get('nodb'), 10);
+            if (noDb === 0 || noDb === 1) {
+                this.parameters.noDb = noDb === 1;
             }
         }
     };
