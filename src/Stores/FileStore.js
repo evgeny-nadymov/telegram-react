@@ -49,7 +49,20 @@ class FileStore extends EventEmitter {
         }
     };
 
-    onClientUpdate = update => {};
+    onClientUpdate = update => {
+        switch (update['@type']) {
+            case 'clientUpdateAudioThumbnailBlob': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateAudioBlob': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            default:
+                break;
+        }
+    };
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
@@ -331,7 +344,7 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateDocumentThumbnailBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
                 );
             }
         }
@@ -358,7 +371,7 @@ class FileStore extends EventEmitter {
                     idb_key,
                     arr,
                     () => this.updateLocationBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
                 );
             }
         }
@@ -732,8 +745,46 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updateAudioThumbnailBlob = (chatId, messageId, fileId) => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateAudioThumbnailBlob',
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+
+        // this.emit('clientUpdateAudioThumbnailBlob', {
+        //     chatId: chatId,
+        //     messageId: messageId,
+        //     fileId: fileId
+        // });
+    };
+
+    updateAudioBlob = (chatId, messageId, fileId) => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateAudioBlob',
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+
+        // this.emit('clientUpdateAudioBlob', {
+        //     chatId: chatId,
+        //     messageId: messageId,
+        //     fileId: fileId
+        // });
+    };
+
     updateVoiceNoteBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVoiceNoteBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateVideoNoteThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVideoNoteThumbnailBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId
@@ -748,8 +799,24 @@ class FileStore extends EventEmitter {
         });
     };
 
+    updateAnimationThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateAnimationThumbnailBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
     updateAnimationBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateAnimationBlob', {
+            chatId: chatId,
+            messageId: messageId,
+            fileId: fileId
+        });
+    };
+
+    updateVideoThumbnailBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateVideoThumbnailBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId
@@ -780,32 +847,8 @@ class FileStore extends EventEmitter {
         });
     };
 
-    updateAudioBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateAudioBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
-        });
-    };
-
-    updateVideoNoteThumbnailBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateVideoNoteThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
-        });
-    };
-
-    updateAnimationThumbnailBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateAnimationThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
-        });
-    };
-
-    updateVideoThumbnailBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateVideoThumbnailBlob', {
+    updateLocationBlob = (chatId, messageId, fileId) => {
+        this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId
@@ -814,14 +857,6 @@ class FileStore extends EventEmitter {
 
     updateDocumentThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateDocumentThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
-        });
-    };
-
-    updateLocationBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateLocationBlob', {
             chatId: chatId,
             messageId: messageId,
             fileId: fileId
@@ -841,14 +876,6 @@ class FileStore extends EventEmitter {
             fileId: fileId
         });
     }
-
-    updateAudioThumbnailBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateAudioThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
-        });
-    };
 }
 
 const store = new FileStore();

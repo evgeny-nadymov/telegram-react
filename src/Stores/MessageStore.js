@@ -6,7 +6,6 @@
  */
 
 import { EventEmitter } from 'events';
-import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class MessageStore extends EventEmitter {
@@ -130,16 +129,13 @@ class MessageStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateMessageSelected': {
-                const chatId = ApplicationStore.getChatId();
-                if (chatId === update.chatId) {
-                    if (update.selected) {
-                        this.selectedItems.set(`chatId=${update.chatId}_messageId=${update.messageId}`, {
-                            chatId: update.chatId,
-                            messageId: update.messageId
-                        });
-                    } else {
-                        this.selectedItems.delete(`chatId=${update.chatId}_messageId=${update.messageId}`);
-                    }
+                if (update.selected) {
+                    this.selectedItems.set(`chatId=${update.chatId}_messageId=${update.messageId}`, {
+                        chatId: update.chatId,
+                        messageId: update.messageId
+                    });
+                } else {
+                    this.selectedItems.delete(`chatId=${update.chatId}_messageId=${update.messageId}`);
                 }
 
                 this.emit('clientUpdateMessageSelected', update);
