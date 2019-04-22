@@ -93,6 +93,10 @@ function substring(text, start, end) {
     return text.substring(start, end);
 }
 
+function stopPropagation(event) {
+    event.stopPropagation();
+}
+
 function getFormattedText(text) {
     if (text['@type'] !== 'formattedText') return null;
     if (!text.text) return null;
@@ -123,7 +127,13 @@ function getFormattedText(text) {
                 }
 
                 result.push(
-                    <a key={text.entities[i].offset} href={url} title={url} target='_blank' rel='noopener noreferrer'>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={url}
+                        title={url}
+                        target='_blank'
+                        rel='noopener noreferrer'>
                         {decodedUrl}
                     </a>
                 );
@@ -134,7 +144,13 @@ function getFormattedText(text) {
                     ? text.entities[i].type.url
                     : 'http://' + text.entities[i].type.url;
                 result.push(
-                    <a key={text.entities[i].offset} href={url} title={url} target='_blank' rel='noopener noreferrer'>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={url}
+                        title={url}
+                        target='_blank'
+                        rel='noopener noreferrer'>
                         {entityText}
                     </a>
                 );
@@ -158,14 +174,17 @@ function getFormattedText(text) {
                 break;
             case 'textEntityTypeMention':
                 result.push(
-                    <a key={text.entities[i].offset} href={`#/im?p=${entityText}`}>
+                    <a key={text.entities[i].offset} onClick={stopPropagation} href={`#/im?p=${entityText}`}>
                         {entityText}
                     </a>
                 );
                 break;
             case 'textEntityTypeMentionName':
                 result.push(
-                    <a key={text.entities[i].offset} href={`#/im?p=u${text.entities[i].type.user_id}`}>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={`#/im?p=u${text.entities[i].type.user_id}`}>
                         {entityText}
                     </a>
                 );
@@ -173,7 +192,10 @@ function getFormattedText(text) {
             case 'textEntityTypeHashtag':
                 let hashtag = entityText.length > 0 && entityText[0] === '#' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a key={text.entities[i].offset} href={`tg://search_hashtag?hashtag=${hashtag}`}>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={`tg://search_hashtag?hashtag=${hashtag}`}>
                         {entityText}
                     </a>
                 );
@@ -182,6 +204,7 @@ function getFormattedText(text) {
                 result.push(
                     <a
                         key={text.entities[i].offset}
+                        onClick={stopPropagation}
                         href={`mailto:${entityText}`}
                         target='_blank'
                         rel='noopener noreferrer'>
@@ -192,7 +215,10 @@ function getFormattedText(text) {
             case 'textEntityTypeBotCommand':
                 let command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a key={text.entities[i].offset} href={`tg://bot_command?command=${command}&bot=`}>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={`tg://bot_command?command=${command}&bot=`}>
                         {entityText}
                     </a>
                 );
