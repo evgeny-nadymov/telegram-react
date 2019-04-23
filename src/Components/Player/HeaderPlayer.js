@@ -24,6 +24,7 @@ import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
+import { openChat } from '../../Utils/Commands';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
@@ -596,9 +597,16 @@ class HeaderPlayer extends React.Component {
         });
     };
 
+    handleTitleClick = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        openChat(message.chat_id, message.id);
+    };
+
     render() {
         const { classes } = this.props;
-        const { playing, message, playlist, src, playbackRate } = this.state;
+        const { playing, message, playlist, src } = this.state;
 
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
@@ -653,7 +661,8 @@ class HeaderPlayer extends React.Component {
                         <div
                             className='header-player-content'
                             onMouseEnter={this.handleTitleMouseEnter}
-                            onMouseLeave={this.handleTitleMouseLeave}>
+                            onMouseLeave={this.handleTitleMouseLeave}
+                            onClick={this.handleTitleClick}>
                             <div className='header-player-title'>
                                 {title}
                                 {showDate && (
