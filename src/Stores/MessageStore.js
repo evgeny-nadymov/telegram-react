@@ -128,6 +128,10 @@ class MessageStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateMessageHighlighted': {
+                this.emit('clientUpdateMessageHighlighted', update);
+                break;
+            }
             case 'clientUpdateMessageSelected': {
                 if (update.selected) {
                     this.selectedItems.set(`chatId=${update.chatId}_messageId=${update.messageId}`, {

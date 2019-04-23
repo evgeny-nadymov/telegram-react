@@ -22,4 +22,21 @@ function openChat(chatId, messageId = null) {
     });
 }
 
-export { openUser, openChat };
+function highlightMessage(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateMessageHighlighted',
+        chatId: chatId,
+        messageId: messageId
+    });
+}
+
+function selectMessage(chatId, messageId, selected) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateMessageSelected',
+        chatId: chatId,
+        messageId: messageId,
+        selected: selected
+    });
+}
+
+export { openUser, openChat, highlightMessage, selectMessage };

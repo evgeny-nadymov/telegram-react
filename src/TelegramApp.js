@@ -32,6 +32,7 @@ import MediaViewer from './Components/Viewer/MediaViewer';
 import ProfileMediaViewer from './Components/Viewer/ProfileMediaViewer';
 import AppInactiveControl from './Components/Additional/AppInactiveControl';
 import registerServiceWorker from './registerServiceWorker';
+import { highlightMessage } from './Utils/Commands';
 import { FIRST_START_OPTIMIZATIONS } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
@@ -195,6 +196,9 @@ class TelegramApp extends Component {
 
         if (currentChatId === chatId && messageId && currentMessageId === messageId) {
             this.dialogDetailsRef.current.scrollToMessage();
+            if (messageId) {
+                highlightMessage(chatId, messageId);
+            }
         } else if (currentChatId === chatId && !messageId) {
             const chat = ChatStore.get(chatId);
             if (chat && chat.unread_count > 0) {

@@ -13,6 +13,7 @@ import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import { getContent, getTitle } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
+import { openChat } from '../../Utils/Commands';
 import MessageStore from '../../Stores/MessageStore';
 import './Reply.css';
 
@@ -59,6 +60,17 @@ class Reply extends React.Component {
         return message && message['@type'] === 'deletedMessage';
     };
 
+    handleClick = event => {
+        event.stopPropagation();
+
+        const { chatId, messageId } = this.props;
+
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        openChat(chatId, messageId);
+    };
+
     render() {
         const { classes, t, chatId, messageId } = this.props;
 
@@ -70,7 +82,7 @@ class Reply extends React.Component {
         const subtitle = this.isDeletedMessage(message) ? 'Deleted message' : getContent(message, t);
 
         return (
-            <div className='reply'>
+            <div className='reply' onClick={this.handleClick}>
                 <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                 <div className='reply-content'>
                     {title && <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>}

@@ -28,7 +28,7 @@ import {
     openMedia
 } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
-import { openUser, openChat } from '../../Utils/Commands';
+import { openUser, openChat, selectMessage } from '../../Utils/Commands';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
@@ -36,6 +36,16 @@ import './Message.css';
 const styles = theme => ({
     messageAuthorColor: {
         color: theme.palette.primary.main
+    },
+    messageSelected: {
+        backgroundColor: theme.palette.primary.main + '11'
+    },
+    '@keyframes highlighted': {
+        from: { backgroundColor: theme.palette.primary.main + '11' },
+        to: { backgroundColor: 'transparent' }
+    },
+    messageHighlighted: {
+        animation: 'highlighted 4s ease-out'
     }
 });
 
@@ -51,14 +61,15 @@ class Message extends Component {
             };
         } else {
             this.state = {
-                selected: false
+                selected: false,
+                highlighted: false
             };
         }
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator } = this.props;
-        const { selected } = this.state;
+        const { selected, highlighted } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -84,6 +95,10 @@ class Message extends Component {
             return true;
         }
 
+        if (nextState.highlighted !== highlighted) {
+            return true;
+        }
+
         return false;
     }
 
@@ -91,6 +106,7 @@ class Message extends Component {
         MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
     }
@@ -99,6 +115,7 @@ class Message extends Component {
         MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
         MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
         MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.removeListener('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
     }
@@ -109,11 +126,33 @@ class Message extends Component {
         this.setState({ selected: false });
     };
 
-    onClientUpdateMessageSelected = update => {
+    onClientUpdateMessageHighlighted = update => {
         const { chatId, messageId } = this.props;
+        const { selected, highlighted } = this.state;
+
+        if (selected) return;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({ selected: update.selected });
+            if (highlighted) {
+                this.setState({ highlighted: false }, () => {
+                    setTimeout(() => {
+                        this.setState({ highlighted: true });
+                    }, 0);
+                });
+            } else {
+                this.setState({ highlighted: true });
+            }
+        } else if (highlighted) {
+            this.setState({ highlighted: false });
+        }
+    };
+
+    onClientUpdateMessageSelected = update => {
+        const { chatId, messageId } = this.props;
+        const { selected } = update;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            this.setState({ selected, highlighted: false });
         }
     };
 
@@ -186,12 +225,8 @@ class Message extends Component {
         const { chatId, messageId } = this.props;
 
         const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMessageSelected',
-            chatId: chatId,
-            messageId: messageId,
-            selected: selected
-        });
+
+        selectMessage(chatId, messageId, selected);
     };
 
     handleDateClick = e => {
@@ -235,9 +270,13 @@ class Message extends Component {
         openMedia(chatId, messageId);
     };
 
+    handleAnimationEnd = () => {
+        this.setState({ highlighted: false });
+    };
+
     render() {
         const { classes, chatId, messageId, showUnreadSeparator } = this.props;
-        const { selected } = this.state;
+        const { selected, highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -258,10 +297,16 @@ class Message extends Component {
             <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
         );
 
-        const messageClassName = classNames('message', { 'message-selected': selected });
+        const messageClassName = classNames(
+            'message',
+            { 'message-selected': selected },
+            { [classes.messageSelected]: selected },
+            // { 'message-highlighted': highlighted && !selected },
+            { [classes.messageHighlighted]: highlighted && !selected }
+        );
 
         return (
-            <div className={messageClassName} onClick={this.handleSelection}>
+            <div className={messageClassName} onClick={this.handleSelection} onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <i className='message-select-tick' />

@@ -62,6 +62,37 @@ pre code {
     cursor: pointer;
 }
 
+.message:hover .message-select-tick {
+    opacity: 0.5;
+}
+
+.message-selected {
+}
+
+.message-selected:hover .message-select-tick {
+    opacity: 1;
+}
+
+.message-selected .message-select-tick {
+    opacity: 1;
+}
+
+.message-highlighted {
+    animation: message-highlighted-animation;
+    animation-duration: 4s;
+    animation-timing-function: ease-out;
+    /*background-color: #80d066;*/
+}
+
+@keyframes message-highlighted-animation {
+    0% {
+        background-color: #80d066;
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
 .message-wrapper {
     max-width: 460px;
     padding: 8px 15px;
@@ -118,22 +149,6 @@ pre code {
 
 .message-views {
     font-weight: 500;
-}
-
-.message:hover .message-select-tick {
-    opacity: 0.5;
-}
-
-.message-selected {
-    /*background: #f2f6fa;*/
-}
-
-.message-selected:hover .message-select-tick {
-    opacity: 1;
-}
-
-.message-selected .message-select-tick {
-    opacity: 1;
 }
 
 .message-select-tick {
