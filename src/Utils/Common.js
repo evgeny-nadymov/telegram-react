@@ -8,6 +8,22 @@
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+function stringToBoolean(string) {
+    switch (string.toLowerCase().trim()) {
+        case 'true':
+        case 'yes':
+        case '1':
+            return true;
+        case 'false':
+        case 'no':
+        case '0':
+        case null:
+            return false;
+        default:
+            return Boolean(string);
+    }
+}
+
 function orderCompare(order1, order2) {
     let diff = order1.length - order2.length;
     if (diff !== 0) return diff < 0 ? -1 : 1;
@@ -298,6 +314,7 @@ function getRandomInt(min, max) {
 }
 
 export {
+    stringToBoolean,
     orderCompare,
     getSize,
     getPhotoThumbnailSize,

@@ -9,6 +9,7 @@ import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
 import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
+import { stringToBoolean } from '../Utils/Common';
 
 class TdLibController extends EventEmitter {
     constructor() {
@@ -77,10 +78,7 @@ class TdLibController extends EventEmitter {
         const params = new URLSearchParams(search.toLowerCase());
 
         if (params.has('test')) {
-            const useTestDC = parseInt(params.get('test'), 10);
-            if (useTestDC === 0 || useTestDC === 1) {
-                this.parameters.useTestDC = useTestDC === 1;
-            }
+            this.parameters.useTestDC = stringToBoolean(params.get('test'));
         }
 
         if (params.has('verbosity')) {
@@ -98,12 +96,12 @@ class TdLibController extends EventEmitter {
         }
 
         if (params.has('tag') && params.has('tagverbosity')) {
-            let tag = params
+            const tag = params
                 .get('tag')
                 .replace('[', '')
                 .replace(']', '')
                 .split(',');
-            let tagVerbosity = params
+            const tagVerbosity = params
                 .get('tagverbosity')
                 .replace('[', '')
                 .replace(']', '')
@@ -115,24 +113,15 @@ class TdLibController extends EventEmitter {
         }
 
         if (params.has('readonly')) {
-            const readOnly = parseInt(params.get('readonly'), 10);
-            if (readOnly === 0 || readOnly === 1) {
-                this.parameters.readOnly = readOnly === 1;
-            }
+            this.parameters.readOnly = stringToBoolean(params.get('readonly'));
         }
 
         if (params.has('fastupdating')) {
-            const fastUpdating = parseInt(params.get('fastupdating'), 10);
-            if (fastUpdating === 0 || fastUpdating === 1) {
-                this.parameters.fastUpdating = fastUpdating === 1;
-            }
+            this.parameters.fastUpdating = stringToBoolean(params.get('fastupdating'));
         }
 
         if (params.has('nodb')) {
-            const noDb = parseInt(params.get('nodb'), 10);
-            if (noDb === 0 || noDb === 1) {
-                this.parameters.noDb = noDb === 1;
-            }
+            this.parameters.noDb = stringToBoolean(params.get('nodb'));
         }
     };
 
