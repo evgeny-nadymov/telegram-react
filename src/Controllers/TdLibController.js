@@ -21,7 +21,8 @@ class TdLibController extends EventEmitter {
             verbosity: 1,
             jsVerbosity: 3,
             fastUpdating: true,
-            noDb: false
+            noDb: false,
+            mode: 'wasm'
         };
 
         this.disableLog = false;
@@ -32,12 +33,12 @@ class TdLibController extends EventEmitter {
     init = location => {
         this.setParameters(location);
 
-        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, noDb } = this.parameters;
+        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, noDb, mode } = this.parameters;
 
         let options = {
             logVerbosityLevel: verbosity,
             jsLogVerbosityLevel: jsVerbosity,
-            mode: 'wasm', // 'wasm-streaming'/'wasm'/'asmjs'
+            mode: mode, // 'wasm-streaming'/'wasm'/'asmjs'
             prefix: useTestDC ? 'tdlib_test' : 'tdlib',
             readOnly: readOnly,
             isBackground: false,
@@ -122,6 +123,9 @@ class TdLibController extends EventEmitter {
 
         if (params.has('nodb')) {
             this.parameters.noDb = stringToBoolean(params.get('nodb'));
+        }
+        if (params.has('mode')) {
+            this.parameters.mode = params.get('mode');
         }
     };
 
