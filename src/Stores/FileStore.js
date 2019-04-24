@@ -96,7 +96,7 @@ class FileStore extends EventEmitter {
                 }
 
                 const { arr, idb_key } = file;
-                //delete file.arr;
+                delete file.arr;
 
                 let items = this.downloads.get(file.id);
                 if (items) {
