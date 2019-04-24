@@ -135,11 +135,6 @@ class LocalizationStore extends EventEmitter {
                     case 'authorizationStateWaitTdlibParameters':
                         TdLibController.send({
                             '@type': 'setOption',
-                            name: 'language_pack_database_path',
-                            value: { '@type': 'optionValueString', value: '/tdlib/dbfs/language' }
-                        });
-                        TdLibController.send({
-                            '@type': 'setOption',
                             name: 'localization_target',
                             value: { '@type': 'optionValueString', value: 'android' }
                         });

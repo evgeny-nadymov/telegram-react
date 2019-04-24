@@ -72,7 +72,7 @@ class TelegramApp extends Component {
         };
 
         /*this.store = localForage.createInstance({
-                    name: '/tdlib'
+                    name: 'tdlib'
                 });*/
 
         //this.initDB();

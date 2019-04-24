@@ -519,7 +519,7 @@ class FileStore extends EventEmitter {
 
             this.initiatingDB = true;
             this.store = localForage.createInstance({
-                name: '/tdlib'
+                name: 'tdlib'
             });
             this.initiatingDB = false;
 
@@ -554,7 +554,7 @@ class FileStore extends EventEmitter {
 
     openDB() {
         return new Promise((resolve, reject) => {
-            const request = window.indexedDB.open('/tdlib');
+            const request = window.indexedDB.open('tdlib');
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
