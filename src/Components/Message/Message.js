@@ -7,8 +7,11 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import Reply from './Reply';
+import Forward from './Forward';
 import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
 import UserTileControl from '../Tile/UserTileControl';
@@ -20,7 +23,6 @@ import {
     getDateHint,
     getText,
     getMedia,
-    getForward,
     getUnread,
     getSenderUserId,
     getWebPage,
@@ -182,33 +184,6 @@ class Message extends Component {
         }
     };
 
-    openForward = event => {
-        const { chatId, messageId } = this.props;
-
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
-
-        const { forward_info } = message;
-        if (!forward_info) return null;
-
-        const { sender_user_id, chat_id } = forward_info;
-
-        switch (forward_info['@type']) {
-            case 'messageForwardedFromUser': {
-                event.stopPropagation();
-
-                this.handleSelectUser(sender_user_id);
-                break;
-            }
-            case 'messageForwardedPost': {
-                event.stopPropagation();
-
-                this.handleSelectChat(chat_id);
-                break;
-            }
-        }
-    };
-
     handleSelectUser = userId => {
         openUser(userId);
     };
@@ -274,20 +249,19 @@ class Message extends Component {
     };
 
     render() {
-        const { classes, chatId, messageId, showUnreadSeparator } = this.props;
+        const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const { selected, highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id } = message;
+        const { sending_state, views, edit_date, reply_to_message_id, forward_info } = message;
 
         const text = getText(message);
         const webPage = getWebPage(message);
         const date = getDate(message);
         const dateHint = getDateHint(message);
         const media = getMedia(message, this.openMedia);
-        const forward = getForward(message);
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
 
@@ -316,15 +290,8 @@ class Message extends Component {
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward && <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />}
-                            {forward && (
-                                <div className={classNames('message-author', classes.messageAuthorColor)}>
-                                    Forwarded from{' '}
-                                    <a className={classes.messageAuthorColor} onClick={this.openForward}>
-                                        {forward}
-                                    </a>
-                                </div>
-                            )}
+                            {!forward_info && <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />}
+                            {forward_info && <Forward forwardInfo={forward_info} />}
                             <div className='message-meta'>
                                 <span>&nbsp;</span>
                                 {views > 0 && (
@@ -337,13 +304,13 @@ class Message extends Component {
                                         </span>
                                     </>
                                 )}
-                                {edit_date > 0 && <span>edited&nbsp;</span>}
+                                {edit_date > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
                                 <a className='message-date' onClick={this.handleDateClick}>
                                     <span title={dateHint}>{date}</span>
                                 </a>
                             </div>
                         </div>
-                        {reply_to_message_id && <Reply chatId={chatId} messageId={reply_to_message_id} />}
+                        {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
                         {media}
                         <div className='message-text'>{text}</div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
@@ -354,4 +321,9 @@ class Message extends Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(Message);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withTranslation()
+);
+
+export default enhance(Message);

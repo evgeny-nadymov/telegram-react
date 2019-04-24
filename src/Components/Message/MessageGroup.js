@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import Message from './../Message/Message';
 import UserTileControl from './../Tile/UserTileControl';
-import { getTitle, getDate, getText, getMedia, getForward } from '../../Utils/Message';
+import { getTitle, getDate, getText, getMedia } from '../../Utils/Message';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';

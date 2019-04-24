@@ -32,6 +32,7 @@ import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
+import { getChatTitle } from './Chat';
 
 function getAuthor(message) {
     if (!message) return null;
@@ -332,26 +333,53 @@ function getMedia(message, openMedia) {
     }
 }
 
-function getForward(message) {
-    if (!message) return null;
-    if (!message.forward_info) return null;
+function isForwardOriginHidden(forwardInfo) {
+    if (!forwardInfo) return false;
 
-    switch (message.forward_info['@type']) {
-        case 'messageForwardedFromUser': {
-            let user = UserStore.get(message.forward_info.sender_user_id);
-            if (user) {
-                return getUserFullName(user);
-            }
-            break;
+    const { origin } = forwardInfo;
+    if (!origin) return false;
+
+    switch (origin['@type']) {
+        case 'messageForwardOriginUser': {
+            return false;
         }
-        case 'messageForwardedPost': {
-            let chat = ChatStore.get(message.forward_info.chat_id);
-            if (chat) return chat.title;
-            break;
+        case 'messageForwardOriginHiddenUser': {
+            return true;
+        }
+        case 'messageForwardOriginChannel': {
+            return false;
         }
     }
 
-    return null;
+    return false;
+}
+
+function getForwardTitle(forwardInfo) {
+    if (!forwardInfo) return '';
+
+    const { origin } = forwardInfo;
+    if (!origin) return '';
+
+    switch (origin['@type']) {
+        case 'messageForwardOriginUser': {
+            const { sender_user_id } = origin;
+
+            const user = UserStore.get(sender_user_id);
+            return getUserFullName(user);
+        }
+        case 'messageForwardOriginHiddenUser': {
+            const { sender_name } = origin;
+
+            return sender_name;
+        }
+        case 'messageForwardOriginChannel': {
+            const { chat_id, author_signature } = origin;
+
+            return getChatTitle(chat_id) + (author_signature ? ` (${author_signature})` : '');
+        }
+    }
+
+    return '';
 }
 
 function getUnread(message) {
@@ -1154,7 +1182,8 @@ export {
     getDate,
     getDateHint,
     getMedia,
-    getForward,
+    isForwardOriginHidden,
+    getForwardTitle,
     getUnread,
     getSenderUserId,
     filterMessages,
