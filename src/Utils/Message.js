@@ -1154,7 +1154,6 @@ export {
     getDate,
     getDateHint,
     getMedia,
-    getReply,
     getForward,
     getUnread,
     getSenderUserId,
