@@ -7,9 +7,9 @@
 
 import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
+import { stringToBoolean } from '../Utils/Common';
 import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
-import { stringToBoolean } from '../Utils/Common';
 
 class TdLibController extends EventEmitter {
     constructor() {
@@ -148,7 +148,9 @@ class TdLibController extends EventEmitter {
         if (!apiId || !apiHash) {
             if (
                 window.confirm(
-                    'API id is missing!\nIn order to obtain an API id and develop your own application using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id'
+                    'API id is missing!\n' +
+                        'In order to obtain an API id and develop your own application ' +
+                        'using the Telegram API please visit https://core.telegram.org/api/obtaining_api_id'
                 )
             ) {
                 window.location.href = 'https://core.telegram.org/api/obtaining_api_id';
