@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
-import { getContent, getTitle } from '../../Utils/Message';
+import { getContent, getTitle, isDeletedMessage } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
 import { openChat } from '../../Utils/Commands';
 import MessageStore from '../../Stores/MessageStore';
@@ -38,35 +38,14 @@ class Reply extends React.Component {
         }
     };
 
-    getSubtitle(message) {
-        if (!message) return 'Loading...';
-
-        const content = message.content;
-        if (!content) return '[content undefined]';
-
-        switch (content['@type']) {
-            case 'messageText':
-                return content.text.text;
-            case 'messagePhoto':
-                return 'Photo';
-            case 'messageDocument':
-                return 'Document';
-            default:
-                return '[' + content['@type'] + ']';
-        }
-    }
-
-    isDeletedMessage = message => {
-        return message && message['@type'] === 'deletedMessage';
-    };
-
     handleClick = event => {
         event.stopPropagation();
 
         const { chatId, messageId } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
+        if (!message) return null;
+        if (isDeletedMessage(message)) return null;
 
         openChat(chatId, messageId);
     };
@@ -74,19 +53,18 @@ class Reply extends React.Component {
     render() {
         const { classes, t, chatId, messageId } = this.props;
 
-        if (!chatId) return null;
-        if (!messageId) return null;
-
         const message = MessageStore.get(chatId, messageId);
-        const title = this.isDeletedMessage(message) ? null : getTitle(message);
-        const subtitle = this.isDeletedMessage(message) ? 'Deleted message' : getContent(message, t);
+        if (isDeletedMessage(message)) return null;
+
+        const title = !message ? null : getTitle(message);
+        const content = !message ? t('Loading') : getContent(message, t);
 
         return (
             <div className='reply' onClick={this.handleClick}>
                 <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                 <div className='reply-content'>
                     {title && <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>}
-                    <div className='reply-content-subtitle'>{subtitle}</div>
+                    <div className='reply-content-subtitle'>{content}</div>
                 </div>
             </div>
         );

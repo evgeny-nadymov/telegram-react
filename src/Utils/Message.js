@@ -332,13 +332,6 @@ function getMedia(message, openMedia) {
     }
 }
 
-function getReply(message) {
-    if (!message) return null;
-    if (!message.reply_to_message_id) return null;
-
-    return message.reply_to_message_id;
-}
-
 function getForward(message) {
     if (!message) return null;
     if (!message.forward_info) return null;
@@ -1147,6 +1140,10 @@ function openMedia(chatId, messageId, fileCancel = true) {
     }
 }
 
+function isDeletedMessage(message) {
+    return message && message['@type'] === 'deletedMessage';
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1163,6 +1160,7 @@ export {
     getSenderUserId,
     filterMessages,
     isMediaContent,
+    isDeletedMessage,
     isVideoMessage,
     isAnimationMessage,
     getLocationId,

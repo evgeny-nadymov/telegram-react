@@ -20,7 +20,6 @@ import {
     getDateHint,
     getText,
     getMedia,
-    getReply,
     getForward,
     getUnread,
     getSenderUserId,
@@ -281,12 +280,13 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
+        const { sending_state, views, edit_date, reply_to_message_id } = message;
+
         const text = getText(message);
         const webPage = getWebPage(message);
         const date = getDate(message);
         const dateHint = getDateHint(message);
         const media = getMedia(message, this.openMedia);
-        const reply = getReply(message);
         const forward = getForward(message);
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
@@ -311,11 +311,7 @@ class Message extends Component {
                 <div className='message-wrapper'>
                     <i className='message-select-tick' />
                     {this.unread && (
-                        <MessageStatus
-                            chatId={message.chat_id}
-                            messageId={message.id}
-                            sendingState={message.sending_state}
-                        />
+                        <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
                     )}
                     {tile}
                     <div className='message-content'>
@@ -330,30 +326,27 @@ class Message extends Component {
                                 </div>
                             )}
                             <div className='message-meta'>
-                                {/*message.id*/}
                                 <span>&nbsp;</span>
-                                {message.views > 0 && (
+                                {views > 0 && (
                                     <>
                                         <i className='message-views-icon' />
                                         <span className='message-views'>
                                             &nbsp;
-                                            {message.views}
+                                            {views}
                                             &nbsp; &nbsp;
                                         </span>
                                     </>
                                 )}
-                                {message.edit_date > 0 && <span>edited&nbsp;</span>}
+                                {edit_date > 0 && <span>edited&nbsp;</span>}
                                 <a className='message-date' onClick={this.handleDateClick}>
                                     <span title={dateHint}>{date}</span>
                                 </a>
                             </div>
                         </div>
-                        {reply && <Reply chatId={message.chat_id} messageId={reply} />}
+                        {reply_to_message_id && <Reply chatId={chatId} messageId={reply_to_message_id} />}
                         {media}
                         <div className='message-text'>{text}</div>
-                        {webPage && (
-                            <WebPage chatId={message.chat_id} messageId={message.id} openMedia={this.openMedia} />
-                        )}
+                        {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                 </div>
             </div>
