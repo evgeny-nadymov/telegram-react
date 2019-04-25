@@ -81,6 +81,9 @@ const styles = theme => ({
             height: 0,
             borderStyle: 'solid'
         }
+    },
+    tooltip: {
+        margin: '6px 0 26px 0'
     }
 });
 
@@ -141,7 +144,7 @@ class Forward extends React.Component {
                 {`${t('ForwardedMessage')}\n${t('From')} `}
                 <Tooltip
                     title={tooltip}
-                    classes={{ popper: classes.arrowPopper }}
+                    classes={{ popper: classes.arrowPopper, tooltip: classes.tooltip }}
                     PopperProps={{
                         popperOptions: {
                             modifiers: {

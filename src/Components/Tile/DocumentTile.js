@@ -62,7 +62,7 @@ class DocumentTile extends React.Component {
 }
 
 DocumentTile.propTypes = {
-    thumbnail: PropTypes.object.isRequired
+    thumbnail: PropTypes.object
 };
 
 export default withStyles(styles, { withTheme: true })(DocumentTile);

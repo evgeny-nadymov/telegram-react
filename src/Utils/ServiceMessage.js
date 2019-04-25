@@ -197,7 +197,7 @@ function getServiceMessageContent(message, openUser = false) {
         }
         case 'messageChatAddMembers': {
             const members = content.member_user_ids
-                .map(x => <MessageAuthor userId={x} openUser={openUser} />)
+                .map(x => <MessageAuthor key={x} userId={x} openUser={openUser} />)
                 .reduce((accumulator, current, index, array) => {
                     const separator = index === array.length - 1 ? ' and ' : ', ';
                     return accumulator === null ? [current] : [...accumulator, separator, current];

@@ -7,7 +7,7 @@
 		exports["tdweb"] = factory();
 	else
 		root["tdweb"] = factory();
-})(typeof self !== 'undefined' ? self : this, function() {
+})(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -46,12 +46,32 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
 /******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
 /******/ 	};
 /******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
@@ -69,1743 +89,236 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
 /******/
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 58);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-var global = module.exports = typeof window != 'undefined' && window.Math == Math
-  ? window : typeof self != 'undefined' && self.Math == Math ? self
-  // eslint-disable-next-line no-new-func
-  : Function('return this')();
-if (typeof __g == 'number') __g = global; // eslint-disable-line no-undef
+module.exports = __webpack_require__(12);
 
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports) {
 
-var core = module.exports = { version: '2.6.1' };
-if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
 
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+module.exports = _asyncToGenerator;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-var store = __webpack_require__(37)('wks');
-var uid = __webpack_require__(29);
-var Symbol = __webpack_require__(0).Symbol;
-var USE_SYMBOL = typeof Symbol == 'function';
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
 
-var $exports = module.exports = function (name) {
-  return store[name] || (store[name] =
-    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
-};
-
-$exports.store = store;
-
+module.exports = _classCallCheck;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-var global = __webpack_require__(0);
-var core = __webpack_require__(1);
-var ctx = __webpack_require__(8);
-var hide = __webpack_require__(9);
-var has = __webpack_require__(13);
-var PROTOTYPE = 'prototype';
-
-var $export = function (type, name, source) {
-  var IS_FORCED = type & $export.F;
-  var IS_GLOBAL = type & $export.G;
-  var IS_STATIC = type & $export.S;
-  var IS_PROTO = type & $export.P;
-  var IS_BIND = type & $export.B;
-  var IS_WRAP = type & $export.W;
-  var exports = IS_GLOBAL ? core : core[name] || (core[name] = {});
-  var expProto = exports[PROTOTYPE];
-  var target = IS_GLOBAL ? global : IS_STATIC ? global[name] : (global[name] || {})[PROTOTYPE];
-  var key, own, out;
-  if (IS_GLOBAL) source = name;
-  for (key in source) {
-    // contains in native
-    own = !IS_FORCED && target && target[key] !== undefined;
-    if (own && has(exports, key)) continue;
-    // export native or passed
-    out = own ? target[key] : source[key];
-    // prevent global pollution for namespaces
-    exports[key] = IS_GLOBAL && typeof target[key] != 'function' ? source[key]
-    // bind timers to global for call from export context
-    : IS_BIND && own ? ctx(out, global)
-    // wrap global constructors for prevent change them in library
-    : IS_WRAP && target[key] == out ? (function (C) {
-      var F = function (a, b, c) {
-        if (this instanceof C) {
-          switch (arguments.length) {
-            case 0: return new C();
-            case 1: return new C(a);
-            case 2: return new C(a, b);
-          } return new C(a, b, c);
-        } return C.apply(this, arguments);
-      };
-      F[PROTOTYPE] = C[PROTOTYPE];
-      return F;
-    // make static versions for prototype methods
-    })(out) : IS_PROTO && typeof out == 'function' ? ctx(Function.call, out) : out;
-    // export proto methods to core.%CONSTRUCTOR%.methods.%NAME%
-    if (IS_PROTO) {
-      (exports.virtual || (exports.virtual = {}))[key] = out;
-      // export proto methods to core.%CONSTRUCTOR%.prototype.%NAME%
-      if (type & $export.R && expProto && !expProto[key]) hide(expProto, key, out);
-    }
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
   }
-};
-// type bitmap
-$export.F = 1;   // forced
-$export.G = 2;   // global
-$export.S = 4;   // static
-$export.P = 8;   // proto
-$export.B = 16;  // bind
-$export.W = 32;  // wrap
-$export.U = 64;  // safe
-$export.R = 128; // real proto method for `library`
-module.exports = $export;
+}
 
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
 
 /***/ }),
 /* 4 */
 /***/ (function(module, exports) {
 
-module.exports = function (it) {
-  return typeof it === 'object' ? it !== null : typeof it === 'function';
-};
+function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
 
+function _typeof(obj) {
+  if (typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol") {
+    module.exports = _typeof = function _typeof(obj) {
+      return _typeof2(obj);
+    };
+  } else {
+    module.exports = _typeof = function _typeof(obj) {
+      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : _typeof2(obj);
+    };
+  }
+
+  return _typeof(obj);
+}
+
+module.exports = _typeof;
 
 /***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var anObject = __webpack_require__(6);
-var IE8_DOM_DEFINE = __webpack_require__(66);
-var toPrimitive = __webpack_require__(67);
-var dP = Object.defineProperty;
+var arrayWithHoles = __webpack_require__(9);
 
-exports.f = __webpack_require__(7) ? Object.defineProperty : function defineProperty(O, P, Attributes) {
-  anObject(O);
-  P = toPrimitive(P, true);
-  anObject(Attributes);
-  if (IE8_DOM_DEFINE) try {
-    return dP(O, P, Attributes);
-  } catch (e) { /* empty */ }
-  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported!');
-  if ('value' in Attributes) O[P] = Attributes.value;
-  return O;
-};
+var iterableToArrayLimit = __webpack_require__(10);
 
+var nonIterableRest = __webpack_require__(11);
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
 
 /***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isObject = __webpack_require__(4);
-module.exports = function (it) {
-  if (!isObject(it)) throw TypeError(it + ' is not an object!');
-  return it;
+module.exports = function() {
+  return new Worker(__webpack_require__.p + "8de188171bac38cad51b.worker.js");
 };
-
 
 /***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// Thank's IE8 for his funny defineProperty
-module.exports = !__webpack_require__(17)(function () {
-  return Object.defineProperty({}, 'a', { get: function () { return 7; } }).a != 7;
-});
+var rng = __webpack_require__(16);
+var bytesToUuid = __webpack_require__(17);
+
+function v4(options, buf, offset) {
+  var i = buf && offset || 0;
+
+  if (typeof(options) == 'string') {
+    buf = options === 'binary' ? new Array(16) : null;
+    options = null;
+  }
+  options = options || {};
+
+  var rnds = options.random || (options.rng || rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    for (var ii = 0; ii < 16; ++ii) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+
+  return buf || bytesToUuid(rnds);
+}
+
+module.exports = v4;
 
 
 /***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// optional / simple context binding
-var aFunction = __webpack_require__(12);
-module.exports = function (fn, that, length) {
-  aFunction(fn);
-  if (that === undefined) return fn;
-  switch (length) {
-    case 1: return function (a) {
-      return fn.call(that, a);
-    };
-    case 2: return function (a, b) {
-      return fn.call(that, a, b);
-    };
-    case 3: return function (a, b, c) {
-      return fn.call(that, a, b, c);
-    };
-  }
-  return function (/* ...args */) {
-    return fn.apply(that, arguments);
-  };
-};
+module.exports = __webpack_require__(18);
 
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-var dP = __webpack_require__(5);
-var createDesc = __webpack_require__(34);
-module.exports = __webpack_require__(7) ? function (object, key, value) {
-  return dP.f(object, key, createDesc(1, value));
-} : function (object, key, value) {
-  object[key] = value;
-  return object;
-};
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
 
+module.exports = _arrayWithHoles;
 
 /***/ }),
 /* 10 */
 /***/ (function(module, exports) {
 
-module.exports = {};
+function _iterableToArrayLimit(arr, i) {
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
 
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
 
 /***/ }),
 /* 11 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
 
-var $at = __webpack_require__(65)(true);
-
-// 21.1.3.27 String.prototype[@@iterator]()
-__webpack_require__(23)(String, 'String', function (iterated) {
-  this._t = String(iterated); // target
-  this._i = 0;                // next index
-// 21.1.5.2.1 %StringIteratorPrototype%.next()
-}, function () {
-  var O = this._t;
-  var index = this._i;
-  var point;
-  if (index >= O.length) return { value: undefined, done: true };
-  point = $at(O, index);
-  this._i += point.length;
-  return { value: point, done: false };
-});
-
+module.exports = _nonIterableRest;
 
 /***/ }),
 /* 12 */
-/***/ (function(module, exports) {
-
-module.exports = function (it) {
-  if (typeof it != 'function') throw TypeError(it + ' is not a function!');
-  return it;
-};
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports) {
-
-var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
-  return hasOwnProperty.call(it, key);
-};
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports) {
-
-var toString = {}.toString;
-
-module.exports = function (it) {
-  return toString.call(it).slice(8, -1);
-};
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(76);
-var global = __webpack_require__(0);
-var hide = __webpack_require__(9);
-var Iterators = __webpack_require__(10);
-var TO_STRING_TAG = __webpack_require__(2)('toStringTag');
-
-var DOMIterables = ('CSSRuleList,CSSStyleDeclaration,CSSValueList,ClientRectList,DOMRectList,DOMStringList,' +
-  'DOMTokenList,DataTransferItemList,FileList,HTMLAllCollection,HTMLCollection,HTMLFormElement,HTMLSelectElement,' +
-  'MediaList,MimeTypeArray,NamedNodeMap,NodeList,PaintRequestList,Plugin,PluginArray,SVGLengthList,SVGNumberList,' +
-  'SVGPathSegList,SVGPointList,SVGStringList,SVGTransformList,SourceBufferList,StyleSheetList,TextTrackCueList,' +
-  'TextTrackList,TouchList').split(',');
-
-for (var i = 0; i < DOMIterables.length; i++) {
-  var NAME = DOMIterables[i];
-  var Collection = global[NAME];
-  var proto = Collection && Collection.prototype;
-  if (proto && !proto[TO_STRING_TAG]) hide(proto, TO_STRING_TAG, NAME);
-  Iterators[NAME] = Iterators.Array;
-}
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var ctx = __webpack_require__(8);
-var call = __webpack_require__(79);
-var isArrayIter = __webpack_require__(80);
-var anObject = __webpack_require__(6);
-var toLength = __webpack_require__(27);
-var getIterFn = __webpack_require__(43);
-var BREAK = {};
-var RETURN = {};
-var exports = module.exports = function (iterable, entries, fn, that, ITERATOR) {
-  var iterFn = ITERATOR ? function () { return iterable; } : getIterFn(iterable);
-  var f = ctx(fn, that, entries ? 2 : 1);
-  var index = 0;
-  var length, step, iterator, result;
-  if (typeof iterFn != 'function') throw TypeError(iterable + ' is not iterable!');
-  // fast case for arrays with default iterator
-  if (isArrayIter(iterFn)) for (length = toLength(iterable.length); length > index; index++) {
-    result = entries ? f(anObject(step = iterable[index])[0], step[1]) : f(iterable[index]);
-    if (result === BREAK || result === RETURN) return result;
-  } else for (iterator = iterFn.call(iterable); !(step = iterator.next()).done;) {
-    result = call(iterator, f, step.value, entries);
-    if (result === BREAK || result === RETURN) return result;
-  }
-};
-exports.BREAK = BREAK;
-exports.RETURN = RETURN;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
-
-module.exports = function (exec) {
-  try {
-    return !!exec();
-  } catch (e) {
-    return true;
-  }
-};
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var def = __webpack_require__(5).f;
-var has = __webpack_require__(13);
-var TAG = __webpack_require__(2)('toStringTag');
-
-module.exports = function (it, tag, stat) {
-  if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, { configurable: true, value: tag });
-};
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// getting tag from 19.1.3.6 Object.prototype.toString()
-var cof = __webpack_require__(14);
-var TAG = __webpack_require__(2)('toStringTag');
-// ES3 wrong here
-var ARG = cof(function () { return arguments; }()) == 'Arguments';
-
-// fallback for IE11 Script Access Denied error
-var tryGet = function (it, key) {
-  try {
-    return it[key];
-  } catch (e) { /* empty */ }
-};
-
-module.exports = function (it) {
-  var O, T, B;
-  return it === undefined ? 'Undefined' : it === null ? 'Null'
-    // @@toStringTag case
-    : typeof (T = tryGet(O = Object(it), TAG)) == 'string' ? T
-    // builtinTag case
-    : ARG ? cof(O)
-    // ES3 arguments fallback
-    : (B = cof(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : B;
-};
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports) {
-
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-// 7.1.4 ToInteger
-var ceil = Math.ceil;
-var floor = Math.floor;
-module.exports = function (it) {
-  return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
-};
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports) {
-
-// 7.2.1 RequireObjectCoercible(argument)
-module.exports = function (it) {
-  if (it == undefined) throw TypeError("Can't call method on  " + it);
-  return it;
-};
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var LIBRARY = __webpack_require__(24);
-var $export = __webpack_require__(3);
-var redefine = __webpack_require__(68);
-var hide = __webpack_require__(9);
-var Iterators = __webpack_require__(10);
-var $iterCreate = __webpack_require__(69);
-var setToStringTag = __webpack_require__(18);
-var getPrototypeOf = __webpack_require__(75);
-var ITERATOR = __webpack_require__(2)('iterator');
-var BUGGY = !([].keys && 'next' in [].keys()); // Safari has buggy iterators w/o `next`
-var FF_ITERATOR = '@@iterator';
-var KEYS = 'keys';
-var VALUES = 'values';
-
-var returnThis = function () { return this; };
-
-module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED) {
-  $iterCreate(Constructor, NAME, next);
-  var getMethod = function (kind) {
-    if (!BUGGY && kind in proto) return proto[kind];
-    switch (kind) {
-      case KEYS: return function keys() { return new Constructor(this, kind); };
-      case VALUES: return function values() { return new Constructor(this, kind); };
-    } return function entries() { return new Constructor(this, kind); };
-  };
-  var TAG = NAME + ' Iterator';
-  var DEF_VALUES = DEFAULT == VALUES;
-  var VALUES_BUG = false;
-  var proto = Base.prototype;
-  var $native = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT];
-  var $default = $native || getMethod(DEFAULT);
-  var $entries = DEFAULT ? !DEF_VALUES ? $default : getMethod('entries') : undefined;
-  var $anyNative = NAME == 'Array' ? proto.entries || $native : $native;
-  var methods, key, IteratorPrototype;
-  // Fix native
-  if ($anyNative) {
-    IteratorPrototype = getPrototypeOf($anyNative.call(new Base()));
-    if (IteratorPrototype !== Object.prototype && IteratorPrototype.next) {
-      // Set @@toStringTag to native iterators
-      setToStringTag(IteratorPrototype, TAG, true);
-      // fix for some old engines
-      if (!LIBRARY && typeof IteratorPrototype[ITERATOR] != 'function') hide(IteratorPrototype, ITERATOR, returnThis);
-    }
-  }
-  // fix Array#{values, @@iterator}.name in V8 / FF
-  if (DEF_VALUES && $native && $native.name !== VALUES) {
-    VALUES_BUG = true;
-    $default = function values() { return $native.call(this); };
-  }
-  // Define iterator
-  if ((!LIBRARY || FORCED) && (BUGGY || VALUES_BUG || !proto[ITERATOR])) {
-    hide(proto, ITERATOR, $default);
-  }
-  // Plug for library
-  Iterators[NAME] = $default;
-  Iterators[TAG] = returnThis;
-  if (DEFAULT) {
-    methods = {
-      values: DEF_VALUES ? $default : getMethod(VALUES),
-      keys: IS_SET ? $default : getMethod(KEYS),
-      entries: $entries
-    };
-    if (FORCED) for (key in methods) {
-      if (!(key in proto)) redefine(proto, key, methods[key]);
-    } else $export($export.P + $export.F * (BUGGY || VALUES_BUG), NAME, methods);
-  }
-  return methods;
-};
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports) {
-
-module.exports = true;
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isObject = __webpack_require__(4);
-var document = __webpack_require__(0).document;
-// typeof document.createElement is 'object' in old IE
-var is = isObject(document) && isObject(document.createElement);
-module.exports = function (it) {
-  return is ? document.createElement(it) : {};
-};
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(36);
-var defined = __webpack_require__(22);
-module.exports = function (it) {
-  return IObject(defined(it));
-};
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.1.15 ToLength
-var toInteger = __webpack_require__(21);
-var min = Math.min;
-module.exports = function (it) {
-  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
-};
-
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var shared = __webpack_require__(37)('keys');
-var uid = __webpack_require__(29);
-module.exports = function (key) {
-  return shared[key] || (shared[key] = uid(key));
-};
-
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports) {
-
-var id = 0;
-var px = Math.random();
-module.exports = function (key) {
-  return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
-};
-
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var hide = __webpack_require__(9);
-module.exports = function (target, src, safe) {
-  for (var key in src) {
-    if (safe && target[key]) target[key] = src[key];
-    else hide(target, key, src[key]);
-  } return target;
-};
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-module.exports = function (it, Constructor, name, forbiddenField) {
-  if (!(it instanceof Constructor) || (forbiddenField !== undefined && forbiddenField in it)) {
-    throw TypeError(name + ': incorrect invocation!');
-  } return it;
-};
-
-
-/***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isObject = __webpack_require__(4);
-module.exports = function (it, TYPE) {
-  if (!isObject(it) || it._t !== TYPE) throw TypeError('Incompatible receiver, ' + TYPE + ' required!');
-  return it;
-};
-
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// 25.4.1.5 NewPromiseCapability(C)
-var aFunction = __webpack_require__(12);
-
-function PromiseCapability(C) {
-  var resolve, reject;
-  this.promise = new C(function ($$resolve, $$reject) {
-    if (resolve !== undefined || reject !== undefined) throw TypeError('Bad Promise constructor');
-    resolve = $$resolve;
-    reject = $$reject;
-  });
-  this.resolve = aFunction(resolve);
-  this.reject = aFunction(reject);
-}
-
-module.exports.f = function (C) {
-  return new PromiseCapability(C);
-};
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports) {
-
-module.exports = function (bitmap, value) {
-  return {
-    enumerable: !(bitmap & 1),
-    configurable: !(bitmap & 2),
-    writable: !(bitmap & 4),
-    value: value
-  };
-};
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-var anObject = __webpack_require__(6);
-var dPs = __webpack_require__(70);
-var enumBugKeys = __webpack_require__(38);
-var IE_PROTO = __webpack_require__(28)('IE_PROTO');
-var Empty = function () { /* empty */ };
-var PROTOTYPE = 'prototype';
-
-// Create object with fake `null` prototype: use iframe Object with cleared prototype
-var createDict = function () {
-  // Thrash, waste and sodomy: IE GC bug
-  var iframe = __webpack_require__(25)('iframe');
-  var i = enumBugKeys.length;
-  var lt = '<';
-  var gt = '>';
-  var iframeDocument;
-  iframe.style.display = 'none';
-  __webpack_require__(39).appendChild(iframe);
-  iframe.src = 'javascript:'; // eslint-disable-line no-script-url
-  // createDict = iframe.contentWindow.Object;
-  // html.removeChild(iframe);
-  iframeDocument = iframe.contentWindow.document;
-  iframeDocument.open();
-  iframeDocument.write(lt + 'script' + gt + 'document.F=Object' + lt + '/script' + gt);
-  iframeDocument.close();
-  createDict = iframeDocument.F;
-  while (i--) delete createDict[PROTOTYPE][enumBugKeys[i]];
-  return createDict();
-};
-
-module.exports = Object.create || function create(O, Properties) {
-  var result;
-  if (O !== null) {
-    Empty[PROTOTYPE] = anObject(O);
-    result = new Empty();
-    Empty[PROTOTYPE] = null;
-    // add "__proto__" for Object.getPrototypeOf polyfill
-    result[IE_PROTO] = O;
-  } else result = createDict();
-  return Properties === undefined ? result : dPs(result, Properties);
-};
-
-
-/***/ }),
-/* 36 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// fallback for non-array-like ES3 and non-enumerable old V8 strings
-var cof = __webpack_require__(14);
-// eslint-disable-next-line no-prototype-builtins
-module.exports = Object('z').propertyIsEnumerable(0) ? Object : function (it) {
-  return cof(it) == 'String' ? it.split('') : Object(it);
-};
-
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var core = __webpack_require__(1);
-var global = __webpack_require__(0);
-var SHARED = '__core-js_shared__';
-var store = global[SHARED] || (global[SHARED] = {});
-
-(module.exports = function (key, value) {
-  return store[key] || (store[key] = value !== undefined ? value : {});
-})('versions', []).push({
-  version: core.version,
-  mode: __webpack_require__(24) ? 'pure' : 'global',
-  copyright: '© 2018 Denis Pushkarev (zloirock.ru)'
-});
-
-
-/***/ }),
-/* 38 */
-/***/ (function(module, exports) {
-
-// IE 8- don't enum bug keys
-module.exports = (
-  'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'
-).split(',');
-
-
-/***/ }),
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var document = __webpack_require__(0).document;
-module.exports = document && document.documentElement;
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.1.13 ToObject(argument)
-var defined = __webpack_require__(22);
-module.exports = function (it) {
-  return Object(defined(it));
-};
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports) {
-
-module.exports = function (done, value) {
-  return { value: value, done: !!done };
-};
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var dP = __webpack_require__(5).f;
-var create = __webpack_require__(35);
-var redefineAll = __webpack_require__(30);
-var ctx = __webpack_require__(8);
-var anInstance = __webpack_require__(31);
-var forOf = __webpack_require__(16);
-var $iterDefine = __webpack_require__(23);
-var step = __webpack_require__(41);
-var setSpecies = __webpack_require__(44);
-var DESCRIPTORS = __webpack_require__(7);
-var fastKey = __webpack_require__(45).fastKey;
-var validate = __webpack_require__(32);
-var SIZE = DESCRIPTORS ? '_s' : 'size';
-
-var getEntry = function (that, key) {
-  // fast case
-  var index = fastKey(key);
-  var entry;
-  if (index !== 'F') return that._i[index];
-  // frozen object case
-  for (entry = that._f; entry; entry = entry.n) {
-    if (entry.k == key) return entry;
-  }
-};
-
-module.exports = {
-  getConstructor: function (wrapper, NAME, IS_MAP, ADDER) {
-    var C = wrapper(function (that, iterable) {
-      anInstance(that, C, NAME, '_i');
-      that._t = NAME;         // collection type
-      that._i = create(null); // index
-      that._f = undefined;    // first entry
-      that._l = undefined;    // last entry
-      that[SIZE] = 0;         // size
-      if (iterable != undefined) forOf(iterable, IS_MAP, that[ADDER], that);
-    });
-    redefineAll(C.prototype, {
-      // 23.1.3.1 Map.prototype.clear()
-      // 23.2.3.2 Set.prototype.clear()
-      clear: function clear() {
-        for (var that = validate(this, NAME), data = that._i, entry = that._f; entry; entry = entry.n) {
-          entry.r = true;
-          if (entry.p) entry.p = entry.p.n = undefined;
-          delete data[entry.i];
-        }
-        that._f = that._l = undefined;
-        that[SIZE] = 0;
-      },
-      // 23.1.3.3 Map.prototype.delete(key)
-      // 23.2.3.4 Set.prototype.delete(value)
-      'delete': function (key) {
-        var that = validate(this, NAME);
-        var entry = getEntry(that, key);
-        if (entry) {
-          var next = entry.n;
-          var prev = entry.p;
-          delete that._i[entry.i];
-          entry.r = true;
-          if (prev) prev.n = next;
-          if (next) next.p = prev;
-          if (that._f == entry) that._f = next;
-          if (that._l == entry) that._l = prev;
-          that[SIZE]--;
-        } return !!entry;
-      },
-      // 23.2.3.6 Set.prototype.forEach(callbackfn, thisArg = undefined)
-      // 23.1.3.5 Map.prototype.forEach(callbackfn, thisArg = undefined)
-      forEach: function forEach(callbackfn /* , that = undefined */) {
-        validate(this, NAME);
-        var f = ctx(callbackfn, arguments.length > 1 ? arguments[1] : undefined, 3);
-        var entry;
-        while (entry = entry ? entry.n : this._f) {
-          f(entry.v, entry.k, this);
-          // revert to the last existing entry
-          while (entry && entry.r) entry = entry.p;
-        }
-      },
-      // 23.1.3.7 Map.prototype.has(key)
-      // 23.2.3.7 Set.prototype.has(value)
-      has: function has(key) {
-        return !!getEntry(validate(this, NAME), key);
-      }
-    });
-    if (DESCRIPTORS) dP(C.prototype, 'size', {
-      get: function () {
-        return validate(this, NAME)[SIZE];
-      }
-    });
-    return C;
-  },
-  def: function (that, key, value) {
-    var entry = getEntry(that, key);
-    var prev, index;
-    // change existing entry
-    if (entry) {
-      entry.v = value;
-    // create new entry
-    } else {
-      that._l = entry = {
-        i: index = fastKey(key, true), // <- index
-        k: key,                        // <- key
-        v: value,                      // <- value
-        p: prev = that._l,             // <- previous entry
-        n: undefined,                  // <- next entry
-        r: false                       // <- removed
-      };
-      if (!that._f) that._f = entry;
-      if (prev) prev.n = entry;
-      that[SIZE]++;
-      // add to index
-      if (index !== 'F') that._i[index] = entry;
-    } return that;
-  },
-  getEntry: getEntry,
-  setStrong: function (C, NAME, IS_MAP) {
-    // add .keys, .values, .entries, [@@iterator]
-    // 23.1.3.4, 23.1.3.8, 23.1.3.11, 23.1.3.12, 23.2.3.5, 23.2.3.8, 23.2.3.10, 23.2.3.11
-    $iterDefine(C, NAME, function (iterated, kind) {
-      this._t = validate(iterated, NAME); // target
-      this._k = kind;                     // kind
-      this._l = undefined;                // previous
-    }, function () {
-      var that = this;
-      var kind = that._k;
-      var entry = that._l;
-      // revert to the last existing entry
-      while (entry && entry.r) entry = entry.p;
-      // get next entry
-      if (!that._t || !(that._l = entry = entry ? entry.n : that._t._f)) {
-        // or finish the iteration
-        that._t = undefined;
-        return step(1);
-      }
-      // return step by kind
-      if (kind == 'keys') return step(0, entry.k);
-      if (kind == 'values') return step(0, entry.v);
-      return step(0, [entry.k, entry.v]);
-    }, IS_MAP ? 'entries' : 'values', !IS_MAP, true);
-
-    // add [@@species], 23.1.2.2, 23.2.2.2
-    setSpecies(NAME);
-  }
-};
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var classof = __webpack_require__(19);
-var ITERATOR = __webpack_require__(2)('iterator');
-var Iterators = __webpack_require__(10);
-module.exports = __webpack_require__(1).getIteratorMethod = function (it) {
-  if (it != undefined) return it[ITERATOR]
-    || it['@@iterator']
-    || Iterators[classof(it)];
-};
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var global = __webpack_require__(0);
-var core = __webpack_require__(1);
-var dP = __webpack_require__(5);
-var DESCRIPTORS = __webpack_require__(7);
-var SPECIES = __webpack_require__(2)('species');
-
-module.exports = function (KEY) {
-  var C = typeof core[KEY] == 'function' ? core[KEY] : global[KEY];
-  if (DESCRIPTORS && C && !C[SPECIES]) dP.f(C, SPECIES, {
-    configurable: true,
-    get: function () { return this; }
-  });
-};
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var META = __webpack_require__(29)('meta');
-var isObject = __webpack_require__(4);
-var has = __webpack_require__(13);
-var setDesc = __webpack_require__(5).f;
-var id = 0;
-var isExtensible = Object.isExtensible || function () {
-  return true;
-};
-var FREEZE = !__webpack_require__(17)(function () {
-  return isExtensible(Object.preventExtensions({}));
-});
-var setMeta = function (it) {
-  setDesc(it, META, { value: {
-    i: 'O' + ++id, // object ID
-    w: {}          // weak collections IDs
-  } });
-};
-var fastKey = function (it, create) {
-  // return primitive with prefix
-  if (!isObject(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-  if (!has(it, META)) {
-    // can't set metadata to uncaught frozen object
-    if (!isExtensible(it)) return 'F';
-    // not necessary to add metadata
-    if (!create) return 'E';
-    // add missing metadata
-    setMeta(it);
-  // return object ID
-  } return it[META].i;
-};
-var getWeak = function (it, create) {
-  if (!has(it, META)) {
-    // can't set metadata to uncaught frozen object
-    if (!isExtensible(it)) return true;
-    // not necessary to add metadata
-    if (!create) return false;
-    // add missing metadata
-    setMeta(it);
-  // return hash weak collections IDs
-  } return it[META].w;
-};
-// add metadata on freeze-family methods calling
-var onFreeze = function (it) {
-  if (FREEZE && meta.NEED && isExtensible(it) && !has(it, META)) setMeta(it);
-  return it;
-};
-var meta = module.exports = {
-  KEY: META,
-  NEED: false,
-  fastKey: fastKey,
-  getWeak: getWeak,
-  onFreeze: onFreeze
-};
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var global = __webpack_require__(0);
-var $export = __webpack_require__(3);
-var meta = __webpack_require__(45);
-var fails = __webpack_require__(17);
-var hide = __webpack_require__(9);
-var redefineAll = __webpack_require__(30);
-var forOf = __webpack_require__(16);
-var anInstance = __webpack_require__(31);
-var isObject = __webpack_require__(4);
-var setToStringTag = __webpack_require__(18);
-var dP = __webpack_require__(5).f;
-var each = __webpack_require__(81)(0);
-var DESCRIPTORS = __webpack_require__(7);
-
-module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
-  var Base = global[NAME];
-  var C = Base;
-  var ADDER = IS_MAP ? 'set' : 'add';
-  var proto = C && C.prototype;
-  var O = {};
-  if (!DESCRIPTORS || typeof C != 'function' || !(IS_WEAK || proto.forEach && !fails(function () {
-    new C().entries().next();
-  }))) {
-    // create collection constructor
-    C = common.getConstructor(wrapper, NAME, IS_MAP, ADDER);
-    redefineAll(C.prototype, methods);
-    meta.NEED = true;
-  } else {
-    C = wrapper(function (target, iterable) {
-      anInstance(target, C, NAME, '_c');
-      target._c = new Base();
-      if (iterable != undefined) forOf(iterable, IS_MAP, target[ADDER], target);
-    });
-    each('add,clear,delete,forEach,get,has,set,keys,values,entries,toJSON'.split(','), function (KEY) {
-      var IS_ADDER = KEY == 'add' || KEY == 'set';
-      if (KEY in proto && !(IS_WEAK && KEY == 'clear')) hide(C.prototype, KEY, function (a, b) {
-        anInstance(this, C, KEY);
-        if (!IS_ADDER && IS_WEAK && !isObject(a)) return KEY == 'get' ? undefined : false;
-        var result = this._c[KEY](a === 0 ? 0 : a, b);
-        return IS_ADDER ? this : result;
-      });
-    });
-    IS_WEAK || dP(C.prototype, 'size', {
-      get: function () {
-        return this._c.size;
-      }
-    });
-  }
-
-  setToStringTag(C, NAME);
-
-  O[NAME] = C;
-  $export($export.G + $export.W + $export.F, O);
-
-  if (!IS_WEAK) common.setStrong(C, NAME, IS_MAP);
-
-  return C;
-};
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var classof = __webpack_require__(19);
-var from = __webpack_require__(86);
-module.exports = function (NAME) {
-  return function toJSON() {
-    if (classof(this) != NAME) throw TypeError(NAME + "#toJSON isn't generic");
-    return from(this);
-  };
-};
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// https://tc39.github.io/proposal-setmap-offrom/
-var $export = __webpack_require__(3);
-
-module.exports = function (COLLECTION) {
-  $export($export.S, COLLECTION, { of: function of() {
-    var length = arguments.length;
-    var A = new Array(length);
-    while (length--) A[length] = arguments[length];
-    return new this(A);
-  } });
-};
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// https://tc39.github.io/proposal-setmap-offrom/
-var $export = __webpack_require__(3);
-var aFunction = __webpack_require__(12);
-var ctx = __webpack_require__(8);
-var forOf = __webpack_require__(16);
-
-module.exports = function (COLLECTION) {
-  $export($export.S, COLLECTION, { from: function from(source /* , mapFn, thisArg */) {
-    var mapFn = arguments[1];
-    var mapping, A, n, cb;
-    aFunction(this);
-    mapping = mapFn !== undefined;
-    if (mapping) aFunction(mapFn);
-    if (source == undefined) return new this();
-    A = [];
-    if (mapping) {
-      n = 0;
-      cb = ctx(mapFn, arguments[2], 2);
-      forOf(source, false, function (nextItem) {
-        A.push(cb(nextItem, n++));
-      });
-    } else {
-      forOf(source, false, A.push, A);
-    }
-    return new this(A);
-  } });
-};
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(90), __esModule: true };
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.3.20 SpeciesConstructor(O, defaultConstructor)
-var anObject = __webpack_require__(6);
-var aFunction = __webpack_require__(12);
-var SPECIES = __webpack_require__(2)('species');
-module.exports = function (O, D) {
-  var C = anObject(O).constructor;
-  var S;
-  return C === undefined || (S = anObject(C)[SPECIES]) == undefined ? D : aFunction(S);
-};
-
-
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var ctx = __webpack_require__(8);
-var invoke = __webpack_require__(92);
-var html = __webpack_require__(39);
-var cel = __webpack_require__(25);
-var global = __webpack_require__(0);
-var process = global.process;
-var setTask = global.setImmediate;
-var clearTask = global.clearImmediate;
-var MessageChannel = global.MessageChannel;
-var Dispatch = global.Dispatch;
-var counter = 0;
-var queue = {};
-var ONREADYSTATECHANGE = 'onreadystatechange';
-var defer, channel, port;
-var run = function () {
-  var id = +this;
-  // eslint-disable-next-line no-prototype-builtins
-  if (queue.hasOwnProperty(id)) {
-    var fn = queue[id];
-    delete queue[id];
-    fn();
-  }
-};
-var listener = function (event) {
-  run.call(event.data);
-};
-// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-if (!setTask || !clearTask) {
-  setTask = function setImmediate(fn) {
-    var args = [];
-    var i = 1;
-    while (arguments.length > i) args.push(arguments[i++]);
-    queue[++counter] = function () {
-      // eslint-disable-next-line no-new-func
-      invoke(typeof fn == 'function' ? fn : Function(fn), args);
-    };
-    defer(counter);
-    return counter;
-  };
-  clearTask = function clearImmediate(id) {
-    delete queue[id];
-  };
-  // Node.js 0.8-
-  if (__webpack_require__(14)(process) == 'process') {
-    defer = function (id) {
-      process.nextTick(ctx(run, id, 1));
-    };
-  // Sphere (JS game engine) Dispatch API
-  } else if (Dispatch && Dispatch.now) {
-    defer = function (id) {
-      Dispatch.now(ctx(run, id, 1));
-    };
-  // Browsers with MessageChannel, includes WebWorkers
-  } else if (MessageChannel) {
-    channel = new MessageChannel();
-    port = channel.port2;
-    channel.port1.onmessage = listener;
-    defer = ctx(port.postMessage, port, 1);
-  // Browsers with postMessage, skip WebWorkers
-  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
-  } else if (global.addEventListener && typeof postMessage == 'function' && !global.importScripts) {
-    defer = function (id) {
-      global.postMessage(id + '', '*');
-    };
-    global.addEventListener('message', listener, false);
-  // IE8-
-  } else if (ONREADYSTATECHANGE in cel('script')) {
-    defer = function (id) {
-      html.appendChild(cel('script'))[ONREADYSTATECHANGE] = function () {
-        html.removeChild(this);
-        run.call(id);
-      };
-    };
-  // Rest old browsers
-  } else {
-    defer = function (id) {
-      setTimeout(ctx(run, id, 1), 0);
-    };
-  }
-}
-module.exports = {
-  set: setTask,
-  clear: clearTask
-};
-
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports) {
-
-module.exports = function (exec) {
-  try {
-    return { e: false, v: exec() };
-  } catch (e) {
-    return { e: true, v: e };
-  }
-};
-
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(6);
-var isObject = __webpack_require__(4);
-var newPromiseCapability = __webpack_require__(33);
-
-module.exports = function (C, x) {
-  anObject(C);
-  if (isObject(x) && x.constructor === C) return x;
-  var promiseCapability = newPromiseCapability.f(C);
-  var resolve = promiseCapability.resolve;
-  resolve(x);
-  return promiseCapability.promise;
-};
-
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(111), __esModule: true };
-
-/***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-exports.__esModule = true;
-
-exports.default = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-exports.__esModule = true;
-
-var _defineProperty = __webpack_require__(112);
-
-var _defineProperty2 = _interopRequireDefault(_defineProperty);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      (0, _defineProperty2.default)(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(59);
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _regenerator = __webpack_require__(60);
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _set = __webpack_require__(63);
-
-var _set2 = _interopRequireDefault(_set);
-
-var _asyncToGenerator2 = __webpack_require__(89);
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
-var _map = __webpack_require__(98);
-
-var _map2 = _interopRequireDefault(_map);
-
-var _slicedToArray2 = __webpack_require__(104);
-
-var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
-
-var _stringify = __webpack_require__(55);
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _classCallCheck2 = __webpack_require__(56);
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = __webpack_require__(57);
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _promise = __webpack_require__(50);
-
-var _promise2 = _interopRequireDefault(_promise);
-
-var _worker = __webpack_require__(115);
-
-var _worker2 = _interopRequireDefault(_worker);
-
-__webpack_require__(116);
-
-var _v = __webpack_require__(117);
-
-var _v2 = _interopRequireDefault(_v);
-
-var _logger = __webpack_require__(120);
-
-var _logger2 = _interopRequireDefault(_logger);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var sleep = function sleep(ms) {
-  return new _promise2.default(function (res) {
-    return setTimeout(res, ms);
-  });
-};
-
-/**
- * TDLib in a browser
- *
- * TDLib can be compiled to WebAssembly or asm.js using Emscripten compiler and used in a browser from JavaScript.
- * This is a convenient wrapper for TDLib in a browser which controls TDLib instance creation, handles interaction
- * with the TDLib and manages a filesystem for persistent TDLib data.
- * TDLib instance is created in a Web Worker, because TDLib needs synchronous access to filesystem and the IndexedDB.
- * TdClient just sends queries to the Web Worker and receive updates and results from it.
- * <br>
- * <br>
- * Differences from TDLib API:<br>
- * 1. Added the update <code>updateFatalError error:string = Update;</code> which is sent whenever a TDLib fatal error is encountered.<br>
- * 2. Added the field <code>idb_key</code> to <code>file</code> object, which contains IndexedDB key in which the file content is stored.<br>
- *    This field is non-empty only for fully downloaded files. IndexedDB database name is chosen during TdClient creation.<br>
- * 3. Added the method <code>setJsLogVerbosityLevel new_verbosity_level:string = Ok;</code>, which allows to change the verbosity level of tdweb logging.<br>
- * 4. Added the possibility to use blobs as input files via constructor <code>inputFileBlob blob:<JavaScript blob> = InputFile;</code>.<br>
- * 5. Added the method <code>readFilePart path:string offset:int64 size:int64 = FilePart;</code> and class <code>filePart data:<JavaScript blob> = FilePart;</code><br>
- *    which can be used on a partially downloaded file to support media streaming.<br>
- * 6. Methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> are not supported.<br>
- * <br>
- */
-
-var TdClient = function () {
-  /**
-   * @callback TdClient~updateCallback
-   * @param {Object} update The update.
-   */
-
-  /**
-   * Create TdClient.
-   * @param {Object} options - The options for TDLib instance creation.
-   * @param {TdClient~updateCallback} options.onUpdate - The callback for all incoming updates.
-   * @param {string} [options.prefix=tdlib] - The name of the IndexedDB database which will be used for persistent data storage. Currently only one instance of TdClient per a database is allowed. All but one created instances will be automatically closed. Usually, the newest non-background instance is kept alive.
-   * @param {boolean} [options.isBackground=false] - Pass true, if the instance is opened from the background.
-   * @param {string} [options.mode=wasm] - The type of the TDLib build to use. 'asmjs' for asm.js and 'wasm' for WebAssembly.
-   * @param {string} [options.jsLogVerbosityLevel='info'] - The initial verbosity level of the JavaScript part of the code (one of 'error', 'warning', 'info', 'log', 'debug').
-   * @param {number} [options.logVerbosityLevel=2] - The initial verbosity level for TDLib internal logging (0-1023).
-   * @param {boolean} [options.noDb=false] - Pass true to use TDLib without database and secret chats. It will significantly improve load time, but some functionality will be unavailable.
-   * @param {boolean} [options.readOnly=false] - Pass true to open TDLib database in read-only mode. For debug only.
-   */
-  function TdClient(options) {
-    (0, _classCallCheck3.default)(this, TdClient);
-
-    _logger2.default.setVerbosity(options.jsLogVerbosityLevel);
-    this.worker = new _worker2.default();
-    var self = this;
-    this.worker.onmessage = function (e) {
-      var response = e.data;
-      _logger2.default.debug('receive from worker: ', JSON.parse((0, _stringify2.default)(response, function (key, value) {
-        if (key === 'arr') {
-          return undefined;
-        }
-        return value;
-      })));
-      if ('@extra' in response) {
-        var query_id = response['@extra'].query_id;
-
-        var _self$query_callbacks = self.query_callbacks.get(query_id),
-            _self$query_callbacks2 = (0, _slicedToArray3.default)(_self$query_callbacks, 2),
-            resolve = _self$query_callbacks2[0],
-            reject = _self$query_callbacks2[1];
-
-        self.query_callbacks.delete(query_id);
-        if ('@old_extra' in response['@extra']) {
-          response['@extra'] = response['@extra']['@old_extra'];
-        }
-        if (resolve) {
-          if (response['@type'] === 'error') {
-            reject(response);
-          } else {
-            resolve(response);
-          }
-        }
-      } else {
-        if (response['@type'] === 'inited') {
-          self.onInited();
-          return;
-        }
-        if (response['@type'] === 'updateAuthorizationState' && response.authorization_state['@type'] === 'authorizationStateClosed') {
-          self.onClosed();
-        }
-        self.onUpdate(response);
-      }
-    };
-    this.query_id = 0;
-    this.query_callbacks = new _map2.default();
-    if ('onUpdate' in options) {
-      this.onUpdate = options.onUpdate;
-      delete options.onUpdate;
-    }
-    this.worker.postMessage({ '@type': 'init', options: options });
-    this.closeOtherClients(options);
-  }
-
-  /**
-   * Send a query to TDLib.
-   *
-   * If the query contains an '@extra' field, the same field will be added into the result.
-   *
-   * @param {Object} query - The query for TDLib. See the [td_api.tl]{@link https://github.com/tdlib/td/blob/master/td/generate/scheme/td_api.tl} scheme or
-   *                         the automatically generated [HTML documentation]{@link https://core.telegram.org/tdlib/docs/td__api_8h.html}
-   *                         for a list of all available TDLib [methods]{@link https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1_function.html} and
-   *                         [classes]{@link https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1_object.html}.
-   * @returns {Promise} Promise object represents the result of the query.
-   */
-
-
-  (0, _createClass3.default)(TdClient, [{
-    key: 'send',
-    value: function send(query) {
-      var _this = this;
-
-      var unsupportedMethods = ['getStorageStatistics', 'getStorageStatisticsFast', 'optimizeStorage', 'addProxy'];
-      if (unsupportedMethods.includes(query['@type'])) {
-        return; // TODO what we need to return?
-      }
-
-      this.query_id++;
-      if (query['@extra']) {
-        query['@extra'] = {
-          '@old_extra': JSON.parse((0, _stringify2.default)(query.extra)),
-          query_id: this.query_id
-        };
-      } else {
-        query['@extra'] = {
-          query_id: this.query_id
-        };
-      }
-      if (query['@type'] === 'setJsLogVerbosityLevel') {
-        _logger2.default.setVerbosity(query.new_verbosity_level);
-      }
-
-      _logger2.default.debug('send to worker: ', query);
-      this.worker.postMessage(query);
-      return new _promise2.default(function (resolve, reject) {
-        _this.query_callbacks.set(_this.query_id, [resolve, reject]);
-      });
-    }
-
-    /** @private */
-
-  }, {
-    key: 'onBroadcastMessage',
-    value: function onBroadcastMessage(e) {
-      var message = e.data;
-      _logger2.default.info('got broadcast message: ', message);
-      if (message.isBackground && !this.isBackground) {
-        // continue
-      } else if (!message.isBackground && this.isBackground || message.timestamp > this.timestamp) {
-        this.close();
-        return;
-      }
-      if (message.state === 'closed') {
-        this.waitSet.delete(message.uid);
-        if (this.waitSet.size === 0) {
-          _logger2.default.info('onWaitSetEmpty');
-          this.onWaitSetEmpty();
-          this.onWaitSetEmpty = function () {};
-        }
-      } else {
-        this.waitSet.add(message.uid);
-        if (message.state !== 'closing') {
-          this.postState();
-        }
-      }
-    }
-
-    /** @private */
-
-  }, {
-    key: 'postState',
-    value: function postState() {
-      var state = {
-        id: this.uid,
-        state: this.state,
-        timestamp: this.timestamp,
-        isBackground: this.isBackground
-      };
-      _logger2.default.info('Post state: ', state);
-      this.channel.postMessage(state);
-    }
-
-    /** @private */
-
-  }, {
-    key: 'onWaitSetEmpty',
-    value: function onWaitSetEmpty() {}
-    // nop
-
-
-    /** @private */
-
-  }, {
-    key: 'onInited',
-    value: function onInited() {
-      this.isInited = true;
-      this.doSendStart();
-    }
-
-    /** @private */
-
-  }, {
-    key: 'sendStart',
-    value: function sendStart() {
-      this.wantSendStart = true;
-      this.doSendStart();
-    }
-
-    /** @private */
-
-  }, {
-    key: 'doSendStart',
-    value: function doSendStart() {
-      if (!this.isInited || !this.wantSendStart || this.state !== 'start') {
-        return;
-      }
-      this.wantSendStart = false;
-      this.state = 'active';
-      var query = { '@type': 'start' };
-      _logger2.default.info('send to worker: ', query);
-      this.worker.postMessage(query);
-    }
-
-    /** @private */
-
-  }, {
-    key: 'onClosed',
-    value: function onClosed() {
-      this.isClosing = true;
-      this.worker.terminate();
-      _logger2.default.info('worker is terminated');
-      this.state = 'closed';
-      this.postState();
-    }
-
-    /** @private */
-
-  }, {
-    key: 'close',
-    value: function close() {
-      if (this.isClosing) {
-        return;
-      }
-      this.isClosing = true;
-
-      _logger2.default.info('close state: ', this.state);
-
-      if (this.state === 'start') {
-        this.onClosed();
-        this.onUpdate({
-          '@type': 'updateAuthorizationState',
-          authorization_state: {
-            '@type': 'authorizationStateClosed'
-          }
-        });
-        return;
-      }
-
-      var query = { '@type': 'close' };
-      _logger2.default.info('send to worker: ', query);
-      this.worker.postMessage(query);
-
-      this.state = 'closing';
-      this.postState();
-    }
-
-    /** @private */
-
-  }, {
-    key: 'closeOtherClients',
-    value: function () {
-      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(options) {
-        var prefix, self;
-        return _regenerator2.default.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                this.uid = (0, _v2.default)();
-                this.state = 'start';
-                this.isBackground = !!options.isBackground;
-                this.timestamp = Date.now();
-                this.waitSet = new _set2.default();
-
-                _logger2.default.info('close other clients');
-                prefix = options.prefix || 'tdlib';
-
-                this.channel = new BroadcastChannel(prefix);
-
-                this.postState();
-
-                self = this;
-
-                this.channel.onmessage = function (message) {
-                  self.onBroadcastMessage(message);
-                };
-
-                _context.next = 13;
-                return sleep(300);
-
-              case 13:
-                if (!(this.waitSet.size !== 0)) {
-                  _context.next = 16;
-                  break;
-                }
-
-                _context.next = 16;
-                return new _promise2.default(function (resolve) {
-                  self.onWaitSetEmpty = resolve;
-                });
-
-              case 16:
-                this.sendStart();
-
-              case 17:
-              case 'end':
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function closeOtherClients(_x) {
-        return _ref.apply(this, arguments);
-      }
-
-      return closeOtherClients;
-    }()
-
-    /** @private */
-
-  }, {
-    key: 'onUpdate',
-    value: function onUpdate(response) {
-      _logger2.default.info('ignore onUpdate');
-      //nop
-    }
-  }]);
-  return TdClient;
-}();
-
-exports.default = TdClient;
-
-/***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(61);
-
-
-/***/ }),
-/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -1815,48 +328,7 @@ module.exports = __webpack_require__(61);
  * LICENSE file in the root directory of this source tree.
  */
 
-// This method of obtaining a reference to the global object needs to be
-// kept identical to the way it is obtained in runtime.js
-var g = (function() { return this })() || Function("return this")();
-
-// Use `getOwnPropertyNames` because not all browsers support calling
-// `hasOwnProperty` on the global `self` object in a worker. See #183.
-var hadRuntime = g.regeneratorRuntime &&
-  Object.getOwnPropertyNames(g).indexOf("regeneratorRuntime") >= 0;
-
-// Save the old regeneratorRuntime in case it needs to be restored later.
-var oldRuntime = hadRuntime && g.regeneratorRuntime;
-
-// Force reevalutation of runtime.js.
-g.regeneratorRuntime = undefined;
-
-module.exports = __webpack_require__(62);
-
-if (hadRuntime) {
-  // Restore the original runtime.
-  g.regeneratorRuntime = oldRuntime;
-} else {
-  // Remove the global property added by runtime.js.
-  try {
-    delete g.regeneratorRuntime;
-  } catch(e) {
-    g.regeneratorRuntime = undefined;
-  }
-}
-
-
-/***/ }),
-/* 62 */
-/***/ (function(module, exports) {
-
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-!(function(global) {
+var runtime = (function (exports) {
   "use strict";
 
   var Op = Object.prototype;
@@ -1866,23 +338,6 @@ if (hadRuntime) {
   var iteratorSymbol = $Symbol.iterator || "@@iterator";
   var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
   var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  var inModule = typeof module === "object";
-  var runtime = global.regeneratorRuntime;
-  if (runtime) {
-    if (inModule) {
-      // If regeneratorRuntime is defined globally and we're in a module,
-      // make the exports object identical to regeneratorRuntime.
-      module.exports = runtime;
-    }
-    // Don't bother evaluating the rest of this file if the runtime was
-    // already defined globally.
-    return;
-  }
-
-  // Define the runtime globally (as expected by generated code) as either
-  // module.exports (if we're in a module) or a new, empty object.
-  runtime = global.regeneratorRuntime = inModule ? module.exports : {};
 
   function wrap(innerFn, outerFn, self, tryLocsList) {
     // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
@@ -1896,7 +351,7 @@ if (hadRuntime) {
 
     return generator;
   }
-  runtime.wrap = wrap;
+  exports.wrap = wrap;
 
   // Try/catch helper to minimize deoptimizations. Returns a completion
   // record like context.tryEntries[i].completion. This interface could
@@ -1967,7 +422,7 @@ if (hadRuntime) {
     });
   }
 
-  runtime.isGeneratorFunction = function(genFun) {
+  exports.isGeneratorFunction = function(genFun) {
     var ctor = typeof genFun === "function" && genFun.constructor;
     return ctor
       ? ctor === GeneratorFunction ||
@@ -1977,7 +432,7 @@ if (hadRuntime) {
       : false;
   };
 
-  runtime.mark = function(genFun) {
+  exports.mark = function(genFun) {
     if (Object.setPrototypeOf) {
       Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
     } else {
@@ -1994,7 +449,7 @@ if (hadRuntime) {
   // `yield regeneratorRuntime.awrap(x)`, so that the runtime can test
   // `hasOwn.call(value, "__await")` to determine if the yielded value is
   // meant to be awaited.
-  runtime.awrap = function(arg) {
+  exports.awrap = function(arg) {
     return { __await: arg };
   };
 
@@ -2019,22 +474,14 @@ if (hadRuntime) {
         return Promise.resolve(value).then(function(unwrapped) {
           // When a yielded Promise is resolved, its final value becomes
           // the .value of the Promise<{value,done}> result for the
-          // current iteration. If the Promise is rejected, however, the
-          // result for this iteration will be rejected with the same
-          // reason. Note that rejections of yielded Promises are not
-          // thrown back into the generator function, as is the case
-          // when an awaited Promise is rejected. This difference in
-          // behavior between yield and await is important, because it
-          // allows the consumer to decide what to do with the yielded
-          // rejection (swallow it and continue, manually .throw it back
-          // into the generator, abandon iteration, whatever). With
-          // await, by contrast, there is no opportunity to examine the
-          // rejection reason outside the generator function, so the
-          // only option is to throw it from the await expression, and
-          // let the generator function handle the exception.
+          // current iteration.
           result.value = unwrapped;
           resolve(result);
-        }, reject);
+        }, function(error) {
+          // If a rejected Promise was yielded, throw the rejection back
+          // into the async generator function so it can be handled there.
+          return invoke("throw", error, resolve, reject);
+        });
       }
     }
 
@@ -2077,17 +524,17 @@ if (hadRuntime) {
   AsyncIterator.prototype[asyncIteratorSymbol] = function () {
     return this;
   };
-  runtime.AsyncIterator = AsyncIterator;
+  exports.AsyncIterator = AsyncIterator;
 
   // Note that simple async functions are implemented on top of
   // AsyncIterator objects; they just return a Promise for the value of
   // the final result produced by the iterator.
-  runtime.async = function(innerFn, outerFn, self, tryLocsList) {
+  exports.async = function(innerFn, outerFn, self, tryLocsList) {
     var iter = new AsyncIterator(
       wrap(innerFn, outerFn, self, tryLocsList)
     );
 
-    return runtime.isGeneratorFunction(outerFn)
+    return exports.isGeneratorFunction(outerFn)
       ? iter // If outerFn is a generator, return the full iterator.
       : iter.next().then(function(result) {
           return result.done ? result.value : iter.next();
@@ -2184,7 +631,8 @@ if (hadRuntime) {
       context.delegate = null;
 
       if (context.method === "throw") {
-        if (delegate.iterator.return) {
+        // Note: ["return"] must be used for ES3 parsing compatibility.
+        if (delegate.iterator["return"]) {
           // If the delegate iterator has a return method, give it a
           // chance to clean up.
           context.method = "return";
@@ -2304,7 +752,7 @@ if (hadRuntime) {
     this.reset(true);
   }
 
-  runtime.keys = function(object) {
+  exports.keys = function(object) {
     var keys = [];
     for (var key in object) {
       keys.push(key);
@@ -2365,7 +813,7 @@ if (hadRuntime) {
     // Return an iterator with no values.
     return { next: doneResult };
   }
-  runtime.values = values;
+  exports.values = values;
 
   function doneResult() {
     return { value: undefined, done: true };
@@ -2570,1238 +1018,2870 @@ if (hadRuntime) {
       return ContinueSentinel;
     }
   };
-})(
-  // In sloppy mode, unbound `this` refers to the global object, fallback to
-  // Function constructor if we're in global strict mode. That is sadly a form
-  // of indirect eval which violates Content Security Policy.
-  (function() { return this })() || Function("return this")()
-);
 
-
-/***/ }),
-/* 63 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(64), __esModule: true };
-
-/***/ }),
-/* 64 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(20);
-__webpack_require__(11);
-__webpack_require__(15);
-__webpack_require__(78);
-__webpack_require__(85);
-__webpack_require__(87);
-__webpack_require__(88);
-module.exports = __webpack_require__(1).Set;
-
-
-/***/ }),
-/* 65 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var toInteger = __webpack_require__(21);
-var defined = __webpack_require__(22);
-// true  -> String#at
-// false -> String#codePointAt
-module.exports = function (TO_STRING) {
-  return function (that, pos) {
-    var s = String(defined(that));
-    var i = toInteger(pos);
-    var l = s.length;
-    var a, b;
-    if (i < 0 || i >= l) return TO_STRING ? '' : undefined;
-    a = s.charCodeAt(i);
-    return a < 0xd800 || a > 0xdbff || i + 1 === l || (b = s.charCodeAt(i + 1)) < 0xdc00 || b > 0xdfff
-      ? TO_STRING ? s.charAt(i) : a
-      : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
-  };
-};
-
-
-/***/ }),
-/* 66 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = !__webpack_require__(7) && !__webpack_require__(17)(function () {
-  return Object.defineProperty(__webpack_require__(25)('div'), 'a', { get: function () { return 7; } }).a != 7;
-});
-
-
-/***/ }),
-/* 67 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.1.1 ToPrimitive(input [, PreferredType])
-var isObject = __webpack_require__(4);
-// instead of the ES6 spec version, we didn't implement @@toPrimitive case
-// and the second argument - flag - preferred type is a string
-module.exports = function (it, S) {
-  if (!isObject(it)) return it;
-  var fn, val;
-  if (S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it))) return val;
-  if (typeof (fn = it.valueOf) == 'function' && !isObject(val = fn.call(it))) return val;
-  if (!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it))) return val;
-  throw TypeError("Can't convert object to primitive value");
-};
-
-
-/***/ }),
-/* 68 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(9);
-
-
-/***/ }),
-/* 69 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var create = __webpack_require__(35);
-var descriptor = __webpack_require__(34);
-var setToStringTag = __webpack_require__(18);
-var IteratorPrototype = {};
-
-// 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-__webpack_require__(9)(IteratorPrototype, __webpack_require__(2)('iterator'), function () { return this; });
-
-module.exports = function (Constructor, NAME, next) {
-  Constructor.prototype = create(IteratorPrototype, { next: descriptor(1, next) });
-  setToStringTag(Constructor, NAME + ' Iterator');
-};
-
-
-/***/ }),
-/* 70 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var dP = __webpack_require__(5);
-var anObject = __webpack_require__(6);
-var getKeys = __webpack_require__(71);
-
-module.exports = __webpack_require__(7) ? Object.defineProperties : function defineProperties(O, Properties) {
-  anObject(O);
-  var keys = getKeys(Properties);
-  var length = keys.length;
-  var i = 0;
-  var P;
-  while (length > i) dP.f(O, P = keys[i++], Properties[P]);
-  return O;
-};
-
-
-/***/ }),
-/* 71 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys = __webpack_require__(72);
-var enumBugKeys = __webpack_require__(38);
-
-module.exports = Object.keys || function keys(O) {
-  return $keys(O, enumBugKeys);
-};
-
-
-/***/ }),
-/* 72 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var has = __webpack_require__(13);
-var toIObject = __webpack_require__(26);
-var arrayIndexOf = __webpack_require__(73)(false);
-var IE_PROTO = __webpack_require__(28)('IE_PROTO');
-
-module.exports = function (object, names) {
-  var O = toIObject(object);
-  var i = 0;
-  var result = [];
-  var key;
-  for (key in O) if (key != IE_PROTO) has(O, key) && result.push(key);
-  // Don't enum bug & hidden keys
-  while (names.length > i) if (has(O, key = names[i++])) {
-    ~arrayIndexOf(result, key) || result.push(key);
-  }
-  return result;
-};
-
-
-/***/ }),
-/* 73 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// false -> Array#indexOf
-// true  -> Array#includes
-var toIObject = __webpack_require__(26);
-var toLength = __webpack_require__(27);
-var toAbsoluteIndex = __webpack_require__(74);
-module.exports = function (IS_INCLUDES) {
-  return function ($this, el, fromIndex) {
-    var O = toIObject($this);
-    var length = toLength(O.length);
-    var index = toAbsoluteIndex(fromIndex, length);
-    var value;
-    // Array#includes uses SameValueZero equality algorithm
-    // eslint-disable-next-line no-self-compare
-    if (IS_INCLUDES && el != el) while (length > index) {
-      value = O[index++];
-      // eslint-disable-next-line no-self-compare
-      if (value != value) return true;
-    // Array#indexOf ignores holes, Array#includes - not
-    } else for (;length > index; index++) if (IS_INCLUDES || index in O) {
-      if (O[index] === el) return IS_INCLUDES || index || 0;
-    } return !IS_INCLUDES && -1;
-  };
-};
-
-
-/***/ }),
-/* 74 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var toInteger = __webpack_require__(21);
-var max = Math.max;
-var min = Math.min;
-module.exports = function (index, length) {
-  index = toInteger(index);
-  return index < 0 ? max(index + length, 0) : min(index, length);
-};
-
-
-/***/ }),
-/* 75 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
-var has = __webpack_require__(13);
-var toObject = __webpack_require__(40);
-var IE_PROTO = __webpack_require__(28)('IE_PROTO');
-var ObjectProto = Object.prototype;
-
-module.exports = Object.getPrototypeOf || function (O) {
-  O = toObject(O);
-  if (has(O, IE_PROTO)) return O[IE_PROTO];
-  if (typeof O.constructor == 'function' && O instanceof O.constructor) {
-    return O.constructor.prototype;
-  } return O instanceof Object ? ObjectProto : null;
-};
-
-
-/***/ }),
-/* 76 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var addToUnscopables = __webpack_require__(77);
-var step = __webpack_require__(41);
-var Iterators = __webpack_require__(10);
-var toIObject = __webpack_require__(26);
-
-// 22.1.3.4 Array.prototype.entries()
-// 22.1.3.13 Array.prototype.keys()
-// 22.1.3.29 Array.prototype.values()
-// 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = __webpack_require__(23)(Array, 'Array', function (iterated, kind) {
-  this._t = toIObject(iterated); // target
-  this._i = 0;                   // next index
-  this._k = kind;                // kind
-// 22.1.5.2.1 %ArrayIteratorPrototype%.next()
-}, function () {
-  var O = this._t;
-  var kind = this._k;
-  var index = this._i++;
-  if (!O || index >= O.length) {
-    this._t = undefined;
-    return step(1);
-  }
-  if (kind == 'keys') return step(0, index);
-  if (kind == 'values') return step(0, O[index]);
-  return step(0, [index, O[index]]);
-}, 'values');
-
-// argumentsList[@@iterator] is %ArrayProto_values% (9.4.4.6, 9.4.4.7)
-Iterators.Arguments = Iterators.Array;
-
-addToUnscopables('keys');
-addToUnscopables('values');
-addToUnscopables('entries');
-
-
-/***/ }),
-/* 77 */
-/***/ (function(module, exports) {
-
-module.exports = function () { /* empty */ };
-
-
-/***/ }),
-/* 78 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var strong = __webpack_require__(42);
-var validate = __webpack_require__(32);
-var SET = 'Set';
-
-// 23.2 Set Objects
-module.exports = __webpack_require__(46)(SET, function (get) {
-  return function Set() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
-}, {
-  // 23.2.3.1 Set.prototype.add(value)
-  add: function add(value) {
-    return strong.def(validate(this, SET), value = value === 0 ? 0 : value, value);
-  }
-}, strong);
-
-
-/***/ }),
-/* 79 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// call something on iterator step with safe closing on error
-var anObject = __webpack_require__(6);
-module.exports = function (iterator, fn, value, entries) {
-  try {
-    return entries ? fn(anObject(value)[0], value[1]) : fn(value);
-  // 7.4.6 IteratorClose(iterator, completion)
-  } catch (e) {
-    var ret = iterator['return'];
-    if (ret !== undefined) anObject(ret.call(iterator));
-    throw e;
-  }
-};
-
-
-/***/ }),
-/* 80 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// check on default Array iterator
-var Iterators = __webpack_require__(10);
-var ITERATOR = __webpack_require__(2)('iterator');
-var ArrayProto = Array.prototype;
-
-module.exports = function (it) {
-  return it !== undefined && (Iterators.Array === it || ArrayProto[ITERATOR] === it);
-};
-
-
-/***/ }),
-/* 81 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 0 -> Array#forEach
-// 1 -> Array#map
-// 2 -> Array#filter
-// 3 -> Array#some
-// 4 -> Array#every
-// 5 -> Array#find
-// 6 -> Array#findIndex
-var ctx = __webpack_require__(8);
-var IObject = __webpack_require__(36);
-var toObject = __webpack_require__(40);
-var toLength = __webpack_require__(27);
-var asc = __webpack_require__(82);
-module.exports = function (TYPE, $create) {
-  var IS_MAP = TYPE == 1;
-  var IS_FILTER = TYPE == 2;
-  var IS_SOME = TYPE == 3;
-  var IS_EVERY = TYPE == 4;
-  var IS_FIND_INDEX = TYPE == 6;
-  var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
-  var create = $create || asc;
-  return function ($this, callbackfn, that) {
-    var O = toObject($this);
-    var self = IObject(O);
-    var f = ctx(callbackfn, that, 3);
-    var length = toLength(self.length);
-    var index = 0;
-    var result = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
-    var val, res;
-    for (;length > index; index++) if (NO_HOLES || index in self) {
-      val = self[index];
-      res = f(val, index, O);
-      if (TYPE) {
-        if (IS_MAP) result[index] = res;   // map
-        else if (res) switch (TYPE) {
-          case 3: return true;             // some
-          case 5: return val;              // find
-          case 6: return index;            // findIndex
-          case 2: result.push(val);        // filter
-        } else if (IS_EVERY) return false; // every
-      }
-    }
-    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : result;
-  };
-};
-
-
-/***/ }),
-/* 82 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 9.4.2.3 ArraySpeciesCreate(originalArray, length)
-var speciesConstructor = __webpack_require__(83);
-
-module.exports = function (original, length) {
-  return new (speciesConstructor(original))(length);
-};
-
-
-/***/ }),
-/* 83 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isObject = __webpack_require__(4);
-var isArray = __webpack_require__(84);
-var SPECIES = __webpack_require__(2)('species');
-
-module.exports = function (original) {
-  var C;
-  if (isArray(original)) {
-    C = original.constructor;
-    // cross-realm fallback
-    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
-    if (isObject(C)) {
-      C = C[SPECIES];
-      if (C === null) C = undefined;
-    }
-  } return C === undefined ? Array : C;
-};
-
-
-/***/ }),
-/* 84 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// 7.2.2 IsArray(argument)
-var cof = __webpack_require__(14);
-module.exports = Array.isArray || function isArray(arg) {
-  return cof(arg) == 'Array';
-};
-
-
-/***/ }),
-/* 85 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var $export = __webpack_require__(3);
-
-$export($export.P + $export.R, 'Set', { toJSON: __webpack_require__(47)('Set') });
-
-
-/***/ }),
-/* 86 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var forOf = __webpack_require__(16);
-
-module.exports = function (iter, ITERATOR) {
-  var result = [];
-  forOf(iter, false, result.push, result, ITERATOR);
-  return result;
-};
-
-
-/***/ }),
-/* 87 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// https://tc39.github.io/proposal-setmap-offrom/#sec-set.of
-__webpack_require__(48)('Set');
-
-
-/***/ }),
-/* 88 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// https://tc39.github.io/proposal-setmap-offrom/#sec-set.from
-__webpack_require__(49)('Set');
-
-
-/***/ }),
-/* 89 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-exports.__esModule = true;
-
-var _promise = __webpack_require__(50);
-
-var _promise2 = _interopRequireDefault(_promise);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (fn) {
-  return function () {
-    var gen = fn.apply(this, arguments);
-    return new _promise2.default(function (resolve, reject) {
-      function step(key, arg) {
-        try {
-          var info = gen[key](arg);
-          var value = info.value;
-        } catch (error) {
-          reject(error);
-          return;
-        }
-
-        if (info.done) {
-          resolve(value);
-        } else {
-          return _promise2.default.resolve(value).then(function (value) {
-            step("next", value);
-          }, function (err) {
-            step("throw", err);
-          });
-        }
-      }
-
-      return step("next");
-    });
-  };
-};
-
-/***/ }),
-/* 90 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(20);
-__webpack_require__(11);
-__webpack_require__(15);
-__webpack_require__(91);
-__webpack_require__(96);
-__webpack_require__(97);
-module.exports = __webpack_require__(1).Promise;
-
-
-/***/ }),
-/* 91 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var LIBRARY = __webpack_require__(24);
-var global = __webpack_require__(0);
-var ctx = __webpack_require__(8);
-var classof = __webpack_require__(19);
-var $export = __webpack_require__(3);
-var isObject = __webpack_require__(4);
-var aFunction = __webpack_require__(12);
-var anInstance = __webpack_require__(31);
-var forOf = __webpack_require__(16);
-var speciesConstructor = __webpack_require__(51);
-var task = __webpack_require__(52).set;
-var microtask = __webpack_require__(93)();
-var newPromiseCapabilityModule = __webpack_require__(33);
-var perform = __webpack_require__(53);
-var userAgent = __webpack_require__(94);
-var promiseResolve = __webpack_require__(54);
-var PROMISE = 'Promise';
-var TypeError = global.TypeError;
-var process = global.process;
-var versions = process && process.versions;
-var v8 = versions && versions.v8 || '';
-var $Promise = global[PROMISE];
-var isNode = classof(process) == 'process';
-var empty = function () { /* empty */ };
-var Internal, newGenericPromiseCapability, OwnPromiseCapability, Wrapper;
-var newPromiseCapability = newGenericPromiseCapability = newPromiseCapabilityModule.f;
-
-var USE_NATIVE = !!function () {
-  try {
-    // correct subclassing with @@species support
-    var promise = $Promise.resolve(1);
-    var FakePromise = (promise.constructor = {})[__webpack_require__(2)('species')] = function (exec) {
-      exec(empty, empty);
-    };
-    // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-    return (isNode || typeof PromiseRejectionEvent == 'function')
-      && promise.then(empty) instanceof FakePromise
-      // v8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
-      // we can't detect it synchronously, so just check versions
-      && v8.indexOf('6.6') !== 0
-      && userAgent.indexOf('Chrome/66') === -1;
-  } catch (e) { /* empty */ }
-}();
-
-// helpers
-var isThenable = function (it) {
-  var then;
-  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
-};
-var notify = function (promise, isReject) {
-  if (promise._n) return;
-  promise._n = true;
-  var chain = promise._c;
-  microtask(function () {
-    var value = promise._v;
-    var ok = promise._s == 1;
-    var i = 0;
-    var run = function (reaction) {
-      var handler = ok ? reaction.ok : reaction.fail;
-      var resolve = reaction.resolve;
-      var reject = reaction.reject;
-      var domain = reaction.domain;
-      var result, then, exited;
-      try {
-        if (handler) {
-          if (!ok) {
-            if (promise._h == 2) onHandleUnhandled(promise);
-            promise._h = 1;
-          }
-          if (handler === true) result = value;
-          else {
-            if (domain) domain.enter();
-            result = handler(value); // may throw
-            if (domain) {
-              domain.exit();
-              exited = true;
-            }
-          }
-          if (result === reaction.promise) {
-            reject(TypeError('Promise-chain cycle'));
-          } else if (then = isThenable(result)) {
-            then.call(result, resolve, reject);
-          } else resolve(result);
-        } else reject(value);
-      } catch (e) {
-        if (domain && !exited) domain.exit();
-        reject(e);
-      }
-    };
-    while (chain.length > i) run(chain[i++]); // variable length - can't use forEach
-    promise._c = [];
-    promise._n = false;
-    if (isReject && !promise._h) onUnhandled(promise);
-  });
-};
-var onUnhandled = function (promise) {
-  task.call(global, function () {
-    var value = promise._v;
-    var unhandled = isUnhandled(promise);
-    var result, handler, console;
-    if (unhandled) {
-      result = perform(function () {
-        if (isNode) {
-          process.emit('unhandledRejection', value, promise);
-        } else if (handler = global.onunhandledrejection) {
-          handler({ promise: promise, reason: value });
-        } else if ((console = global.console) && console.error) {
-          console.error('Unhandled promise rejection', value);
-        }
-      });
-      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-      promise._h = isNode || isUnhandled(promise) ? 2 : 1;
-    } promise._a = undefined;
-    if (unhandled && result.e) throw result.v;
-  });
-};
-var isUnhandled = function (promise) {
-  return promise._h !== 1 && (promise._a || promise._c).length === 0;
-};
-var onHandleUnhandled = function (promise) {
-  task.call(global, function () {
-    var handler;
-    if (isNode) {
-      process.emit('rejectionHandled', promise);
-    } else if (handler = global.onrejectionhandled) {
-      handler({ promise: promise, reason: promise._v });
-    }
-  });
-};
-var $reject = function (value) {
-  var promise = this;
-  if (promise._d) return;
-  promise._d = true;
-  promise = promise._w || promise; // unwrap
-  promise._v = value;
-  promise._s = 2;
-  if (!promise._a) promise._a = promise._c.slice();
-  notify(promise, true);
-};
-var $resolve = function (value) {
-  var promise = this;
-  var then;
-  if (promise._d) return;
-  promise._d = true;
-  promise = promise._w || promise; // unwrap
-  try {
-    if (promise === value) throw TypeError("Promise can't be resolved itself");
-    if (then = isThenable(value)) {
-      microtask(function () {
-        var wrapper = { _w: promise, _d: false }; // wrap
-        try {
-          then.call(value, ctx($resolve, wrapper, 1), ctx($reject, wrapper, 1));
-        } catch (e) {
-          $reject.call(wrapper, e);
-        }
-      });
-    } else {
-      promise._v = value;
-      promise._s = 1;
-      notify(promise, false);
-    }
-  } catch (e) {
-    $reject.call({ _w: promise, _d: false }, e); // wrap
-  }
-};
-
-// constructor polyfill
-if (!USE_NATIVE) {
-  // 25.4.3.1 Promise(executor)
-  $Promise = function Promise(executor) {
-    anInstance(this, $Promise, PROMISE, '_h');
-    aFunction(executor);
-    Internal.call(this);
-    try {
-      executor(ctx($resolve, this, 1), ctx($reject, this, 1));
-    } catch (err) {
-      $reject.call(this, err);
-    }
-  };
-  // eslint-disable-next-line no-unused-vars
-  Internal = function Promise(executor) {
-    this._c = [];             // <- awaiting reactions
-    this._a = undefined;      // <- checked in isUnhandled reactions
-    this._s = 0;              // <- state
-    this._d = false;          // <- done
-    this._v = undefined;      // <- value
-    this._h = 0;              // <- rejection state, 0 - default, 1 - handled, 2 - unhandled
-    this._n = false;          // <- notify
-  };
-  Internal.prototype = __webpack_require__(30)($Promise.prototype, {
-    // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
-    then: function then(onFulfilled, onRejected) {
-      var reaction = newPromiseCapability(speciesConstructor(this, $Promise));
-      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
-      reaction.fail = typeof onRejected == 'function' && onRejected;
-      reaction.domain = isNode ? process.domain : undefined;
-      this._c.push(reaction);
-      if (this._a) this._a.push(reaction);
-      if (this._s) notify(this, false);
-      return reaction.promise;
-    },
-    // 25.4.5.1 Promise.prototype.catch(onRejected)
-    'catch': function (onRejected) {
-      return this.then(undefined, onRejected);
-    }
-  });
-  OwnPromiseCapability = function () {
-    var promise = new Internal();
-    this.promise = promise;
-    this.resolve = ctx($resolve, promise, 1);
-    this.reject = ctx($reject, promise, 1);
-  };
-  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
-    return C === $Promise || C === Wrapper
-      ? new OwnPromiseCapability(C)
-      : newGenericPromiseCapability(C);
-  };
-}
-
-$export($export.G + $export.W + $export.F * !USE_NATIVE, { Promise: $Promise });
-__webpack_require__(18)($Promise, PROMISE);
-__webpack_require__(44)(PROMISE);
-Wrapper = __webpack_require__(1)[PROMISE];
-
-// statics
-$export($export.S + $export.F * !USE_NATIVE, PROMISE, {
-  // 25.4.4.5 Promise.reject(r)
-  reject: function reject(r) {
-    var capability = newPromiseCapability(this);
-    var $$reject = capability.reject;
-    $$reject(r);
-    return capability.promise;
-  }
-});
-$export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
-  // 25.4.4.6 Promise.resolve(x)
-  resolve: function resolve(x) {
-    return promiseResolve(LIBRARY && this === Wrapper ? $Promise : this, x);
-  }
-});
-$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(95)(function (iter) {
-  $Promise.all(iter)['catch'](empty);
-})), PROMISE, {
-  // 25.4.4.1 Promise.all(iterable)
-  all: function all(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var resolve = capability.resolve;
-    var reject = capability.reject;
-    var result = perform(function () {
-      var values = [];
-      var index = 0;
-      var remaining = 1;
-      forOf(iterable, false, function (promise) {
-        var $index = index++;
-        var alreadyCalled = false;
-        values.push(undefined);
-        remaining++;
-        C.resolve(promise).then(function (value) {
-          if (alreadyCalled) return;
-          alreadyCalled = true;
-          values[$index] = value;
-          --remaining || resolve(values);
-        }, reject);
-      });
-      --remaining || resolve(values);
-    });
-    if (result.e) reject(result.v);
-    return capability.promise;
-  },
-  // 25.4.4.4 Promise.race(iterable)
-  race: function race(iterable) {
-    var C = this;
-    var capability = newPromiseCapability(C);
-    var reject = capability.reject;
-    var result = perform(function () {
-      forOf(iterable, false, function (promise) {
-        C.resolve(promise).then(capability.resolve, reject);
-      });
-    });
-    if (result.e) reject(result.v);
-    return capability.promise;
-  }
-});
-
-
-/***/ }),
-/* 92 */
-/***/ (function(module, exports) {
-
-// fast apply, http://jsperf.lnkit.com/fast-apply/5
-module.exports = function (fn, args, that) {
-  var un = that === undefined;
-  switch (args.length) {
-    case 0: return un ? fn()
-                      : fn.call(that);
-    case 1: return un ? fn(args[0])
-                      : fn.call(that, args[0]);
-    case 2: return un ? fn(args[0], args[1])
-                      : fn.call(that, args[0], args[1]);
-    case 3: return un ? fn(args[0], args[1], args[2])
-                      : fn.call(that, args[0], args[1], args[2]);
-    case 4: return un ? fn(args[0], args[1], args[2], args[3])
-                      : fn.call(that, args[0], args[1], args[2], args[3]);
-  } return fn.apply(that, args);
-};
-
-
-/***/ }),
-/* 93 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(0);
-var macrotask = __webpack_require__(52).set;
-var Observer = global.MutationObserver || global.WebKitMutationObserver;
-var process = global.process;
-var Promise = global.Promise;
-var isNode = __webpack_require__(14)(process) == 'process';
-
-module.exports = function () {
-  var head, last, notify;
-
-  var flush = function () {
-    var parent, fn;
-    if (isNode && (parent = process.domain)) parent.exit();
-    while (head) {
-      fn = head.fn;
-      head = head.next;
-      try {
-        fn();
-      } catch (e) {
-        if (head) notify();
-        else last = undefined;
-        throw e;
-      }
-    } last = undefined;
-    if (parent) parent.enter();
-  };
-
-  // Node.js
-  if (isNode) {
-    notify = function () {
-      process.nextTick(flush);
-    };
-  // browsers with MutationObserver, except iOS Safari - https://github.com/zloirock/core-js/issues/339
-  } else if (Observer && !(global.navigator && global.navigator.standalone)) {
-    var toggle = true;
-    var node = document.createTextNode('');
-    new Observer(flush).observe(node, { characterData: true }); // eslint-disable-line no-new
-    notify = function () {
-      node.data = toggle = !toggle;
-    };
-  // environments with maybe non-completely correct, but existent Promise
-  } else if (Promise && Promise.resolve) {
-    // Promise.resolve without an argument throws an error in LG WebOS 2
-    var promise = Promise.resolve(undefined);
-    notify = function () {
-      promise.then(flush);
-    };
-  // for other environments - macrotask based on:
-  // - setImmediate
-  // - MessageChannel
-  // - window.postMessag
-  // - onreadystatechange
-  // - setTimeout
-  } else {
-    notify = function () {
-      // strange IE + webpack dev server bug - use .call(global)
-      macrotask.call(global, flush);
-    };
-  }
-
-  return function (fn) {
-    var task = { fn: fn, next: undefined };
-    if (last) last.next = task;
-    if (!head) {
-      head = task;
-      notify();
-    } last = task;
-  };
-};
-
-
-/***/ }),
-/* 94 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var global = __webpack_require__(0);
-var navigator = global.navigator;
-
-module.exports = navigator && navigator.userAgent || '';
-
-
-/***/ }),
-/* 95 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var ITERATOR = __webpack_require__(2)('iterator');
-var SAFE_CLOSING = false;
+  // Regardless of whether this script is executing as a CommonJS module
+  // or not, return the runtime object so that we can declare the variable
+  // regeneratorRuntime in the outer scope, which allows this module to be
+  // injected easily by `bin/regenerator --include-runtime script.js`.
+  return exports;
+
+}(
+  // If this script is executing as a CommonJS module, use module.exports
+  // as the regeneratorRuntime namespace. Otherwise create a new empty
+  // object. Either way, the resulting object will be used to initialize
+  // the regeneratorRuntime variable at the top of this file.
+   true ? module.exports : undefined
+));
 
 try {
-  var riter = [7][ITERATOR]();
-  riter['return'] = function () { SAFE_CLOSING = true; };
-  // eslint-disable-next-line no-throw-literal
-  Array.from(riter, function () { throw 2; });
-} catch (e) { /* empty */ }
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  // This module should not be running in strict mode, so the above
+  // assignment should always work unless something is misconfigured. Just
+  // in case runtime.js accidentally runs in strict mode, we can escape
+  // strict mode using a global Function call. This could conceivably fail
+  // if a Content Security Policy forbids using Function, but in that case
+  // the proper solution is to fix the accidental strict mode problem. If
+  // you've misconfigured your bundler to force strict mode and applied a
+  // CSP to forbid Function, and you're not willing to fix either of those
+  // problems, please detail your unique predicament in a GitHub issue.
+  Function("r", "regeneratorRuntime = r")(runtime);
+}
 
-module.exports = function (exec, skipClosing) {
-  if (!skipClosing && !SAFE_CLOSING) return false;
-  var safe = false;
-  try {
-    var arr = [7];
-    var iter = arr[ITERATOR]();
-    iter.next = function () { return { done: safe = true }; };
-    arr[ITERATOR] = function () { return iter; };
-    exec(arr);
-  } catch (e) { /* empty */ }
-  return safe;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {var require;var require;/*!
+    localForage -- Offline Storage, Improved
+    Version 1.7.3
+    https://localforage.github.io/localForage
+    (c) 2013-2017 Mozilla, Apache License 2.0
+*/
+(function(f){if(true){module.exports=f()}else { var g; }})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return require(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw (f.code="MODULE_NOT_FOUND", f)}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function (global){
+'use strict';
+var Mutation = global.MutationObserver || global.WebKitMutationObserver;
+
+var scheduleDrain;
+
+{
+  if (Mutation) {
+    var called = 0;
+    var observer = new Mutation(nextTick);
+    var element = global.document.createTextNode('');
+    observer.observe(element, {
+      characterData: true
+    });
+    scheduleDrain = function () {
+      element.data = (called = ++called % 2);
+    };
+  } else if (!global.setImmediate && typeof global.MessageChannel !== 'undefined') {
+    var channel = new global.MessageChannel();
+    channel.port1.onmessage = nextTick;
+    scheduleDrain = function () {
+      channel.port2.postMessage(0);
+    };
+  } else if ('document' in global && 'onreadystatechange' in global.document.createElement('script')) {
+    scheduleDrain = function () {
+
+      // Create a <script> element; its readystatechange event will be fired asynchronously once it is inserted
+      // into the document. Do so, thus queuing up the task. Remember to clean up once it's been called.
+      var scriptEl = global.document.createElement('script');
+      scriptEl.onreadystatechange = function () {
+        nextTick();
+
+        scriptEl.onreadystatechange = null;
+        scriptEl.parentNode.removeChild(scriptEl);
+        scriptEl = null;
+      };
+      global.document.documentElement.appendChild(scriptEl);
+    };
+  } else {
+    scheduleDrain = function () {
+      setTimeout(nextTick, 0);
+    };
+  }
+}
+
+var draining;
+var queue = [];
+//named nextTick for less confusing stack traces
+function nextTick() {
+  draining = true;
+  var i, oldQueue;
+  var len = queue.length;
+  while (len) {
+    oldQueue = queue;
+    queue = [];
+    i = -1;
+    while (++i < len) {
+      oldQueue[i]();
+    }
+    len = queue.length;
+  }
+  draining = false;
+}
+
+module.exports = immediate;
+function immediate(task) {
+  if (queue.push(task) === 1 && !draining) {
+    scheduleDrain();
+  }
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],2:[function(_dereq_,module,exports){
+'use strict';
+var immediate = _dereq_(1);
+
+/* istanbul ignore next */
+function INTERNAL() {}
+
+var handlers = {};
+
+var REJECTED = ['REJECTED'];
+var FULFILLED = ['FULFILLED'];
+var PENDING = ['PENDING'];
+
+module.exports = Promise;
+
+function Promise(resolver) {
+  if (typeof resolver !== 'function') {
+    throw new TypeError('resolver must be a function');
+  }
+  this.state = PENDING;
+  this.queue = [];
+  this.outcome = void 0;
+  if (resolver !== INTERNAL) {
+    safelyResolveThenable(this, resolver);
+  }
+}
+
+Promise.prototype["catch"] = function (onRejected) {
+  return this.then(null, onRejected);
+};
+Promise.prototype.then = function (onFulfilled, onRejected) {
+  if (typeof onFulfilled !== 'function' && this.state === FULFILLED ||
+    typeof onRejected !== 'function' && this.state === REJECTED) {
+    return this;
+  }
+  var promise = new this.constructor(INTERNAL);
+  if (this.state !== PENDING) {
+    var resolver = this.state === FULFILLED ? onFulfilled : onRejected;
+    unwrap(promise, resolver, this.outcome);
+  } else {
+    this.queue.push(new QueueItem(promise, onFulfilled, onRejected));
+  }
+
+  return promise;
+};
+function QueueItem(promise, onFulfilled, onRejected) {
+  this.promise = promise;
+  if (typeof onFulfilled === 'function') {
+    this.onFulfilled = onFulfilled;
+    this.callFulfilled = this.otherCallFulfilled;
+  }
+  if (typeof onRejected === 'function') {
+    this.onRejected = onRejected;
+    this.callRejected = this.otherCallRejected;
+  }
+}
+QueueItem.prototype.callFulfilled = function (value) {
+  handlers.resolve(this.promise, value);
+};
+QueueItem.prototype.otherCallFulfilled = function (value) {
+  unwrap(this.promise, this.onFulfilled, value);
+};
+QueueItem.prototype.callRejected = function (value) {
+  handlers.reject(this.promise, value);
+};
+QueueItem.prototype.otherCallRejected = function (value) {
+  unwrap(this.promise, this.onRejected, value);
 };
 
+function unwrap(promise, func, value) {
+  immediate(function () {
+    var returnValue;
+    try {
+      returnValue = func(value);
+    } catch (e) {
+      return handlers.reject(promise, e);
+    }
+    if (returnValue === promise) {
+      handlers.reject(promise, new TypeError('Cannot resolve promise with itself'));
+    } else {
+      handlers.resolve(promise, returnValue);
+    }
+  });
+}
 
-/***/ }),
-/* 96 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-// https://github.com/tc39/proposal-promise-finally
-
-var $export = __webpack_require__(3);
-var core = __webpack_require__(1);
-var global = __webpack_require__(0);
-var speciesConstructor = __webpack_require__(51);
-var promiseResolve = __webpack_require__(54);
-
-$export($export.P + $export.R, 'Promise', { 'finally': function (onFinally) {
-  var C = speciesConstructor(this, core.Promise || global.Promise);
-  var isFunction = typeof onFinally == 'function';
-  return this.then(
-    isFunction ? function (x) {
-      return promiseResolve(C, onFinally()).then(function () { return x; });
-    } : onFinally,
-    isFunction ? function (e) {
-      return promiseResolve(C, onFinally()).then(function () { throw e; });
-    } : onFinally
-  );
-} });
-
-
-/***/ }),
-/* 97 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// https://github.com/tc39/proposal-promise-try
-var $export = __webpack_require__(3);
-var newPromiseCapability = __webpack_require__(33);
-var perform = __webpack_require__(53);
-
-$export($export.S, 'Promise', { 'try': function (callbackfn) {
-  var promiseCapability = newPromiseCapability.f(this);
-  var result = perform(callbackfn);
-  (result.e ? promiseCapability.reject : promiseCapability.resolve)(result.v);
-  return promiseCapability.promise;
-} });
-
-
-/***/ }),
-/* 98 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(99), __esModule: true };
-
-/***/ }),
-/* 99 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(20);
-__webpack_require__(11);
-__webpack_require__(15);
-__webpack_require__(100);
-__webpack_require__(101);
-__webpack_require__(102);
-__webpack_require__(103);
-module.exports = __webpack_require__(1).Map;
-
-
-/***/ }),
-/* 100 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var strong = __webpack_require__(42);
-var validate = __webpack_require__(32);
-var MAP = 'Map';
-
-// 23.1 Map Objects
-module.exports = __webpack_require__(46)(MAP, function (get) {
-  return function Map() { return get(this, arguments.length > 0 ? arguments[0] : undefined); };
-}, {
-  // 23.1.3.6 Map.prototype.get(key)
-  get: function get(key) {
-    var entry = strong.getEntry(validate(this, MAP), key);
-    return entry && entry.v;
-  },
-  // 23.1.3.9 Map.prototype.set(key, value)
-  set: function set(key, value) {
-    return strong.def(validate(this, MAP), key === 0 ? 0 : key, value);
+handlers.resolve = function (self, value) {
+  var result = tryCatch(getThen, value);
+  if (result.status === 'error') {
+    return handlers.reject(self, result.value);
   }
-}, strong, true);
+  var thenable = result.value;
 
+  if (thenable) {
+    safelyResolveThenable(self, thenable);
+  } else {
+    self.state = FULFILLED;
+    self.outcome = value;
+    var i = -1;
+    var len = self.queue.length;
+    while (++i < len) {
+      self.queue[i].callFulfilled(value);
+    }
+  }
+  return self;
+};
+handlers.reject = function (self, error) {
+  self.state = REJECTED;
+  self.outcome = error;
+  var i = -1;
+  var len = self.queue.length;
+  while (++i < len) {
+    self.queue[i].callRejected(error);
+  }
+  return self;
+};
 
-/***/ }),
-/* 101 */
-/***/ (function(module, exports, __webpack_require__) {
+function getThen(obj) {
+  // Make sure we only access the accessor once as required by the spec
+  var then = obj && obj.then;
+  if (obj && (typeof obj === 'object' || typeof obj === 'function') && typeof then === 'function') {
+    return function appyThen() {
+      then.apply(obj, arguments);
+    };
+  }
+}
 
-// https://github.com/DavidBruant/Map-Set.prototype.toJSON
-var $export = __webpack_require__(3);
+function safelyResolveThenable(self, thenable) {
+  // Either fulfill, reject or reject with error
+  var called = false;
+  function onError(value) {
+    if (called) {
+      return;
+    }
+    called = true;
+    handlers.reject(self, value);
+  }
 
-$export($export.P + $export.R, 'Map', { toJSON: __webpack_require__(47)('Map') });
+  function onSuccess(value) {
+    if (called) {
+      return;
+    }
+    called = true;
+    handlers.resolve(self, value);
+  }
 
+  function tryToUnwrap() {
+    thenable(onSuccess, onError);
+  }
 
-/***/ }),
-/* 102 */
-/***/ (function(module, exports, __webpack_require__) {
+  var result = tryCatch(tryToUnwrap);
+  if (result.status === 'error') {
+    onError(result.value);
+  }
+}
 
-// https://tc39.github.io/proposal-setmap-offrom/#sec-map.of
-__webpack_require__(48)('Map');
+function tryCatch(func, value) {
+  var out = {};
+  try {
+    out.value = func(value);
+    out.status = 'success';
+  } catch (e) {
+    out.status = 'error';
+    out.value = e;
+  }
+  return out;
+}
 
+Promise.resolve = resolve;
+function resolve(value) {
+  if (value instanceof this) {
+    return value;
+  }
+  return handlers.resolve(new this(INTERNAL), value);
+}
 
-/***/ }),
-/* 103 */
-/***/ (function(module, exports, __webpack_require__) {
+Promise.reject = reject;
+function reject(reason) {
+  var promise = new this(INTERNAL);
+  return handlers.reject(promise, reason);
+}
 
-// https://tc39.github.io/proposal-setmap-offrom/#sec-map.from
-__webpack_require__(49)('Map');
+Promise.all = all;
+function all(iterable) {
+  var self = this;
+  if (Object.prototype.toString.call(iterable) !== '[object Array]') {
+    return this.reject(new TypeError('must be an array'));
+  }
 
+  var len = iterable.length;
+  var called = false;
+  if (!len) {
+    return this.resolve([]);
+  }
 
-/***/ }),
-/* 104 */
-/***/ (function(module, exports, __webpack_require__) {
+  var values = new Array(len);
+  var resolved = 0;
+  var i = -1;
+  var promise = new this(INTERNAL);
 
-"use strict";
+  while (++i < len) {
+    allResolver(iterable[i], i);
+  }
+  return promise;
+  function allResolver(value, i) {
+    self.resolve(value).then(resolveFromAll, function (error) {
+      if (!called) {
+        called = true;
+        handlers.reject(promise, error);
+      }
+    });
+    function resolveFromAll(outValue) {
+      values[i] = outValue;
+      if (++resolved === len && !called) {
+        called = true;
+        handlers.resolve(promise, values);
+      }
+    }
+  }
+}
 
+Promise.race = race;
+function race(iterable) {
+  var self = this;
+  if (Object.prototype.toString.call(iterable) !== '[object Array]') {
+    return this.reject(new TypeError('must be an array'));
+  }
 
-exports.__esModule = true;
+  var len = iterable.length;
+  var called = false;
+  if (!len) {
+    return this.resolve([]);
+  }
 
-var _isIterable2 = __webpack_require__(105);
+  var i = -1;
+  var promise = new this(INTERNAL);
 
-var _isIterable3 = _interopRequireDefault(_isIterable2);
+  while (++i < len) {
+    resolver(iterable[i]);
+  }
+  return promise;
+  function resolver(value) {
+    self.resolve(value).then(function (response) {
+      if (!called) {
+        called = true;
+        handlers.resolve(promise, response);
+      }
+    }, function (error) {
+      if (!called) {
+        called = true;
+        handlers.reject(promise, error);
+      }
+    });
+  }
+}
 
-var _getIterator2 = __webpack_require__(108);
+},{"1":1}],3:[function(_dereq_,module,exports){
+(function (global){
+'use strict';
+if (typeof global.Promise !== 'function') {
+  global.Promise = _dereq_(2);
+}
 
-var _getIterator3 = _interopRequireDefault(_getIterator2);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"2":2}],4:[function(_dereq_,module,exports){
+'use strict';
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-exports.default = function () {
-  function sliceIterator(arr, i) {
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = undefined;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function getIDB() {
+    /* global indexedDB,webkitIndexedDB,mozIndexedDB,OIndexedDB,msIndexedDB */
+    try {
+        if (typeof indexedDB !== 'undefined') {
+            return indexedDB;
+        }
+        if (typeof webkitIndexedDB !== 'undefined') {
+            return webkitIndexedDB;
+        }
+        if (typeof mozIndexedDB !== 'undefined') {
+            return mozIndexedDB;
+        }
+        if (typeof OIndexedDB !== 'undefined') {
+            return OIndexedDB;
+        }
+        if (typeof msIndexedDB !== 'undefined') {
+            return msIndexedDB;
+        }
+    } catch (e) {
+        return;
+    }
+}
+
+var idb = getIDB();
+
+function isIndexedDBValid() {
+    try {
+        // Initialize IndexedDB; fall back to vendor-prefixed versions
+        // if needed.
+        if (!idb) {
+            return false;
+        }
+        // We mimic PouchDB here;
+        //
+        // We test for openDatabase because IE Mobile identifies itself
+        // as Safari. Oh the lulz...
+        var isSafari = typeof openDatabase !== 'undefined' && /(Safari|iPhone|iPad|iPod)/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent) && !/BlackBerry/.test(navigator.platform);
+
+        var hasFetch = typeof fetch === 'function' && fetch.toString().indexOf('[native code') !== -1;
+
+        // Safari <10.1 does not meet our requirements for IDB support (#5572)
+        // since Safari 10.1 shipped with fetch, we can use that to detect it
+        return (!isSafari || hasFetch) && typeof indexedDB !== 'undefined' &&
+        // some outdated implementations of IDB that appear on Samsung
+        // and HTC Android devices <4.4 are missing IDBKeyRange
+        // See: https://github.com/mozilla/localForage/issues/128
+        // See: https://github.com/mozilla/localForage/issues/272
+        typeof IDBKeyRange !== 'undefined';
+    } catch (e) {
+        return false;
+    }
+}
+
+// Abstracts constructing a Blob object, so it also works in older
+// browsers that don't support the native Blob constructor. (i.e.
+// old QtWebKit versions, at least).
+// Abstracts constructing a Blob object, so it also works in older
+// browsers that don't support the native Blob constructor. (i.e.
+// old QtWebKit versions, at least).
+function createBlob(parts, properties) {
+    /* global BlobBuilder,MSBlobBuilder,MozBlobBuilder,WebKitBlobBuilder */
+    parts = parts || [];
+    properties = properties || {};
+    try {
+        return new Blob(parts, properties);
+    } catch (e) {
+        if (e.name !== 'TypeError') {
+            throw e;
+        }
+        var Builder = typeof BlobBuilder !== 'undefined' ? BlobBuilder : typeof MSBlobBuilder !== 'undefined' ? MSBlobBuilder : typeof MozBlobBuilder !== 'undefined' ? MozBlobBuilder : WebKitBlobBuilder;
+        var builder = new Builder();
+        for (var i = 0; i < parts.length; i += 1) {
+            builder.append(parts[i]);
+        }
+        return builder.getBlob(properties.type);
+    }
+}
+
+// This is CommonJS because lie is an external dependency, so Rollup
+// can just ignore it.
+if (typeof Promise === 'undefined') {
+    // In the "nopromises" build this will just throw if you don't have
+    // a global promise object, but it would throw anyway later.
+    _dereq_(3);
+}
+var Promise$1 = Promise;
+
+function executeCallback(promise, callback) {
+    if (callback) {
+        promise.then(function (result) {
+            callback(null, result);
+        }, function (error) {
+            callback(error);
+        });
+    }
+}
+
+function executeTwoCallbacks(promise, callback, errorCallback) {
+    if (typeof callback === 'function') {
+        promise.then(callback);
+    }
+
+    if (typeof errorCallback === 'function') {
+        promise["catch"](errorCallback);
+    }
+}
+
+function normalizeKey(key) {
+    // Cast the key to a string, as that's all we can set as a key.
+    if (typeof key !== 'string') {
+        console.warn(key + ' used as a key, but it is not a string.');
+        key = String(key);
+    }
+
+    return key;
+}
+
+function getCallback() {
+    if (arguments.length && typeof arguments[arguments.length - 1] === 'function') {
+        return arguments[arguments.length - 1];
+    }
+}
+
+// Some code originally from async_storage.js in
+// [Gaia](https://github.com/mozilla-b2g/gaia).
+
+var DETECT_BLOB_SUPPORT_STORE = 'local-forage-detect-blob-support';
+var supportsBlobs = void 0;
+var dbContexts = {};
+var toString = Object.prototype.toString;
+
+// Transaction Modes
+var READ_ONLY = 'readonly';
+var READ_WRITE = 'readwrite';
+
+// Transform a binary string to an array buffer, because otherwise
+// weird stuff happens when you try to work with the binary string directly.
+// It is known.
+// From http://stackoverflow.com/questions/14967647/ (continues on next line)
+// encode-decode-image-with-base64-breaks-image (2013-04-21)
+function _binStringToArrayBuffer(bin) {
+    var length = bin.length;
+    var buf = new ArrayBuffer(length);
+    var arr = new Uint8Array(buf);
+    for (var i = 0; i < length; i++) {
+        arr[i] = bin.charCodeAt(i);
+    }
+    return buf;
+}
+
+//
+// Blobs are not supported in all versions of IndexedDB, notably
+// Chrome <37 and Android <5. In those versions, storing a blob will throw.
+//
+// Various other blob bugs exist in Chrome v37-42 (inclusive).
+// Detecting them is expensive and confusing to users, and Chrome 37-42
+// is at very low usage worldwide, so we do a hacky userAgent check instead.
+//
+// content-type bug: https://code.google.com/p/chromium/issues/detail?id=408120
+// 404 bug: https://code.google.com/p/chromium/issues/detail?id=447916
+// FileReader bug: https://code.google.com/p/chromium/issues/detail?id=447836
+//
+// Code borrowed from PouchDB. See:
+// https://github.com/pouchdb/pouchdb/blob/master/packages/node_modules/pouchdb-adapter-idb/src/blobSupport.js
+//
+function _checkBlobSupportWithoutCaching(idb) {
+    return new Promise$1(function (resolve) {
+        var txn = idb.transaction(DETECT_BLOB_SUPPORT_STORE, READ_WRITE);
+        var blob = createBlob(['']);
+        txn.objectStore(DETECT_BLOB_SUPPORT_STORE).put(blob, 'key');
+
+        txn.onabort = function (e) {
+            // If the transaction aborts now its due to not being able to
+            // write to the database, likely due to the disk being full
+            e.preventDefault();
+            e.stopPropagation();
+            resolve(false);
+        };
+
+        txn.oncomplete = function () {
+            var matchedChrome = navigator.userAgent.match(/Chrome\/(\d+)/);
+            var matchedEdge = navigator.userAgent.match(/Edge\//);
+            // MS Edge pretends to be Chrome 42:
+            // https://msdn.microsoft.com/en-us/library/hh869301%28v=vs.85%29.aspx
+            resolve(matchedEdge || !matchedChrome || parseInt(matchedChrome[1], 10) >= 43);
+        };
+    })["catch"](function () {
+        return false; // error, so assume unsupported
+    });
+}
+
+function _checkBlobSupport(idb) {
+    if (typeof supportsBlobs === 'boolean') {
+        return Promise$1.resolve(supportsBlobs);
+    }
+    return _checkBlobSupportWithoutCaching(idb).then(function (value) {
+        supportsBlobs = value;
+        return supportsBlobs;
+    });
+}
+
+function _deferReadiness(dbInfo) {
+    var dbContext = dbContexts[dbInfo.name];
+
+    // Create a deferred object representing the current database operation.
+    var deferredOperation = {};
+
+    deferredOperation.promise = new Promise$1(function (resolve, reject) {
+        deferredOperation.resolve = resolve;
+        deferredOperation.reject = reject;
+    });
+
+    // Enqueue the deferred operation.
+    dbContext.deferredOperations.push(deferredOperation);
+
+    // Chain its promise to the database readiness.
+    if (!dbContext.dbReady) {
+        dbContext.dbReady = deferredOperation.promise;
+    } else {
+        dbContext.dbReady = dbContext.dbReady.then(function () {
+            return deferredOperation.promise;
+        });
+    }
+}
+
+function _advanceReadiness(dbInfo) {
+    var dbContext = dbContexts[dbInfo.name];
+
+    // Dequeue a deferred operation.
+    var deferredOperation = dbContext.deferredOperations.pop();
+
+    // Resolve its promise (which is part of the database readiness
+    // chain of promises).
+    if (deferredOperation) {
+        deferredOperation.resolve();
+        return deferredOperation.promise;
+    }
+}
+
+function _rejectReadiness(dbInfo, err) {
+    var dbContext = dbContexts[dbInfo.name];
+
+    // Dequeue a deferred operation.
+    var deferredOperation = dbContext.deferredOperations.pop();
+
+    // Reject its promise (which is part of the database readiness
+    // chain of promises).
+    if (deferredOperation) {
+        deferredOperation.reject(err);
+        return deferredOperation.promise;
+    }
+}
+
+function _getConnection(dbInfo, upgradeNeeded) {
+    return new Promise$1(function (resolve, reject) {
+        dbContexts[dbInfo.name] = dbContexts[dbInfo.name] || createDbContext();
+
+        if (dbInfo.db) {
+            if (upgradeNeeded) {
+                _deferReadiness(dbInfo);
+                dbInfo.db.close();
+            } else {
+                return resolve(dbInfo.db);
+            }
+        }
+
+        var dbArgs = [dbInfo.name];
+
+        if (upgradeNeeded) {
+            dbArgs.push(dbInfo.version);
+        }
+
+        var openreq = idb.open.apply(idb, dbArgs);
+
+        if (upgradeNeeded) {
+            openreq.onupgradeneeded = function (e) {
+                var db = openreq.result;
+                try {
+                    db.createObjectStore(dbInfo.storeName);
+                    if (e.oldVersion <= 1) {
+                        // Added when support for blob shims was added
+                        db.createObjectStore(DETECT_BLOB_SUPPORT_STORE);
+                    }
+                } catch (ex) {
+                    if (ex.name === 'ConstraintError') {
+                        console.warn('The database "' + dbInfo.name + '"' + ' has been upgraded from version ' + e.oldVersion + ' to version ' + e.newVersion + ', but the storage "' + dbInfo.storeName + '" already exists.');
+                    } else {
+                        throw ex;
+                    }
+                }
+            };
+        }
+
+        openreq.onerror = function (e) {
+            e.preventDefault();
+            reject(openreq.error);
+        };
+
+        openreq.onsuccess = function () {
+            resolve(openreq.result);
+            _advanceReadiness(dbInfo);
+        };
+    });
+}
+
+function _getOriginalConnection(dbInfo) {
+    return _getConnection(dbInfo, false);
+}
+
+function _getUpgradedConnection(dbInfo) {
+    return _getConnection(dbInfo, true);
+}
+
+function _isUpgradeNeeded(dbInfo, defaultVersion) {
+    if (!dbInfo.db) {
+        return true;
+    }
+
+    var isNewStore = !dbInfo.db.objectStoreNames.contains(dbInfo.storeName);
+    var isDowngrade = dbInfo.version < dbInfo.db.version;
+    var isUpgrade = dbInfo.version > dbInfo.db.version;
+
+    if (isDowngrade) {
+        // If the version is not the default one
+        // then warn for impossible downgrade.
+        if (dbInfo.version !== defaultVersion) {
+            console.warn('The database "' + dbInfo.name + '"' + " can't be downgraded from version " + dbInfo.db.version + ' to version ' + dbInfo.version + '.');
+        }
+        // Align the versions to prevent errors.
+        dbInfo.version = dbInfo.db.version;
+    }
+
+    if (isUpgrade || isNewStore) {
+        // If the store is new then increment the version (if needed).
+        // This will trigger an "upgradeneeded" event which is required
+        // for creating a store.
+        if (isNewStore) {
+            var incVersion = dbInfo.db.version + 1;
+            if (incVersion > dbInfo.version) {
+                dbInfo.version = incVersion;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+// encode a blob for indexeddb engines that don't support blobs
+function _encodeBlob(blob) {
+    return new Promise$1(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onerror = reject;
+        reader.onloadend = function (e) {
+            var base64 = btoa(e.target.result || '');
+            resolve({
+                __local_forage_encoded_blob: true,
+                data: base64,
+                type: blob.type
+            });
+        };
+        reader.readAsBinaryString(blob);
+    });
+}
+
+// decode an encoded blob
+function _decodeBlob(encodedBlob) {
+    var arrayBuff = _binStringToArrayBuffer(atob(encodedBlob.data));
+    return createBlob([arrayBuff], { type: encodedBlob.type });
+}
+
+// is this one of our fancy encoded blobs?
+function _isEncodedBlob(value) {
+    return value && value.__local_forage_encoded_blob;
+}
+
+// Specialize the default `ready()` function by making it dependent
+// on the current database operations. Thus, the driver will be actually
+// ready when it's been initialized (default) *and* there are no pending
+// operations on the database (initiated by some other instances).
+function _fullyReady(callback) {
+    var self = this;
+
+    var promise = self._initReady().then(function () {
+        var dbContext = dbContexts[self._dbInfo.name];
+
+        if (dbContext && dbContext.dbReady) {
+            return dbContext.dbReady;
+        }
+    });
+
+    executeTwoCallbacks(promise, callback, callback);
+    return promise;
+}
+
+// Try to establish a new db connection to replace the
+// current one which is broken (i.e. experiencing
+// InvalidStateError while creating a transaction).
+function _tryReconnect(dbInfo) {
+    _deferReadiness(dbInfo);
+
+    var dbContext = dbContexts[dbInfo.name];
+    var forages = dbContext.forages;
+
+    for (var i = 0; i < forages.length; i++) {
+        var forage = forages[i];
+        if (forage._dbInfo.db) {
+            forage._dbInfo.db.close();
+            forage._dbInfo.db = null;
+        }
+    }
+    dbInfo.db = null;
+
+    return _getOriginalConnection(dbInfo).then(function (db) {
+        dbInfo.db = db;
+        if (_isUpgradeNeeded(dbInfo)) {
+            // Reopen the database for upgrading.
+            return _getUpgradedConnection(dbInfo);
+        }
+        return db;
+    }).then(function (db) {
+        // store the latest db reference
+        // in case the db was upgraded
+        dbInfo.db = dbContext.db = db;
+        for (var i = 0; i < forages.length; i++) {
+            forages[i]._dbInfo.db = db;
+        }
+    })["catch"](function (err) {
+        _rejectReadiness(dbInfo, err);
+        throw err;
+    });
+}
+
+// FF doesn't like Promises (micro-tasks) and IDDB store operations,
+// so we have to do it with callbacks
+function createTransaction(dbInfo, mode, callback, retries) {
+    if (retries === undefined) {
+        retries = 1;
+    }
 
     try {
-      for (var _i = (0, _getIterator3.default)(arr), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-
-        if (i && _arr.length === i) break;
-      }
+        var tx = dbInfo.db.transaction(dbInfo.storeName, mode);
+        callback(null, tx);
     } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"]) _i["return"]();
-      } finally {
-        if (_d) throw _e;
-      }
+        if (retries > 0 && (!dbInfo.db || err.name === 'InvalidStateError' || err.name === 'NotFoundError')) {
+            return Promise$1.resolve().then(function () {
+                if (!dbInfo.db || err.name === 'NotFoundError' && !dbInfo.db.objectStoreNames.contains(dbInfo.storeName) && dbInfo.version <= dbInfo.db.version) {
+                    // increase the db version, to create the new ObjectStore
+                    if (dbInfo.db) {
+                        dbInfo.version = dbInfo.db.version + 1;
+                    }
+                    // Reopen the database for upgrading.
+                    return _getUpgradedConnection(dbInfo);
+                }
+            }).then(function () {
+                return _tryReconnect(dbInfo).then(function () {
+                    createTransaction(dbInfo, mode, callback, retries - 1);
+                });
+            })["catch"](callback);
+        }
+
+        callback(err);
+    }
+}
+
+function createDbContext() {
+    return {
+        // Running localForages sharing a database.
+        forages: [],
+        // Shared database.
+        db: null,
+        // Database readiness (promise).
+        dbReady: null,
+        // Deferred operations on the database.
+        deferredOperations: []
+    };
+}
+
+// Open the IndexedDB database (automatically creates one if one didn't
+// previously exist), using any options set in the config.
+function _initStorage(options) {
+    var self = this;
+    var dbInfo = {
+        db: null
+    };
+
+    if (options) {
+        for (var i in options) {
+            dbInfo[i] = options[i];
+        }
     }
 
-    return _arr;
-  }
+    // Get the current context of the database;
+    var dbContext = dbContexts[dbInfo.name];
 
-  return function (arr, i) {
-    if (Array.isArray(arr)) {
-      return arr;
-    } else if ((0, _isIterable3.default)(Object(arr))) {
-      return sliceIterator(arr, i);
+    // ...or create a new context.
+    if (!dbContext) {
+        dbContext = createDbContext();
+        // Register the new context in the global container.
+        dbContexts[dbInfo.name] = dbContext;
+    }
+
+    // Register itself as a running localForage in the current context.
+    dbContext.forages.push(self);
+
+    // Replace the default `ready()` function with the specialized one.
+    if (!self._initReady) {
+        self._initReady = self.ready;
+        self.ready = _fullyReady;
+    }
+
+    // Create an array of initialization states of the related localForages.
+    var initPromises = [];
+
+    function ignoreErrors() {
+        // Don't handle errors here,
+        // just makes sure related localForages aren't pending.
+        return Promise$1.resolve();
+    }
+
+    for (var j = 0; j < dbContext.forages.length; j++) {
+        var forage = dbContext.forages[j];
+        if (forage !== self) {
+            // Don't wait for itself...
+            initPromises.push(forage._initReady()["catch"](ignoreErrors));
+        }
+    }
+
+    // Take a snapshot of the related localForages.
+    var forages = dbContext.forages.slice(0);
+
+    // Initialize the connection process only when
+    // all the related localForages aren't pending.
+    return Promise$1.all(initPromises).then(function () {
+        dbInfo.db = dbContext.db;
+        // Get the connection or open a new one without upgrade.
+        return _getOriginalConnection(dbInfo);
+    }).then(function (db) {
+        dbInfo.db = db;
+        if (_isUpgradeNeeded(dbInfo, self._defaultConfig.version)) {
+            // Reopen the database for upgrading.
+            return _getUpgradedConnection(dbInfo);
+        }
+        return db;
+    }).then(function (db) {
+        dbInfo.db = dbContext.db = db;
+        self._dbInfo = dbInfo;
+        // Share the final connection amongst related localForages.
+        for (var k = 0; k < forages.length; k++) {
+            var forage = forages[k];
+            if (forage !== self) {
+                // Self is already up-to-date.
+                forage._dbInfo.db = dbInfo.db;
+                forage._dbInfo.version = dbInfo.version;
+            }
+        }
+    });
+}
+
+function getItem(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var req = store.get(key);
+
+                    req.onsuccess = function () {
+                        var value = req.result;
+                        if (value === undefined) {
+                            value = null;
+                        }
+                        if (_isEncodedBlob(value)) {
+                            value = _decodeBlob(value);
+                        }
+                        resolve(value);
+                    };
+
+                    req.onerror = function () {
+                        reject(req.error);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Iterate over all items stored in database.
+function iterate(iterator, callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var req = store.openCursor();
+                    var iterationNumber = 1;
+
+                    req.onsuccess = function () {
+                        var cursor = req.result;
+
+                        if (cursor) {
+                            var value = cursor.value;
+                            if (_isEncodedBlob(value)) {
+                                value = _decodeBlob(value);
+                            }
+                            var result = iterator(value, cursor.key, iterationNumber++);
+
+                            // when the iterator callback retuns any
+                            // (non-`undefined`) value, then we stop
+                            // the iteration immediately
+                            if (result !== void 0) {
+                                resolve(result);
+                            } else {
+                                cursor["continue"]();
+                            }
+                        } else {
+                            resolve();
+                        }
+                    };
+
+                    req.onerror = function () {
+                        reject(req.error);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+
+    return promise;
+}
+
+function setItem(key, value, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        var dbInfo;
+        self.ready().then(function () {
+            dbInfo = self._dbInfo;
+            if (toString.call(value) === '[object Blob]') {
+                return _checkBlobSupport(dbInfo.db).then(function (blobSupport) {
+                    if (blobSupport) {
+                        return value;
+                    }
+                    return _encodeBlob(value);
+                });
+            }
+            return value;
+        }).then(function (value) {
+            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+
+                    // The reason we don't _save_ null is because IE 10 does
+                    // not support saving the `null` type in IndexedDB. How
+                    // ironic, given the bug below!
+                    // See: https://github.com/mozilla/localForage/issues/161
+                    if (value === null) {
+                        value = undefined;
+                    }
+
+                    var req = store.put(value, key);
+
+                    transaction.oncomplete = function () {
+                        // Cast to undefined so the value passed to
+                        // callback/promise is the same as what one would get out
+                        // of `getItem()` later. This leads to some weirdness
+                        // (setItem('foo', undefined) will return `null`), but
+                        // it's not my fault localStorage is our baseline and that
+                        // it's weird.
+                        if (value === undefined) {
+                            value = null;
+                        }
+
+                        resolve(value);
+                    };
+                    transaction.onabort = transaction.onerror = function () {
+                        var err = req.error ? req.error : req.transaction.error;
+                        reject(err);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function removeItem(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    // We use a Grunt task to make this safe for IE and some
+                    // versions of Android (including those used by Cordova).
+                    // Normally IE won't like `.delete()` and will insist on
+                    // using `['delete']()`, but we have a build step that
+                    // fixes this for us now.
+                    var req = store["delete"](key);
+                    transaction.oncomplete = function () {
+                        resolve();
+                    };
+
+                    transaction.onerror = function () {
+                        reject(req.error);
+                    };
+
+                    // The request will be also be aborted if we've exceeded our storage
+                    // space.
+                    transaction.onabort = function () {
+                        var err = req.error ? req.error : req.transaction.error;
+                        reject(err);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function clear(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_WRITE, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var req = store.clear();
+
+                    transaction.oncomplete = function () {
+                        resolve();
+                    };
+
+                    transaction.onabort = transaction.onerror = function () {
+                        var err = req.error ? req.error : req.transaction.error;
+                        reject(err);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function length(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var req = store.count();
+
+                    req.onsuccess = function () {
+                        resolve(req.result);
+                    };
+
+                    req.onerror = function () {
+                        reject(req.error);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function key(n, callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        if (n < 0) {
+            resolve(null);
+
+            return;
+        }
+
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var advanced = false;
+                    var req = store.openCursor();
+
+                    req.onsuccess = function () {
+                        var cursor = req.result;
+                        if (!cursor) {
+                            // this means there weren't enough keys
+                            resolve(null);
+
+                            return;
+                        }
+
+                        if (n === 0) {
+                            // We have the first key, return it if that's what they
+                            // wanted.
+                            resolve(cursor.key);
+                        } else {
+                            if (!advanced) {
+                                // Otherwise, ask the cursor to skip ahead n
+                                // records.
+                                advanced = true;
+                                cursor.advance(n);
+                            } else {
+                                // When we get here, we've got the nth key.
+                                resolve(cursor.key);
+                            }
+                        }
+                    };
+
+                    req.onerror = function () {
+                        reject(req.error);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function keys(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            createTransaction(self._dbInfo, READ_ONLY, function (err, transaction) {
+                if (err) {
+                    return reject(err);
+                }
+
+                try {
+                    var store = transaction.objectStore(self._dbInfo.storeName);
+                    var req = store.openCursor();
+                    var keys = [];
+
+                    req.onsuccess = function () {
+                        var cursor = req.result;
+
+                        if (!cursor) {
+                            resolve(keys);
+                            return;
+                        }
+
+                        keys.push(cursor.key);
+                        cursor["continue"]();
+                    };
+
+                    req.onerror = function () {
+                        reject(req.error);
+                    };
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function dropInstance(options, callback) {
+    callback = getCallback.apply(this, arguments);
+
+    var currentConfig = this.config();
+    options = typeof options !== 'function' && options || {};
+    if (!options.name) {
+        options.name = options.name || currentConfig.name;
+        options.storeName = options.storeName || currentConfig.storeName;
+    }
+
+    var self = this;
+    var promise;
+    if (!options.name) {
+        promise = Promise$1.reject('Invalid arguments');
     } else {
-      throw new TypeError("Invalid attempt to destructure non-iterable instance");
+        var isCurrentDb = options.name === currentConfig.name && self._dbInfo.db;
+
+        var dbPromise = isCurrentDb ? Promise$1.resolve(self._dbInfo.db) : _getOriginalConnection(options).then(function (db) {
+            var dbContext = dbContexts[options.name];
+            var forages = dbContext.forages;
+            dbContext.db = db;
+            for (var i = 0; i < forages.length; i++) {
+                forages[i]._dbInfo.db = db;
+            }
+            return db;
+        });
+
+        if (!options.storeName) {
+            promise = dbPromise.then(function (db) {
+                _deferReadiness(options);
+
+                var dbContext = dbContexts[options.name];
+                var forages = dbContext.forages;
+
+                db.close();
+                for (var i = 0; i < forages.length; i++) {
+                    var forage = forages[i];
+                    forage._dbInfo.db = null;
+                }
+
+                var dropDBPromise = new Promise$1(function (resolve, reject) {
+                    var req = idb.deleteDatabase(options.name);
+
+                    req.onerror = req.onblocked = function (err) {
+                        var db = req.result;
+                        if (db) {
+                            db.close();
+                        }
+                        reject(err);
+                    };
+
+                    req.onsuccess = function () {
+                        var db = req.result;
+                        if (db) {
+                            db.close();
+                        }
+                        resolve(db);
+                    };
+                });
+
+                return dropDBPromise.then(function (db) {
+                    dbContext.db = db;
+                    for (var i = 0; i < forages.length; i++) {
+                        var _forage = forages[i];
+                        _advanceReadiness(_forage._dbInfo);
+                    }
+                })["catch"](function (err) {
+                    (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
+                    throw err;
+                });
+            });
+        } else {
+            promise = dbPromise.then(function (db) {
+                if (!db.objectStoreNames.contains(options.storeName)) {
+                    return;
+                }
+
+                var newVersion = db.version + 1;
+
+                _deferReadiness(options);
+
+                var dbContext = dbContexts[options.name];
+                var forages = dbContext.forages;
+
+                db.close();
+                for (var i = 0; i < forages.length; i++) {
+                    var forage = forages[i];
+                    forage._dbInfo.db = null;
+                    forage._dbInfo.version = newVersion;
+                }
+
+                var dropObjectPromise = new Promise$1(function (resolve, reject) {
+                    var req = idb.open(options.name, newVersion);
+
+                    req.onerror = function (err) {
+                        var db = req.result;
+                        db.close();
+                        reject(err);
+                    };
+
+                    req.onupgradeneeded = function () {
+                        var db = req.result;
+                        db.deleteObjectStore(options.storeName);
+                    };
+
+                    req.onsuccess = function () {
+                        var db = req.result;
+                        db.close();
+                        resolve(db);
+                    };
+                });
+
+                return dropObjectPromise.then(function (db) {
+                    dbContext.db = db;
+                    for (var j = 0; j < forages.length; j++) {
+                        var _forage2 = forages[j];
+                        _forage2._dbInfo.db = db;
+                        _advanceReadiness(_forage2._dbInfo);
+                    }
+                })["catch"](function (err) {
+                    (_rejectReadiness(options, err) || Promise$1.resolve())["catch"](function () {});
+                    throw err;
+                });
+            });
+        }
     }
-  };
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+var asyncStorage = {
+    _driver: 'asyncStorage',
+    _initStorage: _initStorage,
+    _support: isIndexedDBValid(),
+    iterate: iterate,
+    getItem: getItem,
+    setItem: setItem,
+    removeItem: removeItem,
+    clear: clear,
+    length: length,
+    key: key,
+    keys: keys,
+    dropInstance: dropInstance
+};
+
+function isWebSQLValid() {
+    return typeof openDatabase === 'function';
+}
+
+// Sadly, the best way to save binary data in WebSQL/localStorage is serializing
+// it to Base64, so this is how we store it to prevent very strange errors with less
+// verbose ways of binary <-> string data storage.
+var BASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+var BLOB_TYPE_PREFIX = '~~local_forage_type~';
+var BLOB_TYPE_PREFIX_REGEX = /^~~local_forage_type~([^~]+)~/;
+
+var SERIALIZED_MARKER = '__lfsc__:';
+var SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER.length;
+
+// OMG the serializations!
+var TYPE_ARRAYBUFFER = 'arbf';
+var TYPE_BLOB = 'blob';
+var TYPE_INT8ARRAY = 'si08';
+var TYPE_UINT8ARRAY = 'ui08';
+var TYPE_UINT8CLAMPEDARRAY = 'uic8';
+var TYPE_INT16ARRAY = 'si16';
+var TYPE_INT32ARRAY = 'si32';
+var TYPE_UINT16ARRAY = 'ur16';
+var TYPE_UINT32ARRAY = 'ui32';
+var TYPE_FLOAT32ARRAY = 'fl32';
+var TYPE_FLOAT64ARRAY = 'fl64';
+var TYPE_SERIALIZED_MARKER_LENGTH = SERIALIZED_MARKER_LENGTH + TYPE_ARRAYBUFFER.length;
+
+var toString$1 = Object.prototype.toString;
+
+function stringToBuffer(serializedString) {
+    // Fill the string into a ArrayBuffer.
+    var bufferLength = serializedString.length * 0.75;
+    var len = serializedString.length;
+    var i;
+    var p = 0;
+    var encoded1, encoded2, encoded3, encoded4;
+
+    if (serializedString[serializedString.length - 1] === '=') {
+        bufferLength--;
+        if (serializedString[serializedString.length - 2] === '=') {
+            bufferLength--;
+        }
+    }
+
+    var buffer = new ArrayBuffer(bufferLength);
+    var bytes = new Uint8Array(buffer);
+
+    for (i = 0; i < len; i += 4) {
+        encoded1 = BASE_CHARS.indexOf(serializedString[i]);
+        encoded2 = BASE_CHARS.indexOf(serializedString[i + 1]);
+        encoded3 = BASE_CHARS.indexOf(serializedString[i + 2]);
+        encoded4 = BASE_CHARS.indexOf(serializedString[i + 3]);
+
+        /*jslint bitwise: true */
+        bytes[p++] = encoded1 << 2 | encoded2 >> 4;
+        bytes[p++] = (encoded2 & 15) << 4 | encoded3 >> 2;
+        bytes[p++] = (encoded3 & 3) << 6 | encoded4 & 63;
+    }
+    return buffer;
+}
+
+// Converts a buffer to a string to store, serialized, in the backend
+// storage library.
+function bufferToString(buffer) {
+    // base64-arraybuffer
+    var bytes = new Uint8Array(buffer);
+    var base64String = '';
+    var i;
+
+    for (i = 0; i < bytes.length; i += 3) {
+        /*jslint bitwise: true */
+        base64String += BASE_CHARS[bytes[i] >> 2];
+        base64String += BASE_CHARS[(bytes[i] & 3) << 4 | bytes[i + 1] >> 4];
+        base64String += BASE_CHARS[(bytes[i + 1] & 15) << 2 | bytes[i + 2] >> 6];
+        base64String += BASE_CHARS[bytes[i + 2] & 63];
+    }
+
+    if (bytes.length % 3 === 2) {
+        base64String = base64String.substring(0, base64String.length - 1) + '=';
+    } else if (bytes.length % 3 === 1) {
+        base64String = base64String.substring(0, base64String.length - 2) + '==';
+    }
+
+    return base64String;
+}
+
+// Serialize a value, afterwards executing a callback (which usually
+// instructs the `setItem()` callback/promise to be executed). This is how
+// we store binary data with localStorage.
+function serialize(value, callback) {
+    var valueType = '';
+    if (value) {
+        valueType = toString$1.call(value);
+    }
+
+    // Cannot use `value instanceof ArrayBuffer` or such here, as these
+    // checks fail when running the tests using casper.js...
+    //
+    // TODO: See why those tests fail and use a better solution.
+    if (value && (valueType === '[object ArrayBuffer]' || value.buffer && toString$1.call(value.buffer) === '[object ArrayBuffer]')) {
+        // Convert binary arrays to a string and prefix the string with
+        // a special marker.
+        var buffer;
+        var marker = SERIALIZED_MARKER;
+
+        if (value instanceof ArrayBuffer) {
+            buffer = value;
+            marker += TYPE_ARRAYBUFFER;
+        } else {
+            buffer = value.buffer;
+
+            if (valueType === '[object Int8Array]') {
+                marker += TYPE_INT8ARRAY;
+            } else if (valueType === '[object Uint8Array]') {
+                marker += TYPE_UINT8ARRAY;
+            } else if (valueType === '[object Uint8ClampedArray]') {
+                marker += TYPE_UINT8CLAMPEDARRAY;
+            } else if (valueType === '[object Int16Array]') {
+                marker += TYPE_INT16ARRAY;
+            } else if (valueType === '[object Uint16Array]') {
+                marker += TYPE_UINT16ARRAY;
+            } else if (valueType === '[object Int32Array]') {
+                marker += TYPE_INT32ARRAY;
+            } else if (valueType === '[object Uint32Array]') {
+                marker += TYPE_UINT32ARRAY;
+            } else if (valueType === '[object Float32Array]') {
+                marker += TYPE_FLOAT32ARRAY;
+            } else if (valueType === '[object Float64Array]') {
+                marker += TYPE_FLOAT64ARRAY;
+            } else {
+                callback(new Error('Failed to get type for BinaryArray'));
+            }
+        }
+
+        callback(marker + bufferToString(buffer));
+    } else if (valueType === '[object Blob]') {
+        // Conver the blob to a binaryArray and then to a string.
+        var fileReader = new FileReader();
+
+        fileReader.onload = function () {
+            // Backwards-compatible prefix for the blob type.
+            var str = BLOB_TYPE_PREFIX + value.type + '~' + bufferToString(this.result);
+
+            callback(SERIALIZED_MARKER + TYPE_BLOB + str);
+        };
+
+        fileReader.readAsArrayBuffer(value);
+    } else {
+        try {
+            callback(JSON.stringify(value));
+        } catch (e) {
+            console.error("Couldn't convert value into a JSON string: ", value);
+
+            callback(null, e);
+        }
+    }
+}
+
+// Deserialize data we've inserted into a value column/field. We place
+// special markers into our strings to mark them as encoded; this isn't
+// as nice as a meta field, but it's the only sane thing we can do whilst
+// keeping localStorage support intact.
+//
+// Oftentimes this will just deserialize JSON content, but if we have a
+// special marker (SERIALIZED_MARKER, defined above), we will extract
+// some kind of arraybuffer/binary data/typed array out of the string.
+function deserialize(value) {
+    // If we haven't marked this string as being specially serialized (i.e.
+    // something other than serialized JSON), we can just return it and be
+    // done with it.
+    if (value.substring(0, SERIALIZED_MARKER_LENGTH) !== SERIALIZED_MARKER) {
+        return JSON.parse(value);
+    }
+
+    // The following code deals with deserializing some kind of Blob or
+    // TypedArray. First we separate out the type of data we're dealing
+    // with from the data itself.
+    var serializedString = value.substring(TYPE_SERIALIZED_MARKER_LENGTH);
+    var type = value.substring(SERIALIZED_MARKER_LENGTH, TYPE_SERIALIZED_MARKER_LENGTH);
+
+    var blobType;
+    // Backwards-compatible blob type serialization strategy.
+    // DBs created with older versions of localForage will simply not have the blob type.
+    if (type === TYPE_BLOB && BLOB_TYPE_PREFIX_REGEX.test(serializedString)) {
+        var matcher = serializedString.match(BLOB_TYPE_PREFIX_REGEX);
+        blobType = matcher[1];
+        serializedString = serializedString.substring(matcher[0].length);
+    }
+    var buffer = stringToBuffer(serializedString);
+
+    // Return the right type based on the code/type set during
+    // serialization.
+    switch (type) {
+        case TYPE_ARRAYBUFFER:
+            return buffer;
+        case TYPE_BLOB:
+            return createBlob([buffer], { type: blobType });
+        case TYPE_INT8ARRAY:
+            return new Int8Array(buffer);
+        case TYPE_UINT8ARRAY:
+            return new Uint8Array(buffer);
+        case TYPE_UINT8CLAMPEDARRAY:
+            return new Uint8ClampedArray(buffer);
+        case TYPE_INT16ARRAY:
+            return new Int16Array(buffer);
+        case TYPE_UINT16ARRAY:
+            return new Uint16Array(buffer);
+        case TYPE_INT32ARRAY:
+            return new Int32Array(buffer);
+        case TYPE_UINT32ARRAY:
+            return new Uint32Array(buffer);
+        case TYPE_FLOAT32ARRAY:
+            return new Float32Array(buffer);
+        case TYPE_FLOAT64ARRAY:
+            return new Float64Array(buffer);
+        default:
+            throw new Error('Unkown type: ' + type);
+    }
+}
+
+var localforageSerializer = {
+    serialize: serialize,
+    deserialize: deserialize,
+    stringToBuffer: stringToBuffer,
+    bufferToString: bufferToString
+};
+
+/*
+ * Includes code from:
+ *
+ * base64-arraybuffer
+ * https://github.com/niklasvh/base64-arraybuffer
+ *
+ * Copyright (c) 2012 Niklas von Hertzen
+ * Licensed under the MIT license.
+ */
+
+function createDbTable(t, dbInfo, callback, errorCallback) {
+    t.executeSql('CREATE TABLE IF NOT EXISTS ' + dbInfo.storeName + ' ' + '(id INTEGER PRIMARY KEY, key unique, value)', [], callback, errorCallback);
+}
+
+// Open the WebSQL database (automatically creates one if one didn't
+// previously exist), using any options set in the config.
+function _initStorage$1(options) {
+    var self = this;
+    var dbInfo = {
+        db: null
+    };
+
+    if (options) {
+        for (var i in options) {
+            dbInfo[i] = typeof options[i] !== 'string' ? options[i].toString() : options[i];
+        }
+    }
+
+    var dbInfoPromise = new Promise$1(function (resolve, reject) {
+        // Open the database; the openDatabase API will automatically
+        // create it for us if it doesn't exist.
+        try {
+            dbInfo.db = openDatabase(dbInfo.name, String(dbInfo.version), dbInfo.description, dbInfo.size);
+        } catch (e) {
+            return reject(e);
+        }
+
+        // Create our key/value table if it doesn't exist.
+        dbInfo.db.transaction(function (t) {
+            createDbTable(t, dbInfo, function () {
+                self._dbInfo = dbInfo;
+                resolve();
+            }, function (t, error) {
+                reject(error);
+            });
+        }, reject);
+    });
+
+    dbInfo.serializer = localforageSerializer;
+    return dbInfoPromise;
+}
+
+function tryExecuteSql(t, dbInfo, sqlStatement, args, callback, errorCallback) {
+    t.executeSql(sqlStatement, args, callback, function (t, error) {
+        if (error.code === error.SYNTAX_ERR) {
+            t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name = ?", [dbInfo.storeName], function (t, results) {
+                if (!results.rows.length) {
+                    // if the table is missing (was deleted)
+                    // re-create it table and retry
+                    createDbTable(t, dbInfo, function () {
+                        t.executeSql(sqlStatement, args, callback, errorCallback);
+                    }, errorCallback);
+                } else {
+                    errorCallback(t, error);
+                }
+            }, errorCallback);
+        } else {
+            errorCallback(t, error);
+        }
+    }, errorCallback);
+}
+
+function getItem$1(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'SELECT * FROM ' + dbInfo.storeName + ' WHERE key = ? LIMIT 1', [key], function (t, results) {
+                    var result = results.rows.length ? results.rows.item(0).value : null;
+
+                    // Check to see if this is serialized content we need to
+                    // unpack.
+                    if (result) {
+                        result = dbInfo.serializer.deserialize(result);
+                    }
+
+                    resolve(result);
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function iterate$1(iterator, callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'SELECT * FROM ' + dbInfo.storeName, [], function (t, results) {
+                    var rows = results.rows;
+                    var length = rows.length;
+
+                    for (var i = 0; i < length; i++) {
+                        var item = rows.item(i);
+                        var result = item.value;
+
+                        // Check to see if this is serialized content
+                        // we need to unpack.
+                        if (result) {
+                            result = dbInfo.serializer.deserialize(result);
+                        }
+
+                        result = iterator(result, item.key, i + 1);
+
+                        // void(0) prevents problems with redefinition
+                        // of `undefined`.
+                        if (result !== void 0) {
+                            resolve(result);
+                            return;
+                        }
+                    }
+
+                    resolve();
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function _setItem(key, value, callback, retriesLeft) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            // The localStorage API doesn't return undefined values in an
+            // "expected" way, so undefined is always cast to null in all
+            // drivers. See: https://github.com/mozilla/localForage/pull/42
+            if (value === undefined) {
+                value = null;
+            }
+
+            // Save the original value to pass to the callback.
+            var originalValue = value;
+
+            var dbInfo = self._dbInfo;
+            dbInfo.serializer.serialize(value, function (value, error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    dbInfo.db.transaction(function (t) {
+                        tryExecuteSql(t, dbInfo, 'INSERT OR REPLACE INTO ' + dbInfo.storeName + ' ' + '(key, value) VALUES (?, ?)', [key, value], function () {
+                            resolve(originalValue);
+                        }, function (t, error) {
+                            reject(error);
+                        });
+                    }, function (sqlError) {
+                        // The transaction failed; check
+                        // to see if it's a quota error.
+                        if (sqlError.code === sqlError.QUOTA_ERR) {
+                            // We reject the callback outright for now, but
+                            // it's worth trying to re-run the transaction.
+                            // Even if the user accepts the prompt to use
+                            // more storage on Safari, this error will
+                            // be called.
+                            //
+                            // Try to re-run the transaction.
+                            if (retriesLeft > 0) {
+                                resolve(_setItem.apply(self, [key, originalValue, callback, retriesLeft - 1]));
+                                return;
+                            }
+                            reject(sqlError);
+                        }
+                    });
+                }
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function setItem$1(key, value, callback) {
+    return _setItem.apply(this, [key, value, callback, 1]);
+}
+
+function removeItem$1(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'DELETE FROM ' + dbInfo.storeName + ' WHERE key = ?', [key], function () {
+                    resolve();
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Deletes every item in the table.
+// TODO: Find out if this resets the AUTO_INCREMENT number.
+function clear$1(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'DELETE FROM ' + dbInfo.storeName, [], function () {
+                    resolve();
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Does a simple `COUNT(key)` to get the number of items stored in
+// localForage.
+function length$1(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                // Ahhh, SQL makes this one soooooo easy.
+                tryExecuteSql(t, dbInfo, 'SELECT COUNT(key) as c FROM ' + dbInfo.storeName, [], function (t, results) {
+                    var result = results.rows.item(0).c;
+                    resolve(result);
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Return the key located at key index X; essentially gets the key from a
+// `WHERE id = ?`. This is the most efficient way I can think to implement
+// this rarely-used (in my experience) part of the API, but it can seem
+// inconsistent, because we do `INSERT OR REPLACE INTO` on `setItem()`, so
+// the ID of each key will change every time it's updated. Perhaps a stored
+// procedure for the `setItem()` SQL would solve this problem?
+// TODO: Don't change ID on `setItem()`.
+function key$1(n, callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'SELECT key FROM ' + dbInfo.storeName + ' WHERE id = ? LIMIT 1', [n + 1], function (t, results) {
+                    var result = results.rows.length ? results.rows.item(0).key : null;
+                    resolve(result);
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function keys$1(callback) {
+    var self = this;
+
+    var promise = new Promise$1(function (resolve, reject) {
+        self.ready().then(function () {
+            var dbInfo = self._dbInfo;
+            dbInfo.db.transaction(function (t) {
+                tryExecuteSql(t, dbInfo, 'SELECT key FROM ' + dbInfo.storeName, [], function (t, results) {
+                    var keys = [];
+
+                    for (var i = 0; i < results.rows.length; i++) {
+                        keys.push(results.rows.item(i).key);
+                    }
+
+                    resolve(keys);
+                }, function (t, error) {
+                    reject(error);
+                });
+            });
+        })["catch"](reject);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// https://www.w3.org/TR/webdatabase/#databases
+// > There is no way to enumerate or delete the databases available for an origin from this API.
+function getAllStoreNames(db) {
+    return new Promise$1(function (resolve, reject) {
+        db.transaction(function (t) {
+            t.executeSql('SELECT name FROM sqlite_master ' + "WHERE type='table' AND name <> '__WebKitDatabaseInfoTable__'", [], function (t, results) {
+                var storeNames = [];
+
+                for (var i = 0; i < results.rows.length; i++) {
+                    storeNames.push(results.rows.item(i).name);
+                }
+
+                resolve({
+                    db: db,
+                    storeNames: storeNames
+                });
+            }, function (t, error) {
+                reject(error);
+            });
+        }, function (sqlError) {
+            reject(sqlError);
+        });
+    });
+}
+
+function dropInstance$1(options, callback) {
+    callback = getCallback.apply(this, arguments);
+
+    var currentConfig = this.config();
+    options = typeof options !== 'function' && options || {};
+    if (!options.name) {
+        options.name = options.name || currentConfig.name;
+        options.storeName = options.storeName || currentConfig.storeName;
+    }
+
+    var self = this;
+    var promise;
+    if (!options.name) {
+        promise = Promise$1.reject('Invalid arguments');
+    } else {
+        promise = new Promise$1(function (resolve) {
+            var db;
+            if (options.name === currentConfig.name) {
+                // use the db reference of the current instance
+                db = self._dbInfo.db;
+            } else {
+                db = openDatabase(options.name, '', '', 0);
+            }
+
+            if (!options.storeName) {
+                // drop all database tables
+                resolve(getAllStoreNames(db));
+            } else {
+                resolve({
+                    db: db,
+                    storeNames: [options.storeName]
+                });
+            }
+        }).then(function (operationInfo) {
+            return new Promise$1(function (resolve, reject) {
+                operationInfo.db.transaction(function (t) {
+                    function dropTable(storeName) {
+                        return new Promise$1(function (resolve, reject) {
+                            t.executeSql('DROP TABLE IF EXISTS ' + storeName, [], function () {
+                                resolve();
+                            }, function (t, error) {
+                                reject(error);
+                            });
+                        });
+                    }
+
+                    var operations = [];
+                    for (var i = 0, len = operationInfo.storeNames.length; i < len; i++) {
+                        operations.push(dropTable(operationInfo.storeNames[i]));
+                    }
+
+                    Promise$1.all(operations).then(function () {
+                        resolve();
+                    })["catch"](function (e) {
+                        reject(e);
+                    });
+                }, function (sqlError) {
+                    reject(sqlError);
+                });
+            });
+        });
+    }
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+var webSQLStorage = {
+    _driver: 'webSQLStorage',
+    _initStorage: _initStorage$1,
+    _support: isWebSQLValid(),
+    iterate: iterate$1,
+    getItem: getItem$1,
+    setItem: setItem$1,
+    removeItem: removeItem$1,
+    clear: clear$1,
+    length: length$1,
+    key: key$1,
+    keys: keys$1,
+    dropInstance: dropInstance$1
+};
+
+function isLocalStorageValid() {
+    try {
+        return typeof localStorage !== 'undefined' && 'setItem' in localStorage &&
+        // in IE8 typeof localStorage.setItem === 'object'
+        !!localStorage.setItem;
+    } catch (e) {
+        return false;
+    }
+}
+
+function _getKeyPrefix(options, defaultConfig) {
+    var keyPrefix = options.name + '/';
+
+    if (options.storeName !== defaultConfig.storeName) {
+        keyPrefix += options.storeName + '/';
+    }
+    return keyPrefix;
+}
+
+// Check if localStorage throws when saving an item
+function checkIfLocalStorageThrows() {
+    var localStorageTestKey = '_localforage_support_test';
+
+    try {
+        localStorage.setItem(localStorageTestKey, true);
+        localStorage.removeItem(localStorageTestKey);
+
+        return false;
+    } catch (e) {
+        return true;
+    }
+}
+
+// Check if localStorage is usable and allows to save an item
+// This method checks if localStorage is usable in Safari Private Browsing
+// mode, or in any other case where the available quota for localStorage
+// is 0 and there wasn't any saved items yet.
+function _isLocalStorageUsable() {
+    return !checkIfLocalStorageThrows() || localStorage.length > 0;
+}
+
+// Config the localStorage backend, using options set in the config.
+function _initStorage$2(options) {
+    var self = this;
+    var dbInfo = {};
+    if (options) {
+        for (var i in options) {
+            dbInfo[i] = options[i];
+        }
+    }
+
+    dbInfo.keyPrefix = _getKeyPrefix(options, self._defaultConfig);
+
+    if (!_isLocalStorageUsable()) {
+        return Promise$1.reject();
+    }
+
+    self._dbInfo = dbInfo;
+    dbInfo.serializer = localforageSerializer;
+
+    return Promise$1.resolve();
+}
+
+// Remove all keys from the datastore, effectively destroying all data in
+// the app's key/value store!
+function clear$2(callback) {
+    var self = this;
+    var promise = self.ready().then(function () {
+        var keyPrefix = self._dbInfo.keyPrefix;
+
+        for (var i = localStorage.length - 1; i >= 0; i--) {
+            var key = localStorage.key(i);
+
+            if (key.indexOf(keyPrefix) === 0) {
+                localStorage.removeItem(key);
+            }
+        }
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Retrieve an item from the store. Unlike the original async_storage
+// library in Gaia, we don't modify return values at all. If a key's value
+// is `undefined`, we pass that value to the callback function.
+function getItem$2(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = self.ready().then(function () {
+        var dbInfo = self._dbInfo;
+        var result = localStorage.getItem(dbInfo.keyPrefix + key);
+
+        // If a result was found, parse it from the serialized
+        // string into a JS object. If result isn't truthy, the key
+        // is likely undefined and we'll pass it straight to the
+        // callback.
+        if (result) {
+            result = dbInfo.serializer.deserialize(result);
+        }
+
+        return result;
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Iterate over all items in the store.
+function iterate$2(iterator, callback) {
+    var self = this;
+
+    var promise = self.ready().then(function () {
+        var dbInfo = self._dbInfo;
+        var keyPrefix = dbInfo.keyPrefix;
+        var keyPrefixLength = keyPrefix.length;
+        var length = localStorage.length;
+
+        // We use a dedicated iterator instead of the `i` variable below
+        // so other keys we fetch in localStorage aren't counted in
+        // the `iterationNumber` argument passed to the `iterate()`
+        // callback.
+        //
+        // See: github.com/mozilla/localForage/pull/435#discussion_r38061530
+        var iterationNumber = 1;
+
+        for (var i = 0; i < length; i++) {
+            var key = localStorage.key(i);
+            if (key.indexOf(keyPrefix) !== 0) {
+                continue;
+            }
+            var value = localStorage.getItem(key);
+
+            // If a result was found, parse it from the serialized
+            // string into a JS object. If result isn't truthy, the
+            // key is likely undefined and we'll pass it straight
+            // to the iterator.
+            if (value) {
+                value = dbInfo.serializer.deserialize(value);
+            }
+
+            value = iterator(value, key.substring(keyPrefixLength), iterationNumber++);
+
+            if (value !== void 0) {
+                return value;
+            }
+        }
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Same as localStorage's key() method, except takes a callback.
+function key$2(n, callback) {
+    var self = this;
+    var promise = self.ready().then(function () {
+        var dbInfo = self._dbInfo;
+        var result;
+        try {
+            result = localStorage.key(n);
+        } catch (error) {
+            result = null;
+        }
+
+        // Remove the prefix from the key, if a key is found.
+        if (result) {
+            result = result.substring(dbInfo.keyPrefix.length);
+        }
+
+        return result;
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function keys$2(callback) {
+    var self = this;
+    var promise = self.ready().then(function () {
+        var dbInfo = self._dbInfo;
+        var length = localStorage.length;
+        var keys = [];
+
+        for (var i = 0; i < length; i++) {
+            var itemKey = localStorage.key(i);
+            if (itemKey.indexOf(dbInfo.keyPrefix) === 0) {
+                keys.push(itemKey.substring(dbInfo.keyPrefix.length));
+            }
+        }
+
+        return keys;
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Supply the number of keys in the datastore to the callback function.
+function length$2(callback) {
+    var self = this;
+    var promise = self.keys().then(function (keys) {
+        return keys.length;
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Remove an item from the store, nice and simple.
+function removeItem$2(key, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = self.ready().then(function () {
+        var dbInfo = self._dbInfo;
+        localStorage.removeItem(dbInfo.keyPrefix + key);
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+// Set a key's value and run an optional callback once the value is set.
+// Unlike Gaia's implementation, the callback function is passed the value,
+// in case you want to operate on that value only after you're sure it
+// saved, or something like that.
+function setItem$2(key, value, callback) {
+    var self = this;
+
+    key = normalizeKey(key);
+
+    var promise = self.ready().then(function () {
+        // Convert undefined values to null.
+        // https://github.com/mozilla/localForage/pull/42
+        if (value === undefined) {
+            value = null;
+        }
+
+        // Save the original value to pass to the callback.
+        var originalValue = value;
+
+        return new Promise$1(function (resolve, reject) {
+            var dbInfo = self._dbInfo;
+            dbInfo.serializer.serialize(value, function (value, error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    try {
+                        localStorage.setItem(dbInfo.keyPrefix + key, value);
+                        resolve(originalValue);
+                    } catch (e) {
+                        // localStorage capacity exceeded.
+                        // TODO: Make this a specific error/event.
+                        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                            reject(e);
+                        }
+                        reject(e);
+                    }
+                }
+            });
+        });
+    });
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+function dropInstance$2(options, callback) {
+    callback = getCallback.apply(this, arguments);
+
+    options = typeof options !== 'function' && options || {};
+    if (!options.name) {
+        var currentConfig = this.config();
+        options.name = options.name || currentConfig.name;
+        options.storeName = options.storeName || currentConfig.storeName;
+    }
+
+    var self = this;
+    var promise;
+    if (!options.name) {
+        promise = Promise$1.reject('Invalid arguments');
+    } else {
+        promise = new Promise$1(function (resolve) {
+            if (!options.storeName) {
+                resolve(options.name + '/');
+            } else {
+                resolve(_getKeyPrefix(options, self._defaultConfig));
+            }
+        }).then(function (keyPrefix) {
+            for (var i = localStorage.length - 1; i >= 0; i--) {
+                var key = localStorage.key(i);
+
+                if (key.indexOf(keyPrefix) === 0) {
+                    localStorage.removeItem(key);
+                }
+            }
+        });
+    }
+
+    executeCallback(promise, callback);
+    return promise;
+}
+
+var localStorageWrapper = {
+    _driver: 'localStorageWrapper',
+    _initStorage: _initStorage$2,
+    _support: isLocalStorageValid(),
+    iterate: iterate$2,
+    getItem: getItem$2,
+    setItem: setItem$2,
+    removeItem: removeItem$2,
+    clear: clear$2,
+    length: length$2,
+    key: key$2,
+    keys: keys$2,
+    dropInstance: dropInstance$2
+};
+
+var sameValue = function sameValue(x, y) {
+    return x === y || typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y);
+};
+
+var includes = function includes(array, searchElement) {
+    var len = array.length;
+    var i = 0;
+    while (i < len) {
+        if (sameValue(array[i], searchElement)) {
+            return true;
+        }
+        i++;
+    }
+
+    return false;
+};
+
+var isArray = Array.isArray || function (arg) {
+    return Object.prototype.toString.call(arg) === '[object Array]';
+};
+
+// Drivers are stored here when `defineDriver()` is called.
+// They are shared across all instances of localForage.
+var DefinedDrivers = {};
+
+var DriverSupport = {};
+
+var DefaultDrivers = {
+    INDEXEDDB: asyncStorage,
+    WEBSQL: webSQLStorage,
+    LOCALSTORAGE: localStorageWrapper
+};
+
+var DefaultDriverOrder = [DefaultDrivers.INDEXEDDB._driver, DefaultDrivers.WEBSQL._driver, DefaultDrivers.LOCALSTORAGE._driver];
+
+var OptionalDriverMethods = ['dropInstance'];
+
+var LibraryMethods = ['clear', 'getItem', 'iterate', 'key', 'keys', 'length', 'removeItem', 'setItem'].concat(OptionalDriverMethods);
+
+var DefaultConfig = {
+    description: '',
+    driver: DefaultDriverOrder.slice(),
+    name: 'localforage',
+    // Default DB size is _JUST UNDER_ 5MB, as it's the highest size
+    // we can use without a prompt.
+    size: 4980736,
+    storeName: 'keyvaluepairs',
+    version: 1.0
+};
+
+function callWhenReady(localForageInstance, libraryMethod) {
+    localForageInstance[libraryMethod] = function () {
+        var _args = arguments;
+        return localForageInstance.ready().then(function () {
+            return localForageInstance[libraryMethod].apply(localForageInstance, _args);
+        });
+    };
+}
+
+function extend() {
+    for (var i = 1; i < arguments.length; i++) {
+        var arg = arguments[i];
+
+        if (arg) {
+            for (var _key in arg) {
+                if (arg.hasOwnProperty(_key)) {
+                    if (isArray(arg[_key])) {
+                        arguments[0][_key] = arg[_key].slice();
+                    } else {
+                        arguments[0][_key] = arg[_key];
+                    }
+                }
+            }
+        }
+    }
+
+    return arguments[0];
+}
+
+var LocalForage = function () {
+    function LocalForage(options) {
+        _classCallCheck(this, LocalForage);
+
+        for (var driverTypeKey in DefaultDrivers) {
+            if (DefaultDrivers.hasOwnProperty(driverTypeKey)) {
+                var driver = DefaultDrivers[driverTypeKey];
+                var driverName = driver._driver;
+                this[driverTypeKey] = driverName;
+
+                if (!DefinedDrivers[driverName]) {
+                    // we don't need to wait for the promise,
+                    // since the default drivers can be defined
+                    // in a blocking manner
+                    this.defineDriver(driver);
+                }
+            }
+        }
+
+        this._defaultConfig = extend({}, DefaultConfig);
+        this._config = extend({}, this._defaultConfig, options);
+        this._driverSet = null;
+        this._initDriver = null;
+        this._ready = false;
+        this._dbInfo = null;
+
+        this._wrapLibraryMethodsWithReady();
+        this.setDriver(this._config.driver)["catch"](function () {});
+    }
+
+    // Set any config values for localForage; can be called anytime before
+    // the first API call (e.g. `getItem`, `setItem`).
+    // We loop through options so we don't overwrite existing config
+    // values.
+
+
+    LocalForage.prototype.config = function config(options) {
+        // If the options argument is an object, we use it to set values.
+        // Otherwise, we return either a specified config value or all
+        // config values.
+        if ((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object') {
+            // If localforage is ready and fully initialized, we can't set
+            // any new configuration values. Instead, we return an error.
+            if (this._ready) {
+                return new Error("Can't call config() after localforage " + 'has been used.');
+            }
+
+            for (var i in options) {
+                if (i === 'storeName') {
+                    options[i] = options[i].replace(/\W/g, '_');
+                }
+
+                if (i === 'version' && typeof options[i] !== 'number') {
+                    return new Error('Database version must be a number.');
+                }
+
+                this._config[i] = options[i];
+            }
+
+            // after all config options are set and
+            // the driver option is used, try setting it
+            if ('driver' in options && options.driver) {
+                return this.setDriver(this._config.driver);
+            }
+
+            return true;
+        } else if (typeof options === 'string') {
+            return this._config[options];
+        } else {
+            return this._config;
+        }
+    };
+
+    // Used to define a custom driver, shared across all instances of
+    // localForage.
+
+
+    LocalForage.prototype.defineDriver = function defineDriver(driverObject, callback, errorCallback) {
+        var promise = new Promise$1(function (resolve, reject) {
+            try {
+                var driverName = driverObject._driver;
+                var complianceError = new Error('Custom driver not compliant; see ' + 'https://mozilla.github.io/localForage/#definedriver');
+
+                // A driver name should be defined and not overlap with the
+                // library-defined, default drivers.
+                if (!driverObject._driver) {
+                    reject(complianceError);
+                    return;
+                }
+
+                var driverMethods = LibraryMethods.concat('_initStorage');
+                for (var i = 0, len = driverMethods.length; i < len; i++) {
+                    var driverMethodName = driverMethods[i];
+
+                    // when the property is there,
+                    // it should be a method even when optional
+                    var isRequired = !includes(OptionalDriverMethods, driverMethodName);
+                    if ((isRequired || driverObject[driverMethodName]) && typeof driverObject[driverMethodName] !== 'function') {
+                        reject(complianceError);
+                        return;
+                    }
+                }
+
+                var configureMissingMethods = function configureMissingMethods() {
+                    var methodNotImplementedFactory = function methodNotImplementedFactory(methodName) {
+                        return function () {
+                            var error = new Error('Method ' + methodName + ' is not implemented by the current driver');
+                            var promise = Promise$1.reject(error);
+                            executeCallback(promise, arguments[arguments.length - 1]);
+                            return promise;
+                        };
+                    };
+
+                    for (var _i = 0, _len = OptionalDriverMethods.length; _i < _len; _i++) {
+                        var optionalDriverMethod = OptionalDriverMethods[_i];
+                        if (!driverObject[optionalDriverMethod]) {
+                            driverObject[optionalDriverMethod] = methodNotImplementedFactory(optionalDriverMethod);
+                        }
+                    }
+                };
+
+                configureMissingMethods();
+
+                var setDriverSupport = function setDriverSupport(support) {
+                    if (DefinedDrivers[driverName]) {
+                        console.info('Redefining LocalForage driver: ' + driverName);
+                    }
+                    DefinedDrivers[driverName] = driverObject;
+                    DriverSupport[driverName] = support;
+                    // don't use a then, so that we can define
+                    // drivers that have simple _support methods
+                    // in a blocking manner
+                    resolve();
+                };
+
+                if ('_support' in driverObject) {
+                    if (driverObject._support && typeof driverObject._support === 'function') {
+                        driverObject._support().then(setDriverSupport, reject);
+                    } else {
+                        setDriverSupport(!!driverObject._support);
+                    }
+                } else {
+                    setDriverSupport(true);
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+
+        executeTwoCallbacks(promise, callback, errorCallback);
+        return promise;
+    };
+
+    LocalForage.prototype.driver = function driver() {
+        return this._driver || null;
+    };
+
+    LocalForage.prototype.getDriver = function getDriver(driverName, callback, errorCallback) {
+        var getDriverPromise = DefinedDrivers[driverName] ? Promise$1.resolve(DefinedDrivers[driverName]) : Promise$1.reject(new Error('Driver not found.'));
+
+        executeTwoCallbacks(getDriverPromise, callback, errorCallback);
+        return getDriverPromise;
+    };
+
+    LocalForage.prototype.getSerializer = function getSerializer(callback) {
+        var serializerPromise = Promise$1.resolve(localforageSerializer);
+        executeTwoCallbacks(serializerPromise, callback);
+        return serializerPromise;
+    };
+
+    LocalForage.prototype.ready = function ready(callback) {
+        var self = this;
+
+        var promise = self._driverSet.then(function () {
+            if (self._ready === null) {
+                self._ready = self._initDriver();
+            }
+
+            return self._ready;
+        });
+
+        executeTwoCallbacks(promise, callback, callback);
+        return promise;
+    };
+
+    LocalForage.prototype.setDriver = function setDriver(drivers, callback, errorCallback) {
+        var self = this;
+
+        if (!isArray(drivers)) {
+            drivers = [drivers];
+        }
+
+        var supportedDrivers = this._getSupportedDrivers(drivers);
+
+        function setDriverToConfig() {
+            self._config.driver = self.driver();
+        }
+
+        function extendSelfWithDriver(driver) {
+            self._extend(driver);
+            setDriverToConfig();
+
+            self._ready = self._initStorage(self._config);
+            return self._ready;
+        }
+
+        function initDriver(supportedDrivers) {
+            return function () {
+                var currentDriverIndex = 0;
+
+                function driverPromiseLoop() {
+                    while (currentDriverIndex < supportedDrivers.length) {
+                        var driverName = supportedDrivers[currentDriverIndex];
+                        currentDriverIndex++;
+
+                        self._dbInfo = null;
+                        self._ready = null;
+
+                        return self.getDriver(driverName).then(extendSelfWithDriver)["catch"](driverPromiseLoop);
+                    }
+
+                    setDriverToConfig();
+                    var error = new Error('No available storage method found.');
+                    self._driverSet = Promise$1.reject(error);
+                    return self._driverSet;
+                }
+
+                return driverPromiseLoop();
+            };
+        }
+
+        // There might be a driver initialization in progress
+        // so wait for it to finish in order to avoid a possible
+        // race condition to set _dbInfo
+        var oldDriverSetDone = this._driverSet !== null ? this._driverSet["catch"](function () {
+            return Promise$1.resolve();
+        }) : Promise$1.resolve();
+
+        this._driverSet = oldDriverSetDone.then(function () {
+            var driverName = supportedDrivers[0];
+            self._dbInfo = null;
+            self._ready = null;
+
+            return self.getDriver(driverName).then(function (driver) {
+                self._driver = driver._driver;
+                setDriverToConfig();
+                self._wrapLibraryMethodsWithReady();
+                self._initDriver = initDriver(supportedDrivers);
+            });
+        })["catch"](function () {
+            setDriverToConfig();
+            var error = new Error('No available storage method found.');
+            self._driverSet = Promise$1.reject(error);
+            return self._driverSet;
+        });
+
+        executeTwoCallbacks(this._driverSet, callback, errorCallback);
+        return this._driverSet;
+    };
+
+    LocalForage.prototype.supports = function supports(driverName) {
+        return !!DriverSupport[driverName];
+    };
+
+    LocalForage.prototype._extend = function _extend(libraryMethodsAndProperties) {
+        extend(this, libraryMethodsAndProperties);
+    };
+
+    LocalForage.prototype._getSupportedDrivers = function _getSupportedDrivers(drivers) {
+        var supportedDrivers = [];
+        for (var i = 0, len = drivers.length; i < len; i++) {
+            var driverName = drivers[i];
+            if (this.supports(driverName)) {
+                supportedDrivers.push(driverName);
+            }
+        }
+        return supportedDrivers;
+    };
+
+    LocalForage.prototype._wrapLibraryMethodsWithReady = function _wrapLibraryMethodsWithReady() {
+        // Add a stub for each driver API method that delays the call to the
+        // corresponding driver method until localForage is ready. These stubs
+        // will be replaced by the driver methods as soon as the driver is
+        // loaded, so there is no performance impact.
+        for (var i = 0, len = LibraryMethods.length; i < len; i++) {
+            callWhenReady(this, LibraryMethods[i]);
+        }
+    };
+
+    LocalForage.prototype.createInstance = function createInstance(options) {
+        return new LocalForage(options);
+    };
+
+    return LocalForage;
 }();
 
-/***/ }),
-/* 105 */
-/***/ (function(module, exports, __webpack_require__) {
+// The actual localForage object that we expose as a module or via a
+// global. It's extended by pulling in one of our other libraries.
 
-module.exports = { "default": __webpack_require__(106), __esModule: true };
 
-/***/ }),
-/* 106 */
-/***/ (function(module, exports, __webpack_require__) {
+var localforage_js = new LocalForage();
 
-__webpack_require__(15);
-__webpack_require__(11);
-module.exports = __webpack_require__(107);
+module.exports = localforage_js;
 
+},{"3":3}]},{},[4])(4)
+});
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
 
 /***/ }),
-/* 107 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 14 */
+/***/ (function(module, exports) {
 
-var classof = __webpack_require__(19);
-var ITERATOR = __webpack_require__(2)('iterator');
-var Iterators = __webpack_require__(10);
-module.exports = __webpack_require__(1).isIterable = function (it) {
-  var O = Object(it);
-  return O[ITERATOR] !== undefined
-    || '@@iterator' in O
-    // eslint-disable-next-line no-prototype-builtins
-    || Iterators.hasOwnProperty(classof(O));
-};
+var g;
 
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
 
-/***/ }),
-/* 108 */
-/***/ (function(module, exports, __webpack_require__) {
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || new Function("return this")();
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
 
-module.exports = { "default": __webpack_require__(109), __esModule: true };
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
 
-/***/ }),
-/* 109 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(15);
-__webpack_require__(11);
-module.exports = __webpack_require__(110);
+module.exports = g;
 
 
 /***/ }),
-/* 110 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var anObject = __webpack_require__(6);
-var get = __webpack_require__(43);
-module.exports = __webpack_require__(1).getIterator = function (it) {
-  var iterFn = get(it);
-  if (typeof iterFn != 'function') throw TypeError(it + ' is not iterable!');
-  return anObject(iterFn.call(it));
-};
-
-
-/***/ }),
-/* 111 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var core = __webpack_require__(1);
-var $JSON = core.JSON || (core.JSON = { stringify: JSON.stringify });
-module.exports = function stringify(it) { // eslint-disable-line no-unused-vars
-  return $JSON.stringify.apply($JSON, arguments);
-};
-
-
-/***/ }),
-/* 112 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(113), __esModule: true };
-
-/***/ }),
-/* 113 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(114);
-var $Object = __webpack_require__(1).Object;
-module.exports = function defineProperty(it, key, desc) {
-  return $Object.defineProperty(it, key, desc);
-};
-
-
-/***/ }),
-/* 114 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var $export = __webpack_require__(3);
-// 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
-$export($export.S + $export.F * !__webpack_require__(7), 'Object', { defineProperty: __webpack_require__(5).f });
-
-
-/***/ }),
-/* 115 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = function() {
-  return new Worker(__webpack_require__.p + "5e1ce2e77834d5e0d748.worker.js");
-};
-
-/***/ }),
-/* 116 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _stringify = __webpack_require__(55);
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+/* 15 */
+/***/ (function(module, exports) {
 
 // from https://gist.github.com/inexorabletash/52f437d1451d12145264
 (function (global) {
@@ -3810,17 +3890,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   function BroadcastChannel(channel) {
     var $this = this;
     channel = String(channel);
-
     var id = '$BroadcastChannel$' + channel + '$';
-
     channels[id] = channels[id] || [];
     channels[id].push(this);
-
     this._name = channel;
     this._id = id;
     this._closed = false;
     this._mc = new MessageChannel();
+
     this._mc.port1.start();
+
     this._mc.port2.start();
 
     global.addEventListener('storage', function (e) {
@@ -3828,6 +3907,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
       if (e.newValue === null) return;
       if (e.key.substring(0, id.length) !== id) return;
       var data = JSON.parse(e.newValue);
+
       $this._mc.port2.postMessage(data);
     });
   }
@@ -3837,35 +3917,40 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     get name() {
       return this._name;
     },
+
     postMessage: function postMessage(message) {
       var $this = this;
+
       if (this._closed) {
         var e = new Error();
         e.name = 'InvalidStateError';
         throw e;
       }
-      var value = (0, _stringify2.default)(message);
 
-      // Broadcast to other contexts via storage events...
+      var value = JSON.stringify(message); // Broadcast to other contexts via storage events...
+
       var key = this._id + String(Date.now()) + '$' + String(Math.random());
       global.localStorage.setItem(key, value);
       setTimeout(function () {
         global.localStorage.removeItem(key);
-      }, 500);
+      }, 500); // Broadcast to current context via ports
 
-      // Broadcast to current context via ports
       channels[this._id].forEach(function (bc) {
         if (bc === $this) return;
+
         bc._mc.port2.postMessage(JSON.parse(value));
       });
     },
     close: function close() {
       if (this._closed) return;
       this._closed = true;
+
       this._mc.port1.close();
+
       this._mc.port2.close();
 
       var index = channels[this._id].indexOf(this);
+
       channels[this._id].splice(index, 1);
     },
 
@@ -3873,13 +3958,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     get onmessage() {
       return this._mc.port1.onmessage;
     },
+
     set onmessage(value) {
       this._mc.port1.onmessage = value;
     },
-    addEventListener: function addEventListener(type, listener /*, useCapture*/) {
+
+    addEventListener: function addEventListener(type, listener
+    /*, useCapture*/
+    ) {
       return this._mc.port1.addEventListener.apply(this._mc.port1, arguments);
     },
-    removeEventListener: function removeEventListener(type, listener /*, useCapture*/) {
+    removeEventListener: function removeEventListener(type, listener
+    /*, useCapture*/
+    ) {
       return this._mc.port1.removeEventListener.apply(this._mc.port1, arguments);
     },
     dispatchEvent: function dispatchEvent(event) {
@@ -3896,42 +3987,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })(window.top);
 
 /***/ }),
-/* 117 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var rng = __webpack_require__(118);
-var bytesToUuid = __webpack_require__(119);
-
-function v4(options, buf, offset) {
-  var i = buf && offset || 0;
-
-  if (typeof(options) == 'string') {
-    buf = options === 'binary' ? new Array(16) : null;
-    options = null;
-  }
-  options = options || {};
-
-  var rnds = options.random || (options.rng || rng)();
-
-  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-  rnds[6] = (rnds[6] & 0x0f) | 0x40;
-  rnds[8] = (rnds[8] & 0x3f) | 0x80;
-
-  // Copy bytes to buffer, if provided
-  if (buf) {
-    for (var ii = 0; ii < 16; ++ii) {
-      buf[i + ii] = rnds[ii];
-    }
-  }
-
-  return buf || bytesToUuid(rnds);
-}
-
-module.exports = v4;
-
-
-/***/ }),
-/* 118 */
+/* 16 */
 /***/ (function(module, exports) {
 
 // Unique ID creation requires a high quality random # generator.  In the
@@ -3971,7 +4027,7 @@ if (getRandomValues) {
 
 
 /***/ }),
-/* 119 */
+/* 17 */
 /***/ (function(module, exports) {
 
 /**
@@ -4001,35 +4057,65 @@ module.exports = bytesToUuid;
 
 
 /***/ }),
-/* 120 */
-/***/ (function(module, exports, __webpack_require__) {
+/* 18 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
+var helpers_typeof = __webpack_require__(4);
+var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
+var slicedToArray = __webpack_require__(5);
+var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(0);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(1);
+var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
+var classCallCheck = __webpack_require__(2);
+var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
+var createClass = __webpack_require__(3);
+var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
+
+// EXTERNAL MODULE: ./src/worker.js
+var worker = __webpack_require__(6);
+var worker_default = /*#__PURE__*/__webpack_require__.n(worker);
+
+// EXTERNAL MODULE: ./node_modules/localforage/dist/localforage.js
+var localforage = __webpack_require__(13);
+
+// EXTERNAL MODULE: ./src/third_party/broadcastchannel.js
+var broadcastchannel = __webpack_require__(15);
+
+// EXTERNAL MODULE: ./node_modules/uuid/v4.js
+var v4 = __webpack_require__(7);
+var v4_default = /*#__PURE__*/__webpack_require__.n(v4);
+
+// CONCATENATED MODULE: ./src/logger.js
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
-var _classCallCheck2 = __webpack_require__(56);
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = __webpack_require__(57);
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Logger = function () {
+var logger_Logger =
+/*#__PURE__*/
+function () {
   function Logger() {
-    (0, _classCallCheck3.default)(this, Logger);
+    classCallCheck_default()(this, Logger);
 
     this.setVerbosity('WARNING');
   }
 
-  (0, _createClass3.default)(Logger, [{
-    key: 'debug',
+  createClass_default()(Logger, [{
+    key: "debug",
     value: function debug() {
       if (this.checkVerbosity(4)) {
         var _console;
@@ -4038,7 +4124,7 @@ var Logger = function () {
       }
     }
   }, {
-    key: 'log',
+    key: "log",
     value: function log() {
       if (this.checkVerbosity(4)) {
         var _console2;
@@ -4047,7 +4133,7 @@ var Logger = function () {
       }
     }
   }, {
-    key: 'info',
+    key: "info",
     value: function info() {
       if (this.checkVerbosity(3)) {
         var _console3;
@@ -4056,7 +4142,7 @@ var Logger = function () {
       }
     }
   }, {
-    key: 'warn',
+    key: "warn",
     value: function warn() {
       if (this.checkVerbosity(2)) {
         var _console4;
@@ -4065,7 +4151,7 @@ var Logger = function () {
       }
     }
   }, {
-    key: 'error',
+    key: "error",
     value: function error() {
       if (this.checkVerbosity(1)) {
         var _console5;
@@ -4074,29 +4160,771 @@ var Logger = function () {
       }
     }
   }, {
-    key: 'setVerbosity',
+    key: "setVerbosity",
     value: function setVerbosity(level) {
       var default_level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'info';
 
       if (level === undefined) {
         level = default_level;
       }
+
       if (typeof level === 'string') {
-        level = { ERROR: 1, WARNING: 2, INFO: 3, LOG: 4, DEBUG: 4 }[level.toUpperCase()] || 2;
+        level = {
+          ERROR: 1,
+          WARNING: 2,
+          INFO: 3,
+          LOG: 4,
+          DEBUG: 4
+        }[level.toUpperCase()] || 2;
       }
+
       this.level = level;
     }
   }, {
-    key: 'checkVerbosity',
+    key: "checkVerbosity",
     value: function checkVerbosity(level) {
       return this.level >= level;
     }
   }]);
+
   return Logger;
 }();
 
-var log = new Logger();
-exports.default = log;
+var log = new logger_Logger();
+/* harmony default export */ var logger = (log);
+// CONCATENATED MODULE: ./src/index.js
+
+
+
+
+
+
+
+
+
+
+
+
+var sleep = function sleep(ms) {
+  return new Promise(function (res) {
+    return setTimeout(res, ms);
+  });
+};
+/**
+ * TDLib in a browser
+ *
+ * TDLib can be compiled to WebAssembly or asm.js using Emscripten compiler and used in a browser from JavaScript.
+ * This is a convenient wrapper for TDLib in a browser which controls TDLib instance creation, handles interaction
+ * with the TDLib and manages a filesystem for persistent TDLib data.
+ * TDLib instance is created in a Web Worker, because TDLib needs synchronous access to filesystem and the IndexedDB.
+ * TdClient just sends queries to the Web Worker and receive updates and results from it.
+ * <br>
+ * <br>
+ * Differences from TDLib API:<br>
+ * 1. Added the update <code>updateFatalError error:string = Update;</code> which is sent whenever a TDLib fatal error is encountered.<br>
+ * 2. Added the field <code>idb_key</code> to <code>file</code> object, which contains IndexedDB key in which the file content is stored. IndexedDB table name is options.instanceName. <br>
+ *    This field is non-empty only for fully downloaded files. IndexedDB database name is chosen during TdClient creation.<br>
+ * 3. Added the method <code>setJsLogVerbosityLevel new_verbosity_level:string = Ok;</code>, which allows to change the verbosity level of tdweb logging.<br>
+ * 4. Added the possibility to use blobs as input files via constructor <code>inputFileBlob data:<JavaScript blob> = InputFile;</code>.<br>
+ * 5. Added the method <code>readFilePart path:string offset:int64 size:int64 = FilePart;</code> and class <code>filePart data:<JavaScript blob> = FilePart;</code><br>
+ *    which can be used on a partially downloaded file to support media streaming.<br>
+ * 6. Methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> are not supported.<br>
+ * <br>
+ */
+
+
+var src_TdClient =
+/*#__PURE__*/
+function () {
+  /**
+   * @callback TdClient~updateCallback
+   * @param {Object} update The update.
+   */
+
+  /**
+   * Create TdClient.
+   * @param {Object} options - The options for TDLib instance creation.
+   * @param {TdClient~updateCallback} options.onUpdate - The callback for all incoming updates.
+   * @param {string} [options.instanceName=tdlib] - The name of the TDLib instance. Currently only one instance of TdClient with a given name is allowed. All but one created instances with a given name will be automatically closed. Usually, the newest non-background instance is kept alive. Files will be stored in IndexedDb table with the same name.
+   * @param {boolean} [options.isBackground=false] - Pass true, if the instance is opened from the background.
+   * @param {string} [options.jsLogVerbosityLevel='info'] - The initial verbosity level of the JavaScript part of the code (one of 'error', 'warning', 'info', 'log', 'debug').
+   * @param {number} [options.logVerbosityLevel=2] - The initial verbosity level for TDLib internal logging (0-1023).
+   * @param {boolean} [options.useDatabase=true] - Pass false to use TDLib without database and secret chats. It will significantly improve load time, but some functionality will be unavailable.
+   * @param {string} [options.mode='auto'] - For debug only. The type of the TDLib build to use. 'asmjs' for asm.js and 'wasm' for WebAssembly. If mode == 'auto'  WebAbassembly will be used if supported by browser, asm.js otherwise.
+   * @param {boolean} [options.readOnly=false] - For debug only. Pass true to open TDLib database in read-only mode
+   */
+  function TdClient(options) {
+    classCallCheck_default()(this, TdClient);
+
+    logger.setVerbosity(options.jsLogVerbosityLevel);
+    this.worker = new worker_default.a();
+    var self = this;
+
+    this.worker.onmessage = function (e) {
+      self.onResponse(e.data);
+    };
+
+    this.query_id = 0;
+    this.query_callbacks = new Map();
+
+    if ('onUpdate' in options) {
+      this.onUpdate = options.onUpdate;
+      delete options.onUpdate;
+    }
+
+    options.instanceName = options.instanceName || 'tdlib';
+    this.fileManager = new src_FileManager(options.instanceName);
+    this.worker.postMessage({
+      '@type': 'init',
+      options: options
+    });
+    this.closeOtherClients(options);
+  }
+  /**
+   * Send a query to TDLib.
+   *
+   * If the query contains an '@extra' field, the same field will be added into the result.
+   *
+   * @param {Object} query - The query for TDLib. See the [td_api.tl]{@link https://github.com/tdlib/td/blob/master/td/generate/scheme/td_api.tl} scheme or
+   *                         the automatically generated [HTML documentation]{@link https://core.telegram.org/tdlib/docs/td__api_8h.html}
+   *                         for a list of all available TDLib [methods]{@link https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1_function.html} and
+   *                         [classes]{@link https://core.telegram.org/tdlib/docs/classtd_1_1td__api_1_1_object.html}.
+   * @returns {Promise} Promise object represents the result of the query.
+   */
+
+
+  createClass_default()(TdClient, [{
+    key: "send",
+    value: function send(query) {
+      var _this = this;
+
+      this.query_id++;
+
+      if (query['@extra']) {
+        query['@extra'] = {
+          '@old_extra': JSON.parse(JSON.stringify(query.extra)),
+          query_id: this.query_id
+        };
+      } else {
+        query['@extra'] = {
+          query_id: this.query_id
+        };
+      }
+
+      if (query['@type'] === 'setJsLogVerbosityLevel') {
+        logger.setVerbosity(query.new_verbosity_level);
+      }
+
+      logger.debug('send to worker: ', query);
+      var res = new Promise(function (resolve, reject) {
+        _this.query_callbacks.set(_this.query_id, [resolve, reject]);
+      });
+      this.externalPostMessage(query);
+      return res;
+    }
+    /** @private */
+
+  }, {
+    key: "externalPostMessage",
+    value: function externalPostMessage(query) {
+      var unsupportedMethods = ['getStorageStatistics', 'getStorageStatisticsFast', 'optimizeStorage', 'addProxy', 'init', 'start'];
+
+      if (unsupportedMethods.includes(query['@type'])) {
+        this.onResponse({
+          '@type': 'error',
+          '@extra': query['@extra'],
+          code: 400,
+          message: "method '" + query['@type'] + "' is not supported"
+        });
+        return;
+      }
+
+      if (query['@type'] === 'readFile') {
+        this.readFile(query);
+        return;
+      }
+
+      this.worker.postMessage(query);
+    }
+    /** @private */
+
+  }, {
+    key: "readFile",
+    value: function () {
+      var _readFile = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee(query) {
+        var response;
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.fileManager.readFile(query);
+
+              case 2:
+                response = _context.sent;
+                this.onResponse(response);
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function readFile(_x) {
+        return _readFile.apply(this, arguments);
+      }
+
+      return readFile;
+    }()
+    /** @private */
+
+  }, {
+    key: "onResponse",
+    value: function onResponse(response) {
+      logger.debug('receive from worker: ', JSON.parse(JSON.stringify(response, function (key, value) {
+        if (key === 'arr') {
+          return undefined;
+        }
+
+        return value;
+      }))); // for FileManager
+
+      response = this.prepareResponse(response);
+
+      if ('@extra' in response) {
+        var query_id = response['@extra'].query_id;
+
+        var _this$query_callbacks = this.query_callbacks.get(query_id),
+            _this$query_callbacks2 = slicedToArray_default()(_this$query_callbacks, 2),
+            resolve = _this$query_callbacks2[0],
+            reject = _this$query_callbacks2[1];
+
+        this.query_callbacks["delete"](query_id);
+
+        if ('@old_extra' in response['@extra']) {
+          response['@extra'] = response['@extra']['@old_extra'];
+        }
+
+        if (resolve) {
+          if (response['@type'] === 'error') {
+            reject(response);
+          } else {
+            resolve(response);
+          }
+        }
+      } else {
+        if (response['@type'] === 'inited') {
+          this.onInited();
+          return;
+        }
+
+        if (response['@type'] === 'updateAuthorizationState' && response.authorization_state['@type'] === 'authorizationStateClosed') {
+          this.onClosed();
+        }
+
+        this.onUpdate(response);
+      }
+    }
+    /** @private */
+
+  }, {
+    key: "prepareFile",
+    value: function prepareFile(file) {
+      return this.fileManager.registerFile(file);
+    }
+    /** @private */
+
+  }, {
+    key: "prepareResponse",
+    value: function prepareResponse(response) {
+      if (response['@type'] === 'file') {
+        return this.prepareFile(response);
+      }
+
+      for (var key in response) {
+        var field = response[key];
+
+        if (field && typeof_default()(field) === 'object') {
+          response[key] = this.prepareResponse(field);
+        }
+      }
+
+      return response;
+    }
+    /** @private */
+
+  }, {
+    key: "onBroadcastMessage",
+    value: function onBroadcastMessage(e) {
+      var message = e.data;
+      logger.info('got broadcast message: ', message);
+
+      if (message.isBackground && !this.isBackground) {// continue
+      } else if (!message.isBackground && this.isBackground || message.timestamp > this.timestamp) {
+        this.close();
+        return;
+      }
+
+      if (message.state === 'closed') {
+        this.waitSet["delete"](message.uid);
+
+        if (this.waitSet.size === 0) {
+          logger.info('onWaitSetEmpty');
+          this.onWaitSetEmpty();
+
+          this.onWaitSetEmpty = function () {};
+        }
+      } else {
+        this.waitSet.add(message.uid);
+
+        if (message.state !== 'closing') {
+          this.postState();
+        }
+      }
+    }
+    /** @private */
+
+  }, {
+    key: "postState",
+    value: function postState() {
+      var state = {
+        id: this.uid,
+        state: this.state,
+        timestamp: this.timestamp,
+        isBackground: this.isBackground
+      };
+      logger.info('Post state: ', state);
+      this.channel.postMessage(state);
+    }
+    /** @private */
+
+  }, {
+    key: "onWaitSetEmpty",
+    value: function onWaitSetEmpty() {} // nop
+
+    /** @private */
+
+  }, {
+    key: "onInited",
+    value: function onInited() {
+      this.isInited = true;
+      this.doSendStart();
+    }
+    /** @private */
+
+  }, {
+    key: "sendStart",
+    value: function sendStart() {
+      this.wantSendStart = true;
+      this.doSendStart();
+    }
+    /** @private */
+
+  }, {
+    key: "doSendStart",
+    value: function doSendStart() {
+      if (!this.isInited || !this.wantSendStart || this.state !== 'start') {
+        return;
+      }
+
+      this.wantSendStart = false;
+      this.state = 'active';
+      var query = {
+        '@type': 'start'
+      };
+      logger.info('send to worker: ', query);
+      this.worker.postMessage(query);
+    }
+    /** @private */
+
+  }, {
+    key: "onClosed",
+    value: function onClosed() {
+      this.isClosing = true;
+      this.worker.terminate();
+      logger.info('worker is terminated');
+      this.state = 'closed';
+      this.postState();
+    }
+    /** @private */
+
+  }, {
+    key: "close",
+    value: function close() {
+      if (this.isClosing) {
+        return;
+      }
+
+      this.isClosing = true;
+      logger.info('close state: ', this.state);
+
+      if (this.state === 'start') {
+        this.onClosed();
+        this.onUpdate({
+          '@type': 'updateAuthorizationState',
+          authorization_state: {
+            '@type': 'authorizationStateClosed'
+          }
+        });
+        return;
+      }
+
+      var query = {
+        '@type': 'close'
+      };
+      logger.info('send to worker: ', query);
+      this.worker.postMessage(query);
+      this.state = 'closing';
+      this.postState();
+    }
+    /** @private */
+
+  }, {
+    key: "closeOtherClients",
+    value: function () {
+      var _closeOtherClients = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee2(options) {
+        var self;
+        return regenerator_default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                this.uid = v4_default()();
+                this.state = 'start';
+                this.isBackground = !!options.isBackground;
+                this.timestamp = Date.now();
+                this.waitSet = new Set();
+                logger.info('close other clients');
+                this.channel = new BroadcastChannel(options.instanceName);
+                this.postState();
+                self = this;
+
+                this.channel.onmessage = function (message) {
+                  self.onBroadcastMessage(message);
+                };
+
+                _context2.next = 12;
+                return sleep(300);
+
+              case 12:
+                if (!(this.waitSet.size !== 0)) {
+                  _context2.next = 15;
+                  break;
+                }
+
+                _context2.next = 15;
+                return new Promise(function (resolve) {
+                  self.onWaitSetEmpty = resolve;
+                });
+
+              case 15:
+                this.sendStart();
+
+              case 16:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function closeOtherClients(_x2) {
+        return _closeOtherClients.apply(this, arguments);
+      }
+
+      return closeOtherClients;
+    }()
+    /** @private */
+
+  }, {
+    key: "onUpdate",
+    value: function onUpdate(response) {
+      logger.info('ignore onUpdate'); //nop
+    }
+  }]);
+
+  return TdClient;
+}();
+/** @private */
+
+
+var src_FileManager =
+/*#__PURE__*/
+function () {
+  function FileManager(instanceName) {
+    classCallCheck_default()(this, FileManager);
+
+    this.cache = new Map();
+    this.idb = new Promise(function (resolve, reject) {
+      var request = window.indexedDB.open(instanceName);
+
+      request.onsuccess = function () {
+        return resolve(request.result);
+      };
+
+      request.onerror = function () {
+        return reject(request.error);
+      };
+    }); //this.store = localforage.createInstance({
+    //name: instanceName
+    //});
+
+    this.pending = [];
+    this.transaction_id = 0;
+  }
+
+  createClass_default()(FileManager, [{
+    key: "registerFile",
+    value: function registerFile(file) {
+      if (file.idb_key || file.arr) {
+        file.is_downloading_completed = true;
+        var info = {};
+        var cached_info = this.cache.get(file.id);
+
+        if (cached_info !== undefined) {
+          info = cached_info;
+        } else {
+          this.cache.set(file.id, info);
+        }
+
+        if (file.idb_key) {
+          info.idb_key = file.idb_key;
+        }
+
+        if (file.arr) {
+          info.arr = file.arr;
+        }
+      }
+
+      return file;
+    }
+  }, {
+    key: "flushLoad",
+    value: function () {
+      var _flushLoad = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee3() {
+        var pending, idb, transaction_id, read, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step;
+
+        return regenerator_default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                pending = this.pending;
+                this.pending = [];
+                _context3.next = 4;
+                return this.idb;
+
+              case 4:
+                idb = _context3.sent;
+                transaction_id = this.transaction_id++;
+                read = idb.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
+                logger.debug('Load group of files from idb', pending.length);
+                _iteratorNormalCompletion = true;
+                _didIteratorError = false;
+                _iteratorError = undefined;
+                _context3.prev = 11;
+
+                _loop = function _loop() {
+                  var query = _step.value;
+                  var request = read.get(query.key);
+
+                  request.onsuccess = function (event) {
+                    var blob = event.target.result;
+
+                    if (blob) {
+                      query.resolve({
+                        data: blob,
+                        transaction_id: transaction_id
+                      });
+                    } else {
+                      query.reject();
+                    }
+                  };
+
+                  request.onerror = query.reject;
+                };
+
+                for (_iterator = pending[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                  _loop();
+                }
+
+                _context3.next = 20;
+                break;
+
+              case 16:
+                _context3.prev = 16;
+                _context3.t0 = _context3["catch"](11);
+                _didIteratorError = true;
+                _iteratorError = _context3.t0;
+
+              case 20:
+                _context3.prev = 20;
+                _context3.prev = 21;
+
+                if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+                  _iterator["return"]();
+                }
+
+              case 23:
+                _context3.prev = 23;
+
+                if (!_didIteratorError) {
+                  _context3.next = 26;
+                  break;
+                }
+
+                throw _iteratorError;
+
+              case 26:
+                return _context3.finish(23);
+
+              case 27:
+                return _context3.finish(20);
+
+              case 28:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this, [[11, 16, 20, 28], [21,, 23, 27]]);
+      }));
+
+      function flushLoad() {
+        return _flushLoad.apply(this, arguments);
+      }
+
+      return flushLoad;
+    }()
+  }, {
+    key: "load",
+    value: function load(key, resolve, reject) {
+      if (this.pending.length === 0) {
+        var self = this;
+        setTimeout(function () {
+          self.flushLoad();
+        }, 1);
+      }
+
+      this.pending.push({
+        key: key,
+        resolve: resolve,
+        reject: reject
+      });
+    }
+  }, {
+    key: "doLoad",
+    value: function () {
+      var _doLoad = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee4(info) {
+        var idb_key, self;
+        return regenerator_default.a.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                if (!info.arr) {
+                  _context4.next = 2;
+                  break;
+                }
+
+                return _context4.abrupt("return", new Blob([info.arr]));
+
+              case 2:
+                idb_key = info.idb_key;
+                self = this; //return this.store.getItem(idb_key);
+
+                _context4.next = 6;
+                return new Promise(function (resolve, reject) {
+                  self.load(idb_key, resolve, reject);
+                });
+
+              case 6:
+                return _context4.abrupt("return", _context4.sent);
+
+              case 7:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this);
+      }));
+
+      function doLoad(_x3) {
+        return _doLoad.apply(this, arguments);
+      }
+
+      return doLoad;
+    }()
+  }, {
+    key: "readFile",
+    value: function () {
+      var _readFile2 = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee5(query) {
+        var info, response;
+        return regenerator_default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                info = this.cache.get(query.file_id);
+
+                if (info) {
+                  _context5.next = 4;
+                  break;
+                }
+
+                throw new Error('File is not loaded');
+
+              case 4:
+                _context5.next = 6;
+                return this.doLoad(info);
+
+              case 6:
+                response = _context5.sent;
+                return _context5.abrupt("return", {
+                  '@type': 'blob',
+                  '@extra': query['@extra'],
+                  data: response.data,
+                  transaction_id: response.transaction_id
+                });
+
+              case 10:
+                _context5.prev = 10;
+                _context5.t0 = _context5["catch"](0);
+                return _context5.abrupt("return", {
+                  '@type': 'error',
+                  '@extra': query['@extra'],
+                  code: 400,
+                  message: _context5.t0
+                });
+
+              case 13:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, this, [[0, 10]]);
+      }));
+
+      function readFile(_x4) {
+        return _readFile2.apply(this, arguments);
+      }
+
+      return readFile;
+    }()
+  }]);
+
+  return FileManager;
+}();
+
+/* harmony default export */ var src = __webpack_exports__["default"] = (src_TdClient);
 
 /***/ })
 /******/ ]);
