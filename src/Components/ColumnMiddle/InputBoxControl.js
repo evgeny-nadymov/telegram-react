@@ -316,7 +316,7 @@ class InputBoxControl extends Component {
 
         const content = {
             '@type': 'inputMessagePhoto',
-            photo: { '@type': 'inputFileBlob', name: file.name, blob: file },
+            photo: { '@type': 'inputFileBlob', name: file.name, data: file },
             width: file.photoWidth,
             height: file.photoHeight
         };
@@ -336,7 +336,7 @@ class InputBoxControl extends Component {
 
         const content = {
             '@type': 'inputMessageDocument',
-            document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+            document: { '@type': 'inputFileBlob', name: file.name, data: file }
         };
 
         this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));

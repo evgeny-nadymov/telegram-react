@@ -58,7 +58,7 @@ class FilesDropTarget extends React.Component {
             let file = files[i];
             const content = {
                 '@type': 'inputMessageDocument',
-                document: { '@type': 'inputFileBlob', name: file.name, blob: file }
+                document: { '@type': 'inputFileBlob', name: file.name, data: file }
             };
 
             this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));

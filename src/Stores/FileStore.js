@@ -10,6 +10,8 @@ import { getLocationId } from '../Utils/Message';
 import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
+const useReadFile = true;
+
 class FileStore extends EventEmitter {
     constructor() {
         super();
@@ -91,8 +93,10 @@ class FileStore extends EventEmitter {
 
         if (this.downloads.has(file.id)) {
             if (file.local.is_downloading_completed) {
-                if (!(file.idb_key || file.arr) || !file.remote.id) {
-                    return;
+                if (!useReadFile) {
+                    if (!(file.idb_key || file.arr) || !file.remote.id) {
+                        return;
+                    }
                 }
 
                 const { arr, idb_key } = file;
@@ -519,7 +523,7 @@ class FileStore extends EventEmitter {
 
             this.initiatingDB = true;
             this.store = localForage.createInstance({
-                name: '/tdlib'
+                name: 'tdlib'
             });
             this.initiatingDB = false;
 
@@ -554,7 +558,7 @@ class FileStore extends EventEmitter {
 
     openDB() {
         return new Promise((resolve, reject) => {
-            const request = window.indexedDB.open('/tdlib');
+            const request = window.indexedDB.open('tdlib');
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
@@ -565,10 +569,16 @@ class FileStore extends EventEmitter {
     }
 
     getReadWriteStore() {
+        if (useReadFile) {
+            return undefined;
+        }
         return this.db.transaction(['keyvaluepairs'], 'readwrite').objectStore('keyvaluepairs');
     }
 
     deleteLocalFile = (store, file) => {
+        if (useReadFile) {
+            return;
+        }
         if (!file.idb_key) {
             return;
         }
@@ -585,6 +595,17 @@ class FileStore extends EventEmitter {
     };
 
     getLocalFile(store, file, idb_key, arr, callback, faultCallback) {
+        if (useReadFile) {
+            (async file => {
+                let response = await TdLibController.send({
+                    '@type': 'readFile',
+                    file_id: file.id
+                });
+                this.setBlob(file.id, response.data);
+            })(file).then(callback, faultCallback);
+            return;
+        }
+
         if (!idb_key && !arr) {
             faultCallback();
             return;
