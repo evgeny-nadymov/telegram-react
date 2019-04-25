@@ -47,7 +47,7 @@
 /******/ 		promises.push(Promise.resolve().then(function() {
 /******/ 			// "1" is the signal for "already loaded"
 /******/ 			if(!installedChunks[chunkId]) {
-/******/ 				importScripts("" + chunkId + "." + "8de188171bac38cad51b" + ".worker.js");
+/******/ 				importScripts("" + chunkId + "." + "8a0dda0da6e695f9b779" + ".worker.js");
 /******/ 			}
 /******/ 		}));
 /******/ 		return Promise.all(promises);
@@ -5354,7 +5354,10 @@ function () {
 
               case 35:
                 this.tdfs = _context12.sent;
-                logger.info('FS inited'); // no async initialization after this point
+                logger.info('FS inited');
+                this.callback({
+                  '@type': 'fsInited'
+                }); // no async initialization after this point
 
                 if (options.logVerbosityLevel === undefined) {
                   options.logVerbosityLevel = 2;
@@ -5382,7 +5385,7 @@ function () {
                 this.flushPendingQueries();
                 this.receive();
 
-              case 45:
+              case 46:
               case "end":
                 return _context12.stop();
             }

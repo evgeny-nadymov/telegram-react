@@ -39,10 +39,10 @@ const styles = theme => ({
         color: theme.palette.primary.main
     },
     messageSelected: {
-        backgroundColor: theme.palette.primary.main + '11'
+        backgroundColor: theme.palette.primary.main + '22'
     },
     '@keyframes highlighted': {
-        from: { backgroundColor: theme.palette.primary.main + '11' },
+        from: { backgroundColor: theme.palette.primary.main + '22' },
         to: { backgroundColor: 'transparent' }
     },
     messageHighlighted: {

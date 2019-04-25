@@ -529,6 +529,7 @@ class FileStore extends EventEmitter {
 
             return;*/
         if (this.db) {
+            console.log('[FileStore] db exists');
             if (callback) callback();
             return;
         }
@@ -542,7 +543,7 @@ class FileStore extends EventEmitter {
         console.log('[FileStore] start initDB');
 
         this.initiatingDB = true;
-        this.db = await this.openDB();
+        this.db = await this.openDB().catch(error => console.log('[FileStore] initDB error', error));
         this.initiatingDB = false;
 
         console.log('[FileStore] stop initDB');
@@ -601,6 +602,7 @@ class FileStore extends EventEmitter {
                     '@type': 'readFile',
                     file_id: file.id
                 });
+                console.log(`readFile file_id=${file.id} result`, response);
                 this.setBlob(file.id, response.data);
             })(file).then(callback, faultCallback);
             return;

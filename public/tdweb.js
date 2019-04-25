@@ -220,7 +220,7 @@ module.exports = _slicedToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "8de188171bac38cad51b.worker.js");
+  return new Worker(__webpack_require__.p + "8a0dda0da6e695f9b779.worker.js");
 };
 
 /***/ }),
@@ -4422,6 +4422,11 @@ function () {
           return;
         }
 
+        if (response['@type'] === 'fsInited') {
+          this.onFsInited();
+          return;
+        }
+
         if (response['@type'] === 'updateAuthorizationState' && response.authorization_state['@type'] === 'authorizationStateClosed') {
           this.onClosed();
         }
@@ -4461,6 +4466,12 @@ function () {
     key: "onBroadcastMessage",
     value: function onBroadcastMessage(e) {
       var message = e.data;
+
+      if (message.uid === this.uid) {
+        logger.info('ignore self broadcast message: ', message);
+        return;
+      }
+
       logger.info('got broadcast message: ', message);
 
       if (message.isBackground && !this.isBackground) {// continue
@@ -4506,6 +4517,13 @@ function () {
     key: "onWaitSetEmpty",
     value: function onWaitSetEmpty() {} // nop
 
+    /** @private */
+
+  }, {
+    key: "onFsInited",
+    value: function onFsInited() {
+      this.fileManager.init();
+    }
     /** @private */
 
   }, {
@@ -4659,26 +4677,33 @@ function () {
   function FileManager(instanceName) {
     classCallCheck_default()(this, FileManager);
 
+    this.instanceName = instanceName;
     this.cache = new Map();
-    this.idb = new Promise(function (resolve, reject) {
-      var request = window.indexedDB.open(instanceName);
-
-      request.onsuccess = function () {
-        return resolve(request.result);
-      };
-
-      request.onerror = function () {
-        return reject(request.error);
-      };
-    }); //this.store = localforage.createInstance({
-    //name: instanceName
-    //});
-
     this.pending = [];
     this.transaction_id = 0;
   }
 
   createClass_default()(FileManager, [{
+    key: "init",
+    value: function init() {
+      var self = this;
+      this.idb = new Promise(function (resolve, reject) {
+        var request = window.indexedDB.open(self.instanceName);
+
+        request.onsuccess = function () {
+          return resolve(request.result);
+        };
+
+        request.onerror = function () {
+          return reject(request.error);
+        };
+      }); //this.store = localforage.createInstance({
+      //name: instanceName
+      //});
+
+      this.isInited = true;
+    }
+  }, {
     key: "registerFile",
     value: function registerFile(file) {
       if (file.idb_key || file.arr) {
@@ -4833,7 +4858,10 @@ function () {
                   break;
                 }
 
-                return _context4.abrupt("return", new Blob([info.arr]));
+                return _context4.abrupt("return", {
+                  data: new Blob([info.arr]),
+                  transaction_id: -1
+                });
 
               case 2:
                 idb_key = info.idb_key;
@@ -4873,20 +4901,29 @@ function () {
             switch (_context5.prev = _context5.next) {
               case 0:
                 _context5.prev = 0;
+
+                if (this.isInited) {
+                  _context5.next = 3;
+                  break;
+                }
+
+                throw new Error('FileManager is not inited');
+
+              case 3:
                 info = this.cache.get(query.file_id);
 
                 if (info) {
-                  _context5.next = 4;
+                  _context5.next = 6;
                   break;
                 }
 
                 throw new Error('File is not loaded');
 
-              case 4:
-                _context5.next = 6;
+              case 6:
+                _context5.next = 8;
                 return this.doLoad(info);
 
-              case 6:
+              case 8:
                 response = _context5.sent;
                 return _context5.abrupt("return", {
                   '@type': 'blob',
@@ -4895,8 +4932,8 @@ function () {
                   transaction_id: response.transaction_id
                 });
 
-              case 10:
-                _context5.prev = 10;
+              case 12:
+                _context5.prev = 12;
                 _context5.t0 = _context5["catch"](0);
                 return _context5.abrupt("return", {
                   '@type': 'error',
@@ -4905,12 +4942,12 @@ function () {
                   message: _context5.t0
                 });
 
-              case 13:
+              case 15:
               case "end":
                 return _context5.stop();
             }
           }
-        }, _callee5, this, [[0, 10]]);
+        }, _callee5, this, [[0, 12]]);
       }));
 
       function readFile(_x4) {

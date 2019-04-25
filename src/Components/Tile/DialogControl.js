@@ -32,7 +32,7 @@ const styles = theme => ({
         cursor: 'pointer',
         margin: '0 12px',
         '&:hover': {
-            backgroundColor: theme.palette.primary.main + '11'
+            backgroundColor: theme.palette.primary.main + '22'
         }
     }
 });
