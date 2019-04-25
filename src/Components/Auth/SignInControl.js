@@ -11,9 +11,7 @@ import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
-import Dialog from '@material-ui/core/Dialog';
-import { formatPhoneNumber } from '../../Utils/Common';
+import { isValidPhoneNumber } from '../../Utils/Common';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Link from '@material-ui/core/Link';
@@ -32,87 +30,87 @@ const styles = {
         textAlign: 'center'
     },
     continueAtLanguage: {
-        transform: 'translateY(80px)'
+        transform: 'translateY(100px)',
+        textAlign: 'center'
     }
 };
 
 class SignInControl extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            error: '',
-            openConfirmation: false,
-            loading: false
-        };
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleNext = this.handleNext.bind(this);
-        this.handleClose = this.handleClose.bind(this);
-        this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.handleDialogKeyPress = this.handleDialogKeyPress.bind(this);
-    }
+    state = {
+        error: null,
+        loading: false
+    };
 
     componentDidMount() {
-        const suggestedOption = OptionStore.get('suggested_language_pack_id');
-        if (suggestedOption && suggestedOption.value !== this.props.i18n.language) {
-            LocalizationStore.loadLanguage(suggestedOption.value).then(() => {
-                this.setState({ suggestedLanguage: suggestedOption.value });
-            });
-        }
+        this.handleSuggestedLanguagePackId();
+
+        OptionStore.on('updateOption', this.handleUpdateOption);
     }
 
-    handleNext() {
-        const phoneNumber = this.phoneNumber || this.props.phone;
+    componentWillUnmount() {
+        OptionStore.removeListener('updateOption', this.handleUpdateOption);
+    }
 
-        if (this.isValidPhoneNumber(phoneNumber)) {
-            this.setState({ error: '', openConfirmation: true });
+    handleUpdateOption = update => {
+        const { name } = update;
+
+        if (name === 'suggested_language_pack_id') {
+            this.handleSuggestedLanguagePackId();
+        }
+    };
+
+    handleSuggestedLanguagePackId = () => {
+        const { i18n } = this.props;
+        if (!i18n) return;
+
+        const languagePackId = OptionStore.get('suggested_language_pack_id');
+        if (!languagePackId) return;
+
+        const { value } = languagePackId;
+        if (value === i18n.language) {
+            this.setState({ suggestedLanguage: null });
+            return;
+        }
+
+        LocalizationStore.loadLanguage(value).then(() => {
+            this.setState({ suggestedLanguage: value });
+        });
+    };
+
+    handleNext = () => {
+        const { phone } = this.props;
+
+        const phoneNumber = this.phoneNumber || phone;
+
+        if (isValidPhoneNumber(phoneNumber)) {
+            this.setState({ error: null, openConfirmation: true });
         } else {
-            this.setState({ error: 'Invalid phone number. Please try again.' });
+            this.setState({ error: { code: 'InvalidPhoneNumber' } });
         }
-    }
+    };
 
-    isValidPhoneNumber(phoneNumber) {
-        if (!phoneNumber) return false;
+    handleChange = event => {
+        this.phoneNumber = event.target.value;
+    };
 
-        let isBad = !phoneNumber.match(/^[\d\-+\s]+$/);
-        if (!isBad) {
-            phoneNumber = phoneNumber.replace(/\D/g, '');
-            if (phoneNumber.length < 7) {
-                isBad = true;
-            }
-        }
-
-        return !isBad;
-    }
-
-    handleChange(e) {
-        this.phoneNumber = e.target.value;
-    }
-
-    handleKeyPress(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
+    handleKeyPress = event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
             this.handleNext();
         }
-    }
-
-    handleDialogKeyPress(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            this.handleDone();
-        }
-    }
-
-    handleClose() {
-        this.setState({ openConfirmation: false });
-    }
+    };
 
     handleDone = () => {
-        const phoneNumber = this.phoneNumber || this.props.phone;
+        const { phone, onPhoneEnter } = this.props;
 
-        this.props.onPhoneEnter(phoneNumber);
-        this.setState({ openConfirmation: false, loading: true });
+        const phoneNumber = this.phoneNumber || phone;
+        if (!isValidPhoneNumber(phoneNumber)) {
+            this.setState({ error: { code: 'InvalidPhoneNumber' } });
+            return;
+        }
+
+        onPhoneEnter(phoneNumber);
+        this.setState({ error: null, loading: true });
         TdLibController.send({
             '@type': 'setAuthenticationPhoneNumber',
             phone_number: phoneNumber
@@ -126,7 +124,7 @@ class SignInControl extends React.Component {
                     errorString = JSON.stringify(error);
                 }
 
-                this.setState({ error: errorString });
+                this.setState({ error: { string: errorString } });
             })
             .finally(() => {
                 this.setState({ loading: false });
@@ -147,8 +145,17 @@ class SignInControl extends React.Component {
 
     render() {
         const { phone, classes, t } = this.props;
-        const { loading, error, openConfirmation, suggestedLanguage } = this.state;
-        const phoneNumber = this.phoneNumber || this.props.phone;
+        const { loading, error, suggestedLanguage } = this.state;
+
+        let errorString = '';
+        if (error) {
+            const { code, string } = error;
+            if (code) {
+                errorString = t(code);
+            } else {
+                errorString = string;
+            }
+        }
 
         return (
             <FormControl fullWidth>
@@ -159,7 +166,7 @@ class SignInControl extends React.Component {
                 <TextField
                     color='primary'
                     disabled={loading}
-                    error={Boolean(error)}
+                    error={Boolean(errorString)}
                     fullWidth
                     autoFocus
                     id='phoneNumber'
@@ -169,14 +176,14 @@ class SignInControl extends React.Component {
                     onKeyPress={this.handleKeyPress}
                     defaultValue={phone}
                 />
-                <FormHelperText id='sign-in-error-text'>{error}</FormHelperText>
+                <FormHelperText id='sign-in-error-text'>{errorString}</FormHelperText>
                 <div className='sign-in-actions'>
                     <Button
                         fullWidth
                         color='primary'
                         disabled={loading}
                         className={classes.button}
-                        onClick={this.handleNext}>
+                        onClick={this.handleDone}>
                         {t('Next')}
                     </Button>
                     <Typography className={classes.continueAtLanguage}>
@@ -185,28 +192,6 @@ class SignInControl extends React.Component {
                         </Link>
                     </Typography>
                 </div>
-                <Dialog
-                    transitionDuration={0}
-                    open={openConfirmation}
-                    onClose={this.handleClose}
-                    onKeyPress={this.handleDialogKeyPress}
-                    aria-labelledby='form-dialog-title'>
-                    <DialogTitle id='form-dialog-title'>Telegram</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>Is this phone number correct?</DialogContentText>
-                        <DialogContentText className={classes.phone}>
-                            {formatPhoneNumber(phoneNumber)}
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClose} color='secondary'>
-                            Cancel
-                        </Button>
-                        <Button onClick={this.handleDone} color='primary'>
-                            Confirm
-                        </Button>
-                    </DialogActions>
-                </Dialog>
             </FormControl>
         );
     }

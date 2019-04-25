@@ -22,6 +22,8 @@ class OptionStore extends EventEmitter {
         switch (update['@type']) {
             case 'updateOption':
                 this.items.set(update.name, update.value);
+
+                this.emit('updateOption', update);
                 break;
             default:
                 break;

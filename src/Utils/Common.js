@@ -8,6 +8,20 @@
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+function isValidPhoneNumber(phoneNumber) {
+    if (!phoneNumber) return false;
+
+    let isBad = !phoneNumber.match(/^[\d\-+\s]+$/);
+    if (!isBad) {
+        phoneNumber = phoneNumber.replace(/\D/g, '');
+        if (phoneNumber.length < 7) {
+            isBad = true;
+        }
+    }
+
+    return !isBad;
+}
+
 function stringToBoolean(string) {
     switch (string.toLowerCase().trim()) {
         case 'true':
@@ -314,6 +328,7 @@ function getRandomInt(min, max) {
 }
 
 export {
+    isValidPhoneNumber,
     stringToBoolean,
     orderCompare,
     getSize,
