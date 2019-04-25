@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
-import { stringToBoolean } from '../Utils/Common';
+import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 import TdClient from '@arseny30/tdweb/dist/tdweb';
 
@@ -26,6 +26,8 @@ class TdLibController extends EventEmitter {
         };
 
         this.disableLog = false;
+
+        //console.log('navigator', navigator);
 
         this.setMaxListeners(Infinity);
     }
@@ -168,8 +170,8 @@ class TdLibController extends EventEmitter {
                 api_id: apiId,
                 api_hash: apiHash,
                 system_language_code: navigator.language || 'en',
-                device_model: 'Web',
-                system_version: 'Unknown',
+                device_model: getBrowser(),
+                system_version: getOSName(),
                 application_version: version,
                 use_secret_chats: false,
                 use_message_database: true,
