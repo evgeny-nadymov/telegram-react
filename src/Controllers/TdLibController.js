@@ -21,7 +21,7 @@ class TdLibController extends EventEmitter {
             verbosity: 1,
             jsVerbosity: 3,
             fastUpdating: true,
-            noDb: false,
+            useDatabase: true,
             mode: 'wasm'
         };
 
@@ -33,7 +33,7 @@ class TdLibController extends EventEmitter {
     init = location => {
         this.setParameters(location);
 
-        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, noDb, mode } = this.parameters;
+        const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
 
         let options = {
             logVerbosityLevel: verbosity,
@@ -42,7 +42,7 @@ class TdLibController extends EventEmitter {
             prefix: useTestDC ? 'tdlib_test' : 'tdlib',
             readOnly: readOnly,
             isBackground: false,
-            noDb: noDb
+            useDatabase: useDatabase
             // onUpdate: update => this.emit('update', update)
         };
 
@@ -121,8 +121,8 @@ class TdLibController extends EventEmitter {
             this.parameters.fastUpdating = stringToBoolean(params.get('fastupdating'));
         }
 
-        if (params.has('nodb')) {
-            this.parameters.noDb = stringToBoolean(params.get('nodb'));
+        if (params.has('db')) {
+            this.parameters.useDatabase = stringToBoolean(params.get('db'));
         }
         if (params.has('mode')) {
             this.parameters.mode = params.get('mode');
@@ -167,7 +167,7 @@ class TdLibController extends EventEmitter {
                 use_test_dc: useTestDC,
                 api_id: apiId,
                 api_hash: apiHash,
-                system_language_code: 'en',
+                system_language_code: navigator.language || 'en',
                 device_model: 'Web',
                 system_version: 'Unknown',
                 application_version: version,
