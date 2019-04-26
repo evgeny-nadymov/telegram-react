@@ -39,6 +39,11 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
         resources: {
             en: {
                 translation: {
+                    YourPhone: 'Your Phone',
+                    StartText: 'Please confirm your country code and enter your phone number.',
+                    Next: 'Next',
+                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
+
                     AppName: 'Telegram',
                     Loading: 'Loading',
                     Connecting: 'Connecting',
@@ -61,6 +66,12 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
             },
             ru: {
                 translation: {
+                    YourPhone: 'Ваш телефон',
+                    StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
+                    Next: 'Далее',
+                    InvalidPhoneNumber:
+                        'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
+
                     AppName: 'Телеграм',
                     Loading: 'Загрузка',
                     Connecting: 'Соединение',
