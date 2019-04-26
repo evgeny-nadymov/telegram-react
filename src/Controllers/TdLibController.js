@@ -21,13 +21,11 @@ class TdLibController extends EventEmitter {
             verbosity: 1,
             jsVerbosity: 3,
             fastUpdating: true,
-            useDatabase: true,
+            useDatabase: false,
             mode: 'wasm'
         };
 
         this.disableLog = false;
-
-        //console.log('navigator', navigator);
 
         this.setMaxListeners(Infinity);
     }
