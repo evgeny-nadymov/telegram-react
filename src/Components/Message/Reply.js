@@ -11,7 +11,8 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
-import { getContent, getTitle, isDeletedMessage } from '../../Utils/Message';
+import Photo from './Media/Photo';
+import { getContent, getTitle, isDeletedMessage, getReplyPhoto } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
 import { openChat } from '../../Utils/Commands';
 import MessageStore from '../../Stores/MessageStore';
@@ -40,6 +41,10 @@ class Reply extends React.Component {
 
     handleClick = event => {
         event.stopPropagation();
+    };
+
+    handleOpen = event => {
+        event.stopPropagation();
 
         const { chatId, messageId } = this.props;
 
@@ -58,10 +63,22 @@ class Reply extends React.Component {
 
         const title = !message ? null : getTitle(message);
         const content = !message ? t('Loading') : getContent(message, t);
+        const photo = getReplyPhoto(chatId, messageId);
 
         return (
-            <div className='reply' onClick={this.handleClick}>
+            <div className='reply' onMouseDown={this.handleOpen} onClick={this.handleClick}>
                 <div className={classNames('reply-border', classes.accentBackgroundLight)} />
+                {photo && (
+                    <div className='reply-photo'>
+                        <Photo
+                            chatId={chatId}
+                            messageId={messageId}
+                            photo={photo}
+                            showProgress={false}
+                            style={{ width: 40, height: 40 }}
+                        />
+                    </div>
+                )}
                 <div className='reply-content'>
                     {title && <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>}
                     <div className='reply-content-subtitle'>{content}</div>

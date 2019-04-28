@@ -288,12 +288,16 @@ class Search extends React.Component {
             '@type': 'getTopChats',
             category: { '@type': 'topChatCategoryUsers' },
             limit: 30
+        }).catch(() => {
+            return { '@type': 'chats', chat_ids: [] };
         });
 
         const recentlyFoundPromise = TdLibController.send({
             '@type': 'searchChats',
             query: '',
             limit: 100
+        }).catch(() => {
+            return { '@type': 'chats', chat_ids: [] };
         });
 
         const me = UserStore.getMe();
@@ -301,7 +305,7 @@ class Search extends React.Component {
             '@type': 'createPrivateChat',
             user_id: me.id,
             force: true
-        });
+        }).catch(error => {});
 
         const [top, recentlyFound, savedMessages] = await Promise.all([
             topPromise,

@@ -206,13 +206,13 @@ class MessageStore extends EventEmitter {
     get(chatId, messageId) {
         let chat = this.items.get(chatId);
         if (!chat) {
-            this.load(chatId, messageId);
+            //this.load(chatId, messageId);
             return null;
         }
 
         let message = chat.get(messageId);
         if (!message) {
-            this.load(chatId, messageId);
+            //this.load(chatId, messageId);
             return null;
         }
 

@@ -36,18 +36,18 @@ const language = cookies.get('i18next') || defaultLanguage;
 i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react-i18next
     .init({
         //detection: detection,
+        ns: [defaultNamespace, 'local'],
+        defaultNS: defaultNamespace,
+        fallbackNS: ['local', 'emoji'],
         resources: {
             en: {
-                translation: {
+                local: {
                     YourPhone: 'Your Phone',
                     StartText: 'Please confirm your country code and enter your phone number.',
                     Next: 'Next',
-                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
-
-                    AppName: 'Telegram',
-                    Loading: 'Loading',
-                    Connecting: 'Connecting',
-                    Updating: 'Updating',
+                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.'
+                },
+                emoji: {
                     Search: 'Search',
                     NotEmojiFound: 'No Emoji Found',
                     ChooseDefaultSkinTone: 'Choose your default skin tone',
@@ -62,20 +62,22 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     Symbols: 'Symbols',
                     Flags: 'Flags',
                     Custom: 'Custom'
+                },
+                translation: {
+                    AppName: 'Telegram',
+                    Loading: 'Loading',
+                    Connecting: 'Connecting',
+                    Updating: 'Updating'
                 }
             },
             ru: {
-                translation: {
+                local: {
                     YourPhone: 'Ваш телефон',
                     StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
                     Next: 'Далее',
-                    InvalidPhoneNumber:
-                        'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
-
-                    AppName: 'Телеграм',
-                    Loading: 'Загрузка',
-                    Connecting: 'Соединение',
-                    Updating: 'Обновление',
+                    InvalidPhoneNumber: 'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.'
+                },
+                emoji: {
                     Search: 'Поиск',
                     NotEmojiFound: 'Емодзи не найдены',
                     ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
@@ -90,6 +92,12 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     Symbols: 'Символы',
                     Flags: 'Флаги',
                     Custom: 'Пользовательские'
+                },
+                translation: {
+                    AppName: 'Телеграм',
+                    Loading: 'Загрузка',
+                    Connecting: 'Соединение',
+                    Updating: 'Обновление'
                 }
             }
         },
@@ -108,15 +116,15 @@ const cache = new LocalStorageBackend(null, {
     prefix: 'i18next_res_',
     expirationTime: Infinity
 });
-const localDefault = cache.read(defaultLanguage, defaultNamespace, (err, data) => {
-    return data;
-});
-const localCurrent = cache.read(language, defaultNamespace, (err, data) => {
-    return data;
-});
 
-i18n.addResourceBundle(defaultLanguage, defaultNamespace, localDefault);
-i18n.addResourceBundle(language, defaultNamespace, localCurrent);
+const translationDefaultLng = cache.read(defaultLanguage, defaultNamespace, (err, data) => {
+    return data;
+});
+const translationCurrentLng = cache.read(language, defaultNamespace, (err, data) => {
+    return data;
+});
+i18n.addResourceBundle(defaultLanguage, defaultNamespace, translationDefaultLng);
+i18n.addResourceBundle(language, defaultNamespace, translationCurrentLng);
 
 class LocalizationStore extends EventEmitter {
     constructor() {

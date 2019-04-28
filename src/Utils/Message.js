@@ -1172,6 +1172,66 @@ function isDeletedMessage(message) {
     return message && message['@type'] === 'deletedMessage';
 }
 
+function getReplyPhoto(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messagePhoto': {
+            const { photo } = content;
+
+            return photo;
+        }
+        // case 'messageDocument': {
+        //     const { document } = content;
+        //     if (!document) return null;
+        //
+        //     const { thumbnail } = document;
+        //     if (!thumbnail) return null;
+        //
+        //     return {
+        //         '@type': 'photo',
+        //         id: 0,
+        //         sizes: [thumbnail],
+        //         has_stickers: false
+        //     };
+        // }
+        // case 'messageAnimation': {
+        //     const { animation } = content;
+        //     if (!animation) return null;
+        //
+        //     const { thumbnail } = animation;
+        //     if (!thumbnail) return null;
+        //
+        //     return {
+        //         '@type': 'photo',
+        //         id: 0,
+        //         sizes: [thumbnail],
+        //         has_stickers: false
+        //     };
+        // }
+        // case 'messageVideo': {
+        //     const { video } = content;
+        //     if (!video) return null;
+        //
+        //     const { thumbnail } = video;
+        //     if (!thumbnail) return null;
+        //
+        //     return {
+        //         '@type': 'photo',
+        //         id: 0,
+        //         sizes: [thumbnail],
+        //         has_stickers: false
+        //     };
+        // }
+    }
+
+    return null;
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1197,5 +1257,6 @@ export {
     getMediaTitle,
     hasAudio,
     getSearchMessagesFilter,
-    openMedia
+    openMedia,
+    getReplyPhoto
 };

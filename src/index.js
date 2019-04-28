@@ -22,10 +22,14 @@ ReactDOM.render(
 );
 
 if (FIRST_START_OPTIMIZATIONS) {
-    const cookies = new Cookies();
-    const register = cookies.get('register');
-
-    if (register) {
+    const cookieEnabled = navigator.cookieEnabled;
+    if (cookieEnabled) {
+        const cookies = new Cookies();
+        const register = cookies.get('register');
+        if (register) {
+            registerServiceWorker();
+        }
+    } else {
         registerServiceWorker();
     }
 } else {

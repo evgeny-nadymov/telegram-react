@@ -50,7 +50,7 @@ class Photo extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, style } = this.props;
+        const { displaySize, openMedia, showProgress, style } = this.props;
         const { thumbnail, photoSize } = this.state;
 
         if (!photoSize) return null;
@@ -80,7 +80,7 @@ class Photo extends React.Component {
                         alt=''
                     />
                 )}
-                <FileProgress file={photoSize.photo} download upload cancelButton />
+                {showProgress && <FileProgress file={photoSize.photo} download upload cancelButton />}
             </div>
         );
     }
@@ -90,7 +90,8 @@ Photo.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     photo: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired,
+    openMedia: PropTypes.func,
+    showProgress: PropTypes.bool,
 
     size: PropTypes.number,
     thumbnailSize: PropTypes.number,
@@ -101,7 +102,8 @@ Photo.propTypes = {
 Photo.defaultProps = {
     size: PHOTO_SIZE,
     thumbnailSize: PHOTO_THUMBNAIL_SIZE,
-    displaySize: PHOTO_DISPLAY_SIZE
+    displaySize: PHOTO_DISPLAY_SIZE,
+    showProgress: true
 };
 
 export default Photo;

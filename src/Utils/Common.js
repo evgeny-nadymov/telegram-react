@@ -94,6 +94,7 @@ function getPhotoSize(sizes) {
 function getSize(sizes, dimension) {
     if (!sizes) return null;
     if (sizes.length === 0) return null;
+    if (dimension === 0) return null;
 
     // let iSize = sizes[2];//.find(x => x.type === 'i');
     // if (iSize){

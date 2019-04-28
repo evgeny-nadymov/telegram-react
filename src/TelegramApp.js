@@ -134,11 +134,13 @@ class TelegramApp extends Component {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
-                const cookies = new Cookies();
-                const register = cookies.get('register');
-
-                if (!register) {
-                    registerServiceWorker();
+                const cookieEnabled = navigator.cookieEnabled;
+                if (cookieEnabled) {
+                    const cookies = new Cookies();
+                    const register = cookies.get('register');
+                    if (!register) {
+                        registerServiceWorker();
+                    }
                 }
             }
         }
