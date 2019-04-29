@@ -364,6 +364,7 @@ class InputBoxControl extends Component {
         if (plainText) {
             event.preventDefault();
             document.execCommand('insertHTML', false, plainText);
+            this.innerHTML = plainText;
             return;
         }
     };
