@@ -518,7 +518,13 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageSticker': {
-            return t('AttachSticker') + caption;
+            const { sticker } = content;
+            let emoji = '';
+            if (sticker && sticker.emoji) {
+                emoji = sticker.emoji;
+            }
+
+            return t('AttachSticker') + (emoji ? ` ${emoji}` : '') + caption;
         }
         case 'messageSupergroupChatCreate': {
             return getServiceMessageContent(message);
@@ -661,7 +667,8 @@ function getMediaTitle(message) {
     return getAuthor(message);
 }
 
-function hasAudio(message) {
+function hasAudio(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
     const { content } = message;
@@ -673,6 +680,7 @@ function hasAudio(message) {
             if (audio) {
                 return true;
             }
+
             break;
         }
         case 'messageText': {
@@ -682,8 +690,41 @@ function hasAudio(message) {
                 if (audio) {
                     return true;
                 }
-                break;
             }
+
+            break;
+        }
+    }
+
+    return false;
+}
+
+function hasVideoNote(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageVideoNote': {
+            const { video_note } = content;
+            if (video_note) {
+                return true;
+            }
+
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { video_note } = web_page;
+                if (video_note) {
+                    return true;
+                }
+            }
+
+            break;
         }
     }
 
@@ -1172,7 +1213,7 @@ function isDeletedMessage(message) {
     return message && message['@type'] === 'deletedMessage';
 }
 
-function getReplyPhoto(chatId, messageId) {
+function getReplyPhotoSize(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;
 
@@ -1180,53 +1221,107 @@ function getReplyPhoto(chatId, messageId) {
     if (!content) return null;
 
     switch (content['@type']) {
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (!animation) return null;
+
+            const { thumbnail } = animation;
+            return thumbnail || null;
+        }
+        case 'messageAudio': {
+            const { audio } = content;
+            if (!audio) return null;
+
+            const { album_cover_thumbnail } = audio;
+            return album_cover_thumbnail || null;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (!document) return null;
+
+            const { thumbnail } = document;
+            return thumbnail || null;
+        }
+        case 'messageGame': {
+            const { game } = content;
+            if (!game) return null;
+
+            const { animation, photo } = game;
+            if (animation) {
+                const { thumbnail } = animation;
+                if (thumbnail) {
+                    return thumbnail;
+                }
+            }
+
+            if (photo) {
+                return getPhotoSize(photo.sizes);
+            }
+
+            return null;
+        }
         case 'messagePhoto': {
             const { photo } = content;
+            if (!photo) return null;
 
-            return photo;
+            return getPhotoSize(photo.sizes);
         }
-        // case 'messageDocument': {
-        //     const { document } = content;
-        //     if (!document) return null;
-        //
-        //     const { thumbnail } = document;
-        //     if (!thumbnail) return null;
-        //
-        //     return {
-        //         '@type': 'photo',
-        //         id: 0,
-        //         sizes: [thumbnail],
-        //         has_stickers: false
-        //     };
-        // }
-        // case 'messageAnimation': {
-        //     const { animation } = content;
-        //     if (!animation) return null;
-        //
-        //     const { thumbnail } = animation;
-        //     if (!thumbnail) return null;
-        //
-        //     return {
-        //         '@type': 'photo',
-        //         id: 0,
-        //         sizes: [thumbnail],
-        //         has_stickers: false
-        //     };
-        // }
-        // case 'messageVideo': {
-        //     const { video } = content;
-        //     if (!video) return null;
-        //
-        //     const { thumbnail } = video;
-        //     if (!thumbnail) return null;
-        //
-        //     return {
-        //         '@type': 'photo',
-        //         id: 0,
-        //         sizes: [thumbnail],
-        //         has_stickers: false
-        //     };
-        // }
+        case 'messageSticker': {
+            const { sticker } = content;
+            if (!sticker) return null;
+
+            const { thumbnail } = sticker;
+            return thumbnail || null;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, audio, document, photo, sticker, video, video_note } = web_page;
+                if (photo) {
+                    return getPhotoSize(photo.sizes);
+                }
+                if (animation) {
+                    const { thumbnail } = animation;
+                    return thumbnail || null;
+                }
+                if (audio) {
+                    const { album_cover_thumbnail } = audio;
+                    return album_cover_thumbnail || null;
+                }
+                if (document) {
+                    const { thumbnail } = document;
+                    return thumbnail || null;
+                }
+                if (sticker) {
+                    const { thumbnail } = sticker;
+                    return thumbnail || null;
+                }
+                if (video) {
+                    const { thumbnail } = video;
+                    return thumbnail || null;
+                }
+                if (video_note) {
+                    const { thumbnail } = video_note;
+                    return thumbnail || null;
+                }
+            }
+
+            break;
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (!video) return null;
+
+            const { thumbnail } = video;
+            return thumbnail || null;
+        }
+        case 'messageVideoNote': {
+            const { video_note } = content;
+            if (!video_note) return null;
+
+            const { thumbnail } = video_note;
+            return thumbnail || null;
+        }
     }
 
     return null;
@@ -1256,7 +1351,8 @@ export {
     isContentOpened,
     getMediaTitle,
     hasAudio,
+    hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhoto
+    getReplyPhotoSize
 };

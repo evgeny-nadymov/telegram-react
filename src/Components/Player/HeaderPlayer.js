@@ -469,11 +469,14 @@ class HeaderPlayer extends React.Component {
 
         const { playbackRate, volume } = PlayerStore;
 
-        player.playbackRate = hasAudio(message) ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate;
+        const { chat_id, id } = message;
+        const audio = hasAudio(chat_id, id);
+
+        player.playbackRate = audio ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate;
         player.volume = volume;
         player.muted = false;
 
-        if (hasAudio(message)) {
+        if (audio) {
             return;
         }
 
@@ -608,13 +611,19 @@ class HeaderPlayer extends React.Component {
         const { classes } = this.props;
         const { playing, message, playlist, src } = this.state;
 
+        let audio = false;
+        if (message) {
+            const { chat_id, id } = message;
+            audio = hasAudio(chat_id, id);
+        }
+
         const title = getMediaTitle(message);
         const dateHint = getDateHint(message);
         const date = getDate(message);
-        const showDate = !hasAudio(message);
-        const showPlaybackRate = !hasAudio(message);
-        const showRepeat = hasAudio(message);
-        const showShuffle = hasAudio(message);
+        const showDate = !audio;
+        const showPlaybackRate = !audio;
+        const showRepeat = audio;
+        const showShuffle = audio;
         const hasPrev = this.hasPrev(message, playlist);
         const hasNext = this.hasNext(message, playlist);
 

@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core';
+import Photo from './Photo';
 import Animation from './Animation';
 import { accentStyles } from '../../Theme';
 import { getFormattedText } from '../../../Utils/Message';
@@ -23,22 +24,6 @@ const styles = theme => ({
 });
 
 class Game extends React.Component {
-    componentDidMount() {
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-    }
-
-    componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-    }
-
-    onClientUpdatePhotoBlob = update => {
-        const { chatId, messageId } = this.props;
-
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.forceUpdate();
-        }
-    };
-
     getContent = () => {
         const { chatId, messageId, game, size, displaySize, openMedia } = this.props;
         if (!game) return null;
@@ -53,7 +38,6 @@ class Game extends React.Component {
         }
 
         if (photo) {
-            let src = '';
             let style = {
                 width: 0,
                 height: 0
@@ -62,20 +46,12 @@ class Game extends React.Component {
             if (photoSize) {
                 const fitPhotoSize = getFitSize(photoSize, displaySize);
                 if (fitPhotoSize) {
-                    const file = photoSize.photo;
-                    const blob = FileStore.getBlob(file.id) || file.blob;
-                    src = FileStore.getBlobUrl(blob);
-
                     style.width = fitPhotoSize.width;
                     style.height = fitPhotoSize.height;
                 }
             }
 
-            return (
-                <div className='game-photo' style={style} onClick={openMedia}>
-                    <img className='photo-image' draggable={false} style={style} src={src} alt='' />
-                </div>
-            );
+            return <Photo chatId={chatId} messageId={messageId} photo={photo} style={style} openMedia={openMedia} />;
         }
 
         return null;

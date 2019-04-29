@@ -1398,6 +1398,193 @@ async function loadReplies(store, chatId, messageIds) {
     loadReplyContents(store, result.messages);
 }
 
+function loadReplyAnimationContent(store, animation, message) {
+    if (!animation) return;
+
+    const { thumbnail: photoSize } = animation;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateAnimationThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyAudioContent(store, audio, message) {
+    if (!audio) return;
+
+    const { album_cover_thumbnail: photoSize } = audio;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateAudioThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyDocumentContent(store, document, message) {
+    if (!document) return;
+
+    const { thumbnail: photoSize } = document;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateDocumentThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyPhotoContent(store, photo, message) {
+    if (!photo) return;
+
+    const { sizes } = photo;
+    if (!sizes) return;
+
+    const photoSize = getPhotoSize(sizes);
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+    );
+}
+
+function loadReplyStickerContent(store, sticker, message) {
+    if (!sticker) return;
+
+    const { thumbnail: photoSize } = sticker;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateStickerThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyVideoContent(store, video, message) {
+    if (!video) return;
+
+    const { thumbnail: photoSize } = video;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateVideoThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyVideoNoteContent(store, videoNote, message) {
+    if (!videoNote) return;
+
+    const { thumbnail: photoSize } = videoNote;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    file = FileStore.get(file.id) || file;
+    if (!file) return;
+
+    const { id, idb_key } = file;
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        idb_key,
+        null,
+        () => FileStore.updateVideoNoteThumbnailBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+    );
+}
+
+function loadReplyGameContent(store, game, message) {
+    if (!game) return;
+
+    const { photo, animation } = game;
+
+    if (animation) {
+        const { thumbnail } = animation;
+        if (thumbnail) {
+            loadReplyAnimationContent(store, animation, message);
+            return;
+        }
+    }
+
+    loadReplyPhotoContent(store, photo, message);
+}
+
 function loadReplyContents(store, messages) {
     for (let i = messages.length - 1; i >= 0; i--) {
         const message = messages[i];
@@ -1408,61 +1595,97 @@ function loadReplyContents(store, messages) {
         const { content } = message;
         if (content) {
             switch (content['@type']) {
+                case 'messageAnimation': {
+                    const { animation } = content;
+
+                    loadReplyAnimationContent(store, animation, message);
+                    break;
+                }
+                case 'messageAudio': {
+                    const { audio } = content;
+
+                    loadReplyAudioContent(store, audio, message);
+                    break;
+                }
+                case 'messageDocument': {
+                    const { document } = content;
+
+                    loadReplyDocumentContent(store, document, message);
+                    break;
+                }
+                case 'messageGame': {
+                    const { game } = content;
+
+                    loadReplyGameContent(store, game, message);
+                    break;
+                }
                 case 'messagePhoto': {
                     const { photo } = content;
-                    if (!photo) break;
 
-                    const { sizes } = photo;
-                    if (!sizes) break;
+                    loadReplyPhotoContent(store, photo, message);
+                    break;
+                }
+                case 'messageSticker': {
+                    const { sticker } = content;
 
-                    const photoSize = getPhotoSize(sizes);
-                    if (!photoSize) break;
+                    loadReplyStickerContent(store, sticker, message);
+                    break;
+                }
+                case 'messageText': {
+                    const { web_page } = content;
+                    if (!web_page) break;
 
-                    let { photo: file } = photoSize;
-                    file = FileStore.get(file.id) || file;
-                    if (!file) break;
+                    const { animation, audio, document, photo, sticker, video, video_note } = web_page;
 
-                    const { id, idb_key } = file;
-                    const blob = FileStore.getBlob(id);
-                    if (blob) break;
+                    if (photo) {
+                        loadReplyPhotoContent(store, photo, message);
+                        break;
+                    }
 
-                    FileStore.getLocalFile(
-                        store,
-                        file,
-                        idb_key,
-                        null,
-                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
-                    );
+                    if (animation) {
+                        loadReplyAnimationContent(store, animation, message);
+                        break;
+                    }
+
+                    if (audio) {
+                        loadReplyAudioContent(store, audio, message);
+                        break;
+                    }
+
+                    if (document) {
+                        loadReplyDocumentContent(store, document, message);
+                        break;
+                    }
+
+                    if (sticker) {
+                        loadReplyStickerContent(store, sticker, message);
+                        break;
+                    }
+
+                    if (video) {
+                        loadReplyVideoContent(store, video, message);
+                        break;
+                    }
+
+                    if (video_note) {
+                        loadReplyVideoNoteContent(store, video_note, message);
+                        break;
+                    }
 
                     break;
                 }
-                // case 'messageAnimation' : {
-                //     const { animation } = content;
-                //     if (!animation) break;
-                //
-                //     const { thumbnail: photoSize } = animation;
-                //     if (!photoSize) break;
-                //
-                //     let { photo: file } = photoSize;
-                //     file = FileStore.get(file.id) || file;
-                //     if (!file) break;
-                //
-                //     const { id, idb_key } = file;
-                //     const blob = FileStore.getBlob(file.id);
-                //     if (!blob) break;
-                //
-                //     FileStore.getLocalFile(
-                //         store,
-                //         file,
-                //         idb_key,
-                //         null,
-                //         () => FileStore.updateAnimationThumbnailBlob(message.chat_id, message.id, id),
-                //         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
-                //     );
-                //
-                //     break;
-                // }
+                case 'messageVideo': {
+                    const { video } = content;
+
+                    loadReplyVideoContent(store, video, message);
+                    break;
+                }
+                case 'messageVideoNote': {
+                    const { video_note } = content;
+
+                    loadReplyVideoNoteContent(store, video_note, message);
+                    break;
+                }
             }
         }
     }
