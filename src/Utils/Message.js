@@ -1235,6 +1235,12 @@ function getReplyPhotoSize(chatId, messageId) {
             const { album_cover_thumbnail } = audio;
             return album_cover_thumbnail || null;
         }
+        case 'messageChatChangePhoto': {
+            const { photo } = content;
+            if (!photo) return null;
+
+            return getPhotoSize(photo.sizes);
+        }
         case 'messageDocument': {
             const { document } = content;
             if (!document) return null;

@@ -1607,6 +1607,12 @@ function loadReplyContents(store, messages) {
                     loadReplyAudioContent(store, audio, message);
                     break;
                 }
+                case 'messageChatChangePhoto': {
+                    const { photo } = content;
+
+                    loadReplyPhotoContent(store, photo, message);
+                    break;
+                }
                 case 'messageDocument': {
                     const { document } = content;
 
@@ -2079,6 +2085,32 @@ function loadMessageContents(store, messages) {
                             }
                         }
                     }
+                    break;
+                }
+                case 'messageChatPhotoChange': {
+                    const { photo } = content;
+                    if (!photo) break;
+
+                    const photoSize = getPhotoSize(photo.sizes);
+                    if (!photoSize) break;
+
+                    const { photo: file } = photoSize;
+                    if (!file) break;
+
+                    const { idb_key, id } = file;
+
+                    const blob = FileStore.get(file.id);
+                    if (blob) break;
+
+                    FileStore.getLocalFile(
+                        store,
+                        file,
+                        idb_key,
+                        null,
+                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+                    );
+
                     break;
                 }
                 case 'messagePhoto': {

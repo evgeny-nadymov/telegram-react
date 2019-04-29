@@ -183,6 +183,12 @@ class FileStore extends EventEmitter {
 
                                         break;
                                     }
+                                    case 'messageChatChangePhoto': {
+                                        const { photo } = obj.content;
+
+                                        this.handlePhoto(store, photo, file, idb_key, arr, obj);
+                                        break;
+                                    }
                                     case 'messagePhoto': {
                                         const { photo } = obj.content;
 
