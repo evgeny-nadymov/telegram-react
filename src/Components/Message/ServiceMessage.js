@@ -38,7 +38,12 @@ class ServiceMessage extends React.Component {
         if (process.env.NODE_ENV !== 'production') {
             const { chatId, messageId } = this.props;
             this.state = {
-                message: MessageStore.get(chatId, messageId)
+                message: MessageStore.get(chatId, messageId),
+                highlighted: false
+            };
+        } else {
+            this.state = {
+                highlighted: false
             };
         }
     }

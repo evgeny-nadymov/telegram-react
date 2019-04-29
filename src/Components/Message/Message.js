@@ -58,7 +58,8 @@ class Message extends Component {
             const { chatId, messageId } = this.props;
             this.state = {
                 message: MessageStore.get(chatId, messageId),
-                selected: false
+                selected: false,
+                highlighted: false
             };
         } else {
             this.state = {
