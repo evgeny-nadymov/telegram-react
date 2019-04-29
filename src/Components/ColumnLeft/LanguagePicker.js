@@ -33,9 +33,12 @@ class LanguagePicker extends React.Component {
     constructor(props) {
         super(props);
 
+        const { i18n } = props;
+        const language = i18n ? i18n.language : null;
+
         this.state = {
             open: false,
-            language: props.lng || 'en'
+            language: language || 'en'
         };
     }
 

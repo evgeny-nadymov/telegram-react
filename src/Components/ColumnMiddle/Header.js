@@ -65,7 +65,7 @@ class Header extends Component {
             return true;
         }
 
-        if (nextProps.lng !== this.props.lng) {
+        if (nextProps.t !== this.props.t) {
             return true;
         }
 

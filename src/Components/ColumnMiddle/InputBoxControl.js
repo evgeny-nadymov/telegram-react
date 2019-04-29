@@ -62,14 +62,14 @@ class InputBoxControl extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, lng } = this.props;
+        const { theme, t } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextProps.lng !== lng) {
+        if (nextProps.t !== t) {
             return true;
         }
 
