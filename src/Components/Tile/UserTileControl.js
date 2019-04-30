@@ -116,10 +116,11 @@ class UserTileControl extends Component {
         }
     };
 
-    handleSelect = () => {
+    handleSelect = event => {
         const { userId, onSelect } = this.props;
         if (!onSelect) return;
 
+        event.stopPropagation();
         onSelect(userId);
     };
 

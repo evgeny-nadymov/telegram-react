@@ -8,11 +8,16 @@
 .reply {
     margin-bottom: 5px;
     margin-top: 2px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
     background: transparent;
     cursor: pointer;
+}
+
+.reply-wrapper {
+    pointer-events: none;
+    flex-direction: row;
+    align-items: center;
+    display: flex;
+    width: 100%;
 }
 
 .reply-border {

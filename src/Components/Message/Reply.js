@@ -67,11 +67,15 @@ class Reply extends React.Component {
 
         return (
             <div className='reply' onMouseDown={this.handleOpen} onClick={this.handleClick}>
-                <div className={classNames('reply-border', classes.accentBackgroundLight)} />
-                {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
-                <div className='reply-content'>
-                    {title && <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>}
-                    <div className='reply-content-subtitle'>{content}</div>
+                <div className='reply-wrapper'>
+                    <div className={classNames('reply-border', classes.accentBackgroundLight)} />
+                    {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
+                    <div className='reply-content'>
+                        {title && (
+                            <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>
+                        )}
+                        <div className='reply-content-subtitle'>{content}</div>
+                    </div>
                 </div>
             </div>
         );

@@ -194,13 +194,14 @@ class Message extends Component {
     };
 
     handleSelection = () => {
+        if (!this.mouseDown) return;
+
         const selection = window.getSelection().toString();
         if (selection) return;
 
         const { chatId, messageId } = this.props;
 
         const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
-
         selectMessage(chatId, messageId, selected);
     };
 
@@ -249,6 +250,18 @@ class Message extends Component {
         this.setState({ highlighted: false });
     };
 
+    handleMouseDown = () => {
+        this.mouseDown = true;
+    };
+
+    handleMouseOver = () => {
+        this.mouseDown = false;
+    };
+
+    handleMouseOut = () => {
+        this.mouseOut = false;
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const { selected, highlighted } = this.state;
@@ -281,7 +294,13 @@ class Message extends Component {
         );
 
         return (
-            <div className={messageClassName} onClick={this.handleSelection} onAnimationEnd={this.handleAnimationEnd}>
+            <div
+                className={messageClassName}
+                onMouseOver={this.handleMouseOver}
+                onMouseOut={this.handleMouseOut}
+                onMouseDown={this.handleMouseDown}
+                onClick={this.handleSelection}
+                onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <i className='message-select-tick' />

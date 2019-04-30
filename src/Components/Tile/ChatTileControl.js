@@ -80,7 +80,6 @@ class ChatTileControl extends Component {
         if (!onSelect) return;
 
         event.stopPropagation();
-
         onSelect(chatId);
     };
 
