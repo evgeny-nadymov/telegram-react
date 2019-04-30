@@ -236,8 +236,19 @@ class ForwardDialog extends React.Component {
         return innerText;
     };
 
-    handleSearch = () => {
+    handleSearchKeyDown = event => {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+        }
+    };
+
+    handleSearchKeyUp = () => {
         const { chatIds, savedMessages } = this.state;
+
+        const innerHTML = this.searchRef.current.innerHTML;
+        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
+            this.searchRef.current.innerHTML = '';
+        }
 
         const innerText = this.getInnerText(this.searchRef.current).trim();
         if (!innerText) {
@@ -260,6 +271,29 @@ class ForwardDialog extends React.Component {
         );
 
         this.setState({ searchText: innerText, searchResults: searchResults });
+    };
+
+    handleSearchPaste = event => {
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            document.execCommand('insertHTML', false, plainText);
+        }
+    };
+
+    handleMessageKeyUp = () => {
+        const innerHTML = this.messageRef.current.innerHTML;
+        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
+            this.messageRef.current.innerHTML = '';
+        }
+    };
+
+    handleMessagePaste = event => {
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            document.execCommand('insertHTML', false, plainText);
+        }
     };
 
     hasSearchText = (chatId, searchText) => {
@@ -335,7 +369,9 @@ class ForwardDialog extends React.Component {
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Search')}
-                    onKeyUp={this.handleSearch}
+                    onKeyDown={this.handleSearchKeyDown}
+                    onKeyUp={this.handleSearchKeyUp}
+                    onPaste={this.handleSearchPaste}
                 />
                 <div className={classNames(classes.borderColor, 'forward-dialog-content')}>
                     <div className='forward-dialog-list'>{chats}</div>
@@ -350,6 +386,8 @@ class ForwardDialog extends React.Component {
                         contentEditable
                         suppressContentEditableWarning
                         placeholder={t('ShareComment')}
+                        onKeyUp={this.handleMessageKeyUp}
+                        onPaste={this.handleMessagePaste}
                     />
                 )}
                 <DialogActions>

@@ -94,19 +94,29 @@ class DialogsHeader extends React.Component {
         onSearch(!openSearch);
     };
 
-    handleKeyDown = () => {};
+    handleKeyDown = event => {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+        }
+    };
 
-    handleKeyUp = () => {};
-
-    handleInput = () => {
+    handleKeyUp = () => {
         const innerText = this.searchInput.current.innerText;
         const innerHTML = this.searchInput.current.innerHTML;
 
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
+        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
             this.searchInput.current.innerHTML = '';
         }
 
         ApplicationStore.emit('clientUpdateSearchText', { text: innerText });
+    };
+
+    handlePaste = event => {
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            document.execCommand('insertHTML', false, plainText);
+        }
     };
 
     render() {
@@ -152,7 +162,7 @@ class DialogsHeader extends React.Component {
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
                                 onKeyUp={this.handleKeyUp}
-                                onInput={this.handleInput}
+                                onPaste={this.handlePaste}
                             />
                         </div>
                     </>

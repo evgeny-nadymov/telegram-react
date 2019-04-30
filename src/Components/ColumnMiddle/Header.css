@@ -128,17 +128,18 @@
 }
 
 #header-search-inputbox::before {
-    content: attr(placeholder);
+    /*content: attr(placeholder);*/
     color: #8e9396;
     pointer-events: none;
     transform: translateX(20px);
     will-change: transform;
     opacity: 0;
-    position: absolute;
+    /*position: absolute;*/
     transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
 #header-search-inputbox:empty::before {
+    content: attr(placeholder);
     transform: translateX(0px);
     opacity: 0.75;
 }
