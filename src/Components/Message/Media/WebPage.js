@@ -17,11 +17,10 @@ import Document from './Document';
 import VoiceNote from './VoiceNote';
 import VideoNote from './VideoNote';
 import Sticker from './Sticker';
-import { getFitSize, getSize } from '../../../Utils/Common';
+import { getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
 import { getSrc } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_DISPLAY_SMALL_SIZE, PHOTO_SIZE } from '../../../Constants';
-import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import './WebPage.css';
 
@@ -30,22 +29,6 @@ const styles = theme => ({
 });
 
 class WebPage extends React.Component {
-    componentDidMount() {
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-    }
-
-    componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-    }
-
-    onClientUpdatePhotoBlob = update => {
-        const { chatId, messageId } = this.props;
-
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.forceUpdate();
-        }
-    };
-
     getContent = () => {
         const { classes, chatId, messageId, size, displaySize, displaySmallSize, openMedia } = this.props;
 
