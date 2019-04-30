@@ -114,13 +114,13 @@ function getPassportElementTypeString(type) {
     return '';
 }
 
-function getMessageAuthor(message) {
+function getMessageAuthor(message, openUser) {
     if (!message) return null;
 
     const { chat_id, sender_user_id } = message;
 
     if (sender_user_id !== 0) {
-        return <MessageAuthor userId={sender_user_id} openUser />;
+        return <MessageAuthor userId={sender_user_id} openUser={openUser} />;
     }
 
     const chat = ChatStore.get(chat_id);
@@ -450,7 +450,7 @@ function getServiceMessageContent(message, openUser = false) {
             return 'Payment successful';
         }
         case 'messagePinMessage': {
-            const author = getMessageAuthor(message);
+            const author = getMessageAuthor(message, openUser);
             const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
             if (!pinnedMessage || !pinnedMessage.content) {
                 return (
