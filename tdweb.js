@@ -91,18 +91,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(12);
+module.exports = __webpack_require__(13);
 
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = false;
+
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
@@ -144,7 +152,7 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 function _classCallCheck(instance, Constructor) {
@@ -156,7 +164,7 @@ function _classCallCheck(instance, Constructor) {
 module.exports = _classCallCheck;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 function _defineProperties(target, props) {
@@ -178,7 +186,7 @@ function _createClass(Constructor, protoProps, staticProps) {
 module.exports = _createClass;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 function _typeof2(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof2 = function _typeof2(obj) { return typeof obj; }; } else { _typeof2 = function _typeof2(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof2(obj); }
@@ -200,14 +208,14 @@ function _typeof(obj) {
 module.exports = _typeof;
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayWithHoles = __webpack_require__(9);
+var arrayWithHoles = __webpack_require__(10);
 
-var iterableToArrayLimit = __webpack_require__(10);
+var iterableToArrayLimit = __webpack_require__(11);
 
-var nonIterableRest = __webpack_require__(11);
+var nonIterableRest = __webpack_require__(12);
 
 function _slicedToArray(arr, i) {
   return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
@@ -216,19 +224,19 @@ function _slicedToArray(arr, i) {
 module.exports = _slicedToArray;
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = function() {
-  return new Worker(__webpack_require__.p + "8a0dda0da6e695f9b779.worker.js");
-};
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var rng = __webpack_require__(16);
-var bytesToUuid = __webpack_require__(17);
+module.exports = function() {
+  return new Worker(__webpack_require__.p + "3f008fc55643eb59e34b.worker.js");
+};
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var rng = __webpack_require__(17);
+var bytesToUuid = __webpack_require__(18);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -259,14 +267,14 @@ module.exports = v4;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(18);
+module.exports = __webpack_require__(19);
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports) {
 
 function _arrayWithHoles(arr) {
@@ -276,7 +284,7 @@ function _arrayWithHoles(arr) {
 module.exports = _arrayWithHoles;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports) {
 
 function _iterableToArrayLimit(arr, i) {
@@ -308,7 +316,7 @@ function _iterableToArrayLimit(arr, i) {
 module.exports = _iterableToArrayLimit;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports) {
 
 function _nonIterableRest() {
@@ -318,7 +326,7 @@ function _nonIterableRest() {
 module.exports = _nonIterableRest;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -1050,7 +1058,7 @@ try {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var require;var require;/*!
@@ -3851,10 +3859,10 @@ module.exports = localforage_js;
 },{"3":3}]},{},[4])(4)
 });
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var g;
@@ -3880,114 +3888,13 @@ module.exports = g;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
-// from https://gist.github.com/inexorabletash/52f437d1451d12145264
-(function (global) {
-  var channels = [];
-
-  function BroadcastChannel(channel) {
-    var $this = this;
-    channel = String(channel);
-    var id = '$BroadcastChannel$' + channel + '$';
-    channels[id] = channels[id] || [];
-    channels[id].push(this);
-    this._name = channel;
-    this._id = id;
-    this._closed = false;
-    this._mc = new MessageChannel();
-
-    this._mc.port1.start();
-
-    this._mc.port2.start();
-
-    global.addEventListener('storage', function (e) {
-      if (e.storageArea !== global.localStorage) return;
-      if (e.newValue === null) return;
-      if (e.key.substring(0, id.length) !== id) return;
-      var data = JSON.parse(e.newValue);
-
-      $this._mc.port2.postMessage(data);
-    });
-  }
-
-  BroadcastChannel.prototype = {
-    // BroadcastChannel API
-    get name() {
-      return this._name;
-    },
-
-    postMessage: function postMessage(message) {
-      var $this = this;
-
-      if (this._closed) {
-        var e = new Error();
-        e.name = 'InvalidStateError';
-        throw e;
-      }
-
-      var value = JSON.stringify(message); // Broadcast to other contexts via storage events...
-
-      var key = this._id + String(Date.now()) + '$' + String(Math.random());
-      global.localStorage.setItem(key, value);
-      setTimeout(function () {
-        global.localStorage.removeItem(key);
-      }, 500); // Broadcast to current context via ports
-
-      channels[this._id].forEach(function (bc) {
-        if (bc === $this) return;
-
-        bc._mc.port2.postMessage(JSON.parse(value));
-      });
-    },
-    close: function close() {
-      if (this._closed) return;
-      this._closed = true;
-
-      this._mc.port1.close();
-
-      this._mc.port2.close();
-
-      var index = channels[this._id].indexOf(this);
-
-      channels[this._id].splice(index, 1);
-    },
-
-    // EventTarget API
-    get onmessage() {
-      return this._mc.port1.onmessage;
-    },
-
-    set onmessage(value) {
-      this._mc.port1.onmessage = value;
-    },
-
-    addEventListener: function addEventListener(type, listener
-    /*, useCapture*/
-    ) {
-      return this._mc.port1.addEventListener.apply(this._mc.port1, arguments);
-    },
-    removeEventListener: function removeEventListener(type, listener
-    /*, useCapture*/
-    ) {
-      return this._mc.port1.removeEventListener.apply(this._mc.port1, arguments);
-    },
-    dispatchEvent: function dispatchEvent(event) {
-      return this._mc.port1.dispatchEvent.apply(this._mc.port1, arguments);
-    }
-  };
-
-  if (global.BroadcastChannel) {
-    console.log("already has native BroadcastChannel");
-  } else {
-    global.BroadcastChannel = BroadcastChannel;
-    console.log("use polyfill for BroadcastChannel");
-  }
-})(window.top);
+/* (ignored) */
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 // Unique ID creation requires a high quality random # generator.  In the
@@ -4027,7 +3934,7 @@ if (getRandomValues) {
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
 /**
@@ -4057,18 +3964,18 @@ module.exports = bytesToUuid;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
-var helpers_typeof = __webpack_require__(4);
+var helpers_typeof = __webpack_require__(5);
 var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
-var slicedToArray = __webpack_require__(5);
+var slicedToArray = __webpack_require__(6);
 var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
@@ -4076,29 +3983,913 @@ var regenerator = __webpack_require__(0);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(1);
+var asyncToGenerator = __webpack_require__(2);
 var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
-var classCallCheck = __webpack_require__(2);
+var classCallCheck = __webpack_require__(3);
 var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(3);
+var createClass = __webpack_require__(4);
 var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 
 // EXTERNAL MODULE: ./src/worker.js
-var worker = __webpack_require__(6);
+var worker = __webpack_require__(7);
 var worker_default = /*#__PURE__*/__webpack_require__.n(worker);
 
 // EXTERNAL MODULE: ./node_modules/localforage/dist/localforage.js
-var localforage = __webpack_require__(13);
+var localforage = __webpack_require__(14);
 
-// EXTERNAL MODULE: ./src/third_party/broadcastchannel.js
-var broadcastchannel = __webpack_require__(15);
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/util.js
+/**
+ * returns true if the given object is a promise
+ */
+function isPromise(obj) {
+  if (obj && typeof obj.then === 'function') {
+    return true;
+  } else {
+    return false;
+  }
+}
+function sleep(time) {
+  if (!time) time = 0;
+  return new Promise(function (res) {
+    return setTimeout(res, time);
+  });
+}
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+/**
+ * https://stackoverflow.com/a/1349426/3443137
+ */
 
+function randomToken(length) {
+  if (!length) length = 5;
+  var text = '';
+  var possible = 'abcdefghijklmnopqrstuvwxzy0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+
+  return text;
+}
+var lastMs = 0;
+var additional = 0;
+/**
+ * returns the current time in micro-seconds,
+ * WARNING: This is a pseudo-function
+ * Performance.now is not reliable in webworkers, so we just make sure to never return the same time.
+ * This is enough in browsers, and this function will not be used in nodejs.
+ * The main reason for this hack is to ensure that BroadcastChannel behaves equal to production when it is used in fast-running unit tests.
+ */
+
+function microSeconds() {
+  var ms = new Date().getTime();
+
+  if (ms === lastMs) {
+    additional++;
+    return ms * 1000 + additional;
+  } else {
+    lastMs = ms;
+    additional = 0;
+    return ms * 1000;
+  }
+}
+// EXTERNAL MODULE: ./node_modules/detect-node/browser.js
+var browser = __webpack_require__(1);
+var browser_default = /*#__PURE__*/__webpack_require__.n(browser);
+
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/methods/native.js
+
+
+var native_microSeconds = microSeconds;
+var type = 'native';
+function create(channelName) {
+  var state = {
+    messagesCallback: null,
+    bc: new BroadcastChannel(channelName),
+    subFns: [] // subscriberFunctions
+
+  };
+
+  state.bc.onmessage = function (msg) {
+    if (state.messagesCallback) {
+      state.messagesCallback(msg.data);
+    }
+  };
+
+  return state;
+}
+function native_close(channelState) {
+  channelState.bc.close();
+  channelState.subFns = [];
+}
+function postMessage(channelState, messageJson) {
+  channelState.bc.postMessage(messageJson, false);
+}
+function onMessage(channelState, fn, time) {
+  channelState.messagesCallbackTime = time;
+  channelState.messagesCallback = fn;
+}
+function canBeUsed() {
+  /**
+   * in the electron-renderer, isNode will be true even if we are in browser-context
+   * so we also check if window is undefined
+   */
+  if (browser_default.a && typeof window === 'undefined') return false;
+
+  if (typeof BroadcastChannel === 'function') {
+    if (BroadcastChannel._pubkey) {
+      throw new Error('BroadcastChannel: Do not overwrite window.BroadcastChannel with this module, this is not a polyfill');
+    }
+
+    return true;
+  } else return false;
+}
+function averageResponseTime() {
+  return 100;
+}
+/* harmony default export */ var methods_native = ({
+  create: create,
+  close: native_close,
+  onMessage: onMessage,
+  postMessage: postMessage,
+  canBeUsed: canBeUsed,
+  type: type,
+  averageResponseTime: averageResponseTime,
+  microSeconds: native_microSeconds
+});
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/oblivious-set.js
+/**
+ *
+ *
+ */
+var ObliviousSet = function ObliviousSet(ttl) {
+  this.ttl = ttl;
+  this.set = new Set();
+  this.timeMap = new Map();
+  this.has = this.set.has.bind(this.set);
+};
+
+ObliviousSet.prototype = {
+  add: function add(value) {
+    this.timeMap.set(value, oblivious_set_now());
+    this.set.add(value);
+
+    _removeTooOldValues(this);
+  },
+  clear: function clear() {
+    this.set.clear();
+    this.timeMap.clear();
+  }
+};
+function _removeTooOldValues(obliviousSet) {
+  var olderThen = oblivious_set_now() - obliviousSet.ttl;
+  var iterator = obliviousSet.set[Symbol.iterator]();
+
+  while (true) {
+    var value = iterator.next().value;
+    if (!value) return; // no more elements
+
+    var time = obliviousSet.timeMap.get(value);
+
+    if (time < olderThen) {
+      obliviousSet.timeMap["delete"](value);
+      obliviousSet.set["delete"](value);
+    } else {
+      // we reached a value that is not old enough
+      return;
+    }
+  }
+}
+
+function oblivious_set_now() {
+  return new Date().getTime();
+}
+
+/* harmony default export */ var oblivious_set = (ObliviousSet);
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/options.js
+function fillOptionsWithDefaults(options) {
+  if (!options) options = {};
+  options = JSON.parse(JSON.stringify(options)); // main
+
+  if (typeof options.webWorkerSupport === 'undefined') options.webWorkerSupport = true; // indexed-db
+
+  if (!options.idb) options.idb = {}; //  after this time the messages get deleted
+
+  if (!options.idb.ttl) options.idb.ttl = 1000 * 45;
+  if (!options.idb.fallbackInterval) options.idb.fallbackInterval = 150; // localstorage
+
+  if (!options.localstorage) options.localstorage = {};
+  if (!options.localstorage.removeTimeout) options.localstorage.removeTimeout = 1000 * 60; // node
+
+  if (!options.node) options.node = {};
+  if (!options.node.ttl) options.node.ttl = 1000 * 60 * 2; // 2 minutes;
+
+  if (typeof options.node.useFastPath === 'undefined') options.node.useFastPath = true;
+  return options;
+}
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/methods/indexed-db.js
+/**
+ * this method uses indexeddb to store the messages
+ * There is currently no observerAPI for idb
+ * @link https://github.com/w3c/IndexedDB/issues/51
+ */
+
+
+var indexed_db_microSeconds = microSeconds;
+
+
+var DB_PREFIX = 'pubkey.broadcast-channel-0-';
+var OBJECT_STORE_ID = 'messages';
+var indexed_db_type = 'idb';
+function getIdb() {
+  if (typeof indexedDB !== 'undefined') return indexedDB;
+  if (typeof window.mozIndexedDB !== 'undefined') return window.mozIndexedDB;
+  if (typeof window.webkitIndexedDB !== 'undefined') return window.webkitIndexedDB;
+  if (typeof window.msIndexedDB !== 'undefined') return window.msIndexedDB;
+  return false;
+}
+function createDatabase(channelName) {
+  var IndexedDB = getIdb(); // create table
+
+  var dbName = DB_PREFIX + channelName;
+  var openRequest = IndexedDB.open(dbName, 1);
+
+  openRequest.onupgradeneeded = function (ev) {
+    var db = ev.target.result;
+    db.createObjectStore(OBJECT_STORE_ID, {
+      keyPath: 'id',
+      autoIncrement: true
+    });
+  };
+
+  var dbPromise = new Promise(function (res, rej) {
+    openRequest.onerror = function (ev) {
+      return rej(ev);
+    };
+
+    openRequest.onsuccess = function () {
+      res(openRequest.result);
+    };
+  });
+  return dbPromise;
+}
+/**
+ * writes the new message to the database
+ * so other readers can find it
+ */
+
+function writeMessage(db, readerUuid, messageJson) {
+  var time = new Date().getTime();
+  var writeObject = {
+    uuid: readerUuid,
+    time: time,
+    data: messageJson
+  };
+  var transaction = db.transaction([OBJECT_STORE_ID], 'readwrite');
+  return new Promise(function (res, rej) {
+    transaction.oncomplete = function () {
+      return res();
+    };
+
+    transaction.onerror = function (ev) {
+      return rej(ev);
+    };
+
+    var objectStore = transaction.objectStore(OBJECT_STORE_ID);
+    objectStore.add(writeObject);
+  });
+}
+function getAllMessages(db) {
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+  return new Promise(function (res) {
+    objectStore.openCursor().onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        ret.push(cursor.value); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
+
+        cursor["continue"]();
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+function getMessagesHigherThen(db, lastCursorId) {
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+  var keyRangeValue = IDBKeyRange.bound(lastCursorId + 1, Infinity);
+  return new Promise(function (res) {
+    objectStore.openCursor(keyRangeValue).onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        ret.push(cursor.value); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
+
+        cursor["continue"]();
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+function removeMessageById(db, id) {
+  var request = db.transaction([OBJECT_STORE_ID], 'readwrite').objectStore(OBJECT_STORE_ID)["delete"](id);
+  return new Promise(function (res) {
+    request.onsuccess = function () {
+      return res();
+    };
+  });
+}
+function getOldMessages(db, ttl) {
+  var olderThen = new Date().getTime() - ttl;
+  var objectStore = db.transaction(OBJECT_STORE_ID).objectStore(OBJECT_STORE_ID);
+  var ret = [];
+  return new Promise(function (res) {
+    objectStore.openCursor().onsuccess = function (ev) {
+      var cursor = ev.target.result;
+
+      if (cursor) {
+        var msgObk = cursor.value;
+
+        if (msgObk.time < olderThen) {
+          ret.push(msgObk); //alert("Name for SSN " + cursor.key + " is " + cursor.value.name);
+
+          cursor["continue"]();
+        } else {
+          // no more old messages,
+          res(ret);
+          return;
+        }
+      } else {
+        res(ret);
+      }
+    };
+  });
+}
+function cleanOldMessages(db, ttl) {
+  return getOldMessages(db, ttl).then(function (tooOld) {
+    return Promise.all(tooOld.map(function (msgObj) {
+      return removeMessageById(db, msgObj.id);
+    }));
+  });
+}
+function indexed_db_create(channelName, options) {
+  options = fillOptionsWithDefaults(options);
+  return createDatabase(channelName).then(function (db) {
+    var state = {
+      closed: false,
+      lastCursorId: 0,
+      channelName: channelName,
+      options: options,
+      uuid: randomToken(10),
+
+      /**
+       * emittedMessagesIds
+       * contains all messages that have been emitted before
+       * @type {ObliviousSet}
+       */
+      eMIs: new oblivious_set(options.idb.ttl * 2),
+      // ensures we do not read messages in parrallel
+      writeBlockPromise: Promise.resolve(),
+      messagesCallback: null,
+      readQueuePromises: [],
+      db: db
+    };
+    /**
+     * if service-workers are used,
+     * we have no 'storage'-event if they post a message,
+     * therefore we also have to set an interval
+     */
+
+    _readLoop(state);
+
+    return state;
+  });
+}
+
+function _readLoop(state) {
+  if (state.closed) return;
+  return readNewMessages(state).then(function () {
+    return sleep(state.options.idb.fallbackInterval);
+  }).then(function () {
+    return _readLoop(state);
+  });
+}
+
+function _filterMessage(msgObj, state) {
+  if (msgObj.uuid === state.uuid) return false; // send by own
+
+  if (state.eMIs.has(msgObj.id)) return false; // already emitted
+
+  if (msgObj.data.time < state.messagesCallbackTime) return false; // older then onMessageCallback
+
+  return true;
+}
+/**
+ * reads all new messages from the database and emits them
+ */
+
+
+function readNewMessages(state) {
+  // channel already closed
+  if (state.closed) return Promise.resolve(); // if no one is listening, we do not need to scan for new messages
+
+  if (!state.messagesCallback) return Promise.resolve();
+  return getMessagesHigherThen(state.db, state.lastCursorId).then(function (newerMessages) {
+    var useMessages = newerMessages.map(function (msgObj) {
+      if (msgObj.id > state.lastCursorId) {
+        state.lastCursorId = msgObj.id;
+      }
+
+      return msgObj;
+    }).filter(function (msgObj) {
+      return _filterMessage(msgObj, state);
+    }).sort(function (msgObjA, msgObjB) {
+      return msgObjA.time - msgObjB.time;
+    }); // sort by time
+
+    useMessages.forEach(function (msgObj) {
+      if (state.messagesCallback) {
+        state.eMIs.add(msgObj.id);
+        state.messagesCallback(msgObj.data);
+      }
+    });
+    return Promise.resolve();
+  });
+}
+
+function indexed_db_close(channelState) {
+  channelState.closed = true;
+  channelState.db.close();
+}
+function indexed_db_postMessage(channelState, messageJson) {
+  channelState.writeBlockPromise = channelState.writeBlockPromise.then(function () {
+    return writeMessage(channelState.db, channelState.uuid, messageJson);
+  }).then(function () {
+    if (randomInt(0, 10) === 0) {
+      /* await (do not await) */
+      cleanOldMessages(channelState.db, channelState.options.idb.ttl);
+    }
+  });
+  return channelState.writeBlockPromise;
+}
+function indexed_db_onMessage(channelState, fn, time) {
+  channelState.messagesCallbackTime = time;
+  channelState.messagesCallback = fn;
+  readNewMessages(channelState);
+}
+function indexed_db_canBeUsed() {
+  if (browser_default.a) return false;
+  var idb = getIdb();
+  if (!idb) return false;
+  return true;
+}
+function indexed_db_averageResponseTime(options) {
+  return options.idb.fallbackInterval * 2;
+}
+/* harmony default export */ var indexed_db = ({
+  create: indexed_db_create,
+  close: indexed_db_close,
+  onMessage: indexed_db_onMessage,
+  postMessage: indexed_db_postMessage,
+  canBeUsed: indexed_db_canBeUsed,
+  type: indexed_db_type,
+  averageResponseTime: indexed_db_averageResponseTime,
+  microSeconds: indexed_db_microSeconds
+});
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/methods/localstorage.js
+/**
+ * A localStorage-only method which uses localstorage and its 'storage'-event
+ * This does not work inside of webworkers because they have no access to locastorage
+ * This is basically implemented to support IE9 or your grandmothers toaster.
+ * @link https://caniuse.com/#feat=namevalue-storage
+ * @link https://caniuse.com/#feat=indexeddb
+ */
+
+
+
+
+var localstorage_microSeconds = microSeconds;
+var KEY_PREFIX = 'pubkey.broadcastChannel-';
+var localstorage_type = 'localstorage';
+/**
+ * copied from crosstab
+ * @link https://github.com/tejacques/crosstab/blob/master/src/crosstab.js#L32
+ */
+
+function getLocalStorage() {
+  var localStorage;
+  if (typeof window === 'undefined') return null;
+
+  try {
+    localStorage = window.localStorage;
+    localStorage = window['ie8-eventlistener/storage'] || window.localStorage;
+  } catch (e) {// New versions of Firefox throw a Security exception
+    // if cookies are disabled. See
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1028153
+  }
+
+  return localStorage;
+}
+function storageKey(channelName) {
+  return KEY_PREFIX + channelName;
+}
+/**
+* writes the new message to the storage
+* and fires the storage-event so other readers can find it
+*/
+
+function localstorage_postMessage(channelState, messageJson) {
+  return new Promise(function (res) {
+    sleep().then(function () {
+      var key = storageKey(channelState.channelName);
+      var writeObj = {
+        token: randomToken(10),
+        time: new Date().getTime(),
+        data: messageJson,
+        uuid: channelState.uuid
+      };
+      var value = JSON.stringify(writeObj);
+      localStorage.setItem(key, value);
+      /**
+       * StorageEvent does not fire the 'storage' event
+       * in the window that changes the state of the local storage.
+       * So we fire it manually
+       */
+
+      var ev = document.createEvent('Event');
+      ev.initEvent('storage', true, true);
+      ev.key = key;
+      ev.newValue = value;
+      window.dispatchEvent(ev);
+      res();
+    });
+  });
+}
+function addStorageEventListener(channelName, fn) {
+  var key = storageKey(channelName);
+
+  var listener = function listener(ev) {
+    if (ev.key === key) {
+      fn(JSON.parse(ev.newValue));
+    }
+  };
+
+  window.addEventListener('storage', listener);
+  return listener;
+}
+function removeStorageEventListener(listener) {
+  window.removeEventListener('storage', listener);
+}
+function localstorage_create(channelName, options) {
+  options = fillOptionsWithDefaults(options);
+
+  if (!localstorage_canBeUsed()) {
+    throw new Error('BroadcastChannel: localstorage cannot be used');
+  }
+
+  var uuid = randomToken(10);
+  /**
+   * eMIs
+   * contains all messages that have been emitted before
+   * @type {ObliviousSet}
+   */
+
+  var eMIs = new oblivious_set(options.localstorage.removeTimeout);
+  var state = {
+    channelName: channelName,
+    uuid: uuid,
+    eMIs: eMIs // emittedMessagesIds
+
+  };
+  state.listener = addStorageEventListener(channelName, function (msgObj) {
+    if (!state.messagesCallback) return; // no listener
+
+    if (msgObj.uuid === uuid) return; // own message
+
+    if (!msgObj.token || eMIs.has(msgObj.token)) return; // already emitted
+
+    if (msgObj.data.time && msgObj.data.time < state.messagesCallbackTime) return; // too old
+
+    eMIs.add(msgObj.token);
+    state.messagesCallback(msgObj.data);
+  });
+  return state;
+}
+function localstorage_close(channelState) {
+  removeStorageEventListener(channelState.listener);
+}
+function localstorage_onMessage(channelState, fn, time) {
+  channelState.messagesCallbackTime = time;
+  channelState.messagesCallback = fn;
+}
+function localstorage_canBeUsed() {
+  if (browser_default.a) return false;
+  var ls = getLocalStorage();
+  if (!ls) return false;
+  return true;
+}
+function localstorage_averageResponseTime() {
+  return 120;
+}
+/* harmony default export */ var localstorage = ({
+  create: localstorage_create,
+  close: localstorage_close,
+  onMessage: localstorage_onMessage,
+  postMessage: localstorage_postMessage,
+  canBeUsed: localstorage_canBeUsed,
+  type: localstorage_type,
+  averageResponseTime: localstorage_averageResponseTime,
+  microSeconds: localstorage_microSeconds
+});
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/method-chooser.js
+var require;
+
+
+ // order is important
+
+var METHODS = [methods_native, // fastest
+indexed_db, localstorage];
+var REQUIRE_FUN = require;
+/**
+ * The NodeMethod is loaded lazy
+ * so it will not get bundled in browser-builds
+ */
+
+if (browser_default.a) {
+  /**
+   * we use the non-transpiled code for nodejs
+   * because it runs faster
+   */
+  var NodeMethod = __webpack_require__(16);
+  /**
+   * this will be false for webpackbuilds
+   * which will shim the node-method with an empty object {}
+   */
+
+  if (typeof NodeMethod.canBeUsed === 'function') {
+    METHODS.push(NodeMethod);
+  }
+}
+
+function chooseMethod(options) {
+  // directly chosen
+  if (options.type) {
+    var ret = METHODS.find(function (m) {
+      return m.type === options.type;
+    });
+    if (!ret) throw new Error('method-type ' + options.type + ' not found');else return ret;
+  }
+
+  var chooseMethods = METHODS;
+
+  if (!options.webWorkerSupport && !browser_default.a) {
+    // prefer localstorage over idb when no webworker-support needed
+    chooseMethods = METHODS.filter(function (m) {
+      return m.type !== 'idb';
+    });
+  }
+
+  var useMethod = chooseMethods.find(function (method) {
+    return method.canBeUsed();
+  });
+  if (!useMethod) throw new Error('No useable methode found:' + JSON.stringify(METHODS.map(function (m) {
+    return m.type;
+  })));else return useMethod;
+}
+// CONCATENATED MODULE: ./node_modules/broadcast-channel/dist/es/index.js
+
+
+
+
+var es_BroadcastChannel = function BroadcastChannel(name, options) {
+  this.name = name;
+  this.options = fillOptionsWithDefaults(options);
+  this.method = chooseMethod(this.options); // isListening
+
+  this._iL = false;
+  /**
+   * _onMessageListener
+   * setting onmessage twice,
+   * will overwrite the first listener
+   */
+
+  this._onML = null;
+  /**
+   * _addEventListeners
+   */
+
+  this._addEL = {
+    message: [],
+    internal: []
+  };
+  /**
+   * _beforeClose
+   * array of promises that will be awaited
+   * before the channel is closed
+   */
+
+  this._befC = [];
+  /**
+   * _preparePromise
+   */
+
+  this._prepP = null;
+
+  _prepareChannel(this);
+}; // STATICS
+
+/**
+ * used to identify if someone overwrites
+ * window.BroadcastChannel with this
+ * See methods/native.js
+ */
+
+
+es_BroadcastChannel._pubkey = true;
+/**
+ * clears the tmp-folder if is node
+ * @return {Promise<boolean>} true if has run, false if not node
+ */
+
+es_BroadcastChannel.clearNodeFolder = function (options) {
+  options = fillOptionsWithDefaults(options);
+  var method = chooseMethod(options);
+
+  if (method.type === 'node') {
+    return method.clearNodeFolder().then(function () {
+      return true;
+    });
+  } else {
+    return Promise.resolve(false);
+  }
+}; // PROTOTYPE
+
+
+es_BroadcastChannel.prototype = {
+  postMessage: function postMessage(msg) {
+    if (this.closed) {
+      throw new Error('BroadcastChannel.postMessage(): ' + 'Cannot post message after channel has closed');
+    }
+
+    return _post(this, 'message', msg);
+  },
+  postInternal: function postInternal(msg) {
+    return _post(this, 'internal', msg);
+  },
+
+  set onmessage(fn) {
+    var time = this.method.microSeconds();
+    var listenObj = {
+      time: time,
+      fn: fn
+    };
+
+    _removeListenerObject(this, 'message', this._onML);
+
+    if (fn && typeof fn === 'function') {
+      this._onML = listenObj;
+
+      _addListenerObject(this, 'message', listenObj);
+    } else {
+      this._onML = null;
+    }
+  },
+
+  addEventListener: function addEventListener(type, fn) {
+    var time = this.method.microSeconds();
+    var listenObj = {
+      time: time,
+      fn: fn
+    };
+
+    _addListenerObject(this, type, listenObj);
+  },
+  removeEventListener: function removeEventListener(type, fn) {
+    var obj = this._addEL[type].find(function (obj) {
+      return obj.fn === fn;
+    });
+
+    _removeListenerObject(this, type, obj);
+  },
+  close: function close() {
+    var _this = this;
+
+    if (this.closed) return;
+    this.closed = true;
+    var awaitPrepare = this._prepP ? this._prepP : Promise.resolve();
+    this._onML = null;
+    this._addEL.message = [];
+    return awaitPrepare.then(function () {
+      return Promise.all(_this._befC.map(function (fn) {
+        return fn();
+      }));
+    }).then(function () {
+      return _this.method.close(_this._state);
+    });
+  },
+
+  get type() {
+    return this.method.type;
+  }
+
+};
+
+function _post(broadcastChannel, type, msg) {
+  var time = broadcastChannel.method.microSeconds();
+  var msgObj = {
+    time: time,
+    type: type,
+    data: msg
+  };
+  var awaitPrepare = broadcastChannel._prepP ? broadcastChannel._prepP : Promise.resolve();
+  return awaitPrepare.then(function () {
+    return broadcastChannel.method.postMessage(broadcastChannel._state, msgObj);
+  });
+}
+
+function _prepareChannel(channel) {
+  var maybePromise = channel.method.create(channel.name, channel.options);
+
+  if (isPromise(maybePromise)) {
+    channel._prepP = maybePromise;
+    maybePromise.then(function (s) {
+      // used in tests to simulate slow runtime
+
+      /*if (channel.options.prepareDelay) {
+           await new Promise(res => setTimeout(res, this.options.prepareDelay));
+      }*/
+      channel._state = s;
+    });
+  } else {
+    channel._state = maybePromise;
+  }
+}
+
+function _hasMessageListeners(channel) {
+  if (channel._addEL.message.length > 0) return true;
+  if (channel._addEL.internal.length > 0) return true;
+  return false;
+}
+
+function _addListenerObject(channel, type, obj) {
+  channel._addEL[type].push(obj);
+
+  _startListening(channel);
+}
+
+function _removeListenerObject(channel, type, obj) {
+  channel._addEL[type] = channel._addEL[type].filter(function (o) {
+    return o !== obj;
+  });
+
+  _stopListening(channel);
+}
+
+function _startListening(channel) {
+  if (!channel._iL && _hasMessageListeners(channel)) {
+    // someone is listening, start subscribing
+    var listenerFn = function listenerFn(msgObj) {
+      channel._addEL[msgObj.type].forEach(function (obj) {
+        if (msgObj.time >= obj.time) {
+          obj.fn(msgObj.data);
+        }
+      });
+    };
+
+    var time = channel.method.microSeconds();
+
+    if (channel._prepP) {
+      channel._prepP.then(function () {
+        channel._iL = true;
+        channel.method.onMessage(channel._state, listenerFn, time);
+      });
+    } else {
+      channel._iL = true;
+      channel.method.onMessage(channel._state, listenerFn, time);
+    }
+  }
+}
+
+function _stopListening(channel) {
+  if (channel._iL && !_hasMessageListeners(channel)) {
+    // noone is listening, stop subscribing
+    channel._iL = false;
+    var time = channel.method.microSeconds();
+    channel.method.onMessage(channel._state, null, time);
+  }
+}
+
+/* harmony default export */ var es = (es_BroadcastChannel);
 // EXTERNAL MODULE: ./node_modules/uuid/v4.js
-var v4 = __webpack_require__(7);
+var v4 = __webpack_require__(8);
 var v4_default = /*#__PURE__*/__webpack_require__.n(v4);
 
 // CONCATENATED MODULE: ./src/logger.js
@@ -4200,12 +4991,13 @@ var log = new logger_Logger();
 
 
 
+ //import './third_party/broadcastchannel.js';
 
 
 
 
 
-var sleep = function sleep(ms) {
+var src_sleep = function sleep(ms) {
   return new Promise(function (res) {
     return setTimeout(res, ms);
   });
@@ -4216,19 +5008,16 @@ var sleep = function sleep(ms) {
  * TDLib can be compiled to WebAssembly or asm.js using Emscripten compiler and used in a browser from JavaScript.
  * This is a convenient wrapper for TDLib in a browser which controls TDLib instance creation, handles interaction
  * with the TDLib and manages a filesystem for persistent TDLib data.
- * TDLib instance is created in a Web Worker, because TDLib needs synchronous access to filesystem and the IndexedDB.
+ * TDLib instance is created in a Web Worker to run it in a separate thread.
  * TdClient just sends queries to the Web Worker and receive updates and results from it.
  * <br>
  * <br>
- * Differences from TDLib API:<br>
+ * Differences from TDLib JSON API:<br>
  * 1. Added the update <code>updateFatalError error:string = Update;</code> which is sent whenever a TDLib fatal error is encountered.<br>
- * 2. Added the field <code>idb_key</code> to <code>file</code> object, which contains IndexedDB key in which the file content is stored. IndexedDB table name is options.instanceName. <br>
- *    This field is non-empty only for fully downloaded files. IndexedDB database name is chosen during TdClient creation.<br>
- * 3. Added the method <code>setJsLogVerbosityLevel new_verbosity_level:string = Ok;</code>, which allows to change the verbosity level of tdweb logging.<br>
- * 4. Added the possibility to use blobs as input files via constructor <code>inputFileBlob data:<JavaScript blob> = InputFile;</code>.<br>
- * 5. Added the method <code>readFilePart path:string offset:int64 size:int64 = FilePart;</code> and class <code>filePart data:<JavaScript blob> = FilePart;</code><br>
- *    which can be used on a partially downloaded file to support media streaming.<br>
- * 6. Methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> are not supported.<br>
+ * 2. Added the method <code>setJsLogVerbosityLevel new_verbosity_level:string = Ok;</code>, which allows to change the verbosity level of tdweb logging.<br>
+ * 3. Added the possibility to use blobs as input files via constructor <code>inputFileBlob data:<JavaScript blob> = InputFile;</code>.<br>
+ * 4. The class <code>filePart</code> contains data as a JavaScript blob instead of a base64-encoded string.<br>
+ * 5. Methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> are not supported.<br>
  * <br>
  */
 
@@ -4247,21 +5036,22 @@ function () {
    * @param {TdClient~updateCallback} options.onUpdate - The callback for all incoming updates.
    * @param {string} [options.instanceName=tdlib] - The name of the TDLib instance. Currently only one instance of TdClient with a given name is allowed. All but one created instances with a given name will be automatically closed. Usually, the newest non-background instance is kept alive. Files will be stored in IndexedDb table with the same name.
    * @param {boolean} [options.isBackground=false] - Pass true, if the instance is opened from the background.
-   * @param {string} [options.jsLogVerbosityLevel='info'] - The initial verbosity level of the JavaScript part of the code (one of 'error', 'warning', 'info', 'log', 'debug').
+   * @param {string} [options.jsLogVerbosityLevel=info] - The initial verbosity level of the JavaScript part of the code (one of 'error', 'warning', 'info', 'log', 'debug').
    * @param {number} [options.logVerbosityLevel=2] - The initial verbosity level for TDLib internal logging (0-1023).
    * @param {boolean} [options.useDatabase=true] - Pass false to use TDLib without database and secret chats. It will significantly improve load time, but some functionality will be unavailable.
-   * @param {string} [options.mode='auto'] - For debug only. The type of the TDLib build to use. 'asmjs' for asm.js and 'wasm' for WebAssembly. If mode == 'auto'  WebAbassembly will be used if supported by browser, asm.js otherwise.
    * @param {boolean} [options.readOnly=false] - For debug only. Pass true to open TDLib database in read-only mode
+   * @param {string} [options.mode=auto] - For debug only. The type of the TDLib build to use. 'asmjs' for asm.js and 'wasm' for WebAssembly. If mode == 'auto' WebAbassembly will be used if supported by browser, asm.js otherwise.
    */
   function TdClient(options) {
+    var _this = this;
+
     classCallCheck_default()(this, TdClient);
 
     logger.setVerbosity(options.jsLogVerbosityLevel);
     this.worker = new worker_default.a();
-    var self = this;
 
     this.worker.onmessage = function (e) {
-      self.onResponse(e.data);
+      _this.onResponse(e.data);
     };
 
     this.query_id = 0;
@@ -4296,13 +5086,27 @@ function () {
   createClass_default()(TdClient, [{
     key: "send",
     value: function send(query) {
-      var _this = this;
+      return this.doSend(query, true);
+    }
+    /** @private */
+
+  }, {
+    key: "sendInternal",
+    value: function sendInternal(query) {
+      return this.doSend(query, false);
+    }
+    /** @private */
+
+  }, {
+    key: "doSend",
+    value: function doSend(query, isExternal) {
+      var _this2 = this;
 
       this.query_id++;
 
       if (query['@extra']) {
         query['@extra'] = {
-          '@old_extra': JSON.parse(JSON.stringify(query.extra)),
+          '@old_extra': JSON.parse(JSON.stringify(query['@extra'])),
           query_id: this.query_id
         };
       } else {
@@ -4317,9 +5121,15 @@ function () {
 
       logger.debug('send to worker: ', query);
       var res = new Promise(function (resolve, reject) {
-        _this.query_callbacks.set(_this.query_id, [resolve, reject]);
+        _this2.query_callbacks.set(_this2.query_id, [resolve, reject]);
       });
-      this.externalPostMessage(query);
+
+      if (isExternal) {
+        this.externalPostMessage(query);
+      } else {
+        this.worker.postMessage(query);
+      }
+
       return res;
     }
     /** @private */
@@ -4334,13 +5144,18 @@ function () {
           '@type': 'error',
           '@extra': query['@extra'],
           code: 400,
-          message: "method '" + query['@type'] + "' is not supported"
+          message: "Method '" + query['@type'] + "' is not supported"
         });
         return;
       }
 
-      if (query['@type'] === 'readFile') {
+      if (query['@type'] === 'readFile' || query['@type'] == 'readFilePart') {
         this.readFile(query);
+        return;
+      }
+
+      if (query['@type'] === 'deleteFile') {
+        this.deleteFile(query);
         return;
       }
 
@@ -4379,6 +5194,68 @@ function () {
       }
 
       return readFile;
+    }()
+    /** @private */
+
+  }, {
+    key: "deleteFile",
+    value: function () {
+      var _deleteFile = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee2(query) {
+        var response;
+        return regenerator_default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                response = this.fileManager.deleteFile(query);
+                _context2.prev = 1;
+
+                if (!response.idb_key) {
+                  _context2.next = 6;
+                  break;
+                }
+
+                _context2.next = 5;
+                return this.sendInternal({
+                  '@type': 'deleteIdbKey',
+                  idb_key: response.idb_key
+                });
+
+              case 5:
+                delete response.idb_key;
+
+              case 6:
+                _context2.next = 8;
+                return this.sendInternal({
+                  '@type': 'deleteFile',
+                  file_id: query.file_id
+                });
+
+              case 8:
+                _context2.next = 12;
+                break;
+
+              case 10:
+                _context2.prev = 10;
+                _context2.t0 = _context2["catch"](1);
+
+              case 12:
+                this.onResponse(response);
+
+              case 13:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[1, 10]]);
+      }));
+
+      function deleteFile(_x2) {
+        return _deleteFile.apply(this, arguments);
+      }
+
+      return deleteFile;
     }()
     /** @private */
 
@@ -4446,7 +5323,11 @@ function () {
   }, {
     key: "prepareResponse",
     value: function prepareResponse(response) {
+      var _this3 = this;
+
       if (response['@type'] === 'file') {
+        if (false) {}
+
         return this.prepareFile(response);
       }
 
@@ -4465,7 +5346,8 @@ function () {
   }, {
     key: "onBroadcastMessage",
     value: function onBroadcastMessage(e) {
-      var message = e.data;
+      //const message = e.data;
+      var message = e;
 
       if (message.uid === this.uid) {
         logger.info('ignore self broadcast message: ', message);
@@ -4503,7 +5385,7 @@ function () {
     key: "postState",
     value: function postState() {
       var state = {
-        id: this.uid,
+        uid: this.uid,
         state: this.state,
         timestamp: this.timestamp,
         isBackground: this.isBackground
@@ -4606,11 +5488,12 @@ function () {
     value: function () {
       var _closeOtherClients = asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee2(options) {
-        var self;
-        return regenerator_default.a.wrap(function _callee2$(_context2) {
+      regenerator_default.a.mark(function _callee4(options) {
+        var _this4 = this;
+
+        return regenerator_default.a.wrap(function _callee4$(_context4) {
           while (1) {
-            switch (_context2.prev = _context2.next) {
+            switch (_context4.prev = _context4.next) {
               case 0:
                 this.uid = v4_default()();
                 this.state = 'start';
@@ -4618,40 +5501,41 @@ function () {
                 this.timestamp = Date.now();
                 this.waitSet = new Set();
                 logger.info('close other clients');
-                this.channel = new BroadcastChannel(options.instanceName);
+                this.channel = new es(options.instanceName, {
+                  webWorkerSupport: false
+                });
                 this.postState();
-                self = this;
 
                 this.channel.onmessage = function (message) {
-                  self.onBroadcastMessage(message);
+                  _this4.onBroadcastMessage(message);
                 };
 
-                _context2.next = 12;
-                return sleep(300);
+                _context4.next = 11;
+                return src_sleep(300);
 
-              case 12:
+              case 11:
                 if (!(this.waitSet.size !== 0)) {
-                  _context2.next = 15;
+                  _context4.next = 14;
                   break;
                 }
 
-                _context2.next = 15;
+                _context4.next = 14;
                 return new Promise(function (resolve) {
-                  self.onWaitSetEmpty = resolve;
+                  _this4.onWaitSetEmpty = resolve;
                 });
 
-              case 15:
+              case 14:
                 this.sendStart();
 
-              case 16:
+              case 15:
               case "end":
-                return _context2.stop();
+                return _context4.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee4, this);
       }));
 
-      function closeOtherClients(_x2) {
+      function closeOtherClients(_x3) {
         return _closeOtherClients.apply(this, arguments);
       }
 
@@ -4661,12 +5545,65 @@ function () {
 
   }, {
     key: "onUpdate",
-    value: function onUpdate(response) {
+    value: function onUpdate(update) {
       logger.info('ignore onUpdate'); //nop
     }
   }]);
 
   return TdClient;
+}();
+/** @private */
+
+
+var src_ListNode =
+/*#__PURE__*/
+function () {
+  function ListNode(value) {
+    classCallCheck_default()(this, ListNode);
+
+    this.value = value;
+    this.clear();
+  }
+
+  createClass_default()(ListNode, [{
+    key: "erase",
+    value: function erase() {
+      this.prev.connect(this.next);
+      this.clear();
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      this.prev = this;
+      this.next = this;
+    }
+  }, {
+    key: "connect",
+    value: function connect(other) {
+      this.next = other;
+      other.prev = this;
+    }
+  }, {
+    key: "onUsed",
+    value: function onUsed(other) {
+      other.usedAt = Date.now();
+      other.clear();
+      other.connect(this.next);
+      logger.debug('LRU: used file_id: ', other.value);
+      this.connect(other);
+    }
+  }, {
+    key: "getLru",
+    value: function getLru() {
+      if (this === this.next) {
+        throw new Error('popLru from empty list');
+      }
+
+      return this.prev;
+    }
+  }]);
+
+  return ListNode;
 }();
 /** @private */
 
@@ -4681,14 +5618,17 @@ function () {
     this.cache = new Map();
     this.pending = [];
     this.transaction_id = 0;
+    this.totalSize = 0;
+    this.lru = new src_ListNode(-1);
   }
 
   createClass_default()(FileManager, [{
     key: "init",
     value: function init() {
-      var self = this;
+      var _this5 = this;
+
       this.idb = new Promise(function (resolve, reject) {
-        var request = window.indexedDB.open(self.instanceName);
+        var request = window.indexedDB.open(_this5.instanceName);
 
         request.onsuccess = function () {
           return resolve(request.result);
@@ -4704,14 +5644,33 @@ function () {
       this.isInited = true;
     }
   }, {
+    key: "unload",
+    value: function unload(info) {
+      if (info.arr) {
+        logger.debug('LRU: delete file_id: ', info.node.value, ' with arr.length: ', info.arr.length);
+        this.totalSize -= info.arr.length;
+        delete info.arr;
+      }
+
+      if (info.node) {
+        info.node.erase();
+        delete info.node;
+      }
+    }
+  }, {
     key: "registerFile",
     value: function registerFile(file) {
+      var cached_info = this.cache.get(file.id);
+
+      if (cached_info && !file.idb_key) {
+        delete cached_info.idb_key;
+      }
+
       if (file.idb_key || file.arr) {
         file.is_downloading_completed = true;
         var info = {};
-        var cached_info = this.cache.get(file.id);
 
-        if (cached_info !== undefined) {
+        if (cached_info) {
           info = cached_info;
         } else {
           this.cache.set(file.id, info);
@@ -4719,10 +5678,38 @@ function () {
 
         if (file.idb_key) {
           info.idb_key = file.idb_key;
+          delete file.idb_key;
         }
 
         if (file.arr) {
+          var now = Date.now();
+
+          while (this.totalSize > 10000000) {
+            var node = this.lru.getLru(); // immunity for 5 seconds
+
+            if (node.usedAt + 5 * 1000 > now) {
+              break;
+            }
+
+            var lru_info = this.cache.get(node.value);
+            this.unload(lru_info);
+          }
+
+          if (info.arr) {
+            logger.warn('Got file.arr at least twice for the same file');
+            this.totalSize -= info.arr.length;
+          }
+
           info.arr = file.arr;
+          this.totalSize += info.arr.length;
+
+          if (!info.node) {
+            logger.debug('LRU: create file_id: ', file.id, ' with arr.length: ', info.arr.length);
+            info.node = new src_ListNode(file.id);
+          }
+
+          this.lru.onUsed(info.node);
+          logger.info('Total file.arr size: ', this.totalSize);
         }
       }
 
@@ -4733,27 +5720,27 @@ function () {
     value: function () {
       var _flushLoad = asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee3() {
+      regenerator_default.a.mark(function _callee5() {
         var pending, idb, transaction_id, read, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _loop, _iterator, _step;
 
-        return regenerator_default.a.wrap(function _callee3$(_context3) {
+        return regenerator_default.a.wrap(function _callee5$(_context5) {
           while (1) {
-            switch (_context3.prev = _context3.next) {
+            switch (_context5.prev = _context5.next) {
               case 0:
                 pending = this.pending;
                 this.pending = [];
-                _context3.next = 4;
+                _context5.next = 4;
                 return this.idb;
 
               case 4:
-                idb = _context3.sent;
+                idb = _context5.sent;
                 transaction_id = this.transaction_id++;
                 read = idb.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
                 logger.debug('Load group of files from idb', pending.length);
                 _iteratorNormalCompletion = true;
                 _didIteratorError = false;
                 _iteratorError = undefined;
-                _context3.prev = 11;
+                _context5.prev = 11;
 
                 _loop = function _loop() {
                   var query = _step.value;
@@ -4779,45 +5766,45 @@ function () {
                   _loop();
                 }
 
-                _context3.next = 20;
+                _context5.next = 20;
                 break;
 
               case 16:
-                _context3.prev = 16;
-                _context3.t0 = _context3["catch"](11);
+                _context5.prev = 16;
+                _context5.t0 = _context5["catch"](11);
                 _didIteratorError = true;
-                _iteratorError = _context3.t0;
+                _iteratorError = _context5.t0;
 
               case 20:
-                _context3.prev = 20;
-                _context3.prev = 21;
+                _context5.prev = 20;
+                _context5.prev = 21;
 
                 if (!_iteratorNormalCompletion && _iterator["return"] != null) {
                   _iterator["return"]();
                 }
 
               case 23:
-                _context3.prev = 23;
+                _context5.prev = 23;
 
                 if (!_didIteratorError) {
-                  _context3.next = 26;
+                  _context5.next = 26;
                   break;
                 }
 
                 throw _iteratorError;
 
               case 26:
-                return _context3.finish(23);
+                return _context5.finish(23);
 
               case 27:
-                return _context3.finish(20);
+                return _context5.finish(20);
 
               case 28:
               case "end":
-                return _context3.stop();
+                return _context5.stop();
             }
           }
-        }, _callee3, this, [[11, 16, 20, 28], [21,, 23, 27]]);
+        }, _callee5, this, [[11, 16, 20, 28], [21,, 23, 27]]);
       }));
 
       function flushLoad() {
@@ -4829,10 +5816,11 @@ function () {
   }, {
     key: "load",
     value: function load(key, resolve, reject) {
+      var _this6 = this;
+
       if (this.pending.length === 0) {
-        var self = this;
         setTimeout(function () {
-          self.flushLoad();
+          _this6.flushLoad();
         }, 1);
       }
 
@@ -4847,115 +5835,162 @@ function () {
     value: function () {
       var _doLoad = asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee4(info) {
-        var idb_key, self;
-        return regenerator_default.a.wrap(function _callee4$(_context4) {
+      regenerator_default.a.mark(function _callee6(info) {
+        var _this7 = this;
+
+        var idb_key;
+        return regenerator_default.a.wrap(function _callee6$(_context6) {
           while (1) {
-            switch (_context4.prev = _context4.next) {
+            switch (_context6.prev = _context6.next) {
               case 0:
                 if (!info.arr) {
-                  _context4.next = 2;
+                  _context6.next = 2;
                   break;
                 }
 
-                return _context4.abrupt("return", {
+                return _context6.abrupt("return", {
                   data: new Blob([info.arr]),
                   transaction_id: -1
                 });
 
               case 2:
-                idb_key = info.idb_key;
-                self = this; //return this.store.getItem(idb_key);
+                idb_key = info.idb_key; //return this.store.getItem(idb_key);
 
-                _context4.next = 6;
+                _context6.next = 5;
                 return new Promise(function (resolve, reject) {
-                  self.load(idb_key, resolve, reject);
+                  _this7.load(idb_key, resolve, reject);
                 });
 
-              case 6:
-                return _context4.abrupt("return", _context4.sent);
+              case 5:
+                return _context6.abrupt("return", _context6.sent);
 
-              case 7:
+              case 6:
               case "end":
-                return _context4.stop();
+                return _context6.stop();
             }
           }
-        }, _callee4, this);
+        }, _callee6);
       }));
 
-      function doLoad(_x3) {
+      function doLoad(_x4) {
         return _doLoad.apply(this, arguments);
       }
 
       return doLoad;
     }()
   }, {
+    key: "doDelete",
+    value: function doDelete(info) {
+      this.unload(info);
+      return info.idb_key;
+    }
+  }, {
     key: "readFile",
     value: function () {
       var _readFile2 = asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee5(query) {
+      regenerator_default.a.mark(function _callee7(query) {
         var info, response;
-        return regenerator_default.a.wrap(function _callee5$(_context5) {
+        return regenerator_default.a.wrap(function _callee7$(_context7) {
           while (1) {
-            switch (_context5.prev = _context5.next) {
+            switch (_context7.prev = _context7.next) {
               case 0:
-                _context5.prev = 0;
+                _context7.prev = 0;
 
+                if (!(query.offset || query.size)) {
+                  _context7.next = 3;
+                  break;
+                }
+
+                throw new Error('readFilePart: offset and size are not supported yet');
+
+              case 3:
                 if (this.isInited) {
-                  _context5.next = 3;
+                  _context7.next = 5;
                   break;
                 }
 
                 throw new Error('FileManager is not inited');
 
-              case 3:
+              case 5:
                 info = this.cache.get(query.file_id);
 
                 if (info) {
-                  _context5.next = 6;
+                  _context7.next = 8;
                   break;
                 }
 
                 throw new Error('File is not loaded');
 
-              case 6:
-                _context5.next = 8;
+              case 8:
+                if (info.node) {
+                  this.lru.onUsed(info.node);
+                }
+
+                _context7.next = 11;
                 return this.doLoad(info);
 
-              case 8:
-                response = _context5.sent;
-                return _context5.abrupt("return", {
-                  '@type': 'blob',
+              case 11:
+                response = _context7.sent;
+                return _context7.abrupt("return", {
+                  '@type': 'filePart',
                   '@extra': query['@extra'],
                   data: response.data,
                   transaction_id: response.transaction_id
                 });
 
-              case 12:
-                _context5.prev = 12;
-                _context5.t0 = _context5["catch"](0);
-                return _context5.abrupt("return", {
+              case 15:
+                _context7.prev = 15;
+                _context7.t0 = _context7["catch"](0);
+                return _context7.abrupt("return", {
                   '@type': 'error',
                   '@extra': query['@extra'],
                   code: 400,
-                  message: _context5.t0
+                  message: _context7.t0
                 });
 
-              case 15:
+              case 18:
               case "end":
-                return _context5.stop();
+                return _context7.stop();
             }
           }
-        }, _callee5, this, [[0, 12]]);
+        }, _callee7, this, [[0, 15]]);
       }));
 
-      function readFile(_x4) {
+      function readFile(_x5) {
         return _readFile2.apply(this, arguments);
       }
 
       return readFile;
     }()
+  }, {
+    key: "deleteFile",
+    value: function deleteFile(query) {
+      var res = {
+        '@type': 'ok',
+        '@extra': query['@extra']
+      };
+
+      try {
+        if (!this.isInited) {
+          throw new Error('FileManager is not inited');
+        }
+
+        var info = this.cache.get(query.file_id);
+
+        if (!info) {
+          throw new Error('File is not loaded');
+        }
+
+        var idb_key = this.doDelete(info);
+
+        if (idb_key) {
+          res.idb_key = idb_key;
+        }
+      } catch (e) {}
+
+      return res;
+    }
   }]);
 
   return FileManager;
