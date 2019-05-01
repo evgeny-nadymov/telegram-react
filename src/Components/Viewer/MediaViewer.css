@@ -6,119 +6,59 @@
  */
 
 .media-viewer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: rgba(26, 26, 26, 0.7);
-  display: flex;
-  flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(26, 26, 26, 0.7);
+    display: flex;
+    flex-direction: column;
 }
 
 .media-viewer-wrapper {
-  cursor: pointer;
-  flex-grow: 1;
-  flex-shrink: 1;
-  display: flex;
-  overflow: hidden;
+    cursor: pointer;
+    flex-grow: 1;
+    flex-shrink: 1;
+    display: flex;
+    overflow: hidden;
 }
 
 .media-viewer-left-column {
-  min-width: 104px;
-  display: flex;
-  flex-direction: column;
+    min-width: 105px;
+    display: flex;
+    flex-direction: column;
 }
 
 .media-viewer-button-placeholder {
-  height: 104px;
-  width: 100%;
-}
-
-.media-viewer-previous-icon {
-  width: 16px;
-  height: 24px;
-  pointer-events: none;
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-position: -12px -41px;
-  background-repeat: no-repeat;
-}
-
-.media-viewer-next-icon {
-  width: 16px;
-  height: 24px;
-  pointer-events: none;
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-position: -14px -75px;
-  background-repeat: no-repeat;
+    height: 105px;
+    width: 100%;
 }
 
 .media-viewer-content-column {
-  flex-grow: 1;
-  flex-shrink: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .media-viewer-right-column {
-  min-width: 104px;
-  display: flex;
-  flex-direction: column;
+    min-width: 105px;
+    display: flex;
+    flex-direction: column;
 }
 
 .media-viewer-footer {
-  min-height: 68px;
-  width: 100%;
-  background: #313131;
-  display: flex;
-  flex-direction: row;
+    min-height: 68px;
+    width: 100%;
+    background: #313131;
+    display: flex;
+    flex-direction: row;
 }
 
 .media-viewer-footer-commands {
-  display: flex;
-  flex-direction: row;
-}
-
-.media-viewer-close-icon {
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-repeat: no-repeat;
-  background-position: -10px -10px;
-  width: 24px;
-  height: 24px;
-  margin: 40px;
-}
-
-.media-viewer-save-icon {
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-repeat: no-repeat;
-  background-position: -12px -163px;
-  width: 16px;
-  height: 20px;
-  margin: 22px 26px;
-}
-
-.media-viewer-forward-icon {
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-repeat: no-repeat;
-  background-position: -9px -109px;
-  width: 23px;
-  height: 15px;
-  margin: 24px 22px;
-}
-
-.media-viewer-delete-icon {
-  background-image: url(../../Assets/Icons/PhotoIcons_2x.png);
-  background-size: 40px 200px;
-  background-repeat: no-repeat;
-  background-position: -13px -135px;
-  width: 14px;
-  height: 18px;
-  margin: 23px 27px;
+    display: flex;
+    flex-direction: row;
 }

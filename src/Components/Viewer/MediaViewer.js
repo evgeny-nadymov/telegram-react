@@ -18,6 +18,11 @@ import {
     DialogTitle,
     FormControlLabel
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
+import ReplyIcon from '@material-ui/icons/Reply';
+import DeleteIcon from '@material-ui/icons/Delete';
 import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
@@ -40,6 +45,22 @@ import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
+
+const forwardIconStyle = {
+    padding: 20,
+    color: 'white',
+    transform: 'scaleX(-1)'
+};
+
+const iconStyle = {
+    padding: 20,
+    color: 'white'
+};
+
+const navigationIconStyle = {
+    padding: 35,
+    color: 'white'
+};
 
 class MediaViewer extends React.Component {
     constructor(props) {
@@ -721,7 +742,7 @@ class MediaViewer extends React.Component {
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
                         <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
-                            <div className='media-viewer-previous-icon' />
+                            <NavigateBeforeIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
                     </div>
 
@@ -736,10 +757,10 @@ class MediaViewer extends React.Component {
 
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>
-                            <div className='media-viewer-close-icon' />
+                            <CloseIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
                         <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
-                            <div className='media-viewer-next-icon' />
+                            <NavigateNextIcon fontSize='large' style={navigationIconStyle} />
                         </MediaViewerButton>
                     </div>
                 </div>
@@ -749,14 +770,15 @@ class MediaViewer extends React.Component {
                         title={title}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
-                    <MediaViewerDownloadButton fileId={fileId} onClick={this.handleSave}>
-                        <div className='media-viewer-save-icon' />
-                    </MediaViewerDownloadButton>
-                    <MediaViewerFooterButton title='Forward' disabled={!canBeForwarded} onClick={this.handleForward}>
-                        <div className='media-viewer-forward-icon' />
+                    <MediaViewerDownloadButton title={t('Save')} fileId={fileId} onClick={this.handleSave} />
+                    <MediaViewerFooterButton
+                        title={t('Forward')}
+                        disabled={!canBeForwarded}
+                        onClick={this.handleForward}>
+                        <ReplyIcon style={forwardIconStyle} />
                     </MediaViewerFooterButton>
-                    <MediaViewerFooterButton title='Delete' disabled={!canBeDeleted} onClick={this.handleDelete}>
-                        <div className='media-viewer-delete-icon' />
+                    <MediaViewerFooterButton title={t('Delete')} disabled={!canBeDeleted} onClick={this.handleDelete}>
+                        <DeleteIcon style={iconStyle} />
                     </MediaViewerFooterButton>
                 </div>
             </div>

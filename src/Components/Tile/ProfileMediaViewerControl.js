@@ -22,16 +22,16 @@ class ProfileMediaViewerControl extends React.Component {
         return (
             <div className='media-viewer-control'>
                 <div className='media-viewer-control-wrapper'>
-                    <ChatTileControl chatId={chatId} />
+                    <ChatTileControl chatId={chatId} showSavedMessages={false} />
                     <div className='media-viewer-control-content'>
                         <div className='media-viewer-row'>
                             <MessageAuthor chatId={chatId} />
                         </div>
-                        {   date &&
+                        {date && (
                             <div className='media-viewer-row message-meta'>
                                 <span className='message-date'>{date}</span>
                             </div>
-                        }
+                        )}
                     </div>
                 </div>
             </div>

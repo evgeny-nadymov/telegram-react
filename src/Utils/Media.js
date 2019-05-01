@@ -17,8 +17,12 @@ function getAudioTitle(audio) {
     if (!audio) return null;
 
     const { file_name, title, performer } = audio;
+    const trimmedTitle = title ? title.trim() : '';
+    const trimmedPerformer = performer ? performer.trim() : '';
 
-    return title || performer ? `${performer || 'Unknown Artist'} — ${title || 'Unknown Track'}` : file_name;
+    return trimmedTitle || trimmedPerformer
+        ? `${trimmedPerformer || 'Unknown Artist'} — ${trimmedTitle || 'Unknown Track'}`
+        : file_name;
 }
 
 export { isBlurredThumbnail, getAudioTitle };

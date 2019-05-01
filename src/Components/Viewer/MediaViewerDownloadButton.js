@@ -1,8 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import SaveIcon from '@material-ui/icons/GetApp';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import FileStore from '../../Stores/FileStore';
 import './MediaViewerFooterButton.css';
+
+const iconStyle = {
+    padding: 20,
+    color: 'white'
+};
 
 class MediaViewerDownloadButton extends React.Component {
     constructor(props) {
@@ -101,11 +107,12 @@ class MediaViewerDownloadButton extends React.Component {
     };
 
     render() {
+        const { title } = this.props;
         const { disabled } = this.state;
 
         return (
-            <MediaViewerFooterButton disabled={disabled} title='Save' onClick={this.handleClick}>
-                <div className='media-viewer-save-icon' />
+            <MediaViewerFooterButton disabled={disabled} title={title} onClick={this.handleClick}>
+                <SaveIcon style={iconStyle} />
             </MediaViewerFooterButton>
         );
     }
@@ -113,7 +120,8 @@ class MediaViewerDownloadButton extends React.Component {
 
 MediaViewerDownloadButton.propTypes = {
     fileId: PropTypes.number.isRequired,
-    onClick: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired,
+    title: PropTypes.string
 };
 
 export default MediaViewerDownloadButton;
