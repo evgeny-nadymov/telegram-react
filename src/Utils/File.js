@@ -1387,6 +1387,17 @@ async function loadReplies(store, chatId, messageIds) {
         message_ids: messageIds
     });
 
+    result.messages = result.messages.map((message, i) => {
+        return (
+            message || {
+                '@type': 'deletedMessage',
+                chat_id: chatId,
+                id: messageIds[i],
+                content: null
+            }
+        );
+    });
+
     MessageStore.setItems(result.messages);
 
     for (let i = messageIds.length - 1; i >= 0; i--) {
