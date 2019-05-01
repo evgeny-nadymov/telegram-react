@@ -354,7 +354,7 @@ function isForwardOriginHidden(forwardInfo) {
     return false;
 }
 
-function getForwardTitle(forwardInfo) {
+function getForwardTitle(forwardInfo, t = key => key) {
     if (!forwardInfo) return '';
 
     const { origin } = forwardInfo;
@@ -375,7 +375,7 @@ function getForwardTitle(forwardInfo) {
         case 'messageForwardOriginChannel': {
             const { chat_id, author_signature } = origin;
 
-            return getChatTitle(chat_id) + (author_signature ? ` (${author_signature})` : '');
+            return getChatTitle(chat_id, false, t) + (author_signature ? ` (${author_signature})` : '');
         }
     }
 

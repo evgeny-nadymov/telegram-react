@@ -7,15 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import { getChatTitle } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitleControl.css';
 
 class DialogTitleControl extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -47,9 +44,9 @@ class DialogTitleControl extends React.Component {
     };
 
     render() {
-        const { chatId, showSavedMessages } = this.props;
+        const { t, chatId, showSavedMessages } = this.props;
 
-        const title = getChatTitle(chatId, showSavedMessages);
+        const title = getChatTitle(chatId, showSavedMessages, t);
 
         return <div className='dialog-title'>{title}</div>;
     }
@@ -64,4 +61,4 @@ DialogTitleControl.defaultProps = {
     showSavedMessages: true
 };
 
-export default DialogTitleControl;
+export default withTranslation()(DialogTitleControl);

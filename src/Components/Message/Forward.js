@@ -129,7 +129,7 @@ class Forward extends React.Component {
         const { t, classes, forwardInfo } = this.props;
         const { arrowRef } = this.state;
 
-        const title = getForwardTitle(forwardInfo);
+        const title = getForwardTitle(forwardInfo, t);
         const tooltip = isForwardOriginHidden(forwardInfo) ? (
             <>
                 {t('HidAccount')}

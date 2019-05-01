@@ -599,15 +599,15 @@ function isChatMember(chatId) {
     return false;
 }
 
-function getChatTitle(chatId, showSavedMessages = false) {
+function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
 
     if (isMeChat(chatId) && showSavedMessages) {
-        return 'Saved messages';
+        return t('SavedMessages');
     }
 
-    return chat.title || 'Deleted account';
+    return chat.title || t('HiddenName');
 }
 
 function isMeChat(chatId) {

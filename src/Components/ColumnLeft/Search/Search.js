@@ -8,9 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
+import { withStyles } from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
-import { withStyles } from '@material-ui/core/styles';
 import ChatControl from '../../Tile/ChatControl';
 import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
@@ -20,6 +22,7 @@ import SearchCaption from './SearchCaption';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
+import { orderCompare } from '../../../Utils/Common';
 import { USERNAME_LENGTH_MIN } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import FileStore from '../../../Stores/FileStore';
@@ -28,7 +31,6 @@ import UserStore from '../../../Stores/UserStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
-import { orderCompare } from '../../../Utils/Common';
 
 const styles = theme => ({
     closeSearchIconButton: {
@@ -170,10 +172,14 @@ class Search extends React.Component {
             }
 
             if (savedMessages) {
-                const savedMessageString = 'SAVED MESSAGES';
+                const { t } = this.props;
+
+                const searchText = text.toUpperCase();
+                const savedMessagesStrings = ['SAVED MESSAGES', t('SavedMessages').toUpperCase()];
+
                 if (
-                    savedMessageString.indexOf(text.toUpperCase()) !== -1 ||
-                    (latinText && savedMessageString.indexOf(latinText.toUpperCase()) !== -1)
+                    savedMessagesStrings.some(el => el.includes(searchText)) ||
+                    (latinText && savedMessagesStrings.some(el => el.includes(latinText.toUpperCase())))
                 ) {
                     local.splice(0, 0, savedMessages.id);
                 }
@@ -592,4 +598,9 @@ Search.propTypes = {
     onClose: PropTypes.func.isRequired
 };
 
-export default withStyles(styles)(Search);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withTranslation()
+);
+
+export default enhance(Search);

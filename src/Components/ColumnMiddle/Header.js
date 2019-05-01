@@ -274,7 +274,7 @@ class Header extends Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { authorizationState, connectionState, selectionCount } = this.state;
 
         if (selectionCount) {
@@ -285,7 +285,7 @@ class Header extends Component {
         const chat = ChatStore.get(chatId);
 
         const isAccentSubtitle = isAccentChatSubtitle(chatId);
-        let title = getChatTitle(chatId, true);
+        let title = getChatTitle(chatId, true, t);
         let subtitle = getChatSubtitle(chatId, true);
         let showProgressAnimation = false;
 

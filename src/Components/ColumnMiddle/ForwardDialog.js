@@ -297,16 +297,17 @@ class ForwardDialog extends React.Component {
     };
 
     hasSearchText = (chatId, searchText) => {
+        const { t } = this.props;
         const { savedMessages } = this.state;
 
         if (savedMessages && chatId === savedMessages.id) {
-            const title = getChatTitle(chatId, true) || '';
+            const title = getChatTitle(chatId, true, t) || '';
             if (title.toLocaleLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
                 return true;
             }
         }
 
-        const title1 = getChatTitle(chatId, false) || '';
+        const title1 = getChatTitle(chatId, false, t) || '';
         if (title1.toLocaleLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
             return true;
         }

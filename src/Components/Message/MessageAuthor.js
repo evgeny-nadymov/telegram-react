@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
 import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
@@ -35,7 +36,7 @@ class MessageAuthor extends React.Component {
     };
 
     render() {
-        const { chatId, userId, openUser, openChat } = this.props;
+        const { t, chatId, userId, openUser, openChat } = this.props;
 
         const user = UserStore.get(userId);
         if (user) {
@@ -59,7 +60,7 @@ class MessageAuthor extends React.Component {
         if (chat) {
             const className = classNames('message-author-color', 'message-author');
 
-            const fullName = getChatTitle(chatId, false);
+            const fullName = getChatTitle(chatId, false, t);
 
             return openChat ? (
                 <a className={className} onClick={this.handleSelect}>
@@ -86,4 +87,4 @@ MessageAuthor.defaultProps = {
     openChat: false
 };
 
-export default MessageAuthor;
+export default withTranslation()(MessageAuthor);
