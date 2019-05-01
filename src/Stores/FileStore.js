@@ -61,6 +61,10 @@ class FileStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateDocumentBlob': {
+                this.emit(update['@type'], update);
+                break;
+            }
             default:
                 break;
         }
@@ -346,7 +350,7 @@ class FileStore extends EventEmitter {
 
     handleDocument = (store, document, file, idb_key, arr, obj) => {
         if (document.thumbnail) {
-            const source = document.thumbnail.photo;
+            const { photo: source } = document.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,
@@ -360,12 +364,16 @@ class FileStore extends EventEmitter {
         }
 
         if (document.document) {
-            let source = document.document;
+            const { document: source } = document;
             if (source && source.id === file.id) {
-                //this.emit('file_update', file);
-                // this.getLocalFile(store, source, idb_key, arr,
-                //     () => this.emit('file_update', file),
-                //     () => this.getRemoteFile(file.id, 1, obj));
+                this.getLocalFile(
+                    store,
+                    source,
+                    idb_key,
+                    arr,
+                    () => this.updateDocumentBlob(obj.chat_id, obj.id, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                );
             }
         }
     };
@@ -845,7 +853,8 @@ class FileStore extends EventEmitter {
     };
 
     updateDocumentBlob = (chatId, messageId, fileId) => {
-        this.emit('clientUpdateDocumentBlob', {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDocumentBlob',
             chatId: chatId,
             messageId: messageId,
             fileId: fileId

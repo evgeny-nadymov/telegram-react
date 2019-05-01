@@ -611,7 +611,7 @@ function isLottieMessage(chatId, messageId) {
 
             const { file_name } = document;
 
-            return file_name.toLowerCase().endsWith('.json');
+            return file_name && file_name.toLowerCase().endsWith('.json');
         }
         case 'messageText': {
             const { web_page } = content;
@@ -622,7 +622,7 @@ function isLottieMessage(chatId, messageId) {
 
             const { file_name } = document;
 
-            return file_name.toLowerCase().endsWith('.json');
+            return file_name && file_name.toLowerCase().endsWith('.json');
         }
         default: {
             return false;
