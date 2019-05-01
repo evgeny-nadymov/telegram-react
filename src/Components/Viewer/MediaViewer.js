@@ -37,7 +37,13 @@ import {
     preloadMediaViewerContent,
     saveOrDownload
 } from '../../Utils/File';
-import { filterMessages, isAnimationMessage, isMediaContent, isVideoMessage } from '../../Utils/Message';
+import {
+    filterMessages,
+    isAnimationMessage,
+    isLottieMessage,
+    isMediaContent,
+    isVideoMessage
+} from '../../Utils/Message';
 import { between } from '../../Utils/Common';
 import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
@@ -733,6 +739,8 @@ class MediaViewer extends React.Component {
             title = t('AttachVideo');
         } else if (isAnimationMessage(chatId, currentMessageId)) {
             title = t('AttachGif');
+        } else if (isLottieMessage(chatId, currentMessageId)) {
+            title = 'Lottie';
         }
 
         return (

@@ -597,6 +597,39 @@ function isVideoMessage(chatId, messageId) {
     }
 }
 
+function isLottieMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageDocument': {
+            const { document } = content;
+            if (!document) return false;
+
+            const { file_name } = document;
+
+            return file_name.toLowerCase().endsWith('.json');
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (!web_page) return false;
+
+            const { document } = web_page;
+            if (!document) return false;
+
+            const { file_name } = document;
+
+            return file_name.toLowerCase().endsWith('.json');
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 function isAnimationMessage(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
@@ -923,24 +956,45 @@ function openDocument(document, message, fileCancel) {
     if (!document) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { document: file } = document;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
     if (fileCancel && file.local.is_downloading_active) {
         FileStore.cancelGetRemoteFile(file.id, message);
+        return;
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
-    } else {
-        saveOrDownload(file, document.file_name, message, () => {
-            const { chat_id, id } = message;
+        return;
+    }
 
-            TdLibController.send({
-                '@type': 'openMessageContent',
-                chat_id: chat_id,
-                message_id: id
-            });
+    if (isLottieMessage(chat_id, id)) {
+        console.log('isLottieMessage=true');
+        download(file, message);
+
+        TdLibController.send({
+            '@type': 'openMessageContent',
+            chat_id: chat_id,
+            message_id: id
         });
+
+        ApplicationStore.setMediaViewerContent({
+            chatId: chat_id,
+            messageId: id
+        });
+    } else {
+        console.log('isLottieMessage=false');
+        // saveOrDownload(file, document.file_name, message, () => {
+        //     const { chat_id, id } = message;
+        //
+        //     TdLibController.send({
+        //         '@type': 'openMessageContent',
+        //         chat_id: chat_id,
+        //         message_id: id
+        //     });
+        // });
     }
 }
 
@@ -1352,6 +1406,7 @@ export {
     isDeletedMessage,
     isVideoMessage,
     isAnimationMessage,
+    isLottieMessage,
     getLocationId,
     getVenueId,
     isContentOpened,

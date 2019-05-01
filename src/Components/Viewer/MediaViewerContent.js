@@ -9,9 +9,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from './FileProgress';
+import Lottie from './Lottie';
 import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
-import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
+import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -51,6 +52,8 @@ class MediaViewerContent extends React.Component {
             thumbnailHeight: thumbnailHeight,
             thumbnail: thumbnail
         };
+
+        this.updateAnimationData();
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -84,6 +87,7 @@ class MediaViewerContent extends React.Component {
     }
 
     componentDidMount() {
+        FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
@@ -93,6 +97,7 @@ class MediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
+        FileStore.removeListener('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
@@ -101,15 +106,63 @@ class MediaViewerContent extends React.Component {
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { chatId, messageId } = this.props;
+
+        if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
+            this.updateAnimationData();
+        }
+    }
+
+    onClientUpdateDocumentBlob = update => {
+        const { chatId, messageId } = this.props;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            this.updateAnimationData();
+        }
+    };
+
+    updateAnimationData = async () => {
+        const { chatId, messageId, size } = this.props;
+
+        if (!isLottieMessage(chatId, messageId)) return;
+
+        const [width, height, file] = getMediaFile(chatId, messageId, size);
+        const animationData = await this.getAnimationData(file);
+
+        this.setState({ animationData });
+    };
+
+    getAnimationData = file => {
+        return new Promise(resolve => {
+            if (!file) {
+                resolve(null);
+                return;
+            }
+
+            const blob = FileStore.getBlob(file.id);
+            if (!blob) {
+                resolve(null);
+                return;
+            }
+
+            const fileReader = new FileReader();
+            fileReader.onload = event => resolve(JSON.parse(event.target.result));
+            fileReader.onerror = () => resolve(null);
+            fileReader.onabort = () => resolve(null);
+            fileReader.readAsText(blob);
+        });
+    };
+
     onClientUpdateMediaBlob = update => {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             const [width, height, file] = getMediaFile(chatId, messageId, size);
             this.setState({
-                width: width,
-                height: height,
-                file: file
+                width,
+                height,
+                file
             });
         }
     };
@@ -150,7 +203,17 @@ class MediaViewerContent extends React.Component {
 
     render() {
         const { chatId, messageId } = this.props;
-        const { width, height, thumbnailWidth, thumbnailHeight, file, text, thumbnail, isPlaying } = this.state;
+        const {
+            animationData,
+            width,
+            height,
+            thumbnailWidth,
+            thumbnailHeight,
+            file,
+            text,
+            thumbnail,
+            isPlaying
+        } = this.state;
         if (!file) return null;
 
         const blob = FileStore.getBlob(file.id) || file.blob;
@@ -162,6 +225,7 @@ class MediaViewerContent extends React.Component {
 
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
+        const isLottie = isLottieMessage(chatId, messageId);
         let videoWidth = width;
         let videoHeight = height;
         if (Math.max(videoWidth, videoHeight) > 640) {
@@ -274,6 +338,17 @@ class MediaViewerContent extends React.Component {
                         ))}
                 </div>
             );
+        } else if (isLottie) {
+            const defaultOptions = {
+                loop: true,
+                autoplay: true,
+                //path: src,
+                animationData: animationData,
+                rendererSettings: {
+                    preserveAspectRatio: 'xMidYMid slice'
+                }
+            };
+            content = <Lottie options={defaultOptions} height={400} width={400} isStopped={false} isPaused={false} />;
         } else {
             content = <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />;
         }

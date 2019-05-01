@@ -2672,15 +2672,22 @@ function getMediaPreviewFile(chatId, messageId) {
     if (!content) return [0, 0, null];
 
     switch (content['@type']) {
-        case 'messagePhoto': {
-            return getMediaFile(chatId, messageId, PHOTO_SIZE);
-        }
-        case 'messageVideo': {
-            const { video } = content;
-            if (video.thumbnail) {
-                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation && animation.thumbnail) {
+                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
             }
             break;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (document) {
+                return [50, 50, document.document];
+            }
+            break;
+        }
+        case 'messagePhoto': {
+            return getMediaFile(chatId, messageId, PHOTO_SIZE);
         }
         case 'messageText': {
             const { web_page } = content;
@@ -2689,19 +2696,22 @@ function getMediaPreviewFile(chatId, messageId) {
                 if (animation && animation.thumbnail) {
                     return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
                 }
-                if (video && video.thumbnail) {
-                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                if (document) {
+                    return [50, 50, document.document];
                 }
                 if (photo) {
                     return getMediaFile(chatId, messageId, PHOTO_SIZE);
                 }
+                if (video && video.thumbnail) {
+                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                }
             }
             break;
         }
-        case 'messageAnimation': {
-            const { animation } = content;
-            if (animation && animation.thumbnail) {
-                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
+        case 'messageVideo': {
+            const { video } = content;
+            if (video.thumbnail) {
+                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
             }
             break;
         }
@@ -2722,6 +2732,20 @@ function getMediaFile(chatId, messageId, size) {
     if (!content) return [0, 0, null];
 
     switch (content['@type']) {
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation) {
+                return [animation.width, animation.height, animation.animation];
+            }
+            break;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (document) {
+                return [50, 50, document.document];
+            }
+            break;
+        }
         case 'messagePhoto': {
             const { photo } = content;
             if (photo) {
@@ -2732,30 +2756,18 @@ function getMediaFile(chatId, messageId, size) {
             }
             break;
         }
-        case 'messageVideo': {
-            const { video } = content;
-            if (video) {
-                return [video.width, video.height, video.video];
-            }
-            break;
-        }
-        case 'messageAnimation': {
-            const { animation } = content;
-            if (animation) {
-                return [animation.width, animation.height, animation.animation];
-            }
-            break;
-        }
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { animation, video, photo } = web_page;
+                const { animation, document, photo, video } = web_page;
                 if (animation) {
                     return [animation.width, animation.height, animation.animation];
                 }
-                if (video) {
-                    return [video.width, video.height, video.video];
+
+                if (document) {
+                    return [50, 50, document.document];
                 }
+
                 if (photo) {
                     const photoSize = getSize(photo.sizes, size);
                     if (photoSize) {
@@ -2763,6 +2775,17 @@ function getMediaFile(chatId, messageId, size) {
                     }
                     break;
                 }
+
+                if (video) {
+                    return [video.width, video.height, video.video];
+                }
+            }
+            break;
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (video) {
+                return [video.width, video.height, video.video];
             }
             break;
         }
@@ -2902,6 +2925,29 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
         const { content } = message;
         if (content) {
             switch (content['@type']) {
+                case 'messageDocument': {
+                    const { document } = content;
+                    if (!document) break;
+
+                    const { document: file } = document;
+                    if (!file) break;
+
+                    const { id, idb_key } = file;
+
+                    const blob = FileStore.getBlob(file.id) || file.blob;
+                    if (blob) break;
+
+                    FileStore.getLocalFile(
+                        store,
+                        file,
+                        idb_key,
+                        null,
+                        () => FileStore.updateDocumentBlob(message.chat_id, message.id, id),
+                        () => {
+                            FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                        }
+                    );
+                }
                 case 'messageText': {
                     const { web_page } = message.content;
                     if (!web_page) {
