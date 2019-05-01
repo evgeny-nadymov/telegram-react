@@ -370,6 +370,26 @@ class MediaViewer extends React.Component {
         if (!content) return;
 
         switch (content['@type']) {
+            case 'messageAnimation': {
+                const { animation } = content;
+                if (animation) {
+                    const file = animation.animation;
+                    if (file) {
+                        saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
+                    }
+                }
+                break;
+            }
+            case 'messageDocument': {
+                const { document } = content;
+                if (document) {
+                    const file = document.document;
+                    if (file) {
+                        saveOrDownload(file, document.file_name || file.id + '.mp4', message);
+                    }
+                }
+                break;
+            }
             case 'messagePhoto': {
                 const { photo } = content;
                 if (photo) {
@@ -383,20 +403,10 @@ class MediaViewer extends React.Component {
                 }
                 break;
             }
-            case 'messageVideo': {
-                const { video } = content;
-                if (video) {
-                    const file = video.video;
-                    if (file) {
-                        saveOrDownload(file, video.file_name || file.id + '.mp4', message);
-                    }
-                }
-                break;
-            }
             case 'messageText': {
                 const { web_page } = content;
                 if (web_page) {
-                    const { animation, video, photo } = web_page;
+                    const { animation, document, photo, video } = web_page;
 
                     if (animation) {
                         const file = animation.animation;
@@ -406,10 +416,11 @@ class MediaViewer extends React.Component {
                         }
                     }
 
-                    if (video) {
-                        const file = video.video;
+                    if (document) {
+                        const file = document.document;
                         if (file) {
-                            saveOrDownload(file, video.file_name || file.id + '.mp4', message);
+                            saveOrDownload(file, document.file_name || file.id + '.dat', message);
+                            return;
                         }
                     }
 
@@ -423,15 +434,22 @@ class MediaViewer extends React.Component {
                             }
                         }
                     }
+
+                    if (video) {
+                        const file = video.video;
+                        if (file) {
+                            saveOrDownload(file, video.file_name || file.id + '.mp4', message);
+                        }
+                    }
                 }
                 break;
             }
-            case 'messageAnimation': {
-                const { animation } = content;
-                if (animation) {
-                    const file = animation.animation;
+            case 'messageVideo': {
+                const { video } = content;
+                if (video) {
+                    const file = video.video;
                     if (file) {
-                        saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
+                        saveOrDownload(file, video.file_name || file.id + '.mp4', message);
                     }
                 }
                 break;

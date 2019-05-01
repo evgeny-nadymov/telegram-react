@@ -39,50 +39,24 @@ class MediaViewerDownloadButton extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdateUserBlob', this.onClientUpdateUserBlob);
-        FileStore.on('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.on('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
+        FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateChatBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateUserBlob', this.onClientUpdateMediaBlob);
+        FileStore.on('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
-        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateVideoBlob);
+        FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateDocumentBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateMediaBlob);
+        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
     }
 
-    onClientUpdateUserBlob = update => {
-        const { fileId } = this.state;
-
-        if (fileId === update.fileId) {
-            this.setState({
-                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
-            });
-        }
-    };
-
-    onClientUpdateChatBlob = update => {
-        const { fileId } = this.state;
-
-        if (fileId === update.fileId) {
-            this.setState({
-                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
-            });
-        }
-    };
-
-    onClientUpdatePhotoBlob = update => {
-        const { fileId } = this.state;
-
-        if (fileId === update.fileId) {
-            this.setState({
-                disabled: MediaViewerDownloadButton.saveDisabled(fileId)
-            });
-        }
-    };
-
-    onClientUpdateVideoBlob = update => {
+    onClientUpdateMediaBlob = update => {
         const { fileId } = this.state;
 
         if (fileId === update.fileId) {
