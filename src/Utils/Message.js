@@ -840,24 +840,19 @@ function openVideo(video, message, fileCancel) {
     if (!video) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { video: file } = video;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    if (file) {
-        if (fileCancel && file.local.is_downloading_active) {
-            FileStore.cancelGetRemoteFile(file.id, message);
-            return;
-        } else if (fileCancel && file.remote.is_uploading_active) {
-            FileStore.cancelUploadFile(file.id, message);
-            return;
-        }
-        // else {
-        //     saveOrDownload(file, document.file_name, message);
-        // }
+    if (fileCancel && file.local.is_downloading_active) {
+        FileStore.cancelGetRemoteFile(file.id, message);
+        return;
+    } else if (fileCancel && file.remote.is_uploading_active) {
+        FileStore.cancelUploadFile(file.id, message);
+        return;
     }
-
-    const { chat_id, id } = message;
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -875,6 +870,8 @@ function openAudio(audio, message, fileCancel) {
     if (!audio) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { audio: file } = audio;
     if (!file) return;
 
@@ -886,10 +883,8 @@ function openAudio(audio, message, fileCancel) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     } else {
-        download(file, message);
+        download(file, message, () => FileStore.updateAudioBlob(chat_id, id, file.id));
     }
-
-    const { chat_id, id } = message;
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -908,6 +903,8 @@ function openVoiceNote(voiceNote, message, fileCancel) {
     if (!voiceNote) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { voice: file } = voiceNote;
     if (!file) return;
 
@@ -919,10 +916,8 @@ function openVoiceNote(voiceNote, message, fileCancel) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     } else {
-        download(file, message);
+        download(file, message, () => FileStore.updateVoiceNoteBlob(chat_id, id, file.id));
     }
-
-    const { chat_id, id } = message;
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -970,10 +965,13 @@ function openDocument(document, message, fileCancel) {
         return;
     }
 
-    if (isLottieMessage(chat_id, id)) {
-        console.log('isLottieMessage=true');
-        download(file, message);
+    TdLibController.send({
+        '@type': 'openMessageContent',
+        chat_id: chat_id,
+        message_id: id
+    });
 
+    if (isLottieMessage(chat_id, id)) {
         TdLibController.send({
             '@type': 'openMessageContent',
             chat_id: chat_id,
@@ -985,16 +983,7 @@ function openDocument(document, message, fileCancel) {
             messageId: id
         });
     } else {
-        console.log('isLottieMessage=false');
-        // saveOrDownload(file, document.file_name, message, () => {
-        //     const { chat_id, id } = message;
-        //
-        //     TdLibController.send({
-        //         '@type': 'openMessageContent',
-        //         chat_id: chat_id,
-        //         message_id: id
-        //     });
-        // });
+        saveOrDownload(file, document.file_name, message);
     }
 }
 
@@ -1002,26 +991,24 @@ function openPhoto(photo, message, fileCancel) {
     if (!photo) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     const photoSize = getPhotoSize(photo.sizes);
-    if (photoSize) {
-        let { photo: file } = photoSize;
-        if (file) {
-            file = FileStore.get(file.id) || file;
-            if (file) {
-                if (fileCancel && file.local.is_downloading_active) {
-                    FileStore.cancelGetRemoteFile(file.id, message);
-                    return;
-                } else if (fileCancel && file.remote.is_uploading_active) {
-                    FileStore.cancelUploadFile(file.id, message);
-                    return;
-                } else {
-                    download(file, message);
-                }
-            }
-        }
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    if (!file) return;
+
+    file = FileStore.get(file.id) || file;
+    if (fileCancel && file.local.is_downloading_active) {
+        FileStore.cancelGetRemoteFile(file.id, message);
+        return;
+    } else if (fileCancel && file.remote.is_uploading_active) {
+        FileStore.cancelUploadFile(file.id, message);
+        return;
     }
 
-    const { chat_id, id } = message;
+    download(file, message, () => FileStore.updatePhotoBlob(chat_id, id, file.id));
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -1039,26 +1026,24 @@ function openGame(game, message, fileCancel) {
     if (!game) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     const { animation } = game;
     if (animation) {
         let { animation: file } = animation;
-        if (file) {
-            file = FileStore.get(file.id) || file;
-            if (file) {
-                if (fileCancel && file.local.is_downloading_active) {
-                    FileStore.cancelGetRemoteFile(file.id, message);
-                    return;
-                } else if (fileCancel && file.remote.is_uploading_active) {
-                    FileStore.cancelUploadFile(file.id, message);
-                    return;
-                } else {
-                    download(file, message);
-                }
-            }
-        }
-    }
+        if (!file) return;
 
-    const { chat_id, id } = message;
+        file = FileStore.get(file.id) || file;
+        if (fileCancel && file.local.is_downloading_active) {
+            FileStore.cancelGetRemoteFile(file.id, message);
+            return;
+        } else if (fileCancel && file.remote.is_uploading_active) {
+            FileStore.cancelUploadFile(file.id, message);
+            return;
+        }
+
+        download(file, message, () => FileStore.updateAnimationBlob(chat_id, id, file.id));
+    }
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -1077,6 +1062,8 @@ function openVideoNote(videoNote, message, fileCancel) {
     if (!videoNote) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { video: file } = videoNote;
     if (!file) return;
 
@@ -1087,11 +1074,9 @@ function openVideoNote(videoNote, message, fileCancel) {
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
-    } else {
-        download(file, message);
     }
 
-    const { chat_id, id } = message;
+    download(file, message, () => FileStore.updateVideoNoteBlob(chat_id, id, file.id));
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -1110,6 +1095,8 @@ function openAnimation(animation, message, fileCancel) {
     if (!animation) return;
     if (!message) return;
 
+    const { chat_id, id } = message;
+
     let { animation: file } = animation;
     if (!file) return;
 
@@ -1120,11 +1107,10 @@ function openAnimation(animation, message, fileCancel) {
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
-    } else {
-        download(file, message);
     }
 
-    const { chat_id, id } = message;
+    // download file at loadMediaViewerContent instead
+    // download(file, message, FileStore.updateAnimationBlob(chat_id, id, file.id));
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateActiveAnimation',

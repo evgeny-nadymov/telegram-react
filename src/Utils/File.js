@@ -2595,78 +2595,45 @@ function loadMessageContents(store, messages) {
     loadReplies(store, chatId, [...replies.keys()]);
 }
 
-function saveOrDownload(file, fileName, obj, onDownload) {
+function saveOrDownload(file, fileName, obj, callback) {
     if (!file) return;
     if (!fileName) return;
 
     if (file.arr) {
         saveData(file.arr, fileName);
-        if (onDownload) onDownload();
         return;
     }
 
-    if (file.blob) {
-        saveBlob(file.blob, fileName);
-        if (onDownload) onDownload();
-        return;
-    }
-
-    const blob = FileStore.getBlob(file.id);
+    let blob = FileStore.getBlob(file.id) || file.blob;
     if (blob) {
         saveBlob(blob, fileName);
-        if (onDownload) onDownload();
         return;
     }
 
-    if (file.idb_key) {
-        let store = FileStore.getStore();
+    download(file, obj, () => {
+        if (callback) callback();
 
-        FileStore.getLocalFile(
-            store,
-            file,
-            file.idb_key,
-            null,
-            () => {
-                if (file.blob) {
-                    saveBlob(file.blob, fileName);
-                    if (onDownload) onDownload();
-                }
-            },
-            () => {
-                if (file.local.can_be_downloaded) {
-                    FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
-                }
-            }
-        );
-        return;
-    }
-
-    if (file.local.can_be_downloaded) {
-        FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
-    }
+        blob = FileStore.getBlob(file.id) || file.blob;
+        if (blob) {
+            saveBlob(blob, fileName);
+        }
+    });
 }
 
-function download(file, obj) {
+function download(file, obj, callback) {
     const blob = FileStore.getBlob(file.id);
     if (blob) {
         return;
     }
 
     if (file.idb_key) {
-        let store = FileStore.getStore();
+        const store = FileStore.getStore();
 
-        FileStore.getLocalFile(
-            store,
-            file,
-            file.idb_key,
-            null,
-            () => {},
-            () => {
-                if (file.local.can_be_downloaded) {
-                    FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
-                }
+        FileStore.getLocalFile(store, file, file.idb_key, null, callback, () => {
+            if (file.local.can_be_downloaded) {
+                FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
             }
-        );
+        });
         return;
     }
 
@@ -2938,15 +2905,21 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
             switch (content['@type']) {
                 case 'messageDocument': {
                     const { document } = content;
-                    if (!document) break;
+                    if (!document) {
+                        break;
+                    }
 
                     const { document: file } = document;
-                    if (!file) break;
+                    if (!file) {
+                        break;
+                    }
 
                     const { id, idb_key } = file;
 
                     const blob = FileStore.getBlob(file.id) || file.blob;
-                    if (blob) break;
+                    if (blob) {
+                        break;
+                    }
 
                     FileStore.getLocalFile(
                         store,

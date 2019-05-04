@@ -25,6 +25,7 @@ class MediaViewerContent extends React.Component {
         super(props);
 
         this.videoRef = React.createRef();
+        this.lottieRef = React.createRef();
 
         const { chatId, messageId, size } = this.props;
 
@@ -41,6 +42,7 @@ class MediaViewerContent extends React.Component {
         //console.log('mediaViewer thumbnail', thumbnail);
 
         this.state = {
+            speed: 1,
             prevChatId: chatId,
             prevMessageId: messageId,
             isPlaying: false,
@@ -70,6 +72,7 @@ class MediaViewerContent extends React.Component {
             const text = getText(message);
 
             return {
+                speed: 1,
                 prevChatId: chatId,
                 prevMessageId: messageId,
                 isPlaying: false,
@@ -125,7 +128,9 @@ class MediaViewerContent extends React.Component {
     updateAnimationData = async () => {
         const { chatId, messageId, size } = this.props;
 
-        if (!isLottieMessage(chatId, messageId)) return;
+        if (!isLottieMessage(chatId, messageId)) {
+            return;
+        }
 
         const [width, height, file] = getMediaFile(chatId, messageId, size);
         const animationData = await this.getAnimationData(file);
@@ -199,6 +204,12 @@ class MediaViewerContent extends React.Component {
 
     handleContentClick = event => {
         if (event) event.stopPropagation();
+    };
+
+    changeSpeed = speed => {
+        this.setState({
+            speed
+        });
     };
 
     render() {
@@ -348,7 +359,19 @@ class MediaViewerContent extends React.Component {
                     preserveAspectRatio: 'xMidYMid slice'
                 }
             };
-            content = <Lottie options={defaultOptions} height={400} width={400} isStopped={false} isPaused={false} />;
+            const { speed } = this.state;
+
+            content = (
+                <Lottie
+                    ref={this.lottieRef}
+                    speed={speed}
+                    options={defaultOptions}
+                    height='auto'
+                    width={400}
+                    isStopped={false}
+                    isPaused={false}
+                />
+            );
         } else {
             content = <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />;
         }

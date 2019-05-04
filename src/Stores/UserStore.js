@@ -73,12 +73,12 @@ class UserStore extends EventEmitter {
         //this.set(Object.assign({}, source1, source2));
     }
 
-    getMe() {
+    getMyId() {
         const myId = OptionStore.get('my_id');
         if (!myId) return null;
         if (!myId.value) return null;
 
-        return this.get(myId.value);
+        return myId.value;
     }
 
     get(userId) {

@@ -623,9 +623,7 @@ function isMeChat(chatId) {
         }
         case 'chatTypeSecret':
         case 'chatTypePrivate': {
-            const user = UserStore.getMe();
-
-            return user && user.id === chat.type.user_id;
+            return UserStore.getMyId() === chat.type.user_id;
         }
     }
 

@@ -84,10 +84,9 @@ class ForwardDialog extends React.Component {
         });
         promises.push(getChatsPromise);
 
-        const me = UserStore.getMe();
         const savedMessagesPromise = TdLibController.send({
             '@type': 'createPrivateChat',
-            user_id: me.id,
+            user_id: UserStore.getMyId(),
             force: true
         });
         promises.push(savedMessagesPromise);

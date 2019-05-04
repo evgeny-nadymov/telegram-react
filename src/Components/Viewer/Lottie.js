@@ -1,8 +1,16 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import lottie from 'lottie-web';
+import './Lottie.css';
 
-export default class Lottie extends React.Component {
+class Lottie extends React.Component {
     componentDidMount() {
         const { options, eventListeners } = this.props;
 
@@ -18,9 +26,9 @@ export default class Lottie extends React.Component {
         this.options = {
             container: this.el,
             renderer: 'svg',
-            loop: loop !== false,
-            autoplay: autoplay !== false,
-            segments: segments !== false,
+            loop: Boolean(loop),
+            autoplay: Boolean(autoplay),
+            segments: Boolean(segments),
             animationData,
             //path,
             rendererSettings
@@ -32,7 +40,7 @@ export default class Lottie extends React.Component {
         this.registerEvents(eventListeners);
     }
 
-    componentWillUpdate(nextProps /* , nextState */) {
+    componentWillUpdate(nextProps, nextState, nextContext) {
         /* Recreate the animation handle if the data is changed */
         if (
             this.options.animationData !== nextProps.options.animationData ||
@@ -46,7 +54,7 @@ export default class Lottie extends React.Component {
         }
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.props.isStopped) {
             this.stop();
         } else if (this.props.segments) {
@@ -193,3 +201,5 @@ Lottie.defaultProps = {
     isClickToPauseDisabled: false,
     title: ''
 };
+
+export default Lottie;

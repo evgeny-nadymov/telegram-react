@@ -405,10 +405,9 @@ document.addEventListener('keydown', async event => {
                 event.preventDefault();
                 event.stopPropagation();
 
-                const me = UserStore.getMe();
                 const chat = await TdLibController.send({
                     '@type': 'createPrivateChat',
-                    user_id: me.id,
+                    user_id: UserStore.getMyId(),
                     force: true
                 });
 

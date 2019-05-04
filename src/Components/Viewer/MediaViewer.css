@@ -16,6 +16,21 @@
     flex-direction: column;
 }
 
+.default {
+    background: rgba(26, 26, 26, 0.7);
+    color: white;
+}
+
+.black {
+    background: black;
+    color: white;
+}
+
+.white {
+    background: white;
+    color: black;
+}
+
 .media-viewer-wrapper {
     cursor: pointer;
     flex-grow: 1;
@@ -54,6 +69,7 @@
     min-height: 68px;
     width: 100%;
     background: #313131;
+    color: white;
     display: flex;
     flex-direction: row;
 }

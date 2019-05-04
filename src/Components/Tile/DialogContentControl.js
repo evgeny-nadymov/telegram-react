@@ -18,12 +18,12 @@ import ChatStore from '../../Stores/ChatStore';
 import './DialogContentControl.css';
 
 class DialogContentControl extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
+
+        if (nextProps.t !== this.props.t) {
             return true;
         }
 

@@ -133,8 +133,7 @@ function getServiceMessageContent(message, openUser = false) {
     if (!message) return null;
     if (!message.content) return null;
 
-    const me = UserStore.getMe();
-    const isOutgoing = me && message.sender_user_id === me.id;
+    const isOutgoing = message.sender_user_id === UserStore.getMyId();
     const chat = ChatStore.get(message.chat_id);
     const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
 
@@ -204,7 +203,7 @@ function getServiceMessageContent(message, openUser = false) {
                 }, null);
 
             if (isOutgoing) {
-                return me && content.member_user_ids.length === 1 && content.member_user_ids[0] === me.id ? (
+                return content.member_user_ids.length === 1 && content.member_user_ids[0] === UserStore.getMyId() ? (
                     'You joined the group'
                 ) : (
                     <>
@@ -263,7 +262,7 @@ function getServiceMessageContent(message, openUser = false) {
         }
         case 'messageChatDeleteMember': {
             if (isOutgoing) {
-                return me && content.user_id === me.id ? (
+                return content.user_id === UserStore.getMyId() ? (
                     'You left the group'
                 ) : (
                     <>

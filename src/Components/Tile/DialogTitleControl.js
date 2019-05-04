@@ -18,6 +18,10 @@ class DialogTitleControl extends React.Component {
             return true;
         }
 
+        if (nextProps.t !== this.props.t) {
+            return true;
+        }
+
         return false;
     }
 

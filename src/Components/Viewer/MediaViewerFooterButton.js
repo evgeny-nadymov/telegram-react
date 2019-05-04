@@ -1,6 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import './MediaViewerFooterButton.css';
+
+const styles = theme => ({
+    checked: {
+        color: theme.palette.primary.main
+    }
+});
 
 class MediaViewerFooterButton extends React.Component {
     handleClick = event => {
@@ -14,18 +22,15 @@ class MediaViewerFooterButton extends React.Component {
     };
 
     render() {
-        const { title, disabled, children } = this.props;
+        const { checked, children, classes, disabled, title } = this.props;
 
         return (
             <div
-                className={
-                    disabled
-                        ? 'media-viewer-footer-button-disabled'
-                        : 'media-viewer-footer-button'
-                }
+                className={classNames(disabled ? 'media-viewer-footer-button-disabled' : 'media-viewer-footer-button', {
+                    [classes.checked]: checked
+                })}
                 title={title}
-                onClick={this.handleClick}
-            >
+                onClick={this.handleClick}>
                 {children}
             </div>
         );
@@ -35,7 +40,8 @@ class MediaViewerFooterButton extends React.Component {
 MediaViewerFooterButton.propTypes = {
     title: PropTypes.string,
     disabled: PropTypes.bool,
+    checked: PropTypes.bool,
     onClick: PropTypes.func
 };
 
-export default MediaViewerFooterButton;
+export default withStyles(styles)(MediaViewerFooterButton);

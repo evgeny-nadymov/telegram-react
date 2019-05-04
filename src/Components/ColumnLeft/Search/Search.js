@@ -306,10 +306,9 @@ class Search extends React.Component {
             return { '@type': 'chats', chat_ids: [] };
         });
 
-        const me = UserStore.getMe();
         const savedMessagesPromise = TdLibController.send({
             '@type': 'createPrivateChat',
-            user_id: me.id,
+            user_id: UserStore.getMyId(),
             force: true
         }).catch(error => {});
 

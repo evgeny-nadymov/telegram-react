@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import {
     Button,
@@ -23,6 +24,8 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import ReplyIcon from '@material-ui/icons/Reply';
 import DeleteIcon from '@material-ui/icons/Delete';
+import InvertColorsIcon from '@material-ui/icons/InvertColors';
+import SlowMotionVideoIcon from '@material-ui/icons/SlowMotionVideo';
 import MediaViewerControl from '../Tile/MediaViewerControl';
 import MediaViewerContent from './MediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
@@ -54,29 +57,29 @@ import './MediaViewer.css';
 
 const forwardIconStyle = {
     padding: 20,
-    color: 'white',
     transform: 'scaleX(-1)'
 };
 
 const iconStyle = {
-    padding: 20,
-    color: 'white'
+    padding: 20
 };
 
 const navigationIconStyle = {
-    padding: 35,
-    color: 'white'
+    padding: 35
 };
 
 class MediaViewer extends React.Component {
     constructor(props) {
         super(props);
 
+        this.contentRef = React.createRef();
         this.history = [];
 
         const { chatId, messageId } = this.props;
 
         this.state = {
+            speed: 1,
+            background: 'default',
             prevChatId: chatId,
             prevMessageId: messageId,
             currentMessageId: messageId,
@@ -90,13 +93,19 @@ class MediaViewer extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId } = this.props;
         const {
+            background,
             currentMessageId,
-            hasPreviousMedia,
-            hasNextMedia,
+            deleteConfirmationOpened,
             firstSliceLoaded,
-            totalCount,
-            deleteConfirmationOpened
+            hasNextMedia,
+            hasPreviousMedia,
+            speed,
+            totalCount
         } = this.state;
+
+        if (nextState.background !== background) {
+            return true;
+        }
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -127,6 +136,10 @@ class MediaViewer extends React.Component {
         }
 
         if (nextState.deleteConfirmationOpened !== deleteConfirmationOpened) {
+            return true;
+        }
+
+        if (nextState.speed !== speed) {
             return true;
         }
 
@@ -359,6 +372,65 @@ class MediaViewer extends React.Component {
         }
     };
 
+    saveAnimation = (animation, message) => {
+        if (!message) return;
+        const { chat_id, id } = message;
+
+        if (!animation) return;
+
+        const { animation: file, file_name } = animation;
+        if (!file) return;
+
+        const { id: fileId } = file;
+
+        saveOrDownload(file, file_name || id, message, () => FileStore.updateAnimationBlob(chat_id, id, fileId));
+    };
+
+    saveDocument = (document, message) => {
+        if (!message) return;
+        const { chat_id, id } = message;
+
+        if (!document) return;
+
+        const { document: file, file_name } = document;
+        if (!file) return;
+
+        const { id: fileId } = file;
+
+        saveOrDownload(file, file_name || id, message, () => FileStore.updateDocumentBlob(chat_id, id, fileId));
+    };
+
+    saveVideo = (video, message) => {
+        if (!message) return;
+        const { chat_id, id } = message;
+
+        if (!video) return;
+
+        const { video: file, file_name } = video;
+        if (!file) return;
+
+        const { id: fileId } = file;
+
+        saveOrDownload(file, file_name || id, message, () => FileStore.updateVideoBlob(chat_id, id, fileId));
+    };
+
+    savePhoto = (photo, message) => {
+        if (!message) return;
+        const { chat_id, id } = message;
+
+        if (!photo) return;
+
+        const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+        if (!photoSize) return;
+
+        const { photo: file } = photoSize;
+        if (!file) return;
+
+        const { id: fileId } = file;
+
+        saveOrDownload(file, file.id + '.jpg', message, () => FileStore.updatePhotoBlob(chat_id, id, fileId));
+    };
+
     handleSave = () => {
         const { chatId } = this.props;
         const { currentMessageId } = this.state;
@@ -372,86 +444,53 @@ class MediaViewer extends React.Component {
         switch (content['@type']) {
             case 'messageAnimation': {
                 const { animation } = content;
-                if (animation) {
-                    const file = animation.animation;
-                    if (file) {
-                        saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
-                    }
-                }
+
+                this.saveAnimation(animation, message);
                 break;
             }
             case 'messageDocument': {
                 const { document } = content;
-                if (document) {
-                    const file = document.document;
-                    if (file) {
-                        saveOrDownload(file, document.file_name || file.id + '.mp4', message);
-                    }
-                }
+
+                this.saveDocument(document, message);
                 break;
             }
             case 'messagePhoto': {
                 const { photo } = content;
-                if (photo) {
-                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                    if (photoSize) {
-                        const file = photoSize.photo;
-                        if (file) {
-                            saveOrDownload(file, file.id + '.jpg', message);
-                        }
-                    }
-                }
+
+                this.savePhoto(photo, message);
                 break;
             }
             case 'messageText': {
                 const { web_page } = content;
-                if (web_page) {
-                    const { animation, document, photo, video } = web_page;
+                if (!web_page) return;
 
-                    if (animation) {
-                        const file = animation.animation;
-                        if (file) {
-                            saveOrDownload(file, animation.file_name || file.id + '.mp4', message);
-                            return;
-                        }
-                    }
+                const { animation, document, photo, video } = web_page;
 
-                    if (document) {
-                        const file = document.document;
-                        if (file) {
-                            saveOrDownload(file, document.file_name || file.id + '.dat', message);
-                            return;
-                        }
-                    }
+                if (animation) {
+                    this.saveAnimation(animation, message);
+                    return;
+                }
 
-                    if (photo) {
-                        const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                        if (photoSize) {
-                            const file = photoSize.photo;
-                            if (file) {
-                                saveOrDownload(file, file.id + '.jpg', message);
-                                return;
-                            }
-                        }
-                    }
+                if (document) {
+                    this.saveDocument(document, message);
+                    return;
+                }
 
-                    if (video) {
-                        const file = video.video;
-                        if (file) {
-                            saveOrDownload(file, video.file_name || file.id + '.mp4', message);
-                        }
-                    }
+                if (photo) {
+                    this.savePhoto(photo, message);
+                    return;
+                }
+
+                if (video) {
+                    this.saveVideo(video, message);
+                    return;
                 }
                 break;
             }
             case 'messageVideo': {
                 const { video } = content;
-                if (video) {
-                    const file = video.video;
-                    if (file) {
-                        saveOrDownload(file, video.file_name || file.id + '.mp4', message);
-                    }
-                }
+
+                this.saveVideo(video, message);
                 break;
             }
         }
@@ -685,16 +724,56 @@ class MediaViewer extends React.Component {
         this.setState({ deleteForAll: event.target.checked });
     };
 
+    handleInvertColors = () => {
+        const { background } = this.state;
+
+        let nextBackground = 'default';
+        switch (background) {
+            case 'default': {
+                nextBackground = 'black';
+                break;
+            }
+            case 'black': {
+                nextBackground = 'white';
+                break;
+            }
+            case 'white': {
+                nextBackground = 'default';
+                break;
+            }
+        }
+
+        this.setState({
+            background: nextBackground
+        });
+    };
+
+    handleChangeSpeed = () => {
+        if (!this.contentRef) return;
+
+        const { current } = this.contentRef;
+        if (!current) return;
+
+        const { speed } = this.state;
+        const nextSpeed = speed < 1 ? 1 : 0.1;
+
+        this.setState({ speed: nextSpeed });
+
+        current.changeSpeed(nextSpeed);
+    };
+
     render() {
-        const { chatId, messageId, t } = this.props;
+        const { chatId, t } = this.props;
         const {
+            background,
             currentMessageId,
+            deleteConfirmationOpened,
+            deleteForAll,
+            firstSliceLoaded,
             hasNextMedia,
             hasPreviousMedia,
-            firstSliceLoaded,
             totalCount,
-            deleteConfirmationOpened,
-            deleteForAll
+            speed
         } = this.state;
 
         let index = -1;
@@ -758,11 +837,11 @@ class MediaViewer extends React.Component {
         } else if (isAnimationMessage(chatId, currentMessageId)) {
             title = t('AttachGif');
         } else if (isLottieMessage(chatId, currentMessageId)) {
-            title = 'Lottie';
+            title = '';
         }
 
         return (
-            <div className='media-viewer'>
+            <div className={classNames('media-viewer', background)}>
                 {deleteConfirmation}
                 <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
@@ -774,6 +853,7 @@ class MediaViewer extends React.Component {
 
                     <div className='media-viewer-content-column'>
                         <MediaViewerContent
+                            ref={this.contentRef}
                             chatId={chatId}
                             messageId={currentMessageId}
                             size={PHOTO_BIG_SIZE}
@@ -796,6 +876,21 @@ class MediaViewer extends React.Component {
                         title={title}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
+                    {isLottieMessage(chatId, currentMessageId) && (
+                        <>
+                            <MediaViewerFooterButton
+                                title={t('ChangeSpeed')}
+                                checked={speed < 1}
+                                onClick={this.handleChangeSpeed}>
+                                <SlowMotionVideoIcon style={iconStyle} />
+                            </MediaViewerFooterButton>
+                            <MediaViewerFooterButton
+                                title={t('InvertBackgroundColor')}
+                                onClick={this.handleInvertColors}>
+                                <InvertColorsIcon style={iconStyle} />
+                            </MediaViewerFooterButton>
+                        </>
+                    )}
                     <MediaViewerDownloadButton title={t('Save')} fileId={fileId} onClick={this.handleSave} />
                     <MediaViewerFooterButton
                         title={t('Forward')}

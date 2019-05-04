@@ -190,7 +190,7 @@ class ProfileMediaViewer extends React.Component {
         const file = FileStore.get(photo.big.id) || photo.big;
         if (!file) return;
 
-        saveOrDownload(file, file.id + '.jpg', chat);
+        saveOrDownload(file, file.id + '.jpg', chat, () => FileStore.updateChatPhotoBlob(chatId, file.id));
     };
 
     handleForward = () => {};
