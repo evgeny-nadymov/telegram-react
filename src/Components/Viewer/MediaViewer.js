@@ -79,7 +79,7 @@ class MediaViewer extends React.Component {
 
         this.state = {
             speed: 1,
-            background: 'default',
+            background: 'media-viewer-default',
             prevChatId: chatId,
             prevMessageId: messageId,
             currentMessageId: messageId,
@@ -727,18 +727,18 @@ class MediaViewer extends React.Component {
     handleInvertColors = () => {
         const { background } = this.state;
 
-        let nextBackground = 'default';
+        let nextBackground = 'media-viewer-default';
         switch (background) {
-            case 'default': {
-                nextBackground = 'black';
+            case 'media-viewer-default': {
+                nextBackground = 'media-viewer-dark';
                 break;
             }
-            case 'black': {
-                nextBackground = 'white';
+            case 'media-viewer-dark': {
+                nextBackground = 'media-viewer-light';
                 break;
             }
-            case 'white': {
-                nextBackground = 'default';
+            case 'media-viewer-light': {
+                nextBackground = 'media-viewer-default';
                 break;
             }
         }

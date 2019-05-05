@@ -16,17 +16,17 @@
     flex-direction: column;
 }
 
-.default {
+.media-viewer-default {
     background: rgba(26, 26, 26, 0.7);
     color: white;
 }
 
-.black {
+.media-viewer-dark {
     background: black;
     color: white;
 }
 
-.white {
+.media-viewer-light {
     background: white;
     color: black;
 }
