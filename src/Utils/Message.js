@@ -569,13 +569,6 @@ function getLocationId(location) {
     return `loc=${latitude},${longitude}&size=${LOCATION_WIDTH},${LOCATION_HEIGHT}&scale=${LOCATION_SCALE}&zoom=${LOCATION_ZOOM}`;
 }
 
-function getVenueId(location) {
-    if (!location) return null;
-
-    const { longitude, latitude } = location;
-    return `loc=${latitude},${longitude}&size=${LOCATION_WIDTH},${LOCATION_HEIGHT}&scale=${LOCATION_SCALE}&zoom=${LOCATION_ZOOM}`;
-}
-
 function isVideoMessage(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
@@ -1394,7 +1387,6 @@ export {
     isAnimationMessage,
     isLottieMessage,
     getLocationId,
-    getVenueId,
     isContentOpened,
     getMediaTitle,
     hasAudio,
