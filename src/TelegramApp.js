@@ -225,11 +225,6 @@ class TelegramApp extends Component {
         this.handleSelectChat(chat.id);
     };
 
-    clearCache = () => {
-        // this.store.clear()
-        //     .then(() => alert('cache cleared'));
-    };
-
     handleChangePhone = () => {
         this.setState({
             authorizationState: { '@type': 'authorizationStateWaitPhoneNumber' }

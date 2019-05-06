@@ -1049,6 +1049,7 @@ function getChatDraftReplyToMessageId(chatId) {
         }
     }
 
+    console.log('getChatDraft', replyToMessageId);
     return replyToMessageId;
 }
 

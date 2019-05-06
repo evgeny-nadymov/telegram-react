@@ -119,6 +119,9 @@ class InputBoxControl extends Component {
     };
 
     onClientUpdateChatId = update => {
+        const { chatId } = this.state;
+        if (chatId === update.nextChatId) return;
+
         this.innerHTML = null;
         this.setState({
             chatId: update.nextChatId,
@@ -136,7 +139,7 @@ class InputBoxControl extends Component {
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
-        if (prevState.chatId === this.state.chatId) return;
+        if (prevState.chatId === this.state.chatId) return null;
 
         return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
     }
