@@ -26,10 +26,10 @@ import {
     PRELOAD_VOICENOTE_SIZE,
     THUMBNAIL_PRIORITY
 } from '../Constants';
-import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
-import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
+import MessageStore from '../Stores/MessageStore';
+import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 function getSizeString(size) {
@@ -86,179 +86,6 @@ function getSmallPhoto(photo) {
 function getBigPhoto(photo) {
     if (photo && photo.big && photo.big.remote) {
         return [photo.big.id, photo.big.remote.id, photo.big.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getWebPageVideoThumbnailFile(message) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messageText') {
-        return [0, '', ''];
-    }
-
-    const { web_page } = content;
-    if (!web_page) {
-        return [0, '', ''];
-    }
-
-    const { video } = web_page;
-    if (!video) {
-        return [0, '', ''];
-    }
-
-    const { thumbnail } = video;
-    if (!thumbnail) {
-        return [0, '', ''];
-    }
-
-    const file = thumbnail.photo;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getVideoThumbnailFile(message) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messageVideo') {
-        return [0, '', ''];
-    }
-
-    const { video } = content;
-    if (!video) {
-        return [0, '', ''];
-    }
-
-    const { thumbnail } = video;
-    if (!thumbnail) {
-        return [0, '', ''];
-    }
-
-    const file = thumbnail.photo;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getWebPagePhotoFile(message, size = PHOTO_SIZE) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messageText') {
-        return [0, '', ''];
-    }
-
-    const { web_page } = content;
-    if (!web_page) {
-        return [0, '', ''];
-    }
-
-    const { photo } = web_page;
-    if (!photo) {
-        return [0, '', ''];
-    }
-
-    const photoSize = getSize(photo.sizes, size);
-    if (!photoSize || photoSize['@type'] !== 'photoSize') {
-        return [0, '', ''];
-    }
-
-    const file = photoSize.photo;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getWebPageVideoFile(message) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messageText') {
-        return [0, '', ''];
-    }
-
-    const { web_page } = content;
-    if (!web_page) {
-        return [0, '', ''];
-    }
-
-    const { video } = web_page;
-    if (!video) {
-        return [0, '', ''];
-    }
-
-    const file = video.video;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getPhotoFile(message, size = PHOTO_SIZE) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messagePhoto') {
-        return [0, '', ''];
-    }
-
-    const { photo } = content;
-    if (!photo) {
-        return [0, '', ''];
-    }
-
-    const photoSize = getSize(content.photo.sizes, size);
-    if (!photoSize || photoSize['@type'] !== 'photoSize') {
-        return [0, '', ''];
-    }
-
-    const file = photoSize.photo;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
-    }
-
-    return [0, '', ''];
-}
-
-function getVideoFile(message) {
-    if (message['@type'] !== 'message') {
-        return [0, '', ''];
-    }
-
-    const { content } = message;
-    if (!content || content['@type'] !== 'messageVideo') {
-        return [0, '', ''];
-    }
-
-    const { video } = content;
-    if (!video) {
-        return [0, '', ''];
-    }
-
-    const file = video.video;
-    if (file && file.remote.id) {
-        return [file.id, file.remote.id, file.idb_key];
     }
 
     return [0, '', ''];
@@ -337,7 +164,6 @@ function loadUserPhotos(store, userIds) {
                     FileStore.getLocalFile(
                         store,
                         user.profile_photo.small,
-                        idb_key,
                         null,
                         () => FileStore.updateUserPhotoBlob(user.id, id),
                         () => FileStore.getRemoteFile(id, 1, user)
@@ -359,7 +185,6 @@ function loadUsersContent(store, userIds) {
             FileStore.getLocalFile(
                 store,
                 user.profile_photo.small,
-                idb_key,
                 null,
                 () => FileStore.updateUserPhotoBlob(user.id, id),
                 () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
@@ -381,7 +206,6 @@ function loadChatsContent(store, chatIds) {
             FileStore.getLocalFile(
                 store,
                 chat.photo.small,
-                idb_key,
                 null,
                 () => FileStore.updateChatPhotoBlob(chat.id, id),
                 () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
@@ -543,7 +367,7 @@ function loadAudioContent(store, audio, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -551,7 +375,6 @@ function loadAudioContent(store, audio, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateAudioBlob(message.chat_id, message.id, id),
         () => {
@@ -573,7 +396,7 @@ function loadAudioThumbnailContent(store, audio, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
@@ -581,7 +404,6 @@ function loadAudioThumbnailContent(store, audio, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateAudioThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -598,7 +420,7 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -606,7 +428,6 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateAnimationBlob(message.chat_id, message.id, id),
         () => {
@@ -628,7 +449,7 @@ function loadAnimationThumbnailContent(store, animation, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
@@ -636,7 +457,6 @@ function loadAnimationThumbnailContent(store, animation, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateAnimationThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -660,7 +480,7 @@ function loadContactContent(store, contact, message) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -668,7 +488,6 @@ function loadContactContent(store, contact, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateUserPhotoBlob(user_id, id),
         () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
@@ -683,7 +502,7 @@ function loadDocumentContent(store, document, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -691,7 +510,6 @@ function loadDocumentContent(store, document, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateDocumentBlob(message.chat_id, message.id, id),
         () => {
@@ -713,7 +531,7 @@ function loadDocumentThumbnailContent(store, document, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
@@ -721,7 +539,6 @@ function loadDocumentThumbnailContent(store, document, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateDocumentThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -776,7 +593,7 @@ async function loadLocationContent(store, location, message) {
     }
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(file.id);
     if (blob) return;
@@ -784,7 +601,6 @@ async function loadLocationContent(store, location, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateLocationBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
@@ -805,7 +621,7 @@ function loadPhotoContent(store, photo, message) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -813,7 +629,6 @@ function loadPhotoContent(store, photo, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
@@ -831,7 +646,7 @@ function loadPhotoThumbnailContent(store, photo, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return true;
@@ -839,7 +654,6 @@ function loadPhotoThumbnailContent(store, photo, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -856,7 +670,7 @@ function loadStickerContent(store, sticker, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -864,7 +678,6 @@ function loadStickerContent(store, sticker, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateStickerBlob(message.chat_id, message.id, id),
         () => {
@@ -886,7 +699,7 @@ function loadStickerThumbnailContent(store, sticker, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return true;
@@ -894,7 +707,6 @@ function loadStickerThumbnailContent(store, sticker, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateStickerThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -911,7 +723,7 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -919,7 +731,6 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateVideoBlob(message.chat_id, message.id, id),
         () => {
@@ -941,7 +752,7 @@ function loadVideoThumbnailContent(store, video, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return true;
@@ -949,7 +760,6 @@ function loadVideoThumbnailContent(store, video, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateVideoThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -966,7 +776,7 @@ function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -974,7 +784,6 @@ function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateVideoNoteBlob(message.chat_id, message.id, id),
         () => {
@@ -996,7 +805,7 @@ function loadVideoNoteThumbnailContent(store, videoNote, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key } = file;
+    const { id } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return true;
@@ -1004,7 +813,6 @@ function loadVideoNoteThumbnailContent(store, videoNote, message) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateVideoNoteThumbnailBlob(message.chat_id, message.id, id),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
@@ -1021,7 +829,7 @@ function loadVoiceNoteContent(store, voiceNote, message, useFileSize = true) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id, idb_key, size } = file;
+    const { id, size } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
@@ -1029,7 +837,6 @@ function loadVoiceNoteContent(store, voiceNote, message, useFileSize = true) {
     FileStore.getLocalFile(
         store,
         file,
-        idb_key,
         null,
         () => FileStore.updateVoiceNoteBlob(message.chat_id, message.id, id),
         () => {
@@ -1237,17 +1044,17 @@ function saveOrDownload(file, fileName, obj, callback) {
 
 function download(file, obj, callback) {
     if (!file) return;
-    const { id, idb_key, local } = file;
+    const { id, local } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) {
         return;
     }
 
-    if (idb_key) {
+    if (local.is_downloading_completed) {
         const store = FileStore.getStore();
 
-        FileStore.getLocalFile(store, file, idb_key, null, callback, () => {
+        FileStore.getLocalFile(store, file, null, callback, () => {
             if (local.can_be_downloaded) {
                 FileStore.getRemoteFile(file.id, FILE_PRIORITY, obj);
             }
@@ -1262,6 +1069,7 @@ function download(file, obj, callback) {
 
 function getMediaPreviewFile(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
+    console.log('getMediaViewerFile', message);
     if (!message) return [0, 0, null];
 
     const { content } = message;
@@ -1288,18 +1096,22 @@ function getMediaPreviewFile(chatId, messageId) {
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { animation, video, photo } = web_page;
+                const { animation, document, video, photo } = web_page;
+
                 if (animation && animation.thumbnail) {
                     return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
                 }
+
                 if (document) {
                     return [50, 50, document.document];
                 }
-                if (photo) {
-                    return getMediaFile(chatId, messageId, PHOTO_SIZE);
-                }
+
                 if (video && video.thumbnail) {
                     return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                }
+
+                if (photo) {
+                    return getMediaFile(chatId, messageId, PHOTO_SIZE);
                 }
             }
             break;
@@ -1402,67 +1214,52 @@ function cancelLoadMediaViewerContent(messages) {
         if (content) {
             switch (content['@type']) {
                 case 'messagePhoto': {
+                    const { photo } = content;
+                    if (!photo) break;
+
                     // preview
                     /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                                        if (previewPid) {
-                                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                                            if (!preview.blob){
-                                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                                    () => MessageStore.updateMessagePhoto(message.id),
-                                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                                    'load_contents_preview_',
-                                                    message.id);
+                    if (previewPid) {
+                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                        if (!preview.blob){
+                            FileStore.getLocalFile(store, preview, null,
+                                () => MessageStore.updateMessagePhoto(message.id),
+                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                'load_contents_preview_',
+                                message.id);
 
-                                            }
-                                        }*/
-
-                    const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
-                    if (pid) {
-                        const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
-                        if (photoSize) {
-                            const file = photoSize.photo;
-                            const blob = file.blob || FileStore.getBlob(file.id);
-                            if (!blob) {
-                                TdLibController.send({
-                                    '@type': 'cancelDownloadFile',
-                                    file_id: file.id,
-                                    only_if_pending: false
-                                });
-                            }
                         }
-                    }
+                    }*/
 
+                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                    if (!photoSize) break;
+
+                    const { photo: file } = photoSize;
+                    const blob = file.blob || FileStore.getBlob(file.id);
+                    if (blob) return;
+
+                    FileStore.cancelGetRemoteFile(file.id);
                     break;
                 }
                 case 'messageVideo': {
-                    // preview
-                    const [previewId, previewPid, previewIdbKey] = getVideoThumbnailFile(message);
-                    if (previewPid) {
-                        const file = message.content.video.thumbnail.photo;
+                    const { video } = content;
+                    if (!video) break;
+
+                    if (video.thumbnail) {
+                        const { photo: file } = video.thumbnail;
                         const blob = file.blob || FileStore.getBlob(file.id);
-                        if (!blob) {
-                            TdLibController.send({
-                                '@type': 'cancelDownloadFile',
-                                file_id: file.id,
-                                only_if_pending: false
-                            });
-                        }
+                        if (blob) break;
+
+                        FileStore.cancelGetRemoteFile(file.id);
                     }
 
-                    // file
-                    const [id, pid, idb_key] = getVideoFile(message);
-                    if (pid) {
-                        const file = message.content.video.video;
-                        const blob = file.blob || FileStore.getBlob(file.id);
-                        if (!blob) {
-                            TdLibController.send({
-                                '@type': 'cancelDownloadFile',
-                                file_id: file.id,
-                                only_if_pending: false
-                            });
-                        }
-                    }
+                    const { video: file } = video;
+                    if (!file) break;
 
+                    const blob = file.blob || FileStore.getBlob(file.id);
+                    if (blob) break;
+
+                    FileStore.cancelGetRemoteFile(file.id);
                     break;
                 }
                 case 'messageText': {
@@ -1471,33 +1268,21 @@ function cancelLoadMediaViewerContent(messages) {
                         const { video } = web_page;
 
                         if (video) {
-                            // preview
-                            const [previewId, previewPid, previewIdbKey] = getWebPageVideoThumbnailFile(message);
-                            if (previewPid) {
-                                const file = video.thumbnail.photo;
+                            if (video.thumbnail) {
+                                const { photo: file } = video.thumbnail;
                                 const blob = file.blob || FileStore.getBlob(file.id);
-                                if (!blob) {
-                                    TdLibController.send({
-                                        '@type': 'cancelDownloadFile',
-                                        file_id: file.id,
-                                        only_if_pending: false
-                                    });
-                                }
+                                if (blob) break;
+
+                                FileStore.cancelGetRemoteFile(file.id);
                             }
 
-                            // file
-                            const [id, pid, idb_key] = getWebPageVideoFile(message);
-                            if (pid) {
-                                const file = video.video;
-                                const blob = file.blob || FileStore.getBlob(file.id);
-                                if (!blob) {
-                                    TdLibController.send({
-                                        '@type': 'cancelDownloadFile',
-                                        file_id: file.id,
-                                        only_if_pending: false
-                                    });
-                                }
-                            }
+                            const { video: file } = video;
+                            if (!file) break;
+
+                            const blob = file.blob || FileStore.getBlob(file.id);
+                            if (blob) break;
+
+                            FileStore.cancelGetRemoteFile(file.id);
                         }
                     }
 
@@ -1533,40 +1318,40 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     break;
                 }
                 case 'messagePhoto': {
+                    const { photo } = content;
+
                     // preview
                     /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                                        if (previewPid) {
-                                            let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                                            if (!preview.blob){
-                                                FileStore.getLocalFile(store, preview, previewIdbKey, null,
-                                                    () => MessageStore.updateMessagePhoto(message.id),
-                                                    () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                                    'load_contents_preview_',
-                                                    message.id);
+                    if (previewPid) {
+                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
+                        if (!preview.blob){
+                            FileStore.getLocalFile(store, preview, null,
+                                () => MessageStore.updateMessagePhoto(message.id),
+                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
+                                'load_contents_preview_',
+                                message.id);
 
-                                            }
-                                        }*/
-
-                    const [id, pid, idb_key] = getPhotoFile(message, PHOTO_BIG_SIZE);
-                    if (pid) {
-                        const photoSize = getSize(content.photo.sizes, PHOTO_BIG_SIZE);
-                        if (photoSize) {
-                            let file = photoSize.photo;
-                            let blob = file.blob || FileStore.getBlob(file.id);
-                            if (!blob) {
-                                const localMessage = message;
-                                FileStore.getLocalFile(
-                                    store,
-                                    file,
-                                    idb_key,
-                                    null,
-                                    () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, file.id),
-                                    () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
-                                );
-                            }
                         }
-                    }
+                    }*/
 
+                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                    if (!photoSize) break;
+
+                    const { photo: file } = photoSize;
+                    if (!file) break;
+
+                    const blob = file.blob || FileStore.getBlob(file.id);
+                    if (blob) break;
+
+                    const { id } = file;
+
+                    FileStore.getLocalFile(
+                        store,
+                        file,
+                        null,
+                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+                    );
                     break;
                 }
                 case 'messageText': {
@@ -1594,24 +1379,25 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     }
 
                     if (loadPhoto) {
-                        const [id, pid, idb_key] = getWebPagePhotoFile(message, PHOTO_BIG_SIZE);
-                        if (pid) {
+                        if (photo) {
                             const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                            if (photoSize) {
-                                const file = photoSize.photo;
-                                const blob = FileStore.getBlob(file.id);
-                                if (!blob) {
-                                    let localMessage = message;
-                                    FileStore.getLocalFile(
-                                        store,
-                                        file,
-                                        idb_key,
-                                        null,
-                                        () => FileStore.updatePhotoBlob(localMessage.chat_id, localMessage.id, id),
-                                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, localMessage)
-                                    );
-                                }
-                            }
+                            if (!photoSize) break;
+
+                            const { photo: file } = photoSize;
+                            if (!file) break;
+
+                            const blob = file.blob || FileStore.getBlob(file.id);
+                            if (blob) break;
+
+                            const { id } = file;
+
+                            FileStore.getLocalFile(
+                                store,
+                                file,
+                                null,
+                                () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+                                () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+                            );
                         }
                     }
 
@@ -1684,7 +1470,6 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                     FileStore.getLocalFile(
                                         store,
                                         file,
-                                        idb_key,
                                         null,
                                         () => FileStore.updateUserPhotoBlob(user.id, file.id),
                                         () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
@@ -1709,7 +1494,6 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                 FileStore.getLocalFile(
                                     store,
                                     file,
-                                    idb_key,
                                     null,
                                     () => FileStore.updateUserPhotoBlob(user.id, file.id),
                                     () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
@@ -1732,7 +1516,6 @@ function loadProfileMediaViewerContent(chatId, photos) {
                                 FileStore.getLocalFile(
                                     store,
                                     file,
-                                    idb_key,
                                     null,
                                     () => FileStore.updateChatPhotoBlob(chat.id, file.id),
                                     () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
@@ -1775,7 +1558,6 @@ function loadUserContent(user) {
         FileStore.getLocalFile(
             store,
             user.profile_photo.small,
-            idb_key,
             null,
             () => FileStore.updateUserPhotoBlob(user.id, id),
             () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
@@ -1793,7 +1575,6 @@ function loadChatContent(chat) {
         FileStore.getLocalFile(
             store,
             chat.photo.small,
-            idb_key,
             null,
             () => FileStore.updateChatPhotoBlob(chat.id, id),
             () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
@@ -1850,10 +1631,6 @@ export {
     getSmallPhoto,
     getUserPhoto,
     getChatPhoto,
-    getPhotoFile,
-    getVideoFile,
-    getVideoThumbnailFile,
-    getWebPagePhotoFile,
     saveData,
     saveBlob,
     loadUserPhotos,

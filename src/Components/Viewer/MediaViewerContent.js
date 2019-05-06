@@ -33,6 +33,7 @@ class MediaViewerContent extends React.Component {
         file = FileStore.get(file.id) || file;
 
         let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
+        console.log('getMediaPreviewFile', thumbnailWidth, thumbnailHeight, thumbnail);
         thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
         const message = MessageStore.get(chatId, messageId);
