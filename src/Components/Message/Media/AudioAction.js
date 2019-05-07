@@ -132,12 +132,10 @@ class AudioAction extends React.Component {
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
-        const hasLocalPath = isDownloadingCompleted || file.idb_key;
-
         const durationString = getDurationString(Math.floor(duration || 0));
         const currentTimeString = getDurationString(Math.floor(currentTime || 0));
 
-        return active && hasLocalPath ? `${currentTimeString}/${durationString}` : `${durationString}`;
+        return active && isDownloadingCompleted ? `${currentTimeString}/${durationString}` : `${durationString}`;
     };
 
     render() {
@@ -148,8 +146,6 @@ class AudioAction extends React.Component {
         const isUploadingActive = file.remote && file.remote.is_uploading_active;
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
-
-        const hasLocalPath = isDownloadingCompleted || file.idb_key;
 
         const size = getFileSize(file);
         let progressSize = null;
@@ -162,7 +158,7 @@ class AudioAction extends React.Component {
 
         return (
             <div className='audio-action'>
-                {!hasLocalPath && <span>{`${sizeString}, `}</span>}
+                {!isDownloadingCompleted && <span>{`${sizeString}, `}</span>}
                 <span>{timeString}</span>
             </div>
         );

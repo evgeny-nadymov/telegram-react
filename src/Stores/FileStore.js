@@ -95,202 +95,215 @@ class FileStore extends EventEmitter {
         const { file } = update;
         if (!file) return;
 
-        if (this.downloads.has(file.id)) {
-            if (file.local.is_downloading_completed) {
-                if (!useReadFile) {
-                    if (!(file.idb_key || file.arr)) {
-                        return;
-                    }
+        this.handleDownloads(file);
+        this.handleUploads(file);
+    };
+
+    handleDownloads = file => {
+        const { arr, id, idb_key, local } = file;
+        delete file.arr;
+
+        if (!this.downloads.has(id)) return;
+        if (!local.is_downloading_completed) return;
+        if (!useReadFile && !idb_key && !arr) return;
+
+        const items = this.downloads.get(id);
+        if (!items) return;
+
+        this.downloads.delete(id);
+
+        const store = this.getStore();
+
+        items.forEach(item => {
+            switch (item['@type']) {
+                case 'chat': {
+                    this.handleChat(store, item, file, arr);
+                    break;
+                }
+                case 'message': {
+                    this.handleMessage(store, item, file, arr);
+                    break;
+                }
+                case 'user': {
+                    this.handleUser(store, item, file, arr);
+                    break;
+                }
+                default:
+                    console.error('FileStore.onUpdateFile unhandled item', item);
+                    break;
+            }
+        });
+    };
+
+    handleUploads = file => {
+        const { id, remote } = file;
+        delete file.arr;
+
+        if (!this.uploads.has(id)) return;
+        if (remote.is_uploading_completed) return;
+
+        this.uploads.delete(id);
+    };
+
+    handleChat = (store, chat, file, arr) => {
+        if (!chat) return;
+
+        this.getLocalFile(
+            store,
+            file,
+            arr,
+            () => this.updateChatPhotoBlob(chat.id, file.id),
+            () => this.getRemoteFile(file.id, FILE_PRIORITY, chat)
+        );
+    };
+
+    handleUser = (store, user, file, arr) => {
+        if (!user) return;
+
+        this.getLocalFile(
+            store,
+            file,
+            arr,
+            () => this.updateUserPhotoBlob(user.id, file.id),
+            () => this.getRemoteFile(file.id, FILE_PRIORITY, user)
+        );
+    };
+
+    handleMessage = (store, message, file, arr) => {
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        switch (content['@type']) {
+            case 'messageAnimation': {
+                const { animation } = content;
+
+                this.handleAnimation(store, animation, file, arr, message);
+                break;
+            }
+            case 'messageAudio': {
+                const { audio } = content;
+
+                this.handleAudio(store, audio, file, arr, message);
+                break;
+            }
+            case 'messageChatChangePhoto': {
+                const { photo } = content;
+
+                this.handlePhoto(store, photo, file, arr, message);
+                break;
+            }
+            case 'messageDocument': {
+                const { document } = content;
+
+                this.handleDocument(store, document, file, arr, message);
+                break;
+            }
+            case 'messageGame': {
+                const { game } = content;
+
+                this.handleGame(store, game, file, arr, message);
+                break;
+            }
+            case 'messageLocation': {
+                const { location } = content;
+
+                this.handleLocation(store, location, file, arr, message);
+                break;
+            }
+            case 'messagePhoto': {
+                const { photo } = content;
+
+                this.handlePhoto(store, photo, file, arr, message);
+                break;
+            }
+            case 'messageSticker': {
+                const { sticker } = content;
+
+                this.handleSticker(store, sticker, file, arr, message);
+                break;
+            }
+            case 'messageText': {
+                const { web_page } = content;
+                if (!web_page) break;
+
+                const { animation, audio, document, photo, sticker, video, video_note, voice_note } = web_page;
+
+                if (animation) {
+                    this.handleAnimation(store, animation, file, arr, message);
                 }
 
-                const { arr } = file;
-                delete file.arr;
-
-                let items = this.downloads.get(file.id);
-                if (items) {
-                    this.downloads.delete(file.id);
-
-                    const store = this.getStore();
-
-                    for (let i = 0; i < items.length; i++) {
-                        let obj = items[i];
-                        switch (obj['@type']) {
-                            case 'chat': {
-                                this.getLocalFile(
-                                    store,
-                                    file,
-                                    arr,
-                                    () => this.updateChatPhotoBlob(obj.id, file.id),
-                                    () => this.getRemoteFile(file.id, 1, obj)
-                                );
-
-                                break;
-                            }
-                            case 'user': {
-                                this.getLocalFile(
-                                    store,
-                                    file,
-                                    arr,
-                                    () => this.updateUserPhotoBlob(obj.id, file.id),
-                                    () => this.getRemoteFile(file.id, 1, obj)
-                                );
-
-                                break;
-                            }
-                            case 'message':
-                                switch (obj.content['@type']) {
-                                    case 'messageText': {
-                                        const { web_page } = obj.content;
-                                        if (web_page) {
-                                            const { photo } = web_page;
-                                            if (photo) {
-                                                this.handlePhoto(store, photo, file, arr, obj);
-                                            }
-
-                                            const { animation } = web_page;
-                                            if (animation) {
-                                                this.handleAnimation(store, animation, file, arr, obj);
-                                            }
-
-                                            const { audio } = web_page;
-                                            if (audio) {
-                                                this.handleAudio(store, audio, file, arr, obj);
-                                            }
-
-                                            const { document } = web_page;
-                                            if (document) {
-                                                this.handleDocument(store, document, file, arr, obj);
-                                            }
-
-                                            const { sticker } = web_page;
-                                            if (sticker) {
-                                                this.handleSticker(store, sticker, file, arr, obj);
-                                            }
-
-                                            const { video } = web_page;
-                                            if (video) {
-                                                this.handleVideo(store, video, file, arr, obj);
-                                            }
-
-                                            const { voice_note } = web_page;
-                                            if (voice_note) {
-                                                this.handleVoiceNote(store, voice_note, file, arr, obj);
-                                            }
-
-                                            const { video_note } = web_page;
-                                            if (video_note) {
-                                                this.handleVideoNote(store, video_note, file, arr, obj);
-                                            }
-                                        }
-
-                                        break;
-                                    }
-                                    case 'messageChatChangePhoto': {
-                                        const { photo } = obj.content;
-
-                                        this.handlePhoto(store, photo, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messagePhoto': {
-                                        const { photo } = obj.content;
-
-                                        this.handlePhoto(store, photo, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageGame': {
-                                        const { game } = obj.content;
-
-                                        this.handleGame(store, game, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageSticker': {
-                                        const { sticker } = obj.content;
-
-                                        this.handleSticker(store, sticker, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageVoiceNote': {
-                                        const { voice_note } = obj.content;
-
-                                        this.handleVoiceNote(store, voice_note, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageVideoNote': {
-                                        const { video_note } = obj.content;
-
-                                        this.handleVideoNote(store, video_note, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageAnimation': {
-                                        const { animation } = obj.content;
-
-                                        this.handleAnimation(store, animation, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageVideo': {
-                                        const { video } = obj.content;
-
-                                        this.handleVideo(store, video, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageAudio': {
-                                        const { audio } = obj.content;
-
-                                        this.handleAudio(store, audio, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageDocument': {
-                                        const { document } = obj.content;
-
-                                        this.handleDocument(store, document, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageLocation': {
-                                        const { location } = obj.content;
-
-                                        this.handleLocation(store, location, file, arr, obj);
-                                        break;
-                                    }
-                                    case 'messageVenue': {
-                                        const { venue } = obj.content;
-                                        const { location } = venue;
-
-                                        this.handleLocation(store, location, file, arr, obj);
-                                        break;
-                                    }
-                                    default:
-                                        break;
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
+                if (audio) {
+                    this.handleAudio(store, audio, file, arr, message);
                 }
-            } else {
-                //this.emit('file_update', file);
+
+                if (document) {
+                    this.handleDocument(store, document, file, arr, message);
+                }
+
+                if (photo) {
+                    this.handlePhoto(store, photo, file, arr, message);
+                }
+
+                if (sticker) {
+                    this.handleSticker(store, sticker, file, arr, message);
+                }
+
+                if (video) {
+                    this.handleVideo(store, video, file, arr, message);
+                }
+
+                if (voice_note) {
+                    this.handleVoiceNote(store, voice_note, file, arr, message);
+                }
+
+                if (video_note) {
+                    this.handleVideoNote(store, video_note, file, arr, message);
+                }
+
+                break;
             }
-        } else if (this.uploads.has(file.id)) {
-            if (file.remote.is_uploading_completed) {
-                this.uploads.delete(file.id);
-                //this.emit('file_upload_update', file);
-            } else {
-                //this.emit('file_upload_update', file);
+            case 'messageVenue': {
+                const { venue } = content;
+                const { location } = venue;
+
+                this.handleLocation(store, location, file, arr, message);
+                break;
             }
+            case 'messageVideo': {
+                const { video } = content;
+
+                this.handleVideo(store, video, file, arr, message);
+                break;
+            }
+            case 'messageVideoNote': {
+                const { video_note } = content;
+
+                this.handleVideoNote(store, video_note, file, arr, message);
+                break;
+            }
+            case 'messageVoiceNote': {
+                const { voice_note } = content;
+
+                this.handleVoiceNote(store, voice_note, file, arr, message);
+                break;
+            }
+            default:
+                break;
         }
     };
 
-    handleGame = (store, game, file, arr, obj) => {
-        if (game) {
-            const { photo } = game;
-            if (photo) {
-                this.handlePhoto(store, photo, file, arr, obj);
-            }
+    handleGame = (store, game, file, arr, message) => {
+        if (!game) return;
 
-            const { animation } = game;
-            if (animation) {
-                this.handleAnimation(store, animation, file, arr, obj);
-            }
+        const { animation, photo } = game;
+        if (photo) {
+            this.handlePhoto(store, photo, file, arr, message);
+        }
+
+        if (animation) {
+            this.handleAnimation(store, animation, file, arr, message);
         }
     };
 
@@ -633,21 +646,12 @@ class FileStore extends EventEmitter {
     }
 
     getRemoteFile(fileId, priority, obj) {
-        if (this.downloads.has(fileId)) {
-            const items = this.downloads.get(fileId);
+        const items = this.downloads.get(fileId) || [];
+        if (items.some(x => x === obj)) return;
 
-            for (let i = 0; i < items.length; i++) {
-                if (items[i] === obj) {
-                    return;
-                }
-            }
+        items.push(obj);
+        this.downloads.set(fileId, items);
 
-            items.push(obj);
-        } else {
-            this.downloads.set(fileId, [obj]);
-        }
-
-        //console.log('[perf] downloadFile file_id=' + fileId);
         TdLibController.send({
             '@type': 'downloadFile',
             file_id: fileId,
@@ -656,20 +660,20 @@ class FileStore extends EventEmitter {
     }
 
     cancelGetRemoteFile(fileId, obj) {
-        if (this.downloads.has(fileId)) {
-            if (!obj) {
-                this.downloads.delete(fileId);
-            } else {
-                const items = this.downloads.get(fileId).filter(x => x !== obj);
-                this.downloads.set(fileId, items);
-            }
+        if (!this.downloads.has(fileId)) return;
 
-            TdLibController.send({
-                '@type': 'cancelDownloadFile',
-                file_id: fileId,
-                only_if_pending: false
-            });
+        if (!obj) {
+            this.downloads.delete(fileId);
+        } else {
+            const items = this.downloads.get(fileId).filter(x => x !== obj);
+            this.downloads.set(fileId, items);
         }
+
+        TdLibController.send({
+            '@type': 'cancelDownloadFile',
+            file_id: fileId,
+            only_if_pending: false
+        });
     }
 
     uploadFile(fileId, obj) {
@@ -764,12 +768,6 @@ class FileStore extends EventEmitter {
             messageId: messageId,
             fileId: fileId
         });
-
-        // this.emit('clientUpdateAudioThumbnailBlob', {
-        //     chatId: chatId,
-        //     messageId: messageId,
-        //     fileId: fileId
-        // });
     };
 
     updateAudioBlob = (chatId, messageId, fileId) => {
@@ -779,12 +777,6 @@ class FileStore extends EventEmitter {
             messageId: messageId,
             fileId: fileId
         });
-
-        // this.emit('clientUpdateAudioBlob', {
-        //     chatId: chatId,
-        //     messageId: messageId,
-        //     fileId: fileId
-        // });
     };
 
     updateVoiceNoteBlob = (chatId, messageId, fileId) => {

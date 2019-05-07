@@ -397,7 +397,7 @@ class InputBoxControl extends Component {
                 if (!size) return;
 
                 let file = size.photo;
-                if (file && file.local && file.local.is_downloading_completed && !file.idb_key && !file.blob) {
+                if (file && file.local && file.local.is_downloading_completed && !file.blob) {
                     file.blob = blob;
                     FileStore.updatePhotoBlob(message.chat_id, message.id, file.id);
                 }

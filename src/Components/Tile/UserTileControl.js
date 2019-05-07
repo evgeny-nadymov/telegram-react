@@ -87,7 +87,8 @@ class UserTileControl extends Component {
                         //console.log('UserTileControl.onUpdateChatPhoto user_id=' + userId);
                         this.forceUpdate();
                     } else {
-                        loadChatContent(chat);
+                        const store = FileStore.getStore();
+                        loadChatContent(store, chat);
                     }
                 }
             }

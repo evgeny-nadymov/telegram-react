@@ -42,7 +42,7 @@ import {
     getChatUserId
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
-import { loadUserPhotos, loadChatsContent } from '../../Utils/File';
+import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
 import { openUser } from '../../Utils/Commands';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
@@ -231,7 +231,7 @@ class ChatDetails extends React.Component {
 
         loadChatsContent(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);
-        loadUserPhotos(store, members);
+        loadUsersContent(store, members);
     };
 
     getFullInfo = () => {

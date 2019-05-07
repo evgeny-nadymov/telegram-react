@@ -71,7 +71,8 @@ class ChatTileControl extends Component {
         if (!update.photo) {
             this.forceUpdate();
         } else {
-            loadChatContent(chat);
+            const store = FileStore.getStore();
+            loadChatContent(store, chat);
         }
     };
 

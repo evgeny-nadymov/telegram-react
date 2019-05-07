@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import UnreadSeparator from './UnreadSeparator';
 import Photo from './Media/Photo';
+import { openMedia } from '../../Utils/Message';
 import { getServiceMessageContent } from '../../Utils/ServiceMessage';
 import MessageStore from '../../Stores/MessageStore';
 import './ServiceMessage.css';
@@ -108,6 +109,17 @@ class ServiceMessage extends React.Component {
         this.setState({ highlighted: false });
     };
 
+    openMedia = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { chatId, messageId } = this.props;
+
+        openMedia(chatId, messageId);
+    };
+
     render() {
         const { classes, chatId, messageId, showUnreadSeparator } = this.props;
         const { highlighted } = this.state;
@@ -130,7 +142,15 @@ class ServiceMessage extends React.Component {
                 <div className='service-message-wrapper'>
                     <div className='service-message-content'>{text}</div>
                 </div>
-                {photo && <Photo chatId={chatId} messageId={messageId} photo={photo} style={chatPhotoStyle} />}
+                {photo && (
+                    <Photo
+                        chatId={chatId}
+                        messageId={messageId}
+                        photo={photo}
+                        style={chatPhotoStyle}
+                        openMedia={this.openMedia}
+                    />
+                )}
             </div>
         );
     }

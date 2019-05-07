@@ -353,8 +353,6 @@ class MessagesList extends React.Component {
 
         this.suppressHandleScrollOnSelectChat = true;
         if (chat) {
-            let sessionId = this.sessionId;
-
             TdLibController.send({
                 '@type': 'openChat',
                 chat_id: chat.id
@@ -365,7 +363,8 @@ class MessagesList extends React.Component {
             const offset = unread || messageId ? -1 - MESSAGE_SLICE_LIMIT : 0;
             const limit = unread || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
-            let result = await TdLibController.send({
+            const sessionId = this.sessionId;
+            const result = await TdLibController.send({
                 '@type': 'getChatHistory',
                 chat_id: chat.id,
                 from_message_id: fromMessageId,
@@ -373,10 +372,11 @@ class MessagesList extends React.Component {
                 limit: limit
             });
 
-            //TODO: replace result with one-way data flow
             if (sessionId !== this.sessionId) {
                 return;
             }
+
+            //TODO: replace result with one-way data flow
 
             if (chat.last_message) {
                 this.completed = result.messages.length > 0 && chat.last_message.id === result.messages[0].id;
@@ -520,6 +520,8 @@ class MessagesList extends React.Component {
         }
 
         this.loading = true;
+
+        const sessionId = this.sessionId;
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: chatId,
@@ -529,6 +531,10 @@ class MessagesList extends React.Component {
         }).finally(() => {
             this.loading = false;
         });
+
+        if (sessionId !== this.sessionId) {
+            return;
+        }
 
         if (this.props.chatId !== chatId) {
             return;
@@ -585,7 +591,9 @@ class MessagesList extends React.Component {
         }
 
         this.loading = true;
-        let result = await TdLibController.send({
+
+        const sessionId = this.sessionId;
+        const result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: basicGroupChat.id,
             from_message_id: fromMessageId,
@@ -594,6 +602,10 @@ class MessagesList extends React.Component {
         }).finally(() => {
             this.loading = false;
         });
+
+        if (sessionId !== this.sessionId) {
+            return;
+        }
 
         if (this.props.chatId !== chatId) {
             return;
@@ -622,6 +634,8 @@ class MessagesList extends React.Component {
         }
 
         this.loading = true;
+
+        const sessionId = this.sessionId;
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: chatId,
@@ -631,6 +645,10 @@ class MessagesList extends React.Component {
         }).finally(() => {
             this.loading = false;
         });
+
+        if (sessionId !== this.sessionId) {
+            return;
+        }
 
         if (this.props.chatId !== chatId) {
             return;
@@ -877,13 +895,13 @@ class MessagesList extends React.Component {
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
-        let sessionId = this.sessionId;
 
         const fromMessageId = 0;
         const offset = 0;
         const limit = MESSAGE_SLICE_LIMIT;
 
-        let result = await TdLibController.send({
+        const sessionId = this.sessionId;
+        const result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: chat.id,
             from_message_id: fromMessageId,
@@ -891,10 +909,11 @@ class MessagesList extends React.Component {
             limit: limit
         });
 
-        //TODO: replace result with one-way data flow
         if (sessionId !== this.sessionId) {
             return;
         }
+
+        //TODO: replace result with one-way data flow
 
         if (this.props.chatId !== chatId) {
             return;
@@ -947,7 +966,7 @@ class MessagesList extends React.Component {
             : history.map((x, i) =>
                   isServiceMessage(x) ? (
                       <ServiceMessage
-                          key={x.id}
+                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
                           messageId={x.id}
@@ -955,7 +974,7 @@ class MessagesList extends React.Component {
                       />
                   ) : (
                       <Message
-                          key={x.id}
+                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
                           messageId={x.id}

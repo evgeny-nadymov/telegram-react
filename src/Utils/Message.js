@@ -829,13 +829,13 @@ function getSearchMessagesFilter(chatId, messageId) {
     return null;
 }
 
-function openVideo(video, message, fileCancel) {
-    if (!video) return;
+function openAnimation(animation, message, fileCancel) {
+    if (!animation) return;
     if (!message) return;
 
     const { chat_id, id } = message;
 
-    let { video: file } = video;
+    let { animation: file } = animation;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -846,6 +846,15 @@ function openVideo(video, message, fileCancel) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     }
+
+    // download file at loadMediaViewerContent instead
+    // download(file, message, FileStore.updateAnimationBlob(chat_id, id, file.id));
+
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateActiveAnimation',
+        chatId: chat_id,
+        messageId: id
+    });
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -892,13 +901,16 @@ function openAudio(audio, message, fileCancel) {
     });
 }
 
-function openVoiceNote(voiceNote, message, fileCancel) {
-    if (!voiceNote) return;
+function openChatPhoto(photo, message, fileCancel) {
+    if (!photo) return;
     if (!message) return;
 
     const { chat_id, id } = message;
 
-    let { voice: file } = voiceNote;
+    const photoSize = getPhotoSize(photo.sizes);
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -908,9 +920,9 @@ function openVoiceNote(voiceNote, message, fileCancel) {
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
-    } else {
-        download(file, message, () => FileStore.updateVoiceNoteBlob(chat_id, id, file.id));
     }
+
+    download(file, message, () => FileStore.updatePhotoBlob(chat_id, id, file.id));
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -918,14 +930,13 @@ function openVoiceNote(voiceNote, message, fileCancel) {
         message_id: id
     });
 
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateMediaActive',
+    ApplicationStore.setProfileMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });
 }
 
-function openContact(contact, message) {
+function openContact(contact, message, fileCancel) {
     if (!contact) return;
     if (!message) return;
 
@@ -980,6 +991,42 @@ function openDocument(document, message, fileCancel) {
     }
 }
 
+function openGame(game, message, fileCancel) {
+    if (!game) return;
+    if (!message) return;
+
+    const { chat_id, id } = message;
+
+    const { animation } = game;
+    if (animation) {
+        let { animation: file } = animation;
+        if (!file) return;
+
+        file = FileStore.get(file.id) || file;
+        if (fileCancel && file.local.is_downloading_active) {
+            FileStore.cancelGetRemoteFile(file.id, message);
+            return;
+        } else if (fileCancel && file.remote.is_uploading_active) {
+            FileStore.cancelUploadFile(file.id, message);
+            return;
+        }
+
+        download(file, message, () => FileStore.updateAnimationBlob(chat_id, id, file.id));
+    }
+
+    TdLibController.send({
+        '@type': 'openMessageContent',
+        chat_id: chat_id,
+        message_id: id
+    });
+
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateActiveAnimation',
+        chatId: chat_id,
+        messageId: id
+    });
+}
+
 function openPhoto(photo, message, fileCancel) {
     if (!photo) return;
     if (!message) return;
@@ -1015,27 +1062,24 @@ function openPhoto(photo, message, fileCancel) {
     });
 }
 
-function openGame(game, message, fileCancel) {
-    if (!game) return;
+function openSticker(sticker, message, fileCancel) {}
+
+function openVideo(video, message, fileCancel) {
+    if (!video) return;
     if (!message) return;
 
     const { chat_id, id } = message;
 
-    const { animation } = game;
-    if (animation) {
-        let { animation: file } = animation;
-        if (!file) return;
+    let { video: file } = video;
+    if (!file) return;
 
-        file = FileStore.get(file.id) || file;
-        if (fileCancel && file.local.is_downloading_active) {
-            FileStore.cancelGetRemoteFile(file.id, message);
-            return;
-        } else if (fileCancel && file.remote.is_uploading_active) {
-            FileStore.cancelUploadFile(file.id, message);
-            return;
-        }
-
-        download(file, message, () => FileStore.updateAnimationBlob(chat_id, id, file.id));
+    file = FileStore.get(file.id) || file;
+    if (fileCancel && file.local.is_downloading_active) {
+        FileStore.cancelGetRemoteFile(file.id, message);
+        return;
+    } else if (fileCancel && file.remote.is_uploading_active) {
+        FileStore.cancelUploadFile(file.id, message);
+        return;
     }
 
     TdLibController.send({
@@ -1044,8 +1088,7 @@ function openGame(game, message, fileCancel) {
         message_id: id
     });
 
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateActiveAnimation',
+    ApplicationStore.setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });
@@ -1084,13 +1127,13 @@ function openVideoNote(videoNote, message, fileCancel) {
     });
 }
 
-function openAnimation(animation, message, fileCancel) {
-    if (!animation) return;
+function openVoiceNote(voiceNote, message, fileCancel) {
+    if (!voiceNote) return;
     if (!message) return;
 
     const { chat_id, id } = message;
 
-    let { animation: file } = animation;
+    let { voice: file } = voiceNote;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -1100,16 +1143,9 @@ function openAnimation(animation, message, fileCancel) {
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
+    } else {
+        download(file, message, () => FileStore.updateVoiceNoteBlob(chat_id, id, file.id));
     }
-
-    // download file at loadMediaViewerContent instead
-    // download(file, message, FileStore.updateAnimationBlob(chat_id, id, file.id));
-
-    TdLibController.clientUpdate({
-        '@type': 'clientUpdateActiveAnimation',
-        chatId: chat_id,
-        messageId: id
-    });
 
     TdLibController.send({
         '@type': 'openMessageContent',
@@ -1117,7 +1153,8 @@ function openAnimation(animation, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setMediaViewerContent({
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateMediaActive',
         chatId: chat_id,
         messageId: id
     });
@@ -1131,26 +1168,10 @@ function openMedia(chatId, messageId, fileCancel = true) {
     if (!content) return null;
 
     switch (content['@type']) {
-        case 'messageContact': {
-            const { contact } = content;
-            if (contact) {
-                openContact(contact, message);
-            }
-
-            break;
-        }
-        case 'messageDocument': {
-            const { document } = content;
-            if (document) {
-                openDocument(document, message, fileCancel);
-            }
-
-            break;
-        }
-        case 'messageVoiceNote': {
-            const { voice_note } = content;
-            if (voice_note) {
-                openVoiceNote(voice_note, message, fileCancel);
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation) {
+                openAnimation(animation, message, fileCancel);
             }
 
             break;
@@ -1163,49 +1184,85 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
-        case 'messagePhoto': {
-            const { photo } = message.content;
+        case 'messageChatChangePhoto': {
+            const { photo } = content;
             if (photo) {
-                openPhoto(photo, message, fileCancel);
+                openChatPhoto(photo, message, fileCancel);
+            }
+
+            break;
+        }
+        case 'messageContact': {
+            const { contact } = content;
+            if (contact) {
+                openContact(contact, message, fileCancel);
+            }
+
+            break;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (document) {
+                openDocument(document, message, fileCancel);
             }
 
             break;
         }
         case 'messageGame': {
-            const { game } = message.content;
+            const { game } = content;
             if (game) {
                 openGame(game, message, fileCancel);
             }
 
             break;
         }
-        case 'messageText': {
-            const { web_page } = message.content;
-            if (web_page) {
-                const { photo, animation, document, audio, video, voice_note, video_note } = web_page;
+        case 'messagePhoto': {
+            const { photo } = content;
+            if (photo) {
+                openPhoto(photo, message, fileCancel);
+            }
 
-                if (video) {
-                    openVideo(video, message, fileCancel);
+            break;
+        }
+        case 'messageSticker': {
+            const { sticker } = content;
+            if (sticker) {
+                openSticker(sticker, message, fileCancel);
+            }
+
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, audio, document, photo, sticker, video, video_note, voice_note } = web_page;
+
+                if (animation) {
+                    openAnimation(animation, message, fileCancel);
                 }
 
                 if (audio) {
                     openAudio(audio, message, fileCancel);
                 }
 
-                if (voice_note) {
-                    openVoiceNote(voice_note, message, fileCancel);
+                if (document) {
+                    openDocument(document, message, fileCancel);
+                }
+
+                if (sticker) {
+                    openSticker(sticker, message, fileCancel);
+                }
+
+                if (video) {
+                    openVideo(video, message, fileCancel);
                 }
 
                 if (video_note) {
                     openVideoNote(video_note, message, fileCancel);
                 }
 
-                if (document) {
-                    openDocument(document, message, fileCancel);
-                }
-
-                if (animation) {
-                    openAnimation(animation, message, fileCancel);
+                if (voice_note) {
+                    openVoiceNote(voice_note, message, fileCancel);
                 }
 
                 if (photo) {
@@ -1215,26 +1272,26 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
+        case 'messageVideo': {
+            const { video } = content;
+            if (video) {
+                openVideo(video, message, fileCancel);
+            }
+
+            break;
+        }
         case 'messageVideoNote': {
-            const { video_note } = message.content;
+            const { video_note } = content;
             if (video_note) {
                 openVideoNote(video_note, message, fileCancel);
             }
 
             break;
         }
-        case 'messageAnimation': {
-            const { animation } = message.content;
-            if (animation) {
-                openAnimation(animation, message, fileCancel);
-            }
-
-            break;
-        }
-        case 'messageVideo': {
-            const { video } = message.content;
-            if (video) {
-                openVideo(video, message, fileCancel);
+        case 'messageVoiceNote': {
+            const { voice_note } = content;
+            if (voice_note) {
+                openVoiceNote(voice_note, message, fileCancel);
             }
 
             break;

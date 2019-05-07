@@ -105,7 +105,7 @@ function getSize(sizes, dimension) {
     let diff = Math.abs(dimension - (useWidth ? sizes[0].width : sizes[0].height));
     let index = 0;
     for (let i = 1; i < sizes.length; i++) {
-        if (sizes[i].type === 'i' && !sizes[i].photo.idb_key) {
+        if (sizes[i].type === 'i' && !sizes[i].photo.local.is_downloading_completed) {
             continue;
         }
 
