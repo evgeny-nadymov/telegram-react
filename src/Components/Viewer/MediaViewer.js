@@ -448,6 +448,12 @@ class MediaViewer extends React.Component {
                 this.saveAnimation(animation, message);
                 break;
             }
+            case 'messageChatChangePhoto': {
+                const { photo } = content;
+
+                this.savePhoto(photo, message);
+                break;
+            }
             case 'messageDocument': {
                 const { document } = content;
 

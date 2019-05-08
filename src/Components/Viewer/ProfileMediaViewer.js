@@ -20,7 +20,7 @@ import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
 import ProfileMediaViewerControl from '../Tile/ProfileMediaViewerControl';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
-import { getProfilePhotoDateHint, getProfilePhotoFromPhoto } from '../../Utils/User';
+import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
 import { MEDIA_SLICE_LIMIT, PHOTO_BIG_SIZE } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -142,7 +142,7 @@ class ProfileMediaViewer extends React.Component {
 
         if (!isPrivateChat(chatId)) return;
 
-        let result = await TdLibController.send({
+        const result = await TdLibController.send({
             '@type': 'getUserProfilePhotos',
             user_id: getChatUserId(chatId),
             offset: 0,
@@ -181,9 +181,7 @@ class ProfileMediaViewer extends React.Component {
         }
 
         const photo =
-            index > 0 && index < this.history.length
-                ? getProfilePhotoFromPhoto(this.history[index])
-                : getPhotoFromChat(chatId);
+            index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
         if (!photo) return;
         if (!photo.big) return;
 
@@ -209,9 +207,7 @@ class ProfileMediaViewer extends React.Component {
         }
 
         const photo =
-            index > 0 && index < this.history.length
-                ? getProfilePhotoFromPhoto(this.history[index])
-                : getPhotoFromChat(chatId);
+            index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
         if (photo) {
             let file = photo.big;
             file = FileStore.get(file.id) || file;
@@ -247,32 +243,6 @@ class ProfileMediaViewer extends React.Component {
 
     loadPrevious = async () => {
         return;
-        const { chatId } = this.props;
-        const { currentMessageId } = this.state;
-
-        const result = await TdLibController.send({
-            '@type': 'searchChatMessages',
-            chat_id: chatId,
-            query: '',
-            sender_user_id: 0,
-            from_message_id: currentMessageId,
-            offset: 0,
-            limit: MEDIA_SLICE_LIMIT,
-            filter: { '@type': 'searchMessagesFilterPhoto' }
-        });
-
-        //filterMessages(result, this.history);
-        //MessageStore.setItems(result.messages);
-
-        this.history = this.history.concat(result.messages);
-
-        const index = this.history.findIndex(x => x.id === currentMessageId);
-
-        this.setState({
-            hasNextMedia: this.hasNextMedia(index),
-            hasPreviousMedia: this.hasPreviousMedia(index),
-            totalCount: result.total_count
-        });
     };
 
     hasNextMedia = index => {
@@ -367,9 +337,7 @@ class ProfileMediaViewer extends React.Component {
 
         const deleteConfirmation = null;
         const photo =
-            index > 0 && index < this.history.length
-                ? getProfilePhotoFromPhoto(this.history[index])
-                : getPhotoFromChat(chatId);
+            index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
         const userProfilePhoto = index >= 0 && index < this.history.length ? this.history[index] : null;
         const fileId = photo.big.id;
         return (

@@ -23,16 +23,24 @@ import { getUserFullName } from './User';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getAudioTitle } from './Media';
 import { download, saveOrDownload } from './File';
-import { getPhotoSize } from './Common';
+import { getChatTitle } from './Chat';
+import { getPhotoSize, getSize } from './Common';
 import { openUser } from './Commands';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
+import {
+    LOCATION_HEIGHT,
+    LOCATION_SCALE,
+    LOCATION_WIDTH,
+    LOCATION_ZOOM,
+    PHOTO_BIG_SIZE,
+    PROFILE_PHOTO_BIG_SIZE,
+    PROFILE_PHOTO_SMALL_SIZE
+} from '../Constants';
 import UserStore from '../Stores/UserStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
 import FileStore from '../Stores/FileStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
-import { getChatTitle } from './Chat';
 
 function getAuthor(message) {
     if (!message) return null;
@@ -930,7 +938,7 @@ function openChatPhoto(photo, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setProfileMediaViewerContent({
+    ApplicationStore.setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });

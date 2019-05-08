@@ -6,58 +6,51 @@
  */
 
 import dateFormat from 'dateformat';
-import {
-    getLetters,
-    getSize
-} from './Common';
-import {
-    PROFILE_PHOTO_BIG_SIZE,
-    PROFILE_PHOTO_SMALL_SIZE
-} from '../Constants';
+import { getLetters, getSize } from './Common';
+import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE } from '../Constants';
 import UserStore from '../Stores/UserStore';
 
-function getUserStatus(user){
+function getUserStatus(user) {
     if (!user) return null;
     if (!user.status) return null;
 
-    if (user.id === 777000){
+    if (user.id === 777000) {
         return 'service notifications';
     }
 
-    if (user.type
-        && user.type['@type'] === 'userTypeBot'){
+    if (user.type && user.type['@type'] === 'userTypeBot') {
         return 'bot';
     }
 
     switch (user.status['@type']) {
-        case 'userStatusEmpty':{
+        case 'userStatusEmpty': {
             return 'last seen a long time ago';
         }
-        case 'userStatusLastMonth':{
+        case 'userStatusLastMonth': {
             return 'last seen within a month';
         }
-        case 'userStatusLastWeek':{
+        case 'userStatusLastWeek': {
             return 'last seen within a week';
         }
-        case 'userStatusOffline':{
-            let {was_online} = user.status;
+        case 'userStatusOffline': {
+            let { was_online } = user.status;
             if (!was_online) return 'offline';
 
             const now = new Date();
             const wasOnline = new Date(was_online * 1000);
-            if (wasOnline > now){
+            if (wasOnline > now) {
                 return 'last seen just now';
             }
 
             let diff = new Date(now - wasOnline);
 
             // within a minute
-            if (diff.getTime() / 1000 < 60){
+            if (diff.getTime() / 1000 < 60) {
                 return 'last seen just now';
             }
 
             // within an hour
-            if (diff.getTime() / 1000 < 60 * 60){
+            if (diff.getTime() / 1000 < 60 * 60) {
                 const minutes = Math.floor(diff.getTime() / 1000 / 60);
                 return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
             }
@@ -65,9 +58,9 @@ function getUserStatus(user){
             // today
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            if (wasOnline > today){
+            if (wasOnline > today) {
                 // up to 6 hours ago
-                if (diff.getTime() / 1000 < 6 * 60 * 60){
+                if (diff.getTime() / 1000 < 6 * 60 * 60) {
                     const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
                     return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
                 }
@@ -80,16 +73,16 @@ function getUserStatus(user){
             let yesterday = new Date();
             yesterday.setDate(now.getDate() - 1);
             today.setHours(0, 0, 0, 0);
-            if (wasOnline > yesterday){
+            if (wasOnline > yesterday) {
                 return `last seen yesterday at ${dateFormat(wasOnline, 'H:MM')}`;
             }
 
             return `last seen ${dateFormat(wasOnline, 'dd.mm.yyyy')}`;
         }
-        case 'userStatusOnline':{
+        case 'userStatusOnline': {
             return 'online';
         }
-        case 'userStatusRecently':{
+        case 'userStatusRecently': {
             return 'last seen recently';
         }
     }
@@ -98,11 +91,13 @@ function getUserStatus(user){
 }
 
 function isAccentUserSubtitle(user) {
-    if (user
-        && user.status
-        && user.status['@type'] === 'userStatusOnline'
-        && user.type
-        && user.type['@type'] !== 'userTypeBot'){
+    if (
+        user &&
+        user.status &&
+        user.status['@type'] === 'userStatusOnline' &&
+        user.type &&
+        user.type['@type'] !== 'userTypeBot'
+    ) {
         return true;
     }
 
@@ -149,25 +144,25 @@ function getUserShortName(userId) {
     return null;
 }
 
-function isUserBlocked(userId){
+function isUserBlocked(userId) {
     const fullInfo = UserStore.getFullInfo(userId);
-    if (fullInfo){
+    if (fullInfo) {
         return fullInfo.is_blocked;
     }
 
     return false;
 }
 
-function getUserLetters(user){
+function getUserLetters(user) {
     if (!user) return null;
 
     let title = getUserFullName(user);
     let letters = getLetters(title);
-    if (letters && letters.length > 0){
+    if (letters && letters.length > 0) {
         return letters;
     }
 
-    return user.first_name ? user.first_name.charAt(0) : (user.last_name ? user.last_name.charAt(0) : '');
+    return user.first_name ? user.first_name.charAt(0) : user.last_name ? user.last_name.charAt(0) : '';
 }
 
 function getUserStatusOrder(user) {
@@ -197,27 +192,31 @@ function getUserStatusOrder(user) {
     }
 }
 
-function getProfilePhotoFromPhoto(photo){
-    if (!photo) return null;
-    if (!photo.sizes) return null;
-    if (!photo.sizes.length) return null;
+function getProfilePhoto(userProfilePhoto) {
+    if (!userProfilePhoto) return null;
 
-    const smallSize = getSize(photo.sizes, PROFILE_PHOTO_SMALL_SIZE);
-    const bigSize = getSize(photo.sizes, PROFILE_PHOTO_BIG_SIZE);
+    const { id, sizes } = userProfilePhoto;
+    if (!sizes) return null;
+    if (!sizes.length) return null;
+
+    const smallPhotoSize = getSize(sizes, PROFILE_PHOTO_SMALL_SIZE);
+    const bigPhotoSize = getSize(sizes, PROFILE_PHOTO_BIG_SIZE);
 
     return {
         '@type': 'profilePhoto',
-        id: photo.id,
-        small: smallSize.photo,
-        big: bigSize.photo
+        id: id,
+        small: smallPhotoSize.photo,
+        big: bigPhotoSize.photo
     };
 }
 
-function getProfilePhotoDateHint(userProfilePhoto){
+function getProfilePhotoDateHint(userProfilePhoto) {
     if (!userProfilePhoto) return null;
-    if (!userProfilePhoto.added_date) return null;
 
-    const date = new Date(userProfilePhoto.added_date * 1000);
+    const { added_date } = userProfilePhoto;
+    if (!added_date) return null;
+
+    const date = new Date(added_date * 1000);
     return dateFormat(date, 'H:MM:ss d.mm.yyyy');
 }
 
@@ -228,7 +227,7 @@ export {
     isUserBlocked,
     getUserLetters,
     getUserStatusOrder,
-    getProfilePhotoFromPhoto,
+    getProfilePhoto,
     getProfilePhotoDateHint,
     getUserShortName
-}
+};

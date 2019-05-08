@@ -7,7 +7,7 @@
 
 import { getPhotoSize, getPhotoThumbnailSize, getSize } from './Common';
 import { getChatUserId } from './Chat';
-import { getProfilePhotoFromPhoto } from './User';
+import { getProfilePhoto } from './User';
 import { getLocationId } from './Message';
 import {
     FILE_PRIORITY,
@@ -974,6 +974,9 @@ function getMediaPreviewFile(chatId, messageId) {
             }
             break;
         }
+        case 'messageChatChangePhoto': {
+            return getMediaFile(chatId, messageId, PHOTO_SIZE);
+        }
         case 'messageDocument': {
             const { document } = content;
             if (document) {
@@ -1035,6 +1038,16 @@ function getMediaFile(chatId, messageId, size) {
             const { animation } = content;
             if (animation) {
                 return [animation.width, animation.height, animation.animation];
+            }
+            break;
+        }
+        case 'messageChatChangePhoto': {
+            const { photo } = content;
+            if (photo) {
+                const photoSize = getSize(photo.sizes, size);
+                if (photoSize) {
+                    return [photoSize.width, photoSize.height, photoSize.photo];
+                }
             }
             break;
         }
@@ -1202,6 +1215,29 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     loadAnimationThumbnailContent(store, animation, message);
                     break;
                 }
+                case 'messageChatChangePhoto': {
+                    const { photo } = content;
+
+                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
+                    if (!photoSize) break;
+
+                    const { photo: file } = photoSize;
+                    if (!file) break;
+
+                    const blob = file.blob || FileStore.getBlob(file.id);
+                    if (blob) break;
+
+                    const { id } = file;
+
+                    FileStore.getLocalFile(
+                        store,
+                        file,
+                        null,
+                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+                    );
+                    break;
+                }
                 case 'messageDocument': {
                     const { document } = content;
 
@@ -1348,7 +1384,7 @@ function loadProfileMediaViewerContent(chatId, photos) {
 
         switch (photo['@type']) {
             case 'userProfilePhoto': {
-                photo = getProfilePhotoFromPhoto(photo);
+                photo = getProfilePhoto(photo);
                 if (!photo) break;
 
                 if (photo) {
