@@ -13,7 +13,8 @@ import {
     getChatUnreadCount,
     getChatUnreadMentionCount,
     getChatUnreadMessageIcon,
-    isChatMuted
+    isChatMuted,
+    showChatDraft
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -44,6 +45,7 @@ class DialogBadgeControl extends React.Component {
     componentDidMount() {
         ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatNotificationSettings', this.onUpdate);
@@ -56,6 +58,7 @@ class DialogBadgeControl extends React.Component {
     componentWillUnmount() {
         ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
         ChatStore.removeListener('updateChatIsMarkedAsUnread', this.onUpdate);
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
@@ -116,15 +119,18 @@ class DialogBadgeControl extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
+        const { draft_message } = chat;
+
         const unreadMessageIcon = getChatUnreadMessageIcon(chat);
         const unreadCount = getChatUnreadCount(chat);
         const unreadMentionCount = getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
+        const showDraftChat = showChatDraft(chat.id);
         const muteClassName = isChatMuted(chat) ? 'dialog-badge-muted' : '';
 
         return (
             <>
-                {unreadMessageIcon && <i className='dialog-badge-unread' />}
+                {unreadMessageIcon && !showDraftChat && <i className='dialog-badge-unread' />}
                 {unreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>

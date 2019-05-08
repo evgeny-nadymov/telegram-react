@@ -13,7 +13,7 @@ import ServiceMessage from '../Message/ServiceMessage';
 import Message from '../Message/Message';
 import FilesDropTarget from './FilesDropTarget';
 import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
-import { loadChatsContent, loadMessageContents } from '../../Utils/File';
+import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
@@ -424,6 +424,7 @@ class MessagesList extends React.Component {
             const store = FileStore.getStore();
             loadMessageContents(store, result.messages);
             loadChatsContent(store, [chatId]);
+            loadDraftContent(store, chatId);
 
             MessagesList.viewMessages(result.messages);
 

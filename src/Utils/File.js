@@ -1529,6 +1529,19 @@ function loadChatsContent(store, ids) {
     ids.forEach(id => loadChatContent(store, ChatStore.get(id)));
 }
 
+function loadDraftContent(store, chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
+
+    const { draft_message } = chat;
+    if (!draft_message) return;
+
+    const { reply_to_message_id } = draft_message;
+    if (!reply_to_message_id) return;
+
+    loadReplies(store, chatId, [reply_to_message_id]);
+}
+
 function isGifMimeType(mimeType) {
     return mimeType && mimeType.toLowerCase() === 'image/gif';
 }
@@ -1583,6 +1596,7 @@ export {
     cancelPreloadMediaViewerContent,
     loadProfileMediaViewerContent,
     preloadProfileMediaViewerContent,
+    loadDraftContent,
     loadUserContent,
     loadChatContent,
     loadChatsContent,
