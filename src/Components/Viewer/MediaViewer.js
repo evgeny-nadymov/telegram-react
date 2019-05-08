@@ -294,19 +294,57 @@ class MediaViewer extends React.Component {
         });
     };
 
+    getFilter = (chatId, messageId) => {
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return null;
+
+        const { content } = message;
+        if (!content) return null;
+
+        switch (content['@type']) {
+            case 'messageChatChangePhoto': {
+                return {
+                    '@type': 'searchMessagesFilterChatPhoto'
+                };
+            }
+            case 'messagePhoto': {
+                return {
+                    '@type': 'searchMessagesFilterPhotoAndVideo'
+                };
+            }
+            case 'messageVideo': {
+                return {
+                    '@type': 'searchMessagesFilterPhotoAndVideo'
+                };
+            }
+            default: {
+                return null;
+            }
+        }
+    };
+
     loadHistory = async () => {
         const { chatId, messageId } = this.props;
 
-        let result = await TdLibController.send({
-            '@type': 'searchChatMessages',
-            chat_id: chatId,
-            query: '',
-            sender_user_id: 0,
-            from_message_id: messageId,
-            offset: -MEDIA_SLICE_LIMIT,
-            limit: 2 * MEDIA_SLICE_LIMIT,
-            filter: { '@type': 'searchMessagesFilterPhotoAndVideo' }
-        });
+        const filter = this.getFilter(chatId, messageId);
+
+        let result = {
+            '@type': 'messages',
+            messages: [],
+            total_count: 0
+        };
+        if (filter) {
+            result = await TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                query: '',
+                sender_user_id: 0,
+                from_message_id: messageId,
+                offset: -MEDIA_SLICE_LIMIT,
+                limit: 2 * MEDIA_SLICE_LIMIT,
+                filter: filter
+            });
+        }
 
         filterMessages(result, this.history);
         MessageStore.setItems(result.messages);
@@ -328,10 +366,13 @@ class MediaViewer extends React.Component {
         } else {
             preloadMediaViewerContent(index, this.history);
 
+            const filter = this.getFilter(chatId, messageId);
+            if (!filter) return;
+
             const maxCount = 1500;
             let count = 0;
             while (!this.firstSliceLoaded && count < maxCount) {
-                result = await TdLibController.send({
+                const result = await TdLibController.send({
                     '@type': 'searchChatMessages',
                     chat_id: chatId,
                     query: '',
@@ -339,7 +380,7 @@ class MediaViewer extends React.Component {
                     from_message_id: this.history.length > 0 ? this.history[0].id : 0,
                     offset: -99,
                     limit: 99 + 1,
-                    filter: { '@type': 'searchMessagesFilterPhoto' }
+                    filter: filter
                 });
                 count += result.messages.length;
 
@@ -565,19 +606,28 @@ class MediaViewer extends React.Component {
     };
 
     loadPrevious = async () => {
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
         const { currentMessageId } = this.state;
 
-        const result = await TdLibController.send({
-            '@type': 'searchChatMessages',
-            chat_id: chatId,
-            query: '',
-            sender_user_id: 0,
-            from_message_id: currentMessageId,
-            offset: 0,
-            limit: MEDIA_SLICE_LIMIT,
-            filter: { '@type': 'searchMessagesFilterPhoto' }
-        });
+        const filter = this.getFilter(chatId, messageId);
+
+        let result = {
+            '@type': 'messages',
+            messages: [],
+            total_count: 0
+        };
+        if (filter) {
+            result = await TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                query: '',
+                sender_user_id: 0,
+                from_message_id: currentMessageId,
+                offset: 0,
+                limit: MEDIA_SLICE_LIMIT,
+                filter: filter
+            });
+        }
 
         filterMessages(result, this.history);
         MessageStore.setItems(result.messages);
@@ -617,19 +667,28 @@ class MediaViewer extends React.Component {
     };
 
     loadNext = async () => {
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
         const { currentMessageId } = this.state;
 
-        let result = await TdLibController.send({
-            '@type': 'searchChatMessages',
-            chat_id: chatId,
-            query: '',
-            sender_user_id: 0,
-            from_message_id: currentMessageId,
-            offset: -MEDIA_SLICE_LIMIT,
-            limit: MEDIA_SLICE_LIMIT + 1,
-            filter: { '@type': 'searchMessagesFilterPhoto' }
-        });
+        const filter = this.getFilter(chatId, messageId);
+
+        let result = {
+            '@type': 'messages',
+            messages: [],
+            total_count: 0
+        };
+        if (filter) {
+            result = await TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                query: '',
+                sender_user_id: 0,
+                from_message_id: currentMessageId,
+                offset: -MEDIA_SLICE_LIMIT,
+                limit: MEDIA_SLICE_LIMIT + 1,
+                filter: filter
+            });
+        }
 
         filterMessages(result, this.history);
         MessageStore.setItems(result.messages);
@@ -768,6 +827,23 @@ class MediaViewer extends React.Component {
         current.changeSpeed(nextSpeed);
     };
 
+    canBeForwarded = (chatId, messageId) => {
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return false;
+
+        const { can_be_forwarded, content } = message;
+        if (!content) return false;
+
+        switch (content['@type']) {
+            case 'messageChatChangePhoto': {
+                return true;
+            }
+            default: {
+                return can_be_forwarded;
+            }
+        }
+    };
+
     render() {
         const { chatId, t } = this.props;
         const {
@@ -778,8 +854,8 @@ class MediaViewer extends React.Component {
             firstSliceLoaded,
             hasNextMedia,
             hasPreviousMedia,
-            totalCount,
-            speed
+            speed,
+            totalCount
         } = this.state;
 
         let index = -1;
@@ -788,13 +864,11 @@ class MediaViewer extends React.Component {
         }
         const maxCount = Math.max(this.history.length, totalCount);
 
-        //console.log(`MediaViewer.render index=${index} currentMessageId=${currentMessageId}`, this.history);
-
         const message = MessageStore.get(chatId, currentMessageId);
-        const { can_be_forwarded, can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
+        const { can_be_deleted_for_all_users, can_be_deleted_only_for_self } = message;
 
-        const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
-        const canBeForwarded = can_be_forwarded;
+        const canBeDeleted = can_be_deleted_for_all_users || can_be_deleted_only_for_self;
+        const canBeForwarded = this.canBeForwarded(chatId, currentMessageId);
 
         let deleteConfirmationContent = '';
         if (isVideoMessage(chatId, currentMessageId)) {
