@@ -325,7 +325,7 @@ class InputBoxControl extends Component {
         };
 
         this.onSendInternal(content, result => {
-            let cachedMessage = MessageStore.get(result.chat_id, result.id);
+            const cachedMessage = MessageStore.get(result.chat_id, result.id);
             if (cachedMessage != null) {
                 this.handleSendingMessage(cachedMessage, file);
             }
