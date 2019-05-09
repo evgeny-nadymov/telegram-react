@@ -69,3 +69,8 @@ body {
 .pointer {
     cursor: pointer;
 }
+
+.subtitle {
+    color: #70777b;
+    font-size: 14px;
+}

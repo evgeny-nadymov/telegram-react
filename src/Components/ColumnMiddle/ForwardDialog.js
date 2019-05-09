@@ -466,8 +466,9 @@ class ForwardDialog extends React.Component {
 }
 
 ForwardDialog.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageIds: PropTypes.array.isRequired
+    chatId: PropTypes.number,
+    messageIds: PropTypes.array,
+    photoSize: PropTypes.object
 };
 
 const enhance = compose(

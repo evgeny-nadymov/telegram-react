@@ -70,9 +70,9 @@ class DialogContentControl extends React.Component {
     };
 
     render() {
-        if (this.clearHistory) return <div className='dialog-content'>{'\u00A0'}</div>;
-
         const { chatId, t } = this.props;
+
+        if (this.clearHistory) return <div className='dialog-content'>{'\u00A0'}</div>;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return <div className='dialog-content'>{'\u00A0'}</div>;
@@ -90,7 +90,7 @@ class DialogContentControl extends React.Component {
 
                 contentControl = (
                     <>
-                        <span className='dialog-content-draft'>Draft: </span>
+                        <span className='dialog-content-draft'>{t('Draft') + ': '}</span>
                         {text}
                     </>
                 );

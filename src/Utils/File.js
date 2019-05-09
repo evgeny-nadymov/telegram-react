@@ -1372,13 +1372,14 @@ function preloadMediaViewerContent(index, history) {
     loadMediaViewerContent(messages, true);
 }
 
-function loadUserPhoto(store, file, userId) {
+function loadUserFileContent(store, file, userId) {
     if (!file) return;
+
+    const { id } = file;
+    file = FileStore.get(id) || file;
 
     const user = UserStore.get(userId);
     if (!user) return;
-
-    const { id } = file;
 
     const blob = file.blob || FileStore.getBlob(id);
     if (blob) return;
@@ -1388,17 +1389,18 @@ function loadUserPhoto(store, file, userId) {
         file,
         null,
         () => FileStore.updateUserPhotoBlob(userId, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, user)
     );
 }
 
-function loadChatPhoto(store, file, chatId) {
+function loadChatFileContent(store, file, chatId) {
     if (!file) return;
+
+    const { id } = file;
+    file = FileStore.get(id) || file;
 
     const chat = ChatStore.get(chatId);
     if (!chat) return;
-
-    const { id } = file;
 
     const blob = file.blob || FileStore.getBlob(id);
     if (blob) return;
@@ -1408,7 +1410,7 @@ function loadChatPhoto(store, file, chatId) {
         file,
         null,
         () => FileStore.updateChatPhotoBlob(chatId, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, chat)
     );
 }
 
@@ -1421,26 +1423,18 @@ function loadProfileMediaViewerContent(chatId, photos) {
         switch (photo['@type']) {
             case 'chatPhoto': {
                 const { small, big } = photo;
-                if (small) {
-                    loadChatPhoto(store, small, chatId);
-                }
 
-                if (big) {
-                    loadChatPhoto(store, big, chatId);
-                }
+                loadChatFileContent(store, small, chatId);
+                loadChatFileContent(store, big, chatId);
                 break;
             }
             case 'profilePhoto': {
                 const userId = getChatUserId(chatId);
 
                 const { small, big } = photo;
-                if (small) {
-                    loadUserPhoto(store, small, userId);
-                }
 
-                if (big) {
-                    loadUserPhoto(store, big, userId);
-                }
+                loadUserFileContent(store, small, userId);
+                loadUserFileContent(store, big, userId);
                 break;
             }
             case 'userProfilePhoto': {
@@ -1450,13 +1444,9 @@ function loadProfileMediaViewerContent(chatId, photos) {
                 const userId = getChatUserId(chatId);
 
                 const { small, big } = photo;
-                if (small) {
-                    loadUserPhoto(store, small, userId);
-                }
 
-                if (big) {
-                    loadUserPhoto(store, big, userId);
-                }
+                loadUserFileContent(store, small, userId);
+                loadUserFileContent(store, big, userId);
                 break;
             }
         }
@@ -1480,64 +1470,40 @@ function preloadProfileMediaViewerContent(chatId, index, history) {
     loadProfileMediaViewerContent(chatId, items);
 }
 
-function loadUserContent(store, user) {
+function loadUserContent(store, userId) {
+    const user = UserStore.get(userId);
     if (!user) return;
 
     const { profile_photo } = user;
     if (!profile_photo) return;
 
-    let { small: file } = profile_photo;
-    if (!file) return;
+    const { small: file } = profile_photo;
 
-    file = FileStore.get(file.id) || file;
-    const { id } = file;
-
-    const blob = FileStore.getBlob(id);
-    if (blob) return;
-
-    FileStore.getLocalFile(
-        store,
-        file,
-        null,
-        () => FileStore.updateUserPhotoBlob(user.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
-    );
+    loadUserFileContent(store, file, userId);
 }
 
 function loadUsersContent(store, ids) {
     if (!ids) return;
 
-    ids.forEach(id => loadUserContent(store, UserStore.get(id)));
+    ids.forEach(id => loadUserContent(store, id));
 }
 
-function loadChatContent(store, chat) {
+function loadChatContent(store, chatId) {
+    const chat = ChatStore.get(chatId);
     if (!chat) return;
 
     const { photo } = chat;
     if (!photo) return;
 
-    let { small: file } = photo;
-    if (!file) return;
+    const { small: file } = photo;
 
-    file = FileStore.get(file.id) || file;
-    const { id } = file;
-
-    const blob = FileStore.getBlob(id) || file.blob;
-    if (blob) return;
-
-    FileStore.getLocalFile(
-        store,
-        file,
-        null,
-        () => FileStore.updateChatPhotoBlob(chat.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
-    );
+    loadChatFileContent(store, file, chatId);
 }
 
 function loadChatsContent(store, ids) {
     if (!ids) return;
 
-    ids.forEach(id => loadChatContent(store, ChatStore.get(id)));
+    ids.forEach(id => loadChatContent(store, id));
 }
 
 function loadDraftContent(store, chatId) {

@@ -7,39 +7,32 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import Photo from '../Components/Message/Media/Photo';
-import Video from '../Components/Message/Media/Video';
-import Game from '../Components/Message/Media/Game';
-import VoiceNote from '../Components/Message/Media/VoiceNote';
-import VideoNote from '../Components/Message/Media/VideoNote';
+import Audio from '../Components/Message/Media/Audio';
 import Animation from '../Components/Message/Media/Animation';
-import Sticker from '../Components/Message/Media/Sticker';
-import Location from '../Components/Message/Media/Location';
-import Venue from '../Components/Message/Media/Venue';
 import Contact from '../Components/Message/Media/Contact';
 import Document from '../Components/Message/Media/Document';
-import Audio from '../Components/Message/Media/Audio';
-import { getUserFullName } from './User';
-import { getServiceMessageContent } from './ServiceMessage';
-import { getAudioTitle } from './Media';
-import { download, saveOrDownload } from './File';
+import Game from '../Components/Message/Media/Game';
+import Location from '../Components/Message/Media/Location';
+import Photo from '../Components/Message/Media/Photo';
+import Poll from '../Components/Message/Media/Poll';
+import Sticker from '../Components/Message/Media/Sticker';
+import Venue from '../Components/Message/Media/Venue';
+import Video from '../Components/Message/Media/Video';
+import VideoNote from '../Components/Message/Media/VideoNote';
+import VoiceNote from '../Components/Message/Media/VoiceNote';
 import { getChatTitle } from './Chat';
-import { getPhotoSize, getSize } from './Common';
 import { openUser } from './Commands';
-import {
-    LOCATION_HEIGHT,
-    LOCATION_SCALE,
-    LOCATION_WIDTH,
-    LOCATION_ZOOM,
-    PHOTO_BIG_SIZE,
-    PROFILE_PHOTO_BIG_SIZE,
-    PROFILE_PHOTO_SMALL_SIZE
-} from '../Constants';
-import UserStore from '../Stores/UserStore';
-import ChatStore from '../Stores/ChatStore';
-import MessageStore from '../Stores/MessageStore';
-import FileStore from '../Stores/FileStore';
+import { getPhotoSize, getSize } from './Common';
+import { download, saveOrDownload } from './File';
+import { getAudioTitle } from './Media';
+import { getServiceMessageContent } from './ServiceMessage';
+import { getUserFullName } from './User';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
 import ApplicationStore from '../Stores/ApplicationStore';
+import ChatStore from '../Stores/ChatStore';
+import FileStore from '../Stores/FileStore';
+import MessageStore from '../Stores/MessageStore';
+import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 function getAuthor(message) {
@@ -310,32 +303,34 @@ function getMedia(message, openMedia) {
     if (!content) return null;
 
     switch (content['@type']) {
-        case 'messageText':
-            return null;
+        case 'messageAnimation':
+            return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
+        case 'messageAudio':
+            return <Audio chatId={chat_id} messageId={id} audio={content.audio} openMedia={openMedia} />;
+        case 'messageContact':
+            return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
+        case 'messageDocument':
+            return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
+        case 'messageGame':
+            return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
+        case 'messageLocation':
+            return <Location chatId={chat_id} messageId={id} location={content.location} openMedia={openMedia} />;
         case 'messagePhoto':
             return <Photo chatId={chat_id} messageId={id} photo={content.photo} openMedia={openMedia} />;
+        case 'messagePoll':
+            return <Poll chatId={chat_id} messageId={id} poll={content.poll} openMedia={openMedia} />;
+        case 'messageSticker':
+            return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
+        case 'messageText':
+            return null;
+        case 'messageVenue':
+            return <Venue chatId={chat_id} messageId={id} venue={content.venue} openMedia={openMedia} />;
         case 'messageVideo':
             return <Video chatId={chat_id} messageId={id} video={content.video} openMedia={openMedia} />;
         case 'messageVideoNote':
             return <VideoNote chatId={chat_id} messageId={id} videoNote={content.video_note} openMedia={openMedia} />;
         case 'messageVoiceNote':
             return <VoiceNote chatId={chat_id} messageId={id} voiceNote={content.voice_note} openMedia={openMedia} />;
-        case 'messageAnimation':
-            return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
-        case 'messageGame':
-            return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
-        case 'messageSticker':
-            return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
-        case 'messageLocation':
-            return <Location chatId={chat_id} messageId={id} location={content.location} openMedia={openMedia} />;
-        case 'messageVenue':
-            return <Venue chatId={chat_id} messageId={id} venue={content.venue} openMedia={openMedia} />;
-        case 'messageContact':
-            return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
-        case 'messageAudio':
-            return <Audio chatId={chat_id} messageId={id} audio={content.audio} openMedia={openMedia} />;
-        case 'messageDocument':
-            return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
         default:
             return '[' + content['@type'] + ']';
     }
@@ -518,6 +513,11 @@ function getContent(message, t = key => key) {
         }
         case 'messagePhoto': {
             return t('AttachPhoto') + caption;
+        }
+        case 'messagePoll': {
+            const { poll } = content;
+
+            return '📊 ' + (poll.question || t('Poll')) + caption;
         }
         case 'messagePinMessage': {
             return getServiceMessageContent(message);

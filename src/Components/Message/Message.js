@@ -105,21 +105,21 @@ class Message extends Component {
     }
 
     componentDidMount() {
-        MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
-        MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
-        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
-        //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
+        MessageStore.on('updateMessageViews', this.onUpdateMessageViews);
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
-        MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
-        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.removeListener('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateClearSelection);
-        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
+        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.removeListener('updateMessageEdited', this.onUpdateMessageEdited);
+        MessageStore.removeListener('updateMessageViews', this.onUpdateMessageViews);
     }
 
     onClientUpdateClearSelection = update => {
@@ -158,7 +158,7 @@ class Message extends Component {
         }
     };
 
-    handleUpdateMessageEdited = update => {
+    onUpdateMessageEdited = update => {
         const { chat_id, message_id } = update;
         const { chatId, messageId } = this.props;
 
@@ -167,7 +167,7 @@ class Message extends Component {
         }
     };
 
-    handleUpdateMessageViews = update => {
+    onUpdateMessageViews = update => {
         const { chat_id, message_id } = update;
         const { chatId, messageId } = this.props;
 
@@ -176,12 +176,24 @@ class Message extends Component {
         }
     };
 
-    handleUpdateMessageContent = update => {
+    onUpdateMessageContent = update => {
         const { chat_id, message_id } = update;
         const { chatId, messageId } = this.props;
 
-        if (chatId === chat_id && messageId === message_id) {
-            this.forceUpdate();
+        if (chatId !== chat_id) return;
+        if (messageId !== message_id) return;
+
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        switch (content['@type']) {
+            case 'messagePoll': {
+                this.forceUpdate();
+                break;
+            }
         }
     };
 
