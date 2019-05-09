@@ -548,7 +548,7 @@ class MediaViewer extends React.Component {
         const { currentMessageId } = this.state;
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateForwardMessages',
+            '@type': 'clientUpdateForward',
             info: {
                 chatId: chatId,
                 messageIds: [currentMessageId]

@@ -96,7 +96,7 @@ class TelegramApp extends Component {
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
-        ApplicationStore.on('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
+        ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
     }
 
     componentWillUnmount() {
@@ -114,7 +114,7 @@ class TelegramApp extends Component {
         );
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
-        ApplicationStore.removeListener('clientUpdateForwardMessages', this.onClientUpdateForwardMessages);
+        ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
     }
 
     onClientUpdateOpenChat = update => {
@@ -146,7 +146,7 @@ class TelegramApp extends Component {
         }
     };
 
-    onClientUpdateForwardMessages = update => {
+    onClientUpdateForward = update => {
         const { info } = update;
 
         this.setState({ forwardInfo: info });

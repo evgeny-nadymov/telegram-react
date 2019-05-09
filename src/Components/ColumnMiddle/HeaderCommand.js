@@ -111,7 +111,7 @@ class HeaderCommand extends React.Component {
         this.handleCancel();
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateForwardMessages',
+            '@type': 'clientUpdateForward',
             info: {
                 chatId: id,
                 messageIds: messageIds

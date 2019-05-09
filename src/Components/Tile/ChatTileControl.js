@@ -52,12 +52,16 @@ class ChatTileControl extends Component {
 
     onUpdateChatPhoto = update => {
         const { chatId } = this.props;
+        const { chat_id } = update;
 
-        if (!update.chat_id) return;
-        if (update.chat_id !== chatId) return;
+        if (chat_id !== chatId) return;
 
+        const chat = ChatStore.get(chatId);
         if (!update.photo) {
             this.forceUpdate();
+        } else {
+            const store = FileStore.getStore();
+            loadChatContent(store, chat);
         }
     };
 

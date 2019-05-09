@@ -1372,84 +1372,95 @@ function preloadMediaViewerContent(index, history) {
     loadMediaViewerContent(messages, true);
 }
 
+function loadUserPhoto(store, file, userId) {
+    if (!file) return;
+
+    const user = UserStore.get(userId);
+    if (!user) return;
+
+    const { id } = file;
+
+    const blob = file.blob || FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        null,
+        () => FileStore.updateUserPhotoBlob(userId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, user)
+    );
+}
+
+function loadChatPhoto(store, file, chatId) {
+    if (!file) return;
+
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
+
+    const { id } = file;
+
+    const blob = file.blob || FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        null,
+        () => FileStore.updateChatPhotoBlob(chatId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, chat)
+    );
+}
+
 function loadProfileMediaViewerContent(chatId, photos) {
     if (!photos) return;
-    if (!photos.length) return;
 
     const store = FileStore.getStore();
 
-    for (let i = 0; i < photos.length; i++) {
-        let photo = photos[i];
-        if (!photo) continue;
-
+    photos.forEach(photo => {
         switch (photo['@type']) {
+            case 'chatPhoto': {
+                const { small, big } = photo;
+                if (small) {
+                    loadChatPhoto(store, small, chatId);
+                }
+
+                if (big) {
+                    loadChatPhoto(store, big, chatId);
+                }
+                break;
+            }
+            case 'profilePhoto': {
+                const userId = getChatUserId(chatId);
+
+                const { small, big } = photo;
+                if (small) {
+                    loadUserPhoto(store, small, userId);
+                }
+
+                if (big) {
+                    loadUserPhoto(store, big, userId);
+                }
+                break;
+            }
             case 'userProfilePhoto': {
                 photo = getProfilePhoto(photo);
                 if (!photo) break;
 
-                if (photo) {
-                    const file = getBigPhoto(photo);
-                    if (!file) break;
+                const userId = getChatUserId(chatId);
 
-                    const userId = getChatUserId(chatId);
-                    const user = UserStore.get(userId);
-                    if (!user) break;
-
-                    const blob = file.blob || FileStore.getBlob(file.id);
-                    if (blob) break;
-
-                    FileStore.getLocalFile(
-                        store,
-                        file,
-                        null,
-                        () => FileStore.updateUserPhotoBlob(userId, file.id),
-                        () => FileStore.getRemoteFile(file.id, FILE_PRIORITY, user)
-                    );
+                const { small, big } = photo;
+                if (small) {
+                    loadUserPhoto(store, small, userId);
                 }
 
-                break;
-            }
-            case 'profilePhoto': {
-                const file = getBigPhoto(photo);
-                if (!file) break;
-
-                const userId = getChatUserId(chatId);
-                const user = UserStore.get(userId);
-                if (!user) break;
-
-                const blob = file.blob || FileStore.getBlob(file.id);
-                if (blob) break;
-
-                FileStore.getLocalFile(
-                    store,
-                    file,
-                    null,
-                    () => FileStore.updateUserPhotoBlob(userId, file.id),
-                    () => FileStore.getRemoteFile(file.id, FILE_PRIORITY, user)
-                );
-                break;
-            }
-            case 'chatPhoto': {
-                const file = getBigPhoto(photo);
-                if (!file) break;
-
-                const chat = ChatStore.get(chatId);
-                if (!chat) break;
-
-                const blob = file.blob || FileStore.getBlob(file.id);
-                if (blob) break;
-
-                FileStore.getLocalFile(
-                    store,
-                    file,
-                    null,
-                    () => FileStore.updateChatPhotoBlob(chatId, file.id),
-                    () => FileStore.getRemoteFile(file.id, FILE_PRIORITY, chat)
-                );
+                if (big) {
+                    loadUserPhoto(store, big, userId);
+                }
                 break;
             }
         }
-    }
+    });
 }
 
 function preloadProfileMediaViewerContent(chatId, index, history) {
@@ -1511,7 +1522,7 @@ function loadChatContent(store, chat) {
     file = FileStore.get(file.id) || file;
     const { id } = file;
 
-    const blob = FileStore.getBlob(id);
+    const blob = FileStore.getBlob(id) || file.blob;
     if (blob) return;
 
     FileStore.getLocalFile(

@@ -14,6 +14,16 @@ import ChatStore from '../../Stores/ChatStore';
 import './ChatControl.css';
 
 class ChatControl extends React.Component {
+    constructor(props) {
+        super(props);
+        if (process.env.NODE_ENV !== 'production') {
+            const { chatId } = this.props;
+            this.state = {
+                chat: ChatStore.get(chatId)
+            };
+        }
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         return nextProps.chatId !== this.props.chatId;
     }

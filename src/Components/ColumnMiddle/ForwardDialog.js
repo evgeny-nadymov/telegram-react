@@ -105,6 +105,8 @@ class ForwardDialog extends React.Component {
 
     getPublicMessageLink = async () => {
         const { chatId, messageIds } = this.props;
+        if (!chatId) return;
+        if (!messageIds) return;
         if (messageIds.length > 1) return;
         if (!isSupergroup(chatId)) return;
         if (!getChatUsername(chatId)) return;
@@ -123,7 +125,7 @@ class ForwardDialog extends React.Component {
 
     handleClose = () => {
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateForwardMessages',
+            '@type': 'clientUpdateForward',
             info: null
         });
     };
@@ -170,61 +172,66 @@ class ForwardDialog extends React.Component {
         }
     };
 
+    getForwardPhotoSize = (chatId, messageIds) => {
+        if (messageIds.length !== 1) return null;
+
+        const message = MessageStore.get(chatId, messageIds[0]);
+        if (!message) return null;
+
+        const { can_be_forwarded, content } = message;
+        if (!can_be_forwarded && content['@type'] === 'messageChatChangePhoto') {
+            const { photo } = content;
+            if (!photo) return null;
+
+            const { sizes } = photo;
+            if (sizes && sizes.length) {
+                return sizes[sizes.length - 1];
+            }
+        }
+
+        return null;
+    };
+
     handleSend = () => {
         this.handleClose();
 
-        const { chatId, messageIds } = this.props;
-        if (!chatId) return;
-        if (!messageIds || !messageIds.length) return;
+        const { chatId, messageIds, photoSize } = this.props;
+        if (!chatId && !messageIds && !messageIds && !photoSize) return;
 
         const text = this.getInnerText(this.messageRef.current);
 
         this.targetChats.forEach(targetChatId => {
-            if (messageIds.length === 1) {
-                const message = MessageStore.get(chatId, messageIds[0]);
-                if (message) {
-                    const { can_be_forwarded, content } = message;
-                    if (!can_be_forwarded && content['@type'] === 'messageChatChangePhoto') {
-                        const { photo } = content;
-                        if (photo) {
-                            const { sizes } = photo;
-                            if (sizes && sizes.length) {
-                                const photoSize = sizes[sizes.length - 1];
-                                if (photoSize) {
-                                    const { width, height, photo } = photoSize;
+            const size = photoSize || this.getForwardPhotoSize(chatId, messageIds);
+            if (size) {
+                const { width, height, photo } = size;
 
-                                    TdLibController.send({
-                                        '@type': 'sendMessage',
-                                        chat_id: targetChatId,
-                                        reply_to_message_id: 0,
-                                        disable_notifications: false,
-                                        from_background: false,
-                                        reply_markup: null,
-                                        input_message_content: {
-                                            '@type': 'inputMessagePhoto',
-                                            photo: {
-                                                '@type': 'inputFileId',
-                                                id: photo.id
-                                            },
-                                            thumbnail: null,
-                                            added_sticker_file_ids: [],
-                                            width: width,
-                                            height: height,
-                                            caption: {
-                                                '@type': 'formattedText',
-                                                text: text,
-                                                entities: null
-                                            },
-                                            ttl: 0
-                                        }
-                                    });
-
-                                    return;
-                                }
-                            }
-                        }
+                TdLibController.send({
+                    '@type': 'sendMessage',
+                    chat_id: targetChatId,
+                    reply_to_message_id: 0,
+                    disable_notifications: false,
+                    from_background: false,
+                    reply_markup: null,
+                    input_message_content: {
+                        '@type': 'inputMessagePhoto',
+                        photo: {
+                            '@type': 'inputFileId',
+                            id: photo.id
+                        },
+                        thumbnail: null,
+                        added_sticker_file_ids: [],
+                        width: width,
+                        height: height,
+                        caption: {
+                            '@type': 'formattedText',
+                            text: text,
+                            entities: null
+                        },
+                        ttl: 0
                     }
-                }
+                });
+
+                return;
             }
 
             if (text) {

@@ -22,9 +22,7 @@ import ProfileMediaViewerControl from '../Tile/ProfileMediaViewerControl';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
-import { MEDIA_SLICE_LIMIT, PHOTO_BIG_SIZE } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import MessageStore from '../../Stores/MessageStore';
 import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -191,13 +189,40 @@ class ProfileMediaViewer extends React.Component {
         saveOrDownload(file, file.id + '.jpg', chat, () => FileStore.updateChatPhotoBlob(chatId, file.id));
     };
 
-    handleForward = () => {};
+    handleForward = () => {
+        const { chatId } = this.props;
+        if (!isPrivateChat(chatId)) return;
+
+        const { currentIndex, totalCount } = this.state;
+
+        let index = -1;
+        if (totalCount) {
+            index = currentIndex;
+        }
+
+        if (index < 0 || index >= this.history.length) return;
+        const photo = getProfilePhoto(this.history[index]);
+        if (!photo) return;
+
+        let { big: file } = photo;
+        file = FileStore.get(file.id) || file;
+        if (!file) return;
+
+        const photoSize = {
+            '@type': 'photoSize',
+            type: 'c',
+            photo: file,
+            width: 640,
+            height: 640
+        };
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateForward',
+            info: { photoSize }
+        });
+    };
 
     handleDelete = () => {
-        // return;
-        // this.handleDialogOpen();
-        // return;
-
         const { chatId, messageId } = this.props;
         const { currentIndex, totalCount } = this.state;
 
@@ -208,6 +233,7 @@ class ProfileMediaViewer extends React.Component {
 
         const photo =
             index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+
         if (photo) {
             let file = photo.big;
             file = FileStore.get(file.id) || file;
@@ -269,34 +295,6 @@ class ProfileMediaViewer extends React.Component {
 
     loadNext = async () => {
         return;
-        const { chatId } = this.props;
-        const { currentMessageId } = this.state;
-
-        let result = await TdLibController.send({
-            '@type': 'searchChatMessages',
-            chat_id: chatId,
-            query: '',
-            sender_user_id: 0,
-            from_message_id: currentMessageId,
-            offset: -MEDIA_SLICE_LIMIT,
-            limit: MEDIA_SLICE_LIMIT + 1,
-            filter: { '@type': 'searchMessagesFilterPhoto' }
-        });
-
-        //filterMessages(result, this.history);
-        MessageStore.setItems(result.messages);
-
-        this.firstSliceLoaded = result.messages.length === 0;
-        this.history = result.messages.concat(this.history);
-
-        const index = this.history.findIndex(x => x.id === currentMessageId);
-
-        this.setState({
-            hasNextMedia: this.hasNextMedia(index),
-            hasPreviousMedia: this.hasPreviousMedia(index),
-            firstSliceLoaded: this.firstSliceLoaded,
-            totalCount: result.total_count
-        });
     };
 
     loadMedia = (index, callback) => {
@@ -336,10 +334,11 @@ class ProfileMediaViewer extends React.Component {
         }
 
         const deleteConfirmation = null;
-        const photo =
-            index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
-        const userProfilePhoto = index >= 0 && index < this.history.length ? this.history[index] : null;
-        const fileId = photo.big.id;
+        const inHistory = index >= 0 && index < this.history.length;
+        const photo = inHistory ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+        const userProfilePhoto = inHistory ? this.history[index] : null;
+        const { big: file } = photo;
+
         return (
             <div className='media-viewer'>
                 {deleteConfirmation}
@@ -370,10 +369,15 @@ class ProfileMediaViewer extends React.Component {
                         title={t('AttachPhoto')}
                         subtitle={totalCount && index >= 0 ? `${index + 1} of ${totalCount}` : null}
                     />
-                    <MediaViewerDownloadButton title={t('Save')} fileId={fileId} onClick={this.handleSave} />
-                    <MediaViewerFooterButton title={t('Forward')} disabled onClick={this.handleForward}>
-                        <ReplyIcon style={forwardIconStyle} />
-                    </MediaViewerFooterButton>
+                    <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
+                    {isPrivateChat(chatId) && (
+                        <MediaViewerFooterButton
+                            title={t('Forward')}
+                            disabled={!inHistory}
+                            onClick={this.handleForward}>
+                            <ReplyIcon style={forwardIconStyle} />
+                        </MediaViewerFooterButton>
+                    )}
                     <MediaViewerFooterButton title={t('Delete')} disabled onClick={this.handleDelete}>
                         <DeleteIcon style={deleteIconStyle} />
                     </MediaViewerFooterButton>

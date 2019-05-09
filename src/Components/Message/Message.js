@@ -226,7 +226,7 @@ class Message extends Component {
         const canBeForwarded = message && message.can_be_forwarded;
         if (canBeForwarded) {
             TdLibController.clientUpdate({
-                '@type': 'clientUpdateForwardMessages',
+                '@type': 'clientUpdateForward',
                 info: {
                     chatId: chatId,
                     messageIds: [messageId]
