@@ -50,17 +50,15 @@ class Poll extends React.Component {
                     <span className='subtitle'>{is_closed ? t('FinalResults') : t('AnonymousPoll')}</span>
                 </div>
                 <div className='poll-options'>
-                    <RadioGroup name='option'>
-                        {options.map((x, index) => (
-                            <PollOption
-                                key={index}
-                                option={x}
-                                canBeSelected={canBeSelected}
-                                maxVoterCount={maxVoterCount}
-                                onChange={() => this.handleChoose(index)}
-                            />
-                        ))}
-                    </RadioGroup>
+                    {options.map((x, index) => (
+                        <PollOption
+                            key={index}
+                            option={x}
+                            canBeSelected={canBeSelected}
+                            maxVoterCount={maxVoterCount}
+                            onChange={() => this.handleChoose(index)}
+                        />
+                    ))}
                 </div>
                 <div className='poll-total-count subtitle'>{this.getTotalVoterCountString(total_voter_count, t)}</div>
             </div>
