@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CloseIcon from '@material-ui/icons/Close';
-import { ANIMATION_COMPLETE_PROGRESS_MS } from '../../Constants';
+import { ANIMATION_DURATION_300MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import './FileProgress.css';
 
@@ -190,7 +190,7 @@ class FileProgress extends React.Component {
                 // console.log('FileProgress.render animationComplete=false');
 
                 this.setState({ prevFile: null });
-            }, ANIMATION_COMPLETE_PROGRESS_MS);
+            }, ANIMATION_DURATION_300MS);
         }
 
         const style = zIndex ? { zIndex: zIndex } : {};

@@ -31,10 +31,10 @@ const styles = {
 
 class PollRadio extends React.Component {
     render() {
-        const { classes, chosen, beingChosen, invisible, onChange } = this.props;
+        const { classes, chosen, beingChosen, hidden, onChange } = this.props;
 
         return (
-            <div className={classNames('poll-radio', { 'poll-radio-invisible': invisible })}>
+            <div className={classNames('poll-radio', { 'poll-radio-hidden': hidden })}>
                 <Radio
                     classes={{ root: classes.radioRoot }}
                     color='primary'
@@ -51,7 +51,7 @@ class PollRadio extends React.Component {
 PollRadio.propTypes = {
     chosen: PropTypes.bool.isRequired,
     beingChosen: PropTypes.bool.isRequired,
-    invisible: PropTypes.bool
+    hidden: PropTypes.bool
 };
 
 export default withStyles(styles)(PollRadio);

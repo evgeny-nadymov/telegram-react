@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { ANIMATION_FRAME_DURATION_MS, ANIMATION_DURATION_200MS } from './../../../Constants';
 import './PollPercentage.css';
 
 class PollPercentage extends React.Component {
@@ -15,23 +16,40 @@ class PollPercentage extends React.Component {
         super(props);
 
         this.timerHandler = null;
-        this.duration = 200;
+
+        const { value } = props;
 
         this.state = {
-            value: props.value,
-            animatedValue: props.value,
-            prevValue: props.value,
-            prevPropsValue: props.value
+            from: value,
+            to: value,
+            animated: value,
+
+            prevPropsValue: value
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { animated } = this.state;
+        const { value } = this.props;
+
+        if (value !== nextProps.value) {
+            return true;
+        }
+
+        if (animated !== nextState.animated) {
+            return true;
+        }
+
+        return false;
     }
 
     static getDerivedStateFromProps(props, state) {
         if (props.value !== state.prevPropsValue) {
             return {
-                value: props.value,
                 startTime: Date.now(),
-                fromValue: state.animatedValue,
-                prevValue: state.prevPropsValue,
+                from: state.animated,
+                to: props.value,
+
                 prevPropsValue: props.value
             };
         }
@@ -52,43 +70,40 @@ class PollPercentage extends React.Component {
     updateAnimation = () => {
         this.stopAnimation();
 
-        this.timerHandler = setInterval(this.onAnimationFrame, 40);
+        this.timerHandler = requestAnimationFrame(this.onAnimationFrame);
+        //this.timerHandler = setInterval(this.onAnimationFrame, ANIMATION_FRAME_DURATION_MS);
     };
 
     stopAnimation = () => {
         if (!this.timerHandler) return;
 
-        clearInterval(this.timerHandler);
+        cancelAnimationFrame(this.timerHandler);
+        //clearInterval(this.timerHandler);
         this.timerHandler = null;
     };
 
     onAnimationFrame = () => {
-        const now = Date.now();
+        const { startTime, from, to } = this.state;
 
-        const timePassed = now - this.state.startTime;
+        const timePassed = Date.now() - startTime;
 
-        if (timePassed >= this.duration) {
-            console.log('Poll.animationEnd', this.state.value);
-            this.setState({
-                animatedValue: this.state.value
-            });
+        if (timePassed >= ANIMATION_DURATION_200MS) {
+            console.log('Poll.animationEnd', to);
+            this.setState({ animated: to });
             this.stopAnimation();
         } else {
-            const nextAnimatedValue =
-                this.state.fromValue +
-                Math.floor(((this.state.value - this.state.fromValue) * timePassed) / this.duration);
-            console.log('Poll.animating', this.state.value, this.state.fromValue, nextAnimatedValue);
-            this.setState({
-                animatedValue: nextAnimatedValue
-            });
+            const animated = from + Math.floor(((to - from) * timePassed) / ANIMATION_DURATION_200MS);
+            console.log('Poll.animating', from, to, animated);
+            this.setState({ animated });
+            this.timerHandler = requestAnimationFrame(this.onAnimationFrame);
         }
     };
 
     render() {
         const { chosen } = this.props;
-        const { animatedValue } = this.state;
+        const { animated } = this.state;
 
-        return <div className={classNames('poll-percentage', { subtitle: !chosen })}>{animatedValue + '%'}</div>;
+        return <div className={classNames('poll-percentage', { subtitle: !chosen })}>{animated + '%'}</div>;
     }
 }
 

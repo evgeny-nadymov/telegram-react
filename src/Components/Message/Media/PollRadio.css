@@ -14,7 +14,7 @@
     position: fixed;
 }
 
-.poll-radio-invisible {
+.poll-radio-hidden {
     pointer-events: none;
     opacity: 0;
 }

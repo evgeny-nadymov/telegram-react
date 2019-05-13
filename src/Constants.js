@@ -5,7 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-export const ANIMATION_COMPLETE_PROGRESS_MS = 300;
+export const ANIMATION_FRAME_DURATION_MS = 40;
+export const ANIMATION_DURATION_200MS = 200;
+export const ANIMATION_DURATION_300MS = 300;
 export const CHAT_SLICE_LIMIT = 25;
 export const LOCATION_HEIGHT = 150;
 export const LOCATION_SCALE = 2;

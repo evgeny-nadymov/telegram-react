@@ -44,10 +44,12 @@ class PollOption extends React.Component {
     };
 
     handleClick = event => {
-        const { canBeSelected } = this.props;
+        const { canBeSelected, onChange } = this.props;
         if (!canBeSelected) return;
 
         event.stopPropagation();
+
+        onChange();
     };
 
     render() {
@@ -71,7 +73,7 @@ class PollOption extends React.Component {
                     <div className='poll-option-text-wrapper' title={this.getTitleString(voter_count, t)}>
                         <PollPercentage value={vote_percentage} chosen={is_chosen} />
                         <PollRadio
-                            invisible={!canBeSelected}
+                            hidden={!canBeSelected}
                             chosen={is_chosen}
                             beingChosen={is_being_chosen}
                             onChange={onChange}
@@ -93,6 +95,7 @@ class PollOption extends React.Component {
 
 PollOption.propTypes = {
     option: PropTypes.object.isRequired,
+    onChange: PropTypes.func.isRequired,
     canBeSelected: PropTypes.bool,
     maxVoterCount: PropTypes.number
 };
