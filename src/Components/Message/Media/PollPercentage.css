@@ -13,6 +13,10 @@
     transition: opacity 0.2s linear;
 }
 
+.poll-percentage-action {
+    color: inherit;
+}
+
 .poll-option-unselected .poll-percentage {
     opacity: 0;
 }

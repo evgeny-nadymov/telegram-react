@@ -25,7 +25,7 @@ class Poll extends React.Component {
         return count + ' votes';
     };
 
-    handleChoose = index => {
+    handleSet = index => {
         const { chatId, messageId } = this.props;
 
         TdLibController.send({
@@ -33,6 +33,19 @@ class Poll extends React.Component {
             chat_id: chatId,
             message_id: messageId,
             option_ids: [index]
+        });
+    };
+
+    handleCancel = () => {
+        const { chatId, messageId, poll } = this.props;
+        const { is_closed } = poll;
+        if (is_closed) return;
+
+        TdLibController.send({
+            '@type': 'setPollAnswer',
+            chat_id: chatId,
+            message_id: messageId,
+            option_ids: []
         });
     };
 
@@ -55,8 +68,10 @@ class Poll extends React.Component {
                             key={index}
                             option={x}
                             canBeSelected={canBeSelected}
+                            closed={is_closed}
                             maxVoterCount={maxVoterCount}
-                            onChange={() => this.handleChoose(index)}
+                            onSet={() => this.handleSet(index)}
+                            onCancel={this.handleCancel}
                         />
                     ))}
                 </div>

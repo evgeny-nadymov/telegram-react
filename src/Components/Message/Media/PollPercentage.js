@@ -8,14 +8,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { ANIMATION_FRAME_DURATION_MS, ANIMATION_DURATION_200MS } from './../../../Constants';
+import { ANIMATION_DURATION_200MS } from './../../../Constants';
 import './PollPercentage.css';
 
 class PollPercentage extends React.Component {
     constructor(props) {
         super(props);
 
-        this.timerHandler = null;
+        this.handle = null;
 
         const { value } = props;
 
@@ -70,16 +70,14 @@ class PollPercentage extends React.Component {
     updateAnimation = () => {
         this.stopAnimation();
 
-        this.timerHandler = requestAnimationFrame(this.onAnimationFrame);
-        //this.timerHandler = setInterval(this.onAnimationFrame, ANIMATION_FRAME_DURATION_MS);
+        this.handle = requestAnimationFrame(this.onAnimationFrame);
     };
 
     stopAnimation = () => {
-        if (!this.timerHandler) return;
+        if (!this.handle) return;
 
-        cancelAnimationFrame(this.timerHandler);
-        //clearInterval(this.timerHandler);
-        this.timerHandler = null;
+        cancelAnimationFrame(this.handle);
+        this.handle = null;
     };
 
     onAnimationFrame = () => {
@@ -88,28 +86,40 @@ class PollPercentage extends React.Component {
         const timePassed = Date.now() - startTime;
 
         if (timePassed >= ANIMATION_DURATION_200MS) {
-            console.log('Poll.animationEnd', to);
+            // console.log('Poll.animationEnd', to);
             this.setState({ animated: to });
             this.stopAnimation();
         } else {
             const animated = from + Math.floor(((to - from) * timePassed) / ANIMATION_DURATION_200MS);
-            console.log('Poll.animating', from, to, animated);
+            // console.log('Poll.animating', from, to, animated);
             this.setState({ animated });
-            this.timerHandler = requestAnimationFrame(this.onAnimationFrame);
+            this.handle = requestAnimationFrame(this.onAnimationFrame);
         }
     };
 
     render() {
-        const { chosen } = this.props;
+        const { chosen, closed, onClick } = this.props;
         const { animated } = this.state;
 
-        return <div className={classNames('poll-percentage', { subtitle: !chosen })}>{animated + '%'}</div>;
+        return (
+            <div className={classNames('poll-percentage', { subtitle: !chosen })}>
+                {!closed && chosen ? (
+                    <a className='poll-percentage-action' onClick={onClick}>
+                        {animated + '%'}
+                    </a>
+                ) : (
+                    <>{animated + '%'}</>
+                )}
+            </div>
+        );
     }
 }
 
 PollPercentage.propTypes = {
     value: PropTypes.number.isRequired,
-    chosen: PropTypes.bool
+    chosen: PropTypes.bool,
+    closed: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
 export default PollPercentage;
