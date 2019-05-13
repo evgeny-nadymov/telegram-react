@@ -6,7 +6,7 @@
  */
 
 .poll-option {
-    min-height: 48px;
+    min-height: 36px;
     width: 100%;
     display: flex;
     align-items: center;
