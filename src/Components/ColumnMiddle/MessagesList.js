@@ -17,7 +17,7 @@ import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../U
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
-import { highlightMessage } from '../../Utils/Commands';
+import { highlightMessage } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';

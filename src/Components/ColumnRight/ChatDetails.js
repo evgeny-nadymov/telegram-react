@@ -44,7 +44,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
-import { openUser } from '../../Utils/Commands';
+import { openUser } from '../../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';

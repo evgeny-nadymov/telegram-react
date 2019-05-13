@@ -32,7 +32,7 @@ import MediaViewer from './Components/Viewer/MediaViewer';
 import ProfileMediaViewer from './Components/Viewer/ProfileMediaViewer';
 import AppInactiveControl from './Components/Additional/AppInactiveControl';
 import registerServiceWorker from './registerServiceWorker';
-import { highlightMessage } from './Utils/Commands';
+import { highlightMessage } from './Actions/Client';
 import { FIRST_START_OPTIMIZATIONS } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';

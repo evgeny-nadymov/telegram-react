@@ -13,7 +13,7 @@ import { withStyles } from '@material-ui/core';
 import { withTranslation } from 'react-i18next';
 import Tooltip from '@material-ui/core/Tooltip';
 import { getForwardTitle, isForwardOriginHidden } from '../../Utils/Message';
-import { openUser, openChat } from '../../Utils/Commands';
+import { openUser, openChat } from '../../Actions/Client';
 import './Forward.css';
 
 function arrowGenerator(color) {

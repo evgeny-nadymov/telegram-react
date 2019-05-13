@@ -14,7 +14,7 @@ import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import { borderStyle } from '../Theme';
-import { openChat } from '../../Utils/Commands';
+import { openChat } from '../../Actions/Client';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Dialogs.css';
 

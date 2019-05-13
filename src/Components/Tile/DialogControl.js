@@ -14,7 +14,7 @@ import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
 import DialogTitleControl from './DialogTitleControl';
 import DialogMetaControl from './DialogMetaControl';
-import { openChat } from '../../Utils/Commands';
+import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogControl.css';

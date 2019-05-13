@@ -29,7 +29,7 @@ import {
     openMedia
 } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
-import { openUser, openChat, selectMessage } from '../../Utils/Commands';
+import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
@@ -71,7 +71,7 @@ class Message extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator } = this.props;
-        const { selected, highlighted } = this.state;
+        const { contextMenu, selected, highlighted } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -90,6 +90,10 @@ class Message extends Component {
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            return true;
+        }
+
+        if (nextState.contextMenu !== contextMenu) {
             return true;
         }
 
@@ -276,7 +280,7 @@ class Message extends Component {
 
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
-        const { selected, highlighted } = this.state;
+        const { contextMenu, left, top, selected, highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;

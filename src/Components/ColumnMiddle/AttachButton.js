@@ -72,6 +72,7 @@ class AttachButton extends React.Component {
                     open={Boolean(anchorEl)}
                     getContentAnchorEl={null}
                     disableAutoFocusItem
+                    disableRestoreFocus={true}
                     anchorOrigin={{
                         vertical: 'top',
                         horizontal: 'right'

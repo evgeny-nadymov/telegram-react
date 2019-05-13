@@ -108,6 +108,7 @@ class MainMenuButton extends React.Component {
                     onClose={this.handleMenuClose}
                     getContentAnchorEl={null}
                     disableAutoFocusItem
+                    disableRestoreFocus={true}
                     anchorOrigin={menuAnchorOrigin}>
                     <MenuItem onClick={this.handleCheckUpdates}>{t('UpdateTelegram')}</MenuItem>
                     <MenuItem onClick={this.handleAppearance}>{t('Appearance')}</MenuItem>

@@ -21,7 +21,7 @@ import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
 import { getChatTitle } from './Chat';
-import { openUser } from './Commands';
+import { openUser } from './../Actions/Client';
 import { getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload } from './File';
 import { getAudioTitle } from './Media';

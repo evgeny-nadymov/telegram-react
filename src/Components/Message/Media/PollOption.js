@@ -40,24 +40,24 @@ class PollOption extends React.Component {
         if (!count) return t('NoVotes').toLowerCase();
         if (count === 1) return '1 vote';
 
-        return count + 'votes';
+        return count + ' votes';
     };
 
     handleClick = event => {
-        const { canBeSelected, onSet } = this.props;
+        const { canBeSelected, onVote } = this.props;
         if (!canBeSelected) return;
 
         event.stopPropagation();
 
-        onSet();
+        onVote();
     };
 
     handleCancel = event => {
-        const { onCancel } = this.props;
+        const { onUnvote } = this.props;
 
         event.stopPropagation();
 
-        onCancel();
+        onUnvote();
     };
 
     render() {
@@ -108,8 +108,8 @@ class PollOption extends React.Component {
 
 PollOption.propTypes = {
     option: PropTypes.object.isRequired,
-    onSet: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired,
+    onVote: PropTypes.func.isRequired,
+    onUnvote: PropTypes.func.isRequired,
     canBeSelected: PropTypes.bool,
     closed: PropTypes.bool,
     maxVoterCount: PropTypes.number

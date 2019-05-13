@@ -320,6 +320,7 @@ class MainMenuButton extends React.Component {
                     onClose={this.handleMenuClose}
                     getContentAnchorEl={null}
                     disableAutoFocusItem
+                    disableRestoreFocus={true}
                     anchorOrigin={menuAnchorOrigin}
                     transformOrigin={menuTransformOrigin}>
                     <MenuItem onClick={this.handleChatInfo}>Chat info</MenuItem>

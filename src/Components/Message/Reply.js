@@ -14,7 +14,7 @@ import { withStyles } from '@material-ui/core/styles';
 import ReplyTile from '../Tile/ReplyTile';
 import { getContent, getTitle, isDeletedMessage, getReplyPhotoSize } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
-import { openChat } from '../../Utils/Commands';
+import { openChat } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './Reply.css';
 

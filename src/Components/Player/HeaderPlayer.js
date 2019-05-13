@@ -24,7 +24,7 @@ import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
-import { openChat } from '../../Utils/Commands';
+import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';

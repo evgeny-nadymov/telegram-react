@@ -11,7 +11,7 @@ import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
 import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
-import { openUser as openUserCommand, openChat as openChatCommand } from '../../Utils/Commands';
+import { openUser as openUserCommand, openChat as openChatCommand } from '../../Actions/Client';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import './MessageAuthor.css';

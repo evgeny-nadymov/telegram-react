@@ -7,14 +7,14 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
-function openUser(userId) {
+export function openUser(userId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenUser',
         userId: userId
     });
 }
 
-function openChat(chatId, messageId = null) {
+export function openChat(chatId, messageId = null) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenChat',
         chatId: chatId,
@@ -22,7 +22,7 @@ function openChat(chatId, messageId = null) {
     });
 }
 
-function highlightMessage(chatId, messageId) {
+export function highlightMessage(chatId, messageId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMessageHighlighted',
         chatId: chatId,
@@ -30,7 +30,7 @@ function highlightMessage(chatId, messageId) {
     });
 }
 
-function selectMessage(chatId, messageId, selected) {
+export function selectMessage(chatId, messageId, selected) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMessageSelected',
         chatId: chatId,
@@ -38,5 +38,3 @@ function selectMessage(chatId, messageId, selected) {
         selected: selected
     });
 }
-
-export { openUser, openChat, highlightMessage, selectMessage };

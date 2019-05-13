@@ -12,6 +12,8 @@
     align-items: center;
     background: transparent;
     position: relative;
+    box-sizing: border-box;
+    padding: 12px 0;
 }
 
 .poll-option-wrapper {

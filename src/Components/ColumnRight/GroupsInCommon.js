@@ -12,7 +12,7 @@ import ChatControl from '../Tile/ChatControl';
 import GroupsInCommonHeader from './GroupsInCommonHeader';
 import { getChatUserId } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
-import { openChat } from '../../Utils/Commands';
+import { openChat } from '../../Actions/Client';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './GroupsInCommon.css';
