@@ -1,0 +1,24 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.user-status {
+    width: 8px;
+    height: 8px;
+    background: #80d066;
+    border-radius: 50%;
+    /*position: absolute;*/
+    /*right: 1px;*/
+    /*bottom: 1px;*/
+    /*z-index: 1;*/
+    border: 2px solid;
+}
+
+.user-status-inner {
+    width: 4px;
+    height: 4px;
+    padding: 2px;
+}

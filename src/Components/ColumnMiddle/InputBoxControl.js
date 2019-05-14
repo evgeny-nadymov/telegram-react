@@ -238,6 +238,8 @@ class InputBoxControl extends Component {
         this.onSendInternal(content, result => {});
     };
 
+    handleAttachPoll = () => {};
+
     handleAttachPhoto = () => {
         this.attachPhoto.current.click();
     };
@@ -490,6 +492,7 @@ class InputBoxControl extends Component {
                             <AttachButton
                                 onAttachPhoto={this.handleAttachPhoto}
                                 onAttachDocument={this.handleAttachDocument}
+                                onAttachPoll={this.handleAttachPoll}
                             />
 
                             {/*<IconButton>*/}

@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.chat-tile {
+    position: relative;
+    height: 48px;
+}
+
 .tile_color_1 {
     background: #cc90e2;
 }

@@ -8,6 +8,7 @@
 .poll {
     max-width: 300px;
     background: transparent;
+    user-select: none;
 }
 
 .poll-question {

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.top-chat{
+.top-chat {
     padding: 6px 12px;
     box-sizing: border-box;
     max-width: 72px;
@@ -13,7 +13,7 @@
     flex-direction: column;
 }
 
-.top-chat-title{
+.top-chat-title {
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;

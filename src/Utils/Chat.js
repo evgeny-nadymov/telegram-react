@@ -7,7 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
-import { getUserFullName, getUserShortName, getUserStatus, isAccentUserSubtitle } from './User';
+import { getUserFullName, getUserShortName, getUserStatus, isUserOnline } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
@@ -367,7 +367,7 @@ function isAccentChatSubtitleWithoutTyping(chatId) {
         case 'chatTypeSecret': {
             const user = UserStore.get(chat.type.user_id);
             if (user) {
-                return isAccentUserSubtitle(user);
+                return isUserOnline(user);
             }
 
             break;

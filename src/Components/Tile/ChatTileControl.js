@@ -8,12 +8,24 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
-import { getChatLetters, isMeChat } from '../../Utils/Chat';
+import ChatStatus from './ChatStatus';
+import { getChatLetters, getChatUserId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './ChatTileControl.css';
+
+const styles = {
+    statusRoot: {
+        position: 'absolute',
+        right: 1,
+        bottom: 1,
+        zIndex: 1
+    },
+    statusIcon: {}
+};
 
 class ChatTileControl extends Component {
     shouldComponentUpdate(nextProps, nextState) {
@@ -89,7 +101,7 @@ class ChatTileControl extends Component {
     };
 
     render() {
-        const { chatId, showSavedMessages, onSelect } = this.props;
+        const { classes, chatId, showOnline, showSavedMessages, onSelect } = this.props;
 
         if (isMeChat(chatId) && showSavedMessages) {
             const className = classNames('tile-photo', 'tile_color_4', { pointer: onSelect });
@@ -114,24 +126,34 @@ class ChatTileControl extends Component {
         const tileColor = `tile_color_${(Math.abs(chatId) % 8) + 1}`;
         const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
 
-        return src ? (
-            <img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect} />
-        ) : (
-            <div className={className} onClick={this.handleSelect}>
-                <span className='tile-text'>{letters}</span>
+        return (
+            <div className='chat-tile' onClick={this.handleSelect}>
+                {src ? (
+                    <img className={className} src={src} draggable={false} alt='' />
+                ) : (
+                    <div className={className}>
+                        <span className='tile-text'>{letters}</span>
+                    </div>
+                )}
+                {showOnline && isPrivateChat(chatId) && (
+                    <ChatStatus classes={{ root: classes.statusRoot, icon: classes.statusIcon }} chatId={chatId} />
+                )}
             </div>
         );
     }
 }
 
 ChatTileControl.propTypes = {
+    classes: PropTypes.object,
     chatId: PropTypes.number.isRequired,
     onSelect: PropTypes.func,
-    showSavedMessages: PropTypes.bool
+    showSavedMessages: PropTypes.bool,
+    showOnline: PropTypes.bool
 };
 
 ChatTileControl.defaultProps = {
-    showSavedMessages: true
+    showSavedMessages: true,
+    showOnline: false
 };
 
-export default ChatTileControl;
+export default withStyles(styles)(ChatTileControl);

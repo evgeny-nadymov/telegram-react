@@ -6,17 +6,20 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
-import PhotoIcon from '@material-ui/icons/Photo';
+import IconButton from '@material-ui/core/IconButton';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import PhotoIcon from '@material-ui/icons/Photo';
+import PollIcon from '@material-ui/icons/Poll';
+import { ANIMATION_DURATION_300MS } from '../../Constants';
 
 const styles = {
     iconButton: {
@@ -25,13 +28,9 @@ const styles = {
 };
 
 class AttachButton extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            anchorEl: null
-        };
-    }
+    state = {
+        anchorEl: null
+    };
 
     handleMenuClick = event => {
         this.setState({ anchorEl: event.currentTarget });
@@ -44,13 +43,28 @@ class AttachButton extends React.Component {
     handleAttachPhoto = () => {
         this.handleMenuClose();
 
-        setTimeout(x => x.props.onAttachPhoto(), 300, this);
+        const { onAttachPhoto } = this.props;
+        if (!onAttachPhoto) return;
+
+        setTimeout(() => onAttachPhoto(), ANIMATION_DURATION_300MS);
     };
 
     handleAttachDocument = () => {
         this.handleMenuClose();
 
-        setTimeout(x => x.props.onAttachDocument(), 300, this);
+        const { onAttachDocument } = this.props;
+        if (!onAttachDocument) return;
+
+        setTimeout(() => onAttachDocument(), ANIMATION_DURATION_300MS);
+    };
+
+    handleAttachPoll = () => {
+        this.handleMenuClose();
+
+        const { onAttachPoll } = this.props;
+        if (!onAttachPoll) return;
+
+        setTimeout(() => onAttachPoll(), ANIMATION_DURATION_300MS);
     };
 
     render() {
@@ -94,11 +108,23 @@ class AttachButton extends React.Component {
                         </ListItemIcon>
                         <ListItemText inset primary={t('AttachDocument')} />
                     </MenuItem>
+                    <MenuItem onClick={this.handleAttachPoll}>
+                        <ListItemIcon>
+                            <PollIcon />
+                        </ListItemIcon>
+                        <ListItemText inset primary={t('Poll')} />
+                    </MenuItem>
                 </Menu>
             </>
         );
     }
 }
+
+AttachButton.propTypes = {
+    onAttachDocument: PropTypes.func.isRequired,
+    onAttachPhoto: PropTypes.func.isRequired,
+    onAttachPoll: PropTypes.func.isRequired
+};
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),

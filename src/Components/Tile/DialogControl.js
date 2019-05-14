@@ -20,19 +20,35 @@ import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogControl.css';
 
 const styles = theme => ({
+    statusRoot: {
+        position: 'absolute',
+        right: 1,
+        bottom: 1,
+        zIndex: 1
+    },
+    statusIcon: {},
     dialogActive: {
-        color: '#fff',
+        color: '#fff', //theme.palette.primary.contrastText,
         backgroundColor: theme.palette.primary.main,
-        borderRadius: '8px',
+        borderRadius: 8,
         cursor: 'pointer',
-        margin: '0 12px'
+        margin: '0 12px',
+        '& $statusRoot': {
+            background: theme.palette.primary.main
+        }
     },
     dialog: {
-        borderRadius: '8px',
+        borderRadius: 8,
         cursor: 'pointer',
         margin: '0 12px',
         '&:hover': {
-            backgroundColor: theme.palette.primary.main + '22'
+            backgroundColor: theme.palette.primary.main + '22',
+            '& $statusRoot': {
+                background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
+            },
+            '& $statusIcon': {
+                background: theme.palette.primary.main + '22'
+            }
         }
     }
 });
@@ -102,7 +118,12 @@ class DialogControl extends Component {
                 )}
                 onMouseDown={this.handleSelect}>
                 <div className='dialog-wrapper'>
-                    <ChatTileControl chatId={chatId} showSavedMessages={showSavedMessages} />
+                    <ChatTileControl
+                        chatId={chatId}
+                        showSavedMessages={showSavedMessages}
+                        showOnline
+                        classes={{ statusRoot: classes.statusRoot, statusIcon: classes.statusIcon }}
+                    />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} />

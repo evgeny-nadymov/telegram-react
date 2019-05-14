@@ -102,7 +102,7 @@ class PollPercentage extends React.Component {
         const { animated } = this.state;
 
         return (
-            <div className={classNames('poll-percentage', { subtitle: !chosen })}>
+            <div className={classNames('poll-percentage', { 'poll-percentage-subtitle': !chosen })}>
                 {!closed && chosen ? (
                     <a className='poll-percentage-action' onClick={onClick}>
                         {animated + '%'}

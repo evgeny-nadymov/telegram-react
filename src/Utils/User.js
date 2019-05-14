@@ -90,18 +90,14 @@ function getUserStatus(user) {
     return null;
 }
 
-function isAccentUserSubtitle(user) {
-    if (
-        user &&
-        user.status &&
-        user.status['@type'] === 'userStatusOnline' &&
-        user.type &&
-        user.type['@type'] !== 'userTypeBot'
-    ) {
-        return true;
-    }
+function isUserOnline(user) {
+    if (!user) return false;
 
-    return false;
+    const { status, type } = user;
+    if (!status) return false;
+    if (!type) return false;
+
+    return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
 function getUserFullName(user) {
@@ -222,7 +218,7 @@ function getProfilePhotoDateHint(userProfilePhoto) {
 
 export {
     getUserStatus,
-    isAccentUserSubtitle,
+    isUserOnline,
     getUserFullName,
     isUserBlocked,
     getUserLetters,

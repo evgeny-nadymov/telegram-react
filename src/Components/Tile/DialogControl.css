@@ -15,6 +15,11 @@
     /*margin: 0 12px;*/
 }
 
+.dialog-tile {
+    height: 48px;
+    position: relative;
+}
+
 .dialog-active {
     /*background-color: #3B9EDB;*/
     /*color: #fff;*/

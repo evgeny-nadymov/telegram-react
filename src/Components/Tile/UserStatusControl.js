@@ -8,7 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core';
-import { getUserStatus, isAccentUserSubtitle } from '../../Utils/User';
+import { getUserStatus, isUserOnline } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import './UserStatusControl.css';
 
@@ -31,7 +31,7 @@ class UserStatusControl extends React.Component {
         this.state = {
             prevUserId: userId,
             status: getUserStatus(user),
-            isAccent: isAccentUserSubtitle(user)
+            isAccent: isUserOnline(user)
         };
     }
 
@@ -43,7 +43,7 @@ class UserStatusControl extends React.Component {
             return {
                 prevUserId: userId,
                 status: getUserStatus(user),
-                isAccent: isAccentUserSubtitle(user)
+                isAccent: isUserOnline(user)
             };
         }
 
@@ -86,7 +86,7 @@ class UserStatusControl extends React.Component {
         const user = UserStore.get(userId);
 
         if (userId === update.user_id) {
-            this.setState({ status: getUserStatus(user), isAccent: isAccentUserSubtitle(user) });
+            this.setState({ status: getUserStatus(user), isAccent: isUserOnline(user) });
         }
     };
 

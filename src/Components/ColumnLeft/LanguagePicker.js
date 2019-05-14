@@ -7,6 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'recompose';
+import { withStyles } from '@material-ui/core/styles';
+import { withTranslation } from 'react-i18next';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -14,9 +17,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { withStyles } from '@material-ui/core/styles';
-import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import TdLibController from '../../Controllers/TdLibController';
 import LocalizationStore from '../../Stores/LocalizationStore';
 
@@ -95,24 +96,6 @@ class LanguagePicker extends React.Component {
 }
 
 LanguagePicker.propTypes = {};
-
-function withSaveRef() {
-    return Component => {
-        return React.forwardRef((props, ref) => <Component {...props} forwardedRef={ref} />);
-    };
-}
-
-function withRestoreRef() {
-    return Component => {
-        return class extends React.Component {
-            render() {
-                const { forwardedRef, ...rest } = this.props;
-
-                return <Component {...rest} ref={forwardedRef} />;
-            }
-        };
-    };
-}
 
 const enhance = compose(
     withSaveRef(),
