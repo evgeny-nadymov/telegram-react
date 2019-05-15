@@ -11,7 +11,6 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DocumentTile from '../../Tile/DocumentTile';
 import DocumentAction from './DocumentAction';
-import FileProgress from '../../Viewer/FileProgress';
 import { getExtension } from '../../../Utils/File';
 import './Document.css';
 
@@ -25,19 +24,13 @@ class Document extends React.Component {
 
         return (
             <div className='document'>
-                <div className='document-tile' onClick={openMedia}>
-                    <DocumentTile thumbnail={thumbnail} />
-                    <FileProgress
-                        file={file}
-                        download
-                        upload
-                        cancelButton
-                        zIndex={1}
-                        icon={<ArrowDownwardIcon />}
-                        completeIcon={<InsertDriveFileIcon />}
-                    />
-                </div>
-
+                <DocumentTile
+                    thumbnail={thumbnail}
+                    file={file}
+                    openMedia={openMedia}
+                    icon={<ArrowDownwardIcon />}
+                    completeIcon={<InsertDriveFileIcon />}
+                />
                 <div className='document-content'>
                     <div className='document-title'>
                         <a

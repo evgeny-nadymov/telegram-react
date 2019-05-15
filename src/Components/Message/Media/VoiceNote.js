@@ -132,19 +132,13 @@ class VoiceNote extends React.Component {
 
         return (
             <div className='document'>
-                <div className='document-tile' onClick={openMedia}>
-                    <DocumentTile thumbnail={null} />
-                    <FileProgress
-                        file={file}
-                        download
-                        upload
-                        cancelButton
-                        zIndex={1}
-                        icon={<ArrowDownwardIcon />}
-                        completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
-                    />
-                </div>
-
+                <DocumentTile
+                    thumbnail={null}
+                    file={file}
+                    openMedia={openMedia}
+                    icon={<ArrowDownwardIcon />}
+                    completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+                />
                 <div className='voice-note-content'>
                     <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />
                     <div className='voice-note-meta'>

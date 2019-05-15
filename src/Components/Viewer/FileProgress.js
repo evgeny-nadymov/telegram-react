@@ -44,7 +44,11 @@ class FileProgress extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { download, upload, icon } = this.props;
+        const { download, upload, icon, thumbnailSrc } = this.props;
+
+        if (nextProps.thumbnailSrc !== thumbnailSrc) {
+            return true;
+        }
 
         if (nextProps.icon !== icon) {
             return true;
@@ -166,7 +170,7 @@ class FileProgress extends React.Component {
     };
 
     render() {
-        let { cancelButton, zIndex, icon, completeIcon } = this.props;
+        let { thumbnailSrc, cancelButton, zIndex, icon, completeIcon } = this.props;
         const { file, prevFile } = this.state;
         if (!file) return null;
 
@@ -193,7 +197,10 @@ class FileProgress extends React.Component {
             }, ANIMATION_DURATION_300MS);
         }
 
-        const style = zIndex ? { zIndex: zIndex } : {};
+        const style = {
+            zIndex: zIndex,
+            background: !thumbnailSrc ? null : 'rgba(0, 0, 0, 0.25)'
+        };
 
         const isDownloadingCompleted =
             file &&
@@ -265,6 +272,7 @@ class FileProgress extends React.Component {
 
 FileProgress.propTypes = {
     file: PropTypes.object.isRequired,
+    thumbnailSrc: PropTypes.object,
     cancelButton: PropTypes.bool,
     download: PropTypes.bool,
     upload: PropTypes.bool,

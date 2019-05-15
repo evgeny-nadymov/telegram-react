@@ -5,6 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.document-tile {
+    cursor: pointer;
+    height: 48px;
+    position: relative;
+}
+
 .document-tile-background {
     background: rgba(218, 228, 234, 0.5);
 }

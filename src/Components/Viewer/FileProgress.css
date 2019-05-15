@@ -12,6 +12,9 @@
     top: 50%;
     margin: -24px 0 0 -24px;
     border-radius: 50%;
+}
+
+.file-progress-background {
     background: rgba(0, 0, 0, 0.25);
 }
 
@@ -26,14 +29,6 @@
     height: 42px;
     margin: 3px;
     animation: spin 4s linear infinite;
-}
-
-.file-progress-background {
-    position: absolute;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.25);
 }
 
 .file-progress-circle {

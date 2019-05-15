@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
+import FileProgress from '../../Components/Viewer/FileProgress';
+import { getSrc } from '../../Utils/File';
 import FileStore from '../../Stores/FileStore';
 import './DocumentTile.css';
-import PropTypes from 'prop-types';
-import { getSrc } from '../../Utils/File';
 
 const styles = theme => ({
-    documentTileBackground: {
+    background: {
         background: theme.palette.primary.main,
         borderRadius: '50%',
         width: 48,
@@ -48,21 +49,41 @@ class DocumentTile extends React.Component {
     };
 
     render() {
-        const { classes, thumbnail } = this.props;
+        const { classes, thumbnail, file, icon, completeIcon, openMedia } = this.props;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const className = classNames('tile-photo', { 'document-tile-background': !thumbnailSrc });
 
-        return thumbnailSrc ? (
-            <img className={className} src={thumbnailSrc} draggable={false} alt='' />
-        ) : (
-            <div className={classes.documentTileBackground} />
+        return (
+            <div className='document-tile' onClick={openMedia}>
+                {thumbnailSrc ? (
+                    <img className={className} src={thumbnailSrc} draggable={false} alt='' />
+                ) : (
+                    <div className={classes.background} />
+                )}
+                {file && (
+                    <FileProgress
+                        file={file}
+                        thumbnailSrc={thumbnailSrc}
+                        download
+                        upload
+                        cancelButton
+                        zIndex={1}
+                        icon={icon}
+                        completeIcon={completeIcon}
+                    />
+                )}
+            </div>
         );
     }
 }
 
 DocumentTile.propTypes = {
-    thumbnail: PropTypes.object
+    thumbnail: PropTypes.object,
+    file: PropTypes.object,
+    openMedia: PropTypes.func,
+    icon: PropTypes.node,
+    completeIcon: PropTypes.node
 };
 
 export default withStyles(styles, { withTheme: true })(DocumentTile);

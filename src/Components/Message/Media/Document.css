@@ -11,12 +11,6 @@
     align-items: center;
 }
 
-.document-tile {
-    cursor: pointer;
-    height: 48px;
-    position: relative;
-}
-
 .document-progress {
     position: absolute;
     top: 0;

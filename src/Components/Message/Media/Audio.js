@@ -16,6 +16,7 @@ import FileProgress from '../../Viewer/FileProgress';
 import { getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './Audio.css';
+import InsertDriveFileIcon from './Document';
 
 class Audio extends React.Component {
     constructor(props) {
@@ -131,19 +132,13 @@ class Audio extends React.Component {
 
         return (
             <div className='document'>
-                <div className='document-tile' onClick={openMedia}>
-                    <DocumentTile thumbnail={album_cover_thumbnail} />
-                    <FileProgress
-                        file={file}
-                        download
-                        upload
-                        cancelButton
-                        zIndex={1}
-                        icon={<ArrowDownwardIcon />}
-                        completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
-                    />
-                </div>
-
+                <DocumentTile
+                    thumbnail={album_cover_thumbnail}
+                    file={file}
+                    openMedia={openMedia}
+                    icon={<ArrowDownwardIcon />}
+                    completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+                />
                 <div className='document-content'>
                     <div className='document-title'>
                         <a className='document-name' onClick={openMedia} title={title}>
