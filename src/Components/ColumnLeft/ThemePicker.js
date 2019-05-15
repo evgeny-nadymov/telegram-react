@@ -18,7 +18,7 @@ import FormLabel from '@material-ui/core/FormLabel';
 import { withStyles } from '@material-ui/core/styles';
 import red from '@material-ui/core/colors/red';
 import orange from '@material-ui/core/colors/orange';
-import yellow from '@material-ui/core/colors/yellow';
+import amber from '@material-ui/core/colors/amber';
 import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import indigo from '@material-ui/core/colors/indigo';
@@ -44,10 +44,10 @@ const styles = theme => ({
             color: orange[500]
         }
     },
-    yellowRoot: {
-        color: yellow[600],
+    amberRoot: {
+        color: amber[600],
         '&$checked': {
-            color: yellow[500]
+            color: amber[500]
         }
     },
     greenRoot: {
@@ -112,8 +112,8 @@ class ThemePicker extends React.Component {
                 return 'red';
             case orange['500']:
                 return 'orange';
-            case yellow['500']:
-                return 'yellow';
+            case amber['500']:
+                return 'amber';
             case green['500']:
                 return 'green';
             case blue['500']:
@@ -133,8 +133,8 @@ class ThemePicker extends React.Component {
                 return red;
             case 'orange':
                 return orange;
-            case 'yellow':
-                return yellow;
+            case 'amber':
+                return amber;
             case 'green':
                 return green;
             case 'blue':
@@ -218,16 +218,16 @@ class ThemePicker extends React.Component {
                                 label='Orange'
                             />
                             <FormControlLabel
-                                value='yellow'
+                                value='amber'
                                 control={
                                     <Radio
                                         classes={{
-                                            root: classes.yellowRoot,
+                                            root: classes.amberRoot,
                                             checked: classes.checked
                                         }}
                                     />
                                 }
-                                label='Yellow'
+                                label='Amber'
                             />
                             <FormControlLabel
                                 value='green'
