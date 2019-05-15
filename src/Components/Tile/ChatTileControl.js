@@ -33,6 +33,10 @@ class ChatTileControl extends Component {
             return true;
         }
 
+        if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
         return false;
     }
 
@@ -156,4 +160,4 @@ ChatTileControl.defaultProps = {
     showOnline: false
 };
 
-export default withStyles(styles)(ChatTileControl);
+export default withStyles(styles, { withTheme: true })(ChatTileControl);
