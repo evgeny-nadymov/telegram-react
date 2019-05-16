@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+import { compose } from 'recompose';
+import { withStyles } from '@material-ui/core/styles';
+import { withTranslation } from 'react-i18next';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Typography from '@material-ui/core/Typography';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import Switch from '@material-ui/core/Switch';
+import ListItemText from '@material-ui/core/ListItemText';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
-import { withStyles } from '@material-ui/core/styles';
+import Switch from '@material-ui/core/Switch';
+import Typography from '@material-ui/core/Typography';
 import NotificationsControl from '../ColumnMiddle/NotificationsControl';
 
 const styles = {
@@ -24,33 +26,35 @@ const styles = {
 };
 
 class NotificationsListItem extends NotificationsControl {
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, t } = this.props;
         const { isMuted } = this.state;
 
         return (
             <ListItem button className={classes.listItem} onClick={this.handleSetChatNotifications}>
-                <ListItemIcon>
-                    {
-                        !isMuted
-                            ? <NotificationsActiveIcon/>
-                            : <NotificationsIcon/>
+                <ListItemIcon>{!isMuted ? <NotificationsActiveIcon /> : <NotificationsIcon />}</ListItemIcon>
+                <ListItemText
+                    primary={
+                        <Typography variant='inherit' noWrap>
+                            {t('Notifications')}
+                        </Typography>
                     }
-                </ListItemIcon>
-                <ListItemText primary={<Typography variant='inherit' noWrap>Notifications</Typography>}/>
+                />
                 <ListItemSecondaryAction>
-                    <Switch
-                        color='primary'
-                        onChange={this.handleSetChatNotifications}
-                        checked={!isMuted}/>
+                    <Switch color='primary' onChange={this.handleSetChatNotifications} checked={!isMuted} />
                 </ListItemSecondaryAction>
             </ListItem>
         );
     }
 }
 
-export default withStyles(styles)(NotificationsListItem);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(NotificationsListItem);

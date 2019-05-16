@@ -45,7 +45,11 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     YourPhone: 'Your Phone',
                     StartText: 'Please confirm your country code and enter your phone number.',
                     Next: 'Next',
-                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.'
+                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
+                    More: 'More',
+                    SendMessage: 'Send Message',
+                    ChatInfo: 'Chat Info',
+                    UsernameCopied: 'Username copied to clipboard'
                 },
                 emoji: {
                     Search: 'Search',
@@ -75,7 +79,12 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     YourPhone: 'Ваш телефон',
                     StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
                     Next: 'Далее',
-                    InvalidPhoneNumber: 'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.'
+                    InvalidPhoneNumber:
+                        'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
+                    More: 'Ещё',
+                    SendMessage: 'Отправить сообщение',
+                    ChatInfo: 'Информация о чате',
+                    UsernameCopied: 'Имя пользователя скопировано в буфер обмена'
                 },
                 emoji: {
                     Search: 'Поиск',

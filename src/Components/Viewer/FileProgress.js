@@ -199,7 +199,7 @@ class FileProgress extends React.Component {
 
         const style = {
             zIndex: zIndex,
-            background: !thumbnailSrc ? null : 'rgba(0, 0, 0, 0.25)'
+            background: !thumbnailSrc && typeof thumbnailSrc !== 'undefined' ? null : 'rgba(0, 0, 0, 0.25)'
         };
 
         const isDownloadingCompleted =

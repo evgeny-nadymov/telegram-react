@@ -7,9 +7,10 @@
 
 import React from 'react';
 import copy from 'copy-to-clipboard';
+import { compose } from 'recompose';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
-import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
 import PhotoIcon from '@material-ui/icons/Photo';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import CallIcon from '@material-ui/icons/Call';
@@ -257,7 +258,7 @@ class ChatDetails extends React.Component {
     };
 
     handleUsernameHint = () => {
-        const { chatId } = this.props;
+        const { t, chatId } = this.props;
         const username = getChatUsername(chatId);
         if (!username) return;
 
@@ -267,7 +268,7 @@ class ChatDetails extends React.Component {
         copy(usernameLink + username);
 
         const key = `${chatId}_copy_username`;
-        const message = 'Username copied';
+        const message = t('UsernameCopied');
         const action = null;
 
         this.handleScheduledAction(key, message, action);
@@ -300,14 +301,14 @@ class ChatDetails extends React.Component {
     };
 
     handlePhoneHint = () => {
-        const { chatId } = this.props;
+        const { t, chatId } = this.props;
         const phoneNumber = getChatPhoneNumber(chatId);
         if (!phoneNumber) return;
 
         copy(formatPhoneNumber(phoneNumber));
 
         const key = `${chatId}_copy_phone`;
-        const message = 'Phone copied';
+        const message = t('PhoneCopied');
         const action = null;
 
         this.handleScheduledAction(key, message, action);
@@ -331,7 +332,7 @@ class ChatDetails extends React.Component {
     };
 
     render() {
-        const { chatId, classes, openSharedMedia, openGroupsInCommon, backButton, onClose } = this.props;
+        const { t, chatId, classes, openSharedMedia, openGroupsInCommon, backButton, onClose } = this.props;
         const { hasGroupsInCommon } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -435,7 +436,7 @@ class ChatDetails extends React.Component {
                             <ListItemText
                                 primary={
                                     <Typography variant='inherit' noWrap>
-                                        Shared Media
+                                        {t('SharedMedia')}
                                     </Typography>
                                 }
                             />
@@ -446,7 +447,7 @@ class ChatDetails extends React.Component {
                                     inset
                                     primary={
                                         <Typography variant='inherit' noWrap>
-                                            Groups in Common
+                                            {t('GroupsInCommon')}
                                         </Typography>
                                     }
                                 />
@@ -462,6 +463,7 @@ class ChatDetails extends React.Component {
 }
 
 const enhance = compose(
+    withTranslation(),
     withStyles(styles, { withTheme: true }),
     withSnackbar
 );

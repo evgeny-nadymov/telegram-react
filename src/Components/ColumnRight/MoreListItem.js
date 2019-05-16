@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -81,7 +83,7 @@ class MoreListItem extends React.Component {
     };
 
     render() {
-        const { chatId, classes } = this.props;
+        const { t, chatId, classes } = this.props;
         const { openMore } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -103,7 +105,7 @@ class MoreListItem extends React.Component {
                     <ListItemText
                         primary={
                             <Typography variant='inherit' noWrap>
-                                More
+                                {t('More')}
                             </Typography>
                         }
                     />
@@ -118,7 +120,7 @@ class MoreListItem extends React.Component {
                                         inset
                                         primary={
                                             <Typography variant='inherit' noWrap>
-                                                Send Message
+                                                {t('SendMessage')}
                                             </Typography>
                                         }
                                     />
@@ -128,7 +130,7 @@ class MoreListItem extends React.Component {
                                         inset
                                         primary={
                                             <Typography color='secondary' variant='inherit' noWrap>
-                                                {isBlocked ? 'Unblock' : 'Block'}
+                                                {isBlocked ? t('Unblock') : t('BlockContact')}
                                             </Typography>
                                         }
                                     />
@@ -141,7 +143,7 @@ class MoreListItem extends React.Component {
                                     inset
                                     primary={
                                         <Typography color='secondary' variant='inherit' noWrap>
-                                            {isChannel ? 'Leave Channel' : 'Delete and Exit'}
+                                            {isChannel ? t('LeaveChannel') : t('DeleteChat')}
                                         </Typography>
                                     }
                                 />
@@ -153,7 +155,7 @@ class MoreListItem extends React.Component {
                                     inset
                                     primary={
                                         <Typography color='secondary' variant='inherit' noWrap>
-                                            Report
+                                            {t('ReportChat')}
                                         </Typography>
                                     }
                                 />
@@ -166,4 +168,9 @@ class MoreListItem extends React.Component {
     }
 }
 
-export default withStyles(styles)(MoreListItem);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(MoreListItem);
