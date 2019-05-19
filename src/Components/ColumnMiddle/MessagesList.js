@@ -170,6 +170,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
@@ -184,6 +185,7 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
@@ -260,6 +262,40 @@ class MessagesList extends React.Component {
     onUpdateChatLastMessage = update => {
         const { chatId } = this.props;
         if (chatId !== update.chat_id) return;
+    };
+
+    onUpdateMessageSendSucceeded = update => {
+        const { message, old_message_id } = update;
+        const { chatId } = this.props;
+        if (chatId !== message.chat_id) return;
+
+        let handleSendSucceeded = false;
+        const { content } = message;
+        switch (content['@type']) {
+            case 'messagePoll': {
+                handleSendSucceeded = true;
+                break;
+            }
+        }
+
+        if (!handleSendSucceeded) return;
+
+        let scrollBehavior = ScrollBehaviorEnum.NONE;
+        const list = this.listRef.current;
+        // at the end of list
+        if (list.scrollTop === list.scrollHeight - list.offsetHeight) {
+            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+        }
+        // sent message
+        else if (message.is_outgoing) {
+            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+        }
+
+        console.log('SCROLL MessagesList.onUpdateMessageSendSucceeded scrollBehavior=' + scrollBehavior);
+        this.replaceMessage(old_message_id, message, scrollBehavior);
+        const store = FileStore.getStore();
+        loadMessageContents(store, [message]);
+        MessagesList.viewMessages([message]);
     };
 
     onUpdateNewMessage = update => {
@@ -691,6 +727,18 @@ class MessagesList extends React.Component {
 
         this.setState(
             { history: history.concat(this.state.history), scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION },
+            callback
+        );
+    }
+
+    replaceMessage(oldMessageId, message, scrollBehavior, callback) {
+        if (!message) return;
+
+        this.setState(
+            {
+                history: this.state.history.filter(x => x.id !== oldMessageId).concat([message]),
+                scrollBehavior: scrollBehavior
+            },
             callback
         );
     }

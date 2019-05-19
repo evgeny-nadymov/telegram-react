@@ -268,7 +268,7 @@ class ChatDetails extends React.Component {
         copy(usernameLink + username);
 
         const key = `${chatId}_copy_username`;
-        const message = t('UsernameCopied');
+        const message = t('TextCopied');
         const action = null;
 
         this.handleScheduledAction(key, message, action);

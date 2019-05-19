@@ -509,6 +509,10 @@ function getServiceMessageContent(message, openUser = false) {
                         pinnedContent = ' pinned a photo';
                         break;
                     }
+                    case 'messagePoll': {
+                        pinnedContent = ' pinned a poll';
+                        break;
+                    }
                     case 'messageSticker': {
                         pinnedContent = ' pinned a sticker';
                         break;

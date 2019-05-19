@@ -19,6 +19,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import PhotoIcon from '@material-ui/icons/Photo';
 import PollIcon from '@material-ui/icons/Poll';
+import { canSendDocuments, canSendPhotos, canSendPolls } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 
 const styles = {
@@ -68,7 +69,7 @@ class AttachButton extends React.Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { classes, t, chatId } = this.props;
         const { anchorEl } = this.state;
 
         return (
@@ -96,19 +97,19 @@ class AttachButton extends React.Component {
                         horizontal: 'right'
                     }}
                     onClose={this.handleMenuClose}>
-                    <MenuItem onClick={this.handleAttachPhoto}>
+                    <MenuItem onClick={this.handleAttachPhoto} disabled={!canSendPhotos(chatId)}>
                         <ListItemIcon>
                             <PhotoIcon />
                         </ListItemIcon>
                         <ListItemText inset primary={t('AttachPhoto')} />
                     </MenuItem>
-                    <MenuItem onClick={this.handleAttachDocument}>
+                    <MenuItem onClick={this.handleAttachDocument} disabled={!canSendDocuments(chatId)}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>
                         <ListItemText inset primary={t('AttachDocument')} />
                     </MenuItem>
-                    <MenuItem onClick={this.handleAttachPoll}>
+                    <MenuItem onClick={this.handleAttachPoll} disabled={!canSendPolls(chatId)}>
                         <ListItemIcon>
                             <PollIcon />
                         </ListItemIcon>
@@ -121,6 +122,7 @@ class AttachButton extends React.Component {
 }
 
 AttachButton.propTypes = {
+    chatId: PropTypes.number.isRequired,
     onAttachDocument: PropTypes.func.isRequired,
     onAttachPhoto: PropTypes.func.isRequired,
     onAttachPoll: PropTypes.func.isRequired

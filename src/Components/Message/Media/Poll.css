@@ -18,6 +18,7 @@
 
 .poll-question-title {
     font-weight: bold;
+    white-space: pre;
 }
 
 .poll-total-count {

@@ -95,6 +95,8 @@ class MessageStore extends EventEmitter {
                         this.set(update.message);
                     }
                 }
+
+                this.set(update.message);
                 this.emit('updateMessageSendSucceeded', update);
                 break;
             }

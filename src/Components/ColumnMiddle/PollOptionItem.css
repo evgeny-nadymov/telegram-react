@@ -5,7 +5,33 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#create-poll-dialog-question {
+.poll-option-item {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 0 24px 0 24px;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.poll-option-item-delete-button {
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin: 10px 0;
+}
+
+.poll-option-item-bottom-border {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-bottom: 1px solid transparent;
+    margin-left: 24px;
+}
+
+#poll-option-item-text {
+    flex-grow: 1;
+    flex-shrink: 1;
     margin: 0 -24px;
     box-shadow: 0 0 0 0;
     max-height: 150px;
@@ -19,7 +45,7 @@
     word-break: break-word;
 }
 
-#create-poll-dialog-question::before {
+#poll-option-item-text::before {
     /*content: attr(placeholder);*/
     color: #8e9396;
     pointer-events: none;
@@ -30,18 +56,18 @@
     transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
-#create-poll-dialog-question:empty::before {
+#poll-option-item-text:empty::before {
     content: attr(placeholder);
     transform: translateX(0px);
     opacity: 0.75;
 }
 
-#create-poll-dialog-question:empty:active::before,
-#create-poll-dialog-question:empty:focus::before {
+#poll-option-item-text:empty:active::before,
+#poll-option-item-text:empty:focus::before {
     opacity: 0.75;
 }
 
-#create-poll-dialog-question:focus {
+#poll-option-item-text:focus {
     border: 0;
     outline: none;
     box-shadow: 0 0 0 0;

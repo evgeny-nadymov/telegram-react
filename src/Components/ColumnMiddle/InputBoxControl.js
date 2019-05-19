@@ -21,9 +21,10 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
 import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
+import CreatePollDialog from './CreatePollDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
-import { getChatDraft, getChatDraftReplyToMessageId, isMeChat } from '../../Utils/Chat';
+import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import { PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
@@ -47,9 +48,10 @@ class InputBoxControl extends Component {
     constructor(props) {
         super(props);
 
-        this.attachDocument = React.createRef();
-        this.attachPhoto = React.createRef();
-        this.newMessage = React.createRef();
+        this.attachDocumentRef = React.createRef();
+        this.attachPhotoRef = React.createRef();
+        this.attachPollRef = React.createRef();
+        this.newMessageRef = React.createRef();
 
         const chatId = ApplicationStore.getChatId();
 
@@ -146,8 +148,8 @@ class InputBoxControl extends Component {
 
     setInputFocus = () => {
         setTimeout(() => {
-            if (this.newMessage.current) {
-                const element = this.newMessage.current;
+            if (this.newMessageRef.current) {
+                const element = this.newMessageRef.current;
 
                 if (element.childNodes.length > 0) {
                     const range = document.createRange();
@@ -218,8 +220,8 @@ class InputBoxControl extends Component {
     handleSubmit = () => {
         let text = this.getInputText();
 
-        this.newMessage.current.innerText = null;
-        this.newMessage.current.textContent = null;
+        this.newMessageRef.current.innerText = null;
+        this.newMessageRef.current.textContent = null;
         this.innerHTML = null;
 
         if (!text) return;
@@ -238,14 +240,20 @@ class InputBoxControl extends Component {
         this.onSendInternal(content, result => {});
     };
 
-    handleAttachPoll = () => {};
+    handleAttachPoll = () => {
+        if (!this.attachPollRef) return;
+
+        this.attachPollRef.current.openDialog();
+    };
 
     handleAttachPhoto = () => {
-        this.attachPhoto.current.click();
+        if (!this.attachPhotoRef) return;
+
+        this.attachPhotoRef.current.click();
     };
 
     handleAttachPhotoComplete = () => {
-        let files = this.attachPhoto.current.files;
+        let files = this.attachPhotoRef.current.files;
         if (files.length === 0) return;
 
         Array.from(files).forEach(file => {
@@ -254,30 +262,32 @@ class InputBoxControl extends Component {
             });
         });
 
-        this.attachPhoto.current.value = '';
+        this.attachPhotoRef.current.value = '';
     };
 
     handleAttachDocument = () => {
-        this.attachDocument.current.click();
+        if (!this.attachDocumentRef) return;
+
+        this.attachDocumentRef.current.click();
     };
 
     handleAttachDocumentComplete = () => {
-        let files = this.attachDocument.current.files;
+        let files = this.attachDocumentRef.current.files;
         if (files.length === 0) return;
 
         Array.from(files).forEach(file => {
             this.handleSendDocument(file);
         });
 
-        this.attachDocument.current.value = '';
+        this.attachDocumentRef.current.value = '';
     };
 
     getInputText() {
-        let innerText = this.newMessage.current.innerText;
-        let innerHTML = this.newMessage.current.innerHTML;
+        let innerText = this.newMessageRef.current.innerText;
+        let innerHTML = this.newMessageRef.current.innerHTML;
 
         if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.newMessage.current.innerHTML = '';
+            this.newMessageRef.current.innerHTML = '';
         }
 
         return innerText;
@@ -291,11 +301,11 @@ class InputBoxControl extends Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        const innerText = this.newMessage.current.innerText;
-        const innerHTML = this.newMessage.current.innerHTML;
+        const innerText = this.newMessageRef.current.innerText;
+        const innerHTML = this.newMessageRef.current.innerHTML;
 
         if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.newMessage.current.innerHTML = '';
+            this.newMessageRef.current.innerHTML = '';
         }
 
         if (!innerText) return;
@@ -306,8 +316,8 @@ class InputBoxControl extends Component {
     };
 
     handleKeyDown = e => {
-        const innerText = this.newMessage.current.innerText;
-        const innerHTML = this.newMessage.current.innerHTML;
+        const innerText = this.newMessageRef.current.innerText;
+        const innerHTML = this.newMessageRef.current.innerHTML;
         this.innerHTML = innerHTML;
 
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -334,6 +344,10 @@ class InputBoxControl extends Component {
 
             FileStore.uploadFile(result.content.photo.sizes[0].photo.id, result);
         });
+    };
+
+    handleSendPoll = poll => {
+        this.onSendInternal(poll, () => {});
     };
 
     handleSendDocument = file => {
@@ -441,7 +455,7 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
-        this.newMessage.current.innerText += emoji.native;
+        this.newMessageRef.current.innerText += emoji.native;
     };
 
     render() {
@@ -462,7 +476,7 @@ class InputBoxControl extends Component {
                         <div className='inputbox-middle-column'>
                             <div
                                 id='inputbox-message'
-                                ref={this.newMessage}
+                                ref={this.newMessageRef}
                                 key={new Date()}
                                 placeholder={t('Message')}
                                 contentEditable
@@ -475,14 +489,14 @@ class InputBoxControl extends Component {
                         </div>
                         <div className='inputbox-right-column'>
                             <input
-                                ref={this.attachDocument}
+                                ref={this.attachDocumentRef}
                                 className='inputbox-attach-button'
                                 type='file'
                                 multiple='multiple'
                                 onChange={this.handleAttachDocumentComplete}
                             />
                             <input
-                                ref={this.attachPhoto}
+                                ref={this.attachPhotoRef}
                                 className='inputbox-attach-button'
                                 type='file'
                                 multiple='multiple'
@@ -490,6 +504,7 @@ class InputBoxControl extends Component {
                                 onChange={this.handleAttachPhotoComplete}
                             />
                             <AttachButton
+                                chatId={chatId}
                                 onAttachPhoto={this.handleAttachPhoto}
                                 onAttachDocument={this.handleAttachDocument}
                                 onAttachPoll={this.handleAttachPoll}
@@ -504,6 +519,7 @@ class InputBoxControl extends Component {
                         </div>
                     </div>
                 </div>
+                {!isPrivateChat(chatId) && <CreatePollDialog ref={this.attachPollRef} onSend={this.handleSendPoll} />}
                 <Dialog
                     transitionDuration={0}
                     open={openPasteDialog}

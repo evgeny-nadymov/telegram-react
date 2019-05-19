@@ -29,8 +29,12 @@ class PollPercentage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { closed, value } = this.props;
         const { animated } = this.state;
-        const { value } = this.props;
+
+        if (closed !== nextProps.closed) {
+            return true;
+        }
 
         if (value !== nextProps.value) {
             return true;
