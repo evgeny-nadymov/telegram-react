@@ -133,7 +133,7 @@ class CreatePollDialog extends React.Component {
     };
 
     handleKeyDown = event => {
-        console.log('Poll.keyDown', event.key, event.keyCode, event);
+        //console.log('Poll.keyDown', event.key, event.keyCode, event);
 
         const node = this.questionRef.current;
         const maxLength = node.dataset.maxLength;
@@ -157,6 +157,24 @@ class CreatePollDialog extends React.Component {
                     event.preventDefault();
                     return false;
                 }
+
+                break;
+            }
+            case 'ArrowDown': {
+                const selection = window.getSelection();
+                if (!selection) break;
+                if (!selection.isCollapsed) break;
+
+                const lastChild =
+                    node.childNodes && node.childNodes.length > 0 ? node.childNodes[node.childNodes.length - 1] : null;
+
+                if (!lastChild || (selection.anchorNode === lastChild && selection.anchorOffset === lastChild.length)) {
+                    this.handleFocusNextOption(0);
+
+                    event.preventDefault();
+                    return false;
+                }
+
                 break;
             }
         }
@@ -259,6 +277,23 @@ class CreatePollDialog extends React.Component {
         focusNode(prevNode, true);
     };
 
+    handleFocusPrevOption = id => {
+        const { options } = this.state;
+
+        const index = options.findIndex(x => x.id === id);
+        const prevIndex = index - 1;
+
+        const prevNode = this.optionsRefMap.get(prevIndex);
+        if (!prevNode) {
+            const element = this.questionRef.current;
+
+            focusNode(element, false);
+            return;
+        }
+
+        prevNode.focus(false);
+    };
+
     handleFocusNextOption = id => {
         const { options } = this.state;
 
@@ -277,7 +312,7 @@ class CreatePollDialog extends React.Component {
             return;
         }
 
-        focusNode(nextNode, true);
+        nextNode.focus(nextNode, true);
     };
 
     getHint = () => {
@@ -334,6 +369,7 @@ class CreatePollDialog extends React.Component {
                 option={x}
                 onDelete={this.handleDeleteOption}
                 onDeleteByBackspace={this.handleDeleteOptionByBackspace}
+                onFocusPrev={this.handleFocusPrevOption}
                 onFocusNext={this.handleFocusNextOption}
             />
         ));

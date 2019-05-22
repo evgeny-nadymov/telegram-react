@@ -50,10 +50,10 @@ class CreatePollOption extends React.Component {
         return this.optionTextRef.current.innerText;
     };
 
-    focus = () => {
+    focus = (toEnd = false) => {
         const node = this.optionTextRef.current;
 
-        focusNode(node, true);
+        focusNode(node, toEnd);
     };
 
     handleDelete = () => {
@@ -115,6 +115,45 @@ class CreatePollOption extends React.Component {
 
                 event.preventDefault();
                 return false;
+            }
+            case 'ArrowUp': {
+                const selection = window.getSelection();
+                if (!selection) break;
+                if (!selection.isCollapsed) break;
+
+                const firstChild = node.childNodes && node.childNodes.length > 0 ? node.childNodes[0] : null;
+
+                if (!firstChild || (selection.anchorNode === firstChild && !selection.anchorOffset)) {
+                    const { option, onFocusPrev } = this.props;
+                    if (onFocusPrev) {
+                        onFocusPrev(option.id);
+                    }
+
+                    event.preventDefault();
+                    return false;
+                }
+
+                break;
+            }
+            case 'ArrowDown': {
+                const selection = window.getSelection();
+                if (!selection) break;
+                if (!selection.isCollapsed) break;
+
+                const lastChild =
+                    node.childNodes && node.childNodes.length > 0 ? node.childNodes[node.childNodes.length - 1] : null;
+
+                if (!lastChild || (selection.anchorNode === lastChild && selection.anchorOffset === lastChild.length)) {
+                    const { option, onFocusNext } = this.props;
+                    if (onFocusNext) {
+                        onFocusNext(option.id);
+                    }
+
+                    event.preventDefault();
+                    return false;
+                }
+
+                break;
             }
         }
 
@@ -195,6 +234,7 @@ CreatePollOption.propTypes = {
     option: PropTypes.object.isRequired,
     onDelete: PropTypes.func.isRequired,
     onDeleteByBackspace: PropTypes.func.isRequired,
+    onFocusPrev: PropTypes.func.isRequired,
     onFocusNext: PropTypes.func.isRequired
 };
 
