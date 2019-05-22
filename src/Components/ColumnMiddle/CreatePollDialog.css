@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.create-poll-dialog-question-title {
+    display: flex;
+}
+
 #create-poll-dialog-question {
     margin: 0 -24px;
     box-shadow: 0 0 0 0;

@@ -17,15 +17,23 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import PollOptionItem from './PollOptionItem';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import { POLL_OPTIONS_MAX_COUNT } from '../../Constants';
+import {
+    POLL_OPTION_LENGTH,
+    POLL_OPTIONS_MAX_COUNT,
+    POLL_QUESTION_HINT_LENGTH,
+    POLL_QUESTION_LENGTH,
+    POLL_QUESTION_MAX_LENGTH
+} from '../../Constants';
 import './CreatePollDialog.css';
 
-const styles = {
+const styles = theme => ({
+    dialogRoot: {
+        color: theme.palette.text.primary
+    },
     contentRoot: {
         width: 300
     },
@@ -38,18 +46,54 @@ const styles = {
         height: 48
     },
     typographyRoot: {}
-};
+});
 
 class CreatePollDialog extends React.Component {
     constructor(props) {
         super(props);
+
+        this.keys = {
+            backspace: 8,
+            shift: 16,
+            ctrl: 17,
+            alt: 18,
+            delete: 46,
+            // 'cmd':
+            leftArrow: 37,
+            upArrow: 38,
+            rightArrow: 39,
+            downArrow: 40
+        };
+
+        this.utils = {
+            special: {},
+            navigational: {},
+            isSpecial(e) {
+                return typeof this.special[e.keyCode] !== 'undefined';
+            },
+            isNavigational(e) {
+                return typeof this.navigational[e.keyCode] !== 'undefined';
+            }
+        };
+
+        this.utils.special[this.keys['backspace']] = true;
+        this.utils.special[this.keys['shift']] = true;
+        this.utils.special[this.keys['ctrl']] = true;
+        this.utils.special[this.keys['alt']] = true;
+        this.utils.special[this.keys['delete']] = true;
+
+        this.utils.navigational[this.keys['upArrow']] = true;
+        this.utils.navigational[this.keys['downArrow']] = true;
+        this.utils.navigational[this.keys['leftArrow']] = true;
+        this.utils.navigational[this.keys['rightArrow']] = true;
 
         this.questionRef = React.createRef();
         this.optionsRefMap = new Map();
 
         this.state = {
             open: false,
-            options: []
+            options: [],
+            remainLength: POLL_QUESTION_MAX_LENGTH
         };
     }
 
@@ -68,14 +112,16 @@ class CreatePollDialog extends React.Component {
         return innerText;
     };
 
-    handleSend = () => {
-        const { onSend } = this.props;
+    getPoll = () => {
+        if (!this.questionRef) return;
+        const node = this.questionRef.current;
+        if (!node) return;
+
         const { options } = this.state;
 
-        const question = this.getInnerText(this.questionRef.current);
-        if (!question) return;
-
-        if (!options.length) return;
+        const question = this.getInnerText(node);
+        if (!question) return null;
+        if (question.length > POLL_QUESTION_LENGTH) return null;
 
         const pollOptions = [];
         options.forEach((el, index) => {
@@ -83,19 +129,26 @@ class CreatePollDialog extends React.Component {
                 const optionRef = this.optionsRefMap.get(index);
                 if (optionRef) {
                     const text = optionRef.getText();
-                    if (text) {
+                    if (text && text.length < POLL_OPTION_LENGTH) {
                         pollOptions.push(text);
                     }
                 }
             }
         });
-        if (pollOptions.length <= 1) return;
+        if (pollOptions.length <= 1) return null;
 
-        const poll = {
+        return {
             '@type': 'inputMessagePoll',
             question,
             options: pollOptions
         };
+    };
+
+    handleSend = () => {
+        const { onSend } = this.props;
+
+        const poll = this.getPoll();
+        if (!poll) return;
 
         onSend(poll);
 
@@ -106,13 +159,80 @@ class CreatePollDialog extends React.Component {
         this.setState({ open: true, options: [] });
     };
 
-    handleQuestionKeyUp = event => {};
+    handleKeyDown = event => {
+        console.log('Poll.keyDown', event.key, event.shiftKey, event);
 
-    handleQuestionPaste = event => {};
+        const node = this.questionRef.current;
+        const maxLength = node.dataset.maxLength;
+        const innerText = this.getInnerText(node);
+        const length = innerText.length;
 
-    handleQuestionChange = event => {};
+        let hasSelection = false;
+        const selection = window.getSelection();
+        const isSpecial = this.utils.isSpecial(event);
+        const isNavigational = this.utils.isNavigational(event);
 
-    handleAddPollOption = () => {
+        if (selection) {
+            hasSelection = !!selection.toString();
+        }
+
+        if (isSpecial || isNavigational) {
+            return true;
+        }
+
+        if (event.key === 'Enter') {
+            if (!event.shiftKey) {
+                this.handleFocusNextOption(0);
+
+                event.preventDefault();
+                return false;
+            }
+        }
+
+        if (length >= maxLength && !hasSelection) {
+            event.preventDefault();
+            return false;
+        }
+
+        return true;
+    };
+
+    handlePaste = event => {
+        event.preventDefault();
+
+        const node = this.questionRef.current;
+        const maxLength = node.dataset.maxLength;
+
+        const selection = window.getSelection();
+        const selectionString = selection ? selection.toString() : '';
+
+        const innerText = this.getInnerText(node);
+        if (innerText.length - selection.length >= maxLength) return;
+
+        let pasteText = event.clipboardData.getData('text/plain');
+        if (!pasteText) return;
+
+        if (innerText.length - selectionString.length + pasteText.length > maxLength) {
+            pasteText = pasteText.substr(0, maxLength - innerText.length + selectionString.length);
+        }
+        document.execCommand('insertHTML', false, pasteText);
+    };
+
+    handleInput = event => {
+        event.preventDefault();
+
+        const node = this.questionRef.current;
+        const length = node.dataset.length;
+        const maxLength = node.dataset.maxLength;
+
+        const innerText = this.getInnerText(node);
+
+        this.setState({
+            remainLength: length - innerText.length
+        });
+    };
+
+    handleAddOption = () => {
         const { options } = this.state;
         if (options.length >= POLL_OPTIONS_MAX_COUNT) return;
 
@@ -120,20 +240,77 @@ class CreatePollDialog extends React.Component {
 
         this.setState({ options }, () => {
             setTimeout(() => {
-                if (this.optionsRefMap.has(options.length - 1)) {
-                    const optionRef = this.optionsRefMap.get(options.length - 1);
-                    if (optionRef) {
-                        optionRef.focus();
-                    }
-                }
+                const node = this.optionsRefMap.get(options.length - 1);
+                if (!node) return;
+
+                node.focus();
             });
         });
     };
 
-    handleDeletePollOption = id => {
+    handleDeleteOption = id => {
         const { options } = this.state;
 
         this.setState({ options: options.filter(x => x.id !== id) });
+    };
+
+    handleDeleteOptionByBackspace = id => {
+        const { options } = this.state;
+
+        const index = options.findIndex(x => x.id === id);
+        const prevIndex = index - 1;
+        let deleteOption = true;
+        for (let i = index; i < options.length; i++) {
+            const node = this.optionsRefMap.get(i);
+            const text = node ? node.getText() : '';
+            if (text) {
+                deleteOption = false;
+                break;
+            }
+        }
+
+        if (deleteOption) {
+            this.handleDeleteOption(id);
+        }
+
+        const prevNode = this.optionsRefMap.get(prevIndex);
+        if (!prevNode) {
+            const element = this.questionRef.current;
+            if (element.childNodes.length > 0) {
+                const range = document.createRange();
+                range.setStart(element.childNodes[0], element.childNodes[0].length);
+                range.collapse(true);
+
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            element.focus();
+            return;
+        }
+
+        prevNode.focus();
+    };
+
+    handleFocusNextOption = id => {
+        const { options } = this.state;
+
+        const index = options.findIndex(x => x.id === id);
+        const nextIndex = index + 1;
+
+        const nextNode = this.optionsRefMap.get(nextIndex);
+        if (!nextNode) {
+            const node = this.optionsRefMap.get(index);
+            const text = node ? node.getText() : '';
+            if (options.length && !text) {
+                return;
+            }
+
+            this.handleAddOption();
+            return;
+        }
+
+        nextNode.focus();
     };
 
     getHint = () => {
@@ -153,7 +330,7 @@ class CreatePollDialog extends React.Component {
 
     render() {
         const { classes, t } = this.props;
-        const { open, options } = this.state;
+        const { remainLength, open, options } = this.state;
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
@@ -161,7 +338,9 @@ class CreatePollDialog extends React.Component {
                 ref={el => this.optionsRefMap.set(i, el)}
                 key={x.id}
                 option={x}
-                onDelete={this.handleDeletePollOption}
+                onDelete={this.handleDeleteOption}
+                onDeleteByBackspace={this.handleDeleteOptionByBackspace}
+                onFocusNext={this.handleFocusNextOption}
             />
         ));
 
@@ -169,23 +348,37 @@ class CreatePollDialog extends React.Component {
         const hint = this.getHint();
 
         return (
-            <Dialog open={open} transitionDuration={0} onClose={this.handleClose} aria-labelledby='dialog-title'>
+            <Dialog
+                className={classes.dialogRoot}
+                open={open}
+                transitionDuration={0}
+                onClose={this.handleClose}
+                aria-labelledby='dialog-title'>
                 <DialogTitle id='dialog-title'>{t('NewPoll')}</DialogTitle>
                 <DialogContent classes={{ root: classes.contentRoot }}>
-                    <Typography color='primary' variant='subheading'>
-                        {t('Question')}
-                    </Typography>
+                    <div className='create-poll-dialog-question-title'>
+                        <Typography color='primary' variant='subtitle1' style={{ flexGrow: 1 }}>
+                            {t('Question')}
+                        </Typography>
+                        {remainLength <= POLL_QUESTION_LENGTH - POLL_QUESTION_HINT_LENGTH && (
+                            <Typography color={remainLength >= 0 ? 'textSecondary' : 'error'} variant='subtitle1'>
+                                {remainLength}
+                            </Typography>
+                        )}
+                    </div>
                     <div
                         ref={this.questionRef}
                         id='create-poll-dialog-question'
                         contentEditable
                         suppressContentEditableWarning
                         placeholder={t('QuestionHint')}
-                        onChange={this.handleQuestionChange}
-                        onKeyUp={this.handleQuestionKeyUp}
-                        onPaste={this.handleQuestionPaste}
+                        data-length={POLL_QUESTION_LENGTH}
+                        data-max-length={POLL_QUESTION_MAX_LENGTH}
+                        onPaste={this.handlePaste}
+                        onKeyDown={this.handleKeyDown}
+                        onInput={this.handleInput}
                     />
-                    <Typography color='primary' variant='subheading'>
+                    <Typography color='primary' variant='subtitle1'>
                         {t('PollOptions')}
                     </Typography>
                     <List classes={{ root: classes.listRoot }}>
@@ -195,7 +388,7 @@ class CreatePollDialog extends React.Component {
                                 selected={false}
                                 className={classes.listItem}
                                 button
-                                onClick={this.handleAddPollOption}>
+                                onClick={this.handleAddOption}>
                                 <ListItemText disableTypography primary={t('AddAnOption')} />
                             </ListItem>
                         )}
@@ -206,9 +399,11 @@ class CreatePollDialog extends React.Component {
                     <Button color='primary' onClick={this.handleClose}>
                         {t('Cancel')}
                     </Button>
-                    <Button color='primary' onClick={this.handleSend}>
-                        {t('Send')}
-                    </Button>
+                    {
+                        <Button color='primary' onClick={this.handleSend}>
+                            {t('Send')}
+                        </Button>
+                    }
                 </DialogActions>
             </Dialog>
         );

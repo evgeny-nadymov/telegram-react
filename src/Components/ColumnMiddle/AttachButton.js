@@ -19,7 +19,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import PhotoIcon from '@material-ui/icons/Photo';
 import PollIcon from '@material-ui/icons/Poll';
-import { canSendDocuments, canSendPhotos, canSendPolls } from '../../Utils/Chat';
+import { canSendDocuments, canSendPhotos, canSendPolls, isPrivateChat } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 
 const styles = {
@@ -109,12 +109,14 @@ class AttachButton extends React.Component {
                         </ListItemIcon>
                         <ListItemText inset primary={t('AttachDocument')} />
                     </MenuItem>
-                    <MenuItem onClick={this.handleAttachPoll} disabled={!canSendPolls(chatId)}>
-                        <ListItemIcon>
-                            <PollIcon />
-                        </ListItemIcon>
-                        <ListItemText inset primary={t('Poll')} />
-                    </MenuItem>
+                    {!isPrivateChat(chatId) && (
+                        <MenuItem onClick={this.handleAttachPoll} disabled={!canSendPolls(chatId)}>
+                            <ListItemIcon>
+                                <PollIcon />
+                            </ListItemIcon>
+                            <ListItemText inset primary={t('Poll')} />
+                        </MenuItem>
+                    )}
                 </Menu>
             </>
         );
