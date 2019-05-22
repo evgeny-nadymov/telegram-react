@@ -19,8 +19,9 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
-import PollOptionItem from './PollOptionItem';
+import CreatePollOption from './CreatePollOption';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { utils } from '../../Utils/Key';
 import {
     POLL_OPTION_LENGTH,
     POLL_OPTIONS_MAX_COUNT,
@@ -51,41 +52,6 @@ const styles = theme => ({
 class CreatePollDialog extends React.Component {
     constructor(props) {
         super(props);
-
-        this.keys = {
-            backspace: 8,
-            shift: 16,
-            ctrl: 17,
-            alt: 18,
-            delete: 46,
-            // 'cmd':
-            leftArrow: 37,
-            upArrow: 38,
-            rightArrow: 39,
-            downArrow: 40
-        };
-
-        this.utils = {
-            special: {},
-            navigational: {},
-            isSpecial(e) {
-                return typeof this.special[e.keyCode] !== 'undefined';
-            },
-            isNavigational(e) {
-                return typeof this.navigational[e.keyCode] !== 'undefined';
-            }
-        };
-
-        this.utils.special[this.keys['backspace']] = true;
-        this.utils.special[this.keys['shift']] = true;
-        this.utils.special[this.keys['ctrl']] = true;
-        this.utils.special[this.keys['alt']] = true;
-        this.utils.special[this.keys['delete']] = true;
-
-        this.utils.navigational[this.keys['upArrow']] = true;
-        this.utils.navigational[this.keys['downArrow']] = true;
-        this.utils.navigational[this.keys['leftArrow']] = true;
-        this.utils.navigational[this.keys['rightArrow']] = true;
 
         this.questionRef = React.createRef();
         this.optionsRefMap = new Map();
@@ -129,7 +95,7 @@ class CreatePollDialog extends React.Component {
                 const optionRef = this.optionsRefMap.get(index);
                 if (optionRef) {
                     const text = optionRef.getText();
-                    if (text && text.length < POLL_OPTION_LENGTH) {
+                    if (text && text.length <= POLL_OPTION_LENGTH) {
                         pollOptions.push(text);
                     }
                 }
@@ -160,7 +126,7 @@ class CreatePollDialog extends React.Component {
     };
 
     handleKeyDown = event => {
-        console.log('Poll.keyDown', event.key, event.shiftKey, event);
+        console.log('Poll.keyDown', event.key, event.keyCode, event);
 
         const node = this.questionRef.current;
         const maxLength = node.dataset.maxLength;
@@ -169,24 +135,27 @@ class CreatePollDialog extends React.Component {
 
         let hasSelection = false;
         const selection = window.getSelection();
-        const isSpecial = this.utils.isSpecial(event);
-        const isNavigational = this.utils.isNavigational(event);
+        const isSpecial = utils.isSpecial(event);
+        const isNavigational = utils.isNavigational(event);
 
         if (selection) {
             hasSelection = !!selection.toString();
         }
 
-        if (isSpecial || isNavigational) {
-            return true;
+        switch (event.key) {
+            case 'Enter': {
+                if (!event.shiftKey) {
+                    this.handleFocusNextOption(0);
+
+                    event.preventDefault();
+                    return false;
+                }
+                break;
+            }
         }
 
-        if (event.key === 'Enter') {
-            if (!event.shiftKey) {
-                this.handleFocusNextOption(0);
-
-                event.preventDefault();
-                return false;
-            }
+        if (isSpecial || isNavigational) {
+            return true;
         }
 
         if (length >= maxLength && !hasSelection) {
@@ -334,7 +303,7 @@ class CreatePollDialog extends React.Component {
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
-            <PollOptionItem
+            <CreatePollOption
                 ref={el => this.optionsRefMap.set(i, el)}
                 key={x.id}
                 option={x}

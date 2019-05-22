@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.poll-option-item {
+.create-poll-option {
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -14,7 +14,7 @@
     position: relative;
 }
 
-.poll-option-item-delete-button {
+.create-poll-option-delete-button {
     flex-grow: 0;
     flex-shrink: 0;
     position: absolute;
@@ -22,7 +22,7 @@
     top: 10px;
 }
 
-.poll-option-item-bottom-border {
+.create-poll-option-bottom-border {
     position: absolute;
     left: 0;
     right: 0;
@@ -31,7 +31,7 @@
     margin-left: 24px;
 }
 
-#poll-option-item-text {
+#create-poll-option-text {
     flex-grow: 1;
     flex-shrink: 1;
     margin: 0 0 0 -24px;
@@ -47,7 +47,7 @@
     word-break: break-word;
 }
 
-#poll-option-item-text::before {
+#create-poll-option-text::before {
     /*content: attr(placeholder);*/
     color: #8e9396;
     pointer-events: none;
@@ -58,18 +58,18 @@
     transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
-#poll-option-item-text:empty::before {
+#create-poll-option-text:empty::before {
     content: attr(placeholder);
     transform: translateX(0px);
     opacity: 0.75;
 }
 
-#poll-option-item-text:empty:active::before,
-#poll-option-item-text:empty:focus::before {
+#create-poll-option-text:empty:active::before,
+#create-poll-option-text:empty:focus::before {
     opacity: 0.75;
 }
 
-#poll-option-item-text:focus {
+#create-poll-option-text:focus {
     border: 0;
     outline: none;
     box-shadow: 0 0 0 0;

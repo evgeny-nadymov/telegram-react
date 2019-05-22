@@ -15,9 +15,10 @@ import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/es/Typography/Typography';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { utils } from '../../Utils/Key';
 import { borderStyle } from '../Theme';
 import { POLL_OPTION_HINT_LENGTH, POLL_OPTION_LENGTH, POLL_OPTION_MAX_LENGTH } from '../../Constants';
-import './PollOptionItem.css';
+import './CreatePollOption.css';
 
 const styles = theme => ({
     iconButton: {
@@ -33,44 +34,9 @@ const styles = theme => ({
     ...borderStyle(theme)
 });
 
-class PollOptionItem extends React.Component {
+class CreatePollOption extends React.Component {
     constructor(props) {
         super(props);
-
-        this.keys = {
-            backspace: 8,
-            shift: 16,
-            ctrl: 17,
-            alt: 18,
-            delete: 46,
-            // 'cmd':
-            leftArrow: 37,
-            upArrow: 38,
-            rightArrow: 39,
-            downArrow: 40
-        };
-
-        this.utils = {
-            special: {},
-            navigational: {},
-            isSpecial(e) {
-                return typeof this.special[e.keyCode] !== 'undefined';
-            },
-            isNavigational(e) {
-                return typeof this.navigational[e.keyCode] !== 'undefined';
-            }
-        };
-
-        this.utils.special[this.keys['backspace']] = true;
-        this.utils.special[this.keys['shift']] = true;
-        this.utils.special[this.keys['ctrl']] = true;
-        this.utils.special[this.keys['alt']] = true;
-        this.utils.special[this.keys['delete']] = true;
-
-        this.utils.navigational[this.keys['upArrow']] = true;
-        this.utils.navigational[this.keys['downArrow']] = true;
-        this.utils.navigational[this.keys['leftArrow']] = true;
-        this.utils.navigational[this.keys['rightArrow']] = true;
 
         this.optionTextRef = React.createRef();
 
@@ -138,8 +104,8 @@ class PollOptionItem extends React.Component {
 
         let hasSelection = false;
         const selection = window.getSelection();
-        const isSpecial = this.utils.isSpecial(event);
-        const isNavigational = this.utils.isNavigational(event);
+        const isSpecial = utils.isSpecial(event);
+        const isNavigational = utils.isNavigational(event);
 
         if (selection) {
             hasSelection = !!selection.toString();
@@ -211,10 +177,10 @@ class PollOptionItem extends React.Component {
         const { remainLength } = this.state;
 
         return (
-            <div className='poll-option-item'>
+            <div className='create-poll-option'>
                 <div
                     ref={this.optionTextRef}
-                    id='poll-option-item-text'
+                    id='create-poll-option-text'
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Option')}
@@ -224,12 +190,12 @@ class PollOptionItem extends React.Component {
                     onKeyDown={this.handleKeyDown}
                     onPaste={this.handlePaste}
                 />
-                <div className='poll-option-item-delete-button'>
+                <div className='create-poll-option-delete-button'>
                     <IconButton className={classes.iconButton} onClick={this.handleDelete}>
                         <CloseIcon fontSize='small' />
                     </IconButton>
                 </div>
-                <div className={classNames('poll-option-item-bottom-border', { [classes.borderColor]: true })} />
+                <div className={classNames('create-poll-option-bottom-border', { [classes.borderColor]: true })} />
                 {remainLength <= POLL_OPTION_LENGTH - POLL_OPTION_HINT_LENGTH && (
                     <Typography
                         align='center'
@@ -244,7 +210,7 @@ class PollOptionItem extends React.Component {
     }
 }
 
-PollOptionItem.propTypes = {
+CreatePollOption.propTypes = {
     option: PropTypes.object.isRequired,
     onDelete: PropTypes.func.isRequired,
     onDeleteByBackspace: PropTypes.func.isRequired,
@@ -258,4 +224,4 @@ const enhance = compose(
     withRestoreRef()
 );
 
-export default enhance(PollOptionItem);
+export default enhance(CreatePollOption);
