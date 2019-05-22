@@ -75,6 +75,9 @@ class CreatePollOption extends React.Component {
         this.setState({
             remainLength: length - innerText.length
         });
+
+        const { onInput } = this.props;
+        onInput(event);
     };
 
     handleKeyDown = event => {
@@ -96,9 +99,9 @@ class CreatePollOption extends React.Component {
             case 'Backspace': {
                 const text = this.getText();
                 if (!text) {
-                    const { option, onDeleteByBackspace } = this.props;
-                    if (onDeleteByBackspace) {
-                        onDeleteByBackspace(option.id);
+                    const { option, onDelete } = this.props;
+                    if (onDelete) {
+                        onDelete(option.id, true);
                     }
 
                     event.preventDefault();
@@ -233,7 +236,6 @@ class CreatePollOption extends React.Component {
 CreatePollOption.propTypes = {
     option: PropTypes.object.isRequired,
     onDelete: PropTypes.func.isRequired,
-    onDeleteByBackspace: PropTypes.func.isRequired,
     onFocusPrev: PropTypes.func.isRequired,
     onFocusNext: PropTypes.func.isRequired
 };

@@ -58,6 +58,7 @@ class CreatePollDialog extends React.Component {
         this.optionsRefMap = new Map();
 
         this.state = {
+            poll: null,
             open: false,
             confirm: false,
             options: [],
@@ -67,6 +68,7 @@ class CreatePollDialog extends React.Component {
 
     openDialog = () => {
         this.setState({
+            poll: null,
             open: true,
             confirm: false,
             options: [],
@@ -85,9 +87,9 @@ class CreatePollDialog extends React.Component {
     }
 
     hasData = () => {
-        if (!this.questionRef) return;
+        if (!this.questionRef) return false;
         const node = this.questionRef.current;
-        if (!node) return;
+        if (!node) return false;
 
         const { options } = this.state;
 
@@ -101,9 +103,9 @@ class CreatePollDialog extends React.Component {
     };
 
     getPoll = () => {
-        if (!this.questionRef) return;
+        if (!this.questionRef) return null;
         const node = this.questionRef.current;
-        if (!node) return;
+        if (!node) return null;
 
         const { options } = this.state;
 
@@ -111,18 +113,24 @@ class CreatePollDialog extends React.Component {
         if (!question) return null;
         if (question.length > POLL_QUESTION_LENGTH) return null;
 
+        let breakPoll = false;
         const pollOptions = [];
         options.forEach((el, index) => {
             if (this.optionsRefMap.has(index)) {
                 const optionRef = this.optionsRefMap.get(index);
                 if (optionRef) {
                     const text = optionRef.getText();
-                    if (text && text.length <= POLL_OPTION_LENGTH) {
-                        pollOptions.push(text);
+                    if (!text) return;
+
+                    if (text.length > POLL_OPTION_LENGTH) {
+                        breakPoll = true;
                     }
+
+                    pollOptions.push(text);
                 }
             }
         });
+        if (breakPoll) return null;
         if (pollOptions.length <= 1) return null;
 
         return {
@@ -220,9 +228,15 @@ class CreatePollDialog extends React.Component {
         const maxLength = node.dataset.maxLength;
 
         const innerText = node.innerText;
+        const innerHtml = node.innerHTML;
+
+        if (innerHtml === '<br>') {
+            node.innerText = '';
+        }
 
         this.setState({
-            remainLength: length - innerText.length
+            remainLength: length - innerText.length,
+            poll: this.getPoll()
         });
     };
 
@@ -241,13 +255,21 @@ class CreatePollDialog extends React.Component {
         });
     };
 
-    handleDeleteOption = id => {
+    handleDeleteOption = (id, backspace = false) => {
+        if (backspace) {
+            this.handleDeleteByBackspace(id);
+        } else {
+            this.handleDelete(id);
+        }
+    };
+
+    handleDelete = id => {
         const { options } = this.state;
 
         this.setState({ options: options.filter(x => x.id !== id) });
     };
 
-    handleDeleteOptionByBackspace = id => {
+    handleDeleteByBackspace = id => {
         const { options } = this.state;
 
         const index = options.findIndex(x => x.id === id);
@@ -274,7 +296,7 @@ class CreatePollDialog extends React.Component {
             return;
         }
 
-        focusNode(prevNode, true);
+        prevNode.focus(true);
     };
 
     handleFocusPrevOption = id => {
@@ -357,9 +379,13 @@ class CreatePollDialog extends React.Component {
         this.setState({ open: false, confirm: false });
     };
 
+    handleInputOption = () => {
+        this.setState({ poll: this.getPoll() });
+    };
+
     render() {
         const { classes, t } = this.props;
-        const { remainLength, open, confirm, options } = this.state;
+        const { remainLength, open, confirm, poll, options } = this.state;
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
@@ -367,8 +393,8 @@ class CreatePollDialog extends React.Component {
                 ref={el => this.optionsRefMap.set(i, el)}
                 key={x.id}
                 option={x}
+                onInput={this.handleInputOption}
                 onDelete={this.handleDeleteOption}
-                onDeleteByBackspace={this.handleDeleteOptionByBackspace}
                 onFocusPrev={this.handleFocusPrevOption}
                 onFocusNext={this.handleFocusNextOption}
             />
@@ -430,11 +456,11 @@ class CreatePollDialog extends React.Component {
                         <Button color='primary' onClick={this.handleClose}>
                             {t('Cancel')}
                         </Button>
-                        {
+                        {Boolean(poll) && (
                             <Button color='primary' onClick={this.handleSend}>
                                 {t('Send')}
                             </Button>
-                        }
+                        )}
                     </DialogActions>
                 </Dialog>
                 <Dialog
