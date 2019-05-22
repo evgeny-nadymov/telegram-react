@@ -20,6 +20,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import CreatePollOption from './CreatePollOption';
+import { focusNode } from '../../Utils/Component';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
 import {
@@ -58,24 +59,36 @@ class CreatePollDialog extends React.Component {
 
         this.state = {
             open: false,
+            confirmation: false,
             options: [],
             remainLength: POLL_QUESTION_MAX_LENGTH
         };
     }
 
-    handleClose = () => {
-        this.setState({ open: false });
-    };
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { open } = this.state;
 
-    getInnerText = div => {
-        const innerText = div.innerText;
-        const innerHTML = div.innerHTML;
-
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            div.innerHTML = '';
+        if (open && !prevState.open) {
+            setTimeout(() => {
+                focusNode(this.questionRef.current, true);
+            }, 0);
         }
+    }
 
-        return innerText;
+    hasData = () => {
+        if (!this.questionRef) return;
+        const node = this.questionRef.current;
+        if (!node) return;
+
+        const { options } = this.state;
+
+        const question = node.innerText;
+        if (question) return true;
+
+        return options.some((x, index) => {
+            const optionRef = this.optionsRefMap.get(index);
+            return optionRef && optionRef.getText();
+        });
     };
 
     getPoll = () => {
@@ -85,7 +98,7 @@ class CreatePollDialog extends React.Component {
 
         const { options } = this.state;
 
-        const question = this.getInnerText(node);
+        const question = node.innerText;
         if (!question) return null;
         if (question.length > POLL_QUESTION_LENGTH) return null;
 
@@ -110,19 +123,8 @@ class CreatePollDialog extends React.Component {
         };
     };
 
-    handleSend = () => {
-        const { onSend } = this.props;
-
-        const poll = this.getPoll();
-        if (!poll) return;
-
-        onSend(poll);
-
-        this.handleClose();
-    };
-
     openDialog = () => {
-        this.setState({ open: true, options: [] });
+        this.setState({ open: true, confirm: false, options: [] });
     };
 
     handleKeyDown = event => {
@@ -130,7 +132,7 @@ class CreatePollDialog extends React.Component {
 
         const node = this.questionRef.current;
         const maxLength = node.dataset.maxLength;
-        const innerText = this.getInnerText(node);
+        const innerText = node.innerText;
         const length = innerText.length;
 
         let hasSelection = false;
@@ -175,7 +177,7 @@ class CreatePollDialog extends React.Component {
         const selection = window.getSelection();
         const selectionString = selection ? selection.toString() : '';
 
-        const innerText = this.getInnerText(node);
+        const innerText = node.innerText;
         if (innerText.length - selection.length >= maxLength) return;
 
         let pasteText = event.clipboardData.getData('text/plain');
@@ -194,7 +196,7 @@ class CreatePollDialog extends React.Component {
         const length = node.dataset.length;
         const maxLength = node.dataset.maxLength;
 
-        const innerText = this.getInnerText(node);
+        const innerText = node.innerText;
 
         this.setState({
             remainLength: length - innerText.length
@@ -210,9 +212,8 @@ class CreatePollDialog extends React.Component {
         this.setState({ options }, () => {
             setTimeout(() => {
                 const node = this.optionsRefMap.get(options.length - 1);
-                if (!node) return;
 
-                node.focus();
+                focusNode(node, true);
             });
         });
     };
@@ -245,20 +246,12 @@ class CreatePollDialog extends React.Component {
         const prevNode = this.optionsRefMap.get(prevIndex);
         if (!prevNode) {
             const element = this.questionRef.current;
-            if (element.childNodes.length > 0) {
-                const range = document.createRange();
-                range.setStart(element.childNodes[0], element.childNodes[0].length);
-                range.collapse(true);
 
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-            element.focus();
+            focusNode(element, true);
             return;
         }
 
-        prevNode.focus();
+        focusNode(prevNode, true);
     };
 
     handleFocusNextOption = id => {
@@ -279,7 +272,7 @@ class CreatePollDialog extends React.Component {
             return;
         }
 
-        nextNode.focus();
+        focusNode(nextNode, true);
     };
 
     getHint = () => {
@@ -297,9 +290,36 @@ class CreatePollDialog extends React.Component {
         return `You can add ${POLL_OPTIONS_MAX_COUNT - options.length} more options.`;
     };
 
+    handleClose = () => {
+        if (this.hasData()) {
+            this.setState({ confirm: true });
+        } else {
+            this.handleConfirmationDone();
+        }
+    };
+
+    handleSend = () => {
+        const { onSend } = this.props;
+
+        const poll = this.getPoll();
+        if (!poll) return;
+
+        onSend(poll);
+
+        this.handleConfirmationDone();
+    };
+
+    handleConfirmationClose = () => {
+        this.setState({ confirm: false });
+    };
+
+    handleConfirmationDone = () => {
+        this.setState({ open: false, confirm: false });
+    };
+
     render() {
         const { classes, t } = this.props;
-        const { remainLength, open, options } = this.state;
+        const { remainLength, open, confirm, options } = this.state;
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
@@ -317,64 +337,83 @@ class CreatePollDialog extends React.Component {
         const hint = this.getHint();
 
         return (
-            <Dialog
-                className={classes.dialogRoot}
-                open={open}
-                transitionDuration={0}
-                onClose={this.handleClose}
-                aria-labelledby='dialog-title'>
-                <DialogTitle id='dialog-title'>{t('NewPoll')}</DialogTitle>
-                <DialogContent classes={{ root: classes.contentRoot }}>
-                    <div className='create-poll-dialog-question-title'>
-                        <Typography color='primary' variant='subtitle1' style={{ flexGrow: 1 }}>
-                            {t('Question')}
-                        </Typography>
-                        {remainLength <= POLL_QUESTION_LENGTH - POLL_QUESTION_HINT_LENGTH && (
-                            <Typography color={remainLength >= 0 ? 'textSecondary' : 'error'} variant='subtitle1'>
-                                {remainLength}
+            <>
+                <Dialog
+                    className={classes.dialogRoot}
+                    open={open}
+                    transitionDuration={0}
+                    onClose={this.handleClose}
+                    aria-labelledby='dialog-title'>
+                    <DialogTitle id='dialog-title'>{t('NewPoll')}</DialogTitle>
+                    <DialogContent classes={{ root: classes.contentRoot }}>
+                        <div className='create-poll-dialog-question-title'>
+                            <Typography color='primary' variant='subtitle1' style={{ flexGrow: 1 }}>
+                                {t('Question')}
                             </Typography>
-                        )}
-                    </div>
-                    <div
-                        ref={this.questionRef}
-                        id='create-poll-dialog-question'
-                        contentEditable
-                        suppressContentEditableWarning
-                        placeholder={t('QuestionHint')}
-                        data-length={POLL_QUESTION_LENGTH}
-                        data-max-length={POLL_QUESTION_MAX_LENGTH}
-                        onPaste={this.handlePaste}
-                        onKeyDown={this.handleKeyDown}
-                        onInput={this.handleInput}
-                    />
-                    <Typography color='primary' variant='subtitle1'>
-                        {t('PollOptions')}
-                    </Typography>
-                    <List classes={{ root: classes.listRoot }}>
-                        {items}
-                        {canAddOption && (
-                            <ListItem
-                                selected={false}
-                                className={classes.listItem}
-                                button
-                                onClick={this.handleAddOption}>
-                                <ListItemText disableTypography primary={t('AddAnOption')} />
-                            </ListItem>
-                        )}
-                    </List>
-                    <Typography>{hint}</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button color='primary' onClick={this.handleClose}>
-                        {t('Cancel')}
-                    </Button>
-                    {
-                        <Button color='primary' onClick={this.handleSend}>
-                            {t('Send')}
+                            {remainLength <= POLL_QUESTION_LENGTH - POLL_QUESTION_HINT_LENGTH && (
+                                <Typography color={remainLength >= 0 ? 'textSecondary' : 'error'} variant='subtitle1'>
+                                    {remainLength}
+                                </Typography>
+                            )}
+                        </div>
+                        <div
+                            ref={this.questionRef}
+                            id='create-poll-dialog-question'
+                            contentEditable
+                            suppressContentEditableWarning
+                            placeholder={t('QuestionHint')}
+                            data-length={POLL_QUESTION_LENGTH}
+                            data-max-length={POLL_QUESTION_MAX_LENGTH}
+                            onPaste={this.handlePaste}
+                            onKeyDown={this.handleKeyDown}
+                            onInput={this.handleInput}
+                        />
+                        <Typography color='primary' variant='subtitle1'>
+                            {t('PollOptions')}
+                        </Typography>
+                        <List classes={{ root: classes.listRoot }}>
+                            {items}
+                            {canAddOption && (
+                                <ListItem
+                                    selected={false}
+                                    className={classes.listItem}
+                                    button
+                                    onClick={this.handleAddOption}>
+                                    <ListItemText disableTypography primary={t('AddAnOption')} />
+                                </ListItem>
+                            )}
+                        </List>
+                        <Typography>{hint}</Typography>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button color='primary' onClick={this.handleClose}>
+                            {t('Cancel')}
                         </Button>
-                    }
-                </DialogActions>
-            </Dialog>
+                        {
+                            <Button color='primary' onClick={this.handleSend}>
+                                {t('Send')}
+                            </Button>
+                        }
+                    </DialogActions>
+                </Dialog>
+                <Dialog
+                    className={classes.dialogRoot}
+                    open={confirm}
+                    transitionDuration={0}
+                    onClose={this.handleConfirmationClose}
+                    aria-labelledby='dialog-title'>
+                    <DialogTitle id='dialog-title'>{t('CancelPollAlertTitle')}</DialogTitle>
+                    <DialogContent classes={{ root: classes.contentRoot }}>{t('CancelPollAlertText')}</DialogContent>
+                    <DialogActions>
+                        <Button color='primary' onClick={this.handleConfirmationClose}>
+                            {t('Cancel')}
+                        </Button>
+                        <Button color='primary' onClick={this.handleConfirmationDone}>
+                            {t('Ok')}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </>
         );
     }
 }

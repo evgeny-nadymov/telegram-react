@@ -14,6 +14,7 @@ import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/es/Typography/Typography';
+import { focusNode } from '../../Utils/Component';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
 import { borderStyle } from '../Theme';
@@ -45,6 +46,16 @@ class CreatePollOption extends React.Component {
         };
     }
 
+    getText = () => {
+        return this.optionTextRef.current.innerText;
+    };
+
+    focus = () => {
+        const node = this.optionTextRef.current;
+
+        focusNode(node, true);
+    };
+
     handleDelete = () => {
         const { option, onDelete } = this.props;
         if (!option) return;
@@ -53,43 +64,13 @@ class CreatePollOption extends React.Component {
         onDelete(option.id);
     };
 
-    getInnerText = div => {
-        const innerText = div.innerText;
-        const innerHTML = div.innerHTML;
-
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            div.innerHTML = '';
-        }
-
-        return innerText;
-    };
-
-    getText = () => {
-        return this.getInnerText(this.optionTextRef.current);
-    };
-
-    focus = () => {
-        const element = this.optionTextRef.current;
-        if (element.childNodes.length > 0) {
-            const range = document.createRange();
-            range.setStart(element.childNodes[0], element.childNodes[0].length);
-            range.collapse(true);
-
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-        }
-        element.focus();
-    };
-
     handleInput = event => {
         event.preventDefault();
 
         const node = this.optionTextRef.current;
         const length = node.dataset.length;
         const maxLength = node.dataset.maxLength;
-
-        const innerText = this.getInnerText(node);
+        const innerText = this.getText();
 
         this.setState({
             remainLength: length - innerText.length
@@ -99,7 +80,7 @@ class CreatePollOption extends React.Component {
     handleKeyDown = event => {
         const node = this.optionTextRef.current;
         const maxLength = node.dataset.maxLength;
-        const innerText = this.getInnerText(node);
+        const innerText = this.getText();
         const length = innerText.length;
 
         let hasSelection = false;
