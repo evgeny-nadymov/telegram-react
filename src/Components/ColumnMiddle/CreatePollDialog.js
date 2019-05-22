@@ -59,11 +59,20 @@ class CreatePollDialog extends React.Component {
 
         this.state = {
             open: false,
-            confirmation: false,
+            confirm: false,
             options: [],
             remainLength: POLL_QUESTION_MAX_LENGTH
         };
     }
+
+    openDialog = () => {
+        this.setState({
+            open: true,
+            confirm: false,
+            options: [],
+            remainLength: POLL_QUESTION_MAX_LENGTH
+        });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { open } = this.state;
@@ -121,10 +130,6 @@ class CreatePollDialog extends React.Component {
             question,
             options: pollOptions
         };
-    };
-
-    openDialog = () => {
-        this.setState({ open: true, confirm: false, options: [] });
     };
 
     handleKeyDown = event => {

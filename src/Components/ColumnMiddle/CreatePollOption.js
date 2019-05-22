@@ -139,7 +139,7 @@ class CreatePollOption extends React.Component {
         const selection = window.getSelection();
         const selectionString = selection ? selection.toString() : '';
 
-        const innerText = this.getInnerText(node);
+        const innerText = this.getText();
         if (innerText.length - selection.length >= maxLength) return;
 
         let pasteText = event.clipboardData.getData('text/plain');
