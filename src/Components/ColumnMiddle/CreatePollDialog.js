@@ -246,13 +246,19 @@ class CreatePollDialog extends React.Component {
 
         options.push({ id: Date.now() });
 
-        this.setState({ options }, () => {
-            setTimeout(() => {
-                const node = this.optionsRefMap.get(options.length - 1);
+        this.setState(
+            {
+                options,
+                poll: this.getPoll()
+            },
+            () => {
+                setTimeout(() => {
+                    const node = this.optionsRefMap.get(options.length - 1);
 
-                focusNode(node, true);
-            });
-        });
+                    focusNode(node, true);
+                });
+            }
+        );
     };
 
     handleDeleteOption = (id, backspace = false) => {
@@ -266,7 +272,10 @@ class CreatePollDialog extends React.Component {
     handleDelete = id => {
         const { options } = this.state;
 
-        this.setState({ options: options.filter(x => x.id !== id) });
+        this.setState({
+            options: options.filter(x => x.id !== id),
+            poll: this.getPoll()
+        });
     };
 
     handleDeleteByBackspace = id => {
