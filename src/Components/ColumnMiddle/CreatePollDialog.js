@@ -23,14 +23,16 @@ import CreatePollOption from './CreatePollOption';
 import { focusNode } from '../../Utils/Component';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
+import { hasPollData, isValidPoll } from '../../Utils/Poll';
 import {
-    POLL_OPTION_LENGTH,
     POLL_OPTIONS_MAX_COUNT,
     POLL_QUESTION_HINT_LENGTH,
     POLL_QUESTION_LENGTH,
     POLL_QUESTION_MAX_LENGTH
 } from '../../Constants';
+import PollStore from '../../Stores/PollStore';
 import './CreatePollDialog.css';
+import TdLibController from '../../Controllers/TdLibController';
 
 const styles = theme => ({
     dialogRoot: {
@@ -59,90 +61,82 @@ class CreatePollDialog extends React.Component {
 
         this.state = {
             poll: null,
-            open: false,
             confirm: false,
-            options: [],
             remainLength: POLL_QUESTION_MAX_LENGTH
         };
     }
 
+    componentDidMount() {
+        PollStore.on('clientUpdateDeletePoll', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdateNewPoll', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
+        PollStore.on('clientUpdatePollOption', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
+    }
+
+    componentWillUnmount() {
+        PollStore.removeListener('clientUpdateDeletePoll', this.handleClientUpdatePoll);
+        PollStore.removeListener('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
+        PollStore.removeListener('clientUpdateNewPoll', this.handleClientUpdatePoll);
+        PollStore.removeListener('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
+        PollStore.removeListener('clientUpdatePollOption', this.handleClientUpdatePoll);
+        PollStore.removeListener('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
+    }
+
+    handleClientUpdatePollQuestion = update => {
+        const { poll } = PollStore;
+
+        const node = this.questionRef.current;
+        const length = node.dataset.length;
+        const innerText = node.innerText;
+
+        this.setState({
+            remainLength: length - innerText.length,
+            poll
+        });
+    };
+
+    handleClientUpdatePoll = update => {
+        const { poll } = PollStore;
+
+        this.setState({ poll });
+    };
+
+    handleClientUpdateNewPollOption = update => {
+        const { poll } = PollStore;
+
+        this.setState({ poll }, () => {
+            setTimeout(() => {
+                const node = this.optionsRefMap.get(poll.options.length - 1);
+
+                node.focus(true);
+            });
+        });
+    };
+
     openDialog = () => {
         this.setState({
-            poll: null,
-            open: true,
             confirm: false,
-            options: [],
             remainLength: POLL_QUESTION_MAX_LENGTH
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateNewPoll'
         });
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { open } = this.state;
+        const { poll } = this.state;
 
-        if (open && !prevState.open) {
+        if (poll && !prevState.poll) {
             setTimeout(() => {
                 focusNode(this.questionRef.current, true);
             }, 0);
         }
     }
 
-    hasData = () => {
-        if (!this.questionRef) return false;
-        const node = this.questionRef.current;
-        if (!node) return false;
-
-        const { options } = this.state;
-
-        const question = node.innerText;
-        if (question) return true;
-
-        return options.some((x, index) => {
-            const optionRef = this.optionsRefMap.get(index);
-            return optionRef && optionRef.getText();
-        });
-    };
-
-    getPoll = () => {
-        if (!this.questionRef) return null;
-        const node = this.questionRef.current;
-        if (!node) return null;
-
-        const { options } = this.state;
-
-        const question = node.innerText;
-        if (!question) return null;
-        if (question.length > POLL_QUESTION_LENGTH) return null;
-
-        let breakPoll = false;
-        const pollOptions = [];
-        options.forEach((el, index) => {
-            if (this.optionsRefMap.has(index)) {
-                const optionRef = this.optionsRefMap.get(index);
-                if (optionRef) {
-                    const text = optionRef.getText();
-                    if (!text) return;
-
-                    if (text.length > POLL_OPTION_LENGTH) {
-                        breakPoll = true;
-                    }
-
-                    pollOptions.push(text);
-                }
-            }
-        });
-        if (breakPoll) return null;
-        if (pollOptions.length <= 1) return null;
-
-        return {
-            '@type': 'inputMessagePoll',
-            question,
-            options: pollOptions
-        };
-    };
-
     handleKeyDown = event => {
-        //console.log('Poll.keyDown', event.key, event.keyCode, event);
-
         const node = this.questionRef.current;
         const maxLength = node.dataset.maxLength;
         const innerText = node.innerText;
@@ -224,8 +218,7 @@ class CreatePollDialog extends React.Component {
         event.preventDefault();
 
         const node = this.questionRef.current;
-        const length = node.dataset.length;
-        const maxLength = node.dataset.maxLength;
+        //const length = node.dataset.length;
 
         const innerText = node.innerText;
         const innerHtml = node.innerHTML;
@@ -234,31 +227,32 @@ class CreatePollDialog extends React.Component {
             node.innerText = '';
         }
 
-        this.setState({
-            remainLength: length - innerText.length,
-            poll: this.getPoll()
+        // this.setState({
+        //     remainLength: length - innerText.length
+        // });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollQuestion',
+            question: innerText
         });
     };
 
     handleAddOption = () => {
-        const { options } = this.state;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const { options } = poll;
         if (options.length >= POLL_OPTIONS_MAX_COUNT) return;
 
-        options.push({ id: Date.now() });
+        const option = {
+            id: Date.now(),
+            text: ''
+        };
 
-        this.setState(
-            {
-                options,
-                poll: this.getPoll()
-            },
-            () => {
-                setTimeout(() => {
-                    const node = this.optionsRefMap.get(options.length - 1);
-
-                    focusNode(node, true);
-                });
-            }
-        );
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateNewPollOption',
+            option
+        });
     };
 
     handleDeleteOption = (id, backspace = false) => {
@@ -270,23 +264,23 @@ class CreatePollDialog extends React.Component {
     };
 
     handleDelete = id => {
-        const { options } = this.state;
-
-        this.setState({
-            options: options.filter(x => x.id !== id),
-            poll: this.getPoll()
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDeletePollOption',
+            id
         });
     };
 
     handleDeleteByBackspace = id => {
-        const { options } = this.state;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const { options } = poll;
 
         const index = options.findIndex(x => x.id === id);
         const prevIndex = index - 1;
         let deleteOption = true;
         for (let i = index; i < options.length; i++) {
-            const node = this.optionsRefMap.get(i);
-            const text = node ? node.getText() : '';
+            const { text } = options[i];
             if (text) {
                 deleteOption = false;
                 break;
@@ -309,7 +303,10 @@ class CreatePollDialog extends React.Component {
     };
 
     handleFocusPrevOption = id => {
-        const { options } = this.state;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const { options } = poll;
 
         const index = options.findIndex(x => x.id === id);
         const prevIndex = index - 1;
@@ -326,15 +323,17 @@ class CreatePollDialog extends React.Component {
     };
 
     handleFocusNextOption = id => {
-        const { options } = this.state;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const { options } = poll;
 
         const index = options.findIndex(x => x.id === id);
         const nextIndex = index + 1;
 
         const nextNode = this.optionsRefMap.get(nextIndex);
         if (!nextNode) {
-            const node = this.optionsRefMap.get(index);
-            const text = node ? node.getText() : '';
+            const text = index >= 0 && index < options.length ? options[index].text : '';
             if (options.length && !text) {
                 return;
             }
@@ -347,7 +346,10 @@ class CreatePollDialog extends React.Component {
     };
 
     getHint = () => {
-        const { options } = this.state;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const { options } = poll;
 
         const addCount = POLL_OPTIONS_MAX_COUNT - options.length;
 
@@ -362,7 +364,9 @@ class CreatePollDialog extends React.Component {
     };
 
     handleClose = () => {
-        if (this.hasData()) {
+        const { poll } = this.state;
+
+        if (hasPollData(poll)) {
             this.setState({ confirm: true });
         } else {
             this.handleConfirmationDone();
@@ -372,10 +376,10 @@ class CreatePollDialog extends React.Component {
     handleSend = () => {
         const { onSend } = this.props;
 
-        const poll = this.getPoll();
-        if (!poll) return;
+        const inputMessagePoll = PollStore.getInputMessagePoll();
+        if (!inputMessagePoll) return;
 
-        onSend(poll);
+        onSend(inputMessagePoll);
 
         this.handleConfirmationDone();
     };
@@ -385,16 +389,17 @@ class CreatePollDialog extends React.Component {
     };
 
     handleConfirmationDone = () => {
-        this.setState({ open: false, confirm: false });
-    };
+        this.handleConfirmationClose();
 
-    handleInputOption = () => {
-        this.setState({ poll: this.getPoll() });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDeletePoll'
+        });
     };
 
     render() {
         const { classes, t } = this.props;
-        const { remainLength, open, confirm, poll, options } = this.state;
+        const { remainLength, confirm, poll } = this.state;
+        const options = poll ? poll.options : [];
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
@@ -402,7 +407,6 @@ class CreatePollDialog extends React.Component {
                 ref={el => this.optionsRefMap.set(i, el)}
                 key={x.id}
                 option={x}
-                onInput={this.handleInputOption}
                 onDelete={this.handleDeleteOption}
                 onFocusPrev={this.handleFocusPrevOption}
                 onFocusNext={this.handleFocusNextOption}
@@ -416,7 +420,7 @@ class CreatePollDialog extends React.Component {
             <>
                 <Dialog
                     className={classes.dialogRoot}
-                    open={open}
+                    open={Boolean(poll)}
                     transitionDuration={0}
                     onClose={this.handleClose}
                     aria-labelledby='dialog-title'>
@@ -465,7 +469,7 @@ class CreatePollDialog extends React.Component {
                         <Button color='primary' onClick={this.handleClose}>
                             {t('Cancel')}
                         </Button>
-                        {Boolean(poll) && (
+                        {isValidPoll(poll) && (
                             <Button color='primary' onClick={this.handleSend}>
                                 {t('Send')}
                             </Button>

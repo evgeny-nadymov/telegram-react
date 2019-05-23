@@ -19,6 +19,7 @@ import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
 import { borderStyle } from '../Theme';
 import { POLL_OPTION_HINT_LENGTH, POLL_OPTION_LENGTH, POLL_OPTION_MAX_LENGTH } from '../../Constants';
+import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollOption.css';
 
 const styles = theme => ({
@@ -65,19 +66,24 @@ class CreatePollOption extends React.Component {
     };
 
     handleInput = event => {
+        const { option } = this.props;
+
         event.preventDefault();
 
         const node = this.optionTextRef.current;
         const length = node.dataset.length;
         const maxLength = node.dataset.maxLength;
-        const innerText = this.getText();
+        const text = this.getText();
 
         this.setState({
-            remainLength: length - innerText.length
+            remainLength: length - text.length
         });
 
-        const { onInput } = this.props;
-        onInput(event);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollOption',
+            id: option.id,
+            text
+        });
     };
 
     handleKeyDown = event => {

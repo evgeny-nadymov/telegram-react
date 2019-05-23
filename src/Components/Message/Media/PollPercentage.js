@@ -90,12 +90,10 @@ class PollPercentage extends React.Component {
         const timePassed = Date.now() - startTime;
 
         if (timePassed >= ANIMATION_DURATION_200MS) {
-            // console.log('Poll.animationEnd', to);
             this.setState({ animated: to });
             this.stopAnimation();
         } else {
             const animated = from + Math.floor(((to - from) * timePassed) / ANIMATION_DURATION_200MS);
-            // console.log('Poll.animating', from, to, animated);
             this.setState({ animated });
             this.handle = requestAnimationFrame(this.onAnimationFrame);
         }

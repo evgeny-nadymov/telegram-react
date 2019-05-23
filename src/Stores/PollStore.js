@@ -6,6 +6,7 @@
  */
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
+import { isValidPoll } from '../Utils/Poll';
 
 class PollStore extends EventEmitter {
     constructor() {
@@ -23,7 +24,7 @@ class PollStore extends EventEmitter {
         switch (update['@type']) {
             case 'clientUpdateNewPoll': {
                 this.set({
-                    '@type': 'inputMessagePoll',
+                    id: Date.now(),
                     question: '',
                     options: []
                 });
@@ -41,6 +42,7 @@ class PollStore extends EventEmitter {
             }
             case 'clientUpdatePollOption': {
                 const { id, text } = update;
+                const { options } = this.poll;
 
                 this.assign(this.poll, { options: options.map(x => (x.id === id ? { ...x, text } : { ...x })) });
 
@@ -49,6 +51,7 @@ class PollStore extends EventEmitter {
             }
             case 'clientUpdateNewPollOption': {
                 const { option } = update;
+                const { options } = this.poll;
 
                 this.assign(this.poll, { options: [...options, option] });
                 this.emit('clientUpdateNewPollOption', update);
@@ -56,13 +59,14 @@ class PollStore extends EventEmitter {
             }
             case 'clientUpdateDeletePollOption': {
                 const { id } = update;
+                const { options } = this.poll;
 
                 this.assign(this.poll, { options: options.filter(x => x.id !== id) });
                 this.emit('clientUpdateDeletePollOption', update);
                 break;
             }
             case 'clientUpdateDeletePoll': {
-                this.poll = null;
+                this.set(null);
 
                 this.emit('clientUpdateDeletePoll', update);
                 break;
@@ -87,7 +91,20 @@ class PollStore extends EventEmitter {
     }
 
     set(poll) {
+        console.log('Poll.set', poll);
         this.poll = poll;
+    }
+
+    getInputMessagePoll() {
+        if (!this.poll) return null;
+        if (!isValidPoll(this.poll)) return null;
+        const { question, options } = this.poll;
+
+        return {
+            '@type': 'inputMessagePoll',
+            question,
+            options: options.filter(x => Boolean(x.text)).map(x => x.text)
+        };
     }
 }
 
