@@ -11,10 +11,10 @@ import classNames from 'classnames';
 import FileProgress from '../../Viewer/FileProgress';
 import { getSize, getFitSize } from '../../../Utils/Common';
 import { getSrc } from '../../../Utils/File';
+import { isBlurredThumbnail } from '../../../Utils/Media';
 import { PHOTO_SIZE, PHOTO_DISPLAY_SIZE, PHOTO_THUMBNAIL_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Photo.css';
-import { isBlurredThumbnail } from '../../../Utils/Media';
 
 class Photo extends React.Component {
     constructor(props) {

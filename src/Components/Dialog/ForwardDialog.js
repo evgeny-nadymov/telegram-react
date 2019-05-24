@@ -195,12 +195,56 @@ class ForwardDialog extends React.Component {
     handleSend = () => {
         this.handleClose();
 
-        const { chatId, messageIds, photoSize } = this.props;
-        if (!chatId && !messageIds && !messageIds && !photoSize) return;
+        const { chatId, messageIds, photoSize, link } = this.props;
+        if (!chatId && !messageIds && !messageIds && !photoSize && !link) return;
 
         const text = this.getInnerText(this.messageRef.current);
 
         this.targetChats.forEach(targetChatId => {
+            if (link) {
+                if (text) {
+                    TdLibController.send({
+                        '@type': 'sendMessage',
+                        chat_id: targetChatId,
+                        reply_to_message_id: 0,
+                        disable_notifications: false,
+                        from_background: false,
+                        reply_markup: null,
+                        input_message_content: {
+                            '@type': 'inputMessageText',
+                            text: {
+                                '@type': 'formattedText',
+                                text: text,
+                                entities: null
+                            },
+                            disable_web_page_preview: true,
+                            clear_draft: false
+                        }
+                    });
+                }
+
+                TdLibController.send({
+                    '@type': 'sendMessage',
+                    chat_id: targetChatId,
+                    reply_to_message_id: 0,
+                    disable_notifications: false,
+                    from_background: false,
+                    reply_markup: null,
+                    input_message_content: {
+                        '@type': 'inputMessageText',
+                        text: {
+                            '@type': 'formattedText',
+                            text: link,
+                            entities: null
+                        },
+                        disable_web_page_preview: true,
+                        clear_draft: false
+                    }
+                });
+
+                return;
+            }
+
             const size = photoSize || this.getForwardPhotoSize(chatId, messageIds);
             if (size) {
                 const { width, height, photo } = size;

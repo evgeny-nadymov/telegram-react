@@ -1070,7 +1070,33 @@ function openPhoto(photo, message, fileCancel) {
     });
 }
 
-function openSticker(sticker, message, fileCancel) {}
+async function openSticker(sticker, message, fileCancel) {
+    if (!sticker) return;
+    if (!message) return;
+
+    const { chat_id, id } = message;
+
+    TdLibController.send({
+        '@type': 'openMessageContent',
+        chat_id: chat_id,
+        message_id: id
+    });
+
+    const { set_id } = sticker;
+    if (!set_id) return;
+
+    const stickerSet = await TdLibController.send({
+        '@type': 'getStickerSet',
+        set_id
+    });
+
+    if (!stickerSet) return;
+
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateStickerSet',
+        stickerSet
+    });
+}
 
 function openVideo(video, message, fileCancel) {
     if (!video) return;

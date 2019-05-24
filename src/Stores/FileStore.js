@@ -124,6 +124,10 @@ class FileStore extends EventEmitter {
                     this.handleMessage(store, item, file, arr);
                     break;
                 }
+                case 'sticker': {
+                    this.handleSticker(store, item, file, arr, null);
+                    break;
+                }
                 case 'user': {
                     this.handleUser(store, item, file, arr);
                     break;
@@ -404,12 +408,15 @@ class FileStore extends EventEmitter {
         if (sticker.thumbnail) {
             const source = sticker.thumbnail.photo;
             if (source && source.id === file.id) {
+                const chatId = obj ? obj.chat_id : 0;
+                const messageId = obj ? obj.id : 0;
+
                 this.getLocalFile(
                     store,
                     source,
                     arr,
-                    () => this.updateStickerThumbnailBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj)
+                    () => this.updateStickerThumbnailBlob(chatId, messageId, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj || sticker)
                 );
             }
         }
@@ -417,12 +424,15 @@ class FileStore extends EventEmitter {
         if (sticker.sticker) {
             const source = sticker.sticker;
             if (source && source.id === file.id) {
+                const chatId = obj ? obj.chat_id : 0;
+                const messageId = obj ? obj.id : 0;
+
                 this.getLocalFile(
                     store,
                     source,
                     arr,
-                    () => this.updateStickerBlob(obj.chat_id, obj.id, file.id),
-                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj)
+                    () => this.updateStickerBlob(chatId, messageId, file.id),
+                    () => this.getRemoteFile(file.id, FILE_PRIORITY, obj || sticker)
                 );
             }
         }

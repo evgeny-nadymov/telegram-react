@@ -9,11 +9,11 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import Footer from './Footer';
 import Header from './Header';
+import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
-import ChatStore from '../../Stores/ChatStore';
+import StickerSetDialog from '../Dialog/StickerSetDialog';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogDetails.css';
-import HeaderPlayer from '../Player/HeaderPlayer';
 
 class DialogDetails extends Component {
     constructor(props) {
@@ -115,6 +115,7 @@ class DialogDetails extends Component {
                 <Header chatId={chatId} />
                 <MessagesList innerRef={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
                 <Footer chatId={chatId} />
+                <StickerSetDialog />
             </div>
         );
     }

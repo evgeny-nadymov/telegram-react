@@ -69,7 +69,7 @@ class CreatePollDialog extends React.Component {
     componentDidMount() {
         PollStore.on('clientUpdateDeletePoll', this.handleClientUpdatePoll);
         PollStore.on('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
-        PollStore.on('clientUpdateNewPoll', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
         PollStore.on('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
         PollStore.on('clientUpdatePollOption', this.handleClientUpdatePoll);
         PollStore.on('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
@@ -78,11 +78,21 @@ class CreatePollDialog extends React.Component {
     componentWillUnmount() {
         PollStore.removeListener('clientUpdateDeletePoll', this.handleClientUpdatePoll);
         PollStore.removeListener('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
-        PollStore.removeListener('clientUpdateNewPoll', this.handleClientUpdatePoll);
+        PollStore.removeListener('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
         PollStore.removeListener('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
         PollStore.removeListener('clientUpdatePollOption', this.handleClientUpdatePoll);
         PollStore.removeListener('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
     }
+
+    handleClientUpdateNewPoll = update => {
+        const { poll } = PollStore;
+
+        this.setState({
+            confirm: false,
+            remainLength: POLL_QUESTION_MAX_LENGTH,
+            poll
+        });
+    };
 
     handleClientUpdatePollQuestion = update => {
         const { poll } = PollStore;
@@ -112,17 +122,6 @@ class CreatePollDialog extends React.Component {
 
                 node.focus(true);
             });
-        });
-    };
-
-    openDialog = () => {
-        this.setState({
-            confirm: false,
-            remainLength: POLL_QUESTION_MAX_LENGTH
-        });
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateNewPoll'
         });
     };
 
@@ -399,6 +398,8 @@ class CreatePollDialog extends React.Component {
     render() {
         const { classes, t } = this.props;
         const { remainLength, confirm, poll } = this.state;
+        if (!poll) return null;
+
         const options = poll ? poll.options : [];
 
         this.optionsRefMap.clear();
@@ -420,7 +421,7 @@ class CreatePollDialog extends React.Component {
             <>
                 <Dialog
                     className={classes.dialogRoot}
-                    open={Boolean(poll)}
+                    open
                     transitionDuration={0}
                     onClose={this.handleClose}
                     aria-labelledby='dialog-title'>

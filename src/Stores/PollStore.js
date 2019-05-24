@@ -91,7 +91,6 @@ class PollStore extends EventEmitter {
     }
 
     set(poll) {
-        console.log('Poll.set', poll);
         this.poll = poll;
     }
 

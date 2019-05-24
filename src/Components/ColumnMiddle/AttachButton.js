@@ -65,7 +65,7 @@ class AttachButton extends React.Component {
         const { onAttachPoll } = this.props;
         if (!onAttachPoll) return;
 
-        setTimeout(() => onAttachPoll(), ANIMATION_DURATION_300MS);
+        onAttachPoll();
     };
 
     render() {

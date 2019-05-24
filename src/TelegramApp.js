@@ -22,7 +22,7 @@ import packageJson from '../package.json';
 import withLanguage from './Language';
 import withTheme from './Theme';
 import withSnackbarNotifications from './Notifications';
-import ForwardDialog from './Components/ColumnMiddle/ForwardDialog';
+import ForwardDialog from './Components/Dialog/ForwardDialog';
 import DialogInfo from './Components/ColumnRight/DialogInfo';
 import Dialogs from './Components/ColumnLeft/Dialogs';
 import DialogDetails from './Components/ColumnMiddle/DialogDetails';

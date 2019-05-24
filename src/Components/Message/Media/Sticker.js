@@ -49,25 +49,35 @@ class Sticker extends React.Component {
     };
 
     render() {
-        const { thumbnail, sticker, width, height } = this.props.sticker;
+        const { displaySize, blur, sticker: source, style, openMedia } = this.props;
+        const { thumbnail, sticker, width, height } = source;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(sticker);
         const isBlurred = isBlurredThumbnail(thumbnail);
 
-        const fitSize = getFitSize({ width: width, height: height }, STICKER_DISPLAY_SIZE);
+        const fitSize = getFitSize({ width: width, height: height }, displaySize);
+        if (!fitSize) return null;
 
-        return src ? (
-            <img className='sticker' draggable={false} width={fitSize.width} height={fitSize.height} src={src} alt='' />
-        ) : (
-            <img
-                className={classNames('sticker', { 'media-blurred': isBlurred })}
-                draggable={false}
-                width={fitSize.width}
-                height={fitSize.height}
-                src={thumbnailSrc}
-                alt=''
-            />
+        const stickerStyle = {
+            width: fitSize.width,
+            height: fitSize.height,
+            ...style
+        };
+
+        return (
+            <div className='sticker' style={stickerStyle} onClick={openMedia}>
+                {src ? (
+                    <img className='sticker-image' draggable={false} src={src} alt='' />
+                ) : (
+                    <img
+                        className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                        draggable={false}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                )}
+            </div>
         );
     }
 }
@@ -76,7 +86,14 @@ Sticker.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     sticker: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    openMedia: PropTypes.func.isRequired,
+    blur: PropTypes.bool,
+    displaySize: PropTypes.number
+};
+
+Sticker.defaultProps = {
+    blur: true,
+    displaySize: STICKER_DISPLAY_SIZE
 };
 
 export default Sticker;

@@ -21,7 +21,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
 import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
-import CreatePollDialog from './CreatePollDialog';
+import CreatePollDialog from '../Dialog/CreatePollDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
@@ -50,7 +50,6 @@ class InputBoxControl extends Component {
 
         this.attachDocumentRef = React.createRef();
         this.attachPhotoRef = React.createRef();
-        this.attachPollRef = React.createRef();
         this.newMessageRef = React.createRef();
 
         const chatId = ApplicationStore.getChatId();
@@ -241,9 +240,9 @@ class InputBoxControl extends Component {
     };
 
     handleAttachPoll = () => {
-        if (!this.attachPollRef) return;
-
-        this.attachPollRef.current.openDialog();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateNewPoll'
+        });
     };
 
     handleAttachPhoto = () => {
@@ -519,7 +518,7 @@ class InputBoxControl extends Component {
                         </div>
                     </div>
                 </div>
-                {!isPrivateChat(chatId) && <CreatePollDialog ref={this.attachPollRef} onSend={this.handleSendPoll} />}
+                {!isPrivateChat(chatId) && <CreatePollDialog onSend={this.handleSendPoll} />}
                 <Dialog
                     transitionDuration={0}
                     open={openPasteDialog}
