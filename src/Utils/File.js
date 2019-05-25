@@ -499,6 +499,34 @@ async function loadLocationContent(store, location, message) {
     );
 }
 
+function loadBigPhotoContent(store, photo, message) {
+    if (!photo) return;
+    if (!message) return;
+
+    const { sizes } = photo;
+    if (!sizes) return;
+
+    const photoSize = getSize(sizes, PHOTO_BIG_SIZE);
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    if (!file) return;
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        null,
+        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+    );
+}
+
 function loadPhotoContent(store, photo, message) {
     if (!photo) return;
     if (!message) return;
@@ -855,13 +883,16 @@ function loadMessageContents(store, messages) {
                     }
 
                     if (loadPhoto) {
+                        loadBigPhotoContent(store, photo, message);
                         loadPhotoContent(store, photo, message);
+                        loadPhotoThumbnailContent(store, photo, message);
                     }
                     break;
                 }
                 case 'messagePhoto': {
                     const { photo } = content;
 
+                    loadBigPhotoContent(store, photo, message);
                     loadPhotoContent(store, photo, message);
                     loadPhotoThumbnailContent(store, photo, message);
                     break;
