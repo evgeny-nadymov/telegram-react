@@ -379,49 +379,51 @@ class ChatDetails extends React.Component {
                     <div className='chat-details-info'>
                         <ChatControl chatId={chatId} onTileSelect={photo ? this.handleOpenViewer : null} />
                     </div>
-                    <List>
-                        {username && (
-                            <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
-                                <ListItemIcon>
-                                    <AlternateEmailIcon />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={
-                                        <Typography variant='inherit' noWrap>
-                                            {username}
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                        )}
-                        {phoneNumber && (
-                            <>
-                                <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
+                    {(username || phoneNumber || bio) && (
+                        <List>
+                            {username && (
+                                <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
                                     <ListItemIcon>
-                                        <CallIcon />
+                                        <AlternateEmailIcon />
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={
                                             <Typography variant='inherit' noWrap>
-                                                {formatPhoneNumber(phoneNumber)}
+                                                {username}
                                             </Typography>
                                         }
                                     />
                                 </ListItem>
-                            </>
-                        )}
-                        {bio && (
-                            <ListItem className={classes.listItem}>
-                                <ListItemIcon>
-                                    <ErrorOutlineIcon className='chat-details-info-icon' />
-                                </ListItemIcon>
-                                <ListItemText
-                                    primary={bio}
-                                    style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                                />
-                            </ListItem>
-                        )}
-                    </List>
+                            )}
+                            {phoneNumber && (
+                                <>
+                                    <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
+                                        <ListItemIcon>
+                                            <CallIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {formatPhoneNumber(phoneNumber)}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                </>
+                            )}
+                            {bio && (
+                                <ListItem className={classes.listItem}>
+                                    <ListItemIcon>
+                                        <ErrorOutlineIcon className='chat-details-info-icon' />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary={bio}
+                                        style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                                    />
+                                </ListItem>
+                            )}
+                        </List>
+                    )}
                     <Divider />
                     <List>
                         <NotificationsListItem chatId={chatId} />

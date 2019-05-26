@@ -15,6 +15,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -31,8 +32,8 @@ import {
     POLL_QUESTION_MAX_LENGTH
 } from '../../Constants';
 import PollStore from '../../Stores/PollStore';
-import './CreatePollDialog.css';
 import TdLibController from '../../Controllers/TdLibController';
+import './CreatePollDialog.css';
 
 const styles = theme => ({
     dialogRoot: {
@@ -40,6 +41,9 @@ const styles = theme => ({
     },
     contentRoot: {
         width: 300
+    },
+    dividerRoot: {
+        margin: '8px -24px'
     },
     listRoot: {
         margin: '0 -24px'
@@ -449,6 +453,7 @@ class CreatePollDialog extends React.Component {
                             onKeyDown={this.handleKeyDown}
                             onInput={this.handleInput}
                         />
+                        <Divider className={classes.dividerRoot} />
                         <Typography color='primary' variant='subtitle1'>
                             {t('PollOptions')}
                         </Typography>

@@ -15,6 +15,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Typography from '@material-ui/core/Typography';
 import ShareStickerSetButton from './ShareStickerSetButton';
 import Sticker from '../Message/Media/Sticker';
 import { loadStickerSetContent } from '../../Utils/File';
@@ -25,6 +26,11 @@ import TdLibController from '../../Controllers/TdLibController';
 import './StickerSetDialog.css';
 
 const styles = theme => ({
+    dialogTitleRoot: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
     dialogRoot: {
         color: theme.palette.text.primary
     },
@@ -36,7 +42,11 @@ const styles = theme => ({
         padding: '0 12px 24px'
     },
     shareButtonRoot: {
-        marginTop: 8
+        margin: '-24px -12px -24px 0'
+    },
+    typographyRoot: {
+        flexGrow: 1,
+        flexShrink: 1
     }
 });
 
@@ -119,7 +129,7 @@ class StickerSetDialog extends React.Component {
                 sticker={x}
                 blur={false}
                 displaySize={STICKER_SMALL_DISPLAY_SIZE}
-                style={{ boxSizing: 'border-box', padding: 6 }}
+                style={{ padding: 6 }}
                 openMedia={() => {}}
             />
         ));
@@ -131,10 +141,12 @@ class StickerSetDialog extends React.Component {
                 transitionDuration={0}
                 onClose={this.handleClose}
                 aria-labelledby='sticker-set-dialog-title-text'>
-                <div className='sticker-set-dialog-title'>
-                    <DialogTitle id='sticker-set-dialog-title-text'>{title}</DialogTitle>
+                <DialogTitle id='sticker-set-dialog-title-text' className={classes.dialogTitleRoot} disableTypography>
+                    <Typography variant='h6' className={classes.typographyRoot}>
+                        {title}
+                    </Typography>
                     <ShareStickerSetButton className={classes.shareButtonRoot} />
-                </div>
+                </DialogTitle>
                 <DialogContent classes={{ root: classes.contentRoot }}>{items}</DialogContent>
                 <DialogActions>
                     <Button color='primary' onClick={this.handleClose}>

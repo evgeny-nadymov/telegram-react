@@ -1251,24 +1251,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                 case 'messageChatChangePhoto': {
                     const { photo } = content;
 
-                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                    if (!photoSize) break;
-
-                    const { photo: file } = photoSize;
-                    if (!file) break;
-
-                    const blob = file.blob || FileStore.getBlob(file.id);
-                    if (blob) break;
-
-                    const { id } = file;
-
-                    FileStore.getLocalFile(
-                        store,
-                        file,
-                        null,
-                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
-                    );
+                    loadBigPhotoContent(store, photo, message);
                     break;
                 }
                 case 'messageDocument': {
@@ -1280,38 +1263,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                 case 'messagePhoto': {
                     const { photo } = content;
 
-                    // preview
-                    /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                    if (previewPid) {
-                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                        if (!preview.blob){
-                            FileStore.getLocalFile(store, preview, null,
-                                () => MessageStore.updateMessagePhoto(message.id),
-                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                'load_contents_preview_',
-                                message.id);
-
-                        }
-                    }*/
-
-                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                    if (!photoSize) break;
-
-                    const { photo: file } = photoSize;
-                    if (!file) break;
-
-                    const blob = file.blob || FileStore.getBlob(file.id);
-                    if (blob) break;
-
-                    const { id } = file;
-
-                    FileStore.getLocalFile(
-                        store,
-                        file,
-                        null,
-                        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-                        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
-                    );
+                    loadBigPhotoContent(store, photo, message);
                     break;
                 }
                 case 'messageText': {
@@ -1339,26 +1291,7 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     }
 
                     if (loadPhoto) {
-                        if (photo) {
-                            const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                            if (!photoSize) break;
-
-                            const { photo: file } = photoSize;
-                            if (!file) break;
-
-                            const blob = file.blob || FileStore.getBlob(file.id);
-                            if (blob) break;
-
-                            const { id } = file;
-
-                            FileStore.getLocalFile(
-                                store,
-                                file,
-                                null,
-                                () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-                                () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
-                            );
-                        }
+                        loadBigPhotoContent(store, photo, message);
                     }
 
                     break;
