@@ -15,3 +15,13 @@
     flex-grow: 1;
     flex-shrink: 1;
 }
+
+.sticker-set-dialog-item {
+    position: relative;
+}
+
+.sticker-set-dialog-item-emoji {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+}

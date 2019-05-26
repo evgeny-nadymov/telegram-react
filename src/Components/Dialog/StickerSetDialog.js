@@ -122,16 +122,19 @@ class StickerSetDialog extends React.Component {
         const { title, stickers, emojis, is_installed } = stickerSet;
 
         const items = stickers.map(x => (
-            <Sticker
-                key={x.sticker.id}
-                chatId={0}
-                messageId={0}
-                sticker={x}
-                blur={false}
-                displaySize={STICKER_SMALL_DISPLAY_SIZE}
-                style={{ padding: 6 }}
-                openMedia={() => {}}
-            />
+            <div className='sticker-set-dialog-item' key={x.sticker.id}>
+                <Sticker
+                    key={x.sticker.id}
+                    chatId={0}
+                    messageId={0}
+                    sticker={x}
+                    blur={false}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
+                    style={{ padding: 6 }}
+                    openMedia={() => {}}
+                />
+                <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
+            </div>
         ));
 
         return (
