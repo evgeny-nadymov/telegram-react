@@ -21,11 +21,11 @@ class SharedMedia extends React.Component {
     };
 
     render() {
-        const { onClose } = this.props;
+        const { onClose, popup } = this.props;
         const { value } = this.state;
 
-        return (
-            <div className='shared-media'>
+        const content = (
+            <>
                 <SharedMediaHeaderControl close={onClose} />
                 <Tabs
                     value={value}
@@ -40,8 +40,10 @@ class SharedMedia extends React.Component {
                     <Tab label='Links' style={{ minWidth: '40px' }} />
                     <Tab label='Audio' style={{ minWidth: '40px' }} />
                 </Tabs>
-            </div>
+            </>
         );
+
+        return popup ? <>{content}</> : <div className='shared-media'>{content}</div>;
     }
 }
 

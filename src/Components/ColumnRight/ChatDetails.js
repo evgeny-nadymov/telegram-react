@@ -401,8 +401,8 @@ class ChatDetails extends React.Component {
 
         const { photo } = chat;
 
-        return (
-            <div className={classNames('chat-details', className)}>
+        const content = (
+            <>
                 <ChatDetailsHeader
                     chatId={chatId}
                     backButton={backButton}
@@ -514,8 +514,10 @@ class ChatDetails extends React.Component {
                         </>
                     )}
                 </div>
-            </div>
+            </>
         );
+
+        return popup ? <>{content}</> : <div className={classNames('chat-details', className)}>{content}</div>;
     }
 }
 

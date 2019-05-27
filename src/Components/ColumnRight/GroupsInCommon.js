@@ -59,7 +59,7 @@ class GroupsInCommon extends React.Component {
     };
 
     render() {
-        const { onClose } = this.props;
+        const { onClose, popup } = this.props;
         const { chatIds } = this.state;
 
         const chats = chatIds.map(x => (
@@ -68,12 +68,14 @@ class GroupsInCommon extends React.Component {
             </ListItem>
         ));
 
-        return (
-            <div className='groups-in-common'>
+        const content = (
+            <>
                 <GroupsInCommonHeader onClose={onClose} />
                 <div className='groups-in-common-list'>{chats}</div>
-            </div>
+            </>
         );
+
+        return popup ? <>{content}</> : <div className='groups-in-common'>{content}</div>;
     }
 }
 

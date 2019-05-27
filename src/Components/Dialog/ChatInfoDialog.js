@@ -26,8 +26,7 @@ const styles = theme => ({
         zIndex: 1
     },
     paperRoot: {
-        height: 'auto',
-        transition: 'height 2s linear'
+        width: 336
     }
 });
 

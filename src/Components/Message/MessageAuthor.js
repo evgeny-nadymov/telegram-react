@@ -30,7 +30,7 @@ class MessageAuthor extends React.Component {
         if (openChat && chatId) {
             event.stopPropagation();
 
-            openChatCommand(chatId, true);
+            openChatCommand(chatId, null, true);
             return;
         }
     };

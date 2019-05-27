@@ -124,7 +124,13 @@ class ChatInfo extends React.Component {
             );
         }
 
-        return <div className={classNames(classes.borderColor, { 'right-column': !popup }, className)}>{content}</div>;
+        //return <>{content}</>;
+
+        return popup ? (
+            <>{content}</>
+        ) : (
+            <div className={classNames(classes.borderColor, { 'right-column': !popup }, className)}>{content}</div>
+        );
     }
 }
 
