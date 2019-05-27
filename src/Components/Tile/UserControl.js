@@ -14,16 +14,16 @@ import UserStore from '../../Stores/UserStore';
 import './UserControl.css';
 
 class UserControl extends React.Component {
-
-    shouldComponentUpdate(nextProps, nextState){
+    shouldComponentUpdate(nextProps, nextState) {
         return nextProps.userId !== this.props.userId;
     }
 
     handleClick = () => {
-        const { userId, onSelect} = this.props;
+        const { userId, onSelect } = this.props;
 
         const user = UserStore.get(userId);
         if (!user) return;
+        if (!onSelect) return;
 
         onSelect(user);
     };
@@ -37,15 +37,13 @@ class UserControl extends React.Component {
         return (
             <div className='user' onClick={this.handleClick}>
                 <div className='user-wrapper'>
-                    <UserTileControl userId={userId}/>
+                    <UserTileControl userId={userId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <div className='dialog-title'>
-                                {fullName}
-                            </div>
+                            <div className='dialog-title'>{fullName}</div>
                         </div>
                         <div className='tile-second-row'>
-                            <UserStatusControl userId={userId}/>
+                            <UserStatusControl userId={userId} />
                         </div>
                     </div>
                 </div>

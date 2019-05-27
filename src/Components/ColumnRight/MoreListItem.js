@@ -67,7 +67,7 @@ class MoreListItem extends React.Component {
     };
 
     handleBlock = () => {
-        const { chatId } = this.props;
+        const { chatId } = this.state;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return;

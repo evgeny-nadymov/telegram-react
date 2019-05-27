@@ -59,11 +59,15 @@ class Reply extends React.Component {
         const { classes, t, chatId, messageId } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
-        if (isDeletedMessage(message)) return null;
 
-        const title = !message ? null : getTitle(message);
-        const content = !message ? t('Loading') : getContent(message, t);
+        let title = !message ? null : getTitle(message);
+        let content = !message ? t('Loading') : getContent(message, t);
         const photoSize = getReplyPhotoSize(chatId, messageId);
+
+        if (isDeletedMessage(message)) {
+            title = null;
+            content = t('DeletedMessage');
+        }
 
         return (
             <div className='reply' onMouseDown={this.handleOpen} onClick={this.handleClick}>

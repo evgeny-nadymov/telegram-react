@@ -202,11 +202,11 @@ class Message extends Component {
     };
 
     handleSelectUser = userId => {
-        openUser(userId);
+        openUser(userId, true);
     };
 
     handleSelectChat = chatId => {
-        openChat(chatId);
+        openChat(chatId, true);
     };
 
     handleSelection = () => {

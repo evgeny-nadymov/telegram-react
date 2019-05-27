@@ -23,14 +23,14 @@ class MessageAuthor extends React.Component {
         if (openUser && userId) {
             event.stopPropagation();
 
-            openUserCommand(userId);
+            openUserCommand(userId, true);
             return;
         }
 
         if (openChat && chatId) {
             event.stopPropagation();
 
-            openChatCommand(chatId);
+            openChatCommand(chatId, true);
             return;
         }
     };

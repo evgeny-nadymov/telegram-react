@@ -46,7 +46,16 @@ class GroupsInCommon extends React.Component {
     }
 
     handleSelect = chat => {
+        const { popup } = this.props;
+
         openChat(chat.id);
+
+        if (popup) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateDialogChatId',
+                chatId: 0
+            });
+        }
     };
 
     render() {
@@ -70,7 +79,12 @@ class GroupsInCommon extends React.Component {
 
 GroupsInCommon.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onClose: PropTypes.func.isRequired
+    onClose: PropTypes.func.isRequired,
+    popup: PropTypes.bool
+};
+
+GroupsInCommon.defaultProps = {
+    popup: false
 };
 
 export default GroupsInCommon;

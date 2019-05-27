@@ -7,34 +7,36 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
-export function openUser(userId) {
+export function openUser(userId, popup = false) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenUser',
-        userId: userId
+        userId,
+        popup
     });
 }
 
-export function openChat(chatId, messageId = null) {
+export function openChat(chatId, messageId = null, popup = false) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenChat',
-        chatId: chatId,
-        messageId: messageId
+        chatId,
+        messageId,
+        popup
     });
 }
 
 export function highlightMessage(chatId, messageId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMessageHighlighted',
-        chatId: chatId,
-        messageId: messageId
+        chatId,
+        messageId
     });
 }
 
 export function selectMessage(chatId, messageId, selected) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMessageSelected',
-        chatId: chatId,
-        messageId: messageId,
-        selected: selected
+        chatId,
+        messageId,
+        selected
     });
 }

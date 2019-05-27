@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
+import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withStyles } from '@material-ui/core/styles';
 import { withSnackbar } from 'notistack';
@@ -29,7 +31,7 @@ import CircularProgress from '../ColumnMiddle/MainMenuButton';
 import NotificationTimer from '../Additional/NotificationTimer';
 import UserControl from '../Tile/UserControl';
 import ChatControl from '../Tile/ChatControl';
-import ChatDetailsHeaderControl from './ChatDetailsHeaderControl';
+import ChatDetailsHeader from './ChatDetailsHeader';
 import NotificationsListItem from './NotificationsListItem';
 import MoreListItem from './MoreListItem';
 import {
@@ -40,12 +42,13 @@ import {
     getGroupChatMembers,
     getChatFullInfo,
     isPrivateChat,
-    getChatUserId
+    getChatUserId,
+    isMeChat
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
-import { openUser } from '../../Actions/Client';
+import { openChat } from '../../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
@@ -117,15 +120,18 @@ class ChatDetails extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, theme } = this.props;
+        const { hasGroupsInCommon } = this.state;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
-        if (nextProps.theme !== this.props.theme) {
+        if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextState.hasGroupsInCommon !== this.state.hasGroupsInCommon) {
+        if (nextState.hasGroupsInCommon !== hasGroupsInCommon) {
             return true;
         }
 
@@ -247,6 +253,9 @@ class ChatDetails extends React.Component {
         const isGroup = isGroupChat(chatId);
         if (isGroup) return;
 
+        const isMe = isMeChat(chatId);
+        if (isMe) return;
+
         const result = await TdLibController.send({
             '@type': 'getGroupsInCommon',
             user_id: getChatUserId(chatId),
@@ -327,19 +336,38 @@ class ChatDetails extends React.Component {
         ApplicationStore.setProfileMediaViewerContent({ chatId: chatId });
     };
 
-    handleSelectUser = user => {
-        openUser(user.id);
+    handleOpenChat = () => {
+        const { chatId, popup } = this.props;
+
+        openChat(chatId, null, false);
+
+        if (popup) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateDialogChatId',
+                chatId: 0
+            });
+        }
     };
 
     render() {
-        const { t, chatId, classes, openSharedMedia, openGroupsInCommon, backButton, onClose } = this.props;
+        const {
+            t,
+            className,
+            chatId,
+            classes,
+            onOpenSharedMedia,
+            onOpenGroupsInCommon,
+            popup,
+            backButton,
+            onClose
+        } = this.props;
         const { hasGroupsInCommon } = this.state;
 
         const chat = ChatStore.get(chatId);
         if (!chat) {
             return (
                 <div className='chat-details'>
-                    <ChatDetailsHeaderControl onClose={onClose} />
+                    <ChatDetailsHeader onClose={onClose} />
                     <div ref={this.chatDetailsListRef} className='chat-details-list' />
                 </div>
             );
@@ -349,6 +377,7 @@ class ChatDetails extends React.Component {
         const phoneNumber = getChatPhoneNumber(chatId);
         const bio = getChatBio(chatId);
         const isGroup = isGroupChat(chatId);
+        const isMe = isMeChat(chatId);
 
         const members = getGroupChatMembers(chatId);
         const users = [];
@@ -373,11 +402,21 @@ class ChatDetails extends React.Component {
         const { photo } = chat;
 
         return (
-            <div className='chat-details'>
-                <ChatDetailsHeaderControl backButton={backButton} onClose={onClose} onClick={this.handleHeaderClick} />
+            <div className={classNames('chat-details', className)}>
+                <ChatDetailsHeader
+                    chatId={chatId}
+                    backButton={backButton}
+                    onClose={onClose}
+                    onClick={this.handleHeaderClick}
+                />
                 <div ref={this.chatDetailsListRef} className='chat-details-list'>
                     <div className='chat-details-info'>
-                        <ChatControl chatId={chatId} onTileSelect={photo ? this.handleOpenViewer : null} />
+                        <ChatControl
+                            chatId={chatId}
+                            showStatus={popup}
+                            showSavedMessages={!popup}
+                            onTileSelect={photo ? this.handleOpenViewer : null}
+                        />
                     </div>
                     {(username || phoneNumber || bio) && (
                         <List>
@@ -426,12 +465,24 @@ class ChatDetails extends React.Component {
                     )}
                     <Divider />
                     <List>
-                        <NotificationsListItem chatId={chatId} />
-                        <MoreListItem chatId={chatId} />
+                        {!isMe && <NotificationsListItem chatId={chatId} />}
+                        {isGroup && <MoreListItem chatId={chatId} />}
+                        {!isGroup && (
+                            <ListItem button className={classes.listItem} onClick={this.handleOpenChat}>
+                                <ListItemText
+                                    inset
+                                    primary={
+                                        <Typography color='primary' variant='inherit' noWrap>
+                                            {t('SendMessage').toUpperCase()}
+                                        </Typography>
+                                    }
+                                />
+                            </ListItem>
+                        )}
                     </List>
                     <Divider />
                     <List>
-                        <ListItem button disabled className={classes.listItem} onClick={openSharedMedia}>
+                        <ListItem button disabled className={classes.listItem} onClick={onOpenSharedMedia}>
                             <ListItemIcon>
                                 <PhotoIcon />
                             </ListItemIcon>
@@ -444,7 +495,7 @@ class ChatDetails extends React.Component {
                             />
                         </ListItem>
                         {hasGroupsInCommon && (
-                            <ListItem button className={classes.listItem} onClick={openGroupsInCommon}>
+                            <ListItem button className={classes.listItem} onClick={onOpenGroupsInCommon}>
                                 <ListItemText
                                     inset
                                     primary={
@@ -456,13 +507,25 @@ class ChatDetails extends React.Component {
                             </ListItem>
                         )}
                     </List>
-                    <Divider />
-                    <List>{items}</List>
+                    {items.length > 0 && (
+                        <>
+                            <Divider />
+                            <List>{items}</List>
+                        </>
+                    )}
                 </div>
             </div>
         );
     }
 }
+
+ChatDetails.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    popup: PropTypes.bool,
+    onClose: PropTypes.func,
+    onOpenSharedMedia: PropTypes.func,
+    onOpenGroupsInCommon: PropTypes.func
+};
 
 const enhance = compose(
     withTranslation(),

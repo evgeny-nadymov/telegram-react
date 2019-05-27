@@ -6,16 +6,17 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
 import ChatDetails from './ChatDetails';
-import SharedMedia from './SharedMedia';
 import GroupsInCommon from './GroupsInCommon';
-import ChatStore from '../../Stores/ChatStore';
+import SharedMedia from './SharedMedia';
 import { borderStyle } from '../Theme';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './DialogInfo.css';
+import './ChatInfo.css';
 
 // const styles = (theme) => ({
 //     borderColor: {
@@ -23,12 +24,14 @@ import './DialogInfo.css';
 //     }
 // });
 
-class DialogInfo extends React.Component {
+class ChatInfo extends React.Component {
     constructor(props) {
         super(props);
 
+        const { popup } = props;
+
         this.state = {
-            currentChatId: ApplicationStore.getChatId()
+            chatId: popup ? ApplicationStore.dialogChatId : ApplicationStore.chatId
         };
     }
 
@@ -41,8 +44,11 @@ class DialogInfo extends React.Component {
     }
 
     onClientUpdateChatId = update => {
+        const { popup } = this.props;
+        if (popup) return;
+
         this.setState({
-            currentChatId: update.nextChatId,
+            chatId: update.nextChatId,
             userChatId: null,
             openSharedMedia: false,
             openGroupsInCommon: false
@@ -66,9 +72,15 @@ class DialogInfo extends React.Component {
     };
 
     handleCloseChatDetails = () => {
+        const { popup } = this.props;
         const { userChatId } = this.state;
         if (userChatId) {
             this.setState({ userChatId: null });
+        } else if (popup) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateDialogChatId',
+                chatId: 0
+            });
         } else {
             ApplicationStore.changeChatDetailsVisibility(false);
         }
@@ -90,35 +102,42 @@ class DialogInfo extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
-        const { currentChatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
+        const { classes, className, popup } = this.props;
+        const { chatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
+        const currentChatId = chatId || userChatId;
 
         let content = null;
         if (openSharedMedia) {
-            const chatId = userChatId || currentChatId;
-
-            content = <SharedMedia chatId={chatId} close={this.handleCloseSharedMedia} />;
+            content = <SharedMedia chatId={currentChatId} popup={popup} onClose={this.handleCloseSharedMedia} />;
         } else if (openGroupsInCommon) {
-            const chatId = userChatId || currentChatId;
-
-            content = <GroupsInCommon chatId={chatId} onClose={this.handleCloseGroupsInCommon} />;
+            content = <GroupsInCommon chatId={currentChatId} popup={popup} onClose={this.handleCloseGroupsInCommon} />;
         } else {
-            const chatId = userChatId || currentChatId;
-            const backButton = userChatId === chatId;
-
             content = (
                 <ChatDetails
-                    chatId={chatId}
-                    backButton={backButton}
-                    openSharedMedia={this.handelOpenSharedMedia}
-                    openGroupsInCommon={this.handleOpenGroupsInCommon}
+                    chatId={currentChatId}
+                    popup={popup}
+                    backButton={userChatId === chatId}
+                    onOpenSharedMedia={this.handelOpenSharedMedia}
+                    onOpenGroupsInCommon={this.handleOpenGroupsInCommon}
                     onClose={this.handleCloseChatDetails}
                 />
             );
         }
 
-        return <div className={classNames(classes.borderColor, 'right-column')}>{content}</div>;
+        return <div className={classNames(classes.borderColor, { 'right-column': !popup }, className)}>{content}</div>;
     }
 }
 
-export default withStyles(borderStyle)(DialogInfo);
+ChatInfo.propTypes = {
+    className: PropTypes.string,
+    classes: PropTypes.object,
+    popup: PropTypes.bool
+};
+
+ChatInfo.defaultProps = {
+    className: null,
+    classes: null,
+    popup: false
+};
+
+export default withStyles(borderStyle)(ChatInfo);

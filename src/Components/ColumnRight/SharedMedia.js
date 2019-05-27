@@ -9,7 +9,7 @@ import React from 'react';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import SharedMediaHeaderControl from './SharedMediaHeaderControl';
-import './SharedMedia.css'
+import './SharedMedia.css';
 
 class SharedMedia extends React.Component {
     state = {
@@ -21,12 +21,12 @@ class SharedMedia extends React.Component {
     };
 
     render() {
-        const { close } = this.props;
+        const { onClose } = this.props;
         const { value } = this.state;
 
         return (
             <div className='shared-media'>
-                <SharedMediaHeaderControl close={close}/>
+                <SharedMediaHeaderControl close={onClose} />
                 <Tabs
                     value={value}
                     onChange={this.handleChange}
@@ -35,10 +35,10 @@ class SharedMedia extends React.Component {
                     scrollable
                     scrollButtons='off'
                     fullWidth>
-                    <Tab label='Media' style={{minWidth: '40px'}}/>
-                    <Tab label='Docs'  style={{minWidth: '40px'}}/>
-                    <Tab label='Links'  style={{minWidth: '40px'}}/>
-                    <Tab label='Audio'  style={{minWidth: '40px'}}/>
+                    <Tab label='Media' style={{ minWidth: '40px' }} />
+                    <Tab label='Docs' style={{ minWidth: '40px' }} />
+                    <Tab label='Links' style={{ minWidth: '40px' }} />
+                    <Tab label='Audio' style={{ minWidth: '40px' }} />
                 </Tabs>
             </div>
         );

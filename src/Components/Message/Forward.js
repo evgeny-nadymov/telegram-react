@@ -110,7 +110,7 @@ class Forward extends React.Component {
             case 'messageForwardOriginUser': {
                 const { sender_user_id } = origin;
 
-                openUser(sender_user_id);
+                openUser(sender_user_id, true);
                 break;
             }
             case 'messageForwardOriginHiddenUser': {
@@ -119,7 +119,7 @@ class Forward extends React.Component {
             case 'messageForwardOriginChannel': {
                 const { chat_id, message_id } = origin;
 
-                openChat(chat_id, message_id);
+                openChat(chat_id, message_id, true);
                 break;
             }
         }

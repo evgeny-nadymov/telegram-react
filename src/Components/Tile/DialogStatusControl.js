@@ -6,15 +6,23 @@
  */
 
 import React from 'react';
-import {
-    getChatSubtitleWithoutTyping,
-    isAccentChatSubtitleWithoutTyping
-} from '../../Utils/Chat';
+import classNames from 'classnames';
+import { withStyles } from '@material-ui/core/styles';
+import { getChatSubtitleWithoutTyping, isAccentChatSubtitleWithoutTyping } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import './DialogStatusControl.css';
+
+const styles = theme => ({
+    statusSubtitle: {
+        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+    },
+    statusAccentSubtitle: {
+        color: theme.palette.primary.dark + '!important'
+    }
+});
 
 class DialogStatusControl extends React.Component {
     constructor(props) {
@@ -91,9 +99,7 @@ class DialogStatusControl extends React.Component {
             case 'chatTypeBasicGroup': {
                 const fullInfo = BasicGroupStore.getFullInfo(chat.type.basic_group_id);
                 if (fullInfo && fullInfo.members) {
-                    const member = fullInfo.members.find(
-                        x => x.user_id === update.user_id
-                    );
+                    const member = fullInfo.members.find(x => x.user_id === update.user_id);
                     if (member) {
                         updateSubtitle = true;
                     }
@@ -136,8 +142,7 @@ class DialogStatusControl extends React.Component {
 
         if (
             chat.type &&
-            (chat.type['@type'] === 'chatTypePrivate' ||
-                chat.type['@type'] === 'chatTypeSecret') &&
+            (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') &&
             chat.type.user_id === update.user_id
         ) {
             this.updateSubtitle(chat);
@@ -201,14 +206,19 @@ class DialogStatusControl extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
         const { subtitle, isAccent } = this.state;
 
         return (
-            <div className={isAccent ? 'dialog-status-accent' : 'dialog-status'}>
+            <div
+                className={classNames(
+                    'dialog-status',
+                    isAccent ? classes.statusAccentSubtitle : classes.statusSubtitle
+                )}>
                 {subtitle}
             </div>
         );
     }
 }
 
-export default DialogStatusControl;
+export default withStyles(styles, { withTheme: true })(DialogStatusControl);

@@ -23,7 +23,7 @@ import withLanguage from './Language';
 import withTheme from './Theme';
 import withSnackbarNotifications from './Notifications';
 import ForwardDialog from './Components/Dialog/ForwardDialog';
-import DialogInfo from './Components/ColumnRight/DialogInfo';
+import ChatInfo from './Components/ColumnRight/ChatInfo';
 import Dialogs from './Components/ColumnLeft/Dialogs';
 import DialogDetails from './Components/ColumnMiddle/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
@@ -118,15 +118,15 @@ class TelegramApp extends Component {
     }
 
     onClientUpdateOpenChat = update => {
-        const { chatId, messageId } = update;
+        const { chatId, messageId, popup } = update;
 
-        this.handleSelectChat(chatId, messageId);
+        this.handleSelectChat(chatId, messageId, popup);
     };
 
     onClientUpdateOpenUser = update => {
-        const { userId } = update;
+        const { userId, popup } = update;
 
-        this.handleSelectUser(userId);
+        this.handleSelectUser(userId, popup);
     };
 
     onUpdate = update => {
@@ -192,9 +192,21 @@ class TelegramApp extends Component {
         this.setState({ inactive: true });
     };
 
-    handleSelectChat = (chatId, messageId = null) => {
+    handleSelectChat = (chatId, messageId = null, popup = false) => {
         const currentChatId = ApplicationStore.getChatId();
+        const currentDialogChatId = ApplicationStore.dialogChatId;
         const currentMessageId = ApplicationStore.getMessageId();
+
+        if (popup) {
+            if (currentDialogChatId !== chatId) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateDialogChatId',
+                    chatId
+                });
+            }
+
+            return;
+        }
 
         if (currentChatId === chatId && messageId && currentMessageId === messageId) {
             this.dialogDetailsRef.current.scrollToMessage();
@@ -213,16 +225,16 @@ class TelegramApp extends Component {
         }
     };
 
-    handleSelectUser = async userId => {
+    handleSelectUser = async (userId, popup) => {
         if (!userId) return;
 
-        let chat = await TdLibController.send({
+        const chat = await TdLibController.send({
             '@type': 'createPrivateChat',
             user_id: userId,
             force: true
         });
 
-        this.handleSelectChat(chat.id);
+        this.handleSelectChat(chat.id, null, popup);
     };
 
     handleChangePhone = () => {
@@ -272,7 +284,7 @@ class TelegramApp extends Component {
                 <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
                     <Dialogs onClearCache={this.clearCache} onSelectChat={this.handleSelectChat} />
                     <DialogDetails ref={this.dialogDetailsRef} />
-                    {isChatDetailsVisible && <DialogInfo />}
+                    {isChatDetailsVisible && <ChatInfo />}
                 </div>
                 <Footer />
             </>

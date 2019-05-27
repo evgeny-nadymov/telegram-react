@@ -14,6 +14,7 @@ class ApplicationStore extends EventEmitter {
         super();
 
         this.chatId = 0;
+        this.dialogChatId = 0;
         this.messageId = null;
         this.statistics = new Map();
         this.scopeNotificationSettings = new Map();
@@ -140,23 +141,6 @@ class ApplicationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-            case 'clientUpdateFocusWindow': {
-                TdLibController.send({
-                    '@type': 'setOption',
-                    name: 'online',
-                    value: { '@type': 'optionValueBoolean', value: update.focused }
-                });
-
-                this.emit('clientUpdateFocusWindow', update);
-                break;
-            }
-            case 'clientUpdateLeaveChat': {
-                if (update.inProgress && this.chatId === update.chatId) {
-                    TdLibController.setChatId(0);
-                }
-
-                break;
-            }
             case 'clientUpdateChatId': {
                 const extendedUpdate = {
                     '@type': 'clientUpdateChatId',
@@ -172,8 +156,32 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
+            case 'clientUpdateDialogChatId': {
+                const { chatId } = update;
+                this.dialogChatId = chatId;
+
+                this.emit('clientUpdateDialogChatId', update);
+                break;
+            }
+            case 'clientUpdateFocusWindow': {
+                TdLibController.send({
+                    '@type': 'setOption',
+                    name: 'online',
+                    value: { '@type': 'optionValueBoolean', value: update.focused }
+                });
+
+                this.emit('clientUpdateFocusWindow', update);
+                break;
+            }
             case 'clientUpdateForward': {
                 this.emit('clientUpdateForward', update);
+                break;
+            }
+            case 'clientUpdateLeaveChat': {
+                if (update.inProgress && this.chatId === update.chatId) {
+                    TdLibController.setChatId(0);
+                }
+
                 break;
             }
         }

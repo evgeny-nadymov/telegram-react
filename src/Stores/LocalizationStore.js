@@ -42,13 +42,15 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
         resources: {
             en: {
                 local: {
+                    DeletedMessage: 'Deleted message',
                     YourPhone: 'Your Phone',
                     StartText: 'Please confirm your country code and enter your phone number.',
                     Next: 'Next',
                     InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
                     More: 'More',
                     SendMessage: 'Send Message',
-                    ChatInfo: 'Chat Info'
+                    ChatInfo: 'Chat Info',
+                    ChannelInfo: 'Channel Info'
                 },
                 emoji: {
                     Search: 'Search',
@@ -75,6 +77,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
             },
             ru: {
                 local: {
+                    DeletedMessage: 'Удаленное сообщение',
                     YourPhone: 'Ваш телефон',
                     StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
                     Next: 'Далее',
@@ -82,7 +85,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                         'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
                     More: 'Ещё',
                     SendMessage: 'Отправить сообщение',
-                    ChatInfo: 'Информация о чате'
+                    ChatInfo: 'Информация о чате',
+                    ChannelInfo: 'Информация о канале'
                 },
                 emoji: {
                     Search: 'Поиск',

@@ -47,7 +47,7 @@ class ChatControl extends React.Component {
                     <ChatTileControl chatId={chatId} onSelect={onTileSelect} showSavedMessages={showSavedMessages} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} />
+                            <DialogTitleControl chatId={chatId} showSavedMessages={showSavedMessages} />
                         </div>
                         {showStatus && !showSavedMessages && (
                             <div className='tile-second-row'>
