@@ -49,7 +49,7 @@ class Sticker extends React.Component {
     };
 
     render() {
-        const { displaySize, blur, sticker: source, style, openMedia } = this.props;
+        const { className, displaySize, blur, sticker: source, style, openMedia } = this.props;
         const { thumbnail, sticker, width, height } = source;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
@@ -66,7 +66,7 @@ class Sticker extends React.Component {
         };
 
         return (
-            <div className='sticker' style={stickerStyle} onClick={openMedia}>
+            <div className={classNames('sticker', className)} style={stickerStyle} onClick={openMedia}>
                 {src ? (
                     <img className='sticker-image' draggable={false} src={src} alt='' />
                 ) : (
@@ -83,15 +83,18 @@ class Sticker extends React.Component {
 }
 
 Sticker.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     sticker: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired,
+    openMedia: PropTypes.func,
     blur: PropTypes.bool,
     displaySize: PropTypes.number
 };
 
 Sticker.defaultProps = {
+    chatId: 0,
+    messageId: 0,
+    openMedia: () => {},
     blur: true,
     displaySize: STICKER_DISPLAY_SIZE
 };

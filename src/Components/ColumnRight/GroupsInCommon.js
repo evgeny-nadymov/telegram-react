@@ -59,7 +59,7 @@ class GroupsInCommon extends React.Component {
     };
 
     render() {
-        const { onClose, popup } = this.props;
+        const { minHeight, onClose, popup } = this.props;
         const { chatIds } = this.state;
 
         const chats = chatIds.map(x => (
@@ -71,7 +71,9 @@ class GroupsInCommon extends React.Component {
         const content = (
             <>
                 <GroupsInCommonHeader onClose={onClose} />
-                <div className='groups-in-common-list'>{chats}</div>
+                <div className='groups-in-common-list' style={{ minHeight }}>
+                    {chats}
+                </div>
             </>
         );
 
@@ -82,11 +84,13 @@ class GroupsInCommon extends React.Component {
 GroupsInCommon.propTypes = {
     chatId: PropTypes.number.isRequired,
     onClose: PropTypes.func.isRequired,
-    popup: PropTypes.bool
+    popup: PropTypes.bool,
+    minHeight: PropTypes.number
 };
 
 GroupsInCommon.defaultProps = {
-    popup: false
+    popup: false,
+    minHeight: 0
 };
 
 export default GroupsInCommon;

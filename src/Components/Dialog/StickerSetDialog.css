@@ -17,11 +17,38 @@
 }
 
 .sticker-set-dialog-item {
+    background: transparent;
     position: relative;
 }
 
+.sticker-set-dialog-item-sticker {
+    pointer-events: none;
+    padding: 6px;
+}
+
 .sticker-set-dialog-item-emoji {
+    user-select: none;
+    pointer-events: none;
     position: absolute;
     right: 6px;
     bottom: 6px;
+}
+
+.sticker-set-dialog-preview {
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticker-set-dialog-preview-emoji {
+    margin-bottom: 12px;
 }

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -18,14 +19,22 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import ShareStickerSetButton from './ShareStickerSetButton';
 import Sticker from '../Message/Media/Sticker';
-import { loadStickerSetContent } from '../../Utils/File';
-import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
+import { loadStickerContent, loadStickerSetContent } from '../../Utils/File';
+import { STICKER_PREVIEW_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import StickerStore from '../../Stores/StickerStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickerSetDialog.css';
 
 const styles = theme => ({
+    contentRoot: {
+        width: 320,
+        display: 'flex',
+        flexWrap: 'wrap',
+        maxHeight: 480,
+        padding: '0 12px 24px',
+        background: 'transparent'
+    },
     dialogTitleRoot: {
         display: 'flex',
         flexDirection: 'row',
@@ -34,19 +43,15 @@ const styles = theme => ({
     dialogRoot: {
         color: theme.palette.text.primary
     },
-    contentRoot: {
-        width: 320,
-        display: 'flex',
-        flexWrap: 'wrap',
-        maxHeight: 480,
-        padding: '0 12px 24px'
-    },
     shareButtonRoot: {
         margin: '-24px -12px -24px 0'
     },
     typographyRoot: {
         flexGrow: 1,
         flexShrink: 1
+    },
+    disablePointerEvents: {
+        pointerEvents: 'none'
     }
 });
 
@@ -55,14 +60,15 @@ class StickerSetDialog extends React.Component {
         super(props);
 
         this.state = {
-            stickerSet: StickerStore.stickerSet
+            stickerSet: StickerStore.stickerSet,
+            stickerId: 0
         };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { stickerSet } = this.state;
+        const { stickerSet, stickerId } = this.state;
 
-        return stickerSet !== nextState.stickerSet;
+        return stickerSet !== nextState.stickerSet || stickerId !== nextState.stickerId;
     }
 
     componentDidMount() {
@@ -114,28 +120,70 @@ class StickerSetDialog extends React.Component {
         this.handleClose();
     };
 
+    loadContent = stickerId => {
+        const { stickerSet } = this.state;
+        const { stickers } = stickerSet;
+        const sticker = stickers.find(x => x.sticker.id === stickerId);
+        if (!sticker) return;
+
+        const store = FileStore.getStore();
+        loadStickerContent(store, sticker, null);
+    };
+
+    handleMouseOver = event => {
+        const stickerId = Number(event.target.dataset.stickerId);
+        if (!stickerId) return;
+
+        if (!this.mouseDown) return;
+
+        this.setState({ stickerId });
+        this.loadContent(stickerId);
+    };
+
+    handleMouseDown = event => {
+        const stickerId = Number(event.target.dataset.stickerId);
+        if (!stickerId) return;
+
+        this.setState({ stickerId });
+        this.loadContent(stickerId);
+
+        this.mouseDown = true;
+        document.addEventListener('mouseup', this.handleMouseUp);
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    handleMouseUp = () => {
+        this.setState({ stickerId: 0 });
+        this.mouseDown = false;
+        document.removeEventListener('mouseup', this.handleMouseUp);
+    };
+
     render() {
         const { t, classes } = this.props;
-        const { stickerSet } = this.state;
+        const { stickerSet, stickerId } = this.state;
         if (!stickerSet) return null;
 
         const { title, stickers, emojis, is_installed } = stickerSet;
 
         const items = stickers.map(x => (
-            <div className='sticker-set-dialog-item' key={x.sticker.id}>
+            <div className='sticker-set-dialog-item' key={x.sticker.id} data-sticker-id={x.sticker.id}>
                 <Sticker
                     key={x.sticker.id}
-                    chatId={0}
-                    messageId={0}
+                    className='sticker-set-dialog-item-sticker'
                     sticker={x}
-                    blur={false}
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
-                    style={{ padding: 6 }}
-                    openMedia={() => {}}
+                    blur={false}
                 />
                 <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
             </div>
         ));
+
+        const stickerIndex = stickers.findIndex(x => x.sticker.id === stickerId);
+        const sticker = stickerIndex !== -1 ? stickers[stickerIndex] : null;
+        const emoji = stickerIndex !== -1 ? emojis[stickerIndex].emojis.join(' ') : null;
 
         return (
             <Dialog
@@ -144,14 +192,25 @@ class StickerSetDialog extends React.Component {
                 transitionDuration={0}
                 onClose={this.handleClose}
                 aria-labelledby='sticker-set-dialog-title-text'>
-                <DialogTitle id='sticker-set-dialog-title-text' className={classes.dialogTitleRoot} disableTypography>
+                <DialogTitle
+                    id='sticker-set-dialog-title-text'
+                    className={classNames(classes.dialogTitleRoot, {
+                        [classes.disablePointerEvents]: Boolean(sticker)
+                    })}
+                    disableTypography>
                     <Typography variant='h6' className={classes.typographyRoot}>
                         {title}
                     </Typography>
                     <ShareStickerSetButton className={classes.shareButtonRoot} />
                 </DialogTitle>
-                <DialogContent classes={{ root: classes.contentRoot }}>{items}</DialogContent>
-                <DialogActions>
+                <DialogContent
+                    classes={{ root: classes.contentRoot }}
+                    onMouseOver={this.handleMouseOver}
+                    onMouseOut={this.handleMouseOut}
+                    onMouseDown={this.handleMouseDown}>
+                    {items}
+                </DialogContent>
+                <DialogActions className={classNames({ [classes.disablePointerEvents]: Boolean(sticker) })}>
                     <Button color='primary' onClick={this.handleClose}>
                         {t('Cancel')}
                     </Button>
@@ -159,6 +218,12 @@ class StickerSetDialog extends React.Component {
                         {is_installed ? t('Remove') : t('Add')}
                     </Button>
                 </DialogActions>
+                {Boolean(sticker) && (
+                    <div className='sticker-set-dialog-preview'>
+                        <div className='sticker-set-dialog-preview-emoji'>{emoji}</div>
+                        <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
+                    </div>
+                )}
             </Dialog>
         );
     }

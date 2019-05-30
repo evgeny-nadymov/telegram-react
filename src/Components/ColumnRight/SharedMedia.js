@@ -10,6 +10,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import SharedMediaHeaderControl from './SharedMediaHeaderControl';
 import './SharedMedia.css';
+import PropTypes from 'prop-types';
+import GroupsInCommon from './GroupsInCommon';
 
 class SharedMedia extends React.Component {
     state = {
@@ -46,5 +48,17 @@ class SharedMedia extends React.Component {
         return popup ? <>{content}</> : <div className='shared-media'>{content}</div>;
     }
 }
+
+SharedMedia.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    onClose: PropTypes.func.isRequired,
+    popup: PropTypes.bool,
+    minHeight: PropTypes.number
+};
+
+SharedMedia.defaultProps = {
+    popup: false,
+    minHeight: 0
+};
 
 export default SharedMedia;

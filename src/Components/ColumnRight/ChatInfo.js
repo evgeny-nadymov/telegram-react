@@ -28,6 +28,8 @@ class ChatInfo extends React.Component {
     constructor(props) {
         super(props);
 
+        this.detailsRef = React.createRef();
+
         const { popup } = props;
 
         this.state = {
@@ -63,7 +65,8 @@ class ChatInfo extends React.Component {
         this.setState({ openSharedMedia: false });
     };
 
-    handleOpenGroupsInCommon = () => {
+    handleOpenGroupsInCommon = height => {
+        console.log('ChatInfo.handleOpenGroupsInCommon', height);
         this.setState({ openGroupsInCommon: true });
     };
 
@@ -105,15 +108,31 @@ class ChatInfo extends React.Component {
         const { classes, className, popup } = this.props;
         const { chatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
         const currentChatId = chatId || userChatId;
+        const minHeight = this.detailsRef && this.detailsRef.current ? this.detailsRef.current.getContentHeight() : 0;
 
         let content = null;
         if (openSharedMedia) {
-            content = <SharedMedia chatId={currentChatId} popup={popup} onClose={this.handleCloseSharedMedia} />;
+            content = (
+                <SharedMedia
+                    chatId={currentChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedMedia}
+                />
+            );
         } else if (openGroupsInCommon) {
-            content = <GroupsInCommon chatId={currentChatId} popup={popup} onClose={this.handleCloseGroupsInCommon} />;
+            content = (
+                <GroupsInCommon
+                    chatId={currentChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseGroupsInCommon}
+                />
+            );
         } else {
             content = (
                 <ChatDetails
+                    ref={this.detailsRef}
                     chatId={currentChatId}
                     popup={popup}
                     backButton={userChatId === chatId}
@@ -123,8 +142,6 @@ class ChatInfo extends React.Component {
                 />
             );
         }
-
-        //return <>{content}</>;
 
         return popup ? (
             <>{content}</>

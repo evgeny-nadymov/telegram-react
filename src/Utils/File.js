@@ -584,7 +584,6 @@ function loadPhotoThumbnailContent(store, photo, message) {
 
 function loadStickerContent(store, sticker, message, useFileSize = true) {
     if (!sticker) return;
-    if (!message) return;
 
     let { sticker: file } = sticker;
     if (!file) return;
@@ -595,14 +594,17 @@ function loadStickerContent(store, sticker, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateStickerBlob(message.chat_id, message.id, id),
+        () => FileStore.updateStickerBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_STICKER_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || sticker);
             }
         }
     );
@@ -1553,6 +1555,7 @@ export {
     loadChatContent,
     loadChatsContent,
     loadUsersContent,
+    loadStickerContent,
     loadStickerSetContent,
     saveOrDownload,
     download,
