@@ -27,6 +27,11 @@ body {
     overflow: hidden;
 }
 
+b,
+strong {
+    font-weight: 700;
+}
+
 #root {
     height: 100%;
     width: 100%;

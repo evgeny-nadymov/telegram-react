@@ -28,12 +28,14 @@ import './StickerSetDialog.css';
 
 const styles = theme => ({
     contentRoot: {
-        width: 320,
         display: 'flex',
         flexWrap: 'wrap',
         maxHeight: 480,
         padding: '0 12px 24px',
         background: 'transparent'
+    },
+    paperRoot: {
+        width: 344
     },
     dialogTitleRoot: {
         display: 'flex',
@@ -120,7 +122,7 @@ class StickerSetDialog extends React.Component {
         this.handleClose();
     };
 
-    loadContent = stickerId => {
+    loadPreviewContent = stickerId => {
         const { stickerSet } = this.state;
         const { stickers } = stickerSet;
         const sticker = stickers.find(x => x.sticker.id === stickerId);
@@ -128,6 +130,61 @@ class StickerSetDialog extends React.Component {
 
         const store = FileStore.getStore();
         loadStickerContent(store, sticker, null);
+
+        const preloadStickers = this.getNeighborStickers(stickerId);
+        preloadStickers.forEach(x => {
+            loadStickerContent(store, x, null);
+        });
+    };
+
+    getNeighborStickers = stickerId => {
+        const { stickerSet } = this.state;
+        if (!stickerSet) return [];
+
+        const { stickers } = stickerSet;
+        if (!stickers) return [];
+
+        const indexes = [];
+        const index = stickers.findIndex(x => x.sticker.id === stickerId);
+        if (index === -1) return [];
+
+        const STICKERS_PER_ROW = 4;
+        const row = Math.floor(index / STICKERS_PER_ROW);
+        const column = index % STICKERS_PER_ROW;
+
+        const prevRow = row - 1;
+        const nextRow = row + 1;
+        const prevColumn = column - 1;
+        const nextColumn = column + 1;
+
+        if (prevRow >= 0) {
+            if (prevColumn >= 0) {
+                indexes.push(STICKERS_PER_ROW * prevRow + prevColumn);
+            }
+            indexes.push(STICKERS_PER_ROW * prevRow + column);
+            if (nextColumn < STICKERS_PER_ROW) {
+                indexes.push(STICKERS_PER_ROW * prevRow + nextColumn);
+            }
+        }
+
+        if (prevColumn >= 0) {
+            indexes.push(STICKERS_PER_ROW * row + prevColumn);
+        }
+        if (nextColumn < STICKERS_PER_ROW) {
+            indexes.push(STICKERS_PER_ROW * row + nextColumn);
+        }
+
+        if (nextRow < Math.ceil(stickers.length / STICKERS_PER_ROW)) {
+            if (prevColumn >= 0) {
+                indexes.push(STICKERS_PER_ROW * nextRow + prevColumn);
+            }
+            indexes.push(STICKERS_PER_ROW * nextRow + column);
+            if (nextColumn < STICKERS_PER_ROW) {
+                indexes.push(STICKERS_PER_ROW * nextRow + nextColumn);
+            }
+        }
+
+        return indexes.map(i => stickers[i]);
     };
 
     handleMouseOver = event => {
@@ -137,7 +194,7 @@ class StickerSetDialog extends React.Component {
         if (!this.mouseDown) return;
 
         this.setState({ stickerId });
-        this.loadContent(stickerId);
+        this.loadPreviewContent(stickerId);
     };
 
     handleMouseDown = event => {
@@ -145,7 +202,7 @@ class StickerSetDialog extends React.Component {
         if (!stickerId) return;
 
         this.setState({ stickerId });
-        this.loadContent(stickerId);
+        this.loadPreviewContent(stickerId);
 
         this.mouseDown = true;
         document.addEventListener('mouseup', this.handleMouseUp);
@@ -191,14 +248,15 @@ class StickerSetDialog extends React.Component {
                 open
                 transitionDuration={0}
                 onClose={this.handleClose}
-                aria-labelledby='sticker-set-dialog-title-text'>
+                aria-labelledby='sticker-set-dialog-title-text'
+                classes={{ paper: classes.paperRoot }}>
                 <DialogTitle
                     id='sticker-set-dialog-title-text'
                     className={classNames(classes.dialogTitleRoot, {
                         [classes.disablePointerEvents]: Boolean(sticker)
                     })}
                     disableTypography>
-                    <Typography variant='h6' className={classes.typographyRoot}>
+                    <Typography variant='h6' className={classes.typographyRoot} noWrap>
                         {title}
                     </Typography>
                     <ShareStickerSetButton className={classes.shareButtonRoot} />
