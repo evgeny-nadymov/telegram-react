@@ -395,9 +395,11 @@ class MessagesList extends React.Component {
             });
 
             const unread = !messageId && chat.unread_count > 0;
-            const fromMessageId = unread ? chat.last_read_inbox_message_id : messageId ? messageId : 0;
-            const offset = unread || messageId ? -1 - MESSAGE_SLICE_LIMIT : 0;
-            const limit = unread || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
+            const fromMessageId =
+                unread && chat.unread_count > 1 ? chat.last_read_inbox_message_id : messageId ? messageId : 0;
+            const offset = (unread && chat.unread_count > 1) || messageId ? -1 - MESSAGE_SLICE_LIMIT : 0;
+            const limit =
+                (unread && chat.unread_count > 1) || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
             const sessionId = this.sessionId;
             const result = await TdLibController.send({
