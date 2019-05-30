@@ -226,7 +226,11 @@ class StickerSetDialog extends React.Component {
         const { title, stickers, emojis, is_installed } = stickerSet;
 
         const items = stickers.map(x => (
-            <div className='sticker-set-dialog-item' key={x.sticker.id} data-sticker-id={x.sticker.id}>
+            <div
+                className='sticker-set-dialog-item'
+                key={x.sticker.id}
+                data-sticker-id={x.sticker.id}
+                style={{ width: 76, height: 76 }}>
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
