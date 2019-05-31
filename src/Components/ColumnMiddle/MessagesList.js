@@ -9,9 +9,10 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
-import ServiceMessage from '../Message/ServiceMessage';
-import Message from '../Message/Message';
 import FilesDropTarget from './FilesDropTarget';
+import Message from '../Message/Message';
+import ServiceMessage from '../Message/ServiceMessage';
+import StickersHint from './StickersHint';
 import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
@@ -1049,6 +1050,7 @@ class MessagesList extends React.Component {
                     </div>
                 </div>
                 <FilesDropTarget />
+                <StickersHint />
             </div>
         );
     }

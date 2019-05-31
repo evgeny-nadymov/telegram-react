@@ -12,6 +12,7 @@ class StickerStore extends EventEmitter {
         super();
 
         this.stickerSet = null;
+        this.hint = null;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -38,10 +39,22 @@ class StickerStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateStickerSend': {
+                this.emit('clientUpdateStickerSend', update);
+                break;
+            }
+            case 'clientUpdateStickersHint': {
+                const { hint } = update;
+
+                this.hint = hint;
+
+                this.emit('clientUpdateStickersHint', update);
+                break;
+            }
             case 'clientUpdateStickerSet': {
                 const { stickerSet } = update;
 
-                this.set(stickerSet);
+                this.stickerSet = stickerSet;
 
                 this.emit('clientUpdateStickerSet', update);
                 break;
@@ -63,10 +76,6 @@ class StickerStore extends EventEmitter {
 
     assign(source1, source2) {
         this.set(Object.assign({}, source1, source2));
-    }
-
-    set(stickerSet) {
-        this.stickerSet = stickerSet;
     }
 }
 

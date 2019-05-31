@@ -1,0 +1,24 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.stickers-hint {
+    border-top: 1px solid transparent;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 190px;
+    background: aliceblue;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sticker-hints-item {
+    padding: 6px;
+}

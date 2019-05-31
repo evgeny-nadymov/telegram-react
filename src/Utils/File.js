@@ -1491,6 +1491,12 @@ function loadStickerSetContent(store, stickerSet) {
     if (!stickerSet) return;
 
     const { stickers } = stickerSet;
+    loadStickersContent(store, stickers);
+}
+
+function loadStickersContent(store, stickers) {
+    if (!stickers) return;
+
     stickers.forEach(sticker => {
         loadStickerThumbnailContent(store, sticker, null);
     });
@@ -1556,6 +1562,7 @@ export {
     loadChatsContent,
     loadUsersContent,
     loadStickerContent,
+    loadStickersContent,
     loadStickerSetContent,
     saveOrDownload,
     download,

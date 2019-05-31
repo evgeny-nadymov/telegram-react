@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
+import emojiRegex from 'emoji-regex';
 import { withTranslation } from 'react-i18next';
 import { withStyles } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
@@ -18,10 +19,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
-import InputBoxHeader from './InputBoxHeader';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Dialog/CreatePollDialog';
+import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
+import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
@@ -31,6 +32,7 @@ import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
+import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
 
@@ -90,10 +92,15 @@ class InputBoxControl extends Component {
     }
 
     componentDidMount() {
+        //console.log('Perf componentDidMount');
+
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         this.setInputFocus();
+        this.setDraft();
+        this.handleInput();
     }
 
     componentWillUnmount() {
@@ -102,7 +109,50 @@ class InputBoxControl extends Component {
 
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
         MessageStore.removeListener('clientUpdateReply', this.onClientUpdateReply);
+        StickerStore.removeListener('clientUpdateStickerSend', this.onClientUpdateStickerSend);
     }
+
+    onClientUpdateStickerSend = update => {
+        const { sticker: item } = update;
+        if (!item) return;
+
+        const { sticker, thumbnail, width, height } = item;
+        if (!sticker) return;
+
+        this.newMessageRef.current.innerText = null;
+        this.newMessageRef.current.textContent = null;
+        this.innerHTML = null;
+
+        const content = {
+            '@type': 'inputMessageSticker',
+            sticker: {
+                '@type': 'inputFileId',
+                id: sticker.id
+            },
+            width,
+            height
+        };
+
+        if (thumbnail) {
+            const { width: thumbnailWidth, height: thumbnailHeight, photo } = thumbnail;
+
+            content.thumbnail = {
+                thumbnail: {
+                    '@type': 'inputFileId',
+                    id: photo.id
+                },
+                width: thumbnailWidth,
+                height: thumbnailHeight
+            };
+        }
+
+        this.onSendInternal(content, true, result => {});
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickersHint',
+            hint: null
+        });
+    };
 
     onClientUpdateReply = update => {
         const { chatId: currentChatId } = this.state;
@@ -131,11 +181,29 @@ class InputBoxControl extends Component {
         });
     };
 
+    setDraft = () => {
+        const { chatId } = this.state;
+
+        const element = this.newMessageRef.current;
+
+        const draft = getChatDraft(chatId);
+        if (draft) {
+            element.innerText = draft.text;
+            this.innerHTML = draft.text;
+        } else {
+            element.innerText = null;
+            this.innerHTML = null;
+        }
+    };
+
     componentDidUpdate(prevProps, prevState, snapshot) {
+        //console.log('Perf componentDidUpdate');
         this.setChatDraftMessage(snapshot);
 
         if (prevState.chatId !== this.state.chatId) {
             this.setInputFocus();
+            this.setDraft();
+            this.handleInput();
         }
     }
 
@@ -236,7 +304,7 @@ class InputBoxControl extends Component {
             clear_draft: true
         };
 
-        this.onSendInternal(content, result => {});
+        this.onSendInternal(content, false, result => {});
     };
 
     handleAttachPoll = () => {
@@ -292,7 +360,7 @@ class InputBoxControl extends Component {
         return innerText;
     }
 
-    handleInputChange = () => {
+    handleKeyUp = () => {
         const { chatId } = this.state;
 
         if (isMeChat(chatId)) return;
@@ -335,7 +403,7 @@ class InputBoxControl extends Component {
             height: file.photoHeight
         };
 
-        this.onSendInternal(content, result => {
+        this.onSendInternal(content, true, result => {
             const cachedMessage = MessageStore.get(result.chat_id, result.id);
             if (cachedMessage != null) {
                 this.handleSendingMessage(cachedMessage, file);
@@ -346,7 +414,7 @@ class InputBoxControl extends Component {
     };
 
     handleSendPoll = poll => {
-        this.onSendInternal(poll, () => {});
+        this.onSendInternal(poll, true, () => {});
     };
 
     handleSendDocument = file => {
@@ -357,7 +425,7 @@ class InputBoxControl extends Component {
             document: { '@type': 'inputFileBlob', name: file.name, data: file }
         };
 
-        this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
+        this.onSendInternal(content, true, result => FileStore.uploadFile(result.content.document.document.id, result));
     };
 
     handlePaste = event => {
@@ -420,7 +488,7 @@ class InputBoxControl extends Component {
         }
     };
 
-    onSendInternal = async (content, callback) => {
+    onSendInternal = async (content, clearDraft, callback) => {
         const { chatId, replyToMessageId } = this.state;
 
         if (!chatId) return;
@@ -436,7 +504,15 @@ class InputBoxControl extends Component {
                 input_message_content: content
             });
 
-            this.setState({ replyToMessageId: 0 });
+            this.setState({ replyToMessageId: 0 }, () => {
+                if (clearDraft) {
+                    const newChatDraftMessage = this.getNewChatDraftMessage(
+                        this.state.chatId,
+                        this.state.replyToMessageId
+                    );
+                    this.setChatDraftMessage(newChatDraftMessage);
+                }
+            });
             //MessageStore.set(result);
 
             TdLibController.send({
@@ -455,14 +531,61 @@ class InputBoxControl extends Component {
         if (!emoji) return;
 
         this.newMessageRef.current.innerText += emoji.native;
+        this.handleInput();
+    };
+
+    handleInput = async event => {
+        const innerText = this.newMessageRef.current.innerText;
+        if (!innerText || innerText.length > 11) {
+            const { hint } = StickerStore;
+            if (hint) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateStickersHint',
+                    hint: null
+                });
+            }
+
+            return;
+        }
+
+        const t0 = performance.now();
+        const regex = emojiRegex();
+        let match = regex.exec(innerText);
+        const t1 = performance.now();
+        console.log('Matched ' + (t1 - t0) + 'ms', match);
+        if (!match || innerText !== match[0]) {
+            const { hint } = StickerStore;
+            if (hint) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateStickersHint',
+                    hint: null
+                });
+            }
+
+            return;
+        }
+
+        const stickers = await TdLibController.send({
+            '@type': 'searchStickers',
+            emoji: match[0],
+            limit: 100
+        });
+        console.log('Matched stickers', match[0], stickers);
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickersHint',
+            hint: {
+                emoji: match[0],
+                stickers
+            }
+        });
     };
 
     render() {
         const { classes, t } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
 
-        const draft = getChatDraft(chatId);
-        const content = this.innerHTML !== null ? this.innerHTML : draft ? draft.text : null;
+        const content = this.innerHTML !== null ? this.innerHTML : null;
 
         return (
             <>
@@ -481,8 +604,9 @@ class InputBoxControl extends Component {
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
-                                onKeyUp={this.handleInputChange}
-                                onPaste={this.handlePaste}>
+                                onKeyUp={this.handleKeyUp}
+                                onPaste={this.handlePaste}
+                                onInput={this.handleInput}>
                                 {content}
                             </div>
                         </div>
