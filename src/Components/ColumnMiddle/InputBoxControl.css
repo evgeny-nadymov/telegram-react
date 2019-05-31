@@ -27,6 +27,7 @@
     max-height: 150px;
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 22px 0 22px 0;
     white-space: pre-wrap;
     word-wrap: break-word;

@@ -20,6 +20,7 @@
 
 .chat-details-list {
     overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
     flex-grow: 1;
     flex-shrink: 1;
     will-change: transform;

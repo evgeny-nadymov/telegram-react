@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.search{
+.search {
     position: absolute;
     top: 0;
     right: 0;
@@ -13,27 +13,28 @@
     left: 0;
     background: #ffffff;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
 }
 
-.search-chat-wrapper{
+.search-chat-wrapper {
     display: flex;
     align-items: center;
 }
 
-.search-chat-control{
+.search-chat-control {
     flex-grow: 1;
     flex-shrink: 1;
     padding: 10px 22px;
 }
 
-.search-top-chats{
+.search-top-chats {
     min-height: 110px;
     overflow: hidden;
     position: relative;
 }
 
-.search-top-chats-list{
+.search-top-chats-list {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
@@ -45,6 +46,6 @@
     bottom: -17px;
 }
 
-.search-top-chats-placeholder{
+.search-top-chats-placeholder {
     min-width: 10px;
 }

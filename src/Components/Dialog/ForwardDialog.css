@@ -28,6 +28,7 @@
     align-content: start;
     padding: 12px 24px;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .forward-dialog-content {
@@ -37,6 +38,7 @@
     border-top: 1px solid;
     border-bottom: 1px solid;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .forward-dialog-message {
@@ -51,6 +53,7 @@
     min-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 12px 24px 12px 24px;
     white-space: pre-wrap;
     word-wrap: break-word;

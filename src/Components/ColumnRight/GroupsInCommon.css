@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.groups-in-common{
+.groups-in-common {
     margin: 0;
     box-sizing: border-box;
     height: 100%;
@@ -14,8 +14,9 @@
     flex-direction: column;
 }
 
-.groups-in-common-list{
-    overflow-y: scroll;
+.groups-in-common-list {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     flex-grow: 1;
     flex-shrink: 1;
     transform: translateZ(0);
