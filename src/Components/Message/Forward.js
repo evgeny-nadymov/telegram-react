@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Tooltip from '@material-ui/core/Tooltip';
 import { getForwardTitle, isForwardOriginHidden } from '../../Utils/Message';

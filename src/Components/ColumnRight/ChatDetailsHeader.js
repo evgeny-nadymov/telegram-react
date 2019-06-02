@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import { IconButton } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import './ChatDetailsHeader.css';

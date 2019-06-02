@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import CloseIcon from '@material-ui/icons/Close';
 import LinkIcon from '@material-ui/icons/Link';
 import MoreIcon from '@material-ui/icons/MoreVert';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import './ConfirmCodeControl.css';
@@ -27,13 +27,12 @@ const styles = {
 };
 
 class ConfirmCodeControl extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
 
         this.state = {
-            error : '',
-            loading : false
+            error: '',
+            loading: false
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -43,38 +42,31 @@ class ConfirmCodeControl extends React.Component {
         this.handleKeyPress = this.handleKeyPress.bind(this);
     }
 
-    handleNext(){
-        if (this.code && this.isValid(this.code)){
-            this.setState({ error : '' });
+    handleNext() {
+        if (this.code && this.isValid(this.code)) {
+            this.setState({ error: '' });
             this.handleDone();
-        }
-        else{
-            this.setState({error : 'Invalid code. Please try again.'});
+        } else {
+            this.setState({ error: 'Invalid code. Please try again.' });
         }
     }
-    
-    handleDone(){
+
+    handleDone() {
         const code = this.code;
 
         this.setState({ loading: true });
-        TdLibController
-            .send({
-                '@type': 'checkAuthenticationCode',
-                code: code,
-                first_name: 'A',
-                last_name: 'B'
-            })
-            .then(result => {
-
-            })
+        TdLibController.send({
+            '@type': 'checkAuthenticationCode',
+            code: code,
+            first_name: 'A',
+            last_name: 'B'
+        })
+            .then(result => {})
             .catch(error => {
                 let errorString = null;
-                if (error
-                    && error['@type'] === 'error'
-                    && error.message){
+                if (error && error['@type'] === 'error' && error.message) {
                     errorString = error.message;
-                }
-                else{
+                } else {
                     errorString = JSON.stringify(error);
                 }
 
@@ -85,16 +77,16 @@ class ConfirmCodeControl extends React.Component {
             });
     }
 
-    handleBack(){
+    handleBack() {
         this.props.onChangePhone();
     }
 
-    isValid(code){
+    isValid(code) {
         let isBad = !code.match(/^[\d\-+\s]+$/);
         if (!isBad) {
             code = code.replace(/\D/g, '');
             if (code.length !== 5) {
-                isBad = true
+                isBad = true;
             }
         }
 
@@ -104,29 +96,27 @@ class ConfirmCodeControl extends React.Component {
     handleChange(e) {
         this.code = e.target.value;
 
-        if (this.code
-            && this.codeLength > 0
-            && this.code.length === this.codeLength){
+        if (this.code && this.codeLength > 0 && this.code.length === this.codeLength) {
             this.handleNext();
         }
     }
 
-    handleKeyPress(e){
-        if (e.key === 'Enter'){
+    handleKeyPress(e) {
+        if (e.key === 'Enter') {
             e.preventDefault();
             this.handleNext();
         }
     }
 
-    getPhoneNumber(codeInfo){
+    getPhoneNumber(codeInfo) {
         if (!codeInfo) return null;
         return codeInfo.phone_number;
     }
-    
-    getCodeLength(codeInfo){
+
+    getCodeLength(codeInfo) {
         if (!codeInfo) return 0;
         if (!codeInfo.type) return 0;
-        
+
         switch (codeInfo.type['@type']) {
             case 'authenticationCodeTypeCall': {
                 return codeInfo.type.length;
@@ -145,7 +135,7 @@ class ConfirmCodeControl extends React.Component {
         return 0;
     }
 
-    getSubtitle(codeInfo){
+    getSubtitle(codeInfo) {
         if (!codeInfo) return 'Subtitle';
         if (!codeInfo.type) return 'Subtitle';
 
@@ -160,7 +150,7 @@ class ConfirmCodeControl extends React.Component {
                 return 'We have sent you a message with activation code to your phone. Please enter it below.';
             }
             case 'authenticationCodeTypeTelegramMessage': {
-                return 'Please enter the code you\'ve just received in your previous Telegram app.';
+                return "Please enter the code you've just received in your previous Telegram app.";
             }
         }
 
@@ -168,23 +158,21 @@ class ConfirmCodeControl extends React.Component {
     }
 
     render() {
-        const {loading, error} = this.state;
-        const {classes, codeInfo} = this.props;
+        const { loading, error } = this.state;
+        const { classes, codeInfo } = this.props;
 
         this.phoneNumber = this.getPhoneNumber(codeInfo);
         this.codeLength = this.getCodeLength(codeInfo);
         const subtitle = this.getSubtitle(codeInfo);
 
-        const title = this.phoneNumber? formatPhoneNumber(this.phoneNumber) : 'Your Code';
+        const title = this.phoneNumber ? formatPhoneNumber(this.phoneNumber) : 'Your Code';
 
         return (
             <FormControl fullWidth>
                 <div className='authorization-header'>
                     <span className='authorization-header-content'>{title}</span>
                 </div>
-                <div>
-                    {subtitle}
-                </div>
+                <div>{subtitle}</div>
                 <TextField
                     color='primary'
                     disabled={loading}
@@ -199,11 +187,7 @@ class ConfirmCodeControl extends React.Component {
                 />
                 <FormHelperText id='confirm-code-error-text'>{error}</FormHelperText>
                 <div className='authorization-actions'>
-                    <Button
-                        fullWidth
-                        className={classes.buttonLeft}
-                        onClick={this.handleBack}
-                        disabled={loading}>
+                    <Button fullWidth className={classes.buttonLeft} onClick={this.handleBack} disabled={loading}>
                         Back
                     </Button>
                     <Button

@@ -9,7 +9,7 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import Popover from '@material-ui/core/Popover';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import { Picker } from 'emoji-mart';

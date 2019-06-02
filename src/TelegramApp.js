@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import Cookies from 'universal-cookie';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';

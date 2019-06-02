@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
 import SharedMedia from './SharedMedia';

@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import ReplyIcon from '@material-ui/icons/Reply';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Reply from '../Message/Reply';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';

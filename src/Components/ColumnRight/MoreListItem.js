@@ -17,7 +17,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Collapse from '@material-ui/core/Collapse';
 import Typography from '@material-ui/core/Typography';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { isUserBlocked } from '../../Utils/User';
 import { isChannelChat, isChatMember, isGroupChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import SignInControl from './SignInControl';
 import ConfirmCodeControl from './ConfirmCodeControl';

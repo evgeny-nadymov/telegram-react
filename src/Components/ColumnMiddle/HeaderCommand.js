@@ -18,7 +18,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox/';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { borderStyle } from '../Theme';
 import { canSendMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
 import MessageStore from '../../Stores/MessageStore';

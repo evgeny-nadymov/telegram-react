@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import RepeatIcon from '@material-ui/icons/Repeat';
 import RepeatOneIcon from '@material-ui/icons/RepeatOne';

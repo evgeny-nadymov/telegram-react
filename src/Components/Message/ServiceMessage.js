@@ -7,7 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import UnreadSeparator from './UnreadSeparator';
 import Photo from './Media/Photo';
 import { openMedia } from '../../Utils/Message';

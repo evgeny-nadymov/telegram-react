@@ -7,7 +7,7 @@
 
 import React from 'react';
 import * as ReactDOM from 'react-dom';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';

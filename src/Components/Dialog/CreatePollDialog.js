@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';

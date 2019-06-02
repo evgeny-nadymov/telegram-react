@@ -7,7 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import VolumeMuteIcon from '@material-ui/icons/VolumeMute';
 import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';

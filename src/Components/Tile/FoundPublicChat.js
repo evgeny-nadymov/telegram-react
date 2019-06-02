@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import ChatTileControl from './ChatTileControl';
 import DialogTitleControl from './DialogTitleControl';

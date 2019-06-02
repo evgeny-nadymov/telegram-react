@@ -8,7 +8,7 @@
 import React from 'react';
 import Button from '@material-ui/core/Button/Button';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { borderStyle } from '../Theme';
 import './FooterCommand.css';
 

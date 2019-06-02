@@ -15,7 +15,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import red from '@material-ui/core/colors/red';
 import orange from '@material-ui/core/colors/orange';
 import amber from '@material-ui/core/colors/amber';

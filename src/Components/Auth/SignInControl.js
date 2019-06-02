@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';

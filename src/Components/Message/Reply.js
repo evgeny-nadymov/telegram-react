@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import ReplyTile from '../Tile/ReplyTile';
 import { getContent, getTitle, isDeletedMessage, getReplyPhotoSize } from '../../Utils/Message';
 import { accentStyles } from '../Theme';

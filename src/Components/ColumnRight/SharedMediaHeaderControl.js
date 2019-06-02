@@ -6,20 +6,19 @@
  */
 
 import React from 'react';
-import {withStyles} from '@material-ui/core/styles';
-import {IconButton} from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
+import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import './SharedMediaHeaderControl.css'
+import './SharedMediaHeaderControl.css';
 
 const styles = {
-    backIconButton : {
-        margin: '8px -2px 8px 12px',
+    backIconButton: {
+        margin: '8px -2px 8px 12px'
     }
 };
 
 class SharedMediaHeaderControl extends React.Component {
-
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
@@ -28,15 +27,14 @@ class SharedMediaHeaderControl extends React.Component {
 
         return (
             <div className='header-master'>
-                <IconButton
-                    className={classes.backIconButton}
-                    onClick={close}>
+                <IconButton className={classes.backIconButton} onClick={close}>
                     <ArrowBackIcon />
                 </IconButton>
                 <div className='header-status grow cursor-pointer'>
                     <span className='header-status-content'>Shared Media</span>
                 </div>
-            </div>);
+            </div>
+        );
     }
 }
 

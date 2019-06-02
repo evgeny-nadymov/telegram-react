@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Radio from '@material-ui/core/Radio';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';

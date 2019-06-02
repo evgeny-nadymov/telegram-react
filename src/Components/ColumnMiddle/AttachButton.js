@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import IconButton from '@material-ui/core/IconButton';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';

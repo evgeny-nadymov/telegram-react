@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import Button from '@material-ui/core/Button';

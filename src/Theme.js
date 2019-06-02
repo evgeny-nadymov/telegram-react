@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core';
-import { getDisplayName } from './Utils/HOC';
 import blue from '@material-ui/core/colors/blue';
+import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { getDisplayName } from './Utils/HOC';
 import Cookies from 'universal-cookie';
 import ApplicationStore from './Stores/ApplicationStore';
 

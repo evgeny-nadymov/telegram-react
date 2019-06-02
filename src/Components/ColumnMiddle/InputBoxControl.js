@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import emojiRegex from 'emoji-regex';
 import { withTranslation } from 'react-i18next';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
 import Button from '@material-ui/core/Button';

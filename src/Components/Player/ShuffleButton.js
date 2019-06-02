@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
 import PlayerStore from '../../Stores/PlayerStore';

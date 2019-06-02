@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';

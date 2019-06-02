@@ -16,7 +16,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';
 import ChatTileControl from '../Tile/ChatTileControl';

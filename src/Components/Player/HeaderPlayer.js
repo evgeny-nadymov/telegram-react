@@ -9,7 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import SkipNextIcon from '@material-ui/icons/SkipNext';

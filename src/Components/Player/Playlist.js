@@ -10,7 +10,7 @@ import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import { getMedia, openMedia } from '../../Utils/Message';
 import { borderStyle } from '../Theme';
-import { withStyles } from '@material-ui/core';
+import withStyles from '@material-ui/core/styles/withStyles';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Playlist.css';

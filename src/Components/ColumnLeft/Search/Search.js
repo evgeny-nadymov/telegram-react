@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/core/styles/withStyles';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import ChatControl from '../../Tile/ChatControl';
