@@ -25,7 +25,7 @@ class StickerStore extends EventEmitter {
                 if (this.stickerSet) {
                     const { id, is_installed } = this.stickerSet;
                     if (is_installed !== sticker_set_ids.some(x => x === id)) {
-                        this.assign(this.stickerSet, { is_installed: !is_installed });
+                        this.stickerSet = Object.assign({}, this.stickerSet, { is_installed: !is_installed });
                     }
                 }
 
@@ -43,12 +43,22 @@ class StickerStore extends EventEmitter {
                 this.emit('clientUpdateStickerSend', update);
                 break;
             }
-            case 'clientUpdateStickersHint': {
+            case 'clientUpdateLocalStickersHint': {
                 const { hint } = update;
 
                 this.hint = hint;
 
-                this.emit('clientUpdateStickersHint', update);
+                this.emit('clientUpdateLocalStickersHint', update);
+                break;
+            }
+            case 'clientUpdateRemoteStickersHint': {
+                const { hint } = update;
+
+                if (this.hint && this.hint.timestamp === hint.timestamp) {
+                    this.hint = Object.assign({}, this.hint, { foundStickers: hint.stickers });
+                }
+
+                this.emit('clientUpdateRemoteStickersHint', update);
                 break;
             }
             case 'clientUpdateStickerSet': {
@@ -73,10 +83,6 @@ class StickerStore extends EventEmitter {
         TdLibController.removeListener('update', this.onUpdate);
         TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
-
-    assign(source1, source2) {
-        this.set(Object.assign({}, source1, source2));
-    }
 }
 
 const store = new StickerStore();

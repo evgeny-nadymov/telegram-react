@@ -156,7 +156,7 @@ class InputBoxControl extends Component {
         this.onSendInternal(content, true, result => {});
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateStickersHint',
+            '@type': 'clientUpdateLocalStickersHint',
             hint: null
         });
     };
@@ -547,7 +547,7 @@ class InputBoxControl extends Component {
             const { hint } = StickerStore;
             if (hint) {
                 TdLibController.clientUpdate({
-                    '@type': 'clientUpdateStickersHint',
+                    '@type': 'clientUpdateLocalStickersHint',
                     hint: null
                 });
             }
@@ -564,7 +564,7 @@ class InputBoxControl extends Component {
             const { hint } = StickerStore;
             if (hint) {
                 TdLibController.clientUpdate({
-                    '@type': 'clientUpdateStickersHint',
+                    '@type': 'clientUpdateLocalStickersHint',
                     hint: null
                 });
             }
@@ -572,29 +572,35 @@ class InputBoxControl extends Component {
             return;
         }
 
-        const promises = [];
-        const local = TdLibController.send({
+        const timestamp = Date.now();
+        TdLibController.send({
             '@type': 'getStickers',
             emoji: match[0],
             limit: 100
+        }).then(stickers => {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateLocalStickersHint',
+                hint: {
+                    timestamp,
+                    emoji: match[0],
+                    stickers
+                }
+            });
         });
-        promises.push(local);
 
-        // const remote = TdLibController.send({
-        //     '@type': 'searchStickers',
-        //     emoji: match[0],
-        //     limit: 100
-        // });
-        // promises.push(remote);
-
-        const results = await Promise.all(promises.map(x => x.catch(e => null)));
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateStickersHint',
-            hint: {
-                emoji: match[0],
-                stickers: results[0]
-            }
+        TdLibController.send({
+            '@type': 'searchStickers',
+            emoji: match[0],
+            limit: 100
+        }).then(stickers => {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateRemoteStickersHint',
+                hint: {
+                    timestamp,
+                    emoji: match[0],
+                    stickers
+                }
+            });
         });
     };
 
