@@ -35,6 +35,9 @@ import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
 
 const styles = theme => ({
+    message: {
+        backgroundColor: 'transparent'
+    },
     messageAuthorColor: {
         color: theme.palette.primary.main
     },
@@ -303,6 +306,7 @@ class Message extends Component {
 
         const messageClassName = classNames(
             'message',
+            classes.message,
             { 'message-selected': selected },
             { [classes.messageSelected]: selected },
             // { 'message-highlighted': highlighted && !selected },

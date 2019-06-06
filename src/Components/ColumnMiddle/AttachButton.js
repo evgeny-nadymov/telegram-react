@@ -101,20 +101,20 @@ class AttachButton extends React.Component {
                         <ListItemIcon>
                             <PhotoIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary={t('AttachPhoto')} />
+                        <ListItemText primary={t('AttachPhoto')} />
                     </MenuItem>
                     <MenuItem onClick={this.handleAttachDocument} disabled={!canSendDocuments(chatId)}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary={t('AttachDocument')} />
+                        <ListItemText primary={t('AttachDocument')} />
                     </MenuItem>
                     {!isPrivateChat(chatId) && (
                         <MenuItem onClick={this.handleAttachPoll} disabled={!canSendPolls(chatId)}>
                             <ListItemIcon>
                                 <PollIcon />
                             </ListItemIcon>
-                            <ListItemText inset primary={t('Poll')} />
+                            <ListItemText primary={t('Poll')} />
                         </MenuItem>
                     )}
                 </Menu>

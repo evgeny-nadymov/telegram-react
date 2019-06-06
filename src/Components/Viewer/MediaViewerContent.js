@@ -9,16 +9,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from './FileProgress';
-import Lottie from './Lottie';
 import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
+import { OPTIMIZATIONS_SPLIT_BUNDLE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
+
+let Lottie = null;
+if (OPTIMIZATIONS_SPLIT_BUNDLE) {
+    Lottie = React.lazy(() => import('./Lottie'));
+} else {
+    Lottie = require('./Lottie').default;
+}
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -378,7 +385,7 @@ class MediaViewerContent extends React.Component {
 
         return (
             <div className='media-viewer-content'>
-                {content}
+                <React.Suspense fallback=''>{content}</React.Suspense>
                 {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
                 <FileProgress file={file} zIndex={2} />
                 {text && text.length > 0 && <MediaCaption text={text} />}

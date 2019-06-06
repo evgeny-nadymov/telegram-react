@@ -13,7 +13,8 @@
 }
 
 .playlist-wrapper {
-    border: 1px solid transparent;
+    border-width: 1px;
+    border-style: solid;
     position: absolute;
 }
 

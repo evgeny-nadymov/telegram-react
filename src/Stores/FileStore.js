@@ -561,6 +561,7 @@ class FileStore extends EventEmitter {
         }
 
         console.log('[FileStore] start initDB');
+        if (callback) this.callbacks.push(callback);
 
         this.initiatingDB = true;
         this.db = await this.openDB().catch(error => console.log('[FileStore] initDB error', error));

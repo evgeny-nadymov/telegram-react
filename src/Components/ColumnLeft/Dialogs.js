@@ -18,6 +18,10 @@ import { openChat } from '../../Actions/Client';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './Dialogs.css';
 
+const styles = theme => ({
+    ...borderStyle(theme)
+});
+
 class Dialogs extends Component {
     constructor(props) {
         super(props);
@@ -161,4 +165,4 @@ Dialogs.propTypes = {
     onSelectChat: PropTypes.func.isRequired
 };
 
-export default withStyles(borderStyle)(Dialogs);
+export default withStyles(styles)(Dialogs);

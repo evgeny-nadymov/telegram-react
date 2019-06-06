@@ -13,6 +13,7 @@ import './Lottie.css';
 class Lottie extends React.Component {
     componentDidMount() {
         const { options, eventListeners } = this.props;
+        console.log('Lottie.componentDidMount', eventListeners, this.props);
 
         const {
             loop,
@@ -55,6 +56,7 @@ class Lottie extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
         if (this.props.isStopped) {
             this.stop();
         } else if (this.props.segments) {
@@ -69,6 +71,7 @@ class Lottie extends React.Component {
     }
 
     componentWillUnmount() {
+        console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
         this.deRegisterEvents(this.props.eventListeners);
         this.destroy();
         this.options.animationData = null;
@@ -109,12 +112,16 @@ class Lottie extends React.Component {
     }
 
     registerEvents(eventListeners) {
+        if (!eventListeners) return;
+
         eventListeners.forEach(eventListener => {
             this.anim.addEventListener(eventListener.eventName, eventListener.callback);
         });
     }
 
     deRegisterEvents(eventListeners) {
+        if (!eventListeners) return;
+
         eventListeners.forEach(eventListener => {
             this.anim.removeEventListener(eventListener.eventName, eventListener.callback);
         });

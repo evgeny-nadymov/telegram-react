@@ -6,7 +6,6 @@
  */
 
 a {
-    color: #3a6d99;
     text-decoration: none;
     cursor: pointer;
 }
@@ -58,7 +57,7 @@ pre code {
 .message {
     /*margin: 20px;
     word-wrap: break-word;*/
-    background: transparent;
+    /*background: transparent;*/
     cursor: pointer;
 }
 

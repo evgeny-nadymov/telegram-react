@@ -10,19 +10,20 @@
     width: calc(36% - 0px);
     margin: 0;
     box-sizing: border-box;
-    border-right: 1px solid #E9EBED;
+    border-right-width: 1px;
+    border-right-style: solid;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
-.dialogs-content{
+.dialogs-content {
     overflow: hidden;
     flex-grow: 1;
     flex-shrink: 1;
     position: relative;
 }
 
-.dialogs-third-column{
+.dialogs-third-column {
     width: calc(26.7% - 0px);
 }

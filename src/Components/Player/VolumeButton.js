@@ -27,11 +27,15 @@ const styles = theme => ({
     root: {
         display: 'flex',
         height: 100,
+        width: 28,
         padding: '13px 0',
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
     },
     slider: {
         padding: '0 13px'
+    },
+    thumb: {
+        opacity: 0
     },
     ...borderStyle(theme)
 });
@@ -197,7 +201,7 @@ class VolumeButton extends React.Component {
                             borderStyle: 'solid'
                         }}>
                         <Slider
-                            classes={{ container: classes.slider }}
+                            classes={{ container: classes.slider, thumb: classes.thumb }}
                             min={0}
                             max={1}
                             value={value}

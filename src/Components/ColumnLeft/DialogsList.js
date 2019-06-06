@@ -101,7 +101,6 @@ class DialogsList extends React.Component {
     };
 
     onUpdateConnectionState = update => {
-        console.log(this);
         const newConnectionState = update.state;
         const { connectionState } = this.state;
 

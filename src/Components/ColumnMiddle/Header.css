@@ -18,20 +18,12 @@
     align-items: center;
     overflow: hidden;
     box-sizing: border-box;
-    border-bottom: 1px solid #e9ebed;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
 }
 
 .header-title {
     padding: 15px 19px 15px;
-}
-
-.header-title-icon {
-    width: 62px;
-    height: 14px;
-    display: inline-block;
-    vertical-align: middle;
-    background: url(../../Assets/Telegram.svg) no-repeat 0 0;
-    margin-top: 1px;
 }
 
 .header-status {

@@ -1,13 +1,14 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.320",
+  "version": "0.0.325",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "0.2.48",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
     "@material-ui/lab": "^3.0.0-alpha.30",
+    "@material-ui/styles": "^3.0.0-alpha.9",
     "classnames": "^2.2.6",
     "copy-to-clipboard": "^3.0.8",
     "dateformat": "^3.0.3",
@@ -34,7 +35,6 @@
     "react-router-dom": "^5.0.0",
     "react-scripts": "^2.1.8",
     "recompose": "^0.30.0",
-    "source-map-explorer": "^1.8.0",
     "sw-precache-cra": "^1.0.0-alpha.2",
     "universal-cookie": "^3.1.0"
   },
@@ -45,15 +45,14 @@
     ]
   },
   "scripts": {
-    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "precommit": "lint-staged",
     "start": "react-scripts start",
     "build": "react-scripts build && sw-precache-cra --config sw-config.js --no-minify",
-    "size": "react-scripts size && sw-precache-cra --config sw-config.js --no-minify",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
+    "size": "react-scripts build --stats && npx webpack-bundle-analyzer ./build/bundle-stats.json",
     "sw-precache-cra-list-config": "sw-precache-cra --list-config"
   },
   "devDependencies": {

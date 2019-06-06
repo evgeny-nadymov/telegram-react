@@ -10,7 +10,8 @@
     width: calc(26.7% - 0px);
     margin: 0;
     box-sizing: border-box;
-    border-left: 1px solid #e9ebed;
+    border-left-width: 1px;
+    border-left-style: solid;
     height: 100%;
     min-width: 160px;
     display: flex;

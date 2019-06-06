@@ -114,7 +114,8 @@ class EmojiPickerButton extends React.Component {
                     transformOrigin={{
                         vertical: 'bottom',
                         horizontal: 'left'
-                    }}>
+                    }}
+                    transitionDuration={0}>
                     {this.picker}
                 </Popover>
             </>

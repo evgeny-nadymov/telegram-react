@@ -154,13 +154,13 @@ class ShareStickerSetButton extends React.Component {
                         <ListItemIcon>
                             <LinkIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary={t('CopyLink')} />
+                        <ListItemText primary={t('CopyLink')} />
                     </MenuItem>
                     <MenuItem onClick={this.handleShare}>
                         <ListItemIcon>
                             <ShareIcon />
                         </ListItemIcon>
-                        <ListItemText inset primary={t('StickersShare')} />
+                        <ListItemText primary={t('StickersShare')} />
                     </MenuItem>
                 </Menu>
             </>

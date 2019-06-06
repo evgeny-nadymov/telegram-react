@@ -6,45 +6,38 @@
  */
 
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import Cookies from 'universal-cookie';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import localForage from 'localforage';
-import LocalForageWithGetItems from 'localforage-getitems';
 import packageJson from '../package.json';
 import withLanguage from './Language';
 import withTheme from './Theme';
-import withSnackbarNotifications from './Notifications';
-import ForwardDialog from './Components/Dialog/ForwardDialog';
-import ChatInfo from './Components/ColumnRight/ChatInfo';
-import Dialogs from './Components/ColumnLeft/Dialogs';
-import DialogDetails from './Components/ColumnMiddle/DialogDetails';
 import AuthFormControl from './Components/Auth/AuthFormControl';
-import Footer from './Components/Footer';
-import MediaViewer from './Components/Viewer/MediaViewer';
-import ProfileMediaViewer from './Components/Viewer/ProfileMediaViewer';
-import AppInactiveControl from './Components/Additional/AppInactiveControl';
+import InactivePage from './Components/InactivePage';
+import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
-import { highlightMessage } from './Actions/Client';
-import { FIRST_START_OPTIMIZATIONS } from './Constants';
+import { OPTIMIZATIONS_FIRST_START, OPTIMIZATIONS_SPLIT_BUNDLE } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
+let MainPage = null;
+if (OPTIMIZATIONS_SPLIT_BUNDLE) {
+    MainPage = React.lazy(() => import('./Components/MainPage'));
+} else {
+    MainPage = require('./Components/MainPage').default;
+}
+
 const styles = theme => ({
-    page: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
-    },
     '@global': {
         a: {
             color: theme.palette.primary.main
@@ -61,21 +54,11 @@ class TelegramApp extends Component {
 
         console.log(`Start Telegram Web ${packageJson.version}`);
 
-        this.dialogDetailsRef = React.createRef();
-
         this.state = {
             authorizationState: null,
             inactive: false,
-            mediaViewerContent: ApplicationStore.mediaViewerContent,
-            fatalError: false,
-            forwardInfo: null
+            fatalError: false
         };
-
-        /*this.store = localForage.createInstance({
-                    name: 'tdlib'
-                });*/
-
-        //this.initDB();
     }
 
     componentWillMount() {
@@ -87,50 +70,21 @@ class TelegramApp extends Component {
     componentDidMount() {
         TdLibController.addListener('update', this.onUpdate);
 
-        UserStore.on('clientUpdateOpenUser', this.onClientUpdateOpenUser);
-        ChatStore.on('clientUpdateOpenChat', this.onClientUpdateOpenChat);
-
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
-        ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
     }
 
     componentWillUnmount() {
         TdLibController.removeListener('update', this.onUpdate);
 
-        UserStore.removeListener('clientUpdateOpenUser', this.onClientUpdateOpenUser);
-        ChatStore.removeListener('clientUpdateOpenChat', this.onClientUpdateOpenChat);
-
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.removeListener(
-            'clientUpdateProfileMediaViewerContent',
-            this.onClientUpdateProfileMediaViewerContent
-        );
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
-        ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
     }
 
-    onClientUpdateOpenChat = update => {
-        const { chatId, messageId, popup } = update;
-
-        this.handleSelectChat(chatId, messageId, popup);
-    };
-
-    onClientUpdateOpenUser = update => {
-        const { userId, popup } = update;
-
-        this.handleSelectUser(userId, popup);
-    };
-
     onUpdate = update => {
-        if (FIRST_START_OPTIMIZATIONS) {
+        if (OPTIMIZATIONS_FIRST_START) {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
@@ -144,12 +98,6 @@ class TelegramApp extends Component {
                 }
             }
         }
-    };
-
-    onClientUpdateForward = update => {
-        const { info } = update;
-
-        this.setState({ forwardInfo: info });
     };
 
     onUpdateFatalError = update => {
@@ -172,69 +120,8 @@ class TelegramApp extends Component {
         });
     };
 
-    onClientUpdateChatDetailsVisibility = update => {
-        this.setState({
-            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
-        });
-    };
-
-    onClientUpdateMediaViewerContent = update => {
-        this.setState({ mediaViewerContent: ApplicationStore.mediaViewerContent });
-    };
-
-    onClientUpdateProfileMediaViewerContent = update => {
-        this.setState({
-            profileMediaViewerContent: ApplicationStore.profileMediaViewerContent
-        });
-    };
-
     onClientUpdateAppInactive = update => {
         this.setState({ inactive: true });
-    };
-
-    handleSelectChat = (chatId, messageId = null, popup = false) => {
-        const currentChatId = ApplicationStore.getChatId();
-        const currentDialogChatId = ApplicationStore.dialogChatId;
-        const currentMessageId = ApplicationStore.getMessageId();
-
-        if (popup) {
-            if (currentDialogChatId !== chatId) {
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateDialogChatId',
-                    chatId
-                });
-            }
-
-            return;
-        }
-
-        if (currentChatId === chatId && messageId && currentMessageId === messageId) {
-            this.dialogDetailsRef.current.scrollToMessage();
-            if (messageId) {
-                highlightMessage(chatId, messageId);
-            }
-        } else if (currentChatId === chatId && !messageId) {
-            const chat = ChatStore.get(chatId);
-            if (chat && chat.unread_count > 0) {
-                this.dialogDetailsRef.current.scrollToStart();
-            } else {
-                this.dialogDetailsRef.current.scrollToBottom();
-            }
-        } else {
-            TdLibController.setChatId(chatId, messageId);
-        }
-    };
-
-    handleSelectUser = async (userId, popup) => {
-        if (!userId) return;
-
-        const chat = await TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: userId,
-            force: true
-        });
-
-        this.handleSelectChat(chat.id, null, popup);
     };
 
     handleChangePhone = () => {
@@ -268,50 +155,25 @@ class TelegramApp extends Component {
     };
 
     render() {
-        const {
-            inactive,
-            authorizationState,
-            isChatDetailsVisible,
-            mediaViewerContent,
-            profileMediaViewerContent,
-            fatalError,
-            forwardInfo
-        } = this.state;
-        const { classes } = this.props;
+        const { t } = this.props;
+        const { inactive, authorizationState, fatalError } = this.state;
 
-        let page = (
-            <>
-                <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
-                    <Dialogs onClearCache={this.clearCache} onSelectChat={this.handleSelectChat} />
-                    <DialogDetails ref={this.dialogDetailsRef} />
-                    {isChatDetailsVisible && <ChatInfo />}
-                </div>
-                <Footer />
-            </>
-        );
+        const loading = t('Loading').replace('...', '');
+        let page = <StubPage title={loading} />;
 
         if (inactive) {
-            page = (
-                <>
-                    <div className='header-wrapper' />
-                    <div className={classNames(classes.page, 'page')}>
-                        <AppInactiveControl />
-                    </div>
-                    <Footer />
-                </>
-            );
+            page = <InactivePage />;
         } else if (authorizationState) {
             switch (authorizationState['@type']) {
-                case 'authorizationStateClosed': {
-                    break;
-                }
-                case 'authorizationStateClosing': {
-                    break;
-                }
-                case 'authorizationStateLoggingOut': {
-                    break;
-                }
+                case 'authorizationStateClosed':
+                case 'authorizationStateClosing':
+                case 'authorizationStateLoggingOut':
                 case 'authorizationStateReady': {
+                    page = (
+                        <React.Suspense fallback={<StubPage title='' />}>
+                            <MainPage />
+                        </React.Suspense>
+                    );
                     break;
                 }
                 case 'authorizationStateWaitCode':
@@ -336,8 +198,6 @@ class TelegramApp extends Component {
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>
                 {page}
-                {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
-                {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
                 <Dialog
                     transitionDuration={0}
                     open={fatalError}
@@ -359,7 +219,6 @@ class TelegramApp extends Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
-                {forwardInfo && <ForwardDialog {...forwardInfo} />}
             </div>
         );
     }
@@ -507,9 +366,9 @@ window.onpopstate = function() {
 
 const enhance = compose(
     withLanguage,
+    withTranslation(),
     withTheme,
-    withStyles(styles),
-    withSnackbarNotifications
+    withStyles(styles)
 );
 
 export default enhance(TelegramApp);

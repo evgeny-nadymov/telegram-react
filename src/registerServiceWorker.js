@@ -7,7 +7,7 @@
 
 import { arrayBufferToBase64 } from './Utils/Common';
 import Cookies from 'universal-cookie';
-import { FIRST_START_OPTIMIZATIONS } from './Constants';
+import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 
@@ -32,7 +32,7 @@ const isLocalhost = Boolean(
 export default async function register() {
     console.log('[SW] Register');
 
-    if (FIRST_START_OPTIMIZATIONS) {
+    if (OPTIMIZATIONS_FIRST_START) {
         const cookies = new Cookies();
         cookies.set('register', true);
     }

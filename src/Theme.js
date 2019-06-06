@@ -9,6 +9,7 @@ import React from 'react';
 import blue from '@material-ui/core/colors/blue';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import StylesProvider from '@material-ui/styles/StylesProvider';
 import { getDisplayName } from './Utils/HOC';
 import Cookies from 'universal-cookie';
 import ApplicationStore from './Stores/ApplicationStore';
@@ -69,9 +70,11 @@ function withTheme(WrappedComponent) {
             const { theme } = this.state;
 
             return (
-                <MuiThemeProvider theme={theme}>
-                    <WrappedComponent {...this.props} />
-                </MuiThemeProvider>
+                <StylesProvider injectFirst>
+                    <MuiThemeProvider theme={theme}>
+                        <WrappedComponent {...this.props} />
+                    </MuiThemeProvider>
+                </StylesProvider>
             );
         }
     }

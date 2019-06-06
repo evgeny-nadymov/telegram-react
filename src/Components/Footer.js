@@ -7,20 +7,13 @@
 
 import React from 'react';
 import packageJson from '../../package.json';
-import './Footer.css'
+import './Footer.css';
 
 class Footer extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-    }
-
     render() {
         return (
             <div className='footer-wrapper'>
-                <span>
-                    {packageJson.version}
-                </span>
+                <span>{packageJson.version}</span>
             </div>
         );
     }

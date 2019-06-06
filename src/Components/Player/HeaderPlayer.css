@@ -11,7 +11,8 @@
     align-items: center;
     /*overflow: hidden;*/
     box-sizing: border-box;
-    border-bottom: 1px solid #e9ebed;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
     padding: 0 12px;
 
     /*position: absolute;*/

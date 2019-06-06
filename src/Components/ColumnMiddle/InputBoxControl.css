@@ -10,7 +10,8 @@
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    border-top: 1px solid #e9ebed;
+    border-top-width: 1px;
+    border-top-style: solid;
 }
 
 .inputbox-wrapper {
@@ -68,6 +69,7 @@
 
 .inputbox-left-column {
     margin-right: 20px;
+    width: 48px;
 }
 
 .inputbox-middle-column {

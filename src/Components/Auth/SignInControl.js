@@ -31,7 +31,11 @@ const styles = {
     },
     continueAtLanguage: {
         transform: 'translateY(100px)',
-        textAlign: 'center'
+        textAlign: 'center',
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0
     }
 };
 

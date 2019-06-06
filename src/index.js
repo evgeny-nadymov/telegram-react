@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
 import Cookies from 'universal-cookie';
-import { FIRST_START_OPTIMIZATIONS } from './Constants';
+import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import './index.css';
 
 ReactDOM.render(
@@ -21,7 +21,7 @@ ReactDOM.render(
     document.getElementById('root')
 );
 
-if (FIRST_START_OPTIMIZATIONS) {
+if (OPTIMIZATIONS_FIRST_START) {
     const cookieEnabled = navigator.cookieEnabled;
     if (cookieEnabled) {
         const cookies = new Cookies();

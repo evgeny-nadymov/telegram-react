@@ -29,7 +29,7 @@ const styles = theme => ({
 class StickersHint extends React.Component {
     state = {
         hint: null,
-        stickerId: 0
+        previewStickerId: 0
     };
 
     componentDidMount() {
@@ -43,7 +43,7 @@ class StickersHint extends React.Component {
     onClientUpdateStickersHint = update => {
         const { hint } = update;
 
-        this.setState({ hint, stickerId: 0 });
+        this.setState({ hint, previewStickerId: 0 });
 
         if (!hint) return;
 
@@ -55,7 +55,6 @@ class StickersHint extends React.Component {
     handleSend = sticker => {
         if (!sticker) return;
         if (this.mouseDownStickerId !== sticker.sticker.id) return;
-        console.log('Match.sendSticker', sticker);
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateStickerSend',
@@ -134,7 +133,7 @@ class StickersHint extends React.Component {
         if (this.mouseDownStickerId !== stickerId) {
             this.mouseDownStickerId = null;
         }
-        this.setState({ stickerId });
+        this.setState({ previewStickerId: stickerId });
         this.loadPreviewContent(stickerId);
     };
 
@@ -145,7 +144,7 @@ class StickersHint extends React.Component {
         this.mouseDownStickerId = stickerId;
         const now = Date.now();
 
-        this.setState({ stickerId, timestamp: now, showPreview: false });
+        this.setState({ previewStickerId: stickerId, timestamp: now, showPreview: false });
         setTimeout(() => {
             const { timestamp } = this.state;
             if (timestamp === now) {
@@ -164,14 +163,14 @@ class StickersHint extends React.Component {
     };
 
     handleMouseUp = () => {
-        this.setState({ stickerId: 0, timestamp: 0, showPreview: false });
+        this.setState({ previewStickerId: 0, timestamp: 0, showPreview: false });
         this.mouseDown = false;
         document.removeEventListener('mouseup', this.handleMouseUp);
     };
 
     render() {
         const { classes } = this.props;
-        const { hint, stickerId, showPreview } = this.state;
+        const { hint, previewStickerId, showPreview } = this.state;
         if (!hint) return null;
 
         const { stickers } = hint;
@@ -198,7 +197,7 @@ class StickersHint extends React.Component {
             </div>
         ));
 
-        const stickerIndex = items.findIndex(x => x.sticker.id === stickerId);
+        const stickerIndex = items.findIndex(x => x.sticker.id === previewStickerId);
         const sticker = stickerIndex !== -1 ? items[stickerIndex] : null;
         const emoji = stickerIndex !== -1 ? sticker.emoji : null;
 

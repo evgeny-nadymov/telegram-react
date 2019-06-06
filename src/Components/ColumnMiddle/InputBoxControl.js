@@ -11,7 +11,6 @@ import { compose } from 'recompose';
 import emojiRegex from 'emoji-regex';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
-import IconButton from '@material-ui/core/IconButton';
 import SendIcon from '@material-ui/icons/Send';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -19,15 +18,16 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Dialog/CreatePollDialog';
-import EmojiPickerButton from './../ColumnMiddle/EmojiPickerButton';
+import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
-import { PHOTO_SIZE } from '../../Constants';
+import { OPTIMIZATIONS_SPLIT_BUNDLE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -35,6 +35,13 @@ import FileStore from '../../Stores/FileStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
+
+let EmojiPickerButton = null;
+if (OPTIMIZATIONS_SPLIT_BUNDLE) {
+    EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
+} else {
+    EmojiPickerButton = require('./../ColumnMiddle/EmojiPickerButton').default;
+}
 
 const styles = theme => ({
     iconButton: {
@@ -565,18 +572,28 @@ class InputBoxControl extends Component {
             return;
         }
 
-        const stickers = await TdLibController.send({
-            '@type': 'searchStickers',
+        const promises = [];
+        const local = TdLibController.send({
+            '@type': 'getStickers',
             emoji: match[0],
             limit: 100
         });
-        console.log('Matched stickers', match[0], stickers);
+        promises.push(local);
+
+        // const remote = TdLibController.send({
+        //     '@type': 'searchStickers',
+        //     emoji: match[0],
+        //     limit: 100
+        // });
+        // promises.push(remote);
+
+        const results = await Promise.all(promises.map(x => x.catch(e => null)));
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateStickersHint',
             hint: {
                 emoji: match[0],
-                stickers
+                stickers: results[0]
             }
         });
     };
@@ -593,7 +610,14 @@ class InputBoxControl extends Component {
                     <InputBoxHeader chatId={chatId} messageId={replyToMessageId} />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
-                            <EmojiPickerButton onSelect={this.handleEmojiSelect} />
+                            <React.Suspense
+                                fallback={
+                                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
+                                        <InsertEmoticonIcon />
+                                    </IconButton>
+                                }>
+                                <EmojiPickerButton onSelect={this.handleEmojiSelect} />
+                            </React.Suspense>
                         </div>
                         <div className='inputbox-middle-column'>
                             <div

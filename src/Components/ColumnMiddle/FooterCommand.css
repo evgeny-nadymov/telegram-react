@@ -9,7 +9,8 @@
     text-align: center;
     height: 65px;
     box-sizing: border-box;
-    border-top: 1px solid #e9ebed;
+    border-top-width: 1px;
+    border-top-style: solid;
 }
 
 .footer-command-actions {
