@@ -27,7 +27,7 @@ import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
-import { OPTIMIZATIONS_SPLIT_BUNDLE, PHOTO_SIZE } from '../../Constants';
+import { PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -36,12 +36,7 @@ import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
 
-let EmojiPickerButton = null;
-if (OPTIMIZATIONS_SPLIT_BUNDLE) {
-    EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
-} else {
-    EmojiPickerButton = require('./../ColumnMiddle/EmojiPickerButton').default;
-}
+const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
 const styles = theme => ({
     iconButton: {

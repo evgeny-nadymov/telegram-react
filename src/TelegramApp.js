@@ -23,19 +23,14 @@ import AuthFormControl from './Components/Auth/AuthFormControl';
 import InactivePage from './Components/InactivePage';
 import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
-import { OPTIMIZATIONS_FIRST_START, OPTIMIZATIONS_SPLIT_BUNDLE } from './Constants';
+import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
-let MainPage = null;
-if (OPTIMIZATIONS_SPLIT_BUNDLE) {
-    MainPage = React.lazy(() => import('./Components/MainPage'));
-} else {
-    MainPage = require('./Components/MainPage').default;
-}
+const MainPage = React.lazy(() => import('./Components/MainPage'));
 
 const styles = theme => ({
     '@global': {

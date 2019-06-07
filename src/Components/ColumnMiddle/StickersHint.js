@@ -33,6 +33,7 @@ class StickersHint extends React.Component {
 
         this.state = {
             hint: null,
+            items: [],
             previewStickerId: 0,
             showPreview: false,
             cancelSend: false
@@ -53,10 +54,11 @@ class StickersHint extends React.Component {
         const { hint } = update;
         const { hint: currentHint } = this.state;
 
-        if (hint && hint.timestamp !== currentHint.timestamp) return;
+        if (currentHint && hint.timestamp !== currentHint.timestamp) return;
 
         this.setState({
-            hint: StickerStore.hint
+            hint: StickerStore.hint,
+            items: this.getItems(StickerStore.hint)
         });
 
         const store = FileStore.getStore();
@@ -69,6 +71,7 @@ class StickersHint extends React.Component {
 
         this.setState({
             hint,
+            items: this.getItems(hint),
             previewStickerId: 0,
             showPreview: false,
             cancelSend: false
@@ -93,11 +96,9 @@ class StickersHint extends React.Component {
     };
 
     loadPreviewContent = stickerId => {
-        const { hint } = this.state;
-        const { stickers: result } = hint;
-        const { stickers } = result;
+        const { items } = this.state;
 
-        const sticker = stickers.find(x => x.sticker.id === stickerId);
+        const sticker = items.find(x => x.sticker.id === stickerId);
         if (!sticker) return;
 
         const store = FileStore.getStore();
@@ -108,7 +109,22 @@ class StickersHint extends React.Component {
             stickersPerRow = Math.floor(this.hintsRef.current.clientWidth / STICKER_HINT_DISPLAY_SIZE);
         }
 
-        const preloadStickers = this.getNeighborStickers(stickerId, stickers, stickersPerRow);
+        TdLibController.send({
+            '@type': 'getStickerEmojis',
+            sticker: {
+                '@type': 'inputFileId',
+                id: stickerId
+            }
+        }).then(result => {
+            const { previewStickerId } = this.state;
+            if (previewStickerId === stickerId) {
+                this.setState({
+                    previewStickerEmojis: result.emojis.join(' ')
+                });
+            }
+        });
+
+        const preloadStickers = this.getNeighborStickers(stickerId, items, stickersPerRow);
         preloadStickers.forEach(x => {
             loadStickerContent(store, x, null);
         });
@@ -203,9 +219,9 @@ class StickersHint extends React.Component {
         document.removeEventListener('mouseup', this.handleMouseUp);
     };
 
-    getItems = () => {
+    getItems = hint => {
         const items = [];
-        const { hint } = this.state;
+        if (!hint) return items;
 
         const dict = new Map();
         const { stickers, foundStickers } = hint;
@@ -229,13 +245,9 @@ class StickersHint extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { hint, previewStickerId, showPreview } = this.state;
+        const { hint, items, previewStickerId, previewStickerEmojis, showPreview } = this.state;
         if (!hint) return null;
-
-        const { stickers } = hint;
-        if (!stickers) return null;
-
-        const items = this.getItems();
+        if (!items) return null;
         if (!items.length) return null;
 
         const controls = items.map(x => (
@@ -252,13 +264,11 @@ class StickersHint extends React.Component {
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     blur={false}
                 />
-                {/*<div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>*/}
             </div>
         ));
 
         const stickerIndex = items.findIndex(x => x.sticker.id === previewStickerId);
         const sticker = stickerIndex !== -1 ? items[stickerIndex] : null;
-        const emoji = stickerIndex !== -1 ? sticker.emoji : null;
 
         return (
             <div
@@ -270,7 +280,7 @@ class StickersHint extends React.Component {
                 {controls}
                 {Boolean(sticker) && showPreview && (
                     <div className='sticker-set-dialog-preview'>
-                        {/*<div className='sticker-set-dialog-preview-emoji'>{emoji}</div>*/}
+                        <div className='sticker-set-dialog-preview-emoji'>{previewStickerEmojis}</div>
                         <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
                     </div>
                 )}

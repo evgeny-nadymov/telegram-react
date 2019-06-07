@@ -1,0 +1,19 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.stickers-picker {
+    width: 338px;
+    height: 358px;
+    background: transparent;
+}
+
+.stickers-picker-scroll {
+    background: transparent;
+    padding: 0 12px 6px 6px;
+    height: 356px;
+    overflow-y: scroll;
+}

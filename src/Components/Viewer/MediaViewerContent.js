@@ -13,19 +13,13 @@ import MediaCaption from './MediaCaption';
 import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
-import { OPTIMIZATIONS_SPLIT_BUNDLE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
-let Lottie = null;
-if (OPTIMIZATIONS_SPLIT_BUNDLE) {
-    Lottie = React.lazy(() => import('./Lottie'));
-} else {
-    Lottie = require('./Lottie').default;
-}
+const Lottie = React.lazy(() => import('./Lottie'));
 
 class MediaViewerContent extends React.Component {
     constructor(props) {

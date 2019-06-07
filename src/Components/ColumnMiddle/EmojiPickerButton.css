@@ -4,3 +4,20 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.emoji-picker-header {
+    display: flex;
+}
+
+.emoji-picker-content {
+    display: flex;
+    flex-direction: row;
+    width: 676px;
+    will-change: transform;
+    transition: transform 250ms ease-out;
+    overflow-y: hidden;
+}
+
+.emoji-picker-content-stickers {
+    transform: translateX(-338px);
+}
