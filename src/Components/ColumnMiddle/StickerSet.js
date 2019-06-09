@@ -7,11 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Sticker from '../Message/Media/Sticker';
 import { loadStickerContent } from '../../Utils/File';
-import { STICKER_HINT_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
+import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import './StickerSet.css';
+
+const styles = theme => ({
+    title: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.paper : '#FFFFFF',
+        color: theme.palette.text.primary
+    }
+});
 
 class StickerSet extends React.Component {
     componentDidMount() {
@@ -32,7 +41,7 @@ class StickerSet extends React.Component {
     };
 
     render() {
-        const { info, onSelect } = this.props;
+        const { classes, info, onSelect } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
@@ -56,7 +65,7 @@ class StickerSet extends React.Component {
 
         return (
             <div className='sticker-set'>
-                <div className='sticker-set-title'>
+                <div className={classNames('sticker-set-title', classes.title)}>
                     <span>{title}</span>
                 </div>
                 <div className='sticker-set-content'>{items}</div>
@@ -70,4 +79,4 @@ StickerSet.propTypes = {
     onSelect: PropTypes.func.isRequired
 };
 
-export default StickerSet;
+export default withStyles(styles)(StickerSet);

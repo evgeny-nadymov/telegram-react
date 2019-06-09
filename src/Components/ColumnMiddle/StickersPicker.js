@@ -8,12 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import StickerSet from './StickerSet';
-import TdLibController from '../../Controllers/TdLibController';
-import './StickersPicker.css';
 import Sticker from './StickersHint';
+import { loadStickerContent } from '../../Utils/File';
 import { STICKER_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
-import { loadStickerContent } from '../../Utils/File';
+import TdLibController from '../../Controllers/TdLibController';
+import './StickersPicker.css';
 
 class StickersPicker extends React.Component {
     state = {

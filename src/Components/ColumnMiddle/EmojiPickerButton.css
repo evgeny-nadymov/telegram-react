@@ -15,7 +15,7 @@
     width: 676px;
     will-change: transform;
     transition: transform 250ms ease-out;
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 .emoji-picker-content-stickers {

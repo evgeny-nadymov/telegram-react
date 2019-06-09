@@ -18,8 +18,8 @@ import { Picker as EmojiPicker } from 'emoji-mart';
 import StickersPicker from './StickersPicker';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
-import './EmojiPickerButton.css';
 import TdLibController from '../../Controllers/TdLibController';
+import './EmojiPickerButton.css';
 
 const styles = {
     iconButton: {
@@ -129,7 +129,7 @@ class EmojiPickerButton extends React.Component {
                     onSelect={this.props.onSelect}
                     color={theme.palette.primary.dark}
                     i18n={i18n}
-                    style={{ width: 338 }}
+                    style={{ width: 338, overflowX: 'hidden' }}
                 />
             );
         }
