@@ -23,11 +23,22 @@ const styles = theme => ({
 });
 
 class StickerSet extends React.Component {
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { info } = this.props;
+
+        if (info !== nextProps.info) {
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount() {
         this.loadContent();
     }
 
     loadContent = () => {
+        //return;
         const { info } = this.props;
         if (!info) return;
 

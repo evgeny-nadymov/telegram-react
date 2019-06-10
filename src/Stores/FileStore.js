@@ -10,7 +10,7 @@ import { getLocationId } from '../Utils/Message';
 import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
-const useReadFile = true;
+const useReadFile = false;
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -18,6 +18,7 @@ class FileStore extends EventEmitter {
 
         this.callbacks = [];
 
+        //this.transactionCount = 0;
         this.db = null;
         this.urls = new WeakMap();
         this.items = new Map();
@@ -587,6 +588,7 @@ class FileStore extends EventEmitter {
     }
 
     getStore() {
+        console.log('FileStore.getStore ' + this.transactionCount++);
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 

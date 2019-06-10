@@ -163,9 +163,7 @@ class EmojiPickerButton extends React.Component {
                         horizontal: 'left'
                     }}
                     transitionDuration={0}>
-                    <div
-                        style={{ width: 338, overflowX: 'hidden', background: 'transparent' }}
-                        onMouseLeave={this.switchPopover}>
+                    <div style={{ width: 338, overflowX: 'hidden', background: 'transparent' }}>
                         <div className='emoji-picker-header'>
                             <Button
                                 color={tab === 0 ? 'primary' : 'default'}

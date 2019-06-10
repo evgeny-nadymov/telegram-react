@@ -26,6 +26,11 @@
     background: transparent;
 }
 
+.sticker-set-item:hover {
+    background: aliceblue;
+    border-radius: 6px;
+}
+
 .sticker-set-item-sticker {
     pointer-events: none;
 }
