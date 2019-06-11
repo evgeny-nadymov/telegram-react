@@ -13,30 +13,44 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
-import Popover from '@material-ui/core/Popover';
 import { Picker as EmojiPicker } from 'emoji-mart';
 import StickersPicker from './StickersPicker';
+import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EmojiPickerButton.css';
 
-const styles = {
+const styles = theme => ({
     iconButton: {
         margin: '8px 0px'
     },
     headerButton: {
         borderRadius: 0,
         flex: '50%'
+    },
+    pickerRoot: {
+        width: 338,
+        overflowX: 'hidden',
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
+        borderRadius: theme.shape.borderRadius,
+        boxShadow: theme.shadows[8],
+        position: 'absolute',
+        bottom: 80,
+        display: 'none'
+    },
+    pickerRootOpened: {
+        display: 'block'
     }
-};
+});
 
 class EmojiPickerButton extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            anchorEl: null,
+            open: false,
             tab: 0
         };
 
@@ -58,20 +72,43 @@ class EmojiPickerButton extends React.Component {
         this.picker = null;
     };
 
-    updateAnchorEl = anchorEl => {
-        this.setState({ anchorEl: anchorEl, tab: anchorEl === null ? 0 : this.state.tab });
+    handleButtonMouseEnter = event => {
+        this.buttonEnter = true;
+        setTimeout(() => {
+            if (!this.buttonEnter) return;
+
+            this.updateAnchorEl(true);
+        }, EMOJI_PICKER_TIMEOUT_MS);
     };
 
-    switchPopover = event => {
-        this.updateAnchorEl(this.state.anchorEl ? null : event.currentTarget);
+    handleButtonMouseLeave = () => {
+        this.buttonEnter = false;
+        setTimeout(() => {
+            if (this.paperEnter || this.buttonEnter) return;
+
+            this.updateAnchorEl(false);
+        }, EMOJI_PICKER_TIMEOUT_MS);
     };
 
-    handleMouseOut = event => {
-        //console.log('Popover.handleMouseOut', event.target, event.currentTarget);
+    handlePaperMouseEnter = () => {
+        this.paperEnter = true;
     };
 
-    handleMouseLeave = event => {
-        //console.log('Popover.handleMouseLeave', event);
+    handlePaperMouseLeave = () => {
+        this.paperEnter = false;
+        setTimeout(() => {
+            if (this.paperEnter || this.buttonEnter) return;
+
+            this.updateAnchorEl(false);
+        }, EMOJI_PICKER_TIMEOUT_MS);
+    };
+
+    updateAnchorEl = open => {
+        this.setState({ open });
+    };
+
+    switchPopover = () => {
+        this.updateAnchorEl(!this.state.open);
     };
 
     handleEmojiClick = () => {
@@ -97,11 +134,9 @@ class EmojiPickerButton extends React.Component {
 
     render() {
         const { classes, theme, t } = this.props;
-        const { anchorEl, tab } = this.state;
+        const { open, tab } = this.state;
 
-        const open = Boolean(anchorEl);
-
-        if (!this.picker) {
+        if (open && !this.picker) {
             const i18n = {
                 search: t('Search'),
                 notfound: t('NotEmojiFound'),
@@ -132,6 +167,8 @@ class EmojiPickerButton extends React.Component {
                     style={{ width: 338, overflowX: 'hidden' }}
                 />
             );
+
+            this.stickersPicker = <StickersPicker ref={this.stickersPickerRef} onSelect={this.handleStickerSend} />;
         }
 
         return (
@@ -144,49 +181,34 @@ class EmojiPickerButton extends React.Component {
                 <IconButton
                     className={classes.iconButton}
                     aria-label='Emoticon'
-                    onMouseEnter={this.switchPopover}
-                    onClick={this.switchPopover}>
+                    onClick={this.switchPopover}
+                    onMouseEnter={this.handleButtonMouseEnter}
+                    onMouseLeave={this.handleButtonMouseLeave}>
                     <InsertEmoticonIcon />
                 </IconButton>
-                <Popover
-                    id='render-props-popover'
-                    ref={this.popoverRef}
-                    open={open}
-                    anchorEl={anchorEl}
-                    onClose={() => this.updateAnchorEl(null)}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                    }}
-                    transformOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                    }}
-                    transitionDuration={0}>
-                    <div style={{ width: 338, overflowX: 'hidden', background: 'transparent' }}>
-                        <div className='emoji-picker-header'>
-                            <Button
-                                color={tab === 0 ? 'primary' : 'default'}
-                                className={classes.headerButton}
-                                onClick={this.handleEmojiClick}>
-                                EMOJI
-                            </Button>
-                            <Button
-                                color={tab === 1 ? 'primary' : 'default'}
-                                className={classes.headerButton}
-                                onClick={this.handleStickersClick}>
-                                STICKERS
-                            </Button>
-                        </div>
-                        <div
-                            className={classNames('emoji-picker-content', {
-                                'emoji-picker-content-stickers': tab === 1
-                            })}>
-                            {this.picker}
-                            <StickersPicker ref={this.stickersPickerRef} onSelect={this.handleStickerSend} />
-                        </div>
+                <div
+                    className={classNames(classes.pickerRoot, { [classes.pickerRootOpened]: open })}
+                    onMouseEnter={this.handlePaperMouseEnter}
+                    onMouseLeave={this.handlePaperMouseLeave}>
+                    <div className='emoji-picker-header'>
+                        <Button
+                            color={tab === 0 ? 'primary' : 'default'}
+                            className={classes.headerButton}
+                            onClick={this.handleEmojiClick}>
+                            EMOJI
+                        </Button>
+                        <Button
+                            color={tab === 1 ? 'primary' : 'default'}
+                            className={classes.headerButton}
+                            onClick={this.handleStickersClick}>
+                            STICKERS
+                        </Button>
                     </div>
-                </Popover>
+                    <div className={classNames('emoji-picker-content', { 'emoji-picker-content-stickers': tab === 1 })}>
+                        {this.picker}
+                        {this.stickersPicker}
+                    </div>
+                </div>
             </>
         );
     }
