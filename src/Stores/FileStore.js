@@ -10,7 +10,7 @@ import { getLocationId } from '../Utils/Message';
 import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
-const useReadFile = false;
+const useReadFile = true;
 
 class FileStore extends EventEmitter {
     constructor() {

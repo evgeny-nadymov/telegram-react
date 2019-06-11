@@ -17,7 +17,7 @@ import './StickerSet.css';
 
 const styles = theme => ({
     title: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.paper : '#FFFFFF',
+        backgroundColor: theme.palette.background.paper,
         color: theme.palette.text.primary
     },
     stickerSetItem: {
@@ -44,11 +44,10 @@ class StickerSet extends React.Component {
     }
 
     componentDidMount() {
-        this.loadContent();
+        //this.loadContent();
     }
 
     loadContent = () => {
-        //return;
         const { info } = this.props;
         if (!info) return;
 
@@ -62,7 +61,7 @@ class StickerSet extends React.Component {
     };
 
     render() {
-        const { classes, info, onSelect } = this.props;
+        const { classes, info, onSelect, onMouseDown, onMouseOver } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
@@ -72,7 +71,9 @@ class StickerSet extends React.Component {
                 className={classNames('sticker-set-item', classes.stickerSetItem)}
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
-                onClick={() => onSelect(x)}>
+                onClick={() => onSelect(x)}
+                onMouseDown={onMouseDown}
+                onMouseOver={onMouseOver}>
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-item-sticker'
@@ -96,7 +97,8 @@ class StickerSet extends React.Component {
 
 StickerSet.propTypes = {
     info: PropTypes.object.isRequired,
-    onSelect: PropTypes.func.isRequired
+    onSelect: PropTypes.func.isRequired,
+    onMouseDown: PropTypes.func.isRequired
 };
 
 export default withStyles(styles)(StickerSet);

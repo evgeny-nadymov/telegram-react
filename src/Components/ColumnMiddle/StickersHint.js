@@ -275,7 +275,6 @@ class StickersHint extends React.Component {
                 ref={this.hintsRef}
                 className={classNames('stickers-hint', classes.borderColor, classes.root)}
                 onMouseOver={this.handleMouseOver}
-                onMouseOut={this.handleMouseOut}
                 onMouseDown={this.handleMouseDown}>
                 {controls}
                 {Boolean(sticker) && showPreview && (

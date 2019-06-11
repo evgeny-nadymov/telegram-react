@@ -15,11 +15,14 @@ import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import { Picker as EmojiPicker } from 'emoji-mart';
 import StickersPicker from './StickersPicker';
-import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
+import { EMOJI_PICKER_TIMEOUT_MS, STICKER_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import FileStore from '../../Stores/FileStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EmojiPickerButton.css';
+import { loadStickerSetContent } from '../../Utils/File';
+import StickerPreview from './StickerPreview';
 
 const styles = theme => ({
     iconButton: {
@@ -55,7 +58,6 @@ class EmojiPickerButton extends React.Component {
         };
 
         this.stickersPickerRef = React.createRef();
-        this.popoverRef = React.createRef();
     }
 
     componentDidMount() {
@@ -77,17 +79,50 @@ class EmojiPickerButton extends React.Component {
         setTimeout(() => {
             if (!this.buttonEnter) return;
 
-            this.updateAnchorEl(true);
+            this.updatePicker(true);
+            this.loadStickerSets();
         }, EMOJI_PICKER_TIMEOUT_MS);
+    };
+
+    loadStickerSets = async () => {
+        if (this.sets) return;
+
+        this.stickerSets = await TdLibController.send({
+            '@type': 'getInstalledStickerSets',
+            is_masks: false
+        });
+
+        const promises = [];
+        this.stickerSets.sets.forEach(x => {
+            promises.push(
+                TdLibController.send({
+                    '@type': 'getStickerSet',
+                    set_id: x.id
+                })
+            );
+        });
+
+        this.sets = await Promise.all(promises);
+
+        const store = FileStore.getStore();
+        const previewSets = this.sets.slice(0, 5).reverse();
+        previewSets.forEach(x => {
+            loadStickerSetContent(store, x);
+        });
     };
 
     handleButtonMouseLeave = () => {
         this.buttonEnter = false;
         setTimeout(() => {
-            if (this.paperEnter || this.buttonEnter) return;
-
-            this.updateAnchorEl(false);
+            this.tryClosePicker();
         }, EMOJI_PICKER_TIMEOUT_MS);
+    };
+
+    tryClosePicker = () => {
+        const { sticker } = this.state;
+        if (this.paperEnter || this.buttonEnter || sticker) return;
+
+        this.updatePicker(false);
     };
 
     handlePaperMouseEnter = () => {
@@ -97,18 +132,16 @@ class EmojiPickerButton extends React.Component {
     handlePaperMouseLeave = () => {
         this.paperEnter = false;
         setTimeout(() => {
-            if (this.paperEnter || this.buttonEnter) return;
-
-            this.updateAnchorEl(false);
+            this.tryClosePicker();
         }, EMOJI_PICKER_TIMEOUT_MS);
     };
 
-    updateAnchorEl = open => {
+    updatePicker = open => {
         this.setState({ open });
     };
 
-    switchPopover = () => {
-        this.updateAnchorEl(!this.state.open);
+    switchPicker = () => {
+        this.updatePicker(!this.state.open);
     };
 
     handleEmojiClick = () => {
@@ -116,7 +149,7 @@ class EmojiPickerButton extends React.Component {
     };
 
     handleStickersClick = () => {
-        this.stickersPickerRef.current.loadContent();
+        this.stickersPickerRef.current.loadContent(this.stickerSets, this.sets);
 
         this.setState({ tab: 1 });
     };
@@ -129,12 +162,20 @@ class EmojiPickerButton extends React.Component {
             sticker
         });
 
-        this.updateAnchorEl(null);
+        this.updatePicker(false);
+    };
+
+    handleStickerPreview = sticker => {
+        this.setState({ sticker });
+
+        if (!sticker) {
+            this.tryClosePicker();
+        }
     };
 
     render() {
         const { classes, theme, t } = this.props;
-        const { open, tab } = this.state;
+        const { open, tab, sticker } = this.state;
 
         if (open && !this.picker) {
             const i18n = {
@@ -168,7 +209,13 @@ class EmojiPickerButton extends React.Component {
                 />
             );
 
-            this.stickersPicker = <StickersPicker ref={this.stickersPickerRef} onSelect={this.handleStickerSend} />;
+            this.stickersPicker = (
+                <StickersPicker
+                    ref={this.stickersPickerRef}
+                    onSelect={this.handleStickerSend}
+                    onPreview={this.handleStickerPreview}
+                />
+            );
         }
 
         return (
@@ -181,7 +228,7 @@ class EmojiPickerButton extends React.Component {
                 <IconButton
                     className={classes.iconButton}
                     aria-label='Emoticon'
-                    onClick={this.switchPopover}
+                    onClick={this.switchPicker}
                     onMouseEnter={this.handleButtonMouseEnter}
                     onMouseLeave={this.handleButtonMouseLeave}>
                     <InsertEmoticonIcon />
@@ -195,19 +242,20 @@ class EmojiPickerButton extends React.Component {
                             color={tab === 0 ? 'primary' : 'default'}
                             className={classes.headerButton}
                             onClick={this.handleEmojiClick}>
-                            EMOJI
+                            {t('Emoji')}
                         </Button>
                         <Button
                             color={tab === 1 ? 'primary' : 'default'}
                             className={classes.headerButton}
                             onClick={this.handleStickersClick}>
-                            STICKERS
+                            {t('Stickers')}
                         </Button>
                     </div>
                     <div className={classNames('emoji-picker-content', { 'emoji-picker-content-stickers': tab === 1 })}>
                         {this.picker}
                         {this.stickersPicker}
                     </div>
+                    <StickerPreview sticker={sticker} />
                 </div>
             </>
         );

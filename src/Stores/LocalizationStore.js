@@ -50,7 +50,9 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     More: 'More',
                     SendMessage: 'Send Message',
                     ChatInfo: 'Chat Info',
-                    ChannelInfo: 'Channel Info'
+                    ChannelInfo: 'Channel Info',
+                    Stickers: 'STICKERS',
+                    Emoji: 'EMOJI'
                 },
                 emoji: {
                     Search: 'Search',
@@ -86,7 +88,9 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     More: 'Ещё',
                     SendMessage: 'Отправить сообщение',
                     ChatInfo: 'Информация о чате',
-                    ChannelInfo: 'Информация о канале'
+                    ChannelInfo: 'Информация о канале',
+                    Stickers: 'СТИКЕРЫ',
+                    Emoji: 'ЕМОДЗИ'
                 },
                 emoji: {
                     Search: 'Поиск',
