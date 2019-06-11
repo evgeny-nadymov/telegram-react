@@ -1,15 +1,15 @@
 self.__precacheManifest = [
   {
-    "revision": "3da30aa089714b4b3afc",
+    "revision": "8721d5e49292d5c6e128",
     "url": "/telegram-react/static/css/main.f0cc6d71.chunk.css"
   },
   {
-    "revision": "3da30aa089714b4b3afc",
-    "url": "/telegram-react/static/js/main.34256941.chunk.js"
+    "revision": "8721d5e49292d5c6e128",
+    "url": "/telegram-react/static/js/main.14854ad2.chunk.js"
   },
   {
-    "revision": "82b7202651e252e2dbc9",
-    "url": "/telegram-react/static/js/runtime~main.dc7c1132.js"
+    "revision": "f1a26939d63a546977b5",
+    "url": "/telegram-react/static/js/runtime~main.43edbc38.js"
   },
   {
     "revision": "9ba0e3b1fb585723164b",
@@ -28,12 +28,12 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/js/4.3c01a008.chunk.js"
   },
   {
-    "revision": "b731c21aaad862fe7167",
-    "url": "/telegram-react/static/css/5.9b7a2660.chunk.css"
+    "revision": "112aabf78ca047699a6c",
+    "url": "/telegram-react/static/css/5.64e41942.chunk.css"
   },
   {
-    "revision": "b731c21aaad862fe7167",
-    "url": "/telegram-react/static/js/5.77bb7ba2.chunk.js"
+    "revision": "112aabf78ca047699a6c",
+    "url": "/telegram-react/static/js/5.5e52882f.chunk.js"
   },
   {
     "revision": "6c9af33ce500804deb39",
@@ -68,7 +68,7 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/media/IconsetW_2x.f01cec9b.png"
   },
   {
-    "revision": "a0dd2b2ef27b36187579fe695b7aefe6",
+    "revision": "f3bf9009316c8f1e6dd9e13b9b301958",
     "url": "/telegram-react/index.html"
   }
 ];
