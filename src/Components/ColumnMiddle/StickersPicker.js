@@ -62,7 +62,6 @@ class StickersPicker extends React.Component {
 
     handleScroll = async () => {
         const scroll = this.scrollRef.current;
-        this.setState({ position: scroll.scrollTop + '/' + (scroll.scrollHeight - scroll.offsetHeight) });
 
         if (this.loadingChunk) return;
 

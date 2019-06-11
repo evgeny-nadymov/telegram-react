@@ -19,6 +19,16 @@ const styles = theme => ({
     title: {
         background: theme.palette.type === 'dark' ? theme.palette.background.paper : '#FFFFFF',
         color: theme.palette.text.primary
+    },
+    stickerSetItem: {
+        width: STICKER_SMALL_DISPLAY_SIZE,
+        height: STICKER_SMALL_DISPLAY_SIZE,
+        padding: 3,
+        boxSizing: 'border-box',
+        '&:hover': {
+            background: theme.palette.type === 'dark' ? '#303030' : '#f4f4f4',
+            borderRadius: 6
+        }
     }
 });
 
@@ -59,16 +69,15 @@ class StickerSet extends React.Component {
 
         const items = stickers.map(x => (
             <div
-                className='sticker-set-item'
+                className={classNames('sticker-set-item', classes.stickerSetItem)}
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
-                style={{ width: STICKER_SMALL_DISPLAY_SIZE, height: STICKER_SMALL_DISPLAY_SIZE }}
                 onClick={() => onSelect(x)}>
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-item-sticker'
                     sticker={x}
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
                     blur={false}
                 />
             </div>
