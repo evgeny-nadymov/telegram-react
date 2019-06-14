@@ -47,7 +47,7 @@
 /******/ 		promises.push(Promise.resolve().then(function() {
 /******/ 			// "1" is the signal for "already loaded"
 /******/ 			if(!installedChunks[chunkId]) {
-/******/ 				importScripts("" + chunkId + "." + "3f008fc55643eb59e34b" + ".worker.js");
+/******/ 				importScripts("" + chunkId + "." + "5bf22bc6b3c8aab8a6e3" + ".worker.js");
 /******/ 			}
 /******/ 		}));
 /******/ 		return Promise.all(promises);
@@ -5514,13 +5514,13 @@ function () {
           '@type': 'error',
           '@extra': query['@extra'],
           code: 400,
-          message: e
+          message: e.toString()
         });
         return;
       }
 
       this.callback({
-        '@type': 'FilePart',
+        '@type': 'filePart',
         '@extra': query['@extra'],
         data: res
       }, [res.buffer]);

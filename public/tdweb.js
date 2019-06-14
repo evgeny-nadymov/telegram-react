@@ -228,7 +228,7 @@ module.exports = _slicedToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "3f008fc55643eb59e34b.worker.js");
+  return new Worker(__webpack_require__.p + "5bf22bc6b3c8aab8a6e3.worker.js");
 };
 
 /***/ }),
@@ -2231,7 +2231,7 @@ function () {
     }
 
     options.instanceName = options.instanceName || 'tdlib';
-    this.fileManager = new src_FileManager(options.instanceName);
+    this.fileManager = new src_FileManager(options.instanceName, this);
     this.worker.postMessage({
       '@type': 'init',
       options: options
@@ -2779,7 +2779,7 @@ function () {
 var src_FileManager =
 /*#__PURE__*/
 function () {
-  function FileManager(instanceName) {
+  function FileManager(instanceName, client) {
     classCallCheck_default()(this, FileManager);
 
     this.instanceName = instanceName;
@@ -2788,6 +2788,7 @@ function () {
     this.transaction_id = 0;
     this.totalSize = 0;
     this.lru = new src_ListNode(-1);
+    this.client = client;
   }
 
   createClass_default()(FileManager, [{
@@ -2828,59 +2829,61 @@ function () {
   }, {
     key: "registerFile",
     value: function registerFile(file) {
+      if (file.idb_key || file.arr) {
+        file.local.is_downloading_completed = true;
+      } else {
+        file.local.is_downloading_completed = false;
+      }
+
+      var info = {};
       var cached_info = this.cache.get(file.id);
 
-      if (cached_info && !file.idb_key) {
-        delete cached_info.idb_key;
+      if (cached_info) {
+        info = cached_info;
+      } else {
+        this.cache.set(file.id, info);
       }
 
-      if (file.idb_key || file.arr) {
-        file.is_downloading_completed = true;
-        var info = {};
-
-        if (cached_info) {
-          info = cached_info;
-        } else {
-          this.cache.set(file.id, info);
-        }
-
-        if (file.idb_key) {
-          info.idb_key = file.idb_key;
-          delete file.idb_key;
-        }
-
-        if (file.arr) {
-          var now = Date.now();
-
-          while (this.totalSize > 10000000) {
-            var node = this.lru.getLru(); // immunity for 5 seconds
-
-            if (node.usedAt + 5 * 1000 > now) {
-              break;
-            }
-
-            var lru_info = this.cache.get(node.value);
-            this.unload(lru_info);
-          }
-
-          if (info.arr) {
-            logger.warn('Got file.arr at least twice for the same file');
-            this.totalSize -= info.arr.length;
-          }
-
-          info.arr = file.arr;
-          this.totalSize += info.arr.length;
-
-          if (!info.node) {
-            logger.debug('LRU: create file_id: ', file.id, ' with arr.length: ', info.arr.length);
-            info.node = new src_ListNode(file.id);
-          }
-
-          this.lru.onUsed(info.node);
-          logger.info('Total file.arr size: ', this.totalSize);
-        }
+      if (file.idb_key) {
+        info.idb_key = file.idb_key;
+        delete file.idb_key;
+      } else {
+        delete info.idb_key;
       }
 
+      if (file.arr) {
+        var now = Date.now();
+
+        while (this.totalSize > 10000000) {
+          var node = this.lru.getLru(); // immunity for 5 seconds
+
+          if (node.usedAt + 5 * 1000 > now) {
+            break;
+          }
+
+          var lru_info = this.cache.get(node.value);
+          this.unload(lru_info);
+        }
+
+        if (info.arr) {
+          logger.warn('Got file.arr at least twice for the same file');
+          this.totalSize -= info.arr.length;
+        }
+
+        info.arr = file.arr;
+        delete file.arr;
+        this.totalSize += info.arr.length;
+
+        if (!info.node) {
+          logger.debug('LRU: create file_id: ', file.id, ' with arr.length: ', info.arr.length);
+          info.node = new src_ListNode(file.id);
+        }
+
+        this.lru.onUsed(info.node);
+        logger.info('Total file.arr size: ', this.totalSize);
+      }
+
+      info.file = file;
       return file;
     }
   }, {
@@ -2918,6 +2921,10 @@ function () {
                     var blob = event.target.result;
 
                     if (blob) {
+                      if (blob.size === 0) {
+                        logger.error('Got empty blob from db ', query.key);
+                      }
+
                       query.resolve({
                         data: blob,
                         transaction_id: transaction_id
@@ -2999,9 +3006,9 @@ function () {
       });
     }
   }, {
-    key: "doLoad",
+    key: "doLoadFull",
     value: function () {
-      var _doLoad = asyncToGenerator_default()(
+      var _doLoadFull = asyncToGenerator_default()(
       /*#__PURE__*/
       regenerator_default.a.mark(function _callee6(info) {
         var _this7 = this;
@@ -3022,17 +3029,25 @@ function () {
                 });
 
               case 2:
+                if (!info.idb_key) {
+                  _context6.next = 7;
+                  break;
+                }
+
                 idb_key = info.idb_key; //return this.store.getItem(idb_key);
 
-                _context6.next = 5;
+                _context6.next = 6;
                 return new Promise(function (resolve, reject) {
                   _this7.load(idb_key, resolve, reject);
                 });
 
-              case 5:
+              case 6:
                 return _context6.abrupt("return", _context6.sent);
 
-              case 6:
+              case 7:
+                throw new Error('File is not loaded');
+
+              case 8:
               case "end":
                 return _context6.stop();
             }
@@ -3040,7 +3055,108 @@ function () {
         }, _callee6);
       }));
 
-      function doLoad(_x4) {
+      function doLoadFull(_x4) {
+        return _doLoadFull.apply(this, arguments);
+      }
+
+      return doLoadFull;
+    }()
+  }, {
+    key: "doLoad",
+    value: function () {
+      var _doLoad = asyncToGenerator_default()(
+      /*#__PURE__*/
+      regenerator_default.a.mark(function _callee7(info, offset, size) {
+        var count, _res, res, data_size;
+
+        return regenerator_default.a.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                if (!(!info.arr && !info.idb_key && info.file.local.path)) {
+                  _context7.next = 24;
+                  break;
+                }
+
+                _context7.prev = 1;
+                _context7.next = 4;
+                return this.client.sendInternal({
+                  '@type': 'getFileDownloadedPrefixSize',
+                  file_id: info.file.id,
+                  offset: offset
+                });
+
+              case 4:
+                count = _context7.sent;
+                logger.error(count, size);
+
+                if (size) {
+                  _context7.next = 10;
+                  break;
+                }
+
+                size = count.count;
+                _context7.next = 12;
+                break;
+
+              case 10:
+                if (!(size > count.count)) {
+                  _context7.next = 12;
+                  break;
+                }
+
+                throw new Error('File not loaded yet');
+
+              case 12:
+                _context7.next = 14;
+                return this.client.sendInternal({
+                  '@type': 'readFilePart',
+                  path: info.file.local.path,
+                  offset: offset,
+                  size: size
+                });
+
+              case 14:
+                _res = _context7.sent;
+                _res.data = new Blob([_res.data]);
+                _res.transaction_id = -2;
+                logger.error(_res);
+                return _context7.abrupt("return", _res);
+
+              case 21:
+                _context7.prev = 21;
+                _context7.t0 = _context7["catch"](1);
+                logger.info('readFilePart failed', info, offset, size, _context7.t0);
+
+              case 24:
+                _context7.next = 26;
+                return this.doLoadFull(info);
+
+              case 26:
+                res = _context7.sent;
+                // return slice(size, offset + size)
+                data_size = res.data.size;
+
+                if (!size) {
+                  size = data_size;
+                }
+
+                if (offset > data_size) {
+                  offset = data_size;
+                }
+
+                res.data = res.data.slice(offset, offset + size);
+                return _context7.abrupt("return", res);
+
+              case 32:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this, [[1, 21]]);
+      }));
+
+      function doLoad(_x5, _x6, _x7) {
         return _doLoad.apply(this, arguments);
       }
 
@@ -3057,50 +3173,44 @@ function () {
     value: function () {
       var _readFile2 = asyncToGenerator_default()(
       /*#__PURE__*/
-      regenerator_default.a.mark(function _callee7(query) {
+      regenerator_default.a.mark(function _callee8(query) {
         var info, response;
-        return regenerator_default.a.wrap(function _callee7$(_context7) {
+        return regenerator_default.a.wrap(function _callee8$(_context8) {
           while (1) {
-            switch (_context7.prev = _context7.next) {
+            switch (_context8.prev = _context8.next) {
               case 0:
-                _context7.prev = 0;
+                _context8.prev = 0;
 
-                if (!(query.offset || query.size)) {
-                  _context7.next = 3;
-                  break;
-                }
-
-                throw new Error('readFilePart: offset and size are not supported yet');
-
-              case 3:
                 if (this.isInited) {
-                  _context7.next = 5;
+                  _context8.next = 3;
                   break;
                 }
 
                 throw new Error('FileManager is not inited');
 
-              case 5:
+              case 3:
                 info = this.cache.get(query.file_id);
 
                 if (info) {
-                  _context7.next = 8;
+                  _context8.next = 6;
                   break;
                 }
 
                 throw new Error('File is not loaded');
 
-              case 8:
+              case 6:
                 if (info.node) {
                   this.lru.onUsed(info.node);
                 }
 
-                _context7.next = 11;
-                return this.doLoad(info);
+                query.offset = query.offset || 0;
+                query.size = query.size || 0;
+                _context8.next = 11;
+                return this.doLoad(info, query.offset, query.size);
 
               case 11:
-                response = _context7.sent;
-                return _context7.abrupt("return", {
+                response = _context8.sent;
+                return _context8.abrupt("return", {
                   '@type': 'filePart',
                   '@extra': query['@extra'],
                   data: response.data,
@@ -3108,24 +3218,24 @@ function () {
                 });
 
               case 15:
-                _context7.prev = 15;
-                _context7.t0 = _context7["catch"](0);
-                return _context7.abrupt("return", {
+                _context8.prev = 15;
+                _context8.t0 = _context8["catch"](0);
+                return _context8.abrupt("return", {
                   '@type': 'error',
                   '@extra': query['@extra'],
                   code: 400,
-                  message: _context7.t0
+                  message: _context8.t0
                 });
 
               case 18:
               case "end":
-                return _context7.stop();
+                return _context8.stop();
             }
           }
-        }, _callee7, this, [[0, 15]]);
+        }, _callee8, this, [[0, 15]]);
       }));
 
-      function readFile(_x5) {
+      function readFile(_x8) {
         return _readFile2.apply(this, arguments);
       }
 

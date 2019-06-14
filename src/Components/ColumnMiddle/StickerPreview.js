@@ -80,7 +80,7 @@ class StickerPreview extends React.Component {
 }
 
 StickerPreview.propTypes = {
-    sticker: PropTypes.object.isRequired
+    sticker: PropTypes.object
 };
 
 export default StickerPreview;
