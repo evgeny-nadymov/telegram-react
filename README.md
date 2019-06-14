@@ -20,3 +20,11 @@ All TDLib files will be installed into node_modules/tdweb/dist/ folder. Manually
 ```lang=bash
 cp node_modules/tdweb/dist/* public/
 ```
+
+Run the app in development mode with:
+
+```lang=bash
+npm run start
+```
+
+Open http://localhost:3000 to view it in the browser.
