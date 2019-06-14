@@ -49,7 +49,7 @@ class Sticker extends React.Component {
     };
 
     render() {
-        const { className, displaySize, blur, sticker: source, style, openMedia } = this.props;
+        const { className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
         const { thumbnail, sticker, width, height } = source;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
@@ -67,7 +67,7 @@ class Sticker extends React.Component {
 
         return (
             <div className={classNames('sticker', className)} style={stickerStyle} onClick={openMedia}>
-                {src ? (
+                {src && !preview ? (
                     <img className='sticker-image' draggable={false} src={src} alt='' />
                 ) : (
                     <img

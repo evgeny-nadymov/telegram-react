@@ -10,9 +10,10 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Sticker from '../Message/Media/Sticker';
+import StickerPreview from './StickerPreview';
 import { borderStyle } from '../Theme';
 import { loadStickerContent, loadStickersContent } from '../../Utils/File';
-import { STICKER_HINT_DISPLAY_SIZE, STICKER_PREVIEW_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
+import { STICKER_HINT_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -108,21 +109,6 @@ class StickersHint extends React.Component {
         if (this.hintsRef && this.hintsRef.current) {
             stickersPerRow = Math.floor(this.hintsRef.current.clientWidth / STICKER_HINT_DISPLAY_SIZE);
         }
-
-        TdLibController.send({
-            '@type': 'getStickerEmojis',
-            sticker: {
-                '@type': 'inputFileId',
-                id: stickerId
-            }
-        }).then(result => {
-            const { previewStickerId } = this.state;
-            if (previewStickerId === stickerId) {
-                this.setState({
-                    previewStickerEmojis: result.emojis.join(' ')
-                });
-            }
-        });
 
         const preloadStickers = this.getNeighborStickers(stickerId, items, stickersPerRow);
         preloadStickers.forEach(x => {
@@ -245,7 +231,7 @@ class StickersHint extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { hint, items, previewStickerId, previewStickerEmojis, showPreview } = this.state;
+        const { hint, items, previewStickerId, showPreview } = this.state;
         if (!hint) return null;
         if (!items) return null;
         if (!items.length) return null;
@@ -260,6 +246,7 @@ class StickersHint extends React.Component {
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
+                    preview
                     sticker={x}
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     blur={false}
@@ -277,12 +264,7 @@ class StickersHint extends React.Component {
                 onMouseOver={this.handleMouseOver}
                 onMouseDown={this.handleMouseDown}>
                 {controls}
-                {Boolean(sticker) && showPreview && (
-                    <div className='sticker-set-dialog-preview'>
-                        <div className='sticker-set-dialog-preview-emoji'>{previewStickerEmojis}</div>
-                        <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
-                    </div>
-                )}
+                {Boolean(sticker) && showPreview && <StickerPreview sticker={sticker} />}
             </div>
         );
     }

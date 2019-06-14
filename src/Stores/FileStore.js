@@ -588,7 +588,7 @@ class FileStore extends EventEmitter {
     }
 
     getStore() {
-        console.log('FileStore.getStore ' + this.transactionCount++);
+        //console.log('FileStore.getStore ' + this.transactionCount++);
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
 

@@ -7,11 +7,12 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import ChatInfoDialog from '../Dialog/ChatInfoDialog';
 import Footer from './Footer';
 import Header from './Header';
 import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
-import ChatInfoDialog from '../Dialog/ChatInfoDialog';
+import PinnedMessage from './PinnedMessage';
 import StickerSetDialog from '../Dialog/StickerSetDialog';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './DialogDetails.css';

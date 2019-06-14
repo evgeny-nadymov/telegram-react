@@ -10,9 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Sticker from '../Message/Media/Sticker';
-import { loadStickerContent } from '../../Utils/File';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
-import FileStore from '../../Stores/FileStore';
 import './StickerSet.css';
 
 const styles = theme => ({
@@ -43,30 +41,13 @@ class StickerSet extends React.Component {
         return false;
     }
 
-    componentDidMount() {
-        //this.loadContent();
-    }
-
-    loadContent = () => {
-        const { info } = this.props;
-        if (!info) return;
-
-        const { stickers } = info;
-        if (!stickers) return;
-
-        const store = FileStore.getStore();
-        stickers.forEach(x => {
-            loadStickerContent(store, x, null);
-        });
-    };
-
     render() {
         const { classes, info, onSelect, onMouseDown, onMouseOver } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
 
-        const items = stickers.map(x => (
+        const items = stickers.map((x, i) => (
             <div
                 className={classNames('sticker-set-item', classes.stickerSetItem)}
                 key={x.sticker.id}
@@ -78,6 +59,7 @@ class StickerSet extends React.Component {
                     key={x.sticker.id}
                     className='sticker-set-item-sticker'
                     sticker={x}
+                    preview
                     displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
                     blur={false}
                 />

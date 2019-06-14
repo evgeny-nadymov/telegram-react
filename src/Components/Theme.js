@@ -12,11 +12,20 @@ const borderStyle = theme => ({
 });
 
 const accentStyles = theme => ({
+    accentColorLight: {
+        color: theme.palette.primary.light
+    },
     accentColorDark: {
+        color: theme.palette.primary.dark
+    },
+    accentColorMain: {
         color: theme.palette.primary.main
     },
     accentBackgroundLight: {
         background: theme.palette.primary.light
+    },
+    accentBackgroundDark: {
+        background: theme.palette.primary.dark
     }
 });
 

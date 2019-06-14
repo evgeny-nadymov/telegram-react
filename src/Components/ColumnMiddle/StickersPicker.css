@@ -18,5 +18,7 @@
     margin-right: -15px;
     padding: 0 12px 6px 6px;
     height: 356px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
 }

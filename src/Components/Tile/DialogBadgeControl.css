@@ -29,10 +29,6 @@
     transform: translateY(-1px);
 }
 
-.dialog-badge-muted {
-    background: #d8d8d8 !important;
-}
-
 .dialog-badge-pinned {
     display: inline-block;
     float: right;

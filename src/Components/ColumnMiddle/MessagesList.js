@@ -11,6 +11,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
+import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
 import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
@@ -1007,7 +1008,7 @@ class MessagesList extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
 
         console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
@@ -1043,6 +1044,7 @@ class MessagesList extends React.Component {
                     'messages-list-selection-active': selectionActive
                 })}
                 onDragEnter={this.handleListDragEnter}>
+                <PinnedMessage chatId={chatId} />
                 <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
                     <div className='messages-list-top' />
                     <div ref={this.itemsRef} className='messages-list-items'>

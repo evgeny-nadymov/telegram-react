@@ -23,7 +23,7 @@ const styles = theme => ({
     },
     dialogRoot: {
         color: theme.palette.text.primary,
-        zIndex: 1
+        zIndex: theme.zIndex.modal
     },
     paperRoot: {
         width: 336

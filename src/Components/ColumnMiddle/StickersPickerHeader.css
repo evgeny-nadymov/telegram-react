@@ -1,0 +1,46 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.stickers-picker-header {
+    min-height: 44px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    overflow: hidden;
+}
+
+.stickers-picker-header-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+    overflow-y: hidden;
+    padding-bottom: 16px;
+    margin-bottom: -16px;
+    position: relative;
+    background: transparent;
+}
+
+.stickers-picker-header-items {
+    display: flex;
+    flex-direction: row;
+}
+
+.stickers-picker-header-sticker {
+    flex-grow: 1;
+    flex-shrink: 0;
+    min-width: 32px;
+    padding: 6px;
+}
+
+.stickers-picker-header-anchor {
+    height: 3px;
+    width: 44px;
+    will-change: transform;
+    position: absolute;
+    bottom: 16px;
+    transition: transform 500ms ease-out;
+    /*display: none;*/
+}

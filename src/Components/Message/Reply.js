@@ -76,7 +76,7 @@ class Reply extends React.Component {
                     {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
                     <div className='reply-content'>
                         {title && (
-                            <div className={classNames('reply-content-title', classes.accentColorDark)}>{title}</div>
+                            <div className={classNames('reply-content-title', classes.accentColorMain)}>{title}</div>
                         )}
                         <div className='reply-content-subtitle'>{content}</div>
                     </div>

@@ -1562,6 +1562,7 @@ export {
     loadChatsContent,
     loadUsersContent,
     loadStickerContent,
+    loadStickerThumbnailContent,
     loadStickersContent,
     loadStickerSetContent,
     saveOrDownload,

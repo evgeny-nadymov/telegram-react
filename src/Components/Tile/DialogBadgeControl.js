@@ -9,33 +9,34 @@ import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import {
-    getChatMuteFor,
     getChatUnreadCount,
     getChatUnreadMentionCount,
     getChatUnreadMessageIcon,
     isChatMuted,
     showChatDraft
 } from '../../Utils/Chat';
-import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import './DialogBadgeControl.css';
 
 const styles = theme => ({
     dialogBadge: {
         background: theme.palette.primary.main
+    },
+    dialogBadgeMuted: {
+        background: theme.palette.type === 'dark' ? theme.palette.text.disabled : '#d8d8d8'
     }
 });
 
 class DialogBadgeControl extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, theme } = this.props;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
-        if (nextProps.theme !== this.props.theme) {
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -119,14 +120,11 @@ class DialogBadgeControl extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { draft_message } = chat;
-
         const unreadMessageIcon = getChatUnreadMessageIcon(chat);
         const unreadCount = getChatUnreadCount(chat);
         const unreadMentionCount = getChatUnreadMentionCount(chat);
         const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
         const showDraftChat = showChatDraft(chat.id);
-        const muteClassName = isChatMuted(chat) ? 'dialog-badge-muted' : '';
 
         return (
             <>
@@ -137,7 +135,12 @@ class DialogBadgeControl extends React.Component {
                     </div>
                 )}
                 {showUnreadCount ? (
-                    <div className={classNames(muteClassName, 'dialog-badge', classes.dialogBadge)}>
+                    <div
+                        className={classNames(
+                            { [classes.dialogBadgeMuted]: isChatMuted(chat) },
+                            'dialog-badge',
+                            classes.dialogBadge
+                        )}>
                         <span className='dialog-badge-text'>{unreadCount}</span>
                     </div>
                 ) : chat.is_pinned && !unreadMessageIcon ? (

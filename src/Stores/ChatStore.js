@@ -159,6 +159,15 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
+            case 'updateChatPinnedMessage': {
+                const chat = this.get(update.chat_id);
+                if (chat) {
+                    this.assign(chat, { pinned_message_id: update.pinned_message_id });
+                }
+
+                this.emitFastUpdate(update);
+                break;
+            }
             case 'updateChatReadInbox': {
                 const chat = this.get(update.chat_id);
                 if (chat) {

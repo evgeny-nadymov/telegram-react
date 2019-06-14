@@ -61,7 +61,7 @@ class WebPage extends React.Component {
             return (
                 <>
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -74,7 +74,7 @@ class WebPage extends React.Component {
             return (
                 <>
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -87,7 +87,7 @@ class WebPage extends React.Component {
             return (
                 <>
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -100,7 +100,7 @@ class WebPage extends React.Component {
             return (
                 <>
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -113,7 +113,7 @@ class WebPage extends React.Component {
             return (
                 <>
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -128,7 +128,7 @@ class WebPage extends React.Component {
                 return (
                     <>
                         {site_name && (
-                            <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                            <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                         )}
                         {title && <div className='web-page-title'>{title}</div>}
                         {description && <div className='web-page-description'>{description}</div>}
@@ -143,7 +143,7 @@ class WebPage extends React.Component {
                 return (
                     <>
                         {site_name && (
-                            <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                            <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                         )}
                         {title && <div className='web-page-title'>{title}</div>}
                         {description && <div className='web-page-description'>{description}</div>}
@@ -181,7 +181,7 @@ class WebPage extends React.Component {
                         />
                     )}
                     {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                     )}
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
@@ -193,7 +193,7 @@ class WebPage extends React.Component {
         return (
             <>
                 {site_name && (
-                    <div className={classNames('web-page-site-name', classes.accentColorDark)}>{site_name}</div>
+                    <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
                 )}
                 {title && <div className='web-page-title'>{title}</div>}
                 {description && <div className='web-page-description'>{description}</div>}

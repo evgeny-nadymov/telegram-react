@@ -19,10 +19,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import ShareStickerSetButton from './ShareStickerSetButton';
 import Sticker from '../Message/Media/Sticker';
+import StickerPreview from '../ColumnMiddle/StickerPreview';
 import { loadStickerContent, loadStickerSetContent } from '../../Utils/File';
-import { STICKER_PREVIEW_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
-import StickerStore from '../../Stores/StickerStore';
+import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
+import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickerSetDialog.css';
 
@@ -223,7 +224,7 @@ class StickerSetDialog extends React.Component {
         const { stickerSet, stickerId } = this.state;
         if (!stickerSet) return null;
 
-        const { title, stickers, emojis, is_installed } = stickerSet;
+        const { title, stickers, is_installed } = stickerSet;
 
         const items = stickers.map(x => (
             <div
@@ -234,6 +235,7 @@ class StickerSetDialog extends React.Component {
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
+                    preview
                     sticker={x}
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     blur={false}
@@ -244,7 +246,6 @@ class StickerSetDialog extends React.Component {
 
         const stickerIndex = stickers.findIndex(x => x.sticker.id === stickerId);
         const sticker = stickerIndex !== -1 ? stickers[stickerIndex] : null;
-        const emoji = stickerIndex !== -1 ? emojis[stickerIndex].emojis.join(' ') : null;
 
         return (
             <Dialog
@@ -280,12 +281,7 @@ class StickerSetDialog extends React.Component {
                         {is_installed ? t('Remove') : t('Add')}
                     </Button>
                 </DialogActions>
-                {Boolean(sticker) && (
-                    <div className='sticker-set-dialog-preview'>
-                        <div className='sticker-set-dialog-preview-emoji'>{emoji}</div>
-                        <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
-                    </div>
-                )}
+                {Boolean(sticker) && <StickerPreview sticker={sticker} />}
             </Dialog>
         );
     }

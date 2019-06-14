@@ -14,15 +14,15 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import { Picker as EmojiPicker } from 'emoji-mart';
+import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
-import { EMOJI_PICKER_TIMEOUT_MS, STICKER_PREVIEW_DISPLAY_SIZE } from '../../Constants';
+import { loadStickerThumbnailContent, loadStickerSetContent } from '../../Utils/File';
+import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EmojiPickerButton.css';
-import { loadStickerSetContent } from '../../Utils/File';
-import StickerPreview from './StickerPreview';
 
 const styles = theme => ({
     iconButton: {
@@ -33,6 +33,7 @@ const styles = theme => ({
         flex: '50%'
     },
     pickerRoot: {
+        zIndex: theme.zIndex.modal,
         width: 338,
         overflowX: 'hidden',
         backgroundColor: theme.palette.background.paper,
@@ -57,6 +58,7 @@ class EmojiPickerButton extends React.Component {
             tab: 0
         };
 
+        this.emojiPickerRef = React.createRef();
         this.stickersPickerRef = React.createRef();
     }
 
@@ -104,10 +106,23 @@ class EmojiPickerButton extends React.Component {
 
         this.sets = await Promise.all(promises);
 
+        const node = this.stickersPickerRef.current;
+
         const store = FileStore.getStore();
         const previewSets = this.sets.slice(0, 5).reverse();
         previewSets.forEach(x => {
             loadStickerSetContent(store, x);
+            node.loadedSets.set(x.id, x.id);
+        });
+
+        const previewStickers = this.sets.reduce((stickers, set) => {
+            if (set.stickers.length > 0) {
+                stickers.push(set.stickers[0]);
+            }
+            return stickers;
+        }, []);
+        previewStickers.forEach(x => {
+            loadStickerThumbnailContent(store, x);
         });
     };
 
@@ -149,9 +164,15 @@ class EmojiPickerButton extends React.Component {
     };
 
     handleStickersClick = () => {
-        this.stickersPickerRef.current.loadContent(this.stickerSets, this.sets);
+        const stickersPicker = this.stickersPickerRef.current;
+        const { tab } = this.state;
+
+        stickersPicker.loadContent(this.stickerSets, this.sets);
 
         this.setState({ tab: 1 });
+        if (tab === 1) {
+            stickersPicker.scrollTop();
+        }
     };
 
     handleStickerSend = sticker => {
@@ -199,6 +220,7 @@ class EmojiPickerButton extends React.Component {
 
             this.picker = (
                 <EmojiPicker
+                    ref={this.emojiPickerRef}
                     set='apple'
                     showPreview={false}
                     showSkinTones={false}

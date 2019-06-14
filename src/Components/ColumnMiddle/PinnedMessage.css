@@ -1,0 +1,47 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.pinned-message {
+    z-index: 100;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+}
+
+.pinned-message-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 3px 12px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.pinned-message-content {
+    margin-left: 12px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.pinned-message-delete-button {
+    margin-left: 12px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+}

@@ -68,7 +68,7 @@ class Game extends React.Component {
             <div className='game'>
                 <div className={classNames('game-border', classes.accentBackgroundLight)} />
                 <div className='game-wrapper'>
-                    {title && <div className={classNames('game-title', classes.accentColorDark)}>{title}</div>}
+                    {title && <div className={classNames('game-title', classes.accentColorMain)}>{title}</div>}
                     {formattedText && <div className='game-text'>{formattedText}</div>}
                     {description && <div className='game-description'>{description}</div>}
                     {this.getContent()}
