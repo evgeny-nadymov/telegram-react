@@ -14,3 +14,9 @@ npm install
 ```
 
 This will install all the needed dependencies.
+
+All TDLib files will be installed into node_modules/tdweb/dist/ folder. Manually copy them into the public folder with:
+
+```lang=bash
+cp node_modules/tdweb/dist/* public/
+```

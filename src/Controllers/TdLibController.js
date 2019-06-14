@@ -9,7 +9,7 @@ import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
-import TdClient from '@arseny30/tdweb/dist/tdweb';
+import TdClient from 'tdweb/dist/tdweb';
 
 class TdLibController extends EventEmitter {
     constructor() {
