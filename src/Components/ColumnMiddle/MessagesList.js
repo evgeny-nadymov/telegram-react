@@ -1044,13 +1044,13 @@ class MessagesList extends React.Component {
                     'messages-list-selection-active': selectionActive
                 })}
                 onDragEnter={this.handleListDragEnter}>
-                <PinnedMessage chatId={chatId} />
                 <div ref={this.listRef} className='messages-list-wrapper' onScroll={this.handleScroll}>
                     <div className='messages-list-top' />
                     <div ref={this.itemsRef} className='messages-list-items'>
                         {this.messages}
                     </div>
                 </div>
+                <PinnedMessage chatId={chatId} />
                 <FilesDropTarget />
                 <StickersHint />
             </div>

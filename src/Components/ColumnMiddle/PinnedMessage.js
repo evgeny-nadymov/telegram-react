@@ -29,7 +29,6 @@ const styles = theme => ({
         // padding: 4
     },
     pinnedMessage: {
-        zIndex: theme.zIndex.appBar,
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
     }
