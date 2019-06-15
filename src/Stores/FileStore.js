@@ -603,14 +603,22 @@ class FileStore extends EventEmitter {
 
     getLocalFile(store, file, arr, callback, faultCallback) {
         if (useReadFile) {
+            file = this.get(file.id) || file;
+            if (file && file.local && !file.local.is_downloading_completed) {
+                faultCallback();
+                return;
+            }
+
             (async file => {
                 const response = await TdLibController.send({
                     '@type': 'readFile',
                     file_id: file.id
                 });
-                console.log(`readFile file_id=${file.id} result`, response);
+
+                console.log(`readFile result file_id=${file.id}`, file, response);
                 this.setBlob(file.id, response.data);
             })(file).then(callback, faultCallback);
+
             return;
         }
 
