@@ -2755,7 +2755,7 @@ function () {
     key: "onUsed",
     value: function onUsed(other) {
       other.usedAt = Date.now();
-      other.clear();
+      other.erase();
       other.connect(this.next);
       logger.debug('LRU: used file_id: ', other.value);
       this.connect(other);
