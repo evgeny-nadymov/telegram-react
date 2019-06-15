@@ -32,7 +32,11 @@ const styles = theme => ({
 
 class StickerSet extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { info } = this.props;
+        const { info, theme } = this.props;
+
+        if (theme !== nextProps.theme) {
+            return true;
+        }
 
         if (info !== nextProps.info) {
             return true;
@@ -83,4 +87,4 @@ StickerSet.propTypes = {
     onMouseDown: PropTypes.func.isRequired
 };
 
-export default withStyles(styles)(StickerSet);
+export default withStyles(styles, { withTheme: true })(StickerSet);

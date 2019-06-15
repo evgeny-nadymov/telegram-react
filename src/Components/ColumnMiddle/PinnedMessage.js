@@ -51,7 +51,7 @@ class PinnedMessage extends React.Component {
 
         if (prevPropsChatId !== chatId) {
             const chat = ChatStore.get(chatId);
-            console.log('PinnedMessage.getDerivedStateFromProps', chat, chat.pinned_message_id);
+            //console.log('PinnedMessage.getDerivedStateFromProps', chat, chat.pinned_message_id);
             return {
                 prevPropsChatId: chatId,
                 messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
@@ -120,8 +120,16 @@ class PinnedMessage extends React.Component {
     };
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { chatId } = this.props;
+        const { chatId, t, theme } = this.props;
         const { messageId } = this.state;
+
+        if (nextProps.t !== t) {
+            return true;
+        }
+
+        if (nextProps.theme !== theme) {
+            return true;
+        }
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -153,7 +161,7 @@ class PinnedMessage extends React.Component {
         const { messageId } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
-        console.log('PinnedMessage.message', chatId, messageId, message);
+        //console.log('PinnedMessage.message', chatId, messageId, message);
         if (!message) return null;
 
         let content = !message ? t('Loading') : getContent(message, t);
@@ -171,7 +179,9 @@ class PinnedMessage extends React.Component {
                     <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                     {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
                     <div className='pinned-message-content'>
-                        <div className={classNames('reply-content-title', classes.accentColorMain)}>Pinned message</div>
+                        <div className={classNames('reply-content-title', classes.accentColorMain)}>
+                            {t('PinnedMessage')}
+                        </div>
                         <div className='reply-content-subtitle'>{content}</div>
                     </div>
                     <div className='pinned-message-delete-button'>
