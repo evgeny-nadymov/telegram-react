@@ -132,10 +132,17 @@ class TdLibController extends EventEmitter {
     send = request => {
         if (!this.disableLog) {
             console.log('send', request);
-            return this.client.send(request).then(result => {
-                console.log('receive', result);
-                return result;
-            });
+            return this.client
+                .send(request)
+                .then(result => {
+                    console.log('receive', result);
+                    return result;
+                })
+                .catch(error => {
+                    console.error('catch', error);
+
+                    throw error;
+                });
         } else {
             return this.client.send(request);
         }

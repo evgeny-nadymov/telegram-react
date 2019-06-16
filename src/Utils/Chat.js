@@ -1159,6 +1159,77 @@ function getChatDraftReplyToMessageId(chatId) {
     return replyToMessageId;
 }
 
+function canPinMessages(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+    if (!type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            const basicGroup = BasicGroupStore.get(type.basic_group_id);
+            if (basicGroup && basicGroup.status) {
+                switch (basicGroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        return basicGroup.status.can_pin_messages;
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember': {
+                        return false;
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        return false;
+                    }
+                }
+            }
+
+            break;
+        }
+        case 'chatTypePrivate': {
+            return isMeChat(chatId);
+        }
+        case 'chatTypeSecret': {
+            return false;
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(type.supergroup_id);
+            if (supergroup && supergroup.status) {
+                switch (supergroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        return supergroup.status.can_pin_messages;
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember': {
+                        return false;
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 export {
     showChatDraft,
     getChatDraft,
@@ -1202,6 +1273,7 @@ export {
     isMeChat,
     canClearHistory,
     canDeleteChat,
+    canPinMessages,
     canSendFiles,
     canSendMessages,
     canSendPhotos,

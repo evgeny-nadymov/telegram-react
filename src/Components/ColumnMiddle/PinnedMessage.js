@@ -11,13 +11,22 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
+import Button from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import ReplyTile from '../Tile/ReplyTile';
 import { accentStyles, borderStyle } from '../Theme';
+import { canPinMessages } from '../../Utils/Chat';
 import { getContent, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
+import { loadMessageContents } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
@@ -41,6 +50,7 @@ class PinnedMessage extends React.Component {
         const chat = ChatStore.get(props.chatId);
         this.state = {
             prevPropsChatId: props.chatId,
+            clientData: ChatStore.getClientData(props.chatId),
             messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
         };
     }
@@ -51,9 +61,9 @@ class PinnedMessage extends React.Component {
 
         if (prevPropsChatId !== chatId) {
             const chat = ChatStore.get(chatId);
-            //console.log('PinnedMessage.getDerivedStateFromProps', chat, chat.pinned_message_id);
             return {
                 prevPropsChatId: chatId,
+                clientData: ChatStore.getClientData(chatId),
                 messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
             };
         }
@@ -73,11 +83,21 @@ class PinnedMessage extends React.Component {
         this.loadContent();
 
         ChatStore.on('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
+        ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
     }
 
     componentWillUnmount() {
         ChatStore.removeListener('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
+        ChatStore.removeListener('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
     }
+
+    onClientUpdateSetChatClientData = update => {
+        const { chatId, clientData } = update;
+
+        if (this.props.chatId !== chatId) return;
+
+        this.setState({ clientData });
+    };
 
     onUpdateChatPinnedMessage = update => {
         const { chat_id, pinned_message_id } = update;
@@ -105,6 +125,10 @@ class PinnedMessage extends React.Component {
         })
             .then(result => {
                 MessageStore.set(result);
+
+                const store = FileStore.getStore();
+                loadMessageContents(store, [result]);
+
                 this.forceUpdate();
             })
             .catch(error => {
@@ -121,7 +145,7 @@ class PinnedMessage extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { chatId, t, theme } = this.props;
-        const { messageId } = this.state;
+        const { clientData, confirm, messageId } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -132,6 +156,14 @@ class PinnedMessage extends React.Component {
         }
 
         if (nextProps.chatId !== chatId) {
+            return true;
+        }
+
+        if (nextState.clientData !== clientData) {
+            return true;
+        }
+
+        if (nextState.confirm !== confirm) {
             return true;
         }
 
@@ -151,17 +183,52 @@ class PinnedMessage extends React.Component {
         openChat(chatId, messageId);
     };
 
-    handleDelete = event => {
+    handleDelete = async event => {
         event.preventDefault();
         event.stopPropagation();
+
+        const { chatId } = this.props;
+        const { messageId } = this.state;
+
+        const canPin = canPinMessages(chatId);
+        if (canPin) {
+            this.setState({ confirm: true });
+        } else {
+            this.setState({ confirm: true });
+            const data = ChatStore.getClientData(chatId);
+            await TdLibController.clientUpdate({
+                '@type': 'clientUpdateSetChatClientData',
+                chatId: chatId,
+                clientData: Object.assign({}, data, { unpinned_message_id: messageId })
+            });
+        }
+    };
+
+    handleUnpin = async () => {
+        const { chatId } = this.props;
+
+        this.handleClose();
+
+        TdLibController.send({
+            '@type': 'unpinChatMessage',
+            chat_id: chatId
+        });
+    };
+
+    handleClose = () => {
+        this.setState({ confirm: false });
     };
 
     render() {
         const { chatId, classes, t } = this.props;
-        const { messageId } = this.state;
+        const { messageId, confirm } = this.state;
+
+        if (!chatId) return null;
+
+        const { unpinned_message_id } = ChatStore.getClientData(chatId);
+        if (unpinned_message_id === messageId) return null;
 
         const message = MessageStore.get(chatId, messageId);
-        //console.log('PinnedMessage.message', chatId, messageId, message);
         if (!message) return null;
 
         let content = !message ? t('Loading') : getContent(message, t);
@@ -172,25 +239,47 @@ class PinnedMessage extends React.Component {
         }
 
         return (
-            <div
-                className={classNames('pinned-message', classes.pinnedMessage, classes.borderColor)}
-                onClick={this.handleClick}>
-                <div className='pinned-message-wrapper'>
-                    <div className={classNames('reply-border', classes.accentBackgroundLight)} />
-                    {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
-                    <div className='pinned-message-content'>
-                        <div className={classNames('reply-content-title', classes.accentColorMain)}>
-                            {t('PinnedMessage')}
+            <>
+                <div
+                    className={classNames('pinned-message', classes.pinnedMessage, classes.borderColor)}
+                    onClick={this.handleClick}>
+                    <div className='pinned-message-wrapper'>
+                        <div className={classNames('reply-border', classes.accentBackgroundLight)} />
+                        {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
+                        <div className='pinned-message-content'>
+                            <div className={classNames('reply-content-title', classes.accentColorMain)}>
+                                {t('PinnedMessage')}
+                            </div>
+                            <div className='reply-content-subtitle'>{content}</div>
                         </div>
-                        <div className='reply-content-subtitle'>{content}</div>
-                    </div>
-                    <div className='pinned-message-delete-button'>
-                        <IconButton className={classes.iconButton} onClick={this.handleDelete}>
-                            <CloseIcon />
-                        </IconButton>
+                        <div className='pinned-message-delete-button'>
+                            <IconButton className={classes.iconButton} onClick={this.handleDelete}>
+                                <CloseIcon />
+                            </IconButton>
+                        </div>
                     </div>
                 </div>
-            </div>
+                {confirm && (
+                    <Dialog
+                        transitionDuration={0}
+                        open
+                        onClose={this.handleClose}
+                        aria-labelledby='unpin-message-confirmation'>
+                        <DialogTitle id='unpin-message-confirmation'>{t('AppName')}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>{t('UnpinMessageAlert')}</DialogContentText>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={this.handleClose} color='primary'>
+                                {t('Cancel')}
+                            </Button>
+                            <Button onClick={this.handleUnpin} color='primary'>
+                                {t('Ok')}
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                )}
+            </>
         );
     }
 }
