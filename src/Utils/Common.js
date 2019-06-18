@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { formatNumber } from 'libphonenumber-js';
+import { formatNumber, formatIncompletePhoneNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
 function getOSName() {
@@ -296,6 +296,12 @@ function formatPhoneNumber(number) {
     return formattedNumber || unformattedNumber;
 }
 
+function formatPhoneNumberSimple(code, number, countryCode) {
+    let result = formatIncompletePhoneNumber('+' + code + number, countryCode);
+
+    return result.substr(code.length + 1).trim();
+}
+
 /**
  * use this to make a Base64 encoded string URL friendly,
  * i.e. '+' and '/' are replaced with '-' and '_' also any trailing '='
@@ -381,6 +387,7 @@ export {
     getLetters,
     readImageSize,
     formatPhoneNumber,
+    formatPhoneNumberSimple,
     arrayBufferToBase64,
     isAuthorizationReady,
     between,

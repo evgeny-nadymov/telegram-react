@@ -22,6 +22,8 @@ function withTheme(WrappedComponent) {
             const cookies = new Cookies();
             const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: blue };
 
+            document.body.className = document.body.className.replace(/\w+-theme/g, '').trim() + type + '-theme';
+
             let theme = createMuiTheme({
                 palette: {
                     type: type,
