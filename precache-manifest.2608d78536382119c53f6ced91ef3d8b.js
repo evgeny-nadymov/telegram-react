@@ -1,39 +1,39 @@
 self.__precacheManifest = [
   {
-    "revision": "17c8e28aa4345564cc60",
+    "revision": "6a78665a1930dea572a5",
     "url": "/telegram-react/static/css/main.f0cc6d71.chunk.css"
   },
   {
-    "revision": "17c8e28aa4345564cc60",
-    "url": "/telegram-react/static/js/main.1fd9056e.chunk.js"
+    "revision": "6a78665a1930dea572a5",
+    "url": "/telegram-react/static/js/main.bfdac45d.chunk.js"
   },
   {
-    "revision": "920d36472d1a198d8168",
-    "url": "/telegram-react/static/js/runtime~main.237d7034.js"
+    "revision": "4b4ecc760d14b7e7c584",
+    "url": "/telegram-react/static/js/runtime~main.93d8e8e0.js"
   },
   {
-    "revision": "4d0799650822a5c60f22",
-    "url": "/telegram-react/static/js/2.f0c349ee.chunk.js"
+    "revision": "a8e4e8f7c720b027454c",
+    "url": "/telegram-react/static/js/2.415dde49.chunk.js"
   },
   {
-    "revision": "2fc2a8ffb19a4182c7c8",
+    "revision": "80dc190933e109872cd1",
     "url": "/telegram-react/static/css/3.b63b0b76.chunk.css"
   },
   {
-    "revision": "2fc2a8ffb19a4182c7c8",
-    "url": "/telegram-react/static/js/3.9aa8609b.chunk.js"
+    "revision": "80dc190933e109872cd1",
+    "url": "/telegram-react/static/js/3.5f91db93.chunk.js"
   },
   {
-    "revision": "4d5f6ed575f18ab6df18",
-    "url": "/telegram-react/static/js/4.1a40d05f.chunk.js"
+    "revision": "4ff00d98f69ab229fdf3",
+    "url": "/telegram-react/static/js/4.199dd1cb.chunk.js"
   },
   {
-    "revision": "d6f284f2fe2389356bc9",
+    "revision": "5e28436adaa6eb134703",
     "url": "/telegram-react/static/css/5.9ecaf00e.chunk.css"
   },
   {
-    "revision": "d6f284f2fe2389356bc9",
-    "url": "/telegram-react/static/js/5.36b805bd.chunk.js"
+    "revision": "5e28436adaa6eb134703",
+    "url": "/telegram-react/static/js/5.4ef1e5d2.chunk.js"
   },
   {
     "revision": "2798eac6d5c092df3933",
@@ -68,7 +68,7 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/media/IconsetW_2x.f01cec9b.png"
   },
   {
-    "revision": "c0c1e945165184795187f78312ef1b27",
+    "revision": "e3dd3ddff25e64969b84dbb66023e89f",
     "url": "/telegram-react/index.html"
   }
 ];
