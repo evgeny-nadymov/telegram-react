@@ -44,6 +44,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                 local: {
                     DeletedMessage: 'Deleted message',
                     YourPhone: 'Your Phone',
+                    Country: 'Country',
                     StartText: 'Please confirm your country code and enter your phone number.',
                     Next: 'Next',
                     InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
@@ -81,6 +82,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                 local: {
                     DeletedMessage: 'Удаленное сообщение',
                     YourPhone: 'Ваш телефон',
+                    Country: 'Страна',
                     StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
                     Next: 'Далее',
                     InvalidPhoneNumber:

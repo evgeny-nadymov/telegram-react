@@ -78,7 +78,7 @@ class ConfirmCodeControl extends React.Component {
     }
 
     handleBack() {
-        this.props.onChangePhone();
+        this.props.onBack();
     }
 
     isValid(code) {
