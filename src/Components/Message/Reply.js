@@ -53,6 +53,7 @@ class Reply extends React.Component {
         if (isDeletedMessage(message)) return null;
 
         openChat(chatId, messageId);
+        if (typeof this.props.onOpenChat === 'function') this.props.onOpenChat(this.props);
     };
 
     render() {
