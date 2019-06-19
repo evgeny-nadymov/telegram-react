@@ -22,7 +22,7 @@ import SearchCaption from './SearchCaption';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
-import { orderCompare } from '../../../Utils/Common';
+import { orderCompare, equal } from '../../../Utils/Common';
 import { USERNAME_LENGTH_MIN } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import FileStore from '../../../Stores/FileStore';
@@ -184,14 +184,6 @@ class Search extends React.Component {
                     local.splice(0, 0, savedMessages.id);
                 }
             }
-
-            this.setState({
-                top: null,
-                recentlyFound: null,
-                local: local,
-                global: null,
-                messages: null
-            });
 
             store = FileStore.getStore();
             loadChatsContent(store, local);
@@ -474,6 +466,32 @@ class Search extends React.Component {
 
         onClose();
     };
+
+    isTheSame = (nextState, field, compareField) => {
+        const a1 = this.state[field],
+            a2 = nextState[field],
+            l1 = a1 && a1.length,
+            l2 = a2 && a2.length;
+
+        if (!a1 && !a2) return true;
+
+        if (l1 !== l2) return false;
+
+        return equal(a1[compareField], a2[compareField]);
+    };
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if (!equal(this.state.local, nextState.local) || !equal(this.state.global, nextState.global)) return true;
+
+        if (
+            !this.isTheSame(nextState, 'recentlyFound', 'chat_ids') ||
+            !this.isTheSame(nextState, 'top', 'chat_ids') ||
+            !this.isTheSame(nextState, 'messages', 'messages')
+        )
+            return true;
+
+        return false;
+    }
 
     render() {
         const { classes, chatId } = this.props;
