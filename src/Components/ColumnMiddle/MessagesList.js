@@ -1043,7 +1043,12 @@ class MessagesList extends React.Component {
     };
 
     onJumpReply = props => {
-        if (props.chatId === this.props.chatId) this.jumpHistory.push(props);
+        if (props.chatId === this.props.chatId) {
+            const len = this.jumpHistory.length;
+            if (len > 0 && this.jumpHistory[len - 1].messageId === props.messageId) return;
+
+            this.jumpHistory.push(props);
+        }
     };
 
     onGoBack = () => {
