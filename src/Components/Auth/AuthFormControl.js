@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import SignInControl from './SignInControl';
 import ConfirmCodeControl from './ConfirmCodeControl';
 import PasswordControl from './PasswordControl';
 import AuthErrorDialog from './AuthErrorDialog';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import './AuthFormControl.css';
 
 const styles = theme => ({
@@ -25,24 +26,16 @@ const styles = theme => ({
 });
 
 class AuthFormControl extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.phone = null;
-
-        this.handlePhoneEnter = this.handlePhoneEnter.bind(this);
-    }
-
-    handlePhoneEnter(phone) {
-        this.phone = phone;
-    }
-
     render() {
         const { classes, authorizationState } = this.props;
+        const { defaultPhone } = ApplicationStore;
 
         let control = null;
         switch (authorizationState['@type']) {
             case 'authorizationStateWaitPhoneNumber':
+            case 'authorizationStateWaitEncryptionKey':
+            case 'authorizationStateWaitTdlibParameters':
+            case 'authorizationStateWaitTdlib': {
                 // control = (
                 //     <>
                 //         <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
@@ -50,27 +43,40 @@ class AuthFormControl extends React.Component {
                 //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
                 //         <SignUpControl/>
                 //     </>);
-                control = <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter} />;
+                control = <SignInControl defaultPhone={defaultPhone} />;
                 break;
-            case 'authorizationStateWaitCode':
+            }
+            case 'authorizationStateWaitCode': {
+                const { onChangePhone } = this.props;
+                const { terms_of_service, code_info } = authorizationState;
+
                 control = (
                     <ConfirmCodeControl
-                        termsOfService={authorizationState.terms_of_service}
-                        codeInfo={authorizationState.code_info}
-                        onChangePhone={this.props.onChangePhone}
+                        termsOfService={terms_of_service}
+                        codeInfo={code_info}
+                        onChangePhone={onChangePhone}
                     />
                 );
                 break;
-            case 'authorizationStateWaitPassword':
+            }
+            case 'authorizationStateWaitPassword': {
+                const { onChangePhone } = this.props;
+                const {
+                    password_hint,
+                    has_recovery_email_address,
+                    recovery_email_address_pattern
+                } = authorizationState;
+
                 control = (
                     <PasswordControl
-                        passwordHint={authorizationState.password_hint}
-                        hasRecoveryEmailAddress={authorizationState.has_recovery_email_address}
-                        recoveryEmailAddressPattern={authorizationState.recovery_email_address_pattern}
-                        onChangePhone={this.props.onChangePhone}
+                        passwordHint={password_hint}
+                        hasRecoveryEmailAddress={has_recovery_email_address}
+                        recoveryEmailAddressPattern={recovery_email_address_pattern}
+                        onChangePhone={onChangePhone}
                     />
                 );
                 break;
+            }
             default:
                 break;
         }

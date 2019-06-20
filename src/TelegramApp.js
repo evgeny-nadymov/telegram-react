@@ -51,6 +51,7 @@ class TelegramApp extends Component {
 
         this.state = {
             authorizationState: null,
+            databaseExists: true,
             inactive: false,
             fatalError: false
         };
@@ -65,18 +66,33 @@ class TelegramApp extends Component {
     componentDidMount() {
         TdLibController.addListener('update', this.onUpdate);
 
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        ApplicationStore.on('clientUpdateDatabaseExists', this.onClientUpdateDatabaseExists);
+        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
     }
 
     componentWillUnmount() {
         TdLibController.removeListener('update', this.onUpdate);
 
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        ApplicationStore.removeListener('clientUpdateDatabaseExists', this.onClientUpdateDatabaseExists);
+        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
     }
+
+    onClientUpdateDatabaseExists = update => {
+        const { exists } = update;
+
+        if (!exists) {
+            this.setState({
+                authorizationState: {
+                    '@type': 'authorizationStateWaitTdlib'
+                },
+                databaseExists: exists
+            });
+        }
+    };
 
     onUpdate = update => {
         if (OPTIMIZATIONS_FIRST_START) {
@@ -100,13 +116,13 @@ class TelegramApp extends Component {
     };
 
     onUpdateAuthorizationState = update => {
-        const { authorization_state } = update;
+        const { authorization_state: authorizationState } = update;
 
-        this.setState({ authorizationState: authorization_state });
+        this.setState({ authorizationState });
 
         if (!window.hasFocus) return;
-        if (!authorization_state) return;
-        if (authorization_state['@type'] !== 'authorizationStateReady') return;
+        if (!authorizationState) return;
+        if (authorizationState['@type'] !== 'authorizationStateReady') return;
 
         TdLibController.send({
             '@type': 'setOption',
@@ -151,7 +167,7 @@ class TelegramApp extends Component {
 
     render() {
         const { t } = this.props;
-        const { inactive, authorizationState, fatalError } = this.state;
+        const { inactive, authorizationState, databaseExists, fatalError } = this.state;
 
         const loading = t('Loading').replace('...', '');
         let page = <StubPage title={loading} />;
@@ -174,6 +190,7 @@ class TelegramApp extends Component {
                 case 'authorizationStateWaitCode':
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
+                case 'authorizationStateWaitTdlib':
                     page = (
                         <AuthFormControl
                             authorizationState={authorizationState}
@@ -181,10 +198,17 @@ class TelegramApp extends Component {
                         />
                     );
                     break;
-                case 'authorizationStateWaitEncryptionKey': {
-                    break;
-                }
+                case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {
+                    if (!databaseExists) {
+                        page = (
+                            <AuthFormControl
+                                authorizationState={authorizationState}
+                                onChangePhone={this.handleChangePhone}
+                            />
+                        );
+                    }
+
                     break;
                 }
             }

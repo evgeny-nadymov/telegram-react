@@ -130,7 +130,7 @@ class PasswordControl extends React.Component {
                 </div>
                 <div>Please enter your cloud password.</div>
                 <FormControl fullWidth className={classNames(classes.margin, classes.textField)}>
-                    <InputLabel htmlFor='adornment-password' error={error}>
+                    <InputLabel htmlFor='adornment-password' error={Boolean(error)}>
                         Your cloud password
                     </InputLabel>
                     <Input

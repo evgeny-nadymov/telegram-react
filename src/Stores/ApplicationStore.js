@@ -13,12 +13,14 @@ class ApplicationStore extends EventEmitter {
     constructor() {
         super();
 
+        this.setPhoneNumberRequest = null;
         this.chatId = 0;
         this.dialogChatId = 0;
         this.messageId = null;
         this.statistics = new Map();
         this.scopeNotificationSettings = new Map();
         this.authorizationState = null;
+        this.defaultPhone = null;
         this.connectionState = null;
         this.isChatDetailsVisible = false;
         this.mediaViewerContent = null;
@@ -66,14 +68,22 @@ class ApplicationStore extends EventEmitter {
                     case 'authorizationStateWaitEncryptionKey':
                         TdLibController.send({ '@type': 'checkDatabaseEncryptionKey' });
                         break;
-                    case 'authorizationStateWaitPhoneNumber':
+                    case 'authorizationStateWaitPhoneNumber': {
+                        if (this.setPhoneNumberRequest) {
+                            this.setPhoneNumberRequest();
+
+                            this.setPhoneNumberRequest = null;
+                        }
+
                         break;
+                    }
                     case 'authorizationStateWaitCode':
                         break;
                     case 'authorizationStateWaitPassword':
                         break;
                     case 'authorizationStateReady':
                         this.loggingOut = false;
+                        this.setPhoneNumberRequest = null;
                         break;
                     case 'authorizationStateClosing':
                         break;
@@ -156,6 +166,42 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
+            case 'clientUpdateDatabaseExists': {
+                this.emit('clientUpdateDatabaseExists', update);
+                break;
+            }
+            case 'clientUpdateSetPhone': {
+                const { phone } = update;
+
+                this.defaultPhone = phone;
+
+                if (!phone) {
+                    this.setPhoneNumberRequest = null;
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateSetPhoneCanceled'
+                    });
+                } else {
+                    if (
+                        this.authorizationState &&
+                        this.authorizationState['@type'] === 'authorizationStateWaitPhoneNumber'
+                    ) {
+                        this.setPhoneNumber(phone);
+                    } else {
+                        this.setPhoneNumberRequest = () => this.setPhoneNumber(phone);
+                    }
+                }
+
+                this.emit('clientUpdateSetPhone', update);
+                break;
+            }
+            case 'clientUpdateSetPhoneResult': {
+                this.emit('clientUpdateSetPhoneResult', update);
+                break;
+            }
+            case 'clientUpdateSetPhoneError': {
+                this.emit('clientUpdateSetPhoneError', update);
+                break;
+            }
             case 'clientUpdateDialogChatId': {
                 const { chatId } = update;
                 this.dialogChatId = chatId;
@@ -185,6 +231,25 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
         }
+    };
+
+    setPhoneNumber = phone => {
+        TdLibController.send({
+            '@type': 'setAuthenticationPhoneNumber',
+            phone_number: phone
+        })
+            .then(result => {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateSetPhoneResult',
+                    result
+                });
+            })
+            .catch(error => {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateSetPhoneError',
+                    error
+                });
+            });
     };
 
     onUpdateStatistics = update => {

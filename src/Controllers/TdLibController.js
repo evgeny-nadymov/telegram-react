@@ -11,6 +11,19 @@ import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
 import TdClient from 'tdweb/dist/tdweb';
 
+function databaseExists(dbname, callback) {
+    var req = indexedDB.open(dbname);
+    var existed = true;
+    req.onsuccess = function() {
+        req.result.close();
+        if (!existed) indexedDB.deleteDatabase(dbname);
+        callback(existed);
+    };
+    req.onupgradeneeded = function() {
+        existed = false;
+    };
+}
+
 class TdLibController extends EventEmitter {
     constructor() {
         super();
@@ -34,33 +47,38 @@ class TdLibController extends EventEmitter {
         this.setParameters(location);
 
         const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
+        const dbName = useTestDC ? 'tdlib_test' : 'tdlib';
 
-        let options = {
-            logVerbosityLevel: verbosity,
-            jsLogVerbosityLevel: jsVerbosity,
-            mode: mode, // 'wasm-streaming'/'wasm'/'asmjs'
-            prefix: useTestDC ? 'tdlib_test' : 'tdlib',
-            readOnly: readOnly,
-            isBackground: false,
-            useDatabase: useDatabase
-            // onUpdate: update => this.emit('update', update)
-        };
+        databaseExists(dbName, exists => {
+            this.clientUpdate({ '@type': 'clientUpdateDatabaseExists', exists });
 
-        console.log(
-            `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(options)}`
-        );
+            let options = {
+                logVerbosityLevel: verbosity,
+                jsLogVerbosityLevel: jsVerbosity,
+                mode: mode, // 'wasm-streaming'/'wasm'/'asmjs'
+                prefix: useTestDC ? 'tdlib_test' : 'tdlib',
+                readOnly: readOnly,
+                isBackground: false,
+                useDatabase: useDatabase
+                // onUpdate: update => this.emit('update', update)
+            };
 
-        this.client = new TdClient(options);
-        this.client.onUpdate = update => {
-            if (!this.disableLog) {
-                if (update['@type'] === 'updateFile') {
-                    console.log('receive updateFile file_id=' + update.file.id, update);
-                } else {
-                    console.log('receive update', update);
+            console.log(
+                `[TdLibController] (fast_updating=${fastUpdating}) Start client with params=${JSON.stringify(options)}`
+            );
+
+            this.client = new TdClient(options);
+            this.client.onUpdate = update => {
+                if (!this.disableLog) {
+                    if (update['@type'] === 'updateFile') {
+                        console.log('receive updateFile file_id=' + update.file.id, update);
+                    } else {
+                        console.log('receive update', update);
+                    }
                 }
-            }
-            this.emit('update', update);
-        };
+                this.emit('update', update);
+            };
+        });
     };
 
     clientUpdate = update => {

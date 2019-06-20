@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { isValidPhoneNumber } from '../../Utils/Common';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
+import { isValidPhoneNumber } from '../../Utils/Common';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -48,14 +50,41 @@ class SignInControl extends React.Component {
     componentDidMount() {
         this.handleSuggestedLanguagePackId();
 
-        OptionStore.on('updateOption', this.handleUpdateOption);
+        ApplicationStore.on('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
+        ApplicationStore.on('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
+        ApplicationStore.on('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
+        OptionStore.on('updateOption', this.onUpdateOption);
     }
 
     componentWillUnmount() {
-        OptionStore.removeListener('updateOption', this.handleUpdateOption);
+        ApplicationStore.removeListener('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
+        ApplicationStore.removeListener('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
+        ApplicationStore.removeListener('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
+        OptionStore.removeListener('updateOption', this.onUpdateOption);
     }
 
-    handleUpdateOption = update => {
+    onClientUpdateSetPhoneCanceled = update => {
+        this.setState({ loading: false });
+    };
+
+    onClientUpdateSetPhoneError = update => {
+        const { error } = update;
+
+        let errorString = null;
+        if (error && error['@type'] === 'error' && error.message) {
+            errorString = error.message;
+        } else {
+            errorString = JSON.stringify(error);
+        }
+
+        this.setState({ error: { string: errorString }, loading: false });
+    };
+
+    onClientUpdateSetPhoneResult = update => {
+        this.setState({ loading: false });
+    };
+
+    onUpdateOption = update => {
         const { name } = update;
 
         if (name === 'suggested_language_pack_id') {
@@ -82,11 +111,11 @@ class SignInControl extends React.Component {
     };
 
     handleNext = () => {
-        const { phone } = this.props;
+        const { defaultPhone } = this.props;
 
-        const phoneNumber = this.phoneNumber || phone;
+        const phone = this.enteredPhone || defaultPhone;
 
-        if (isValidPhoneNumber(phoneNumber)) {
+        if (isValidPhoneNumber(phone)) {
             this.setState({ error: null, openConfirmation: true });
         } else {
             this.setState({ error: { code: 'InvalidPhoneNumber' } });
@@ -94,7 +123,7 @@ class SignInControl extends React.Component {
     };
 
     handleChange = event => {
-        this.phoneNumber = event.target.value;
+        this.enteredPhone = event.target.value;
     };
 
     handleKeyPress = event => {
@@ -105,34 +134,19 @@ class SignInControl extends React.Component {
     };
 
     handleDone = () => {
-        const { phone, onPhoneEnter } = this.props;
+        const { defaultPhone } = this.props;
 
-        const phoneNumber = this.phoneNumber || phone;
-        if (!isValidPhoneNumber(phoneNumber)) {
+        const phone = this.enteredPhone || defaultPhone;
+        if (!isValidPhoneNumber(phone)) {
             this.setState({ error: { code: 'InvalidPhoneNumber' } });
             return;
         }
 
-        onPhoneEnter(phoneNumber);
         this.setState({ error: null, loading: true });
-        TdLibController.send({
-            '@type': 'setAuthenticationPhoneNumber',
-            phone_number: phoneNumber
-        })
-            .then(result => {})
-            .catch(error => {
-                let errorString = null;
-                if (error && error['@type'] === 'error' && error.message) {
-                    errorString = error.message;
-                } else {
-                    errorString = JSON.stringify(error);
-                }
-
-                this.setState({ error: { string: errorString } });
-            })
-            .finally(() => {
-                this.setState({ loading: false });
-            });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateSetPhone',
+            phone
+        });
     };
 
     handleChangeLanguage = () => {
@@ -148,7 +162,7 @@ class SignInControl extends React.Component {
     };
 
     render() {
-        const { phone, classes, t } = this.props;
+        const { defaultPhone, classes, t } = this.props;
         const { loading, error, suggestedLanguage } = this.state;
 
         let errorString = '';
@@ -178,7 +192,7 @@ class SignInControl extends React.Component {
                     margin='normal'
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
-                    defaultValue={phone}
+                    defaultValue={defaultPhone}
                 />
                 <FormHelperText id='sign-in-error-text'>{errorString}</FormHelperText>
                 <div className='sign-in-actions'>
@@ -200,6 +214,10 @@ class SignInControl extends React.Component {
         );
     }
 }
+
+SignInControl.propTypes = {
+    defaultPhone: PropTypes.string
+};
 
 const enhance = compose(
     withTranslation(),
