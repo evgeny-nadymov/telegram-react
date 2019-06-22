@@ -18,12 +18,12 @@ import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import './Animation.css';
+import Player from '../../Player/Player';
 
 class Animation extends React.Component {
     constructor(props) {
         super(props);
-
-        this.videoRef = React.createRef();
+        this.playerRef = React.createRef();
 
         this.focused = window.hasFocus;
         this.inView = false;
@@ -53,10 +53,10 @@ class Animation extends React.Component {
     }
 
     startStopPlayer = () => {
-        const player = this.videoRef.current;
+        const player = this.playerRef.current;
+
         if (player) {
             if (this.inView && this.focused && !this.openMediaViewer && !this.openProfileMediaViewer) {
-                //console.log('clientUpdate player play message_id=' + this.props.messageId);
                 player.play();
             } else {
                 //console.log('clientUpdate player pause message_id=' + this.props.messageId);
@@ -138,10 +138,9 @@ class Animation extends React.Component {
                     isGif ? (
                         <img className='media-viewer-content-image' style={style} src={src} alt='' />
                     ) : (
-                        <video
-                            ref={this.videoRef}
+                        <Player
+                            ref={this.playerRef}
                             className='media-viewer-content-image'
-                            src={src}
                             poster={thumbnailSrc}
                             muted
                             autoPlay
@@ -149,6 +148,8 @@ class Animation extends React.Component {
                             playsInline
                             width={style.width}
                             height={style.height}
+                            mimeType={mime_type}
+                            src={src}
                         />
                     )
                 ) : (

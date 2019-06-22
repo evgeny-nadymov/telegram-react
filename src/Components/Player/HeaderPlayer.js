@@ -22,12 +22,14 @@ import ShuffleButton from '../Player/ShuffleButton';
 import PlaybackRateButton from './PlaybackRateButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
+import Player from './Player';
 import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
-import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
+import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
+import StickyPlayer from './StickyPlayer';
 import PlayerStore from '../../Stores/PlayerStore';
 import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -45,7 +47,7 @@ class HeaderPlayer extends React.Component {
     constructor(props) {
         super(props);
 
-        this.videoRef = React.createRef();
+        this.playerRef = React.createRef();
 
         const { message, playlist } = PlayerStore;
 
@@ -123,19 +125,13 @@ class HeaderPlayer extends React.Component {
     onClientUpdateMediaPlaybackRate = update => {
         const { playbackRate } = update;
 
-        const player = this.videoRef.current;
-        if (!player) return;
-
-        player.playbackRate = playbackRate;
+        if (this.playerRef.current) this.playerRef.current.setPlaybackRate(playbackRate);
     };
 
     onClientUpdateMediaVolume = update => {
         const { volume } = update;
 
-        const player = this.videoRef.current;
-        if (!player) return;
-
-        player.volume = volume;
+        if (this.playerRef.current) this.playerRef.current.setVolume(volume);
     };
 
     onClientUpdateMediaViewerContent = update => {
@@ -153,10 +149,7 @@ class HeaderPlayer extends React.Component {
     onClientUpdateMediaViewerPlay = update => {
         this.playingMediaViewer = true;
 
-        const player = this.videoRef.current;
-        if (!player) return;
-
-        player.pause();
+        if (this.playerRef.current) this.playerRef.current.pause();
     };
 
     startPlayingFile = (file, message) => {
@@ -167,7 +160,7 @@ class HeaderPlayer extends React.Component {
                 src: this.getMediaSrc(message)
             },
             () => {
-                const player = this.videoRef.current;
+                const player = this.playerRef.current;
                 if (player) {
                     if (this.playingMediaViewer) {
                         player.pause();
@@ -284,14 +277,8 @@ class HeaderPlayer extends React.Component {
 
         if (message && message.chat_id === chatId && message.id === messageId) {
             if (src) {
-                const player = this.videoRef.current;
-                if (player) {
-                    if (player.paused) {
-                        player.play();
-                    } else {
-                        player.pause();
-                    }
-                }
+                const player = this.playerRef.current;
+                if (player) player.isPaused() ? player.play() : player.pause();
             }
         } else {
             const src = this.getMediaSrc(PlayerStore.message);
@@ -305,14 +292,10 @@ class HeaderPlayer extends React.Component {
                     src: src
                 },
                 () => {
-                    const player = this.videoRef.current;
+                    const player = this.playerRef.current;
                     if (player) {
-                        player.currentTime = this.startTime;
-                        if (this.playingMediaViewer) {
-                            player.pause();
-
-                            //this.handleVideoPause();
-                        }
+                        player.setCurrentTime(this.startTime);
+                        if (this.playingMediaViewer) player.pause();
                     }
                 }
             );
@@ -430,10 +413,8 @@ class HeaderPlayer extends React.Component {
     };
 
     handleClose = () => {
-        const player = this.videoRef.current;
-        if (player) {
-            player.pause();
-        }
+        const player = this.playerRef.current;
+        if (player) player.pause();
 
         this.handleEnded(false);
     };
@@ -442,20 +423,20 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
         if (!message) return;
 
-        const player = this.videoRef.current;
+        const player = this.playerRef.current;
         if (!player) return;
 
         this.setState({
-            currentTime: player.currentTime,
-            currentTimeString: getDurationString(Math.floor(player.currentTime || 0))
+            currentTime: player.getCurrentTime(),
+            currentTimeString: getDurationString(Math.floor(player.getCurrentTime() || 0))
         });
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaTime',
             chatId: message.chat_id,
             messageId: message.id,
-            duration: player.duration,
-            currentTime: player.currentTime,
+            duration: player.getDuration(),
+            currentTime: player.getCurrentTime(),
             timestamp: Date.now()
         });
     };
@@ -464,7 +445,7 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
         if (!message) return;
 
-        const player = this.videoRef.current;
+        const player = this.playerRef.current;
         if (!player) return;
 
         const { playbackRate, volume } = PlayerStore;
@@ -472,31 +453,9 @@ class HeaderPlayer extends React.Component {
         const { chat_id, id } = message;
         const audio = hasAudio(chat_id, id);
 
-        player.playbackRate = audio ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate;
-        player.volume = volume;
-        player.muted = false;
-
-        if (audio) {
-            return;
-        }
-
-        let stream = null;
-        if ('captureStream' in player) {
-            stream = player.captureStream();
-        } else if ('mozCaptureStream' in player) {
-            stream = player.mozCaptureStream();
-        }
-
-        if (!stream) {
-            return;
-        }
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaCaptureStream',
-            chatId: message.chat_id,
-            messageId: message.id,
-            stream: stream
-        });
+        player.setPlaybackRate(audio ? PLAYER_PLAYBACKRATE_NORMAL : playbackRate);
+        player.setVolume(volume);
+        player.setMuted(false);
     };
 
     handleVideoPlay = () => {
@@ -507,15 +466,15 @@ class HeaderPlayer extends React.Component {
             playing: true
         });
 
-        const player = this.videoRef.current;
+        const player = this.playerRef.current;
         if (!player) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaPlay',
             chatId: message.chat_id,
             messageId: message.id,
-            currentTime: player.currentTime,
-            duration: player.duration,
+            currentTime: player.getCurrentTime(),
+            duration: player.getDuration(),
             timestamp: Date.now()
         });
     };
@@ -528,37 +487,10 @@ class HeaderPlayer extends React.Component {
             playing: false
         });
 
-        const player = this.videoRef.current;
-        if (!player) return;
-
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaPause',
             chatId: message.chat_id,
             messageId: message.id
-        });
-    };
-
-    handlePlaybackRate = () => {
-        const { playbackRate } = this.state;
-
-        const nextPlaybackRate =
-            playbackRate === PLAYER_PLAYBACKRATE_NORMAL ? PLAYER_PLAYBACKRATE_FAST : PLAYER_PLAYBACKRATE_NORMAL;
-
-        this.setState(
-            {
-                playbackRate: nextPlaybackRate
-            },
-            () => {
-                const player = this.videoRef.current;
-                if (!player) return;
-
-                player.playbackRate = nextPlaybackRate;
-            }
-        );
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaPlaybackRate',
-            playbackRate: nextPlaybackRate
         });
     };
 
@@ -629,20 +561,19 @@ class HeaderPlayer extends React.Component {
 
         return (
             <>
-                <video
+                <Player
+                    ref={this.playerRef}
                     className='header-player-video'
-                    ref={this.videoRef}
-                    src={src}
                     autoPlay={true}
                     controls={false}
-                    width={44}
-                    height={44}
+                    src={src}
                     onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}
                     onTimeUpdate={this.handleTimeUpdate}
                     onEnded={this.handleVideoEnded}
                 />
+
                 {message && (
                     <div className={classNames(classes.borderColor, 'header-player')}>
                         <IconButton
@@ -693,6 +624,8 @@ class HeaderPlayer extends React.Component {
                         </IconButton>
                     </div>
                 )}
+
+                <StickyPlayer />
             </>
         );
     }

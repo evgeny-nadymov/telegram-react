@@ -1,0 +1,31 @@
+/*
+ *  Copyright (c) 2019-present, Aleksandr Telegin
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.sticky-player-container {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
+    top: 120px;
+    right: -100px;
+    z-index: 1;
+    transition: all 0.2s;
+}
+
+.sticky-player-container video {
+    border-radius: 50px;
+}
+
+.sticky-player-visible {
+    transform: translate3d(-105px, 0, 0);
+}
+
+.sticky-player-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
