@@ -61,20 +61,27 @@ class SignInControl extends React.Component {
             phoneNumber = parts.join(' ').replace(/\D/g, ''),
             phoneData = phoneNumber
                 ? { phoneCode, phoneNumber, countryCode: lookupCountryByPhone(phoneCode, phoneNumber) }
-                : getCountryPhoneData(DEFAULT_COUNTRY_CODE);
+                : {};
 
         this.state = {
             error: null,
             loading: false,
             phoneCode,
             phoneNumber,
-            countryCode: DEFAULT_COUNTRY_CODE,
             ...phoneData
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         this.onSuggestedLanguagePackId();
+
+        const result = await TdLibController.send({
+                '@type': 'getCountryCode'
+            }),
+            countryCode = result && result.text ? result.text : DEFAULT_COUNTRY_CODE,
+            phoneData = getCountryPhoneData(countryCode);
+
+        this.setState({ countryCode, ...phoneData });
 
         OptionStore.on('updateOption', this.onUpdateOption);
     }
