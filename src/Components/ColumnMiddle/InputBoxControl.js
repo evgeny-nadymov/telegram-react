@@ -61,14 +61,15 @@ class InputBoxControl extends Component {
         this.innerHTML = null;
         this.state = {
             chatId: chatId,
-            replyToMessageId: getChatDraftReplyToMessageId(chatId),
-            openPasteDialog: false
+            currentMessageId: getChatDraftReplyToMessageId(chatId),
+            openPasteDialog: false,
+            editMode: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, t } = this.props;
-        const { chatId, replyToMessageId, openPasteDialog } = this.state;
+        const { chatId, currentMessageId, openPasteDialog } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -82,7 +83,7 @@ class InputBoxControl extends Component {
             return true;
         }
 
-        if (nextState.replyToMessageId !== replyToMessageId) {
+        if (nextState.currentMessageId !== currentMessageId) {
             return true;
         }
 
@@ -98,6 +99,7 @@ class InputBoxControl extends Component {
 
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        MessageStore.on('clientUpdateEdit', this.onClientUpdateEdit);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         this.setInputFocus();
@@ -106,11 +108,12 @@ class InputBoxControl extends Component {
     }
 
     componentWillUnmount() {
-        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.chatId, this.state.replyToMessageId);
+        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.chatId, this.state.currentMessageId);
         this.setChatDraftMessage(newChatDraftMessage);
 
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
         MessageStore.removeListener('clientUpdateReply', this.onClientUpdateReply);
+        MessageStore.removeListener('clientUpdateEdit', this.onClientUpdateEdit);
         StickerStore.removeListener('clientUpdateStickerSend', this.onClientUpdateStickerSend);
     }
 
@@ -164,11 +167,42 @@ class InputBoxControl extends Component {
             return;
         }
 
-        this.setState({ replyToMessageId: messageId });
+        this.setState({ editMode: false, currentMessageId: messageId });
 
         if (messageId) {
             this.setInputFocus();
         }
+    };
+
+    onClientUpdateEdit = update => {
+        const { chatId: currentChatId } = this.state,
+            { chatId, messageId } = update;
+
+        if (currentChatId !== chatId) return;
+
+        const element = this.newMessageRef.current;
+
+        this.setState({ editMode: true, currentMessageId: messageId });
+
+        if (!messageId) {
+            element.innerText = null;
+            this.innerHTML = null;
+            return;
+        }
+
+        const message = MessageStore.get(chatId, messageId);
+
+        if (!message || !message.content) return;
+
+        const contentType = message.content['@type'],
+            text = contentType === 'messageText' ? message.content.text.text : message.content.caption.text;
+
+        this.currentContentType = contentType;
+
+        element.innerText = text;
+        this.innerHTML = text;
+
+        this.setInputFocus();
     };
 
     onClientUpdateChatId = update => {
@@ -178,7 +212,7 @@ class InputBoxControl extends Component {
         this.innerHTML = null;
         this.setState({
             chatId: update.nextChatId,
-            replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
+            currentMessageId: getChatDraftReplyToMessageId(update.nextChatId),
             openPasteDialog: false
         });
     };
@@ -212,7 +246,7 @@ class InputBoxControl extends Component {
     getSnapshotBeforeUpdate(prevProps, prevState) {
         if (prevState.chatId === this.state.chatId) return null;
 
-        return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
+        return this.getNewChatDraftMessage(prevState.chatId, prevState.currentMessageId);
     }
 
     setInputFocus = () => {
@@ -247,7 +281,7 @@ class InputBoxControl extends Component {
         });
     };
 
-    getNewChatDraftMessage = (chatId, replyToMessageId) => {
+    getNewChatDraftMessage = (chatId, currentMessageId) => {
         let chat = ChatStore.get(chatId);
         if (!chat) return;
         const newDraft = this.getInputText();
@@ -264,10 +298,10 @@ class InputBoxControl extends Component {
             }
         }
 
-        if (newDraft !== previousDraft || replyToMessageId !== previousReplyToMessageId) {
+        if (newDraft !== previousDraft || currentMessageId !== previousReplyToMessageId) {
             const draftMessage = {
                 '@type': 'draftMessage',
-                reply_to_message_id: replyToMessageId,
+                reply_to_message_id: currentMessageId,
                 input_message_text: {
                     '@type': 'inputMessageText',
                     text: {
@@ -392,6 +426,13 @@ class InputBoxControl extends Component {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             this.handleSubmit();
+        } else if (e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateEditLastMessage',
+                chatId: this.state.chatId
+            });
+        } else if (this.state.currentMessageId && e.key === 'Escape') {
+            this.handleClose();
         }
     };
 
@@ -491,7 +532,7 @@ class InputBoxControl extends Component {
     };
 
     onSendInternal = async (content, clearDraft, callback) => {
-        const { chatId, replyToMessageId } = this.state;
+        const { chatId, currentMessageId, editMode } = this.state;
 
         if (!chatId) return;
         if (!content) return;
@@ -499,18 +540,41 @@ class InputBoxControl extends Component {
         try {
             await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
 
-            let result = await TdLibController.send({
-                '@type': 'sendMessage',
-                chat_id: chatId,
-                reply_to_message_id: replyToMessageId,
-                input_message_content: content
-            });
+            let result;
 
-            this.setState({ replyToMessageId: 0 }, () => {
+            if (editMode) {
+                if (this.currentContentType === 'messageText') {
+                    result = await TdLibController.send({
+                        '@type': 'editMessageText',
+                        chat_id: chatId,
+                        message_id: currentMessageId,
+                        input_message_content: content
+                    });
+                } else {
+                    result = await TdLibController.send({
+                        '@type': 'editMessageCaption',
+                        chat_id: chatId,
+                        message_id: currentMessageId,
+                        caption: content.text
+                    });
+                }
+            } else {
+                result = await TdLibController.send({
+                    '@type': 'sendMessage',
+                    chat_id: chatId,
+                    reply_to_message_id: currentMessageId,
+                    input_message_content: content
+                });
+
+                // TODO: probably TDLib bug: new message always have can_be_edited flag set to false.
+                // Right now need to re-open the chat, so messages will get the flags properly updated.
+            }
+
+            this.setState({ currentMessageId: 0, editMode: false }, () => {
                 if (clearDraft) {
                     const newChatDraftMessage = this.getNewChatDraftMessage(
                         this.state.chatId,
-                        this.state.replyToMessageId
+                        this.state.currentMessageId
                     );
                     this.setChatDraftMessage(newChatDraftMessage);
                 }
@@ -599,16 +663,39 @@ class InputBoxControl extends Component {
         });
     };
 
+    handleClose = () => {
+        const { chatId } = this.state;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateReply',
+            chatId,
+            messageId: 0
+        });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateEdit',
+            chatId,
+            messageId: 0
+        });
+
+        this.setInputFocus();
+        this.setState({ editMode: false });
+    };
+
     render() {
         const { classes, t } = this.props;
-        const { chatId, replyToMessageId, openPasteDialog } = this.state;
+        const { chatId, currentMessageId, openPasteDialog, editMode } = this.state;
 
         const content = this.innerHTML !== null ? this.innerHTML : null;
 
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader chatId={chatId} messageId={replyToMessageId} />
+                    <InputBoxHeader
+                        editMode={editMode}
+                        chatId={chatId}
+                        messageId={currentMessageId}
+                        onClose={this.handleClose}
+                    />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
                             <React.Suspense
@@ -651,12 +738,14 @@ class InputBoxControl extends Component {
                                 accept='image/*'
                                 onChange={this.handleAttachPhotoComplete}
                             />
-                            <AttachButton
-                                chatId={chatId}
-                                onAttachPhoto={this.handleAttachPhoto}
-                                onAttachDocument={this.handleAttachDocument}
-                                onAttachPoll={this.handleAttachPoll}
-                            />
+                            {!editMode && (
+                                <AttachButton
+                                    chatId={chatId}
+                                    onAttachPhoto={this.handleAttachPhoto}
+                                    onAttachDocument={this.handleAttachDocument}
+                                    onAttachPoll={this.handleAttachPoll}
+                                />
+                            )}
 
                             {/*<IconButton>*/}
                             {/*<KeyboardVoiceIcon />*/}

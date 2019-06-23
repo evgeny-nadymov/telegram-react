@@ -100,6 +100,20 @@ class HeaderCommand extends React.Component {
         this.setState({ openDeleteDialog: false });
     };
 
+    handleEdit = () => {
+        if (MessageStore.selectedItems.size !== 1) return;
+
+        const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+
+        this.handleCancel();
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateEdit',
+            chatId: chatId,
+            messageId: messageId
+        });
+    };
+
     handleForward = () => {
         let id;
         const messageIds = [];
@@ -135,30 +149,25 @@ class HeaderCommand extends React.Component {
 
         const chatId = ApplicationStore.getChatId();
 
-        let canBeDeleted = true;
-        for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
-            const message = MessageStore.get(chatId, messageId);
-            if (!message) {
-                canBeDeleted = false;
-                break;
-            }
-            if (!message.can_be_deleted_only_for_self && !message.can_be_deleted_for_all_users) {
-                canBeDeleted = false;
-                break;
-            }
-        }
+        let canBeDeleted = true,
+            canBeForwarded = true,
+            canBeEdited = count === 1;
 
-        let canBeForwarded = true;
         for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
             const message = MessageStore.get(chatId, messageId);
             if (!message) {
-                canBeForwarded = false;
-                break;
-            }
-            if (!message.can_be_forwarded) {
                 canBeDeleted = false;
+                canBeForwarded = false;
+                canBeEdited = false;
                 break;
             }
+
+            canBeDeleted =
+                canBeDeleted && (message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users);
+            canBeForwarded = canBeForwarded && message.can_be_forwarded;
+            canBeEdited = canBeEdited && message.can_be_edited;
+
+            if (!canBeDeleted && !canBeForwarded && !canBeEdited) break;
         }
 
         const canBeReplied = count === 1 && canSendMessages(chatId);
@@ -166,6 +175,11 @@ class HeaderCommand extends React.Component {
         return (
             <>
                 <div className={classNames(classes.borderColor, 'header-command')}>
+                    {canBeEdited && (
+                        <Button color='primary' className={classes.buttonLeft} onClick={this.handleEdit}>
+                            {t('Edit')}
+                        </Button>
+                    )}
                     {canBeForwarded && (
                         <Button color='primary' className={classes.buttonLeft} onClick={this.handleForward}>
                             {count <= 1 ? t('Forward') : `${t('Forward')} ${count}`}
