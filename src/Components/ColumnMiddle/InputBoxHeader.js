@@ -8,15 +8,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReplyIcon from '@material-ui/icons/Reply';
+import EditIcon from '@material-ui/icons/Edit';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Reply from '../Message/Reply';
-import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';
 
 const styles = theme => ({
     replyIcon: {
+        padding: 12,
+        color: theme.palette.action.active
+    },
+    editIcon: {
         padding: 12,
         color: theme.palette.action.active
     },
@@ -26,29 +30,21 @@ const styles = theme => ({
 });
 
 class InputBoxHeader extends React.Component {
-    handleClose = () => {
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateReply',
-            chatId: this.props.chatId,
-            messageId: 0
-        });
-    };
-
     render() {
-        const { classes, chatId, messageId } = this.props;
+        const { classes, chatId, messageId, editMode } = this.props;
         if (!chatId) return null;
         if (!messageId) return null;
 
         return (
             <div className='inputbox-header'>
                 <div className='inputbox-header-left-column'>
-                    <ReplyIcon className={classes.replyIcon} />
+                    {editMode ? <EditIcon className={classes.replyIcon} /> : <ReplyIcon className={classes.editIcon} />}
                 </div>
                 <div className='inputbox-header-middle-column'>
                     <Reply chatId={chatId} messageId={messageId} />
                 </div>
                 <div className='inputbox-header-right-column'>
-                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
+                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.props.onClose}>
                         <CloseIcon />
                     </IconButton>
                 </div>
@@ -59,7 +55,8 @@ class InputBoxHeader extends React.Component {
 
 InputBoxHeader.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired
+    messageId: PropTypes.number.isRequired,
+    editMode: PropTypes.bool
 };
 
 export default withStyles(styles)(InputBoxHeader);

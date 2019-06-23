@@ -175,6 +175,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.on('clientUpdateEditLastMessage', this.onClientUpdateEditLastMessage);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
@@ -190,6 +191,7 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.removeListener('clientUpdateEditLastMessage', this.onClientUpdateEditLastMessage);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
@@ -208,6 +210,23 @@ class MessagesList extends React.Component {
                 list.scrollTop += Math.abs(prevOffsetHeight - list.offsetHeight);
             }
         });
+    };
+
+    onClientUpdateEditLastMessage = update => {
+        let message;
+        const { history } = this.state;
+
+        for (var j = history.length - 1; j >= 0; j--) {
+            const message = history[j];
+            if (message.can_be_edited) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEdit',
+                    chatId: this.props.chatId,
+                    messageId: message.id
+                });
+                break;
+            }
+        }
     };
 
     onClientUpdateMediaEnding = udpate => {
