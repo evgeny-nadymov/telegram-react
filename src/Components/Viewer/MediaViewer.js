@@ -762,7 +762,7 @@ class MediaViewer extends React.Component {
         this.setState({ deleteConfirmationOpened: false });
     };
 
-    handleDone = () => {
+    handleDone = async () => {
         this.setState({ deleteConfirmationOpened: false });
 
         const { chatId } = this.props;
@@ -775,11 +775,18 @@ class MediaViewer extends React.Component {
         const canBeDeleted = can_be_deleted_only_for_self || can_be_deleted_for_all_users;
         if (!canBeDeleted) return;
 
-        TdLibController.send({
+        await TdLibController.send({
             '@type': 'deleteMessages',
             chat_id: chatId,
             message_ids: [currentMessageId],
             revoke: can_be_deleted_for_all_users && deleteForAll
+        });
+
+        TdLibController.emit('update', {
+            '@type': 'updateDeleteMessages',
+            chat_id: chatId,
+            message_ids: [currentMessageId],
+            is_permanent: true
         });
     };
 

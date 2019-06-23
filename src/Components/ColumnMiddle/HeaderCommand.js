@@ -72,7 +72,7 @@ class HeaderCommand extends React.Component {
         });
     };
 
-    handleDeleteContinue = () => {
+    handleDeleteContinue = async () => {
         const { revoke } = this.state;
 
         let id;
@@ -84,11 +84,18 @@ class HeaderCommand extends React.Component {
 
         this.handleCancel();
 
-        TdLibController.send({
+        await TdLibController.send({
             '@type': 'deleteMessages',
             chat_id: id,
             message_ids: messageIds,
             revoke: revoke
+        });
+
+        TdLibController.emit('update', {
+            '@type': 'updateDeleteMessages',
+            chat_id: id,
+            message_ids: messageIds,
+            is_permanent: true
         });
     };
 
