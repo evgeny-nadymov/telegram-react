@@ -149,7 +149,7 @@ class DialogsList extends React.Component {
                 switch (chat.type['@type']) {
                     case 'chatTypeBasicGroup': {
                         const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
-                        if (basicGroup.status['@type'] !== 'chatMemberStatusLeft') {
+                        if (basicGroup && basicGroup.status['@type'] !== 'chatMemberStatusLeft') {
                             chatIds.push(chat.id);
                         }
                         break;
