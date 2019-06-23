@@ -57,7 +57,7 @@ class AuthFormControl extends React.Component {
                     <ConfirmCodeControl
                         termsOfService={authorizationState.terms_of_service}
                         codeInfo={authorizationState.code_info}
-                        onChangePhone={this.props.onChangePhone}
+                        onBack={this.props.onChangePhone}
                     />
                 );
                 break;
@@ -67,7 +67,7 @@ class AuthFormControl extends React.Component {
                         passwordHint={authorizationState.password_hint}
                         hasRecoveryEmailAddress={authorizationState.has_recovery_email_address}
                         recoveryEmailAddressPattern={authorizationState.recovery_email_address_pattern}
-                        onChangePhone={this.props.onChangePhone}
+                        onBack={this.props.onChangePhone}
                     />
                 );
                 break;
