@@ -11,23 +11,24 @@ import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import { isValidPhoneNumber } from '../../Utils/Common';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import { formatPhoneNumberSimple } from '../../Utils/Common';
+import { getCountryList, getDefaultCountryCode, getCountryPhoneData, lookupCountryByPhone } from '../../Utils/Country';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
+import { formatIncompletePhoneNumber, parsePhoneNumberFromString } from 'libphonenumber-js';
 import TdLibController from '../../Controllers/TdLibController';
 import './SignInControl.css';
 
 const styles = {
     button: {
         margin: '16px 0 0 0'
-    },
-    phone: {
-        fontWeight: 'bold',
-        textAlign: 'center'
     },
     continueAtLanguage: {
         transform: 'translateY(100px)',
@@ -36,34 +37,68 @@ const styles = {
         left: 0,
         right: 0,
         bottom: 0
+    },
+    fldPhoneCode: {
+        fontWeight: 'bold',
+        width: 80
+    },
+    fldPhoneNumber: {
+        fontWeight: 'bold'
     }
 };
 
+const DEFAULT_COUNTRY_CODE = getDefaultCountryCode(),
+    PHONE_CODE_INPUT_PROPS = { maxLength: 4 };
+
 class SignInControl extends React.Component {
-    state = {
-        error: null,
-        loading: false
-    };
+    constructor(props) {
+        super(props);
 
-    componentDidMount() {
-        this.handleSuggestedLanguagePackId();
+        this.phoneFieldRef = React.createRef();
 
-        OptionStore.on('updateOption', this.handleUpdateOption);
+        const parts = formatIncompletePhoneNumber('+' + this.props.phone).split(' '),
+            phoneCode = parts.shift().replace(/\D/g, ''),
+            phoneNumber = parts.join(' ').replace(/\D/g, ''),
+            phoneData = phoneNumber
+                ? { phoneCode, phoneNumber, countryCode: lookupCountryByPhone(phoneCode, phoneNumber) }
+                : {};
+
+        this.state = {
+            error: null,
+            loading: false,
+            phoneCode,
+            phoneNumber,
+            ...phoneData
+        };
+    }
+
+    async componentDidMount() {
+        this.onSuggestedLanguagePackId();
+
+        const result = await TdLibController.send({
+                '@type': 'getCountryCode'
+            }),
+            countryCode = result && result.text ? result.text : DEFAULT_COUNTRY_CODE,
+            phoneData = getCountryPhoneData(countryCode);
+
+        this.setState({ countryCode, ...phoneData });
+
+        OptionStore.on('updateOption', this.onUpdateOption);
     }
 
     componentWillUnmount() {
-        OptionStore.removeListener('updateOption', this.handleUpdateOption);
+        OptionStore.removeListener('updateOption', this.onUpdateOption);
     }
 
-    handleUpdateOption = update => {
+    onUpdateOption = update => {
         const { name } = update;
 
         if (name === 'suggested_language_pack_id') {
-            this.handleSuggestedLanguagePackId();
+            this.onSuggestedLanguagePackId();
         }
     };
 
-    handleSuggestedLanguagePackId = () => {
+    onSuggestedLanguagePackId = () => {
         const { i18n } = this.props;
         if (!i18n) return;
 
@@ -81,43 +116,30 @@ class SignInControl extends React.Component {
         });
     };
 
-    handleNext = () => {
-        const { phone } = this.props;
-
-        const phoneNumber = this.phoneNumber || phone;
-
-        if (isValidPhoneNumber(phoneNumber)) {
-            this.setState({ error: null, openConfirmation: true });
-        } else {
-            this.setState({ error: { code: 'InvalidPhoneNumber' } });
-        }
-    };
-
-    handleChange = event => {
-        this.phoneNumber = event.target.value;
-    };
-
-    handleKeyPress = event => {
+    onKeyPress = event => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            this.handleNext();
+            this.onDone();
         }
     };
 
-    handleDone = () => {
-        const { phone, onPhoneEnter } = this.props;
+    onDone = () => {
+        const { onPhoneEnter } = this.props,
+            { phoneCode, phoneNumber, countryCode } = this.state,
+            fullPhoneNumber = phoneCode + phoneNumber,
+            phoneData = parsePhoneNumberFromString('+' + fullPhoneNumber, countryCode);
 
-        const phoneNumber = this.phoneNumber || phone;
-        if (!isValidPhoneNumber(phoneNumber)) {
+        if (!phoneData || !phoneData.isValid()) {
             this.setState({ error: { code: 'InvalidPhoneNumber' } });
             return;
         }
 
-        onPhoneEnter(phoneNumber);
+        onPhoneEnter(fullPhoneNumber);
+
         this.setState({ error: null, loading: true });
         TdLibController.send({
             '@type': 'setAuthenticationPhoneNumber',
-            phone_number: phoneNumber
+            phone_number: fullPhoneNumber
         })
             .then(result => {})
             .catch(error => {
@@ -135,21 +157,85 @@ class SignInControl extends React.Component {
             });
     };
 
-    handleChangeLanguage = () => {
-        const { i18n } = this.props;
-        const { suggestedLanguage } = this.state;
+    onChangeLanguage = () => {
+        const { i18n } = this.props,
+            { suggestedLanguage } = this.state;
 
-        if (!i18n) return;
-        if (!suggestedLanguage) return;
+        if (!i18n || !suggestedLanguage) return;
 
         this.setState({ suggestedLanguage: i18n.language });
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateLanguageChange', language: suggestedLanguage });
     };
 
+    focusPhoneNumber = () => {
+        setTimeout(() => {
+            const el = this.phoneFieldRef.current,
+                l = el.value.length;
+
+            el.focus();
+            el.setSelectionRange(l, l);
+        }, 50);
+    };
+
+    onCountryChange = event => {
+        const countryCode = event.target.value,
+            { phoneCode, phoneNumber } = getCountryPhoneData(countryCode);
+
+        this.setState({ countryCode, phoneCode, phoneNumber });
+        this.focusPhoneNumber();
+    };
+
+    onCodeChange = event => {
+        const phoneCode = event.target.value.replace(/\D/g, ''),
+            { phoneNumber } = this.state,
+            currentPhoneData = getCountryPhoneData(this.state.countryCode),
+            countryCode = phoneCode ? lookupCountryByPhone(phoneCode, phoneNumber) : '';
+
+        if (currentPhoneData.phoneCode && phoneCode.length > currentPhoneData.phoneCode.length) {
+            this.setState({ phoneNumber: phoneCode.substr(currentPhoneData.phoneCode.length) });
+            this.focusPhoneNumber();
+            return;
+        }
+
+        this.setState({ phoneCode, countryCode });
+    };
+
+    onPhoneNumberChange = event => {
+        const phoneNumber = event.target.value.replace(/\D/g, '');
+
+        this.setState({ phoneNumber });
+    };
+
+    renderCountries = lang => {
+        const { i18n, t } = this.props;
+
+        if (!i18n) return null;
+
+        const placeholder = (
+                <MenuItem key='placeholder' disabled value='000'>
+                    <em>{t('Country')}</em>
+                </MenuItem>
+            ),
+            countries = [
+                placeholder,
+                ...getCountryList(i18n.language).map((country, i) => {
+                    return (
+                        <MenuItem key={i} color='primary' value={country.code}>
+                            <span className={`flag-icon flag-icon-${country.codeLC}`} />
+                            {country.name}
+                        </MenuItem>
+                    );
+                })
+            ];
+
+        return countries;
+    };
+
     render() {
-        const { phone, classes, t } = this.props;
-        const { loading, error, suggestedLanguage } = this.state;
+        const { classes, t } = this.props;
+        const { loading, error, suggestedLanguage, countryCode, phoneCode, phoneNumber } = this.state,
+            phoneNumberStr = formatPhoneNumberSimple(phoneCode, phoneNumber, countryCode);
 
         let errorString = '';
         if (error) {
@@ -167,19 +253,48 @@ class SignInControl extends React.Component {
                     <span className='authorization-header-content'>{t('YourPhone')}</span>
                 </div>
                 <div>{t('StartText')}</div>
-                <TextField
-                    color='primary'
-                    disabled={loading}
-                    error={Boolean(errorString)}
-                    fullWidth
-                    autoFocus
-                    id='phoneNumber'
-                    label=''
-                    margin='normal'
-                    onChange={this.handleChange}
-                    onKeyPress={this.handleKeyPress}
-                    defaultValue={phone}
-                />
+                <div className='sign-in-country-container'>
+                    <Select
+                        color='primary'
+                        className='sign-in-country'
+                        value={countryCode || '000'}
+                        disabled={loading}
+                        input={<OutlinedInput labelWidth={0} />}
+                        onChange={this.onCountryChange}>
+                        {this.renderCountries()}
+                    </Select>
+                </div>
+                <div className='sign-in-phone-container'>
+                    <TextField
+                        className={classes.fldPhoneCode}
+                        color='primary'
+                        disabled={loading}
+                        error={Boolean(errorString)}
+                        id='phoneCode'
+                        label=''
+                        size={2}
+                        margin='normal'
+                        onChange={this.onCodeChange}
+                        onKeyPress={this.onKeyPress}
+                        value={`+${phoneCode}`}
+                        inputProps={PHONE_CODE_INPUT_PROPS}
+                    />
+                    <TextField
+                        inputRef={this.phoneFieldRef}
+                        className={classes.fldPhoneNumber}
+                        color='primary'
+                        disabled={loading}
+                        error={Boolean(errorString)}
+                        fullWidth
+                        autoFocus
+                        id='phoneNumber'
+                        label=''
+                        margin='normal'
+                        onChange={this.onPhoneNumberChange}
+                        onKeyPress={this.onKeyPress}
+                        value={phoneNumberStr}
+                    />
+                </div>
                 <FormHelperText id='sign-in-error-text'>{errorString}</FormHelperText>
                 <div className='sign-in-actions'>
                     <Button
@@ -187,11 +302,11 @@ class SignInControl extends React.Component {
                         color='primary'
                         disabled={loading}
                         className={classes.button}
-                        onClick={this.handleDone}>
+                        onClick={this.onDone}>
                         {t('Next')}
                     </Button>
                     <Typography className={classes.continueAtLanguage}>
-                        <Link onClick={this.handleChangeLanguage}>
+                        <Link onClick={this.onChangeLanguage}>
                             {Boolean(suggestedLanguage) ? t('ContinueOnThisLanguage', { lng: suggestedLanguage }) : ' '}
                         </Link>
                     </Typography>
