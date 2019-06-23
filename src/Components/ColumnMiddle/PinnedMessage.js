@@ -152,6 +152,11 @@ class PinnedMessage extends React.Component {
     };
 
     handleDelete = event => {
+        TdLibController.send({
+            '@type': 'unpinChatMessage',
+            chat_id: this.props.chatId
+        });
+
         event.preventDefault();
         event.stopPropagation();
     };
