@@ -156,7 +156,7 @@ class HeaderCommand extends React.Component {
                 break;
             }
             if (!message.can_be_forwarded) {
-                canBeDeleted = false;
+                canBeForwarded = false;
                 break;
             }
         }
