@@ -272,7 +272,7 @@ class FileProgress extends React.Component {
 
 FileProgress.propTypes = {
     file: PropTypes.object.isRequired,
-    thumbnailSrc: PropTypes.object,
+    thumbnailSrc: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
     cancelButton: PropTypes.bool,
     download: PropTypes.bool,
     upload: PropTypes.bool,

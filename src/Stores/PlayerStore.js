@@ -42,7 +42,7 @@ class PlayerStore extends EventEmitter {
         this.playlist = null;
         this.message = null;
         this.time = null;
-        this.videoStream = null;
+        this.playing = true;
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
@@ -77,7 +77,6 @@ class PlayerStore extends EventEmitter {
                 this.playlist = null;
                 this.message = null;
                 this.time = null;
-                this.videoStream = null;
 
                 this.emit(update['@type'], update);
                 break;
@@ -182,6 +181,14 @@ class PlayerStore extends EventEmitter {
                 }
                 break;
             }
+            case 'clientUpdateMediaStickPlayer': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaUnstickPlayer': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaTime': {
                 const { duration, currentTime, timestamp } = update;
 
@@ -190,12 +197,6 @@ class PlayerStore extends EventEmitter {
                     duration: duration,
                     timestamp: timestamp
                 };
-
-                this.emit(update['@type'], update);
-                break;
-            }
-            case 'clientUpdateMediaCaptureStream': {
-                this.videoStream = update.stream;
 
                 this.emit(update['@type'], update);
                 break;

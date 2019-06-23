@@ -18,6 +18,7 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
+import Player from '../Player/Player';
 
 const Lottie = React.lazy(() => import('./Lottie'));
 
@@ -250,7 +251,7 @@ class MediaViewerContent extends React.Component {
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
-                    <video
+                    <Player
                         ref={this.videoRef}
                         className='media-viewer-content-video-player'
                         src={src}
@@ -316,7 +317,7 @@ class MediaViewerContent extends React.Component {
         } else if (isAnimation) {
             content = (
                 <div className='media-viewer-content-wrapper'>
-                    <video
+                    <Player
                         className='media-viewer-content-video-player'
                         src={src}
                         onClick={this.handleContentClick}
