@@ -7,7 +7,6 @@
  */
 
 import { getPhoneCode } from 'libphonenumber-js';
-import '../../node_modules/flag-icon-css/css/flag-icon.css';
 
 const COUNTRY_NAMES_EN = {
         AF: 'Afghanistan',

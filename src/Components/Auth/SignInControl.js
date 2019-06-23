@@ -222,7 +222,6 @@ class SignInControl extends React.Component {
                 ...getCountryList(i18n.language).map((country, i) => {
                     return (
                         <MenuItem key={i} color='primary' value={country.code}>
-                            <span className={`flag-icon flag-icon-${country.codeLC}`} />
                             {country.name}
                         </MenuItem>
                     );
