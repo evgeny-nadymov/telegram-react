@@ -16,7 +16,8 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
-import { isValidPhoneNumber } from '../../Utils/Common';
+import HeaderProgress from '../ColumnMiddle/HeaderProgress';
+import { cleanProgressStatus, isConnecting, isValidPhoneNumber } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
@@ -35,6 +36,7 @@ const styles = {
         transform: 'translateY(100px)',
         textAlign: 'center',
         position: 'absolute',
+        cursor: 'pointer',
         left: 0,
         right: 0,
         bottom: 0
@@ -43,6 +45,7 @@ const styles = {
 
 class SignInControl extends React.Component {
     state = {
+        connecting: isConnecting(ApplicationStore.connectionState),
         error: null,
         loading: false
     };
@@ -53,6 +56,7 @@ class SignInControl extends React.Component {
         ApplicationStore.on('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
         ApplicationStore.on('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
         ApplicationStore.on('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
+        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
         OptionStore.on('updateOption', this.onUpdateOption);
     }
 
@@ -60,8 +64,15 @@ class SignInControl extends React.Component {
         ApplicationStore.removeListener('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
         ApplicationStore.removeListener('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
         ApplicationStore.removeListener('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
+        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
         OptionStore.removeListener('updateOption', this.onUpdateOption);
     }
+
+    onUpdateConnectionState = update => {
+        const { state } = update;
+
+        this.setState({ connecting: isConnecting(state) });
+    };
 
     onClientUpdateSetPhoneCanceled = update => {
         this.setState({ loading: false });
@@ -163,7 +174,7 @@ class SignInControl extends React.Component {
 
     render() {
         const { defaultPhone, classes, t } = this.props;
-        const { loading, error, suggestedLanguage } = this.state;
+        const { connecting, loading, error, suggestedLanguage } = this.state;
 
         let errorString = '';
         if (error) {
@@ -175,10 +186,13 @@ class SignInControl extends React.Component {
             }
         }
 
+        const title = connecting ? cleanProgressStatus(t('Connecting')) : t('YourPhone');
+
         return (
             <FormControl fullWidth>
                 <div className='authorization-header'>
-                    <span className='authorization-header-content'>{t('YourPhone')}</span>
+                    <span className='authorization-header-content'>{title}</span>
+                    {connecting && <HeaderProgress />}
                 </div>
                 <div>{t('StartText')}</div>
                 <TextField

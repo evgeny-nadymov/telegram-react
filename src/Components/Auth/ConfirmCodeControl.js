@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
+import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import './ConfirmCodeControl.css';
 import FormControl from '@material-ui/core/FormControl';
-import { formatPhoneNumber } from '../../Utils/Common';
 import FormHelperText from '@material-ui/core/FormHelperText/FormHelperText';
+import TextField from '@material-ui/core/TextField';
+import HeaderProgress from '../ColumnMiddle/HeaderProgress';
+import { cleanProgressStatus, formatPhoneNumber, isConnecting } from '../../Utils/Common';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
+import './ConfirmCodeControl.css';
 
 const styles = {
     buttonLeft: {
@@ -27,31 +31,36 @@ const styles = {
 };
 
 class ConfirmCodeControl extends React.Component {
-    constructor(props) {
-        super(props);
+    state = {
+        connecting: isConnecting(ApplicationStore.connectionState),
+        error: '',
+        loading: false
+    };
 
-        this.state = {
-            error: '',
-            loading: false
-        };
-
-        this.handleChange = this.handleChange.bind(this);
-        this.handleNext = this.handleNext.bind(this);
-        this.handleBack = this.handleBack.bind(this);
-        this.handleDone = this.handleDone.bind(this);
-        this.handleKeyPress = this.handleKeyPress.bind(this);
+    componentDidMount() {
+        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
-    handleNext() {
+    componentWillUnmount() {
+        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
+    }
+
+    onUpdateConnectionState = update => {
+        const { state } = update;
+
+        this.setState({ connecting: isConnecting(state) });
+    };
+
+    handleNext = () => {
         if (this.code && this.isValid(this.code)) {
             this.setState({ error: '' });
             this.handleDone();
         } else {
             this.setState({ error: 'Invalid code. Please try again.' });
         }
-    }
+    };
 
-    handleDone() {
+    handleDone = () => {
         const code = this.code;
 
         this.setState({ loading: true });
@@ -75,11 +84,11 @@ class ConfirmCodeControl extends React.Component {
             .finally(() => {
                 this.setState({ loading: false });
             });
-    }
+    };
 
-    handleBack() {
+    handleBack = () => {
         this.props.onChangePhone();
-    }
+    };
 
     isValid(code) {
         let isBad = !code.match(/^[\d\-+\s]+$/);
@@ -93,20 +102,20 @@ class ConfirmCodeControl extends React.Component {
         return !isBad;
     }
 
-    handleChange(e) {
+    handleChange = e => {
         this.code = e.target.value;
 
         if (this.code && this.codeLength > 0 && this.code.length === this.codeLength) {
             this.handleNext();
         }
-    }
+    };
 
-    handleKeyPress(e) {
+    handleKeyPress = e => {
         if (e.key === 'Enter') {
             e.preventDefault();
             this.handleNext();
         }
-    }
+    };
 
     getPhoneNumber(codeInfo) {
         if (!codeInfo) return null;
@@ -158,19 +167,25 @@ class ConfirmCodeControl extends React.Component {
     }
 
     render() {
-        const { loading, error } = this.state;
-        const { classes, codeInfo } = this.props;
+        const { classes, codeInfo, t } = this.props;
+        const { connecting, loading, error } = this.state;
 
         this.phoneNumber = this.getPhoneNumber(codeInfo);
         this.codeLength = this.getCodeLength(codeInfo);
         const subtitle = this.getSubtitle(codeInfo);
 
-        const title = this.phoneNumber ? formatPhoneNumber(this.phoneNumber) : 'Your Code';
+        let title = t('YourCode');
+        if (connecting) {
+            title = cleanProgressStatus(t('Connecting'));
+        } else if (this.phoneNumber) {
+            title = formatPhoneNumber(this.phoneNumber);
+        }
 
         return (
             <FormControl fullWidth>
                 <div className='authorization-header'>
                     <span className='authorization-header-content'>{title}</span>
+                    {connecting && <HeaderProgress />}
                 </div>
                 <div>{subtitle}</div>
                 <TextField
@@ -179,7 +194,7 @@ class ConfirmCodeControl extends React.Component {
                     error={Boolean(error)}
                     fullWidth
                     autoFocus
-                    label='Your code'
+                    label=''
                     margin='normal'
                     maxLength={this.codeLength > 0 ? this.codeLength : 256}
                     onChange={this.handleChange}
@@ -188,7 +203,7 @@ class ConfirmCodeControl extends React.Component {
                 <FormHelperText id='confirm-code-error-text'>{error}</FormHelperText>
                 <div className='authorization-actions'>
                     <Button fullWidth className={classes.buttonLeft} onClick={this.handleBack} disabled={loading}>
-                        Back
+                        {t('Back')}
                     </Button>
                     <Button
                         fullWidth
@@ -196,7 +211,7 @@ class ConfirmCodeControl extends React.Component {
                         className={classes.buttonRight}
                         onClick={this.handleNext}
                         disabled={loading}>
-                        Next
+                        {t('Next')}
                     </Button>
                 </div>
             </FormControl>
@@ -204,4 +219,9 @@ class ConfirmCodeControl extends React.Component {
     }
 }
 
-export default withStyles(styles)(ConfirmCodeControl);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(ConfirmCodeControl);

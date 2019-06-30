@@ -16,6 +16,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { borderStyle } from './Theme';
 import Footer from './Footer';
+import HeaderProgress from './ColumnMiddle/HeaderProgress';
 import './ColumnMiddle/Header.css';
 import './ColumnLeft/Dialogs.css';
 import './ColumnMiddle/DialogDetails.css';
@@ -70,13 +71,7 @@ class StubPage extends React.Component {
                         <div className={classNames(classes.borderColor, 'header-details')}>
                             <div className={classNames('header-status', 'grow', 'cursor-default')}>
                                 <span className='header-status-content'>{title}</span>
-                                {Boolean(title) && (
-                                    <>
-                                        <span className='header-progress'>.</span>
-                                        <span className='header-progress'>.</span>
-                                        <span className='header-progress'>.</span>
-                                    </>
-                                )}
+                                {Boolean(title) && <HeaderProgress />}
                             </div>
                         </div>
                         <div className={classes.background} />

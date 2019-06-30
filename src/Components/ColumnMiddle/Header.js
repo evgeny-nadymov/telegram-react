@@ -14,6 +14,7 @@ import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
 import HeaderCommand from './HeaderCommand';
+import HeaderProgress from './HeaderProgress';
 import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import ChatStore from '../../Stores/ChatStore';
@@ -356,13 +357,7 @@ class Header extends Component {
                     className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
                     onClick={this.openChatDetails}>
                     <span className='header-status-content'>{title}</span>
-                    {showProgressAnimation && (
-                        <>
-                            <span className='header-progress'>.</span>
-                            <span className='header-progress'>.</span>
-                            <span className='header-progress'>.</span>
-                        </>
-                    )}
+                    {showProgressAnimation && <HeaderProgress />}
                     <span
                         className={classNames('header-status-title', {
                             [classes.headerStatusAccentTitle]: isAccentSubtitle

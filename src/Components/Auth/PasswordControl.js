@@ -7,6 +7,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -17,6 +19,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Button from '@material-ui/core/Button';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import HeaderProgress from '../ColumnMiddle/HeaderProgress';
+import { cleanProgressStatus, isConnecting } from '../../Utils/Common';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PasswordControl.css';
 
@@ -45,38 +50,41 @@ const styles = theme => ({
 });
 
 class PasswordControl extends React.Component {
-    constructor(props) {
-        super(props);
+    state = {
+        connecting: isConnecting(ApplicationStore.connectionState),
+        password: '',
+        showPassword: false,
+        error: ''
+    };
 
-        this.state = {
-            password: '',
-            showPassword: false,
-            error: ''
-        };
-
-        this.handleClickShowPassword = this.handleClickShowPassword.bind(this);
-        this.handleMouseDownPassword = this.handleMouseDownPassword.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.handleBack = this.handleBack.bind(this);
-        this.handleNext = this.handleNext.bind(this);
-        this.handleDone = this.handleDone.bind(this);
+    componentDidMount() {
+        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
-    handleNext() {
+    componentWillUnmount() {
+        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
+    }
+
+    onUpdateConnectionState = update => {
+        const { state } = update;
+
+        this.setState({ connecting: isConnecting(state) });
+    };
+
+    handleNext = () => {
         if (this.password) {
             this.setState({ error: '' });
             this.handleDone();
         } else {
             this.setState({ error: 'Invalid password. Please try again.' });
         }
-    }
+    };
 
-    handleBack() {
+    handleBack = () => {
         this.props.onChangePhone();
-    }
+    };
 
-    handleDone() {
+    handleDone = () => {
         const password = this.password;
 
         this.setState({ loading: true });
@@ -98,7 +106,7 @@ class PasswordControl extends React.Component {
             .finally(() => {
                 this.setState({ loading: false });
             });
-    }
+    };
 
     handleMouseDownPassword = event => {
         event.preventDefault();
@@ -108,25 +116,31 @@ class PasswordControl extends React.Component {
         this.setState({ showPassword: !this.state.showPassword });
     };
 
-    handleChange(e) {
+    handleChange = e => {
         this.password = e.target.value;
-    }
+    };
 
-    handleKeyPress(e) {
+    handleKeyPress = e => {
         if (e.key === 'Enter') {
             e.preventDefault();
             this.handleNext();
         }
-    }
+    };
 
     render() {
-        const { loading, error, showPassword } = this.state;
-        const { passwordHint, classes } = this.props;
+        const { classes, passwordHint, t } = this.props;
+        const { connecting, loading, error, showPassword } = this.state;
+
+        let title = t('YourPassword');
+        if (connecting) {
+            title = cleanProgressStatus(t('Connecting'));
+        }
 
         return (
             <div>
                 <div className='authorization-header'>
-                    <span className='authorization-header-content'>Cloud Password Check</span>
+                    <span className='authorization-header-content'>{title}</span>
+                    {connecting && <HeaderProgress />}
                 </div>
                 <div>Please enter your cloud password.</div>
                 <FormControl fullWidth className={classNames(classes.margin, classes.textField)}>
@@ -163,7 +177,7 @@ class PasswordControl extends React.Component {
                 <FormHelperText id='password-error-text'>{error}</FormHelperText>
                 <div className='authorization-actions'>
                     <Button fullWidth className={classes.buttonLeft} onClick={this.handleBack} disabled={loading}>
-                        Back
+                        {t('Back')}
                     </Button>
                     <Button
                         fullWidth
@@ -171,7 +185,7 @@ class PasswordControl extends React.Component {
                         className={classes.buttonRight}
                         onClick={this.handleNext}
                         disabled={loading}>
-                        Next
+                        {t('Next')}
                     </Button>
                 </div>
             </div>
@@ -179,4 +193,9 @@ class PasswordControl extends React.Component {
     }
 }
 
-export default withStyles(styles)(PasswordControl);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(PasswordControl);

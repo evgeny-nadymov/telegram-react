@@ -8,6 +8,36 @@
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+function isConnecting(state) {
+    if (!state) return false;
+
+    switch (state['@type']) {
+        case 'connectionStateConnecting': {
+            return true;
+        }
+        case 'connectionStateConnectingToProxy': {
+            return true;
+        }
+        case 'connectionStateReady': {
+            return false;
+        }
+        case 'connectionStateUpdating': {
+            return false;
+        }
+        case 'connectionStateWaitingForNetwork': {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+function cleanProgressStatus(status) {
+    if (!status) return status;
+
+    return status.replace('...', '').replace('…', '');
+}
+
 function getOSName() {
     let OSName = 'Unknown';
     if (window.navigator.userAgent.indexOf('Windows NT 10.0') != -1) OSName = 'Windows 10';
@@ -366,6 +396,8 @@ function getRandomInt(min, max) {
 }
 
 export {
+    cleanProgressStatus,
+    isConnecting,
     getBrowser,
     getOSName,
     isValidPhoneNumber,

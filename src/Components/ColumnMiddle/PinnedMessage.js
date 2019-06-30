@@ -51,7 +51,8 @@ class PinnedMessage extends React.Component {
         this.state = {
             prevPropsChatId: props.chatId,
             clientData: ChatStore.getClientData(props.chatId),
-            messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
+            messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0,
+            confirm: false
         };
     }
 
@@ -64,7 +65,8 @@ class PinnedMessage extends React.Component {
             return {
                 prevPropsChatId: chatId,
                 clientData: ChatStore.getClientData(chatId),
-                messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
+                messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0,
+                confirm: false
             };
         }
 
@@ -194,7 +196,6 @@ class PinnedMessage extends React.Component {
         if (canPin) {
             this.setState({ confirm: true });
         } else {
-            this.setState({ confirm: true });
             const data = ChatStore.getClientData(chatId);
             await TdLibController.clientUpdate({
                 '@type': 'clientUpdateSetChatClientData',

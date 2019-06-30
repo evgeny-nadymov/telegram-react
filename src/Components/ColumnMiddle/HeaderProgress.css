@@ -1,0 +1,33 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+@keyframes blink {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.header-progress {
+    animation-name: blink;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+}
+
+.header-progress:nth-of-type(3) {
+    animation-delay: 0.15s;
+}
+
+.header-progress:nth-of-type(4) {
+    animation-delay: 0.3s;
+}

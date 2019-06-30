@@ -122,7 +122,6 @@ class TelegramApp extends Component {
 
         if (!window.hasFocus) return;
         if (!authorizationState) return;
-        if (authorizationState['@type'] !== 'authorizationStateReady') return;
 
         TdLibController.send({
             '@type': 'setOption',
@@ -345,12 +344,10 @@ window.hasFocus = true;
 // set offline on page lost focus
 window.onblur = function() {
     keyMap.clear();
-    //console.log('window.blur key', keyMap);
 
     const { authorizationState } = ApplicationStore;
 
     if (!authorizationState) return;
-    if (authorizationState['@type'] !== 'authorizationStateReady') return;
 
     window.hasFocus = false;
 
@@ -363,11 +360,10 @@ window.onblur = function() {
 // set online on page get focus
 window.onfocus = function() {
     keyMap.clear();
-    //console.log('window.focus key', keyMap);
+
     const { authorizationState } = ApplicationStore;
 
     if (!authorizationState) return;
-    if (authorizationState['@type'] !== 'authorizationStateReady') return;
 
     window.hasFocus = true;
 

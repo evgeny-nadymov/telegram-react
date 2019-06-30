@@ -69,33 +69,6 @@
     flex-grow: 1;
 }
 
-@keyframes blink {
-    0% {
-        opacity: 0;
-    }
-    20% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
-
-.header-status .header-progress {
-    animation-name: blink;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-fill-mode: both;
-}
-
-.header-status .header-progress:nth-of-type(3) {
-    animation-delay: 0.15s;
-}
-
-.header-status .header-progress:nth-of-type(4) {
-    animation-delay: 0.3s;
-}
-
 .header-search-input {
     padding: 0 0 0 24px;
     overflow: hidden;

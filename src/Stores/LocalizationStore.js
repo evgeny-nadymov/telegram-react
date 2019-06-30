@@ -72,9 +72,11 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                 },
                 translation: {
                     AppName: 'Telegram',
-                    Loading: 'Loading',
-                    Connecting: 'Connecting',
-                    Updating: 'Updating'
+                    Connecting: 'Connecting...',
+                    ConnectingToProxy: 'Connecting to proxy...',
+                    Loading: 'Loading...',
+                    Updating: 'Updating...',
+                    WaitingForNetwork: 'Waiting for network...'
                 }
             },
             ru: {
@@ -110,9 +112,11 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                 },
                 translation: {
                     AppName: 'Телеграм',
-                    Loading: 'Загрузка',
-                    Connecting: 'Соединение',
-                    Updating: 'Обновление'
+                    Connecting: 'Соединение...',
+                    ConnectingToProxy: 'Подключение к прокси...',
+                    Loading: 'Загрузка...',
+                    Updating: 'Обновление...',
+                    WaitingForNetwork: 'Ожидание сети...'
                 }
             }
         },
