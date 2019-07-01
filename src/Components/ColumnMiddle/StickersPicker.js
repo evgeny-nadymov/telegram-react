@@ -173,7 +173,6 @@ class StickersPicker extends React.Component {
             '@type': 'clientUpdateStickerSetPosition',
             position
         });
-        this.setState({ position });
     };
 
     handleScroll = async () => {
@@ -342,7 +341,7 @@ class StickersPicker extends React.Component {
     };
 
     render() {
-        const { position, stickerSets, sets, headerStickers } = this.state;
+        const { stickerSets, sets, headerStickers } = this.state;
         if (!stickerSets) return null;
 
         if (!sets) return null;

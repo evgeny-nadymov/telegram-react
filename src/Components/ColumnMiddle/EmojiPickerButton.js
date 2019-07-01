@@ -155,10 +155,6 @@ class EmojiPickerButton extends React.Component {
         this.setState({ open });
     };
 
-    switchPicker = () => {
-        this.updatePicker(!this.state.open);
-    };
-
     handleEmojiClick = () => {
         this.setState({ tab: 0 });
     };
@@ -250,7 +246,6 @@ class EmojiPickerButton extends React.Component {
                 <IconButton
                     className={classes.iconButton}
                     aria-label='Emoticon'
-                    onClick={this.switchPicker}
                     onMouseEnter={this.handleButtonMouseEnter}
                     onMouseLeave={this.handleButtonMouseLeave}>
                     <InsertEmoticonIcon />

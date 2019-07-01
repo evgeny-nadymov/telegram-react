@@ -13,7 +13,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import Animator from '../../Utils/Animatior';
 import Sticker from './../Message/Media/Sticker';
 import { accentStyles, borderStyle } from '../Theme';
-import { ANIMATION_DURATION_500MS } from '../../Constants';
+import { ANIMATION_DURATION_200MS } from '../../Constants';
 import StickerStore from '../../Stores/StickerStore';
 import './StickersPickerHeader.css';
 
@@ -69,7 +69,7 @@ class StickersPickerHeader extends React.Component {
         if (animator) {
             animator.stop();
         }
-        this.animator = new Animator(ANIMATION_DURATION_500MS, [
+        this.animator = new Animator(ANIMATION_DURATION_200MS, [
             {
                 from: scrollFrom,
                 to: scrollTo,

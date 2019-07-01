@@ -16,6 +16,32 @@ import FileStore from '../../../Stores/FileStore';
 import './Sticker.css';
 
 class Sticker extends React.Component {
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, sticker, blur, displaySize } = this.props;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (sticker !== nextProps.sticker) {
+            return true;
+        }
+
+        if (blur !== nextProps.blur) {
+            return true;
+        }
+
+        if (displaySize !== nextProps.displaySize) {
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount() {
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);

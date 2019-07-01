@@ -292,6 +292,7 @@ class InputBoxControl extends Component {
         this.newMessageRef.current.innerText = null;
         this.newMessageRef.current.textContent = null;
         this.innerHTML = null;
+        this.handleInput();
 
         if (!text) return;
 
