@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
+import emojiRegex from 'emoji-regex/es2015/index.js';
 import Reply from './Reply';
 import Forward from './Forward';
 import MessageStatus from './MessageStatus';
@@ -34,6 +35,8 @@ import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
 
+const EMOJI_WHOLE_STRING_REGEX = new RegExp('^(?:' + emojiRegex().source + ')+$', '');
+
 const styles = theme => ({
     message: {
         backgroundColor: 'transparent'
@@ -50,6 +53,21 @@ const styles = theme => ({
     },
     messageHighlighted: {
         animation: 'highlighted 4s ease-out'
+    },
+    textOnlyWithEmojis_1emoji: {
+        fontSize: '4em',
+        lineHeight: '1em',
+        paddingTop: '10px'
+    },
+    textOnlyWithEmojis_2emoji: {
+        fontSize: '3em',
+        lineHeight: '1em',
+        paddingTop: '10px'
+    },
+    textOnlyWithEmojis_3emoji: {
+        fontSize: '2em',
+        lineHeight: '1em',
+        paddingTop: '10px'
     }
 });
 
@@ -298,6 +316,22 @@ class Message extends Component {
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
 
+        let textOnlyWithEmojis = false;
+        let emojiMatches = 0;
+        if (message.content && message.content['@type'] === 'messageText') {
+            textOnlyWithEmojis = EMOJI_WHOLE_STRING_REGEX.exec(message.content.text.text);
+            if (textOnlyWithEmojis) {
+                let m;
+                const re = emojiRegex();
+                do {
+                    m = re.exec(message.content.text.text);
+                    if (m) {
+                        emojiMatches += 1;
+                    }
+                } while (m);
+            }
+        }
+
         const tile = senderUserId ? (
             <UserTileControl userId={senderUserId} onSelect={this.handleSelectUser} />
         ) : (
@@ -352,7 +386,14 @@ class Message extends Component {
                         </div>
                         {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
                         {media}
-                        <div className='message-text'>{text}</div>
+                        <div
+                            className={classNames('message-text', {
+                                [classes.textOnlyWithEmojis_1emoji]: textOnlyWithEmojis && emojiMatches === 1,
+                                [classes.textOnlyWithEmojis_2emoji]: textOnlyWithEmojis && emojiMatches === 2,
+                                [classes.textOnlyWithEmojis_3emoji]: textOnlyWithEmojis && emojiMatches === 3
+                            })}>
+                            {text}
+                        </div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                 </div>
