@@ -140,7 +140,14 @@ class ChatTileControl extends Component {
                     </div>
                 )}
                 {showOnline && isPrivateChat(chatId) && (
-                    <ChatStatus classes={{ root: classes.statusRoot, icon: classes.statusIcon }} chatId={chatId} />
+                    <ChatStatus
+                        classes={{
+                            root: classes.statusRoot,
+                            icon: classes.statusIcon,
+                            iconIndicator: classes.iconIndicator
+                        }}
+                        chatId={chatId}
+                    />
                 )}
             </div>
         );

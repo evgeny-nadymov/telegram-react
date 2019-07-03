@@ -27,6 +27,9 @@ const styles = theme => ({
         zIndex: 1
     },
     statusIcon: {},
+    iconIndicator: {
+        background: '#80d066'
+    },
     dialogActive: {
         color: '#fff', //theme.palette.primary.contrastText,
         backgroundColor: theme.palette.primary.main,
@@ -35,6 +38,9 @@ const styles = theme => ({
         margin: '0 12px',
         '& $statusRoot': {
             background: theme.palette.primary.main
+        },
+        '& $iconIndicator': {
+            background: '#ffffff'
         }
     },
     dialog: {
@@ -122,7 +128,11 @@ class DialogControl extends Component {
                         chatId={chatId}
                         showSavedMessages={showSavedMessages}
                         showOnline
-                        classes={{ statusRoot: classes.statusRoot, statusIcon: classes.statusIcon }}
+                        classes={{
+                            statusRoot: classes.statusRoot,
+                            statusIcon: classes.statusIcon,
+                            iconIndicator: classes.iconIndicator
+                        }}
                     />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
