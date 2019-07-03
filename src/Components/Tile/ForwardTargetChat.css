@@ -83,9 +83,9 @@
 .forward-target-chat-title {
     max-width: 80px;
     font-size: 12px;
-    line-height: normal;
+    line-height: 16px;
     margin: 6px 0 0;
-    height: 32px;
+    max-height: 32px;
     text-align: center;
     text-overflow: ellipsis;
     overflow: hidden;
