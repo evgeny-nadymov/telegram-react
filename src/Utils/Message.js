@@ -479,6 +479,11 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageDocument': {
+            const { document } = content;
+            if (document && document.file_name) {
+                return document.file_name + caption;
+            }
+
             return t('AttachDocument') + caption;
         }
         case 'messageExpiredPhoto': {
