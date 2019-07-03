@@ -278,7 +278,7 @@ class StickerSetDialog extends React.Component {
                         {t('Cancel')}
                     </Button>
                     <Button color='primary' onClick={this.handleDone}>
-                        {is_installed ? t('Remove') : t('Add')}
+                        {is_installed ? t('StickersRemove') : t('Add')}
                     </Button>
                 </DialogActions>
                 {Boolean(sticker) && <StickerPreview sticker={sticker} />}
