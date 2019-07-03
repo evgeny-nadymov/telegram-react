@@ -54,6 +54,20 @@ pre code {
     border-radius: 0;
 }
 
+.message-without-avatar .message-content {
+    margin-left: 60px;
+}
+
+.message-without-avatar .message-select-tick {
+    margin-top: -3px;
+}
+
+.message-content-row {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+}
+
 .message {
     /*margin: 20px;
     word-wrap: break-word;*/
@@ -123,6 +137,7 @@ pre code {
     user-select: none;
     color: #adadad;
     font-size: 0.85em;
+    flex-shrink: 0;
 }
 
 .message-body {

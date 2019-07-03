@@ -19,16 +19,7 @@ import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import {
-    getDate,
-    getDateHint,
-    getText,
-    getMedia,
-    getUnread,
-    getSenderUserId,
-    getWebPage,
-    openMedia
-} from '../../Utils/Message';
+import { getDate, getDateHint, getText, getMedia, getUnread, getWebPage, openMedia } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
@@ -54,20 +45,17 @@ const styles = theme => ({
     messageHighlighted: {
         animation: 'highlighted 4s ease-out'
     },
-    textOnlyWithEmojis_1emoji: {
+    emojiText_1emoji: {
         fontSize: '4em',
-        lineHeight: '1em',
-        paddingTop: '10px'
+        lineHeight: '1em'
     },
-    textOnlyWithEmojis_2emoji: {
+    emojiText_2emoji: {
         fontSize: '3em',
-        lineHeight: '1em',
-        paddingTop: '10px'
+        lineHeight: '1em'
     },
-    textOnlyWithEmojis_3emoji: {
+    emojiText_3emoji: {
         fontSize: '2em',
-        lineHeight: '1em',
-        paddingTop: '10px'
+        lineHeight: '1em'
     }
 });
 
@@ -91,7 +79,7 @@ class Message extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTitle } = this.props;
         const { contextMenu, selected, highlighted } = this.state;
 
         if (nextProps.theme !== theme) {
@@ -111,6 +99,10 @@ class Message extends Component {
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            return true;
+        }
+
+        if (nextProps.showTitle !== showTitle) {
             return true;
         }
 
@@ -300,13 +292,13 @@ class Message extends Component {
     };
 
     render() {
-        const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
+        const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
         const { contextMenu, left, top, selected, highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id, forward_info } = message;
+        const { content, sending_state, views, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
         const text = getText(message);
         const webPage = getWebPage(message);
@@ -314,17 +306,16 @@ class Message extends Component {
         const dateHint = getDateHint(message);
         const media = getMedia(message, this.openMedia);
         this.unread = getUnread(message);
-        const senderUserId = getSenderUserId(message);
 
-        let textOnlyWithEmojis = false;
+        let onlyEmojis = false;
         let emojiMatches = 0;
-        if (message.content && message.content['@type'] === 'messageText') {
-            textOnlyWithEmojis = EMOJI_WHOLE_STRING_REGEX.exec(message.content.text.text);
-            if (textOnlyWithEmojis) {
+        if (content && content['@type'] === 'messageText') {
+            onlyEmojis = EMOJI_WHOLE_STRING_REGEX.exec(content.text.text);
+            if (onlyEmojis) {
                 let m;
                 const re = emojiRegex();
                 do {
-                    m = re.exec(message.content.text.text);
+                    m = re.exec(content.text.text);
                     if (m) {
                         emojiMatches += 1;
                     }
@@ -332,19 +323,40 @@ class Message extends Component {
             }
         }
 
-        const tile = senderUserId ? (
-            <UserTileControl userId={senderUserId} onSelect={this.handleSelectUser} />
+        const tile = sender_user_id ? (
+            showTitle ? (
+                <UserTileControl userId={sender_user_id} onSelect={this.handleSelectUser} />
+            ) : null
         ) : (
             <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
         );
 
-        const messageClassName = classNames(
-            'message',
-            classes.message,
-            { 'message-selected': selected },
-            { [classes.messageSelected]: selected },
+        const messageClassName = classNames('message', classes.message, {
+            'message-selected': selected,
+            [classes.messageSelected]: selected,
             // { 'message-highlighted': highlighted && !selected },
-            { [classes.messageHighlighted]: highlighted && !selected }
+            [classes.messageHighlighted]: highlighted && !selected,
+            'message-without-avatar': !showTitle
+        });
+
+        const meta = (
+            <div className='message-meta'>
+                <span>&nbsp;</span>
+                {views > 0 && (
+                    <>
+                        <i className='message-views-icon' />
+                        <span className='message-views'>
+                            &nbsp;
+                            {views}
+                            &nbsp; &nbsp;
+                        </span>
+                    </>
+                )}
+                {edit_date > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
+                <a className='message-date' onClick={this.handleDateClick}>
+                    <span title={dateHint}>{date}</span>
+                </a>
+            </div>
         );
 
         return (
@@ -361,41 +373,28 @@ class Message extends Component {
                     {this.unread && (
                         <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
                     )}
-                    {tile}
+                    {showTitle && tile}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward_info && <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />}
+                            {showTitle && !forward_info && (
+                                <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
+                            )}
                             {forward_info && <Forward forwardInfo={forward_info} />}
-                            <div className='message-meta'>
-                                <span>&nbsp;</span>
-                                {views > 0 && (
-                                    <>
-                                        <i className='message-views-icon' />
-                                        <span className='message-views'>
-                                            &nbsp;
-                                            {views}
-                                            &nbsp; &nbsp;
-                                        </span>
-                                    </>
-                                )}
-                                {edit_date > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
-                                <a className='message-date' onClick={this.handleDateClick}>
-                                    <span title={dateHint}>{date}</span>
-                                </a>
-                            </div>
+                            {showTitle && meta}
                         </div>
                         {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
                         {media}
                         <div
                             className={classNames('message-text', {
-                                [classes.textOnlyWithEmojis_1emoji]: textOnlyWithEmojis && emojiMatches === 1,
-                                [classes.textOnlyWithEmojis_2emoji]: textOnlyWithEmojis && emojiMatches === 2,
-                                [classes.textOnlyWithEmojis_3emoji]: textOnlyWithEmojis && emojiMatches === 3
+                                [classes.emojiText_1emoji]: onlyEmojis && emojiMatches === 1,
+                                [classes.emojiText_2emoji]: onlyEmojis && emojiMatches === 2,
+                                [classes.emojiText_3emoji]: onlyEmojis && emojiMatches === 3
                             })}>
                             {text}
                         </div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
+                    {!showTitle && meta}
                 </div>
             </div>
         );

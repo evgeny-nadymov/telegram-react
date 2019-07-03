@@ -14,13 +14,13 @@ import Message from '../Message/Message';
 import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
+import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage } from '../../Actions/Client';
-import { MESSAGE_SLICE_LIMIT } from '../../Constants';
+import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -1011,32 +1011,47 @@ class MessagesList extends React.Component {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
 
-        console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
+        //console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
+
+        const isChannel = isChannelChat(chatId);
 
         this.itemsMap.clear();
         this.messages = clearHistory
             ? null
-            : history.map((x, i) =>
-                  isServiceMessage(x) ? (
-                      <ServiceMessage
-                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                          ref={el => this.itemsMap.set(i, el)}
-                          chatId={x.chat_id}
-                          messageId={x.id}
-                          showUnreadSeparator={separatorMessageId === x.id}
-                      />
-                  ) : (
+            : history.map((x, i) => {
+                  if (isServiceMessage(x)) {
+                      return (
+                          <ServiceMessage
+                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                              ref={el => this.itemsMap.set(i, el)}
+                              chatId={x.chat_id}
+                              messageId={x.id}
+                              showUnreadSeparator={separatorMessageId === x.id}
+                          />
+                      );
+                  }
+
+                  const prevMessage = i > 0 ? history[i - 1] : null;
+                  const showTitle =
+                      isChannel ||
+                      history.length === 1 ||
+                      (prevMessage &&
+                          (isServiceMessage(prevMessage) ||
+                              x.sender_user_id !== prevMessage.sender_user_id ||
+                              x.date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S));
+
+                  return (
                       <Message
                           key={`chat_id=${x.chat_id} message_id=${x.id}`}
                           ref={el => this.itemsMap.set(i, el)}
                           chatId={x.chat_id}
                           messageId={x.id}
-                          showTitle
                           sendingState={x.sending_state}
+                          showTitle={showTitle}
                           showUnreadSeparator={separatorMessageId === x.id}
                       />
-                  )
-              );
+                  );
+              });
 
         return (
             <div
