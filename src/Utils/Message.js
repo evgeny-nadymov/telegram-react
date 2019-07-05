@@ -1485,17 +1485,25 @@ function getEmojiMatches(chatId, messageId) {
     const re = emojiRegex();
     do {
         m = re.exec(text);
+
         if (m) {
             emojiMatches += 1;
+            // none-emoji symbol between prev and current emojis or before first
             if (lastIndex !== m.index) {
                 emojiMatches = 0;
                 break;
             }
+            // more than 3 emojis in a row
             if (emojiMatches > 3) {
                 emojiMatches = 0;
                 break;
             }
             lastIndex = re.lastIndex;
+        }
+        // none-emoji symbol at the end
+        if (!m && lastIndex !== text.length) {
+            emojiMatches = 0;
+            break;
         }
     } while (m);
 
