@@ -17,6 +17,7 @@ export const LOCATION_WIDTH = 300;
 export const LOCATION_ZOOM = 16;
 export const MEDIA_SLICE_LIMIT = 20;
 export const MESSAGE_SLICE_LIMIT = 20;
+export const MESSAGE_SPLIT_MAX_TIME_S = 600;
 export const MUTED_VALUE_MAX = 2147483647; // int32.max = 2^32 - 1
 export const MUTED_VALUE_MIN = 0;
 export const NOTIFICATIONS_DEBOUNCE_DELAY_MS = 500;
@@ -64,3 +65,6 @@ export const PLAYER_STARTTIME = 0.0;
 export const PLAYER_PLAYBACKRATE_NORMAL = 1.0;
 export const PLAYER_PLAYBACKRATE_FAST = 1.75;
 export const PLAYER_PROGRESS_TIMEOUT_MS = 250;
+export const REPLACE_PREFIX = '/telegram-react';
+export const WASM_FILE_NAME = '8bf9264e75149ea59dc582dc91902811.wasm';
+export const WASM_FILE_HASH = '8bf9264e75149ea59dc582dc91902811';

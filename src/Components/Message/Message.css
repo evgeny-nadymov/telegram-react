@@ -133,6 +133,21 @@ pre code {
     word-break: break-word;
 }
 
+.message-text-1emoji {
+    font-size: 4em;
+    line-height: normal;
+}
+
+.message-text-2emoji {
+    font-size: 3em;
+    line-height: normal;
+}
+
+.message-text-3emoji {
+    font-size: 2em;
+    line-height: normal;
+}
+
 .message-meta {
     user-select: none;
     color: #adadad;

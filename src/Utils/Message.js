@@ -7,6 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
+import emojiRegex from 'emoji-regex';
 import Audio from '../Components/Message/Media/Audio';
 import Animation from '../Components/Message/Media/Animation';
 import Contact from '../Components/Message/Media/Contact';
@@ -1462,6 +1463,45 @@ function getReplyPhotoSize(chatId, messageId) {
     return null;
 }
 
+function getEmojiMatches(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return 0;
+
+    const { content } = message;
+    if (!content) return 0;
+    if (content['@type'] !== 'messageText') return 0;
+
+    const { text: textContent } = content;
+    if (!textContent) return;
+    if (textContent['@type'] !== 'formattedText') return 0;
+
+    const { text, entities } = textContent;
+    if (!text) return 0;
+    if (entities && entities.length > 0) return 0;
+
+    let lastIndex = 0;
+    let emojiMatches = 0;
+    let m;
+    const re = emojiRegex();
+    do {
+        m = re.exec(text);
+        if (m) {
+            emojiMatches += 1;
+            if (lastIndex !== m.index) {
+                emojiMatches = 0;
+                break;
+            }
+            if (emojiMatches > 3) {
+                emojiMatches = 0;
+                break;
+            }
+            lastIndex = re.lastIndex;
+        }
+    } while (m);
+
+    return emojiMatches;
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1489,5 +1529,6 @@ export {
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhotoSize
+    getReplyPhotoSize,
+    getEmojiMatches
 };

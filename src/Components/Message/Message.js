@@ -10,7 +10,6 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
-import emojiRegex from 'emoji-regex/es2015/index.js';
 import Reply from './Reply';
 import Forward from './Forward';
 import MessageStatus from './MessageStatus';
@@ -19,14 +18,21 @@ import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import { getDate, getDateHint, getText, getMedia, getUnread, getWebPage, openMedia } from '../../Utils/Message';
+import {
+    getDate,
+    getDateHint,
+    getEmojiMatches,
+    getText,
+    getMedia,
+    getUnread,
+    getWebPage,
+    openMedia
+} from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
-
-const EMOJI_WHOLE_STRING_REGEX = new RegExp('^(?:' + emojiRegex().source + ')+$', '');
 
 const styles = theme => ({
     message: {
@@ -44,18 +50,6 @@ const styles = theme => ({
     },
     messageHighlighted: {
         animation: 'highlighted 4s ease-out'
-    },
-    emojiText_1emoji: {
-        fontSize: '4em',
-        lineHeight: '1em'
-    },
-    emojiText_2emoji: {
-        fontSize: '3em',
-        lineHeight: '1em'
-    },
-    emojiText_3emoji: {
-        fontSize: '2em',
-        lineHeight: '1em'
     }
 });
 
@@ -63,15 +57,17 @@ class Message extends Component {
     constructor(props) {
         super(props);
 
+        const { chatId, messageId } = this.props;
         if (process.env.NODE_ENV !== 'production') {
-            const { chatId, messageId } = this.props;
             this.state = {
                 message: MessageStore.get(chatId, messageId),
+                emojiMatches: getEmojiMatches(chatId, messageId),
                 selected: false,
                 highlighted: false
             };
         } else {
             this.state = {
+                emojiMatches: getEmojiMatches(chatId, messageId),
                 selected: false,
                 highlighted: false
             };
@@ -80,7 +76,7 @@ class Message extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTitle } = this.props;
-        const { contextMenu, selected, highlighted } = this.state;
+        const { contextMenu, selected, highlighted, emojiMatches } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -115,6 +111,10 @@ class Message extends Component {
         }
 
         if (nextState.highlighted !== highlighted) {
+            return true;
+        }
+
+        if (nextState.emojiMatches !== emojiMatches) {
             return true;
         }
 
@@ -200,18 +200,7 @@ class Message extends Component {
         if (chatId !== chat_id) return;
         if (messageId !== message_id) return;
 
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
-
-        const { content } = message;
-        if (!content) return;
-
-        switch (content['@type']) {
-            case 'messagePoll': {
-                this.forceUpdate();
-                break;
-            }
-        }
+        this.setState({ emojiMatches: getEmojiMatches(chatId, messageId) });
     };
 
     handleSelectUser = userId => {
@@ -293,12 +282,12 @@ class Message extends Component {
 
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
-        const { contextMenu, left, top, selected, highlighted } = this.state;
+        const { emojiMatches, selected, highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { content, sending_state, views, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
+        const { sending_state, views, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
         const text = getText(message);
         const webPage = getWebPage(message);
@@ -307,34 +296,18 @@ class Message extends Component {
         const media = getMedia(message, this.openMedia);
         this.unread = getUnread(message);
 
-        let onlyEmojis = false;
-        let emojiMatches = 0;
-        if (content && content['@type'] === 'messageText') {
-            onlyEmojis = EMOJI_WHOLE_STRING_REGEX.exec(content.text.text);
-            if (onlyEmojis) {
-                let m;
-                const re = emojiRegex();
-                do {
-                    m = re.exec(content.text.text);
-                    if (m) {
-                        emojiMatches += 1;
-                    }
-                } while (m);
-            }
-        }
-
-        const tile = sender_user_id ? (
-            showTitle ? (
+        let tile = null;
+        if (showTitle) {
+            tile = sender_user_id ? (
                 <UserTileControl userId={sender_user_id} onSelect={this.handleSelectUser} />
-            ) : null
-        ) : (
-            <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
-        );
+            ) : (
+                <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
+            );
+        }
 
         const messageClassName = classNames('message', classes.message, {
             'message-selected': selected,
             [classes.messageSelected]: selected,
-            // { 'message-highlighted': highlighted && !selected },
             [classes.messageHighlighted]: highlighted && !selected,
             'message-without-avatar': !showTitle
         });
@@ -373,7 +346,7 @@ class Message extends Component {
                     {this.unread && (
                         <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
                     )}
-                    {showTitle && tile}
+                    {tile}
                     <div className='message-content'>
                         <div className='message-title'>
                             {showTitle && !forward_info && (
@@ -386,9 +359,9 @@ class Message extends Component {
                         {media}
                         <div
                             className={classNames('message-text', {
-                                [classes.emojiText_1emoji]: onlyEmojis && emojiMatches === 1,
-                                [classes.emojiText_2emoji]: onlyEmojis && emojiMatches === 2,
-                                [classes.emojiText_3emoji]: onlyEmojis && emojiMatches === 3
+                                'message-text-1emoji': emojiMatches === 1,
+                                'message-text-2emoji': emojiMatches === 2,
+                                'message-text-3emoji': emojiMatches === 3
                             })}>
                             {text}
                         </div>
