@@ -113,6 +113,23 @@ function orderCompare(order1, order2) {
     return order1 > order2 ? 1 : -1;
 }
 
+function equal(a1, a2) {
+    if (!(a1 instanceof Array && a2 instanceof Array)) return a1 === a2;
+
+    const l1 = a1.length,
+        l2 = a2.length;
+
+    if (l1 !== l2) return false;
+
+    for (var i = 0; i < l1; i++) {
+        if (typeof a1[i] === 'object' && typeof a2[i] === 'object') {
+            if (a1[i].id !== a2[i].id) return false;
+        } else if (a1[i] !== a2[i]) return false;
+    }
+
+    return true;
+}
+
 function getPhotoThumbnailSize(sizes) {
     return getSize(sizes, PHOTO_THUMBNAIL_SIZE);
 }
@@ -417,5 +434,6 @@ export {
     isAuthorizationReady,
     between,
     getDurationString,
-    getRandomInt
+    getRandomInt,
+    equal
 };
