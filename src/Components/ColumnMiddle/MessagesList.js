@@ -7,8 +7,9 @@
 
 import React from 'react';
 import * as ReactDOM from 'react-dom';
-import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
+import DayMeta from '../Message/DayMeta';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
 import PinnedMessage from './PinnedMessage';
@@ -21,12 +22,12 @@ import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S } from '../../Constants';
-import ChatStore from '../../Stores/ChatStore';
-import SupergroupStore from '../../Stores/SupergroupStore';
-import MessageStore from '../../Stores/MessageStore';
-import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
+import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
+import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
 
@@ -1019,37 +1020,55 @@ class MessagesList extends React.Component {
         this.messages = clearHistory
             ? null
             : history.map((x, i) => {
+                  const prevMessage = i > 0 ? history[i - 1] : null;
+                  const date = new Date(x.date * 1000);
+                  const prevDate = prevMessage ? new Date(prevMessage.date * 1000) : date;
+                  let showDate = false;
+                  if (
+                      i === 0 ||
+                      date.getFullYear() !== prevDate.getFullYear() ||
+                      date.getMonth() !== prevDate.getMonth() ||
+                      date.getDate() !== prevDate.getDate()
+                  ) {
+                      showDate = true;
+                  }
+
+                  let m = null;
                   if (isServiceMessage(x)) {
-                      return (
+                      m = (
                           <ServiceMessage
-                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
                               ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}
                               showUnreadSeparator={separatorMessageId === x.id}
                           />
                       );
+                  } else {
+                      const showTitle =
+                          isChannel ||
+                          i === 0 ||
+                          (prevMessage &&
+                              (isServiceMessage(prevMessage) ||
+                                  x.sender_user_id !== prevMessage.sender_user_id ||
+                                  x.date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S));
+
+                      m = (
+                          <Message
+                              ref={el => this.itemsMap.set(i, el)}
+                              chatId={x.chat_id}
+                              messageId={x.id}
+                              sendingState={x.sending_state}
+                              showTitle={showTitle}
+                              showUnreadSeparator={separatorMessageId === x.id}
+                          />
+                      );
                   }
 
-                  const prevMessage = i > 0 ? history[i - 1] : null;
-                  const showTitle =
-                      isChannel ||
-                      history.length === 1 ||
-                      (prevMessage &&
-                          (isServiceMessage(prevMessage) ||
-                              x.sender_user_id !== prevMessage.sender_user_id ||
-                              x.date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S));
-
                   return (
-                      <Message
-                          key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                          ref={el => this.itemsMap.set(i, el)}
-                          chatId={x.chat_id}
-                          messageId={x.id}
-                          sendingState={x.sending_state}
-                          showTitle={showTitle}
-                          showUnreadSeparator={separatorMessageId === x.id}
-                      />
+                      <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
+                          {showDate && <DayMeta date={x.date} />}
+                          {m}
+                      </div>
                   );
               });
 
