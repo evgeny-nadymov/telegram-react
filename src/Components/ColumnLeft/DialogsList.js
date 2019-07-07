@@ -290,6 +290,7 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
+            TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
         });
 
         //TODO: replace result with one-way data flow

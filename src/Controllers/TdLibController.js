@@ -8,8 +8,15 @@
 import { EventEmitter } from 'events';
 import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
-import { VERBOSITY_JS_MAX, VERBOSITY_JS_MIN, VERBOSITY_MAX, VERBOSITY_MIN } from '../Constants';
-import TdClient from 'tdweb/dist/tdweb';
+import {
+    VERBOSITY_JS_MAX,
+    VERBOSITY_JS_MIN,
+    VERBOSITY_MAX,
+    VERBOSITY_MIN,
+    WASM_FILE_HASH,
+    WASM_FILE_NAME
+} from '../Constants';
+import TdClient from '@arseny30/tdweb/dist/tdweb';
 
 function databaseExists(dbname, callback) {
     var req = indexedDB.open(dbname);
@@ -59,7 +66,8 @@ class TdLibController extends EventEmitter {
                 prefix: useTestDC ? 'tdlib_test' : 'tdlib',
                 readOnly: readOnly,
                 isBackground: false,
-                useDatabase: useDatabase
+                useDatabase: useDatabase,
+                wasmUrl: `${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`
                 // onUpdate: update => this.emit('update', update)
             };
 

@@ -52,7 +52,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ChatInfo: 'Chat Info',
                     ChannelInfo: 'Channel Info',
                     Stickers: 'STICKERS',
-                    Emoji: 'EMOJI'
+                    Emoji: 'EMOJI',
+                    SelectChatToStartMessaging: 'Select a chat to start messaging'
                 },
                 emoji: {
                     Search: 'Search',
@@ -92,7 +93,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ChatInfo: 'Информация о чате',
                     ChannelInfo: 'Информация о канале',
                     Stickers: 'СТИКЕРЫ',
-                    Emoji: 'ЕМОДЗИ'
+                    Emoji: 'ЕМОДЗИ',
+                    SelectChatToStartMessaging: 'Выберите, кому хотели бы написать'
                 },
                 emoji: {
                     Search: 'Поиск',
@@ -111,7 +113,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     Custom: 'Пользовательские'
                 },
                 translation: {
-                    AppName: 'Телеграм',
+                    AppName: 'Telegram',
                     Connecting: 'Соединение...',
                     ConnectingToProxy: 'Подключение к прокси...',
                     Loading: 'Загрузка...',

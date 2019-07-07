@@ -13,6 +13,7 @@ class ApplicationStore extends EventEmitter {
     constructor() {
         super();
 
+        this.dialogsReady = false;
         this.setPhoneNumberRequest = null;
         this.chatId = 0;
         this.dialogChatId = 0;
@@ -84,6 +85,7 @@ class ApplicationStore extends EventEmitter {
                     case 'authorizationStateReady':
                         this.loggingOut = false;
                         this.setPhoneNumberRequest = null;
+                        this.dialogsReady = false;
                         break;
                     case 'authorizationStateClosing':
                         break;
@@ -168,6 +170,11 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateDatabaseExists': {
                 this.emit('clientUpdateDatabaseExists', update);
+                break;
+            }
+            case 'clientUpdateDialogsReady': {
+                this.dialogsReady = true;
+                this.emit('clientUpdateDialogsReady', update);
                 break;
             }
             case 'clientUpdateSetPhone': {
