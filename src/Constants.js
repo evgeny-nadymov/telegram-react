@@ -17,6 +17,7 @@ export const LOCATION_WIDTH = 300;
 export const LOCATION_ZOOM = 16;
 export const MEDIA_SLICE_LIMIT = 20;
 export const MESSAGE_SLICE_LIMIT = 20;
+export const SHOW_GO_DOWN_BUTTON_DELTA = 40;
 export const MUTED_VALUE_MAX = 2147483647; // int32.max = 2^32 - 1
 export const MUTED_VALUE_MIN = 0;
 export const NOTIFICATIONS_DEBOUNCE_DELAY_MS = 500;

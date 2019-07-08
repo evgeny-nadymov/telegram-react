@@ -34,3 +34,30 @@
 .messages-list-items {
     flex: 0 0 auto;
 }
+
+.messages-list-go-down-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    border-width: 1px;
+    border-style: solid;
+    visibility: hidden;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.messages-list-go-down-button span {
+    display: block;
+}
+
+.messages-list-go-down-icon {
+    position: absolute;
+    left: 5px;
+    top: 8px;
+    mask: url(../../Assets/Icons/go-down.svg) no-repeat;
+    width: 24px;
+    height: 24px;
+}

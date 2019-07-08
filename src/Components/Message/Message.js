@@ -281,6 +281,10 @@ class Message extends Component {
         this.mouseOut = false;
     };
 
+    onJumpReply = () => {
+        if (typeof this.props.onJumpReply === 'function') this.props.onJumpReply(this.props);
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const { contextMenu, left, top, selected, highlighted } = this.state;
@@ -350,10 +354,14 @@ class Message extends Component {
                                 </a>
                             </div>
                         </div>
-                        {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
+                        {Boolean(reply_to_message_id) && (
+                            <Reply chatId={chatId} messageId={reply_to_message_id} onOpenChat={this.onJumpReply} />
+                        )}
                         {media}
                         <div className='message-text'>{text}</div>
-                        {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
+                        {Boolean(webPage) && (
+                            <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />
+                        )}
                     </div>
                 </div>
             </div>

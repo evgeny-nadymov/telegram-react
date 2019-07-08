@@ -19,8 +19,9 @@ import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../U
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isSupergroup } from '../../Utils/Chat';
-import { highlightMessage } from '../../Actions/Client';
-import { MESSAGE_SLICE_LIMIT } from '../../Constants';
+import { highlightMessage, openChat } from '../../Actions/Client';
+import { MESSAGE_SLICE_LIMIT, SHOW_GO_DOWN_BUTTON_DELTA } from '../../Constants';
+import IconButton from '@material-ui/core/IconButton';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -41,6 +42,13 @@ const ScrollBehaviorEnum = Object.freeze({
 const styles = theme => ({
     background: {
         background: theme.palette.type === 'dark' ? theme.palette.grey[900] : 'transparent'
+    },
+    buttonGoDown: {
+        background: theme.palette.background.paper,
+        borderColor: theme.palette.text.secondary
+    },
+    iconGoDown: {
+        background: theme.palette.text.secondary
     }
 });
 
@@ -64,8 +72,10 @@ class MessagesList extends React.Component {
 
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
+        this.btnGoDownRef = React.createRef();
 
         this.itemsMap = new Map();
+        this.jumpHistory = [];
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
         //debounce(this.updateItemsInView, 250);
@@ -118,6 +128,8 @@ class MessagesList extends React.Component {
             list.scrollHeight=${list.scrollHeight} \\
             list.offsetHeight=${list.offsetHeight}`
         );
+
+        if (prevProps.chatId !== chatId) this.jumpHistory = [];
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
@@ -390,6 +402,7 @@ class MessagesList extends React.Component {
         this.loadMigratedHistory = false;
 
         this.suppressHandleScrollOnSelectChat = true;
+
         if (chat) {
             TdLibController.send({
                 '@type': 'openChat',
@@ -420,6 +433,8 @@ class MessagesList extends React.Component {
 
             if (chat.last_message) {
                 this.completed = result.messages.length > 0 && chat.last_message.id === result.messages[0].id;
+                if (this.completed && !this.jumpHistory.length)
+                    this.jumpHistory = [{ chatId: chat.id, messageId: chat.last_message.id }];
             } else {
                 this.completed = true;
             }
@@ -472,6 +487,7 @@ class MessagesList extends React.Component {
 
             // load full info
             getChatFullInfo(chat.id);
+            this.handleScroll();
         } else {
             this.replace(
                 0,
@@ -765,10 +781,25 @@ class MessagesList extends React.Component {
         );
     }
 
+    toggleGoDownBtn = visible => {
+        if (this.goDownBtnState === visible) return;
+
+        const buttonGoDown = ReactDOM.findDOMNode(this.btnGoDownRef.current);
+
+        if (visible) buttonGoDown.style.visibility = 'visible';
+        else
+            setTimeout(() => {
+                buttonGoDown.style.visibility = 'hidden';
+            }, 200);
+        buttonGoDown.style.opacity = visible ? 1 : 0;
+        this.goDownBtnState = visible;
+    };
+
     handleScroll = () => {
         this.updateItemsInView();
 
         const list = this.listRef.current;
+
         //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
 
         if (this.suppressHandleScroll) {
@@ -788,6 +819,9 @@ class MessagesList extends React.Component {
         } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
             console.log('SCROLL HANDLESCROLL onLoadPrevious');
             this.onLoadPrevious();
+            this.toggleGoDownBtn(0);
+        } else if (list.scrollTop + list.offsetHeight < list.scrollHeight - SHOW_GO_DOWN_BUTTON_DELTA) {
+            this.toggleGoDownBtn(1);
         } else {
             //console.log('SCROLL HANDLESCROLL updateItemsInView');
         }
@@ -928,6 +962,7 @@ class MessagesList extends React.Component {
                 suppressHandleScroll=${this.suppressHandleScroll} \\
                 chatId=${this.props.chatId}`
             );
+            this.handleScroll();
         } else {
             console.log(
                 `SCROLL SCROLL_TO_BOTTOM after(already bottom) \\
@@ -1007,6 +1042,26 @@ class MessagesList extends React.Component {
         ApplicationStore.setDragging(true);
     };
 
+    onJumpReply = props => {
+        if (props.chatId === this.props.chatId) {
+            const len = this.jumpHistory.length;
+            if (len > 0 && this.jumpHistory[len - 1].messageId === props.messageId) return;
+
+            this.jumpHistory.push(props);
+        }
+    };
+
+    onGoBack = () => {
+        const len = this.jumpHistory.length;
+
+        if (!len) return;
+
+        const prevStop = this.jumpHistory[len - 1];
+        this.completed && len === 1 ? this.scrollToBottom() : openChat(prevStop.chatId, prevStop.messageId);
+
+        if (len > 1) this.jumpHistory.pop();
+    };
+
     render() {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
@@ -1034,6 +1089,7 @@ class MessagesList extends React.Component {
                           showTitle
                           sendingState={x.sending_state}
                           showUnreadSeparator={separatorMessageId === x.id}
+                          onJumpReply={this.onJumpReply}
                       />
                   )
               );
@@ -1050,6 +1106,13 @@ class MessagesList extends React.Component {
                         {this.messages}
                     </div>
                 </div>
+                <IconButton
+                    ref={this.btnGoDownRef}
+                    aria-label='Scroll to the prev/last message'
+                    onClick={this.onGoBack}
+                    className={classNames('messages-list-go-down-button', classes.buttonGoDown)}>
+                    <div className={classNames(classes.iconGoDown, 'messages-list-go-down-icon')} />
+                </IconButton>
                 <PinnedMessage chatId={chatId} />
                 <FilesDropTarget />
                 <StickersHint />
