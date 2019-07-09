@@ -24,6 +24,7 @@
 
 .sticker-set-item {
     background: transparent;
+    cursor: pointer;
 }
 
 .sticker-set-item-sticker {

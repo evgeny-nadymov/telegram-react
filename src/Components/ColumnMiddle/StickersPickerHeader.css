@@ -33,6 +33,7 @@
     flex-shrink: 0;
     min-width: 32px;
     padding: 6px;
+    cursor: pointer;
 }
 
 .stickers-picker-header-anchor {

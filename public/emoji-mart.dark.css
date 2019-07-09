@@ -417,3 +417,9 @@
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+.emoji-picker-content .emoji-mart-category .emoji-mart-emoji,
+.emoji-picker-content .emoji-mart-category .emoji-mart-emoji span,
+.emoji-picker-content .emoji-mart-anchors button {
+    cursor: pointer;
+}

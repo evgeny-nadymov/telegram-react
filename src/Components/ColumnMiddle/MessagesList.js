@@ -13,6 +13,7 @@ import DayMeta from '../Message/DayMeta';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
 import PinnedMessage from './PinnedMessage';
+import Placeholder from './Placeholder';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
 import { throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
@@ -1016,6 +1017,7 @@ class MessagesList extends React.Component {
 
         const isChannel = isChannelChat(chatId);
 
+        let prevShowDate = false;
         this.itemsMap.clear();
         this.messages = clearHistory
             ? null
@@ -1045,6 +1047,7 @@ class MessagesList extends React.Component {
                       );
                   } else {
                       const showTitle =
+                          prevShowDate ||
                           isChannel ||
                           i === 0 ||
                           (prevMessage &&
@@ -1063,6 +1066,7 @@ class MessagesList extends React.Component {
                           />
                       );
                   }
+                  //prevShowDate = showDate;
 
                   return (
                       <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
@@ -1084,6 +1088,7 @@ class MessagesList extends React.Component {
                         {this.messages}
                     </div>
                 </div>
+                <Placeholder />
                 <PinnedMessage chatId={chatId} />
                 <FilesDropTarget />
                 <StickersHint />
