@@ -228,7 +228,7 @@ module.exports = _slicedToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "5bf22bc6b3c8aab8a6e3.worker.js");
+  return new Worker(__webpack_require__.p + "c9d555990c7c48ff2cc2.worker.js");
 };
 
 /***/ }),
@@ -2158,7 +2158,6 @@ var log = new logger_Logger();
 
 
  //import localforage from 'localforage';
-//import './third_party/broadcastchannel.js';
 
 
 
