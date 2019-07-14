@@ -140,7 +140,7 @@ class SignInControl extends React.Component {
     handleKeyPress = event => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            this.handleNext();
+            this.handleDone();
         }
     };
 
