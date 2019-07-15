@@ -208,7 +208,7 @@ class Message extends Component {
     };
 
     handleSelectChat = chatId => {
-        openChat(chatId, true);
+        openChat(chatId, null, true);
     };
 
     handleSelection = () => {
