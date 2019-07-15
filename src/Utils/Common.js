@@ -8,6 +8,16 @@
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+function isAppleDevice() {
+    const iDevices = ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod', 'MacIntel'];
+
+    if (!!navigator.platform) {
+        return iDevices.indexOf(navigator.platform) > -1;
+    }
+
+    return /iPad|iPhone|iPod|Mac\sOS\sX/.test(navigator.userAgent) && !window.MSStream;
+}
+
 function isConnecting(state) {
     if (!state) return false;
 
@@ -417,5 +427,6 @@ export {
     isAuthorizationReady,
     between,
     getDurationString,
-    getRandomInt
+    getRandomInt,
+    isAppleDevice
 };

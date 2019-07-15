@@ -16,6 +16,7 @@ import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import { Picker as EmojiPicker } from 'emoji-mart';
 import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
+import { isAppleDevice } from '../../Utils/Common';
 import { loadStickerThumbnailContent, loadStickerSetContent } from '../../Utils/File';
 import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -223,6 +224,7 @@ class EmojiPickerButton extends React.Component {
                     onSelect={this.props.onSelect}
                     color={theme.palette.primary.dark}
                     i18n={i18n}
+                    native={isAppleDevice()}
                     style={{ width: 338, overflowX: 'hidden' }}
                 />
             );
