@@ -18,7 +18,7 @@ import './InputBoxHeader.css';
 const styles = theme => ({
     replyIcon: {
         padding: 12,
-        color: theme.palette.action.active
+        color: theme.palette.primary.main
     },
     closeIconButton: {
         margin: 0
