@@ -7,10 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import { compose } from 'recompose';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import { getChatTitle } from '../../Utils/Chat';
+import CheckDecagramIcon from 'mdi-material-ui/CheckDecagram';
+import { getChatTitle, isChatVerified } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitleControl.css';
+
+const styles = theme => ({
+    icon: {
+        color: theme.palette.primary.main
+    }
+});
 
 class DialogTitleControl extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
@@ -19,6 +29,10 @@ class DialogTitleControl extends React.Component {
         }
 
         if (nextProps.t !== this.props.t) {
+            return true;
+        }
+
+        if (nextProps.theme !== this.props.theme) {
             return true;
         }
 
@@ -48,11 +62,21 @@ class DialogTitleControl extends React.Component {
     };
 
     render() {
-        const { t, chatId, showSavedMessages } = this.props;
+        const { classes, t, chatId, showSavedMessages } = this.props;
 
+        const isVerified = isChatVerified(chatId);
         const title = getChatTitle(chatId, showSavedMessages, t);
 
-        return <div className='dialog-title'>{title}</div>;
+        return (
+            <div className='dialog-title'>
+                <span className='dialog-title-span'>{title}</span>
+                {isVerified && (
+                    <CheckDecagramIcon
+                        className={classNames(classes.icon, classes.verifiedIcon, 'dialog-title-icon')}
+                    />
+                )}
+            </div>
+        );
     }
 }
 
@@ -65,4 +89,9 @@ DialogTitleControl.defaultProps = {
     showSavedMessages: true
 };
 
-export default withTranslation()(DialogTitleControl);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles, { withTheme: true })
+);
+
+export default enhance(DialogTitleControl);

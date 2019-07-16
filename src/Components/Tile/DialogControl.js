@@ -30,12 +30,18 @@ const styles = theme => ({
     iconIndicator: {
         background: '#80d066'
     },
+    verifiedIcon: {
+        color: theme.palette.primary.main
+    },
     dialogActive: {
         color: '#fff', //theme.palette.primary.contrastText,
         backgroundColor: theme.palette.primary.main,
         borderRadius: 8,
         cursor: 'pointer',
         margin: '0 12px',
+        '& $verifiedIcon': {
+            color: '#fff'
+        },
         '& $statusRoot': {
             background: theme.palette.primary.main
         },
@@ -114,6 +120,8 @@ class DialogControl extends Component {
 
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
+        const chat = ChatStore.get(chatId);
+        const { is_verified } = chat;
 
         return (
             <div
@@ -136,7 +144,7 @@ class DialogControl extends Component {
                     />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} />
+                            <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
                             <DialogMetaControl chatId={chatId} />
                         </div>
                         <div className='tile-second-row'>

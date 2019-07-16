@@ -15,7 +15,7 @@ import './RecentlyFoundChat.css';
 
 const styles = {
     listItem: {
-        padding: '0px'
+        padding: 0
     }
 };
 

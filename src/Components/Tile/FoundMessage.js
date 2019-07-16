@@ -25,11 +25,18 @@ const styles = theme => ({
     listItem: {
         padding: 0
     },
-    accentBackground: {
-        background: theme.palette.primary.main + '!important'
-    },
     foundMessageSubtitle: {
         color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+    },
+    verifiedIcon: {
+        color: theme.palette.primary.main
+    },
+    foundMessageActive: {
+        color: '#fff',
+        backgroundColor: theme.palette.primary.main,
+        '& $verifiedIcon': {
+            color: '#fff'
+        }
     }
 });
 
@@ -87,6 +94,7 @@ class FoundMessage extends React.Component {
         const senderName = getMessageSenderName(message);
         const senderFullName = getMessageSenderFullName(message);
         const content = getContent(message, t) || '\u00A0';
+        const selected = chatId === selectedChatId && messageId === selectedMessageId;
 
         const tile =
             sender_user_id && chatSearch ? (
@@ -100,8 +108,8 @@ class FoundMessage extends React.Component {
                 <div
                     className={classNames(
                         'found-message',
-                        { [classes.accentBackground]: chatId === selectedChatId && messageId === selectedMessageId },
-                        { 'accent-background': chatId === selectedChatId && messageId === selectedMessageId }
+                        { [classes.foundMessageActive]: selected },
+                        { 'accent-background': selected }
                     )}>
                     {tile}
                     <div className='dialog-inner-wrapper'>
@@ -109,7 +117,7 @@ class FoundMessage extends React.Component {
                             {chatSearch && senderFullName ? (
                                 <div className='dialog-title'>{senderFullName}</div>
                             ) : (
-                                <DialogTitleControl chatId={chatId} />
+                                <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
                             )}
                             <div className={classNames('dialog-meta-date', classes.foundMessageSubtitle)}>{date}</div>
                         </div>

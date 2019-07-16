@@ -1230,6 +1230,33 @@ function canPinMessages(chatId) {
     return false;
 }
 
+function isChatVerified(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+    if (!type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return false;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            const user = UserStore.get(type.user_id);
+
+            return user && user.is_verified;
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(type.supergroup_id);
+
+            return supergroup && supergroup.is_verified;
+        }
+    }
+
+    return false;
+}
+
 export {
     showChatDraft,
     getChatDraft,
@@ -1258,6 +1285,7 @@ export {
     isGroupChat,
     isChannelChat,
     isChatMember,
+    isChatVerified,
     getChatTitle,
     getGroupChatMembers,
     getChatFullInfo,
