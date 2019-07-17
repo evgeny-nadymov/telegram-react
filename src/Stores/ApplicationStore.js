@@ -177,6 +177,20 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateDialogsReady', update);
                 break;
             }
+            case 'clientUpdateMediaViewerContent': {
+                const { content } = update;
+                this.mediaViewerContent = content;
+
+                this.emit('clientUpdateMediaViewerContent', update);
+                break;
+            }
+            case 'clientUpdateProfileMediaViewerContent': {
+                const { content } = update;
+                this.profileMediaViewerContent = content;
+
+                this.emit('clientUpdateProfileMediaViewerContent', update);
+                break;
+            }
             case 'clientUpdateSetPhone': {
                 const { phone } = update;
 
@@ -314,16 +328,6 @@ class ApplicationStore extends EventEmitter {
     changeChatDetailsVisibility(visibility) {
         this.isChatDetailsVisible = visibility;
         this.emit('clientUpdateChatDetailsVisibility', visibility);
-    }
-
-    setMediaViewerContent(content) {
-        this.mediaViewerContent = content;
-        this.emit('clientUpdateMediaViewerContent', content);
-    }
-
-    setProfileMediaViewerContent(content) {
-        this.profileMediaViewerContent = content;
-        this.emit('clientUpdateProfileMediaViewerContent', content);
     }
 
     getConnectionState() {

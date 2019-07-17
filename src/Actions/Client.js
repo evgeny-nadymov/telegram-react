@@ -40,3 +40,17 @@ export function selectMessage(chatId, messageId, selected) {
         selected
     });
 }
+
+export function setMediaViewerContent(content) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateMediaViewerContent',
+        content
+    });
+}
+
+export function setProfileMediaViewerContent(content) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateProfileMediaViewerContent',
+        content
+    });
+}

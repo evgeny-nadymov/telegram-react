@@ -19,6 +19,7 @@ import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
 import ProfileMediaViewerControl from '../Tile/ProfileMediaViewerControl';
+import { setProfileMediaViewerContent } from '../../Actions/Client';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
@@ -163,7 +164,7 @@ class ProfileMediaViewer extends React.Component {
     };
 
     handleClose = () => {
-        ApplicationStore.setProfileMediaViewerContent(null);
+        setProfileMediaViewerContent(null);
     };
 
     handleSave = () => {

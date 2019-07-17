@@ -18,17 +18,13 @@ import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import CallIcon from '@material-ui/icons/Call';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CloseIcon from '@material-ui/icons/Close';
-import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
-import Button from '@material-ui/core/Button';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import CircularProgress from '../ColumnMiddle/MainMenuButton';
-import NotificationTimer from '../Additional/NotificationTimer';
 import UserControl from '../Tile/UserControl';
 import ChatControl from '../Tile/ChatControl';
 import ChatDetailsHeader from './ChatDetailsHeader';
@@ -48,7 +44,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
-import { openChat, openUser } from '../../Actions/Client';
+import { openChat, openUser, setProfileMediaViewerContent } from '../../Actions/Client';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
@@ -322,12 +318,19 @@ class ChatDetails extends React.Component {
     };
 
     handleOpenViewer = () => {
-        const { chatId } = this.props;
+        const { chatId, popup } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
         if (!chat.photo) return;
 
-        ApplicationStore.setProfileMediaViewerContent({ chatId: chatId });
+        setProfileMediaViewerContent({ chatId: chatId });
+
+        if (popup) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateDialogChatId',
+                chatId: 0
+            });
+        }
     };
 
     handleOpenChat = () => {

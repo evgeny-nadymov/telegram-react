@@ -21,6 +21,7 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
+import { setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getPhotoSize, getSize } from './Common';
@@ -876,7 +877,7 @@ function openAnimation(animation, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setMediaViewerContent({
+    setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });
@@ -944,7 +945,7 @@ function openChatPhoto(photo, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setMediaViewerContent({
+    setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });
@@ -996,7 +997,7 @@ function openDocument(document, message, fileCancel) {
             message_id: id
         });
 
-        ApplicationStore.setMediaViewerContent({
+        setMediaViewerContent({
             chatId: chat_id,
             messageId: id
         });
@@ -1070,7 +1071,7 @@ function openPhoto(photo, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setMediaViewerContent({
+    setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });
@@ -1128,7 +1129,7 @@ function openVideo(video, message, fileCancel) {
         message_id: id
     });
 
-    ApplicationStore.setMediaViewerContent({
+    setMediaViewerContent({
         chatId: chat_id,
         messageId: id
     });

@@ -30,6 +30,7 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
+import { setMediaViewerContent } from '../../Actions/Client';
 import { getSize } from '../../Utils/Common';
 import {
     cancelPreloadMediaViewerContent,
@@ -262,7 +263,7 @@ class MediaViewer extends React.Component {
         this.setState({ totalCount: Math.max(totalCount - deletedCount, 0) });
 
         if (!this.history.length) {
-            ApplicationStore.setMediaViewerContent(null);
+            setMediaViewerContent(null);
             return;
         }
 
@@ -402,7 +403,7 @@ class MediaViewer extends React.Component {
     };
 
     handleClose = () => {
-        ApplicationStore.setMediaViewerContent(null);
+        setMediaViewerContent(null);
 
         const { currentMessageId } = this.state;
         const index = this.history.findIndex(x => x.id === currentMessageId);
