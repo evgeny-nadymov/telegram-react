@@ -16,7 +16,7 @@ export const LOCATION_SCALE = 2;
 export const LOCATION_WIDTH = 300;
 export const LOCATION_ZOOM = 16;
 export const MEDIA_SLICE_LIMIT = 20;
-export const MESSAGE_SLICE_LIMIT = 20;
+export const MESSAGE_SLICE_LIMIT = 30;
 export const MESSAGE_SPLIT_MAX_TIME_S = 600;
 export const MUTED_VALUE_MAX = 2147483647; // int32.max = 2^32 - 1
 export const MUTED_VALUE_MIN = 0;
