@@ -32,10 +32,7 @@ class ChatControl extends React.Component {
         const { chatId, onSelect } = this.props;
         if (!onSelect) return;
 
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-
-        onSelect(chat);
+        onSelect(chatId);
     };
 
     render() {

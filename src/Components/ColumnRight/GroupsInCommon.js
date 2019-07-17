@@ -45,10 +45,10 @@ class GroupsInCommon extends React.Component {
         });
     }
 
-    handleSelect = chat => {
+    handleSelect = chatId => {
         const { popup } = this.props;
 
-        openChat(chat.id);
+        openChat(chatId);
 
         if (popup) {
             TdLibController.clientUpdate({

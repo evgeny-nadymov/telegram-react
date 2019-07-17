@@ -48,7 +48,7 @@ import {
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Common';
-import { openChat } from '../../Actions/Client';
+import { openChat, openUser } from '../../Actions/Client';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
@@ -350,6 +350,10 @@ class ChatDetails extends React.Component {
         }
     };
 
+    handleOpenUser = userId => {
+        openUser(userId, true);
+    };
+
     getContentHeight = () => {
         if (!this.chatDetailsListRef) return 0;
 
@@ -402,7 +406,7 @@ class ChatDetails extends React.Component {
         });
         const items = sortedUsers.map(user => (
             <ListItem button className={classes.listItem} key={user.id}>
-                <UserControl userId={user.id} onSelect={this.handleSelectUser} />
+                <UserControl userId={user.id} onSelect={this.handleOpenUser} />
             </ListItem>
         ));
 
