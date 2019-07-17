@@ -145,21 +145,10 @@ class ChatDetails extends React.Component {
             this.handleSelectChat();
         }
 
-        console.log('chatDetailsListRef', this.chatDetailsListRef);
         const list = this.chatDetailsListRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         if (prevProps.chatId === chatId) {
-            console.log(`[ChatDetails] componentDidUpdate before \\
-                chatId=${chatId} \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight}`);
             list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
-            console.log(`[ChatDetails] componentDidUpdate after \\
-                chatId=${chatId} \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight}`);
         } else {
             list.scrollTop = 0;
         }
