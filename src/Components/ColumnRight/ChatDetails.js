@@ -474,7 +474,7 @@ class ChatDetails extends React.Component {
                     <List>
                         {!isMe && <NotificationsListItem chatId={chatId} />}
                         {isGroup && <MoreListItem chatId={chatId} />}
-                        {!isGroup && (
+                        {popup && !isGroup && (
                             <ListItem button className={classes.listItem} onClick={this.handleOpenChat}>
                                 <ListItemText
                                     inset
