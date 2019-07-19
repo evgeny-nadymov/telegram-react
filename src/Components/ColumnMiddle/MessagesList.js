@@ -14,6 +14,7 @@ import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
 import PinnedMessage from './PinnedMessage';
 import Placeholder from './Placeholder';
+import ScrollDownButton from './ScrollDownButton';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
 import { throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
@@ -21,7 +22,7 @@ import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../U
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
-import { highlightMessage } from '../../Actions/Client';
+import { highlightMessage, openChat } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -61,7 +62,9 @@ class MessagesList extends React.Component {
             clearHistory: false,
             selectionActive: false,
             scrollBehavior: ScrollBehaviorEnum.NONE,
-            separatorMessageId: 0
+            separatorMessageId: 0,
+            scrollDownVisible: false,
+            replyHistory: []
         };
 
         this.listRef = React.createRef();
@@ -81,7 +84,9 @@ class MessagesList extends React.Component {
                 clearHistory: false,
                 selectionActive: false,
                 scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
-                separatorMessageId: 0
+                separatorMessageId: 0,
+                scrollDownVisible: props.chatId === state.prevChatId && state.replyHistory.length > 0,
+                replyHistory: props.chatId !== state.prevChatId ? [] : state.replyHistory
             };
         }
 
@@ -130,7 +135,7 @@ class MessagesList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, theme } = this.props;
-        const { playerOpened, history, dragging, clearHistory, selectionActive } = this.state;
+        const { playerOpened, history, dragging, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -141,6 +146,10 @@ class MessagesList extends React.Component {
         }
 
         if (nextProps.messageId !== messageId) {
+            return true;
+        }
+
+        if (nextState.scrollDownVisible !== scrollDownVisible) {
             return true;
         }
 
@@ -177,6 +186,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
@@ -192,6 +202,7 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.removeListener('clientUpdateOpenReply', this.onClientUpdateOpenReply);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
 
@@ -199,6 +210,22 @@ class MessagesList extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateOpenReply = update => {
+        const { chatId, messageId } = update;
+        const { replyHistory } = this.state;
+
+        if (this.props.chatId !== chatId) {
+            return;
+        }
+
+        const lastItem = replyHistory.length > 0 ? replyHistory[replyHistory.length - 1] : null;
+        if (lastItem && lastItem.chatId === chatId && lastItem.messageId === messageId) {
+            return;
+        }
+
+        replyHistory.push({ chatId, messageId });
+    };
 
     onClientUpdateMediaActive = update => {
         const list = this.listRef.current;
@@ -768,6 +795,8 @@ class MessagesList extends React.Component {
     }
 
     handleScroll = () => {
+        const { scrollDownVisible } = this.state;
+
         this.updateItemsInView();
 
         const list = this.listRef.current;
@@ -788,9 +817,16 @@ class MessagesList extends React.Component {
             console.log('SCROLL HANDLESCROLL onLoadNext');
             this.onLoadNext();
         } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
+            if (this.completed && scrollDownVisible) {
+                this.setState({ scrollDownVisible: false, scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION });
+            }
+
             console.log('SCROLL HANDLESCROLL onLoadPrevious');
             this.onLoadPrevious();
         } else {
+            if (!scrollDownVisible) {
+                this.setState({ scrollDownVisible: true });
+            }
             //console.log('SCROLL HANDLESCROLL updateItemsInView');
         }
     };
@@ -979,6 +1015,7 @@ class MessagesList extends React.Component {
         } else {
             this.completed = true;
         }
+        this.setState({ scrollDownVisible: false, replyHistory: [] });
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
@@ -1009,11 +1046,27 @@ class MessagesList extends React.Component {
         ApplicationStore.setDragging(true);
     };
 
+    handleScrollDownClick = event => {
+        const { replyHistory } = this.state;
+
+        if (replyHistory.length > 0) {
+            const lastReply = replyHistory.pop();
+            if (lastReply) {
+                const { chatId, messageId } = lastReply;
+                if (chatId === this.props.chatId) {
+                    openChat(chatId, messageId);
+                }
+            }
+        } else {
+            this.scrollToStart();
+        }
+    };
+
     render() {
         const { classes, chatId } = this.props;
-        const { history, separatorMessageId, clearHistory, selectionActive } = this.state;
+        const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
-        //console.log(`MessagesList.render clearHistory=${clearHistory}`, history);
+        // console.log('MessagesList.render', this.props, this.state);
 
         const isChannel = isChannelChat(chatId);
 
@@ -1089,6 +1142,7 @@ class MessagesList extends React.Component {
                     </div>
                 </div>
                 <Placeholder />
+                {scrollDownVisible && <ScrollDownButton onClick={this.handleScrollDownClick} />}
                 <PinnedMessage chatId={chatId} />
                 <FilesDropTarget />
                 <StickersHint />

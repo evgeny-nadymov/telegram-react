@@ -29,7 +29,7 @@ import {
     openMedia
 } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
-import { openUser, openChat, selectMessage } from '../../Actions/Client';
+import { openUser, openChat, selectMessage, openReply } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
@@ -280,6 +280,11 @@ class Message extends Component {
         this.mouseOut = false;
     };
 
+    handleReplyClick = () => {
+        const { chatId, messageId } = this.props;
+        openReply(chatId, messageId);
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
         const { emojiMatches, selected, highlighted } = this.state;
@@ -355,7 +360,9 @@ class Message extends Component {
                             {forward_info && <Forward forwardInfo={forward_info} />}
                             {showTitle && meta}
                         </div>
-                        {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
+                        {Boolean(reply_to_message_id) && (
+                            <Reply chatId={chatId} messageId={reply_to_message_id} onClick={this.handleReplyClick} />
+                        )}
                         {media}
                         <div
                             className={classNames('message-text', {

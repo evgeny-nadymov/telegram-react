@@ -130,6 +130,21 @@ class MessageStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateChatId': {
+                if (this.selectedItems.size > 0) {
+                    this.selectedItems.clear();
+
+                    this.emit('clientUpdateClearSelection', { '@type': 'clientUpdateClearSelection' });
+                }
+
+                break;
+            }
+            case 'clientUpdateClearSelection': {
+                this.selectedItems.clear();
+
+                this.emit('clientUpdateClearSelection', update);
+                break;
+            }
             case 'clientUpdateMessageHighlighted': {
                 this.emit('clientUpdateMessageHighlighted', update);
                 break;
@@ -147,27 +162,16 @@ class MessageStore extends EventEmitter {
                 this.emit('clientUpdateMessageSelected', update);
                 break;
             }
-            case 'clientUpdateClearSelection': {
-                this.selectedItems.clear();
-
-                this.emit('clientUpdateClearSelection', update);
+            case 'clientUpdateMessagesInView': {
+                this.emit('clientUpdateMessagesInView', update);
                 break;
             }
-            case 'clientUpdateChatId': {
-                if (this.selectedItems.size > 0) {
-                    this.selectedItems.clear();
-
-                    this.emit('clientUpdateClearSelection', { '@type': 'clientUpdateClearSelection' });
-                }
-
+            case 'clientUpdateOpenReply': {
+                this.emit('clientUpdateOpenReply', update);
                 break;
             }
             case 'clientUpdateReply': {
                 this.emit('clientUpdateReply', update);
-                break;
-            }
-            case 'clientUpdateMessagesInView': {
-                this.emit('clientUpdateMessagesInView', update);
                 break;
             }
         }

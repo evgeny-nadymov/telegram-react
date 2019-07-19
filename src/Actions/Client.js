@@ -24,6 +24,14 @@ export function openChat(chatId, messageId = null, popup = false) {
     });
 }
 
+export function openReply(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateOpenReply',
+        chatId,
+        messageId
+    });
+}
+
 export function highlightMessage(chatId, messageId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMessageHighlighted',

@@ -46,13 +46,14 @@ class Reply extends React.Component {
     handleOpen = event => {
         event.stopPropagation();
 
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, onClick } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
         if (isDeletedMessage(message)) return null;
 
-        openChat(chatId, messageId);
+        openChat(chatId, messageId, false);
+        if (onClick) onClick();
     };
 
     render() {
@@ -87,8 +88,9 @@ class Reply extends React.Component {
 }
 
 Reply.propTypes = {
-    chatId: PropTypes.number,
-    messageId: PropTypes.number
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    onClick: PropTypes.func
 };
 
 const enhance = compose(

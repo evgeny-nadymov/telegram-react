@@ -487,7 +487,7 @@ class ChatDetails extends React.Component {
                             </ListItem>
                         )}
                     </List>
-                    <Divider />
+                    {!isMe && <Divider />}
                     <List>
                         <ListItem button disabled className={classes.listItem} onClick={onOpenSharedMedia}>
                             <ListItemIcon>

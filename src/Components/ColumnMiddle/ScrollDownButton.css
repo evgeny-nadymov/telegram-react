@@ -1,0 +1,15 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.scroll-down-button {
+    border-width: 1px;
+    border-style: solid;
+    position: absolute;
+    right: 24px;
+    bottom: 12px;
+    border-radius: 50%;
+}
