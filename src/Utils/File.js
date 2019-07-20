@@ -1047,7 +1047,7 @@ function getMediaPreviewFile(chatId, messageId) {
         }
         case 'messageVideo': {
             const { video } = content;
-            if (video.thumbnail) {
+            if (video && video.thumbnail) {
                 return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
             }
             break;
