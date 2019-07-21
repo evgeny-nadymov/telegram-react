@@ -24,7 +24,8 @@ const styles = {
         bottom: 1,
         zIndex: 1
     },
-    statusIcon: {}
+    statusIcon: {},
+    iconIndicator: {}
 };
 
 class ChatTileControl extends Component {

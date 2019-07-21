@@ -19,7 +19,8 @@ import './DialogTitleControl.css';
 const styles = theme => ({
     icon: {
         color: theme.palette.primary.main
-    }
+    },
+    verifiedIcon: {}
 });
 
 class DialogTitleControl extends React.Component {
