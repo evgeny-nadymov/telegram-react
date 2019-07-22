@@ -37,6 +37,19 @@
     pointer-events: none;
 }
 
+.pinned-message-content-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.pinned-message-content-subtitle {
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .pinned-message-delete-button {
     margin-left: 12px;
     flex-shrink: 0;

@@ -19,6 +19,9 @@ import MessageStore from '../../Stores/MessageStore';
 import './Reply.css';
 
 const styles = theme => ({
+    replyContentSubtitle: {
+        color: theme.palette.text.secondary
+    },
     ...accentStyles(theme)
 });
 
@@ -79,7 +82,9 @@ class Reply extends React.Component {
                         {title && (
                             <div className={classNames('reply-content-title', classes.accentColorMain)}>{title}</div>
                         )}
-                        <div className='reply-content-subtitle'>{content}</div>
+                        <div className={classNames('reply-content-subtitle', classes.replyContentSubtitle)}>
+                            {content}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -12,7 +12,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     flex-grow: 1;
-    color: #70777b;
 }
 
 .dialog-content-accent {

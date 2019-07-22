@@ -26,7 +26,7 @@ const styles = theme => ({
         padding: 0
     },
     foundMessageSubtitle: {
-        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+        color: theme.palette.text.secondary
     },
     verifiedIcon: {
         color: theme.palette.primary.main
@@ -119,7 +119,7 @@ class FoundMessage extends React.Component {
                             ) : (
                                 <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
                             )}
-                            <div className={classNames('dialog-meta-date', classes.foundMessageSubtitle)}>{date}</div>
+                            <div className={classNames('dialog-meta', classes.foundMessageSubtitle)}>{date}</div>
                         </div>
                         <div className='tile-second-row'>
                             <div className={classNames('dialog-content', classes.foundMessageSubtitle)}>

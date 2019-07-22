@@ -7,11 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { getDownloadedSize, getUploadedSize, getFileSize } from '../../../Utils/File';
 import { getDurationString } from '../../../Utils/Common';
 import FileStore from '../../../Stores/FileStore';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './AudioAction.css';
+
+const styles = theme => ({
+    audioAction: {
+        color: theme.palette.text.secondary
+    }
+});
 
 class AudioAction extends React.Component {
     constructor(props) {
@@ -37,7 +45,12 @@ class AudioAction extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        const { theme } = this.props;
         const { active, timeString, file, prevFile } = this.state;
+
+        if (nextProps.theme !== theme) {
+            return true;
+        }
 
         if (nextState.timeString !== timeString) {
             return true;
@@ -139,6 +152,7 @@ class AudioAction extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
         const { file, timeString } = this.state;
         if (!file) return null;
 
@@ -157,7 +171,7 @@ class AudioAction extends React.Component {
         const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
 
         return (
-            <div className='audio-action'>
+            <div className={classNames('audio-action', classes.audioAction)}>
                 {!isDownloadingCompleted && <span>{`${sizeString}, `}</span>}
                 <span>{timeString}</span>
             </div>
@@ -172,4 +186,4 @@ AudioAction.propTypes = {
     file: PropTypes.object.isRequired
 };
 
-export default AudioAction;
+export default withStyles(styles, { withTheme: true })(AudioAction);

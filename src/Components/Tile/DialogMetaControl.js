@@ -6,17 +6,25 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { getLastMessageDate } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogMetaControl.css';
 
-class DialogMetaControl extends React.Component {
-    constructor(props) {
-        super(props);
+const styles = theme => ({
+    dialogMetaDate: {
+        color: theme.palette.text.secondary
     }
+});
 
+class DialogMetaControl extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
+            return true;
+        }
+
+        if (nextProps.theme !== this.props.theme) {
             return true;
         }
 
@@ -67,12 +75,13 @@ class DialogMetaControl extends React.Component {
     render() {
         if (this.clearHistory) return null;
 
-        const { chatId } = this.props;
+        const { chatId, classes } = this.props;
 
         const chat = ChatStore.get(chatId);
         const date = getLastMessageDate(chat);
 
-        return <>{date && <div className='dialog-meta-date'>{date}</div>}</>;
+        return <>{date && <div className={classNames('dialog-meta', classes.dialogMetaDate)}>{date}</div>}</>;
     }
 }
-export default DialogMetaControl;
+
+export default withStyles(styles, { withTheme: true })(DialogMetaControl);

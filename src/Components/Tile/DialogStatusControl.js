@@ -17,7 +17,7 @@ import './DialogStatusControl.css';
 
 const styles = theme => ({
     statusSubtitle: {
-        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+        color: theme.palette.text.secondary
     },
     statusAccentSubtitle: {
         color: theme.palette.primary.dark + '!important'

@@ -29,6 +29,9 @@ const styles = theme => ({
     },
     messageHighlighted: {
         animation: 'highlighted 4s ease-out'
+    },
+    serviceMessageContent: {
+        color: theme.palette.text.secondary
     }
 });
 
@@ -50,7 +53,7 @@ class ServiceMessage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { chatId, messageId, sendingState, showUnreadSeparator, theme } = this.props;
         const { highlighted } = this.state;
 
         if (nextProps.chatId !== chatId) {
@@ -66,6 +69,10 @@ class ServiceMessage extends React.Component {
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            return true;
+        }
+
+        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -140,7 +147,7 @@ class ServiceMessage extends React.Component {
             <div className={messageClassName} onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='service-message-wrapper'>
-                    <div className='service-message-content'>{text}</div>
+                    <div className={classNames('service-message-content', classes.serviceMessageContent)}>{text}</div>
                 </div>
                 {photo && (
                     <Photo

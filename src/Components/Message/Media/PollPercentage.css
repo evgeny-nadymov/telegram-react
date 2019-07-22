@@ -13,10 +13,6 @@
     transition: opacity 0.2s linear;
 }
 
-.poll-percentage-subtitle {
-    color: #70777b;
-}
-
 .poll-percentage-action {
     color: inherit;
 }

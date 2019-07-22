@@ -14,7 +14,7 @@ import './UserStatusControl.css';
 
 const styles = theme => ({
     userStatusSubtitle: {
-        color: theme.palette.type === 'dark' ? theme.palette.text.secondary : '#70777b'
+        color: theme.palette.text.secondary
     },
     userStatusAccentSubtitle: {
         color: theme.palette.primary.dark + '!important'

@@ -41,6 +41,9 @@ const styles = theme => ({
     moreIconButton: {
         margin: '8px 12px 8px 0'
     },
+    headerStatusTitle: {
+        color: theme.palette.text.secondary
+    },
     headerStatusAccentTitle: {
         color: theme.palette.primary.dark + '!important'
     },
@@ -359,7 +362,7 @@ class Header extends Component {
                     <span className='header-status-content'>{title}</span>
                     {showProgressAnimation && <HeaderProgress />}
                     <span
-                        className={classNames('header-status-title', {
+                        className={classNames('header-status-title', classes.headerStatusTitle, {
                             [classes.headerStatusAccentTitle]: isAccentSubtitle
                         })}>
                         {subtitle}

@@ -7,9 +7,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { getDownloadedSize, getUploadedSize, getFileSize } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './DocumentAction.css';
+
+const styles = theme => ({
+    documentAction: {
+        color: theme.palette.text.secondary
+    }
+});
 
 class DocumentAction extends React.Component {
     constructor(props) {
@@ -56,7 +64,12 @@ class DocumentAction extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        const { theme } = this.props;
         const { file, prevFile } = this.state;
+
+        if (nextProps.theme !== theme) {
+            return true;
+        }
 
         if (nextState.file !== file) {
             return true;
@@ -70,6 +83,7 @@ class DocumentAction extends React.Component {
     }
 
     render() {
+        const { classes } = this.props;
         const { file } = this.state;
         if (!file) return null;
 
@@ -87,7 +101,7 @@ class DocumentAction extends React.Component {
         const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
 
         return (
-            <div className='document-action'>
+            <div className={classNames('document-action', classes.documentAction)}>
                 <span>{sizeString}</span>
             </div>
         );
@@ -98,4 +112,4 @@ DocumentAction.propTypes = {
     file: PropTypes.object.isRequired
 };
 
-export default DocumentAction;
+export default withStyles(styles, { withTheme: true })(DocumentAction);

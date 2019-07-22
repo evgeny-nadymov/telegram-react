@@ -7,6 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import withStyles from '@material-ui/core/styles/withStyles';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
@@ -14,9 +16,14 @@ import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
 import MediaStatus from './MediaStatus';
 import VoiceNoteSlider from './VoiceNoteSlider';
-import FileProgress from '../../Viewer/FileProgress';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './VoiceNote.css';
+
+const styles = theme => ({
+    voiceNoteMeta: {
+        color: theme.palette.text.secondary
+    }
+});
 
 class VoiceNote extends React.Component {
     constructor(props) {
@@ -36,13 +43,14 @@ class VoiceNote extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { theme } = this.props;
         const { active, playing, currentTime, duration } = this.state;
 
-        if (nextState.active !== active) {
+        if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextState.playing !== playing) {
+        if (nextState.active !== active) {
             return true;
         }
 
@@ -51,6 +59,10 @@ class VoiceNote extends React.Component {
         }
 
         if (nextState.duration !== duration) {
+            return true;
+        }
+
+        if (nextState.playing !== playing) {
             return true;
         }
 
@@ -141,7 +153,7 @@ class VoiceNote extends React.Component {
                 />
                 <div className='voice-note-content'>
                     <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />
-                    <div className='voice-note-meta'>
+                    <div className={classNames(classes.voiceNoteMeta, 'voice-note-meta')}>
                         <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
                         <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
                     </div>
@@ -158,4 +170,4 @@ VoiceNote.propTypes = {
     openMedia: PropTypes.func.isRequired
 };
 
-export default VoiceNote;
+export default withStyles(styles, { withTheme: true })(VoiceNote);

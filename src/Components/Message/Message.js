@@ -196,11 +196,17 @@ class Message extends Component {
     onUpdateMessageContent = update => {
         const { chat_id, message_id } = update;
         const { chatId, messageId } = this.props;
+        const { emojiMatches } = this.state;
 
         if (chatId !== chat_id) return;
         if (messageId !== message_id) return;
 
-        this.setState({ emojiMatches: getEmojiMatches(chatId, messageId) });
+        const newEmojiMatches = getEmojiMatches(chatId, messageId);
+        if (newEmojiMatches !== emojiMatches) {
+            this.setState({ emojiMatches: getEmojiMatches(chatId, messageId) });
+        } else {
+            this.forceUpdate();
+        }
     };
 
     handleSelectUser = userId => {
