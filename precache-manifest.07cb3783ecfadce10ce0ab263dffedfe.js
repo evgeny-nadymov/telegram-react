@@ -1,39 +1,39 @@
 self.__precacheManifest = [
   {
-    "revision": "1a3b143feeb18adedd0d",
-    "url": "/telegram-react/static/css/main.1b599418.chunk.css"
+    "revision": "8e8d99561c8fe8b2b064",
+    "url": "/telegram-react/static/css/main.4c144d86.chunk.css"
   },
   {
-    "revision": "1a3b143feeb18adedd0d",
-    "url": "/telegram-react/static/js/main.149c8d53.chunk.js"
+    "revision": "8e8d99561c8fe8b2b064",
+    "url": "/telegram-react/static/js/main.45321d54.chunk.js"
   },
   {
-    "revision": "7ce5f85e96ae3aba136a",
-    "url": "/telegram-react/static/js/runtime~main.9b6bdafd.js"
+    "revision": "c0689a9cd5c80942d865",
+    "url": "/telegram-react/static/js/runtime~main.307e43f4.js"
   },
   {
     "revision": "ded71e35f611ed60d5b3",
     "url": "/telegram-react/static/js/2.465a43d5.chunk.js"
   },
   {
-    "revision": "e7e6eafcbd89e815709c",
-    "url": "/telegram-react/static/css/3.d93e24ec.chunk.css"
+    "revision": "bd9cf30f1daadbfe8ebe",
+    "url": "/telegram-react/static/css/3.84ad09ea.chunk.css"
   },
   {
-    "revision": "e7e6eafcbd89e815709c",
-    "url": "/telegram-react/static/js/3.40efb9a6.chunk.js"
+    "revision": "bd9cf30f1daadbfe8ebe",
+    "url": "/telegram-react/static/js/3.77580c0e.chunk.js"
   },
   {
-    "revision": "9da19539567d2075a0c1",
-    "url": "/telegram-react/static/js/4.f03a5acf.chunk.js"
+    "revision": "899ad92be03f269fd14f",
+    "url": "/telegram-react/static/js/4.cd4a672b.chunk.js"
   },
   {
-    "revision": "690c5b3de76bc889265e",
+    "revision": "90af24e52e3f115ec1be",
     "url": "/telegram-react/static/css/5.fda1bfdc.chunk.css"
   },
   {
-    "revision": "690c5b3de76bc889265e",
-    "url": "/telegram-react/static/js/5.4cf60d3a.chunk.js"
+    "revision": "90af24e52e3f115ec1be",
+    "url": "/telegram-react/static/js/5.08c471d0.chunk.js"
   },
   {
     "revision": "4fa0fe5e1432649e8a3d",
@@ -72,7 +72,7 @@ self.__precacheManifest = [
     "url": "/telegram-react/static/media/Bubbles.5b7ac6f8.svg"
   },
   {
-    "revision": "113c5056bbe1d81446ae7844b7e07330",
+    "revision": "2218a2bd6fe5311238e325ae3d6d5a3a",
     "url": "/telegram-react/index.html"
   }
 ];
