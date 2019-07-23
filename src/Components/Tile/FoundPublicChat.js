@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
 import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import DialogTitleControl from './DialogTitleControl';
 import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -106,7 +106,7 @@ class FoundPublicChat extends React.Component {
                         'accent-background': chatId === selectedChatId
                     })}
                     onClick={this.handleClick}>
-                    <ChatTileControl chatId={chatId} />
+                    <ChatTile chatId={chatId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />

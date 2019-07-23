@@ -12,8 +12,8 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import { compose } from 'recompose';
 import ListItem from '@material-ui/core/ListItem';
-import ChatTileControl from './ChatTileControl';
-import UserTileControl from './UserTileControl';
+import ChatTile from './ChatTile';
+import UserTile from './UserTile';
 import DialogTitleControl from './DialogTitleControl';
 import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
@@ -96,12 +96,7 @@ class FoundMessage extends React.Component {
         const content = getContent(message, t) || '\u00A0';
         const selected = chatId === selectedChatId && messageId === selectedMessageId;
 
-        const tile =
-            sender_user_id && chatSearch ? (
-                <UserTileControl userId={sender_user_id} />
-            ) : (
-                <ChatTileControl chatId={chatId} />
-            );
+        const tile = sender_user_id && chatSearch ? <UserTile userId={sender_user_id} /> : <ChatTile chatId={chatId} />;
 
         return (
             <ListItem button className={classes.listItem} onClick={onClick}>

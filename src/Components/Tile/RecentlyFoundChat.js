@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
 import withStyles from '@material-ui/core/styles/withStyles';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import DialogTitleControl from './DialogTitleControl';
 import './RecentlyFoundChat.css';
 
@@ -27,7 +27,7 @@ class RecentlyFoundChat extends React.PureComponent {
             <ListItem button className={classes.listItem} onClick={onClick}>
                 <div className='recently-found-chat'>
                     <div className='chat-wrapper'>
-                        <ChatTileControl chatId={chatId} showSavedMessages />
+                        <ChatTile chatId={chatId} />
                         <div className='dialog-inner-wrapper'>
                             <div className='tile-first-row'>
                                 <DialogTitleControl chatId={chatId} />

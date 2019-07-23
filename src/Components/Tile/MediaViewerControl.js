@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getDateHint, getSenderUserId } from '../../Utils/Message';
-import UserTileControl from './UserTileControl';
-import ChatTileControl from './ChatTileControl';
+import UserTile from './UserTile';
+import ChatTile from './ChatTile';
 import MessageAuthor from '../Message/MessageAuthor';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerControl.css';
@@ -28,11 +28,7 @@ class MediaViewerControl extends React.Component {
         const userId = getSenderUserId(message);
         const dateHint = getDateHint(message);
 
-        const tileControl = userId ? (
-            <UserTileControl userId={userId} />
-        ) : (
-            <ChatTileControl chatId={chatId} />
-        );
+        const tileControl = userId ? <UserTile userId={userId} /> : <ChatTile chatId={chatId} />;
 
         return (
             <div className='media-viewer-control'>

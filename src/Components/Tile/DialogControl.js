@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
 import DialogTitleControl from './DialogTitleControl';
@@ -132,7 +132,7 @@ class DialogControl extends Component {
                 )}
                 onMouseDown={this.handleSelect}>
                 <div className='dialog-wrapper'>
-                    <ChatTileControl
+                    <ChatTile
                         chatId={chatId}
                         showSavedMessages={showSavedMessages}
                         showOnline

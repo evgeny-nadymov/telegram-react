@@ -6,9 +6,11 @@
  */
 
 .document-tile {
-    cursor: pointer;
-    height: 48px;
     position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
 .document-tile-background {

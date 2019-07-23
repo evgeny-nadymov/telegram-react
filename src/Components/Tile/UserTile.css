@@ -5,3 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.user-tile {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}

@@ -11,11 +11,11 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import ChatStatus from './ChatStatus';
-import { getChatLetters, getChatUserId, isMeChat, isPrivateChat } from '../../Utils/Chat';
-import { loadChatContent } from '../../Utils/File';
+import { getChatLetters, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { getSrc, loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
-import './ChatTileControl.css';
+import './ChatTile.css';
 
 const styles = {
     statusRoot: {
@@ -28,13 +28,25 @@ const styles = {
     iconIndicator: {}
 };
 
-class ChatTileControl extends Component {
+class ChatTile extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            loaded: false
+        };
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
         }
 
         if (nextProps.theme !== this.props.theme) {
+            return true;
+        }
+
+        if (nextState.loaded !== this.state.loaded) {
             return true;
         }
 
@@ -62,39 +74,40 @@ class ChatTileControl extends Component {
     onClientUpdateChatBlob = update => {
         const { chatId } = this.props;
 
-        if (chatId === update.chatId) {
+        if (chatId !== update.chatId) return;
+
+        if (this.state.loaded) {
+            this.setState({ loaded: false });
+        } else {
             this.forceUpdate();
         }
     };
 
     onUpdateChatPhoto = update => {
         const { chatId } = this.props;
-        const { chat_id } = update;
+        const { chat_id, photo } = update;
 
         if (chat_id !== chatId) return;
 
-        const chat = ChatStore.get(chatId);
-        if (!update.photo) {
-            this.forceUpdate();
+        if (this.state.loaded) {
+            this.setState({ loaded: false });
         } else {
+            this.forceUpdate();
+        }
+
+        if (photo) {
             const store = FileStore.getStore();
-            loadChatContent(store, chat);
+            loadChatContent(store, chatId);
         }
     };
 
     onUpdateChatTitle = update => {
         const { chatId } = this.props;
+        const { chat_id } = update;
 
-        if (!update.chat_id) return;
-        if (update.chat_id !== chatId) return;
+        if (chat_id !== chatId) return;
 
-        const chat = ChatStore.get(chatId);
-        if (!update.photo) {
-            this.forceUpdate();
-        } else {
-            const store = FileStore.getStore();
-            loadChatContent(store, chat);
-        }
+        this.forceUpdate();
     };
 
     handleSelect = event => {
@@ -105,15 +118,22 @@ class ChatTileControl extends Component {
         onSelect(chatId);
     };
 
+    handleLoad = () => {
+        this.setState({ loaded: true });
+    };
+
     render() {
         const { classes, chatId, showOnline, showSavedMessages, onSelect } = this.props;
+        const { loaded } = this.state;
 
         if (isMeChat(chatId) && showSavedMessages) {
             const className = classNames('tile-photo', 'tile_color_4', { pointer: onSelect });
             return (
-                <div className={className} onClick={this.handleSelect}>
-                    <div className='tile-saved-messages'>
-                        <BookmarkBorderIcon />
+                <div className='chat-tile' onClick={this.handleSelect}>
+                    <div className={className}>
+                        <div className='tile-saved-messages'>
+                            <BookmarkBorderIcon />
+                        </div>
                     </div>
                 </div>
             );
@@ -125,29 +145,29 @@ class ChatTileControl extends Component {
         const { photo } = chat;
 
         const letters = getChatLetters(chat);
-        const blob = photo && photo.small ? FileStore.getBlob(photo.small.id) : null;
-        const src = FileStore.getBlobUrl(blob);
+        const src = getSrc(photo ? photo.small : null);
+        const tileLoaded = src && loaded;
 
         const tileColor = `tile_color_${(Math.abs(chatId) % 8) + 1}`;
-        const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
+        const className = classNames('tile-photo', { [tileColor]: !tileLoaded }, { pointer: onSelect });
 
         return (
             <div className='chat-tile' onClick={this.handleSelect}>
-                {src ? (
-                    <img className={className} src={src} draggable={false} alt='' />
-                ) : (
+                {!tileLoaded && (
                     <div className={className}>
                         <span className='tile-text'>{letters}</span>
                     </div>
                 )}
+                {src && <img className={className} src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
+
                 {showOnline && isPrivateChat(chatId) && (
                     <ChatStatus
+                        chatId={chatId}
                         classes={{
                             root: classes.statusRoot,
                             icon: classes.statusIcon,
                             iconIndicator: classes.iconIndicator
                         }}
-                        chatId={chatId}
                     />
                 )}
             </div>
@@ -155,7 +175,7 @@ class ChatTileControl extends Component {
     }
 }
 
-ChatTileControl.propTypes = {
+ChatTile.propTypes = {
     classes: PropTypes.object,
     chatId: PropTypes.number.isRequired,
     onSelect: PropTypes.func,
@@ -163,9 +183,9 @@ ChatTileControl.propTypes = {
     showOnline: PropTypes.bool
 };
 
-ChatTileControl.defaultProps = {
+ChatTile.defaultProps = {
     showSavedMessages: true,
     showOnline: false
 };
 
-export default withStyles(styles, { withTheme: true })(ChatTileControl);
+export default withStyles(styles, { withTheme: true })(ChatTile);

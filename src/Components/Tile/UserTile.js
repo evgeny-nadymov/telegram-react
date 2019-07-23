@@ -9,15 +9,27 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getUserLetters } from '../../Utils/User';
-import { loadChatContent } from '../../Utils/File';
+import { getSrc, loadChatContent } from '../../Utils/File';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
-import './UserTileControl.css';
+import './UserTile.css';
 
-class UserTileControl extends Component {
+class UserTile extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            loaded: false
+        };
+    }
+
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.userId !== this.props.userId) {
+            return true;
+        }
+
+        if (nextState.loaded !== this.state.loaded) {
             return true;
         }
 
@@ -41,15 +53,20 @@ class UserTileControl extends Component {
     onClientUpdateUserBlob = update => {
         const { userId } = this.props;
 
-        if (userId === update.userId) {
+        if (userId !== update.userId) return;
+
+        if (this.state.loaded) {
+            this.setState({ loaded: false });
+        } else {
             this.forceUpdate();
         }
     };
 
     onClientUpdateChatBlob = update => {
         const { userId } = this.props;
+        const { chatId } = update;
 
-        const chat = ChatStore.get(update.chatId);
+        const chat = ChatStore.get(chatId);
         if (!chat) return;
         if (!chat.type) return;
 
@@ -60,8 +77,11 @@ class UserTileControl extends Component {
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                if (chat.type.user_id === userId) {
-                    //console.log('UserTileControl.onClientUpdateChatBlob user_id=' + userId);
+                if (chat.type.user_id !== userId) return;
+
+                if (this.state.loaded) {
+                    this.setState({ loaded: false });
+                } else {
                     this.forceUpdate();
                 }
             }
@@ -70,8 +90,9 @@ class UserTileControl extends Component {
 
     onUpdateChatPhoto = update => {
         const { userId } = this.props;
+        const { chat_id, photo } = update;
 
-        const chat = ChatStore.get(update.chat_id);
+        const chat = ChatStore.get(chat_id);
         if (!chat) return;
         if (!chat.type) return;
 
@@ -82,14 +103,17 @@ class UserTileControl extends Component {
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                if (chat.type.user_id === userId) {
-                    if (!update.photo) {
-                        //console.log('UserTileControl.onUpdateChatPhoto user_id=' + userId);
-                        this.forceUpdate();
-                    } else {
-                        const store = FileStore.getStore();
-                        loadChatContent(store, chat);
-                    }
+                if (chat.type.user_id !== userId) return;
+
+                if (this.state.loaded) {
+                    this.setState({ loaded: false });
+                } else {
+                    this.forceUpdate();
+                }
+
+                if (photo) {
+                    const store = FileStore.getStore();
+                    loadChatContent(store, chat);
                 }
             }
         }
@@ -109,10 +133,9 @@ class UserTileControl extends Component {
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                if (chat.type.user_id === userId && !chat.photo) {
-                    //console.log('UserTileControl.onUpdateChatTitle user_id=' + userId);
-                    this.forceUpdate();
-                }
+                if (chat.type.user_id !== userId && !chat.photo) return;
+
+                this.forceUpdate();
             }
         }
     };
@@ -125,36 +148,44 @@ class UserTileControl extends Component {
         onSelect(userId);
     };
 
-    render() {
-        const { userId, onSelect } = this.props;
-        let { user } = this.props;
-        if (!userId && !user) return null;
+    handleLoad = () => {
+        this.setState({ loaded: true });
+    };
 
-        user = UserStore.get(userId) || user;
-        if (!user) return null;
+    render() {
+        const { userId, fistName, lastName, onSelect } = this.props;
+        const { loaded } = this.state;
+
+        const user = UserStore.get(userId);
+        if (!user && !(fistName || lastName)) return null;
 
         const { profile_photo } = user;
 
-        const letters = getUserLetters(user);
-        const blob = profile_photo && profile_photo.small ? FileStore.getBlob(profile_photo.small.id) : null;
-        const src = FileStore.getBlobUrl(blob);
-        const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
-        const className = classNames('tile-photo', { [tileColor]: !blob }, { pointer: onSelect });
+        const letters = getUserLetters(userId, fistName, lastName);
+        const src = getSrc(profile_photo ? profile_photo.small : null);
+        const tileLoaded = src && loaded;
 
-        return src ? (
-            <img className={className} src={src} draggable={false} alt='' onClick={this.handleSelect} />
-        ) : (
-            <div className={className} onClick={this.handleSelect}>
-                <span className='tile-text'>{letters}</span>
+        const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
+        const className = classNames('tile-photo', { [tileColor]: !tileLoaded }, { pointer: onSelect });
+
+        return (
+            <div className='user-tile' onClick={this.handleSelect}>
+                {!tileLoaded && (
+                    <div className={className}>
+                        <span className='tile-text'>{letters}</span>
+                    </div>
+                )}
+                {src && <img className={className} src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
             </div>
         );
     }
 }
 
-UserTileControl.propTypes = {
+UserTile.propTypes = {
     userId: PropTypes.number.isRequired,
-    user: PropTypes.object,
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
     onSelect: PropTypes.func
 };
 
-export default UserTileControl;
+export default UserTile;

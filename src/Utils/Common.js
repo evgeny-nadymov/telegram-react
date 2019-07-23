@@ -271,7 +271,7 @@ function getLetters(title) {
     if (!title) return null;
     if (title.length === 0) return null;
 
-    let split = title.split(' ');
+    const split = title.split(' ');
     if (split.length > 1) {
         return getFirstLetter(split[0]) + getFirstLetter(split[1]);
     }

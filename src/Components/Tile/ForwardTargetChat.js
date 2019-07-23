@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './ForwardTargetChat.css';
 
@@ -39,7 +39,7 @@ class ForwardTargetChat extends React.Component {
                 onClick={onSelect}>
                 <div className='forward-target-chat-tile'>
                     <div className='forward-target-chat-tile-wrapper'>
-                        <ChatTileControl chatId={chatId} showSavedMessages />
+                        <ChatTile chatId={chatId} />
                     </div>
                     {selected && <div className={classNames('forward-target-chat-selection', classes.border)} />}
                     <div

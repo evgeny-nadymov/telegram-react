@@ -8,6 +8,8 @@
 .chat-tile {
     position: relative;
     height: 48px;
+    width: 48px;
+    flex-shrink: 0;
 }
 
 .tile_color_1 {
@@ -49,14 +51,15 @@
 
 .tile-photo {
     width: 48px;
-    min-width: 48px;
     height: 48px;
-    min-height: 48px;
     border-radius: 50%;
     overflow: hidden;
     object-fit: cover;
-    position: relative;
-    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     user-select: none;
 }
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import UserTileControl from './UserTileControl';
+import UserTile from './UserTile';
 import UserStatusControl from './UserStatusControl';
 import { getUserFullName } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
@@ -34,7 +34,7 @@ class UserControl extends React.Component {
         return (
             <div className='user' onClick={this.handleClick}>
                 <div className='user-wrapper'>
-                    <UserTileControl userId={userId} />
+                    <UserTile userId={userId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <div className='dialog-title'>{fullName}</div>

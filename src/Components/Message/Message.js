@@ -14,8 +14,8 @@ import Reply from './Reply';
 import Forward from './Forward';
 import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
-import UserTileControl from '../Tile/UserTileControl';
-import ChatTileControl from '../Tile/ChatTileControl';
+import UserTile from '../Tile/UserTile';
+import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
 import {
@@ -310,9 +310,9 @@ class Message extends Component {
         let tile = null;
         if (showTitle) {
             tile = sender_user_id ? (
-                <UserTileControl userId={sender_user_id} onSelect={this.handleSelectUser} />
+                <UserTile userId={sender_user_id} onSelect={this.handleSelectUser} />
             ) : (
-                <ChatTileControl chatId={chatId} onSelect={this.handleSelectChat} />
+                <ChatTile chatId={chatId} onSelect={this.handleSelectChat} />
             );
         }
 

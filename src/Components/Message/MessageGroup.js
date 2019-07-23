@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import Message from './../Message/Message';
-import UserTileControl from './../Tile/UserTileControl';
+import UserTile from '../Tile/UserTile';
 import { getTitle, getDate, getText, getMedia } from '../../Utils/Message';
 import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -114,7 +114,7 @@ class MessageGroup extends Component {
                 {user && (
                     <div className='group-sender'>
                         <div className='group-tile'>
-                            <UserTileControl user={user} />
+                            <UserTile userId={this.props.messages[0].sender_user_id} />
                         </div>
                     </div>
                 )}

@@ -9,7 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
-import UserTileControl from '../../Tile/UserTileControl';
+import UserTile from '../../Tile/UserTile';
 import { formatPhoneNumber } from '../../../Utils/Common';
 import { getUserFullName } from '../../../Utils/User';
 import UserStore from '../../../Stores/UserStore';
@@ -32,8 +32,8 @@ class Contact extends React.Component {
             '@type': 'user',
             type: { '@type': 'userTypeRegular' },
             id: user_id,
-            first_name: first_name,
-            last_name: last_name
+            first_name,
+            last_name
         };
 
         const fullName = getUserFullName(user);
@@ -42,7 +42,7 @@ class Contact extends React.Component {
         return (
             <div className='contact'>
                 <div className='contact-tile'>
-                    <UserTileControl userId={user_id} user={user} />
+                    <UserTile userId={user_id} firstName={first_name} lastName={last_name} />
                 </div>
                 <div className='contact-content'>
                     <div className='contact-name'>

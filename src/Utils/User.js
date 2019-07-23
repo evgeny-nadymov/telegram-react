@@ -150,16 +150,21 @@ function isUserBlocked(userId) {
     return false;
 }
 
-function getUserLetters(user) {
-    if (!user) return null;
+function getUserLetters(userId, firstName, lastName) {
+    const user = UserStore.get(userId);
+    if (!user && !(firstName || lastName)) return null;
 
-    let title = getUserFullName(user);
-    let letters = getLetters(title);
+    const title = getUserFullName(user) || `${firstName} ${lastName}`.trim();
+    const letters = getLetters(title);
     if (letters && letters.length > 0) {
         return letters;
     }
 
-    return user.first_name ? user.first_name.charAt(0) : user.last_name ? user.last_name.charAt(0) : '';
+    if (user) {
+        return user.first_name ? user.first_name.charAt(0) : user.last_name ? user.last_name.charAt(0) : '';
+    }
+
+    return firstName ? firstName.charAt(0) : lastName ? lastName.charAt(0) : '';
 }
 
 function getUserStatusOrder(user) {

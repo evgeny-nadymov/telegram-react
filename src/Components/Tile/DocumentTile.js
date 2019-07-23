@@ -24,6 +24,14 @@ const styles = theme => ({
 });
 
 class DocumentTile extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            loaded: false
+        };
+    }
+
     componentDidMount() {
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
         FileStore.on('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
@@ -43,23 +51,30 @@ class DocumentTile extends React.Component {
 
         const { fileId } = update;
 
-        if (file.id === fileId) {
-            this.forceUpdate();
+        if (file.id !== fileId) {
+            return;
         }
+
+        this.forceUpdate();
+    };
+
+    handleLoad = () => {
+        this.setState({ loaded: true });
     };
 
     render() {
         const { classes, thumbnail, file, icon, completeIcon, openMedia } = this.props;
+        const { loaded } = this.state;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const className = classNames('tile-photo', { 'document-tile-background': !thumbnailSrc });
+        const tileLoaded = thumbnailSrc && loaded;
 
         return (
             <div className='document-tile' onClick={openMedia}>
-                {thumbnailSrc ? (
-                    <img className={className} src={thumbnailSrc} draggable={false} alt='' />
-                ) : (
-                    <div className={classes.background} />
+                {!tileLoaded && <div className={classes.background} />}
+                {thumbnailSrc && (
+                    <img className={className} src={thumbnailSrc} onLoad={this.handleLoad} draggable={false} alt='' />
                 )}
                 {file && (
                     <FileProgress

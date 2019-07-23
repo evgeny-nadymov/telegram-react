@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './TopChat.css';
 
@@ -29,7 +29,7 @@ class TopChat extends React.PureComponent {
 
         return (
             <div className='top-chat'>
-                <ChatTileControl chatId={chatId} onSelect={onSelect} showSavedMessages={showSavedMessages} showOnline />
+                <ChatTile chatId={chatId} onSelect={onSelect} showSavedMessages={showSavedMessages} showOnline />
                 <div className='top-chat-title'>{shortTitle}</div>
             </div>
         );

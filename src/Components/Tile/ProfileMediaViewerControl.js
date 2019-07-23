@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ChatTileControl from './ChatTileControl';
+import ChatTile from './ChatTile';
 import MessageAuthor from '../Message/MessageAuthor';
 import './MediaViewerControl.css';
 
@@ -22,7 +22,7 @@ class ProfileMediaViewerControl extends React.Component {
         return (
             <div className='media-viewer-control'>
                 <div className='media-viewer-control-wrapper'>
-                    <ChatTileControl chatId={chatId} showSavedMessages={false} />
+                    <ChatTile chatId={chatId} showSavedMessages={false} />
                     <div className='media-viewer-control-content'>
                         <div className='media-viewer-row'>
                             <MessageAuthor chatId={chatId} />
