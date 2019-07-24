@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTile from './ChatTile';
-import DialogTitleControl from './DialogTitleControl';
-import DialogStatusControl from './DialogStatusControl';
+import DialogTitle from './DialogTitle';
+import DialogStatus from './DialogStatus';
 import ChatStore from '../../Stores/ChatStore';
 import './ChatControl.css';
 
@@ -44,11 +44,11 @@ class ChatControl extends React.Component {
                     <ChatTile chatId={chatId} onSelect={onTileSelect} showSavedMessages={showSavedMessages} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} showSavedMessages={showSavedMessages} />
+                            <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
                         </div>
                         {showStatus && !showSavedMessages && (
                             <div className='tile-second-row'>
-                                <DialogStatusControl chatId={chatId} />
+                                <DialogStatus chatId={chatId} />
                             </div>
                         )}
                     </div>

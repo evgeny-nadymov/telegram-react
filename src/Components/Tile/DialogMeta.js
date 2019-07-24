@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { getLastMessageDate } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
-import './DialogMetaControl.css';
+import './DialogMeta.css';
 
 const styles = theme => ({
     dialogMetaDate: {
@@ -18,7 +18,7 @@ const styles = theme => ({
     }
 });
 
-class DialogMetaControl extends React.Component {
+class DialogMeta extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -84,4 +84,4 @@ class DialogMetaControl extends React.Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(DialogMetaControl);
+export default withStyles(styles, { withTheme: true })(DialogMeta);

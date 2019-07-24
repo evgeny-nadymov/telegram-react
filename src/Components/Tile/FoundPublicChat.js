@@ -11,7 +11,7 @@ import ListItem from '@material-ui/core/ListItem';
 import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import ChatTile from './ChatTile';
-import DialogTitleControl from './DialogTitleControl';
+import DialogTitle from './DialogTitle';
 import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './FoundPublicChat.css';
@@ -109,7 +109,7 @@ class FoundPublicChat extends React.Component {
                     <ChatTile chatId={chatId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
+                            <DialogTitle chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
                         </div>
                         <div className='tile-second-row'>
                             <div className={classNames('dialog-content', classes.foundPublicChatSubtitle)}>

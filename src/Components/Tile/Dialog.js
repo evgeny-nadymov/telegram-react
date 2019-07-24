@@ -10,14 +10,14 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ChatTile from './ChatTile';
-import DialogContentControl from './DialogContentControl';
-import DialogBadgeControl from './DialogBadgeControl';
-import DialogTitleControl from './DialogTitleControl';
-import DialogMetaControl from './DialogMetaControl';
+import DialogContent from './DialogContent';
+import DialogBadge from './DialogBadge';
+import DialogTitle from './DialogTitle';
+import DialogMeta from './DialogMeta';
 import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import './DialogControl.css';
+import './Dialog.css';
 
 const styles = theme => ({
     statusRoot: {
@@ -65,7 +65,7 @@ const styles = theme => ({
     }
 });
 
-class DialogControl extends Component {
+class Dialog extends Component {
     constructor(props) {
         super(props);
 
@@ -144,12 +144,12 @@ class DialogControl extends Component {
                     />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
-                            <DialogMetaControl chatId={chatId} />
+                            <DialogTitle chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
+                            <DialogMeta chatId={chatId} />
                         </div>
                         <div className='tile-second-row'>
-                            <DialogContentControl chatId={chatId} />
-                            <DialogBadgeControl chatId={chatId} />
+                            <DialogContent chatId={chatId} />
+                            <DialogBadge chatId={chatId} />
                         </div>
                     </div>
                 </div>
@@ -158,15 +158,15 @@ class DialogControl extends Component {
     }
 }
 
-DialogControl.propTypes = {
+Dialog.propTypes = {
     chatId: PropTypes.number.isRequired,
     hidden: PropTypes.bool,
     showSavedMessages: PropTypes.bool
 };
 
-DialogControl.defaultProps = {
+Dialog.defaultProps = {
     hidden: false,
     showSavedMessages: true
 };
 
-export default withStyles(styles, { withTheme: true })(DialogControl);
+export default withStyles(styles, { withTheme: true })(Dialog);

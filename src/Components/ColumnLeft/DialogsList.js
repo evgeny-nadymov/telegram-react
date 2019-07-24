@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { Scrollbars } from 'react-custom-scrollbars';
-import DialogControl from '../Tile/DialogControl';
+import Dialog from '../Tile/Dialog';
 import { CHAT_SLICE_LIMIT } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
-import { itemsInView, orderCompare, throttle } from '../../Utils/Common';
+import { orderCompare } from '../../Utils/Common';
 import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -329,16 +328,7 @@ class DialogsList extends React.Component {
     render() {
         const { chats } = this.state;
 
-        const dialogs = chats.map(x => <DialogControl key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
-
-        /*<Scrollbars*/
-        /*ref={this.listRef}*/
-        /*onScroll={this.handleScroll}*/
-        /*autoHide*/
-        /*autoHideTimeout={500}*/
-        /*autoHideDuration={300}>*/
-        /*{chats}*/
-        /*</Scrollbars>*/
+        const dialogs = chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>

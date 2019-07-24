@@ -14,7 +14,7 @@ import { compose } from 'recompose';
 import ListItem from '@material-ui/core/ListItem';
 import ChatTile from './ChatTile';
 import UserTile from './UserTile';
-import DialogTitleControl from './DialogTitleControl';
+import DialogTitle from './DialogTitle';
 import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
@@ -112,7 +112,7 @@ class FoundMessage extends React.Component {
                             {chatSearch && senderFullName ? (
                                 <div className='dialog-title'>{senderFullName}</div>
                             ) : (
-                                <DialogTitleControl chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
+                                <DialogTitle chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
                             )}
                             <div className={classNames('dialog-meta', classes.foundMessageSubtitle)}>{date}</div>
                         </div>

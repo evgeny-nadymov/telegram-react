@@ -14,7 +14,7 @@ import { withTranslation } from 'react-i18next';
 import CheckDecagramIcon from 'mdi-material-ui/CheckDecagram';
 import { getChatTitle, isChatVerified } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
-import './DialogTitleControl.css';
+import './DialogTitle.css';
 
 const styles = theme => ({
     icon: {
@@ -23,7 +23,7 @@ const styles = theme => ({
     verifiedIcon: {}
 });
 
-class DialogTitleControl extends React.Component {
+class DialogTitle extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -81,12 +81,12 @@ class DialogTitleControl extends React.Component {
     }
 }
 
-DialogTitleControl.propTypes = {
+DialogTitle.propTypes = {
     chatId: PropTypes.number.isRequired,
     showSavedMessages: PropTypes.bool
 };
 
-DialogTitleControl.defaultProps = {
+DialogTitle.defaultProps = {
     showSavedMessages: true
 };
 
@@ -95,4 +95,4 @@ const enhance = compose(
     withStyles(styles, { withTheme: true })
 );
 
-export default enhance(DialogTitleControl);
+export default enhance(DialogTitle);

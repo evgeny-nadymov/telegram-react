@@ -17,7 +17,7 @@ import {
 } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
-import './DialogBadgeControl.css';
+import './DialogBadge.css';
 
 const styles = theme => ({
     dialogBadge: {
@@ -28,7 +28,7 @@ const styles = theme => ({
     }
 });
 
-class DialogBadgeControl extends React.Component {
+class DialogBadge extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, theme } = this.props;
 
@@ -151,4 +151,4 @@ class DialogBadgeControl extends React.Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(DialogBadgeControl);
+export default withStyles(styles, { withTheme: true })(DialogBadge);

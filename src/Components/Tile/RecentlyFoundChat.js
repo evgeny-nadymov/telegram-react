@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ChatTile from './ChatTile';
-import DialogTitleControl from './DialogTitleControl';
+import DialogTitle from './DialogTitle';
 import './RecentlyFoundChat.css';
 
 const styles = {
@@ -30,7 +30,7 @@ class RecentlyFoundChat extends React.PureComponent {
                         <ChatTile chatId={chatId} />
                         <div className='dialog-inner-wrapper'>
                             <div className='tile-first-row'>
-                                <DialogTitleControl chatId={chatId} />
+                                <DialogTitle chatId={chatId} />
                             </div>
                         </div>
                     </div>

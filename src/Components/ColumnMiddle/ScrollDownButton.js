@@ -26,7 +26,7 @@ class ScrollDownButton extends React.Component {
 
         return (
             <div className={classNames('scroll-down-button', classes.scrollDownButton)}>
-                <IconButton disableRipple={true} onClick={onClick}>
+                <IconButton disableRipple={true} onMouseDown={onClick}>
                     <ArrowDownwardIcon />
                 </IconButton>
             </div>

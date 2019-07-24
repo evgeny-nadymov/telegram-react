@@ -12,7 +12,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import withLanguage from '../Language';
 import withTheme from '../Theme';
 import withSnackbarNotifications from '../Notifications';
-import ForwardDialog from './Dialog/ForwardDialog';
+import ForwardDialog from './Popup/ForwardDialog';
 import ChatInfo from './ColumnRight/ChatInfo';
 import Dialogs from './ColumnLeft/Dialogs';
 import DialogDetails from './ColumnMiddle/DialogDetails';
@@ -132,12 +132,7 @@ class MainPage extends React.Component {
                 highlightMessage(chatId, messageId);
             }
         } else if (currentChatId === chatId && !messageId) {
-            const chat = ChatStore.get(chatId);
-            if (chat && chat.unread_count > 0) {
-                this.dialogDetailsRef.current.scrollToStart();
-            } else {
-                this.dialogDetailsRef.current.scrollToBottom();
-            }
+            this.dialogDetailsRef.current.scrollToStart();
         } else {
             TdLibController.setChatId(chatId, messageId);
         }

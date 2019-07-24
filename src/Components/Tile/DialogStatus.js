@@ -13,7 +13,7 @@ import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
-import './DialogStatusControl.css';
+import './DialogStatus.css';
 
 const styles = theme => ({
     statusSubtitle: {
@@ -24,7 +24,7 @@ const styles = theme => ({
     }
 });
 
-class DialogStatusControl extends React.Component {
+class DialogStatus extends React.Component {
     constructor(props) {
         super(props);
 
@@ -221,4 +221,4 @@ class DialogStatusControl extends React.Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(DialogStatusControl);
+export default withStyles(styles, { withTheme: true })(DialogStatus);

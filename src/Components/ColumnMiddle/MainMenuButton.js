@@ -19,7 +19,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';
-import ChatTileControl from '../Tile/ChatTileControl';
+import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
 import { canClearHistory, canDeleteChat, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
@@ -86,7 +86,7 @@ class LeaveChatDialog extends React.Component {
                 <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>
-                        <ChatTileControl chatId={chatId} />
+                        <ChatTile chatId={chatId} />
                         <DialogContentText id='delete-dialog-description'>
                             {this.getDeleteDialogText(chatId)}
                         </DialogContentText>
@@ -118,7 +118,7 @@ class ClearHistoryDialog extends React.Component {
                 <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>
-                        <ChatTileControl chatId={chatId} />
+                        <ChatTile chatId={chatId} />
                         <DialogContentText id='delete-dialog-description'>
                             Are you sure you want clear history?
                         </DialogContentText>

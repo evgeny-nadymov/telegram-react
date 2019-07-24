@@ -18,7 +18,7 @@ import {
     showChatDraft
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
-import './DialogContentControl.css';
+import './DialogContent.css';
 
 const styles = theme => ({
     dialogContent: {
@@ -26,7 +26,7 @@ const styles = theme => ({
     }
 });
 
-class DialogContentControl extends React.Component {
+class DialogContent extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -131,4 +131,4 @@ const enhance = compose(
     withStyles(styles, { withTheme: true })
 );
 
-export default enhance(DialogContentControl);
+export default enhance(DialogContent);
