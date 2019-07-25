@@ -7,6 +7,7 @@
 
 import React from 'react';
 import Dialog from '../Tile/Dialog';
+import DialogPlaceholder from '../Tile/DialogPlaceholder';
 import { CHAT_SLICE_LIMIT } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
 import { orderCompare } from '../../Utils/Common';
@@ -29,12 +30,17 @@ class DialogsList extends React.Component {
         this.state = {
             chats: [],
             authorizationState: ApplicationStore.getAuthorizationState(),
-            connectionState: ApplicationStore.getConnectionState()
+            connectionState: ApplicationStore.getConnectionState(),
+            fistSliceLoaded: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         if (nextState.chats !== this.state.chats) {
+            return true;
+        }
+
+        if (nextState.firstSliceLoaded !== this.state.firstSliceLoaded) {
             return true;
         }
 
@@ -313,11 +319,11 @@ class DialogsList extends React.Component {
     appendChats(chats, callback) {
         if (chats.length === 0) return;
 
-        this.setState({ chats: this.state.chats.concat(chats) }, callback);
+        this.setState({ chats: this.state.chats.concat(chats), firstSliceLoaded: true }, callback);
     }
 
     replaceChats(chats, callback) {
-        this.setState({ chats: chats }, callback);
+        this.setState({ chats: chats, firstSliceLoaded: true }, callback);
     }
 
     scrollToTop() {
@@ -326,9 +332,11 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { chats } = this.state;
+        const { chats, firstSliceLoaded } = this.state;
 
-        const dialogs = chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
+        const dialogs = firstSliceLoaded
+            ? chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />)
+            : Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>

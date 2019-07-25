@@ -120,8 +120,6 @@ class Dialog extends Component {
 
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
-        const chat = ChatStore.get(chatId);
-        const { is_verified } = chat;
 
         return (
             <div

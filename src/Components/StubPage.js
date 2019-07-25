@@ -15,12 +15,14 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { borderStyle } from './Theme';
+import DialogPlaceholder from './Tile/DialogPlaceholder';
 import Footer from './Footer';
 import HeaderProgress from './ColumnMiddle/HeaderProgress';
 import './ColumnMiddle/Header.css';
 import './ColumnLeft/Dialogs.css';
 import './ColumnMiddle/DialogDetails.css';
 import '../TelegramApp.css';
+import Dialog from './ColumnLeft/DialogsList';
 
 const styles = theme => ({
     page: {
@@ -45,6 +47,8 @@ class StubPage extends React.Component {
         const { classes, title, t } = this.props;
         const isChatDetailsVisible = false;
 
+        const dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
+
         return (
             <>
                 <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
@@ -63,6 +67,7 @@ class StubPage extends React.Component {
                                 <SearchIcon />
                             </IconButton>
                         </div>
+                        {dialogs}
                     </div>
                     <div
                         className={classNames('dialog-details', {

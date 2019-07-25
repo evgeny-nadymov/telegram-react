@@ -18,6 +18,7 @@ import './DialogTitle.css';
 
 const styles = theme => ({
     icon: {
+        height: 16,
         color: theme.palette.primary.main
     },
     verifiedIcon: {}

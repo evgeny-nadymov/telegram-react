@@ -39,9 +39,6 @@ class MediaViewerContent extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         const text = getText(message);
 
-        //console.log('mediaViewer file', file);
-        //console.log('mediaViewer thumbnail', thumbnail);
-
         this.state = {
             speed: 1,
             prevChatId: chatId,
