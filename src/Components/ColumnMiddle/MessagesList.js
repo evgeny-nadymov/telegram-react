@@ -85,7 +85,7 @@ class MessagesList extends React.Component {
                 selectionActive: false,
                 scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
                 separatorMessageId: 0,
-                scrollDownVisible: props.chatId === state.prevChatId && state.replyHistory.length > 0,
+                scrollDownVisible: props.chatId === state.prevChatId,
                 replyHistory: props.chatId !== state.prevChatId ? [] : state.replyHistory
             };
         }
@@ -350,7 +350,11 @@ class MessagesList extends React.Component {
         const history = [message];
 
         console.log('SCROLL MessagesList.onUpdateNewMessage scrollBehavior=' + scrollBehavior);
-        this.insertAfter(this.filterMessages(history), scrollBehavior);
+        const newState = {
+            scrollBehavior,
+            scrollDownVisible: false
+        };
+        this.insertAfter(this.filterMessages(history), newState);
         const store = FileStore.getStore();
         loadMessageContents(store, history);
         MessagesList.viewMessages(history);
@@ -510,10 +514,10 @@ class MessagesList extends React.Component {
             );
         }
 
-        if (previousChat) {
+        if (previousChat && previousChatId !== chatId) {
             TdLibController.send({
                 '@type': 'closeChat',
-                chat_id: previousChat.id
+                chat_id: previousChatId
             });
         }
     }
@@ -737,7 +741,7 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
         console.log('SCROLL MessagesList.onLoadPrevious scrollBehavior=NONE');
-        this.insertAfter(this.filterMessages(result.messages), ScrollBehaviorEnum.NONE);
+        this.insertAfter(this.filterMessages(result.messages), { scrollBehavior: ScrollBehaviorEnum.NONE });
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
@@ -776,10 +780,10 @@ class MessagesList extends React.Component {
         );
     }
 
-    insertAfter(history, scrollBehavior, callback) {
+    insertAfter(history, newState, callback) {
         if (history.length === 0) return;
 
-        this.setState({ history: this.state.history.concat(history), scrollBehavior: scrollBehavior }, callback);
+        this.setState({ history: this.state.history.concat(history), ...newState }, callback);
     }
 
     deleteHistory(message_ids, callback) {
@@ -795,7 +799,7 @@ class MessagesList extends React.Component {
     }
 
     handleScroll = () => {
-        const { scrollDownVisible } = this.state;
+        const { scrollDownVisible, replyHistory, history } = this.state;
 
         this.updateItemsInView();
 
@@ -803,13 +807,11 @@ class MessagesList extends React.Component {
         //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
 
         if (this.suppressHandleScroll) {
-            console.log('SCROLL HANDLESCROLL suppressHandleScroll');
             this.suppressHandleScroll = false;
             return;
         }
 
         if (this.suppressHandleScrollOnSelectChat) {
-            console.log('SCROLL HANDLESCROLL suppressHandleScrollOnSelectChat');
             return;
         }
 
@@ -818,7 +820,20 @@ class MessagesList extends React.Component {
             this.onLoadNext();
         } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
             if (this.completed && scrollDownVisible) {
-                this.setState({ scrollDownVisible: false, scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION });
+                if (this.prevScrollTop !== list.scrollTop && this.prevScrollTop && this.prevHistory === history) {
+                    // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, this.prevScrollTop, list.scrollTop);
+                    this.setState({
+                        scrollDownVisible: false,
+                        scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION,
+                        replyHistory: []
+                    });
+                } else if (!replyHistory.length) {
+                    // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, replyHistory.length);
+                    this.setState({
+                        scrollDownVisible: false,
+                        scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION
+                    });
+                }
             }
 
             console.log('SCROLL HANDLESCROLL onLoadPrevious');
@@ -829,6 +844,9 @@ class MessagesList extends React.Component {
             }
             //console.log('SCROLL HANDLESCROLL updateItemsInView');
         }
+
+        this.prevScrollTop = list.scrollTop;
+        this.prevHistory = history;
     };
 
     handleScrollBehavior = snapshot => {
@@ -1015,6 +1033,7 @@ class MessagesList extends React.Component {
         } else {
             this.completed = true;
         }
+        console.log('MessagesList.scrollToStart scrollDown', false);
         this.setState({ scrollDownVisible: false, replyHistory: [] });
 
         MessageStore.setItems(result.messages);
@@ -1066,7 +1085,7 @@ class MessagesList extends React.Component {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
-        // console.log('MessagesList.render', this.props, this.state);
+        //console.log('MessagesList.render scrollDown', this.props.chatId, this.props.messageId, scrollDownVisible, history.length);
 
         const isChannel = isChannelChat(chatId);
 
