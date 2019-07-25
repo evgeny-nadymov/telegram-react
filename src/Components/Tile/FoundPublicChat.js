@@ -31,7 +31,7 @@ const styles = theme => ({
         }
     },
     foundPublicChatSubtitle: {
-        color: theme.palette.text.secondary + '!important'
+        color: theme.palette.text.secondary
     }
 });
 
