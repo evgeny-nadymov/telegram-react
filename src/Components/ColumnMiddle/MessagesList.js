@@ -375,8 +375,9 @@ class MessagesList extends React.Component {
         const messages = new Map();
         const items = itemsInView(this.listRef, this.itemsRef);
         for (let i = 0; i < items.length; i++) {
-            const message = this.messages[items[i]];
-            if (message) {
+            const messageWrapper = this.messages[items[i]];
+            if (messageWrapper) {
+                const message = messageWrapper.props.children[1];
                 const { chatId, messageId } = message.props;
                 const key = `${chatId}_${messageId}`;
                 messages.set(key, key);
@@ -800,10 +801,14 @@ class MessagesList extends React.Component {
 
     handleScroll = () => {
         const { scrollDownVisible, replyHistory, history } = this.state;
-
-        this.updateItemsInView();
-
         const list = this.listRef.current;
+
+        // console.log('MessagesLList.handleScroll scrollDown',
+        //     this.suppressHandleScroll,
+        //     this.suppressHandleScrollOnSelectChat,
+        //     this.prevScrollTop,
+        // );
+        this.updateItemsInView();
         //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
 
         if (this.suppressHandleScroll) {
@@ -1033,7 +1038,7 @@ class MessagesList extends React.Component {
         } else {
             this.completed = true;
         }
-        console.log('MessagesList.scrollToStart scrollDown', false);
+        // console.log('MessagesList.scrollToStart scrollDown', false);
         this.setState({ scrollDownVisible: false, replyHistory: [] });
 
         MessageStore.setItems(result.messages);
@@ -1085,7 +1090,7 @@ class MessagesList extends React.Component {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
-        //console.log('MessagesList.render scrollDown', this.props.chatId, this.props.messageId, scrollDownVisible, history.length);
+        // console.log('MessagesList.render scrollDown', this.props.chatId, this.props.messageId, scrollDownVisible, history.length);
 
         const isChannel = isChannelChat(chatId);
 
