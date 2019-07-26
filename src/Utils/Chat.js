@@ -1257,6 +1257,31 @@ function isChatVerified(chatId) {
     return false;
 }
 
+function isChatSecret(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+    if (!type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return false;
+        }
+        case 'chatTypePrivate': {
+            return false;
+        }
+        case 'chatTypeSecret': {
+            return true;
+        }
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+    }
+
+    return false;
+}
+
 export {
     showChatDraft,
     getChatDraft,
@@ -1286,6 +1311,7 @@ export {
     isChannelChat,
     isChatMember,
     isChatVerified,
+    isChatSecret,
     getChatTitle,
     getGroupChatMembers,
     getChatFullInfo,

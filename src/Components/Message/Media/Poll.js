@@ -93,7 +93,6 @@ class Poll extends React.Component {
     };
 
     handleContextMenu = event => {
-        return;
         const { poll } = this.props;
         const { is_closed } = poll;
         if (is_closed) return;
@@ -157,24 +156,24 @@ class Poll extends React.Component {
                     ))}
                 </div>
                 <div className='poll-total-count subtitle'>{this.getTotalVoterCountString(total_voter_count, t)}</div>
-                {/*<Popover*/}
-                {/*open={contextMenu && (canUnvote || canStopPoll)}*/}
-                {/*onClose={this.handleCloseContextMenu}*/}
-                {/*anchorReference='anchorPosition'*/}
-                {/*anchorPosition={{ top, left }}*/}
-                {/*anchorOrigin={{*/}
-                {/*vertical: 'bottom',*/}
-                {/*horizontal: 'right'*/}
-                {/*}}*/}
-                {/*transformOrigin={{*/}
-                {/*vertical: 'top',*/}
-                {/*horizontal: 'left'*/}
-                {/*}}>*/}
-                {/*<MenuList onClick={e => e.stopPropagation()}>*/}
-                {/*{canUnvote && <MenuItem onClick={this.handleUnvote}>{t('Unvote')}</MenuItem>}*/}
-                {/*{canStopPoll && <MenuItem onClick={this.handleDialog}>{t('StopPoll')}</MenuItem>}*/}
-                {/*</MenuList>*/}
-                {/*</Popover>*/}
+                <Popover
+                    open={contextMenu && (canUnvote || canStopPoll)}
+                    onClose={this.handleCloseContextMenu}
+                    anchorReference='anchorPosition'
+                    anchorPosition={{ top, left }}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                    }}>
+                    <MenuList onClick={e => e.stopPropagation()}>
+                        {canUnvote && <MenuItem onClick={this.handleUnvote}>{t('Unvote')}</MenuItem>}
+                        {canStopPoll && <MenuItem onClick={this.handleDialog}>{t('StopPoll')}</MenuItem>}
+                    </MenuList>
+                </Popover>
                 <Dialog
                     transitionDuration={0}
                     open={dialog}

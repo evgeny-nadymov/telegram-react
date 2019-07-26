@@ -159,10 +159,8 @@ class UserTile extends Component {
         const user = UserStore.get(userId);
         if (!user && !(fistName || lastName)) return null;
 
-        const { profile_photo } = user;
-
         const letters = getUserLetters(userId, fistName, lastName);
-        const src = getSrc(profile_photo ? profile_photo.small : null);
+        const src = getSrc(user && user.profile_photo ? user.profile_photo.small : null);
         const tileLoaded = src && loaded;
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;

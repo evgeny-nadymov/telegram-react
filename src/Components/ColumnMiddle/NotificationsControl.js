@@ -8,14 +8,10 @@
 import React from 'react';
 import { isChatMuted } from '../../Utils/Chat';
 import { debounce } from '../../Utils/Common';
-import {
-    MUTED_VALUE_MAX,
-    NOTIFICATIONS_DEBOUNCE_DELAY_MS,
-    MUTED_VALUE_MIN
-} from '../../Constants';
+import { toggleChatNotificationSettings } from '../../Actions/Chat';
+import { NOTIFICATIONS_DEBOUNCE_DELAY_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import TdLibController from '../../Controllers/TdLibController';
 
 class NotificationsControl extends React.Component {
     constructor(props) {
@@ -30,7 +26,10 @@ class NotificationsControl extends React.Component {
             isMuted: isMuted
         };
 
-        this.debouncedSetChatNotificationSettings = debounce(this.setChatNotificationSettings, NOTIFICATIONS_DEBOUNCE_DELAY_MS);
+        this.debouncedSetChatNotificationSettings = debounce(
+            this.setChatNotificationSettings,
+            NOTIFICATIONS_DEBOUNCE_DELAY_MS
+        );
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -57,7 +56,7 @@ class NotificationsControl extends React.Component {
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
-    onUpdateChatNotificationSettings = (update) => {
+    onUpdateChatNotificationSettings = update => {
         const { chatId } = this.props;
         if (!update.chat_id) return;
         if (update.chat_id !== chatId) return;
@@ -68,26 +67,20 @@ class NotificationsControl extends React.Component {
         this.setState({ isMuted: isChatMuted(chat) });
     };
 
-    onUpdateScopeNotificationSettings = (update) => {
+    onUpdateScopeNotificationSettings = update => {
         const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
         switch (update.scope['@type']) {
             case 'notificationSettingsScopeGroupChats': {
-                if (
-                    chat.type['@type'] === 'chatTypeBasicGroup' ||
-                    chat.type['@type'] === 'chatTypeSupergroup'
-                ) {
+                if (chat.type['@type'] === 'chatTypeBasicGroup' || chat.type['@type'] === 'chatTypeSupergroup') {
                     this.setState({ isMuted: isChatMuted(chat) });
                 }
                 break;
             }
             case 'notificationSettingsScopePrivateChats': {
-                if (
-                    chat.type['@type'] === 'chatTypePrivate' ||
-                    chat.type['@type'] === 'chatTypeSecret'
-                ) {
+                if (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') {
                     this.setState({ isMuted: isChatMuted(chat) });
                 }
                 break;
@@ -103,27 +96,8 @@ class NotificationsControl extends React.Component {
     setChatNotificationSettings = () => {
         const { chatId } = this.props;
         const { isMuted } = this.state;
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-        if (!chat.notification_settings) return;
 
-        const isMutedPrev = isChatMuted(chat);
-        if (isMutedPrev === isMuted) {
-            return;
-        }
-
-        const muteFor = isMuted ? MUTED_VALUE_MAX : MUTED_VALUE_MIN;
-        const newNotificationSettings = {
-            ...chat.notification_settings,
-            use_default_mute_for: false,
-            mute_for: muteFor
-        };
-
-        TdLibController.send({
-            '@type': 'setChatNotificationSettings',
-            chat_id: chatId,
-            notification_settings: newNotificationSettings
-        });
+        toggleChatNotificationSettings(chatId, isMuted);
     };
 }
 
