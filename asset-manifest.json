@@ -1,7 +1,7 @@
 {
   "main.css": "/telegram-react/static/css/main.7837e122.chunk.css",
-  "main.js": "/telegram-react/static/js/main.3629acc3.chunk.js",
-  "main.js.map": "/telegram-react/static/js/main.3629acc3.chunk.js.map",
+  "main.js": "/telegram-react/static/js/main.c2e21155.chunk.js",
+  "main.js.map": "/telegram-react/static/js/main.c2e21155.chunk.js.map",
   "runtime~main.js": "/telegram-react/static/js/runtime~main.f84938f6.js",
   "runtime~main.js.map": "/telegram-react/static/js/runtime~main.f84938f6.js.map",
   "static/js/2.ac6c6cbf.chunk.js": "/telegram-react/static/js/2.ac6c6cbf.chunk.js",
@@ -22,7 +22,7 @@
   "static/js/8.d26830ee.chunk.js": "/telegram-react/static/js/8.d26830ee.chunk.js",
   "static/js/8.d26830ee.chunk.js.map": "/telegram-react/static/js/8.d26830ee.chunk.js.map",
   "index.html": "/telegram-react/index.html",
-  "precache-manifest.8103774d4a9deb85fc0a8b797c76d558.js": "/telegram-react/precache-manifest.8103774d4a9deb85fc0a8b797c76d558.js",
+  "precache-manifest.35922204d81ec20aa733547a3e9e41a8.js": "/telegram-react/precache-manifest.35922204d81ec20aa733547a3e9e41a8.js",
   "service-worker.js": "/telegram-react/service-worker.js",
   "static/css/3.ddb032a4.chunk.css.map": "/telegram-react/static/css/3.ddb032a4.chunk.css.map",
   "static/css/5.dd5443d3.chunk.css.map": "/telegram-react/static/css/5.dd5443d3.chunk.css.map",
