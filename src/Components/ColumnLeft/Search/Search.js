@@ -145,7 +145,7 @@ class Search extends React.Component {
             promises.push(localPromise);
 
             const latinText = getLatinInput(text);
-            if (latinText) {
+            if (latinText && latinText !== text) {
                 const latinLocalPromise = TdLibController.send({
                     '@type': 'searchChats',
                     query: latinText,
@@ -155,7 +155,7 @@ class Search extends React.Component {
             }
 
             const cyrillicText = getCyrillicInput(text);
-            if (cyrillicText) {
+            if (cyrillicText && cyrillicText !== text) {
                 const cyrillicLocalPromise = TdLibController.send({
                     '@type': 'searchChats',
                     query: cyrillicText,
@@ -188,9 +188,7 @@ class Search extends React.Component {
             this.setState({
                 top: null,
                 recentlyFound: null,
-                local: local,
-                global: null,
-                messages: null
+                local: local
             });
 
             store = FileStore.getStore();
@@ -205,7 +203,7 @@ class Search extends React.Component {
                 });
                 globalPromises.push(globalPromise);
 
-                if (latinText) {
+                if (latinText && latinText !== text) {
                     const globalLatinPromise = TdLibController.send({
                         '@type': 'searchPublicChats',
                         query: latinText
@@ -221,11 +219,15 @@ class Search extends React.Component {
                 }
 
                 this.setState({
-                    global: global
+                    global
                 });
 
                 store = FileStore.getStore();
                 loadChatsContent(store, global);
+            } else {
+                this.setState({
+                    global: null
+                });
             }
         }
 
@@ -259,7 +261,7 @@ class Search extends React.Component {
         }
 
         this.setState({
-            messages: messages
+            messages
         });
 
         const chats = new Map();

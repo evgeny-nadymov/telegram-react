@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import OptionStore from '../Stores/OptionStore';
+
 let cyrillicInput = null;
 
 function getCyrillicInputMap() {
@@ -45,9 +47,23 @@ function getCyrillicInputMap() {
     ]);
 }
 
+function isCyrillicPackId(packId) {
+    if (!packId) return false;
+
+    const { value } = packId;
+    if (!value) return false;
+
+    return value.value === 'ru';
+}
+
 function getCyrillicInput(input) {
     if (!input) return null;
     if (!input.length) return null;
+
+    const currentPackId = OptionStore.get('language_pack_id');
+    const suggestedPackId = OptionStore.get('suggested_language_pack_id');
+    const hasCyrillicPackId = isCyrillicPackId(currentPackId) || isCyrillicPackId(suggestedPackId);
+    if (!hasCyrillicPackId) return null;
 
     cyrillicInput = cyrillicInput || getCyrillicInputMap();
 
