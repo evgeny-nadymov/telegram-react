@@ -295,6 +295,7 @@ class InputBoxControl extends Component {
         this.handleInput();
 
         if (!text) return;
+        if (!text.trim()) return;
 
         const content = {
             '@type': 'inputMessageText',
