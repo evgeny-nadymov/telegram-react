@@ -33,6 +33,6 @@
     opacity: 0.5;
 }
 
-.message-without-avatar .messagestatus-icon {
+.message-short .messagestatus-icon {
     margin-top: 5px;
 }

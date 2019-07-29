@@ -54,11 +54,11 @@ pre code {
     border-radius: 0;
 }
 
-.message-without-avatar .message-content {
+.message-short .message-content {
     margin-left: 60px;
 }
 
-.message-without-avatar .message-select-tick {
+.message-short .message-select-tick {
     margin-top: -3px;
 }
 

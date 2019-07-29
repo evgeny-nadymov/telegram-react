@@ -108,7 +108,7 @@ class Search extends React.Component {
         const map = new Map();
 
         for (let i = 0; i < results.length; i++) {
-            let result = results[i].chat_ids;
+            let result = results[i] && results[i].chat_ids;
             if (result) {
                 for (let j = 0; j < result.length; j++) {
                     if (!map.has(result[j])) {
@@ -194,21 +194,27 @@ class Search extends React.Component {
             store = FileStore.getStore();
             loadChatsContent(store, local);
 
-            if (text.length >= USERNAME_LENGTH_MIN) {
+            let trimmedText = text.trim();
+            trimmedText = trimmedText.startsWith('@') ? trimmedText.substr(1) : trimmedText;
+            if (trimmedText.length >= USERNAME_LENGTH_MIN) {
                 const globalPromises = [];
 
                 const globalPromise = TdLibController.send({
                     '@type': 'searchPublicChats',
-                    query: text
+                    query: trimmedText
                 });
                 globalPromises.push(globalPromise);
 
-                if (latinText && latinText !== text) {
-                    const globalLatinPromise = TdLibController.send({
-                        '@type': 'searchPublicChats',
-                        query: latinText
-                    });
-                    globalPromises.push(globalLatinPromise);
+                if (latinText) {
+                    let latinTrimmedText = latinText.trim();
+                    latinTrimmedText = latinTrimmedText.startsWith('@') ? latinTrimmedText.substr(1) : latinTrimmedText;
+                    if (latinTrimmedText.length >= USERNAME_LENGTH_MIN && latinTrimmedText !== trimmedText) {
+                        const globalLatinPromise = TdLibController.send({
+                            '@type': 'searchPublicChats',
+                            query: latinTrimmedText
+                        });
+                        globalPromises.push(globalLatinPromise);
+                    }
                 }
 
                 const globalResults = await Promise.all(globalPromises.map(x => x.catch(e => null)));

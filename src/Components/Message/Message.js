@@ -310,7 +310,7 @@ class Message extends Component {
             'message-selected': selected,
             [classes.messageSelected]: selected,
             [classes.messageHighlighted]: highlighted && !selected,
-            'message-without-avatar': !showTitle
+            'message-short': !showTitle
         });
 
         const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;

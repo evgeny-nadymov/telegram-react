@@ -277,7 +277,7 @@ class DialogsList extends React.Component {
 
         if (this.loading) return;
 
-        let offsetOrder = '9223372036854775807'; // 2^63
+        let offsetOrder = '9223372036854775807'; // 2^63 - 1
         let offsetChatId = 0;
         if (!replace && chats && chats.length > 0) {
             const chat = ChatStore.get(chats[chats.length - 1]);
