@@ -619,9 +619,11 @@ class HeaderPlayer extends React.Component {
             audio = hasAudio(chat_id, id);
         }
 
+        const date = message ? message.date : null;
+
         const title = getMediaTitle(message);
-        const dateHint = getDateHint(message);
-        const date = getDate(message);
+        const dateHintStr = getDateHint(date);
+        const dateStr = getDate(date);
         const showDate = !audio;
         const showPlaybackRate = !audio;
         const showRepeat = audio;
@@ -677,9 +679,9 @@ class HeaderPlayer extends React.Component {
                             <div className='header-player-title'>
                                 {title}
                                 {showDate && (
-                                    <span title={dateHint}>
+                                    <span title={dateHintStr}>
                                         &nbsp;
-                                        {date}
+                                        {dateStr}
                                     </span>
                                 )}
                             </div>

@@ -281,21 +281,19 @@ function getWebPage(message) {
     return message.content.web_page;
 }
 
-function getDate(message) {
-    if (!message) return null;
-    if (!message.date) return null;
+function getDate(date) {
+    if (!date) return null;
 
-    let date = new Date(message.date * 1000);
+    const d = new Date(date * 1000);
 
-    return dateFormat(date, 'H:MM'); //date.toDateString();
+    return dateFormat(d, 'H:MM'); //date.toDateString();
 }
 
-function getDateHint(message) {
-    if (!message) return null;
-    if (!message.date) return null;
+function getDateHint(date) {
+    if (!date) return null;
 
-    const date = new Date(message.date * 1000);
-    return dateFormat(date, 'H:MM:ss d.mm.yyyy'); //date.toDateString();
+    const d = new Date(date * 1000);
+    return dateFormat(d, 'H:MM:ss d.mm.yyyy'); //date.toDateString();
 }
 
 function getMedia(message, openMedia) {

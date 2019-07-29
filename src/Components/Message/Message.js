@@ -12,22 +12,14 @@ import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Reply from './Reply';
 import Forward from './Forward';
+import Meta from './Meta';
 import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import {
-    getDate,
-    getDateHint,
-    getEmojiMatches,
-    getText,
-    getMedia,
-    getUnread,
-    getWebPage,
-    openMedia
-} from '../../Utils/Message';
+import { getEmojiMatches, getText, getMedia, getUnread, getWebPage, openMedia } from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage, openReply } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
@@ -298,12 +290,10 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
+        const { sending_state, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
         const text = getText(message);
         const webPage = getWebPage(message);
-        const date = getDate(message);
-        const dateHint = getDateHint(message);
         const media = getMedia(message, this.openMedia);
         this.unread = getUnread(message);
 
@@ -323,25 +313,7 @@ class Message extends Component {
             'message-without-avatar': !showTitle
         });
 
-        const meta = (
-            <div className='message-meta'>
-                <span>&nbsp;</span>
-                {views > 0 && (
-                    <>
-                        <i className='message-views-icon' />
-                        <span className='message-views'>
-                            &nbsp;
-                            {views}
-                            &nbsp; &nbsp;
-                        </span>
-                    </>
-                )}
-                {edit_date > 0 && <span>{t('EditedMessage')}&nbsp;</span>}
-                <a className='message-date' onClick={this.handleDateClick}>
-                    <span title={dateHint}>{date}</span>
-                </a>
-            </div>
-        );
+        const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;
 
         return (
             <div

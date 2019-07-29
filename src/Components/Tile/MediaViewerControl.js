@@ -25,8 +25,10 @@ class MediaViewerControl extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
+        const { date } = message;
+
         const userId = getSenderUserId(message);
-        const dateHint = getDateHint(message);
+        const dateHint = getDateHint(date);
 
         const tileControl = userId ? <UserTile userId={userId} /> : <ChatTile chatId={chatId} />;
 
@@ -38,8 +40,8 @@ class MediaViewerControl extends React.Component {
                         <div className='media-viewer-row'>
                             <MessageAuthor chatId={chatId} userId={userId} />
                         </div>
-                        <div className='media-viewer-row message-meta'>
-                            <span className='message-date'>{dateHint}</span>
+                        <div className='media-viewer-row meta'>
+                            <span>{dateHint}</span>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,28 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.meta {
+    user-select: none;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+.meta-views {
+    font-weight: 500;
+}
+
+.meta-views-icon {
+    display: inline-block;
+    width: 15px;
+    height: 11px;
+    vertical-align: baseline;
+    background-image: url(../../Assets/Icons/General_2x.png);
+    background-size: 40px 948px;
+    background-repeat: no-repeat;
+    background-position: -12px -850px;
+    transform: translateY(1px);
+}

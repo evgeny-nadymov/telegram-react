@@ -28,8 +28,8 @@ class ProfileMediaViewerControl extends React.Component {
                             <MessageAuthor chatId={chatId} />
                         </div>
                         {date && (
-                            <div className='media-viewer-row message-meta'>
-                                <span className='message-date'>{date}</span>
+                            <div className='media-viewer-row meta'>
+                                <span>{date}</span>
                             </div>
                         )}
                     </div>
