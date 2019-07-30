@@ -87,6 +87,7 @@ class MoreListItem extends React.Component {
         const { openMore } = this.state;
 
         const chat = ChatStore.get(chatId);
+        if (!chat) return null;
 
         const isGroup = isGroupChat(chatId);
         let isBlocked = false;

@@ -63,9 +63,7 @@ class ChatStatus extends React.Component {
         const user = UserStore.get(userId);
         if (!user) return;
 
-        this.setState({
-            online: isUserOnline(user)
-        });
+        this.setState({ online: isUserOnline(user) });
     };
 
     render() {
