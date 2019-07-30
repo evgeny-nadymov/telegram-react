@@ -39,14 +39,18 @@ class PlayerStore extends EventEmitter {
         this.repeat = RepeatEnum.NONE;
         this.shuffle = false;
 
-        this.playlist = null;
-        this.message = null;
-        this.time = null;
-        this.videoStream = null;
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
+
+    reset = () => {
+        this.playlist = null;
+        this.message = null;
+        this.time = null;
+        this.videoStream = null;
+    };
 
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
@@ -60,6 +64,19 @@ class PlayerStore extends EventEmitter {
 
     onUpdate = async update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             default:
                 break;
         }

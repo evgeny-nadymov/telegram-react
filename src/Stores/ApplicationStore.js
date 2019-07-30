@@ -13,6 +13,14 @@ class ApplicationStore extends EventEmitter {
     constructor() {
         super();
 
+        this.reset();
+
+        this.addTdLibListener();
+        this.addStatistics();
+        this.setMaxListeners(Infinity);
+    }
+
+    reset = () => {
         this.dialogsReady = false;
         this.setPhoneNumberRequest = null;
         this.chatId = 0;
@@ -28,11 +36,7 @@ class ApplicationStore extends EventEmitter {
         this.profileMediaViewerContent = null;
         this.dragging = false;
         this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
-
-        this.addTdLibListener();
-        this.addStatistics();
-        this.setMaxListeners(Infinity);
-    }
+    };
 
     addScheduledAction = (key, timeout, action, cancel) => {
         return this.actionScheduler.add(key, timeout, action, cancel);
@@ -85,11 +89,12 @@ class ApplicationStore extends EventEmitter {
                     case 'authorizationStateReady':
                         this.loggingOut = false;
                         this.setPhoneNumberRequest = null;
-                        this.dialogsReady = false;
                         break;
                     case 'authorizationStateClosing':
                         break;
                     case 'authorizationStateClosed':
+                        this.reset();
+
                         if (!this.loggingOut) {
                             document.title += ': Zzz…';
                             this.emit('clientUpdateAppInactive');

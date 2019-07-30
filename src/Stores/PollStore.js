@@ -12,13 +12,35 @@ class PollStore extends EventEmitter {
     constructor() {
         super();
 
-        this.poll = null;
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
-    onUpdate = update => {};
+    reset = () => {
+        this.poll = null;
+    };
+
+    onUpdate = update => {
+        switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
+            default:
+                break;
+        }
+    };
 
     onClientUpdate = update => {
         switch (update['@type']) {

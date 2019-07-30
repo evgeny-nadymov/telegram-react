@@ -12,26 +12,44 @@ class BasicGroupStore extends EventEmitter {
     constructor() {
         super();
 
-        this.items = new Map();
-        this.fullInfoItems = new Map();
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
+    reset = () => {
+        this.items = new Map();
+        this.fullInfoItems = new Map();
+    };
+
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             case 'updateBasicGroup': {
                 this.set(update.basic_group);
 
                 this.emit(update['@type'], update);
                 break;
             }
-            case 'updateBasicGroupFullInfo':
+            case 'updateBasicGroupFullInfo': {
                 this.setFullInfo(update.basic_group_id, update.basic_group_full_info);
 
                 this.emit(update['@type'], update);
                 break;
+            }
             default:
                 break;
         }

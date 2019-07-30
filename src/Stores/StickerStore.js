@@ -11,15 +11,32 @@ class StickerStore extends EventEmitter {
     constructor() {
         super();
 
-        this.stickerSet = null;
-        this.hint = null;
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
+    reset = () => {
+        this.stickerSet = null;
+        this.hint = null;
+    };
+
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             case 'updateInstalledStickerSets': {
                 const { sticker_set_ids } = update;
                 if (this.stickerSet) {

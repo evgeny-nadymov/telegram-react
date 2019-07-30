@@ -15,15 +15,19 @@ class ChatStore extends EventEmitter {
     constructor() {
         super();
 
-        this.items = new Map();
-        this.typingManagers = new Map();
-        this.onlineMemberCount = new Map();
-        this.skippedUpdates = [];
+        this.reset();
         this.loadClientData();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
+
+    reset = () => {
+        this.items = new Map();
+        this.typingManagers = new Map();
+        this.onlineMemberCount = new Map();
+        this.skippedUpdates = [];
+    };
 
     loadClientData = () => {
         const cookies = new Cookies();
@@ -53,6 +57,19 @@ class ChatStore extends EventEmitter {
 
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             case 'updateConnectionState': {
                 if (update.state['@type'] === 'connectionStateUpdating') {
                     this.updating = true;

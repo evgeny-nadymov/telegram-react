@@ -12,15 +12,32 @@ class SupergroupStore extends EventEmitter {
     constructor() {
         super();
 
-        this.items = new Map();
-        this.fullInfoItems = new Map();
+        this.reset();
 
         this.addTdLibListener();
         this.setMaxListeners(Infinity);
     }
 
+    reset = () => {
+        this.items = new Map();
+        this.fullInfoItems = new Map();
+    };
+
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             case 'updateSupergroup':
                 this.set(update.supergroup);
 
