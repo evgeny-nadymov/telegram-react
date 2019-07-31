@@ -86,7 +86,9 @@ class Dialog extends Component {
         const chat = ChatStore.get(this.props.chatId);
         this.state = {
             chat: chat,
-            contextMenu: false
+            contextMenu: false,
+            left: 0,
+            top: 0
         };
     }
 

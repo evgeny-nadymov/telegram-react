@@ -80,13 +80,6 @@ class FoundPublicChat extends React.Component {
         });
     };
 
-    handleClick = () => {
-        const { chatId, onSelect } = this.props;
-        if (!onSelect) return;
-
-        onSelect(chatId);
-    };
-
     render() {
         const { chatId, onClick, classes } = this.props;
         const selectedChatId = this.state.nextChatId;
@@ -104,8 +97,7 @@ class FoundPublicChat extends React.Component {
                     className={classNames('found-public-chat', {
                         [classes.foundPublicChatActive]: chatId === selectedChatId,
                         'accent-background': chatId === selectedChatId
-                    })}
-                    onClick={this.handleClick}>
+                    })}>
                     <ChatTile chatId={chatId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
