@@ -40,7 +40,7 @@ import {
     saveOrDownload
 } from '../../Utils/File';
 import {
-    filterMessages,
+    filterDuplicateMessages,
     isAnimationMessage,
     isLottieMessage,
     isMediaContent,
@@ -345,7 +345,7 @@ class MediaViewer extends React.Component {
             });
         }
 
-        filterMessages(result, this.history);
+        filterDuplicateMessages(result, this.history);
         MessageStore.setItems(result.messages);
 
         this.history = result.messages;
@@ -383,7 +383,7 @@ class MediaViewer extends React.Component {
                 });
                 count += result.messages.length;
 
-                filterMessages(result, this.history);
+                filterDuplicateMessages(result, this.history);
                 MessageStore.setItems(result.messages);
 
                 this.history = result.messages.concat(this.history);
@@ -628,7 +628,7 @@ class MediaViewer extends React.Component {
             });
         }
 
-        filterMessages(result, this.history);
+        filterDuplicateMessages(result, this.history);
         MessageStore.setItems(result.messages);
 
         this.history = this.history.concat(result.messages);
@@ -689,7 +689,7 @@ class MediaViewer extends React.Component {
             });
         }
 
-        filterMessages(result, this.history);
+        filterDuplicateMessages(result, this.history);
         MessageStore.setItems(result.messages);
 
         this.firstSliceLoaded = result.messages.length === 0;
