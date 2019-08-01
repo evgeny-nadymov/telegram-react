@@ -22,6 +22,18 @@ class Placeholder extends React.Component {
         };
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        if (nextState.chatId !== this.state.chatId) {
+            return true;
+        }
+
+        if (nextState.dialogsReady !== this.state.dialogsReady) {
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount() {
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         ApplicationStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);

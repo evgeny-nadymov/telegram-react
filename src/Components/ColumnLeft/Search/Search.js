@@ -20,15 +20,15 @@ import FoundPublicChat from '../../Tile/FoundPublicChat';
 import FoundMessage from '../../Tile/FoundMessage';
 import SearchCaption from './SearchCaption';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
-import { filterMessages } from '../../../Utils/Message';
+import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
 import { USERNAME_LENGTH_MIN } from '../../../Constants';
-import MessageStore from '../../../Stores/MessageStore';
-import FileStore from '../../../Stores/FileStore';
-import ChatStore from '../../../Stores/ChatStore';
-import UserStore from '../../../Stores/UserStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
+import ChatStore from '../../../Stores/ChatStore';
+import FileStore from '../../../Stores/FileStore';
+import MessageStore from '../../../Stores/MessageStore';
+import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
 
@@ -447,8 +447,7 @@ class Search extends React.Component {
         }
         this.loading = false;
 
-        filterMessages(result, messages ? messages.messages : []);
-
+        filterDuplicateMessages(result, messages ? messages.messages : []);
         MessageStore.setItems(result.messages);
 
         if (sessionId !== this.sessionId) {

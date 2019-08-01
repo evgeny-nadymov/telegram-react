@@ -50,9 +50,9 @@ class MessagesList extends React.Component {
     constructor(props) {
         super(props);
 
-        console.log(`MessagesList.ctor chat_id=${props.chatId} message_id=${props.messageId}`);
+        // console.log(`MessagesList.ctor chat_id=${props.chatId} message_id=${props.messageId}`);
 
-        console.log('MessagesList.newSessionId ctor');
+        // console.log('MessagesList.newSessionId ctor');
         this.sessionId = Date.now();
         this.state = {
             prevChatId: 0,
@@ -103,13 +103,13 @@ class MessagesList extends React.Component {
             offsetHeight
         };
 
-        console.log(
-            `MessagesList.getSnapshotBeforeUpdate
-            chatId=${chatId} messageId=${messageId}
-            list.scrollTop=${scrollTop}
-            list.scrollHeight=${scrollHeight}
-            list.offsetHeight=${offsetHeight}`
-        );
+        // console.log(
+        //     `MessagesList.getSnapshotBeforeUpdate
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${scrollTop}
+        //     list.scrollHeight=${scrollHeight}
+        //     list.offsetHeight=${offsetHeight}`
+        // );
 
         this.snapshot = snapshot;
         return snapshot;
@@ -120,20 +120,22 @@ class MessagesList extends React.Component {
         const { scrollDownVisible } = this.state;
 
         const list = this.listRef.current;
-        console.log(
-            `MessagesList.componentDidUpdate 
-            chat_id=${chatId} message_id=${messageId}
-            prevProps.chat_id=${prevProps.chatId} prevProps.message_id=${prevProps.messageId}
-            scrollDownVisible=${scrollDownVisible}
-            list.scrollTop=${list.scrollTop}
-            list.scrollHeight=${list.scrollHeight}
-            list.offsetHeight=${list.offsetHeight}`
-        );
+        // console.log(
+        //     `MessagesList.componentDidUpdate
+        //     chat_id=${chatId} message_id=${messageId}
+        //     prevProps.chat_id=${prevProps.chatId} prevProps.message_id=${prevProps.messageId}
+        //     scrollDownVisible=${scrollDownVisible}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.scrollHeight=${list.scrollHeight}
+        //     list.offsetHeight=${list.offsetHeight}`
+        // );
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
         } else {
-            this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
+            if (!this.scrollBehaviorNone) {
+                this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
+            }
         }
     }
 
@@ -142,51 +144,51 @@ class MessagesList extends React.Component {
         const { playerOpened, history, dragging, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         if (nextProps.theme !== theme) {
-            console.log('MessagesList.shouldComponentUpdate theme');
+            // console.log('MessagesList.shouldComponentUpdate theme');
             return true;
         }
 
         if (nextProps.chatId !== chatId) {
-            console.log('MessagesList.shouldComponentUpdate chatId');
+            // console.log('MessagesList.shouldComponentUpdate chatId');
             return true;
         }
 
         if (nextProps.messageId !== messageId) {
-            console.log('MessagesList.shouldComponentUpdate messageId');
+            // console.log('MessagesList.shouldComponentUpdate messageId');
             return true;
         }
 
         if (nextState.scrollDownVisible !== scrollDownVisible) {
-            console.log('MessagesList.shouldComponentUpdate scrollDownVisible');
+            // console.log('MessagesList.shouldComponentUpdate scrollDownVisible');
             return true;
         }
 
         if (nextState.playerOpened !== playerOpened) {
-            console.log('MessagesList.shouldComponentUpdate playerOpened');
+            // console.log('MessagesList.shouldComponentUpdate playerOpened');
             return true;
         }
 
         if (!historyEquals(nextState.history, history)) {
-            console.trace('MessagesList.shouldComponentUpdate history');
+            // console.trace('MessagesList.shouldComponentUpdate history', nextState.history, history);
             return true;
         }
 
         if (nextState.dragging !== dragging) {
-            console.log('MessagesList.shouldComponentUpdate dragging');
+            // console.log('MessagesList.shouldComponentUpdate dragging');
             return true;
         }
 
         if (nextState.clearHistory !== clearHistory) {
-            console.log('MessagesList.shouldComponentUpdate clearHistory');
+            // console.log('MessagesList.shouldComponentUpdate clearHistory');
             return true;
         }
 
         if (nextState.selectionActive !== selectionActive) {
-            console.log('MessagesList.shouldComponentUpdate selectionActive');
+            // console.log('MessagesList.shouldComponentUpdate selectionActive');
             return true;
         }
 
-        console.log('MessagesList.shouldComponentUpdate false');
+        // console.log('MessagesList.shouldComponentUpdate false');
         return false;
     }
 
@@ -306,6 +308,8 @@ class MessagesList extends React.Component {
     };
 
     onUpdateMessageSendSucceeded = update => {
+        if (!this.completed) return;
+
         const { message, old_message_id } = update;
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
@@ -421,7 +425,7 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
 
-        console.log('MessagesList.newSessionId handleSelectChat');
+        //console.log('MessagesList.newSessionId handleSelectChat');
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
@@ -723,7 +727,10 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertPrevious(filterMessages(result.messages), {});
+        this.scrollBehaviorNone = true;
+        this.insertPrevious(filterMessages(result.messages), {}, () => {
+            this.scrollBehaviorNone = false;
+        });
 
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
@@ -828,14 +835,14 @@ class MessagesList extends React.Component {
             offsetHeight: 0
         };
 
-        console.log(
-            `MessagesList.handleScrollBehavior
-            chatId=${chatId} messageId=${messageId}
-            scrollBehavior=${scrollBehavior}
-            snapshot.scrollTop=${scrollTop}
-            snapshot.scrollHeight=${scrollHeight}
-            snapshot.offsetHeight=${offsetHeight}`
-        );
+        // console.log(
+        //     `MessagesList.handleScrollBehavior
+        //     chatId=${chatId} messageId=${messageId}
+        //     scrollBehavior=${scrollBehavior}
+        //     snapshot.scrollTop=${scrollTop}
+        //     snapshot.scrollHeight=${scrollHeight}
+        //     snapshot.offsetHeight=${offsetHeight}`
+        // );
 
         switch (scrollBehavior) {
             case ScrollBehaviorEnum.SCROLL_TO_BOTTOM: {
@@ -862,23 +869,23 @@ class MessagesList extends React.Component {
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         const list = this.listRef.current;
 
-        console.log(
-            `MessagesList.keepScrollPosition before
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.keepScrollPosition before
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
 
-        console.log(
-            `MessagesList.keepScrollPosition after
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.keepScrollPosition after
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
     };
 
     scrollToUnread = () => {
@@ -886,13 +893,13 @@ class MessagesList extends React.Component {
         const { history } = this.state;
         const list = this.listRef.current;
 
-        console.log(
-            `MessagesList.scrollToUnread before
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToUnread before
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         let scrolled = false;
         for (let i = 0; i < history.length; i++) {
@@ -907,13 +914,13 @@ class MessagesList extends React.Component {
             }
         }
 
-        console.log(
-            `MessagesList.scrollToUnread after
-            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}         
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToUnread after
+        //     chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         if (!scrolled) {
             this.scrollToBottom();
@@ -925,13 +932,13 @@ class MessagesList extends React.Component {
         const { history } = this.state;
         const list = this.listRef.current;
 
-        console.trace(
-            `MessagesList.scrollToMessage before
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToMessage before
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         let scrolled = false;
         for (let i = 0; i < history.length; i++) {
@@ -946,13 +953,13 @@ class MessagesList extends React.Component {
             }
         }
 
-        console.log(
-            `MessagesList.scrollToMessage after
-            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}         
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToMessage after
+        //     chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         if (!scrolled) {
             this.scrollToBottom();
@@ -963,33 +970,33 @@ class MessagesList extends React.Component {
         const { chatId, messageId } = this.props;
         const list = this.listRef.current;
 
-        console.log(
-            `MessagesList.scrollToBottom before
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToBottom before
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         const nextScrollTop = list.scrollHeight - list.offsetHeight;
         if (nextScrollTop !== list.scrollTop) {
             list.scrollTop = list.scrollHeight - list.offsetHeight;
 
-            console.log(
-                `MessagesList.scrollToBottom after
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-            );
+            // console.log(
+            //     `MessagesList.scrollToBottom after
+            // chatId=${chatId} messageId=${messageId}
+            // list.scrollTop=${list.scrollTop}
+            // list.offsetHeight=${list.offsetHeight}
+            // list.scrollHeight=${list.scrollHeight}`
+            // );
         } else {
-            console.log(
-                `MessagesList.scrollToBottom after (no changes)
-            chatId=${chatId} messageId=${messageId}           
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-            );
+            // console.log(
+            //     `MessagesList.scrollToBottom after (no changes)
+            // chatId=${chatId} messageId=${messageId}
+            // list.scrollTop=${list.scrollTop}
+            // list.offsetHeight=${list.offsetHeight}
+            // list.scrollHeight=${list.scrollHeight}`
+            // );
         }
     };
 
@@ -998,7 +1005,7 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        console.log('MessagesList.newSessionId scrollToStart');
+        // console.log('MessagesList.newSessionId scrollToStart');
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
@@ -1107,6 +1114,7 @@ class MessagesList extends React.Component {
                   if (isServiceMessage(x)) {
                       m = (
                           <ServiceMessage
+                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
                               ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}
@@ -1125,6 +1133,7 @@ class MessagesList extends React.Component {
 
                       m = (
                           <Message
+                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
                               ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}
@@ -1134,6 +1143,8 @@ class MessagesList extends React.Component {
                           />
                       );
                   }
+
+                  // return m;
 
                   return (
                       <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
