@@ -405,6 +405,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+function historyEquals(first, second) {
+    if (!first && second) return false;
+    if (first && !second) return false;
+
+    if (!first && !second) return true;
+    if (first.length === 0 && second.length === 0) return true;
+
+    return first === second;
+}
+
 export {
     cleanProgressStatus,
     isConnecting,
@@ -428,5 +438,6 @@ export {
     between,
     getDurationString,
     getRandomInt,
-    isAppleDevice
+    isAppleDevice,
+    historyEquals
 };

@@ -19,7 +19,6 @@ import BasicGroupStore from '../Stores/BasicGroupStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
-import InputBoxControl from '../Components/ColumnMiddle/Footer';
 
 function getGroupChatTypingString(inputTypingManager) {
     if (!inputTypingManager) return null;

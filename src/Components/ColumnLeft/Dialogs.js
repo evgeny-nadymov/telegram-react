@@ -99,11 +99,7 @@ class Dialogs extends Component {
     };
 
     handleSelectMessage = (chatId, messageId, openSearch) => {
-        const { onSelectChat } = this.props;
-
         openChat(chatId, messageId);
-
-        onSelectChat(chatId, messageId);
 
         const searchChatId = openSearch ? this.state.searchChatId : 0;
         const searchText = openSearch ? this.state.searchText : null;
@@ -160,9 +156,5 @@ class Dialogs extends Component {
         );
     }
 }
-
-Dialogs.propTypes = {
-    onSelectChat: PropTypes.func.isRequired
-};
 
 export default withStyles(styles)(Dialogs);

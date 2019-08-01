@@ -402,7 +402,7 @@ function getSenderUserId(message) {
     return message.sender_user_id;
 }
 
-function filterMessages(result, history) {
+function filterDuplicateMessages(result, history) {
     if (result.messages.length === 0) return;
     if (history.length === 0) return;
 
@@ -412,6 +412,10 @@ function filterMessages(result, history) {
     }, new Map());
 
     result.messages = result.messages.filter(x => !map.has(x.id));
+}
+
+function filterMessages(messages) {
+    return messages.filter(x => x.content['@type'] !== 'messageChatUpgradeTo');
 }
 
 function getContent(message, t = key => key) {
@@ -1523,6 +1527,7 @@ export {
     getForwardTitle,
     getUnread,
     getSenderUserId,
+    filterDuplicateMessages,
     filterMessages,
     isMediaContent,
     isDeletedMessage,

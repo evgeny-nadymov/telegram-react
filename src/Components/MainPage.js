@@ -157,7 +157,7 @@ class MainPage extends React.Component {
         return (
             <>
                 <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
-                    <Dialogs onSelectChat={this.handleSelectChat} />
+                    <Dialogs />
                     <DialogDetails ref={this.dialogDetailsRef} />
                     {isChatDetailsVisible && <ChatInfo />}
                 </div>

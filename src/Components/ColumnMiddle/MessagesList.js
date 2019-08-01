@@ -17,9 +17,9 @@ import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
-import { filterMessages } from '../../Utils/Message';
+import { filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage, openChat } from '../../Actions/Client';
@@ -34,7 +34,6 @@ import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
 
 const ScrollBehaviorEnum = Object.freeze({
-    NONE: 'NONE',
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
     SCROLL_TO_UNREAD: 'SCROLL_TO_UNREAD',
     SCROLL_TO_MESSAGE: 'SCROLL_TO_MESSAGE',
@@ -53,6 +52,7 @@ class MessagesList extends React.Component {
 
         console.log(`MessagesList.ctor chat_id=${props.chatId} message_id=${props.messageId}`);
 
+        console.log('MessagesList.newSessionId ctor');
         this.sessionId = Date.now();
         this.state = {
             prevChatId: 0,
@@ -61,7 +61,6 @@ class MessagesList extends React.Component {
             history: [],
             clearHistory: false,
             selectionActive: false,
-            scrollBehavior: ScrollBehaviorEnum.NONE,
             separatorMessageId: 0,
             scrollDownVisible: false,
             replyHistory: []
@@ -73,7 +72,6 @@ class MessagesList extends React.Component {
         this.itemsMap = new Map();
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
-        //debounce(this.updateItemsInView, 250);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -83,9 +81,9 @@ class MessagesList extends React.Component {
                 prevMessageId: props.messageId,
                 clearHistory: false,
                 selectionActive: false,
-                scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
                 separatorMessageId: 0,
-                scrollDownVisible: props.chatId === state.prevChatId,
+                scrollDownVisible:
+                    props.chatId === state.prevChatId && (state.scrollDownVisible || state.replyHistory.length > 0),
                 replyHistory: props.chatId !== state.prevChatId ? [] : state.replyHistory
             };
         }
@@ -94,42 +92,48 @@ class MessagesList extends React.Component {
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
-        const { chatId } = this.props;
+        const { chatId, messageId } = this.props;
 
         const list = this.listRef.current;
+        const { scrollTop, scrollHeight, offsetHeight } = list;
+
         const snapshot = {
-            scrollTop: list.scrollTop,
-            scrollHeight: list.scrollHeight,
-            offsetHeight: list.offsetHeight
+            scrollTop,
+            scrollHeight,
+            offsetHeight
         };
 
         console.log(
-            `SCROLL GETSNAPSHOTBEFOREUPDATE \\
-            list.scrollTop=${list.scrollTop} \\
-            list.scrollHeight=${list.scrollHeight} \\
-            list.offsetHeight=${list.offsetHeight} \\
-            chatId=${chatId}`
+            `MessagesList.getSnapshotBeforeUpdate
+            chatId=${chatId} messageId=${messageId}
+            list.scrollTop=${scrollTop}
+            list.scrollHeight=${scrollHeight}
+            list.offsetHeight=${offsetHeight}`
         );
 
+        this.snapshot = snapshot;
         return snapshot;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId } = this.props;
+        const { scrollDownVisible } = this.state;
 
         const list = this.listRef.current;
         console.log(
-            `MessagesList.componentDidUpdate chat_id=${chatId} message_id=${messageId} \\
-            prev_chat_id=${prevProps.chatId} prev_message_id=${prevProps.messageId} \\
-            list.scrollTop=${list.scrollTop} \\
-            list.scrollHeight=${list.scrollHeight} \\
+            `MessagesList.componentDidUpdate 
+            chat_id=${chatId} message_id=${messageId}
+            prevProps.chat_id=${prevProps.chatId} prevProps.message_id=${prevProps.messageId}
+            scrollDownVisible=${scrollDownVisible}
+            list.scrollTop=${list.scrollTop}
+            list.scrollHeight=${list.scrollHeight}
             list.offsetHeight=${list.offsetHeight}`
         );
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
         } else {
-            this.handleScrollBehavior(snapshot);
+            this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
         }
     }
 
@@ -138,48 +142,55 @@ class MessagesList extends React.Component {
         const { playerOpened, history, dragging, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         if (nextProps.theme !== theme) {
+            console.log('MessagesList.shouldComponentUpdate theme');
             return true;
         }
 
         if (nextProps.chatId !== chatId) {
+            console.log('MessagesList.shouldComponentUpdate chatId');
             return true;
         }
 
         if (nextProps.messageId !== messageId) {
+            console.log('MessagesList.shouldComponentUpdate messageId');
             return true;
         }
 
         if (nextState.scrollDownVisible !== scrollDownVisible) {
+            console.log('MessagesList.shouldComponentUpdate scrollDownVisible');
             return true;
         }
 
         if (nextState.playerOpened !== playerOpened) {
+            console.log('MessagesList.shouldComponentUpdate playerOpened');
             return true;
         }
 
-        if (nextState.history !== history) {
+        if (!historyEquals(nextState.history, history)) {
+            console.trace('MessagesList.shouldComponentUpdate history');
             return true;
         }
 
         if (nextState.dragging !== dragging) {
+            console.log('MessagesList.shouldComponentUpdate dragging');
             return true;
         }
 
         if (nextState.clearHistory !== clearHistory) {
+            console.log('MessagesList.shouldComponentUpdate clearHistory');
             return true;
         }
 
         if (nextState.selectionActive !== selectionActive) {
+            console.log('MessagesList.shouldComponentUpdate selectionActive');
             return true;
         }
 
+        console.log('MessagesList.shouldComponentUpdate false');
         return false;
     }
 
     componentDidMount() {
-        const { chatId } = this.props;
-        this.handleSelectChat(chatId, 0);
-
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
@@ -261,8 +272,7 @@ class MessagesList extends React.Component {
 
     onClientUpdateSelection = update => {
         this.setState({
-            selectionActive: MessageStore.selectedItems.size > 0,
-            scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION
+            selectionActive: MessageStore.selectedItems.size > 0
         });
     };
 
@@ -300,30 +310,27 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
-        let handleSendSucceeded = false;
-        const { content } = message;
-        switch (content['@type']) {
-            case 'messagePoll': {
-                handleSendSucceeded = true;
-                break;
+        // let handleSendSucceeded = false;
+        // const { content } = message;
+        // switch (content['@type']) {
+        //     case 'messagePoll': {
+        //         handleSendSucceeded = true;
+        //         break;
+        //     }
+        // }
+        //
+        // if (!handleSendSucceeded) return;
+
+        const scrollBehavior = message.is_outgoing
+            ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM
+            : ScrollBehaviorEnum.KEEP_SCROLL_POSITION;
+
+        this.replaceMessage(old_message_id, message, () => {
+            if (scrollBehavior !== ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
+                this.handleScrollBehavior(scrollBehavior, this.snapshot);
             }
-        }
+        });
 
-        if (!handleSendSucceeded) return;
-
-        let scrollBehavior = ScrollBehaviorEnum.NONE;
-        const list = this.listRef.current;
-        // at the end of list
-        if (list.scrollTop === list.scrollHeight - list.offsetHeight) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
-        }
-        // sent message
-        else if (message.is_outgoing) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
-        }
-
-        console.log('SCROLL MessagesList.onUpdateMessageSendSucceeded scrollBehavior=' + scrollBehavior);
-        this.replaceMessage(old_message_id, message, scrollBehavior);
         const store = FileStore.getStore();
         loadMessageContents(store, [message]);
         MessagesList.viewMessages([message]);
@@ -336,25 +343,18 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
-        let scrollBehavior = ScrollBehaviorEnum.NONE;
-        const list = this.listRef.current;
-        // at the end of list
-        if (list.scrollTop === list.scrollHeight - list.offsetHeight) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
-        }
-        // sent message
-        else if (message.is_outgoing) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
-        }
+        const scrollBehavior = message.is_outgoing
+            ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM
+            : ScrollBehaviorEnum.KEEP_SCROLL_POSITION;
+        const newState = message.is_outgoing ? { scrollDownVisible: false } : {};
 
         const history = [message];
+        this.insertPrevious(filterMessages(history), newState, () => {
+            if (scrollBehavior !== ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
+                this.handleScrollBehavior(scrollBehavior, this.snapshot);
+            }
+        });
 
-        console.log('SCROLL MessagesList.onUpdateNewMessage scrollBehavior=' + scrollBehavior);
-        const newState = {
-            scrollBehavior,
-            scrollDownVisible: false
-        };
-        this.insertAfter(this.filterMessages(history), newState);
         const store = FileStore.getStore();
         loadMessageContents(store, history);
         MessagesList.viewMessages(history);
@@ -362,11 +362,14 @@ class MessagesList extends React.Component {
 
     onUpdateDeleteMessages = update => {
         const { chatId } = this.props;
-        if (chatId !== update.chat_id) return;
+        const { chat_id, is_permanent, message_ids } = update;
+        if (chatId !== chat_id) return;
 
-        if (!update.is_permanent) return;
+        if (!is_permanent) return;
 
-        this.deleteHistory(update.message_ids);
+        this.deleteHistory(message_ids, () => {
+            this.handleScrollBehavior(ScrollBehaviorEnum.SCROLL_TO_BOTTOM, this.snapshot);
+        });
     };
 
     updateItemsInView = () => {
@@ -418,12 +421,12 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
 
+        console.log('MessagesList.newSessionId handleSelectChat');
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
         this.loadMigratedHistory = false;
 
-        this.suppressHandleScrollOnSelectChat = true;
         if (chat) {
             TdLibController.send({
                 '@type': 'openChat',
@@ -437,6 +440,7 @@ class MessagesList extends React.Component {
             const limit =
                 (unread && chat.unread_count > 1) || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
+            this.loading = true;
             const sessionId = this.sessionId;
             const result = await TdLibController.send({
                 '@type': 'getChatHistory',
@@ -444,13 +448,13 @@ class MessagesList extends React.Component {
                 from_message_id: fromMessageId,
                 offset: offset,
                 limit: limit
+            }).finally(() => {
+                this.loading = false;
             });
 
             if (sessionId !== this.sessionId) {
                 return;
             }
-
-            //TODO: replace result with one-way data flow
 
             if (chat.last_message) {
                 this.completed = result.messages.length > 0 && chat.last_message.id === result.messages[0].id;
@@ -461,7 +465,6 @@ class MessagesList extends React.Component {
             MessageStore.setItems(result.messages);
             result.messages.reverse();
 
-            // calculate separator
             let separatorMessageId = Number.MAX_VALUE;
             if (chat && chat.unread_count > 1) {
                 for (let i = result.messages.length - 1; i >= 0; i--) {
@@ -478,7 +481,6 @@ class MessagesList extends React.Component {
                 }
             }
             separatorMessageId = separatorMessageId === Number.MAX_VALUE ? 0 : separatorMessageId;
-            console.log('[MessagesList] separator_message_id=' + separatorMessageId);
 
             let scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
             if (messageId) {
@@ -487,8 +489,8 @@ class MessagesList extends React.Component {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_UNREAD;
             }
 
-            this.replace(separatorMessageId, result.messages, scrollBehavior, () => {
-                this.suppressHandleScrollOnSelectChat = false;
+            this.replace(separatorMessageId, result.messages, () => {
+                this.handleScrollBehavior(scrollBehavior, this.snapshot);
                 if (messageId) {
                     highlightMessage(chatId, messageId);
                 }
@@ -497,22 +499,20 @@ class MessagesList extends React.Component {
             // load files
             const store = FileStore.getStore();
             loadMessageContents(store, result.messages);
+            MessagesList.viewMessages(result.messages);
+
             loadChatsContent(store, [chatId]);
             loadDraftContent(store, chatId);
-
-            MessagesList.viewMessages(result.messages);
 
             this.loadIncompleteHistory(result);
 
             // load full info
             getChatFullInfo(chat.id);
         } else {
-            this.replace(
-                0,
-                [],
-                ScrollBehaviorEnum.SCROLL_TO_BOTTOM,
-                () => (this.suppressHandleScrollOnSelectChat = false)
-            );
+            this.loading = true;
+            this.replace(0, [], () => {
+                this.loading = false;
+            });
         }
 
         if (previousChat && previousChatId !== chatId) {
@@ -580,6 +580,7 @@ class MessagesList extends React.Component {
 
     onLoadNext = async () => {
         const { chatId } = this.props;
+        const { history } = this.state;
 
         if (!chatId) return;
         if (this.loading) return;
@@ -589,13 +590,9 @@ class MessagesList extends React.Component {
             return;
         }
 
-        let fromMessageId = 0;
-        if (this.state.history && this.state.history.length > 0) {
-            fromMessageId = this.state.history[0].id;
-        }
+        const fromMessageId = history && history.length > 0 ? history[0].id : 0;
 
         this.loading = true;
-
         const sessionId = this.sessionId;
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
@@ -614,15 +611,15 @@ class MessagesList extends React.Component {
         if (this.props.chatId !== chatId) {
             return;
         }
-        //TODO: replace result with one-way data flow
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertBefore(this.filterMessages(result.messages), () => {
+        this.insertNext(filterMessages(result.messages), () => {
             if (!result.messages.length) {
                 this.onLoadMigratedHistory();
             }
         });
+
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
@@ -630,12 +627,9 @@ class MessagesList extends React.Component {
         return result;
     };
 
-    filterMessages = messages => {
-        return messages.filter(x => x.content['@type'] !== 'messageChatUpgradeTo');
-    };
-
     onLoadMigratedHistory = async () => {
         const { chatId } = this.props;
+        const { history } = this.state;
 
         if (!chatId) return;
         if (this.loading) return;
@@ -656,17 +650,9 @@ class MessagesList extends React.Component {
 
         if (!basicGroupChat) return;
 
-        let fromMessageId = 0;
-        if (
-            this.state.history &&
-            this.state.history.length > 0 &&
-            this.state.history[0].chat_id === basicGroupChat.id
-        ) {
-            fromMessageId = this.state.history[0].id;
-        }
+        const fromMessageId = history.length > 0 && history[0].chat_id === basicGroupChat.id ? history[0].id : 0;
 
         this.loading = true;
-
         const sessionId = this.sessionId;
         const result = await TdLibController.send({
             '@type': 'getChatHistory',
@@ -685,11 +671,11 @@ class MessagesList extends React.Component {
         if (this.props.chatId !== chatId) {
             return;
         }
-        //TODO: replace result with one-way data flow
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertBefore(this.filterMessages(result.messages));
+        this.insertNext(filterMessages(result.messages));
+
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
@@ -697,19 +683,17 @@ class MessagesList extends React.Component {
 
     onLoadPrevious = async () => {
         const { chatId } = this.props;
+        const { history } = this.state;
+
         const chat = ChatStore.get(chatId);
 
         if (!chat) return;
         if (this.loading) return;
         if (this.completed) return;
 
-        let fromMessageId = 0;
-        if (this.state.history && this.state.history.length > 0) {
-            fromMessageId = this.state.history[this.state.history.length - 1].id;
-        }
+        const fromMessageId = history && history.length > 0 ? history[history.length - 1].id : 0;
 
         this.loading = true;
-
         const sessionId = this.sessionId;
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
@@ -735,14 +719,12 @@ class MessagesList extends React.Component {
             this.completed = true;
         }
 
-        filterMessages(result, this.state.history);
-
-        //TODO: replace result with one-way data flow
+        filterDuplicateMessages(result, this.state.history);
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        console.log('SCROLL MessagesList.onLoadPrevious scrollBehavior=NONE');
-        this.insertAfter(this.filterMessages(result.messages), { scrollBehavior: ScrollBehaviorEnum.NONE });
+        this.insertPrevious(filterMessages(result.messages), {});
+
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
         MessagesList.viewMessages(result.messages);
@@ -750,194 +732,166 @@ class MessagesList extends React.Component {
         return result;
     };
 
-    replace(separatorMessageId, history, scrollBehavior, callback) {
-        this.setState(
-            { separatorMessageId: separatorMessageId, history: history, scrollBehavior: scrollBehavior },
-            callback
-        );
+    replace(separatorMessageId, history, callback) {
+        this.setState({ separatorMessageId, history }, callback);
     }
 
-    insertBefore(history, callback) {
-        if (history.length === 0) {
+    replaceMessage(oldMessageId, message, callback) {
+        if (!message) {
             if (callback) callback();
             return;
         }
 
         this.setState(
-            { history: history.concat(this.state.history), scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION },
-            callback
-        );
-    }
-
-    replaceMessage(oldMessageId, message, scrollBehavior, callback) {
-        if (!message) return;
-
-        this.setState(
             {
-                history: this.state.history.filter(x => x.id !== oldMessageId).concat([message]),
-                scrollBehavior: scrollBehavior
+                history: this.state.history.filter(x => x.id !== oldMessageId).concat([message])
             },
             callback
         );
     }
 
-    insertAfter(history, newState, callback) {
-        if (history.length === 0) return;
+    insertNext(history, callback) {
+        if (history.length === 0) {
+            if (callback) callback();
+            return;
+        }
+
+        this.setState({ history: history.concat(this.state.history) }, callback);
+    }
+
+    insertPrevious(history, newState, callback) {
+        if (history.length === 0) {
+            if (callback) callback();
+            return;
+        }
 
         this.setState({ history: this.state.history.concat(history), ...newState }, callback);
     }
 
     deleteHistory(message_ids, callback) {
         const { history } = this.state;
-        if (history.length === 0) return;
+        if (history.length === 0) {
+            if (callback) callback();
+            return;
+        }
 
-        let map = new Map(message_ids.map(x => [x, x]));
-
-        this.setState(
-            { history: history.filter(x => !map.has(x.id)), scrollBehavior: ScrollBehaviorEnum.SCROLL_TO_BOTTOM },
-            callback
-        );
+        const map = new Map(message_ids.map(x => [x, x]));
+        this.setState({ history: history.filter(x => !map.has(x.id)) }, callback);
     }
 
     handleScroll = () => {
+        // console.log('MessagesList.handleScroll');
         const { scrollDownVisible, replyHistory, history } = this.state;
         const list = this.listRef.current;
 
-        // console.log('MessagesLList.handleScroll scrollDown',
-        //     this.suppressHandleScroll,
-        //     this.suppressHandleScrollOnSelectChat,
-        //     this.prevScrollTop,
-        // );
         this.updateItemsInView();
-        //console.log(`SCROLL HANDLESCROLL list.scrollTop=${list.scrollTop} list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight} chatId=${this.props.chatId}`);
-
-        if (this.suppressHandleScroll) {
-            this.suppressHandleScroll = false;
-            return;
-        }
-
-        if (this.suppressHandleScrollOnSelectChat) {
-            return;
-        }
 
         if (list.scrollTop <= 0) {
-            console.log('SCROLL HANDLESCROLL onLoadNext');
+            // console.log('SCROLL HANDLESCROLL onLoadNext');
             this.onLoadNext();
         } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
+            // console.log('SCROLL HANDLESCROLL onLoadPrevious', list.scrollTop, list.offsetHeight, list.scrollHeight, history);
+            this.onLoadPrevious();
+        }
+
+        if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
             if (this.completed && scrollDownVisible) {
                 if (this.prevScrollTop !== list.scrollTop && this.prevScrollTop && this.prevHistory === history) {
                     // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, this.prevScrollTop, list.scrollTop);
                     this.setState({
                         scrollDownVisible: false,
-                        scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION,
                         replyHistory: []
                     });
                 } else if (!replyHistory.length) {
                     // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, replyHistory.length);
                     this.setState({
-                        scrollDownVisible: false,
-                        scrollBehavior: ScrollBehaviorEnum.KEEP_SCROLL_POSITION
+                        scrollDownVisible: false
                     });
                 }
             }
-
-            console.log('SCROLL HANDLESCROLL onLoadPrevious');
-            this.onLoadPrevious();
         } else {
             if (!scrollDownVisible) {
+                // console.log('MessagesList.handleScroll scrollDownVisible=true');
                 this.setState({ scrollDownVisible: true });
             }
-            //console.log('SCROLL HANDLESCROLL updateItemsInView');
         }
 
         this.prevScrollTop = list.scrollTop;
         this.prevHistory = history;
     };
 
-    handleScrollBehavior = snapshot => {
+    handleScrollBehavior = (scrollBehavior, snapshot) => {
         const { chatId, messageId } = this.props;
-        const { scrollBehavior, history } = this.state;
-        const { scrollTop, scrollHeight, offsetHeight } = snapshot;
+        const { scrollTop, scrollHeight, offsetHeight } = snapshot || {
+            scrollTop: 0,
+            scrollHeight: 0,
+            offsetHeight: 0
+        };
 
         console.log(
-            `SCROLL HANDLESCROLLBEHAVIOR \\
-            scrollBehavior=${scrollBehavior} \\
-            previousScrollTop=${scrollTop} \\
-            previousScrollHeight=${scrollHeight} \\
-            previousOffsetHeight=${offsetHeight} \\
-            chatId=${chatId}`
+            `MessagesList.handleScrollBehavior
+            chatId=${chatId} messageId=${messageId}
+            scrollBehavior=${scrollBehavior}
+            snapshot.scrollTop=${scrollTop}
+            snapshot.scrollHeight=${scrollHeight}
+            snapshot.offsetHeight=${offsetHeight}`
         );
-        if (scrollBehavior === ScrollBehaviorEnum.NONE) {
-        } else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_BOTTOM) {
-            this.scrollToBottom();
-        } else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_MESSAGE) {
-            this.scrollToMessage();
-        } else if (scrollBehavior === ScrollBehaviorEnum.SCROLL_TO_UNREAD) {
-            const list = this.listRef.current;
-            console.log(
-                `SCROLL SCROLL_TO_UNREAD before \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                chatId=${chatId}`
-            );
 
-            let scrolled = false;
-            for (let i = 0; i < history.length; i++) {
-                let itemComponent = this.itemsMap.get(i);
-                let item = ReactDOM.findDOMNode(itemComponent);
-                if (item) {
-                    // console.log(`SCROLL SCROLL_TO_UNREAD item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
-                    if (itemComponent.props.showUnreadSeparator) {
-                        list.scrollTop = item.offsetTop; // + unread messages margin-top
-                        scrolled = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!scrolled) {
+        switch (scrollBehavior) {
+            case ScrollBehaviorEnum.SCROLL_TO_BOTTOM: {
                 this.scrollToBottom();
+                break;
             }
-
-            console.log(
-                `SCROLL SCROLL_TO_UNREAD after \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                chatId=${chatId}`
-            );
-        } else if (scrollBehavior === ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
-            const list = this.listRef.current;
-            console.log(
-                `SCROLL KEEP_SCROLL_POSITION before \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                chatId=${chatId}`
-            );
-            list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
-            console.log(
-                `SCROLL KEEP_SCROLL_POSITION after \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                chatId=${chatId}`
-            );
+            case ScrollBehaviorEnum.SCROLL_TO_MESSAGE: {
+                this.scrollToMessage();
+                break;
+            }
+            case ScrollBehaviorEnum.SCROLL_TO_UNREAD: {
+                this.scrollToUnread();
+                break;
+            }
+            case ScrollBehaviorEnum.KEEP_SCROLL_POSITION: {
+                this.keepScrollPosition(snapshot);
+                break;
+            }
         }
     };
 
-    scrollToMessage = () => {
+    keepScrollPosition = snapshot => {
+        const { chatId, messageId } = this.props;
+        const { scrollTop, scrollHeight, offsetHeight } = snapshot;
+        const list = this.listRef.current;
+
+        console.log(
+            `MessagesList.keepScrollPosition before
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
+
+        list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+
+        console.log(
+            `MessagesList.keepScrollPosition after
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
+    };
+
+    scrollToUnread = () => {
         const { chatId, messageId } = this.props;
         const { history } = this.state;
-
         const list = this.listRef.current;
+
         console.log(
-            `SCROLL SCROLL_TO_MESSAGE message_id=${messageId} before \\
-            list.scrollTop=${list.scrollTop} \\
-            list.offsetHeight=${list.offsetHeight} \\
-            list.scrollHeight=${list.scrollHeight} \\
-            chatId=${chatId}`
+            `MessagesList.scrollToUnread before
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
         );
 
         let scrolled = false;
@@ -945,7 +899,45 @@ class MessagesList extends React.Component {
             let itemComponent = this.itemsMap.get(i);
             let item = ReactDOM.findDOMNode(itemComponent);
             if (item) {
-                // console.log(`SCROLL SCROLL_TO_MESSAGE message_id=${messageId} item item.scrollTop=${item.scrollTop} showUnreadSeparator=${itemComponent.props.showUnreadSeparator} item.offsetHeight=${item.offsetHeight} item.scrollHeight=${item.scrollHeight}`);
+                if (itemComponent.props.showUnreadSeparator) {
+                    list.scrollTop = item.offsetTop; // + unread messages margin-top
+                    scrolled = true;
+                    break;
+                }
+            }
+        }
+
+        console.log(
+            `MessagesList.scrollToUnread after
+            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}         
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
+
+        if (!scrolled) {
+            this.scrollToBottom();
+        }
+    };
+
+    scrollToMessage = () => {
+        const { chatId, messageId } = this.props;
+        const { history } = this.state;
+        const list = this.listRef.current;
+
+        console.trace(
+            `MessagesList.scrollToMessage before
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
+
+        let scrolled = false;
+        for (let i = 0; i < history.length; i++) {
+            let itemComponent = this.itemsMap.get(i);
+            let item = ReactDOM.findDOMNode(itemComponent);
+            if (item) {
                 if (itemComponent.props.messageId === messageId) {
                     list.scrollTop = item.offsetTop - list.offsetHeight / 2.0;
                     scrolled = true;
@@ -954,49 +946,49 @@ class MessagesList extends React.Component {
             }
         }
 
+        console.log(
+            `MessagesList.scrollToMessage after
+            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}         
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
+
         if (!scrolled) {
             this.scrollToBottom();
         }
-
-        console.log(
-            `SCROLL SCROLL_TO_MESSAGE message_id=${messageId} after \\
-            list.scrollTop=${list.scrollTop} \\
-            list.offsetHeight=${list.offsetHeight} \\
-            list.scrollHeight=${list.scrollHeight} \\
-            chatId=${chatId}`
-        );
     };
 
     scrollToBottom = () => {
-        this.suppressHandleScroll = true;
+        const { chatId, messageId } = this.props;
         const list = this.listRef.current;
+
         console.log(
-            `SCROLL SCROLL_TO_BOTTOM before \\
-            list.scrollHeight=${list.scrollHeight} \\
-            list.offsetHeight=${list.offsetHeight} \\
-            list.scrollTop=${list.scrollTop} \\
-            chatId=${this.props.chatId}`
+            `MessagesList.scrollToBottom before
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
         );
 
         const nextScrollTop = list.scrollHeight - list.offsetHeight;
         if (nextScrollTop !== list.scrollTop) {
             list.scrollTop = list.scrollHeight - list.offsetHeight;
+
             console.log(
-                `SCROLL SCROLL_TO_BOTTOM after \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                suppressHandleScroll=${this.suppressHandleScroll} \\
-                chatId=${this.props.chatId}`
+                `MessagesList.scrollToBottom after
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
             );
         } else {
             console.log(
-                `SCROLL SCROLL_TO_BOTTOM after(already bottom) \\
-                list.scrollTop=${list.scrollTop} \\
-                list.offsetHeight=${list.offsetHeight} \\
-                list.scrollHeight=${list.scrollHeight} \\
-                suppressHandleScroll=${this.suppressHandleScroll} \\
-                chatId=${this.props.chatId}`
+                `MessagesList.scrollToBottom after (no changes)
+            chatId=${chatId} messageId=${messageId}           
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
             );
         }
     };
@@ -1006,6 +998,7 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
+        console.log('MessagesList.newSessionId scrollToStart');
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
@@ -1014,6 +1007,7 @@ class MessagesList extends React.Component {
         const offset = 0;
         const limit = MESSAGE_SLICE_LIMIT;
 
+        this.loading = true;
         const sessionId = this.sessionId;
         const result = await TdLibController.send({
             '@type': 'getChatHistory',
@@ -1021,13 +1015,13 @@ class MessagesList extends React.Component {
             from_message_id: fromMessageId,
             offset: offset,
             limit: limit
+        }).finally(() => {
+            this.loading = false;
         });
 
         if (sessionId !== this.sessionId) {
             return;
         }
-
-        //TODO: replace result with one-way data flow
 
         if (this.props.chatId !== chatId) {
             return;
@@ -1044,17 +1038,14 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
 
-        // calculate separator
         let separatorMessageId = 0;
-        console.log('[MessagesList] separator_message_id=' + separatorMessageId);
-
-        this.replace(separatorMessageId, result.messages, ScrollBehaviorEnum.SCROLL_TO_BOTTOM);
+        this.replace(separatorMessageId, result.messages, () => {
+            this.handleScrollBehavior(ScrollBehaviorEnum.SCROLL_TO_BOTTOM, this.snapshot);
+        });
 
         // load files
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        loadChatsContent(store, [chatId]);
-
         MessagesList.viewMessages(result.messages);
 
         this.loadIncompleteHistory(result);
@@ -1143,7 +1134,6 @@ class MessagesList extends React.Component {
                           />
                       );
                   }
-                  //prevShowDate = showDate;
 
                   return (
                       <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
