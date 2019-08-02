@@ -111,8 +111,8 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'updateChatIsMarkedAsUnread': {
-                const { chat_id } = update;
-                if (chat_id === this.chatId) {
+                const { chat_id, is_marked_as_unread } = update;
+                if (chat_id === this.chatId && is_marked_as_unread) {
                     closeChat();
                 }
 
