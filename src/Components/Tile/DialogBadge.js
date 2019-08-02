@@ -8,13 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import {
-    getChatUnreadCount,
-    getChatUnreadMentionCount,
-    getChatUnreadMessageIcon,
-    isChatMuted,
-    showChatDraft
-} from '../../Utils/Chat';
+import { isChatMuted, showChatDraft, showChatUnreadMessageIcon } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogBadge.css';
@@ -53,6 +47,7 @@ class DialogBadge extends React.Component {
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateChatReadOutbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.on('updateMessageMentionRead', this.onUpdate);
         ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
@@ -66,6 +61,7 @@ class DialogBadge extends React.Component {
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
         ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
@@ -120,16 +116,20 @@ class DialogBadge extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const unreadMessageIcon = getChatUnreadMessageIcon(chat);
-        const unreadCount = getChatUnreadCount(chat);
-        const unreadMentionCount = getChatUnreadMentionCount(chat);
-        const showUnreadCount = unreadCount > 1 || (unreadCount === 1 && unreadMentionCount < 1);
-        const showDraftChat = showChatDraft(chat.id);
+        const { is_marked_as_unread, unread_count, unread_mention_count } = chat;
+
+        const showUnreadIcon = showChatUnreadMessageIcon(chatId);
+        const showUnreadMentionCount = unread_mention_count > 0;
+        const showUnreadCount =
+            unread_count > 1 ||
+            (unread_count === 1 && unread_mention_count === 0) ||
+            (is_marked_as_unread && unread_count === 0 && unread_mention_count === 0);
+        const showDraftChat = showChatDraft(chatId);
 
         return (
             <>
-                {unreadMessageIcon && !showDraftChat && <i className='dialog-badge-unread' />}
-                {unreadMentionCount && (
+                {showUnreadIcon && !showDraftChat && <i className='dialog-badge-unread' />}
+                {showUnreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>
                     </div>
@@ -141,9 +141,9 @@ class DialogBadge extends React.Component {
                             'dialog-badge',
                             classes.dialogBadge
                         )}>
-                        <span className='dialog-badge-text'>{unreadCount}</span>
+                        <span className='dialog-badge-text'>{unread_count > 0 ? unread_count : ''}</span>
                     </div>
-                ) : chat.is_pinned && !unreadMessageIcon ? (
+                ) : chat.is_pinned && !showUnreadIcon ? (
                     <i className='dialog-badge-pinned' />
                 ) : null}
             </>

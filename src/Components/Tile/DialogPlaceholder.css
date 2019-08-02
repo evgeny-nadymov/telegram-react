@@ -22,6 +22,7 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .dialog-placeholder-inner-wrapper {

@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { getChatTitle } from '../../Utils/Chat';
 import './DialogPlaceholder.css';
 
 const styles = theme => ({
@@ -19,7 +20,12 @@ const styles = theme => ({
 
 class DialogPlaceholder extends React.Component {
     render() {
-        const { classes, index } = this.props;
+        const { chatId, classes, index, showTitle } = this.props;
+
+        let title = null;
+        if (showTitle) {
+            title = getChatTitle(chatId, true);
+        }
 
         const titleWidth = `${50 + Math.sin(index) * 10}%`;
         const contentWidth = `${70 + Math.cos(index) * 10}%`;
@@ -30,10 +36,17 @@ class DialogPlaceholder extends React.Component {
                     <div className={classNames('dialog-placeholder-tile', classes.dialogPlaceholderBackground)} />
                     <div className='dialog-placeholder-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <div
-                                className={classNames('dialog-placeholder-title', classes.dialogPlaceholderBackground)}
-                                style={{ width: titleWidth }}
-                            />
+                            {showTitle ? (
+                                title
+                            ) : (
+                                <div
+                                    className={classNames(
+                                        'dialog-placeholder-title',
+                                        classes.dialogPlaceholderBackground
+                                    )}
+                                    style={{ width: titleWidth }}
+                                />
+                            )}
                         </div>
                         <div className='tile-second-row'>
                             <div
@@ -52,7 +65,8 @@ class DialogPlaceholder extends React.Component {
 }
 
 DialogPlaceholder.propTypes = {
-    index: PropTypes.number.isRequired
+    index: PropTypes.number.isRequired,
+    showTitle: PropTypes.bool
 };
 
 export default withStyles(styles)(DialogPlaceholder);

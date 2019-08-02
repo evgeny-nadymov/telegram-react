@@ -17,6 +17,14 @@ export function toggleChatIsPinned(chatId, isPinned) {
     });
 }
 
+export function toggleChatIsMarkedAsUnread(chatId, isMarkedAsUnread) {
+    TdLibController.send({
+        '@type': 'toggleChatIsMarkedAsUnread',
+        chat_id: chatId,
+        is_marked_as_unread: isMarkedAsUnread
+    });
+}
+
 export function toggleChatNotificationSettings(chatId, isMuted) {
     const chat = ChatStore.get(chatId);
     if (!chat) return;

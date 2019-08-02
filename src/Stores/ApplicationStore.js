@@ -6,8 +6,9 @@
  */
 
 import { EventEmitter } from 'events';
-import TdLibController from '../Controllers/TdLibController';
 import ActionScheduler from '../Utils/ActionScheduler';
+import { closeChat } from '../Actions/Client';
+import TdLibController from '../Controllers/TdLibController';
 
 class ApplicationStore extends EventEmitter {
     constructor() {
@@ -107,6 +108,14 @@ class ApplicationStore extends EventEmitter {
                 }
 
                 this.emit(update['@type'], update);
+                break;
+            }
+            case 'updateChatIsMarkedAsUnread': {
+                const { chat_id } = update;
+                if (chat_id === this.chatId) {
+                    closeChat();
+                }
+
                 break;
             }
             case 'updateConnectionState': {

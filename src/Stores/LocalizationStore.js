@@ -53,7 +53,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ChannelInfo: 'Channel Info',
                     Stickers: 'STICKERS',
                     Emoji: 'EMOJI',
-                    SelectChatToStartMessaging: 'Select a chat to start messaging'
+                    SelectChatToStartMessaging: 'Select a chat to start messaging',
+                    ViewChannelInfo: 'View channel info',
+                    ViewGroupInfo: 'View group info',
+                    ViewProfile: 'View profile'
                 },
                 emoji: {
                     Search: 'Search',
@@ -94,7 +97,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ChannelInfo: 'Информация о канале',
                     Stickers: 'СТИКЕРЫ',
                     Emoji: 'ЕМОДЗИ',
-                    SelectChatToStartMessaging: 'Выберите, кому хотели бы написать'
+                    SelectChatToStartMessaging: 'Выберите, кому хотели бы написать',
+                    ViewChannelInfo: 'Информация о канале',
+                    ViewGroupInfo: 'Информация о группе',
+                    ViewProfile: 'Показать профиль'
                 },
                 emoji: {
                     Search: 'Поиск',

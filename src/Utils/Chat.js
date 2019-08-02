@@ -199,25 +199,25 @@ function getLastMessageContent(chat, t = key => key) {
     return getContent(last_message, t);
 }
 
-function getChatUnreadMessageIcon(chat) {
+function showChatUnreadMessageIcon(chatId) {
+    const chat = ChatStore.get(chatId);
     if (!chat) return false;
-    if (!chat.last_message) return false;
 
-    return chat.last_message.is_outgoing && chat.last_message.id > chat.last_read_outbox_message_id;
+    const { last_message, last_read_outbox_message_id } = chat;
+    if (!last_message) return false;
+
+    const { is_outgoing } = last_message;
+
+    return is_outgoing && last_message.id > last_read_outbox_message_id;
 }
 
-function getChatUnreadCount(chat) {
-    if (!chat) return null;
-    if (!chat.unread_count) return null;
+function isChatUnread(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
 
-    return chat.unread_count;
-}
+    const { is_marked_as_unread, unread_count, unread_mention_count } = chat;
 
-function getChatUnreadMentionCount(chat) {
-    if (!chat) return null;
-    if (!chat.unread_mention_count) return null;
-
-    return chat.unread_mention_count;
+    return is_marked_as_unread || unread_count > 0;
 }
 
 function isChatMuted(chat) {
@@ -562,6 +562,7 @@ function isChatMember(chatId) {
                     }
                 }
             }
+            break;
         }
         case 'chatTypeBasicGroup': {
             const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
@@ -1286,9 +1287,7 @@ export {
     getChatDraft,
     getChatDraftReplyToMessageId,
     getChatTypingString,
-    getChatUnreadMessageIcon,
-    getChatUnreadCount,
-    getChatUnreadMentionCount,
+    showChatUnreadMessageIcon,
     getChatMuteFor,
     getChatSubtitle,
     getChatSubtitleWithoutTyping,
@@ -1308,6 +1307,7 @@ export {
     isPrivateChat,
     isGroupChat,
     isChannelChat,
+    isChatUnread,
     isChatMember,
     isChatVerified,
     isChatSecret,

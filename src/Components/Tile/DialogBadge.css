@@ -18,6 +18,7 @@
     white-space: nowrap;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 .dialog-badge-text {
@@ -25,8 +26,9 @@
 }
 
 .dialog-badge-mention {
-    min-width: 11px;
+    min-width: 22px;
     transform: translateY(-1px);
+    margin: 0 -6px;
 }
 
 .dialog-badge-pinned {

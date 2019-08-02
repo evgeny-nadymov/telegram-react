@@ -19,9 +19,10 @@ import DialogContent from './DialogContent';
 import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
-import { isChatMuted, isChatSecret } from '../../Utils/Chat';
-import { toggleChatIsPinned, toggleChatNotificationSettings } from '../../Actions/Chat';
+import { isChatMuted, isChatSecret, isChatUnread } from '../../Utils/Chat';
+import { toggleChatIsMarkedAsUnread, toggleChatIsPinned, toggleChatNotificationSettings } from '../../Actions/Chat';
 import { openChat } from '../../Actions/Client';
+import { viewMessages } from '../../Actions/Message';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import OptionStore from '../../Stores/OptionStore';
@@ -224,6 +225,59 @@ class Dialog extends Component {
         toggleChatIsPinned(chatId, !is_pinned);
     };
 
+    getViewInfoTitle = () => {
+        const { chatId, t } = this.props;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        const { type } = chat;
+        switch (type['@type']) {
+            case 'chatTypeBasicGroup': {
+                return t('ViewGroupInfo');
+            }
+            case 'chatTypePrivate':
+            case 'chatTypeSecret': {
+                return t('ViewProfile');
+            }
+            case 'chatTypeSupergroup': {
+                if (type.is_channel) {
+                    return t('ViewChannelInfo');
+                }
+
+                return t('ViewGroupInfo');
+            }
+        }
+    };
+
+    handleViewInfo = event => {
+        this.handleCloseContextMenu(event);
+
+        const { chatId } = this.props;
+
+        openChat(chatId, null, true);
+    };
+
+    handleRead = event => {
+        this.handleCloseContextMenu(event);
+
+        const { chatId } = this.props;
+
+        const isUnread = isChatUnread(chatId);
+        if (isUnread) {
+            const chat = ChatStore.get(chatId);
+            if (!chat) return;
+
+            const { is_marked_as_unread, last_message, unread_count } = chat;
+            if (unread_count > 0 && last_message) {
+                viewMessages(chatId, [last_message.id], true);
+            } else if (is_marked_as_unread) {
+                toggleChatIsMarkedAsUnread(chatId, false);
+            }
+        } else {
+            toggleChatIsMarkedAsUnread(chatId, true);
+        }
+    };
+
     render() {
         const { classes, chatId, showSavedMessages, hidden, t } = this.props;
         const { contextMenu, left, top, canTogglePin } = this.state;
@@ -235,6 +289,7 @@ class Dialog extends Component {
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
         const isMuted = isChatMuted(chat);
+        const isUnread = isChatUnread(chatId);
         return (
             <div
                 ref={this.dialog}
@@ -281,10 +336,14 @@ class Dialog extends Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
-                        <MenuItem onClick={this.handleMute}>{isMuted ? t('Unmute') : t('Mute')}</MenuItem>
                         {canTogglePin && (
-                            <MenuItem onClick={this.handlePin}>{is_pinned ? t('Unpin') : t('Pin')}</MenuItem>
+                            <MenuItem onClick={this.handlePin}>
+                                {is_pinned ? t('UnpinFromTop') : t('PinToTop')}
+                            </MenuItem>
                         )}
+                        <MenuItem onClick={this.handleViewInfo}>{this.getViewInfoTitle()}</MenuItem>
+                        <MenuItem onClick={this.handleMute}>{isMuted ? t('Unmute') : t('Mute')}</MenuItem>
+                        <MenuItem onClick={this.handleRead}>{isUnread ? t('MarkAsRead') : t('MarkAsUnread')}</MenuItem>
                     </MenuList>
                 </Popover>
             </div>
