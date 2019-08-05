@@ -203,12 +203,36 @@ function showChatUnreadMessageIcon(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { last_message, last_read_outbox_message_id } = chat;
+    const { is_marked_as_unread, last_message, last_read_outbox_message_id } = chat;
     if (!last_message) return false;
 
     const { is_outgoing } = last_message;
 
-    return is_outgoing && last_message.id > last_read_outbox_message_id;
+    return (
+        is_outgoing && last_message.id > last_read_outbox_message_id && !is_marked_as_unread && !showChatDraft(chatId)
+    );
+}
+
+function showChatUnreadMentionCount(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { unread_mention_count } = chat;
+
+    return unread_mention_count > 0;
+}
+
+function showChatUnreadCount(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { is_marked_as_unread, unread_count, unread_mention_count } = chat;
+
+    return (
+        unread_count > 1 ||
+        (unread_count === 1 && unread_mention_count === 0) ||
+        (is_marked_as_unread && unread_count === 0 && unread_mention_count === 0)
+    );
 }
 
 function isChatUnread(chatId) {
@@ -1288,6 +1312,8 @@ export {
     getChatDraftReplyToMessageId,
     getChatTypingString,
     showChatUnreadMessageIcon,
+    showChatUnreadMentionCount,
+    showChatUnreadCount,
     getChatMuteFor,
     getChatSubtitle,
     getChatSubtitleWithoutTyping,

@@ -21,6 +21,7 @@ import Checkbox from '@material-ui/core/Checkbox/';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { borderStyle } from '../Theme';
 import { canSendMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { forwardMessages } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -110,13 +111,7 @@ class HeaderCommand extends React.Component {
 
         this.handleCancel();
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: {
-                chatId: id,
-                messageIds: messageIds
-            }
-        });
+        forwardMessages(id, messageIds);
     };
 
     handleReply = () => {

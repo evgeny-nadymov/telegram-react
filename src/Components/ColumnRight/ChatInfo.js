@@ -11,10 +11,11 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
+import SharedDocument from './SharedMedia/SharedDocuments';
 import SharedMedia from './SharedMedia';
 import { borderStyle } from '../Theme';
+import { getChatCounters } from '../../Actions/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
-import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatInfo.css';
 
@@ -28,16 +29,27 @@ class ChatInfo extends React.Component {
     constructor(props) {
         super(props);
 
+        console.log('ChatDetails.ChatInfo.ctor');
+
         this.detailsRef = React.createRef();
 
         const { popup } = props;
+        const { chatId, dialogChatId } = ApplicationStore;
 
         this.state = {
-            chatId: popup ? ApplicationStore.dialogChatId : ApplicationStore.chatId
+            chatId: popup ? dialogChatId : chatId,
+            userChatId: null,
+            openSharedMedia: false,
+            openSharedDocument: false,
+            openGroupInCommon: false,
+            counters: null
         };
     }
 
     componentDidMount() {
+        console.log('ChatDetails.ChatInfo.componentDidMount');
+        this.loadChatCounters(this.state.chatId);
+
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
@@ -45,16 +57,36 @@ class ChatInfo extends React.Component {
         ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { chatId } = this.state;
+        if (chatId !== prevState.chatId) {
+            this.loadChatCounters(chatId);
+        }
+    }
+
     onClientUpdateChatId = update => {
         const { popup } = this.props;
+        const { chatId } = this.state;
+
         if (popup) return;
+        if (chatId === update.nextChatId) return;
 
         this.setState({
             chatId: update.nextChatId,
             userChatId: null,
             openSharedMedia: false,
-            openGroupsInCommon: false
+            openSharedDocument: false,
+            openGroupInCommon: false,
+            counters: null
         });
+    };
+
+    loadChatCounters = async chatId => {
+        const counters = await getChatCounters(chatId);
+
+        if (chatId !== this.state.chatId) return;
+
+        this.setState({ counters });
     };
 
     handelOpenSharedMedia = () => {
@@ -65,18 +97,18 @@ class ChatInfo extends React.Component {
         this.setState({ openSharedMedia: false });
     };
 
-    handleOpenGroupsInCommon = height => {
-        console.log('ChatInfo.handleOpenGroupsInCommon', height);
-        this.setState({ openGroupsInCommon: true });
+    handleOpenGroupInCommon = () => {
+        this.setState({ openGroupInCommon: true });
     };
 
     handleCloseGroupsInCommon = () => {
-        this.setState({ openGroupsInCommon: false });
+        this.setState({ openGroupInCommon: false });
     };
 
     handleCloseChatDetails = () => {
         const { popup } = this.props;
         const { userChatId } = this.state;
+
         if (userChatId) {
             this.setState({ userChatId: null });
         } else if (popup) {
@@ -89,24 +121,19 @@ class ChatInfo extends React.Component {
         }
     };
 
-    handleSelectUser = async user => {
-        if (!user) return;
+    handleOpenSharedDocument = () => {
+        this.setState({ openSharedDocument: true });
+    };
 
-        let chat = await TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: user.id,
-            force: true
-        });
-
-        chat = ChatStore.get(chat.id) || chat;
-        if (!chat) return;
-
-        this.setState({ userChatId: chat.id });
+    handleCloseSharedDocument = () => {
+        this.setState({ openSharedDocument: false });
     };
 
     render() {
+        console.log('ChatDetails.ChatInfo.render', this.state);
         const { classes, className, popup } = this.props;
-        const { chatId, userChatId, openSharedMedia, openGroupsInCommon } = this.state;
+        const { chatId, counters, userChatId, openSharedDocument, openSharedMedia, openGroupInCommon } = this.state;
+
         const currentChatId = chatId || userChatId;
         const minHeight = this.detailsRef && this.detailsRef.current ? this.detailsRef.current.getContentHeight() : 0;
 
@@ -120,7 +147,16 @@ class ChatInfo extends React.Component {
                     onClose={this.handleCloseSharedMedia}
                 />
             );
-        } else if (openGroupsInCommon) {
+        } else if (openSharedDocument) {
+            content = (
+                <SharedDocument
+                    chatId={currentChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedDocument}
+                />
+            );
+        } else if (openGroupInCommon) {
             content = (
                 <GroupsInCommon
                     chatId={currentChatId}
@@ -136,8 +172,10 @@ class ChatInfo extends React.Component {
                     chatId={currentChatId}
                     popup={popup}
                     backButton={userChatId === chatId}
+                    counters={counters}
                     onOpenSharedMedia={this.handelOpenSharedMedia}
-                    onOpenGroupsInCommon={this.handleOpenGroupsInCommon}
+                    onOpenSharedDocument={this.handleOpenSharedDocument}
+                    onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onClose={this.handleCloseChatDetails}
                 />
             );

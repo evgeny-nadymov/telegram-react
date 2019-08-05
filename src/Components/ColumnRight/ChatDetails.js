@@ -13,18 +13,24 @@ import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
-import PhotoIcon from '@material-ui/icons/Photo';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
+import GroupIcon from '@material-ui/icons/Group';
 import CallIcon from '@material-ui/icons/Call';
-import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import CloseIcon from '@material-ui/icons/Close';
+import Divider from '@material-ui/core/Divider';
+import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
+import HeadsetIcon from '@material-ui/icons/Headset';
 import IconButton from '@material-ui/core/IconButton';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import InsertLinkIcon from '@material-ui/icons/InsertLink';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
+import MicIcon from '@material-ui/icons/Mic';
+import PhotoIcon from '@material-ui/icons/Photo';
 import Typography from '@material-ui/core/Typography';
+import VideocamIcon from '@material-ui/icons/Videocam';
 import UserControl from '../Tile/UserControl';
 import ChatControl from '../Tile/ChatControl';
 import ChatDetailsHeader from './ChatDetailsHeader';
@@ -76,22 +82,22 @@ class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
 
+        console.log('ChatDetails.ctor', this.props.counters);
+
         this.chatDetailsListRef = React.createRef();
 
         const { chatId } = this.props;
 
         this.members = new Map();
         this.state = {
-            prevChatId: chatId,
-            hasGroupsInCommon: false
+            prevChatId: chatId
         };
     }
 
     static getDerivedStateFromProps(props, state) {
         if (props.chatId !== state.prevChatId) {
             return {
-                prevChatId: props.chatId,
-                hasGroupsInCommon: false
+                prevChatId: props.chatId
             };
         }
 
@@ -109,18 +115,21 @@ class ChatDetails extends React.Component {
             offsetHeight: offsetHeight
         };
 
-        console.log(
-            `[ChatDetails] getSnapshotBeforeUpdate chatId=${chatId} scrollTop=${scrollTop} scrollHeight=${scrollHeight} offsetHeight=${offsetHeight}`
-        );
+        // console.log(
+        //     `[ChatDetails] getSnapshotBeforeUpdate chatId=${chatId} scrollTop=${scrollTop} scrollHeight=${scrollHeight} offsetHeight=${offsetHeight}`
+        // );
 
         return snapshot;
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, theme } = this.props;
-        const { hasGroupsInCommon } = this.state;
+        const { chatId, theme, counters } = this.props;
 
         if (nextProps.chatId !== chatId) {
+            return true;
+        }
+
+        if (nextProps.counters !== counters) {
             return true;
         }
 
@@ -128,14 +137,12 @@ class ChatDetails extends React.Component {
             return true;
         }
 
-        if (nextState.hasGroupsInCommon !== hasGroupsInCommon) {
-            return true;
-        }
-
         return false;
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log('ChatDetails.componentDidUpdate', this.props.counters);
+
         const { chatId } = this.props;
         if (prevProps.chatId !== chatId) {
             this.handleSelectChat();
@@ -151,6 +158,7 @@ class ChatDetails extends React.Component {
     }
 
     componentDidMount() {
+        console.log('ChatDetails.componentDidMount');
         this.handleSelectChat();
 
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
@@ -216,8 +224,6 @@ class ChatDetails extends React.Component {
     handleSelectChat = () => {
         this.getFullInfo();
 
-        this.getGroupsInCommon();
-
         this.loadChatContents();
     };
 
@@ -235,25 +241,6 @@ class ChatDetails extends React.Component {
         const { chatId } = this.props;
 
         getChatFullInfo(chatId);
-    };
-
-    getGroupsInCommon = async () => {
-        const { chatId } = this.props;
-
-        const isGroup = isGroupChat(chatId);
-        if (isGroup) return;
-
-        const isMe = isMeChat(chatId);
-        if (isMe) return;
-
-        const result = await TdLibController.send({
-            '@type': 'getGroupsInCommon',
-            user_id: getChatUserId(chatId),
-            offset_chat_id: 0,
-            limit: 1
-        });
-
-        this.setState({ hasGroupsInCommon: result.chat_ids.length > 0 });
     };
 
     handleUsernameHint = () => {
@@ -358,17 +345,26 @@ class ChatDetails extends React.Component {
 
     render() {
         const {
-            t,
+            backButton,
             className,
             chatId,
             classes,
+            counters,
+            onClose,
+            onOpenGroupInCommon,
+            onOpenSharedDocument,
             onOpenSharedMedia,
-            onOpenGroupsInCommon,
             popup,
-            backButton,
-            onClose
+            t
         } = this.props;
-        const { hasGroupsInCommon } = this.state;
+        const [photoCount, videoCount, documentCount, audioCount, urlCount, voiceAndVideoNoteCount] = counters || [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+        ];
 
         const chat = ChatStore.get(chatId);
         if (!chat) {
@@ -378,6 +374,12 @@ class ChatDetails extends React.Component {
                     <div ref={this.chatDetailsListRef} className='chat-details-list' />
                 </div>
             );
+        }
+
+        let groupInCommonCount = 0;
+        if (isPrivateChat(chatId)) {
+            const fullInfo = UserStore.getFullInfo(chat.type.user_id);
+            groupInCommonCount = fullInfo ? fullInfo.group_in_common_count : groupInCommonCount;
         }
 
         const username = getChatUsername(chatId);
@@ -426,100 +428,191 @@ class ChatDetails extends React.Component {
                         />
                     </div>
                     {(username || phoneNumber || bio) && (
-                        <List>
-                            {username && (
-                                <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
-                                    <ListItemIcon>
-                                        <AlternateEmailIcon />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={
-                                            <Typography variant='inherit' noWrap>
-                                                {username}
-                                            </Typography>
-                                        }
-                                    />
-                                </ListItem>
-                            )}
-                            {phoneNumber && (
-                                <>
-                                    <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
+                        <>
+                            <List>
+                                {username && (
+                                    <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
                                         <ListItemIcon>
-                                            <CallIcon />
+                                            <AlternateEmailIcon />
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={
                                                 <Typography variant='inherit' noWrap>
-                                                    {formatPhoneNumber(phoneNumber)}
+                                                    {username}
                                                 </Typography>
                                             }
                                         />
                                     </ListItem>
-                                </>
-                            )}
-                            {bio && (
-                                <ListItem className={classes.listItem}>
-                                    <ListItemIcon>
-                                        <ErrorOutlineIcon className='chat-details-info-icon' />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary={bio}
-                                        style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
-                                    />
-                                </ListItem>
-                            )}
-                        </List>
-                    )}
-                    <Divider />
-                    <List>
-                        {!isMe && <NotificationsListItem chatId={chatId} />}
-                        {isGroup && <MoreListItem chatId={chatId} />}
-                        {popup && !isGroup && (
-                            <ListItem button className={classes.listItem} onClick={this.handleOpenChat}>
-                                <ListItemText
-                                    inset
-                                    primary={
-                                        <Typography color='primary' variant='inherit' noWrap>
-                                            {t('SendMessage').toUpperCase()}
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                        )}
-                    </List>
-                    {!isMe && <Divider />}
-                    <List>
-                        <ListItem button disabled className={classes.listItem} onClick={onOpenSharedMedia}>
-                            <ListItemIcon>
-                                <PhotoIcon />
-                            </ListItemIcon>
-                            <ListItemText
-                                primary={
-                                    <Typography variant='inherit' noWrap>
-                                        {t('SharedMedia')}
-                                    </Typography>
-                                }
-                            />
-                        </ListItem>
-                        {hasGroupsInCommon && (
-                            <ListItem button className={classes.listItem} onClick={onOpenGroupsInCommon}>
-                                <ListItemText
-                                    inset
-                                    primary={
-                                        <Typography variant='inherit' noWrap>
-                                            {t('GroupsInCommon')}
-                                        </Typography>
-                                    }
-                                />
-                            </ListItem>
-                        )}
-                    </List>
-                    {items.length > 0 && (
-                        <>
+                                )}
+                                {phoneNumber && (
+                                    <>
+                                        <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
+                                            <ListItemIcon>
+                                                <CallIcon />
+                                            </ListItemIcon>
+                                            <ListItemText
+                                                primary={
+                                                    <Typography variant='inherit' noWrap>
+                                                        {formatPhoneNumber(phoneNumber)}
+                                                    </Typography>
+                                                }
+                                            />
+                                        </ListItem>
+                                    </>
+                                )}
+                                {bio && (
+                                    <ListItem className={classes.listItem}>
+                                        <ListItemIcon>
+                                            <ErrorOutlineIcon className='chat-details-info-icon' />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={bio}
+                                            style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+                                        />
+                                    </ListItem>
+                                )}
+                            </List>
                             <Divider />
-                            <List>{items}</List>
                         </>
                     )}
+                    {(!isMe || isGroup || (popup && !isGroup)) && (
+                        <>
+                            <List>
+                                {!isMe && <NotificationsListItem chatId={chatId} />}
+                                {isGroup && <MoreListItem chatId={chatId} />}
+                                {popup && !isGroup && (
+                                    <ListItem button className={classes.listItem} onClick={this.handleOpenChat}>
+                                        <ListItemText
+                                            inset
+                                            primary={
+                                                <Typography color='primary' variant='inherit' noWrap>
+                                                    {t('SendMessage').toUpperCase()}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                            </List>
+                            <Divider />
+                        </>
+                    )}
+                    {(photoCount > 0 ||
+                        videoCount > 0 ||
+                        documentCount > 0 ||
+                        audioCount > 0 ||
+                        urlCount > 0 ||
+                        voiceAndVideoNoteCount > 0 ||
+                        groupInCommonCount > 0) && (
+                        <>
+                            <List>
+                                {photoCount > 0 && (
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedMedia}>
+                                        <ListItemIcon>
+                                            <PhotoIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {photoCount === 1 ? '1 photo' : `${photoCount} photos`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {videoCount > 0 && (
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon>
+                                            <VideocamIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {videoCount === 1 ? '1 video' : `${videoCount} videos`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {documentCount > 0 && (
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedDocument}>
+                                        <ListItemIcon>
+                                            <InsertDriveFileIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {documentCount === 1 ? '1 file' : `${documentCount} files`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {audioCount > 0 && (
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon>
+                                            <HeadsetIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {audioCount === 1 ? '1 audio file' : `${audioCount} audio files`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {urlCount > 0 && (
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon>
+                                            <InsertLinkIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {urlCount === 1 ? '1 shared link' : `${urlCount} shared links`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {voiceAndVideoNoteCount > 0 && (
+                                    <ListItem button className={classes.listItem}>
+                                        <ListItemIcon>
+                                            <MicIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {voiceAndVideoNoteCount === 1
+                                                        ? '1 voice message'
+                                                        : `${voiceAndVideoNoteCount} voice messages`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                                {groupInCommonCount > 0 && (
+                                    <ListItem button className={classes.listItem} onClick={onOpenGroupInCommon}>
+                                        <ListItemIcon>
+                                            <GroupIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            inset
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {groupInCommonCount === 1
+                                                        ? '1 group in common'
+                                                        : `${groupInCommonCount} groups in common`}
+                                                </Typography>
+                                            }
+                                        />
+                                    </ListItem>
+                                )}
+                            </List>
+                            <Divider />
+                        </>
+                    )}
+                    <List>{items}</List>
                 </div>
             </>
         );
@@ -532,8 +625,9 @@ ChatDetails.propTypes = {
     chatId: PropTypes.number.isRequired,
     popup: PropTypes.bool,
     onClose: PropTypes.func,
+    onOpenSharedDocument: PropTypes.func,
     onOpenSharedMedia: PropTypes.func,
-    onOpenGroupsInCommon: PropTypes.func
+    onOpenGroupInCommon: PropTypes.func
 };
 
 const enhance = compose(

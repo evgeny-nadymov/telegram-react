@@ -11,6 +11,7 @@ import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
 const useReadFile = true;
+const useDownloadFile = true;
 
 class FileStore extends EventEmitter {
     constructor() {
@@ -601,6 +602,10 @@ class FileStore extends EventEmitter {
     }
 
     getStore() {
+        if (useReadFile) {
+            return undefined;
+        }
+
         //console.log('FileStore.getStore ' + this.transactionCount++);
         return this.db.transaction(['keyvaluepairs'], 'readonly').objectStore('keyvaluepairs');
     }
@@ -609,12 +614,17 @@ class FileStore extends EventEmitter {
         if (useReadFile) {
             return undefined;
         }
+
         return this.db.transaction(['keyvaluepairs'], 'readwrite').objectStore('keyvaluepairs');
     }
 
     deleteLocalFile = (store, file) => {};
 
     getLocalFile(store, file, arr, callback, faultCallback) {
+        if (!useDownloadFile) {
+            return;
+        }
+
         if (useReadFile) {
             file = this.get(file.id) || file;
             if (file && file.local && !file.local.is_downloading_completed) {
@@ -680,6 +690,10 @@ class FileStore extends EventEmitter {
     }
 
     getRemoteFile(fileId, priority, obj) {
+        if (!useDownloadFile) {
+            return;
+        }
+
         const items = this.downloads.get(fileId) || [];
         if (items.some(x => x === obj)) return;
 

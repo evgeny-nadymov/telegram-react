@@ -50,3 +50,96 @@ export function toggleChatNotificationSettings(chatId, isMuted) {
         notification_settings: newNotificationSettings
     });
 }
+
+export async function getChatCounters(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
+
+    const promises = [];
+
+    const photoCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterPhoto' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(photoCounter);
+
+    const videoCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterVideo' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(videoCounter);
+
+    const documentCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterDocument' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(documentCounter);
+
+    const audioCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterAudio' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(audioCounter);
+
+    const urlCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterUrl' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(urlCounter);
+
+    const voiceAndVideoNoteCounter = TdLibController.send({
+        '@type': 'getChatMessageCount',
+        chat_id: chatId,
+        filter: { '@type': 'searchMessagesFilterVoiceAndVideoNote' },
+        return_local: false
+    })
+        .then(result => {
+            return result ? result.count : 0;
+        })
+        .catch(() => {
+            return 0;
+        });
+    promises.push(voiceAndVideoNoteCounter);
+
+    return await Promise.all(promises);
+}

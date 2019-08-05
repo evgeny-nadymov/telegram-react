@@ -56,7 +56,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SelectChatToStartMessaging: 'Select a chat to start messaging',
                     ViewChannelInfo: 'View channel info',
                     ViewGroupInfo: 'View group info',
-                    ViewProfile: 'View profile'
+                    ViewProfile: 'View profile',
+                    GoToMessage: 'Go to message'
                 },
                 emoji: {
                     Search: 'Search',
@@ -100,7 +101,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SelectChatToStartMessaging: 'Выберите, кому хотели бы написать',
                     ViewChannelInfo: 'Информация о канале',
                     ViewGroupInfo: 'Информация о группе',
-                    ViewProfile: 'Показать профиль'
+                    ViewProfile: 'Показать профиль',
+                    GoToMessage: 'Перейти к сообщению'
                 },
                 emoji: {
                     Search: 'Поиск',

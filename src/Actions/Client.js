@@ -7,6 +7,16 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function forwardMessages(chatId, messageIds) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateForward',
+        info: {
+            chatId,
+            messageIds
+        }
+    });
+}
+
 export function openUser(userId, popup = false) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenUser',

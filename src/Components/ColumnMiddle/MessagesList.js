@@ -371,9 +371,7 @@ class MessagesList extends React.Component {
 
         if (!is_permanent) return;
 
-        this.deleteHistory(message_ids, () => {
-            this.handleScrollBehavior(ScrollBehaviorEnum.SCROLL_TO_BOTTOM, this.snapshot);
-        });
+        this.deleteHistory(message_ids);
     };
 
     updateItemsInView = () => {

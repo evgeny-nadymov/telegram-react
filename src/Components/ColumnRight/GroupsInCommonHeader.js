@@ -19,10 +19,6 @@ const styles = {
 };
 
 class GroupsInCommonHeader extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
         const { classes, onClose } = this.props;
 
