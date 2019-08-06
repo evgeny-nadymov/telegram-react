@@ -8,7 +8,12 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { isChatMuted, showChatDraft, showChatUnreadMessageIcon } from '../../Utils/Chat';
+import {
+    isChatMuted,
+    showChatUnreadCount,
+    showChatUnreadMentionCount,
+    showChatUnreadMessageIcon
+} from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogBadge.css';
@@ -111,41 +116,39 @@ class DialogBadge extends React.Component {
     render() {
         if (this.clearHistory) return null;
 
-        const { classes, chatId } = this.props;
+        const { chatId, classes } = this.props;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { is_marked_as_unread, unread_count, unread_mention_count } = chat;
+        const { is_pinned, unread_count } = chat;
 
-        const showUnreadIcon = showChatUnreadMessageIcon(chatId);
-        const showUnreadMentionCount = unread_mention_count > 0;
-        const showUnreadCount =
-            unread_count > 1 ||
-            (unread_count === 1 && unread_mention_count === 0) ||
-            (is_marked_as_unread && unread_count === 0 && unread_mention_count === 0);
-        const showDraftChat = showChatDraft(chatId);
+        const showUnreadMessageIcon = showChatUnreadMessageIcon(chatId);
+        const showUnreadMentionCount = showChatUnreadMentionCount(chatId);
+        const showUnreadCount = showChatUnreadCount(chatId);
+        const isMuted = isChatMuted(chat);
 
         return (
             <>
-                {showUnreadIcon && !showDraftChat && <i className='dialog-badge-unread' />}
+                {showUnreadMessageIcon && <i className='dialog-badge-unread' />}
                 {showUnreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>
                     </div>
                 )}
-                {showUnreadCount ? (
+                {showUnreadCount && (
                     <div
                         className={classNames(
-                            { [classes.dialogBadgeMuted]: isChatMuted(chat) },
+                            { [classes.dialogBadgeMuted]: isMuted },
                             'dialog-badge',
                             classes.dialogBadge
                         )}>
                         <span className='dialog-badge-text'>{unread_count > 0 ? unread_count : ''}</span>
                     </div>
-                ) : chat.is_pinned && !showUnreadIcon ? (
+                )}
+                {is_pinned && !showUnreadMessageIcon && !showUnreadCount && !showUnreadMentionCount && (
                     <i className='dialog-badge-pinned' />
-                ) : null}
+                )}
             </>
         );
     }

@@ -42,6 +42,7 @@
     background: url(../../Assets/Icons/General_2x.png);
     background-position: -13px -916px;
     background-size: 40px 948px;
+    transform: translateY(3px);
 }
 
 .dialog-badge-unread {
@@ -54,6 +55,7 @@
     overflow: hidden;
     margin: 3px 0 0;
     min-width: 8px;
+    transform: translateY(3px);
 }
 
 .dialog-badge-wrapper {
