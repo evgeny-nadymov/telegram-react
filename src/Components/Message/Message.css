@@ -59,7 +59,7 @@ pre code {
 }
 
 .message-short .message-select-tick {
-    margin-top: -3px;
+    margin-top: 0;
 }
 
 .message-content-row {
@@ -106,9 +106,20 @@ pre code {
     }
 }
 
+.message-left-padding {
+    min-width: 52px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.message-right-padding {
+    min-width: 32px;
+}
+
 .message-wrapper {
-    max-width: 460px;
-    padding: 8px 15px;
+    max-width: 556px;
+    padding: 6px 6px;
     margin: 0 auto;
     display: flex;
     flex-direction: row;
@@ -155,16 +166,14 @@ pre code {
 }
 
 .message-select-tick {
-    position: absolute;
-    width: 26px;
-    height: 26px;
-    margin: 9px 0 0 -59px;
-    display: block;
-    background-image: url(../../Assets/Icons/IconsetW_2x.png);
-    background-size: 42px 1171px;
-    background-repeat: no-repeat;
-    background-position: -9px -481px;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: 12px;
     opacity: 0;
+    align-self: flex-start;
+    margin-top: 12px;
 }
 
 .messages-list-selection-active .message-wrapper {

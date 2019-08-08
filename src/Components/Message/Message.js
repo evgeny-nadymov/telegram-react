@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
+import CheckMarkIcon from '@material-ui/icons/Check';
 import Reply from './Reply';
 import Forward from './Forward';
 import Meta from './Meta';
@@ -35,6 +36,10 @@ const styles = theme => ({
     },
     messageSelected: {
         backgroundColor: theme.palette.primary.main + '22'
+    },
+    messageSelectTick: {
+        background: theme.palette.primary.main,
+        color: 'white'
     },
     '@keyframes highlighted': {
         from: { backgroundColor: theme.palette.primary.main + '22' },
@@ -71,45 +76,56 @@ class Message extends Component {
         const { contextMenu, selected, highlighted, emojiMatches } = this.state;
 
         if (nextProps.theme !== theme) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.chatId !== chatId) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.messageId !== messageId) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.sendingState !== sendingState) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.showTitle !== showTitle) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.contextMenu !== contextMenu) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.selected !== selected) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.highlighted !== highlighted) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.emojiMatches !== emojiMatches) {
+            console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
+        // console.log('Message.shouldComponentUpdate false');
         return false;
     }
 
@@ -325,10 +341,13 @@ class Message extends Component {
                 onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
-                    <i className='message-select-tick' />
-                    {this.unread && (
-                        <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
-                    )}
+                    <div className='message-left-padding'>
+                        {/*<i className='message-select-tick' />*/}
+                        <CheckMarkIcon className={classNames('message-select-tick', classes.messageSelectTick)} />
+                        {this.unread && (
+                            <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
+                        )}
+                    </div>
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
@@ -353,6 +372,7 @@ class Message extends Component {
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                     {!showTitle && meta}
+                    <div className='message-right-padding' />
                 </div>
             </div>
         );

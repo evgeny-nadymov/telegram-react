@@ -11,11 +11,9 @@
     display: block;
     width: 10px;
     height: 10px;
-    border-radius: 7px;
-    position: absolute;
-    margin-left: -26px;
-    margin-top: 16px;
+    border-radius: 5px;
     opacity: 1;
+    margin-left: 6px;
 }
 
 .messagestatus-failed {

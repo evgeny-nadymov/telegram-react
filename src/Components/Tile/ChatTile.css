@@ -6,6 +6,7 @@
  */
 
 .chat-tile {
+    z-index: 1;
     position: relative;
     height: 48px;
     width: 48px;
