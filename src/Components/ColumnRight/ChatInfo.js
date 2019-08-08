@@ -11,11 +11,14 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
-import SharedDocument from './SharedMedia/SharedDocuments';
+import SharedDocuments from './SharedMedia/SharedDocuments';
 import SharedMedia from './SharedMedia';
 import { borderStyle } from '../Theme';
 import { getChatCounters } from '../../Actions/Chat';
+import { getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
+import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatInfo.css';
 
@@ -38,17 +41,19 @@ class ChatInfo extends React.Component {
 
         this.state = {
             chatId: popup ? dialogChatId : chatId,
+            migratedChatId: 0,
             userChatId: null,
             openSharedMedia: false,
-            openSharedDocument: false,
+            openSharedDocuments: false,
             openGroupInCommon: false,
-            counters: null
+            counters: null,
+            migratedCounters: null
         };
     }
 
     componentDidMount() {
         console.log('ChatDetails.ChatInfo.componentDidMount');
-        this.loadChatCounters(this.state.chatId);
+        this.loadContent(this.state.chatId);
 
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
@@ -60,7 +65,7 @@ class ChatInfo extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId } = this.state;
         if (chatId !== prevState.chatId) {
-            this.loadChatCounters(chatId);
+            this.loadContent(chatId);
         }
     }
 
@@ -71,22 +76,59 @@ class ChatInfo extends React.Component {
         if (popup) return;
         if (chatId === update.nextChatId) return;
 
+        this.sharedDocuments = null;
+
         this.setState({
             chatId: update.nextChatId,
+            migratedChatId: 0,
             userChatId: null,
             openSharedMedia: false,
-            openSharedDocument: false,
+            openSharedDocuments: false,
             openGroupInCommon: false,
-            counters: null
+            counters: ChatStore.getCounters(update.nextChatId),
+            migratedCounters: null
         });
+    };
+
+    loadContent = chatId => {
+        this.loadChatCounters(chatId);
+        this.loadMigratedCounters(chatId);
     };
 
     loadChatCounters = async chatId => {
         const counters = await getChatCounters(chatId);
+        ChatStore.setCounters(chatId, counters);
 
         if (chatId !== this.state.chatId) return;
 
         this.setState({ counters });
+    };
+
+    loadMigratedCounters = async chatId => {
+        console.log('ChatInfo.loadMigratedCounters');
+        if (!isSupergroup(chatId)) return;
+
+        const fullInfo = SupergroupStore.getFullInfo(getSupergroupId(chatId));
+        if (!fullInfo) return;
+
+        const { upgraded_from_basic_group_id: basic_group_id } = fullInfo;
+        if (!basic_group_id) return;
+
+        const chat = await TdLibController.send({
+            '@type': 'createBasicGroupChat',
+            basic_group_id,
+            force: true
+        });
+
+        if (!chat) return;
+
+        console.log('ChatInfo.loadMigratedCounters chat', chat);
+        const counters = await getChatCounters(chat.id);
+        ChatStore.setCounters(chat.id, counters);
+
+        if (this.state.chatId !== chatId) return;
+
+        this.setState({ migratedChatId: chat.id, migratedCounters: ChatStore.getCounters(chat.id) });
     };
 
     handelOpenSharedMedia = () => {
@@ -121,18 +163,27 @@ class ChatInfo extends React.Component {
         }
     };
 
-    handleOpenSharedDocument = () => {
-        this.setState({ openSharedDocument: true });
+    handleOpenSharedDocuments = () => {
+        this.setState({ openSharedDocuments: true });
     };
 
-    handleCloseSharedDocument = () => {
-        this.setState({ openSharedDocument: false });
+    handleCloseSharedDocuments = () => {
+        this.setState({ openSharedDocuments: false });
     };
 
     render() {
         console.log('ChatDetails.ChatInfo.render', this.state);
         const { classes, className, popup } = this.props;
-        const { chatId, counters, userChatId, openSharedDocument, openSharedMedia, openGroupInCommon } = this.state;
+        const {
+            chatId,
+            counters,
+            migratedChatId,
+            migratedCounters,
+            userChatId,
+            openSharedDocuments,
+            openSharedMedia,
+            openGroupInCommon
+        } = this.state;
 
         const currentChatId = chatId || userChatId;
         const minHeight = this.detailsRef && this.detailsRef.current ? this.detailsRef.current.getContentHeight() : 0;
@@ -147,15 +198,18 @@ class ChatInfo extends React.Component {
                     onClose={this.handleCloseSharedMedia}
                 />
             );
-        } else if (openSharedDocument) {
-            content = (
-                <SharedDocument
+        } else if (openSharedDocuments) {
+            this.sharedDocuments = this.sharedDocuments || (
+                <SharedDocuments
                     chatId={currentChatId}
+                    migratedChatId={migratedChatId}
                     popup={popup}
                     minHeight={minHeight}
-                    onClose={this.handleCloseSharedDocument}
+                    onClose={this.handleCloseSharedDocuments}
                 />
             );
+
+            content = this.sharedDocuments;
         } else if (openGroupInCommon) {
             content = (
                 <GroupsInCommon
@@ -173,8 +227,9 @@ class ChatInfo extends React.Component {
                     popup={popup}
                     backButton={userChatId === chatId}
                     counters={counters}
+                    migratedCounters={migratedCounters}
                     onOpenSharedMedia={this.handelOpenSharedMedia}
-                    onOpenSharedDocument={this.handleOpenSharedDocument}
+                    onOpenSharedDocument={this.handleOpenSharedDocuments}
                     onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onClose={this.handleCloseChatDetails}
                 />

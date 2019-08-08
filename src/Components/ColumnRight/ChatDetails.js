@@ -123,13 +123,17 @@ class ChatDetails extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, theme, counters } = this.props;
+        const { chatId, theme, counters, migratedCounters } = this.props;
 
         if (nextProps.chatId !== chatId) {
             return true;
         }
 
         if (nextProps.counters !== counters) {
+            return true;
+        }
+
+        if (nextProps.migratedCounters !== migratedCounters) {
             return true;
         }
 
@@ -141,11 +145,9 @@ class ChatDetails extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log('ChatDetails.componentDidUpdate', this.props.counters);
-
         const { chatId } = this.props;
         if (prevProps.chatId !== chatId) {
-            this.handleSelectChat();
+            this.loadContent();
         }
 
         const list = this.chatDetailsListRef.current;
@@ -159,7 +161,7 @@ class ChatDetails extends React.Component {
 
     componentDidMount() {
         console.log('ChatDetails.componentDidMount');
-        this.handleSelectChat();
+        this.loadContent();
 
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
@@ -183,8 +185,6 @@ class ChatDetails extends React.Component {
             chat.type['@type'] === 'chatTypeBasicGroup' &&
             chat.type.basic_group_id === update.basic_group_id
         ) {
-            this.handleSelectChat();
-
             this.forceUpdate(); // update bio
         }
     };
@@ -221,9 +221,7 @@ class ChatDetails extends React.Component {
         }
     };
 
-    handleSelectChat = () => {
-        this.getFullInfo();
-
+    loadContent = () => {
         this.loadChatContents();
     };
 
@@ -235,12 +233,6 @@ class ChatDetails extends React.Component {
         loadChatsContent(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);
         loadUsersContent(store, members);
-    };
-
-    getFullInfo = () => {
-        const { chatId } = this.props;
-
-        getChatFullInfo(chatId);
     };
 
     handleUsernameHint = () => {
@@ -349,7 +341,6 @@ class ChatDetails extends React.Component {
             className,
             chatId,
             classes,
-            counters,
             onClose,
             onOpenGroupInCommon,
             onOpenSharedDocument,
@@ -357,14 +348,15 @@ class ChatDetails extends React.Component {
             popup,
             t
         } = this.props;
-        const [photoCount, videoCount, documentCount, audioCount, urlCount, voiceAndVideoNoteCount] = counters || [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-        ];
+
+        let { counters, migratedCounters } = this.props;
+        counters = counters || [0, 0, 0, 0, 0, 0];
+        migratedCounters = migratedCounters || [0, 0, 0, 0, 0, 0];
+        console.log('ChatDetails.render counters', counters, migratedCounters);
+
+        const [photoCount, videoCount, documentCount, audioCount, urlCount, voiceAndVideoNoteCount] = counters.map(
+            (el, i) => el + migratedCounters[i]
+        );
 
         const chat = ChatStore.get(chatId);
         if (!chat) {

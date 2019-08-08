@@ -13,6 +13,8 @@ import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SharedDocument from '../../Tile/SharedMedia/SharedDocument';
+import { between } from '../../../Utils/Common';
+import { isSupergroup } from '../../../Utils/Chat';
 import { loadMessageContents } from '../../../Utils/File';
 import { SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
@@ -41,17 +43,18 @@ function SharedDocumentHeader({ classes, title, onClick, onClose }) {
 
 class SharedDocuments extends React.Component {
     constructor(props) {
+        console.log('SharedDocuments.ctor');
         super(props);
 
         this.listRef = React.createRef();
 
         this.state = {
-            items: []
+            items: [],
+            migratedItems: []
         };
     }
 
     componentDidMount() {
-        // console.log('SharedDocuments.componentDidMount');
         this.loadContent();
 
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -60,7 +63,6 @@ class SharedDocuments extends React.Component {
     }
 
     componentWillUnmount() {
-        // console.log('SharedDocuments.componentWillMount');
         MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
@@ -75,53 +77,76 @@ class SharedDocuments extends React.Component {
         return content['@type'] === 'messageDocument';
     };
 
-    insertSorted = (array, element, comparator) => {
+    insertByOrder = (array, element, comparator) => {
         let i = 0;
         for (; i < array.length && comparator(array[i], element) < 0; i++) {}
 
         return [...array.slice(0, i), element, ...array.slice(i)];
     };
 
-    messageComparator = (left, right) => {
+    messageComparatorDesc = (left, right) => {
         return left.id - right.id;
     };
 
     onUpdateMessageContent = update => {
-        const { chatId } = this.props;
-        const { items } = this.state;
+        const { chatId, migratedChatId } = this.props;
+        const { items, migratedItems } = this.state;
 
         const { chat_id, message_id, old_content, new_content } = update;
-        if (chat_id !== chatId) return;
-        // console.log(`SharedDocuments.onUpdateMessageContent chat_id=${chat_id} message_id=${message_id}`, this.state.items);
-
-        if (!items.length) return;
-        if (message_id > items[0].index) return;
-        if (message_id < items[items.length - 1].index) return;
 
         const message = MessageStore.get(chat_id, message_id);
+        // console.log(`SharedDocuments.onUpdateMessageContent chat_id=${chat_id} message_id=${message_id}`, this.state.items);
 
-        if (new_content['@type'] === 'messageDocument') {
+        if (chat_id === chatId) {
+            if (!items.length) return;
+            if (!between(message_id, items[0].id, items[items.length - 1].id, true)) return;
+
             const index = items.findIndex(x => x.id === message_id);
-            if (index === -1) {
-                // add new document
-                this.setState({ items: this.insertSorted(items, message, this.messageComparator) });
+            if (new_content['@type'] === 'messageDocument') {
+                if (index === -1) {
+                    // add new document
+                    this.setState({ items: this.insertByOrder(items, message, this.messageComparatorDesc) });
+                } else {
+                    // replace document
+                    this.setState({ items: [...items.slice(0, index), message, ...items.slice(index + 1)] });
+                }
             } else {
-                // replace document
-                this.setState({ items: [...items.slice(0, index), message, ...items.slice(index + 1)] });
+                if (index === -1) {
+                } else {
+                    // remove none document
+                    this.setState({ items: items.filter(x => x.id !== message_id) });
+                }
             }
-        } else {
-            const index = items.findIndex(x => x.id === message_id);
-            if (index === -1) {
+        } else if (chat_id === migratedChatId) {
+            if (!migratedItems.length) return;
+            if (!between(message_id, migratedItems[0].id, migratedItems[migratedItems.length - 1].id, true)) return;
+
+            const index = migratedItems.findIndex(x => x.id === message_id);
+            if (new_content['@type'] === 'messageDocument') {
+                if (index === -1) {
+                    // add new document
+                    this.setState({
+                        migratedItems: this.insertByOrder(migratedItems, message, this.messageComparatorDesc)
+                    });
+                } else {
+                    // replace document
+                    this.setState({
+                        migratedItems: [...migratedItems.slice(0, index), message, ...migratedItems.slice(index + 1)]
+                    });
+                }
             } else {
-                // remove none document
-                this.setState({ items: items.filter(x => x.id !== message_id) });
+                if (index === -1) {
+                } else {
+                    // remove none document
+                    this.setState({ migratedItems: migratedItems.filter(x => x.id !== message_id) });
+                }
             }
         }
     };
 
     onUpdateNewMessage = update => {
-        const { chatId } = this.props;
-        const { items } = this.state;
+        const { chatId, migratedChatId } = this.props;
+        const { items, migratedItems } = this.state;
 
         const { message } = update;
         const { chat_id, content } = message;
@@ -134,27 +159,78 @@ class SharedDocuments extends React.Component {
         const store = FileStore.getStore();
         loadMessageContents(store, [message]);
 
-        this.setState({ items: [message].concat(items) });
+        if (chat_id === chatId) {
+            this.setState({ items: [message].concat(items) });
+        } else if (chat_id === migratedChatId) {
+            this.setState({ migratedItems: [message].concat(migratedItems) });
+        }
     };
 
     onUpdateDeleteMessages = update => {
-        const { chatId } = this.props;
-        const { items } = this.state;
+        const { chatId, migratedChatId } = this.props;
+        const { items, migratedItems } = this.state;
 
         const { chat_id, message_ids } = update;
-        if (chat_id !== chatId) return;
 
         const map = new Map(message_ids.map(x => [x, x]));
-
-        this.setState({ items: items.filter(x => !map.has(x.id)) }, () => {
-            if (this.state.items.length < SHARED_MESSAGE_SLICE_LIMIT) {
+        const callback = () => {
+            if (this.state.items.length + this.state.migratedItems.length < SHARED_MESSAGE_SLICE_LIMIT) {
                 this.onLoadNext();
             }
-        });
+        };
+
+        if (chat_id === chatId) {
+            this.setState({ items: items.filter(x => !map.has(x.id)) }, callback);
+        } else if (chat_id === migratedChatId) {
+            this.setState({ migratedItems: migratedItems.filter(x => !map.has(x.id)) }, callback);
+        }
     };
 
     loadContent = () => {
         this.onLoadNext();
+    };
+
+    onLoadMigratedNext = async (loadIncomplete = true) => {
+        const { chatId, migratedChatId } = this.props;
+        const { migratedItems: items } = this.state;
+
+        if (!isSupergroup(chatId)) return;
+        if (!migratedChatId) return;
+
+        if (this.loading) return;
+        if (this.migrateCompleted) return;
+
+        const fromMessageId = items.length > 0 ? items[items.length - 1].id : 0;
+        this.loading = true;
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: migratedChatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: fromMessageId,
+            offset: 0,
+            limit: SHARED_MESSAGE_SLICE_LIMIT,
+            filter: { '@type': 'searchMessagesFilterDocument' }
+        }).finally(() => {
+            this.loading = false;
+        });
+
+        if (this.state.migratedItems !== items) return;
+
+        this.migrateCompleted = result.messages.length === 0;
+        if (this.migrateCompleted) return;
+
+        MessageStore.setItems(result.messages);
+
+        const store = FileStore.getStore();
+        loadMessageContents(store, result.messages);
+
+        this.setState({ migratedItems: items.concat(result.messages.filter(this.isDocumentMessage)) });
+
+        const incomplete = result.messages.length > 0 && result.messages.length < SHARED_MESSAGE_SLICE_LIMIT;
+        if (loadIncomplete && incomplete) {
+            this.onLoadMigratedNext(false);
+        }
     };
 
     onLoadNext = async (loadIncomplete = true) => {
@@ -183,7 +259,10 @@ class SharedDocuments extends React.Component {
         if (this.state.items !== items) return;
 
         this.completed = result.messages.length === 0;
-        if (this.completed) return;
+        if (this.completed) {
+            this.onLoadMigratedNext(true);
+            return;
+        }
 
         MessageStore.setItems(result.messages);
 
@@ -203,7 +282,11 @@ class SharedDocuments extends React.Component {
         if (!list) return;
 
         if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
-            this.onLoadNext();
+            if (!this.completed) {
+                this.onLoadNext();
+            } else {
+                this.onLoadMigratedNext();
+            }
         }
     };
 
@@ -216,11 +299,14 @@ class SharedDocuments extends React.Component {
 
     render() {
         const { classes, t, onClose } = this.props;
-        const { items } = this.state;
+        const { items, migratedItems } = this.state;
+        // console.log('SharedDocuments.render', items, migratedItems, this.state);
 
-        const messages = items.map(x => (
-            <SharedDocument key={`chat_id=${x.chat_id}_message_id=${x.id}`} chatId={x.chat_id} messageId={x.id} />
-        ));
+        const messages = items
+            .concat(migratedItems)
+            .map(x => (
+                <SharedDocument key={`chat_id=${x.chat_id}_message_id=${x.id}`} chatId={x.chat_id} messageId={x.id} />
+            ));
 
         return (
             <>
@@ -240,6 +326,7 @@ class SharedDocuments extends React.Component {
 
 SharedDocuments.propTypes = {
     chatId: PropTypes.number.isRequired,
+    migratedChatId: PropTypes.number,
     onClose: PropTypes.func.isRequired,
     popup: PropTypes.bool,
     minHeight: PropTypes.number

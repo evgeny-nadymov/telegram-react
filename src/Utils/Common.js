@@ -380,8 +380,8 @@ function isAuthorizationReady(state) {
     return state['@type'] === 'authorizationStateReady';
 }
 
-function between(item, first, last) {
-    return item > first && item < last;
+function between(item, first, last, inclusive = false) {
+    return inclusive ? item >= first && item <= last : item > first && item < last;
 }
 
 function getDurationString(secondsTotal) {

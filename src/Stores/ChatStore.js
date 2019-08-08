@@ -26,6 +26,7 @@ class ChatStore extends EventEmitter {
         this.items = new Map();
         this.typingManagers = new Map();
         this.onlineMemberCount = new Map();
+        this.counters = new Map();
         this.skippedUpdates = [];
     };
 
@@ -398,6 +399,14 @@ class ChatStore extends EventEmitter {
 
     set(chat) {
         this.items.set(chat.id, chat);
+    }
+
+    getCounters(chatId) {
+        return this.counters.get(chatId);
+    }
+
+    setCounters(chatId, counters) {
+        this.counters.set(chatId, counters);
     }
 
     getClientData(chatId) {

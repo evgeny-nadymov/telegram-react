@@ -681,41 +681,41 @@ function getGroupChatMembers(chatId) {
     return fallbackValue;
 }
 
-function getChatFullInfo(chatId) {
+async function getChatFullInfo(chatId) {
     const chat = ChatStore.get(chatId);
-    if (!chat) return;
-    if (!chat.type) return;
+    if (!chat) return null;
 
-    switch (chat.type['@type']) {
+    const { type } = chat;
+    if (!type) return null;
+
+    switch (type['@type']) {
         case 'chatTypePrivate': {
-            TdLibController.send({
+            return await TdLibController.send({
                 '@type': 'getUserFullInfo',
-                user_id: chat.type.user_id
+                user_id: type.user_id
             });
-            break;
         }
         case 'chatTypeSecret': {
-            TdLibController.send({
+            return await TdLibController.send({
                 '@type': 'getUserFullInfo',
-                user_id: chat.type.user_id
+                user_id: type.user_id
             });
-            break;
         }
         case 'chatTypeBasicGroup': {
-            TdLibController.send({
+            return await TdLibController.send({
                 '@type': 'getBasicGroupFullInfo',
-                basic_group_id: chat.type.basic_group_id
+                basic_group_id: type.basic_group_id
             });
-            break;
         }
         case 'chatTypeSupergroup': {
-            TdLibController.send({
+            return await TdLibController.send({
                 '@type': 'getSupergroupFullInfo',
-                supergroup_id: chat.type.supergroup_id
+                supergroup_id: type.supergroup_id
             });
-            break;
         }
     }
+
+    return null;
 }
 
 function hasBasicGroupId(chatId, basicGroupId) {
