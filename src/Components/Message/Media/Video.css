@@ -15,7 +15,7 @@
 }
 
 .video-preview {
-    background: aliceblue;
+    /*background: aliceblue;*/
     display: block;
     border-radius: 6px;
     user-select: none;
