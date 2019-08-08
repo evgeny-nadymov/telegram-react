@@ -24,7 +24,8 @@ const styles = theme => ({
     },
     dialogBadgeMuted: {
         background: theme.palette.type === 'dark' ? theme.palette.text.disabled : '#d8d8d8'
-    }
+    },
+    unreadIcon: {}
 });
 
 class DialogBadge extends React.Component {
@@ -130,7 +131,7 @@ class DialogBadge extends React.Component {
 
         return (
             <>
-                {showUnreadMessageIcon && <i className='dialog-badge-unread' />}
+                {showUnreadMessageIcon && <i className={classNames('dialog-badge-unread', classes.unreadIcon)} />}
                 {showUnreadMentionCount && (
                     <div className={classNames('dialog-badge', classes.dialogBadge)}>
                         <div className='dialog-badge-mention'>@</div>

@@ -119,7 +119,7 @@ pre code {
 
 .message-wrapper {
     max-width: 556px;
-    padding: 6px 6px;
+    padding: 6px 60px 6px 6px;
     margin: 0 auto;
     display: flex;
     flex-direction: row;

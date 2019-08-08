@@ -46,12 +46,11 @@
 }
 
 .dialog-badge-unread {
-    background: #c1d6e5;
     display: inline-block;
     float: right;
     width: 8px;
     height: 8px;
-    border-radius: 5px;
+    border-radius: 4px;
     overflow: hidden;
     margin: 3px 0 0;
     min-width: 8px;

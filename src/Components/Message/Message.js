@@ -342,7 +342,6 @@ class Message extends Component {
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <div className='message-left-padding'>
-                        {/*<i className='message-select-tick' />*/}
                         <CheckMarkIcon className={classNames('message-select-tick', classes.messageSelectTick)} />
                         {this.unread && (
                             <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
@@ -372,7 +371,6 @@ class Message extends Component {
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                     {!showTitle && meta}
-                    <div className='message-right-padding' />
                 </div>
             </div>
         );

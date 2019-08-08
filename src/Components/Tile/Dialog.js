@@ -46,6 +46,9 @@ const styles = theme => ({
     verifiedIcon: {
         color: theme.palette.primary.main
     },
+    unreadIcon: {
+        background: theme.palette.primary.light
+    },
     dialogActive: {
         color: '#fff', //theme.palette.primary.contrastText,
         backgroundColor: theme.palette.primary.main,
@@ -54,6 +57,9 @@ const styles = theme => ({
         margin: '0 12px',
         '& $verifiedIcon': {
             color: '#fff'
+        },
+        '& $unreadIcon': {
+            background: '#ffffff77'
         },
         '& $statusRoot': {
             background: theme.palette.primary.main
@@ -317,7 +323,7 @@ class Dialog extends Component {
                         </div>
                         <div className='tile-second-row'>
                             <DialogContent chatId={chatId} />
-                            <DialogBadge chatId={chatId} />
+                            <DialogBadge chatId={chatId} classes={{ unreadIcon: classes.unreadIcon }} />
                         </div>
                     </div>
                 </div>

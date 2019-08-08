@@ -7,64 +7,108 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import MessageStore from '../../Stores/MessageStore';
+import withStyles from '@material-ui/core/styles/withStyles';
 import ChatStore from '../../Stores/ChatStore';
+import MessageStore from '../../Stores/MessageStore';
 import './MessageStatus.css';
+import PropTypes from 'prop-types';
+
+const styles = theme => ({
+    messageStatusFailed: {
+        background: theme.palette.error.light
+    },
+    messageStatusPending: {
+        background: theme.palette.primary.light
+    },
+    messageStatusSucceeded: {
+        background: theme.palette.primary.light
+    }
+});
 
 class MessageStatus extends React.Component {
     constructor(props) {
         super(props);
-        this.handleUpdateMessageSend = this.handleUpdateMessageSend.bind(this);
-        this.handleUpdateChatReadOutbox = this.handleUpdateChatReadOutbox.bind(this);
 
         this.state = {
+            prevChatId: props.chatId,
+            prevMessageId: props.messageId,
             sendingState: props.sendingState,
             unread: true
         };
     }
 
+    static getDerivedStateFromProps(props, state) {
+        if (props.chatId !== state.prevChatId || props.messageId !== state.prevMessageId) {
+            return {
+                prevChatId: props.chatId,
+                prevMessageId: props.messageId,
+                sendingState: props.sendingState
+            };
+        }
+
+        return null;
+    }
+
     componentDidMount() {
-        MessageStore.on('updateMessageSendFailed', this.handleUpdateMessageSend);
-        MessageStore.on('updateMessageSendSucceeded', this.handleUpdateMessageSend);
+        ChatStore.on('updateChatReadOutbox', this.onUpdateChatReadOutbox);
 
-        ChatStore.on('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
-    }
-
-    handleUpdateMessageSend(payload) {
-        if (this.props.messageId === payload.old_message_id && payload.message) {
-            this.newMessageId = payload.message.id;
-            this.setState({ sendingState: payload.message.sending_state });
-        }
-    }
-
-    handleUpdateChatReadOutbox(payload) {
-        if (
-            this.props.chatId === payload.chat_id &&
-            ((this.props.newMessageId && this.props.newMessageId <= payload.last_read_outbox_message_id) ||
-                this.props.messageId <= payload.last_read_outbox_message_id)
-        ) {
-            this.setState({ sendingState: null, unread: false });
-        }
+        MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSend);
+        MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSend);
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('updateMessageSendFailed', this.handleUpdateMessageSend);
-        MessageStore.removeListener('updateMessageSendSucceeded', this.handleUpdateMessageSend);
+        ChatStore.removeListener('updateChatReadOutbox', this.onUpdateChatReadOutbox);
 
-        ChatStore.removeListener('updateChatReadOutbox', this.handleUpdateChatReadOutbox);
+        MessageStore.removeListener('updateMessageSendFailed', this.onUpdateMessageSend);
+        MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSend);
     }
 
+    onUpdateMessageSend = update => {
+        const { chatId, messageId } = this.props;
+        const { old_message_id, message } = update;
+
+        if (messageId !== old_message_id) return;
+        if (!message) return;
+
+        const { chat_id, id, sending_state } = message;
+        if (chatId !== chat_id) return;
+
+        this.newMessageId = id;
+        this.setState({ sendingState: sending_state });
+    };
+
+    onUpdateChatReadOutbox = update => {
+        const { chatId, messageId } = this.props;
+        const { chat_id, last_read_outbox_message_id } = update;
+        const { newMessageId } = this;
+
+        if (chatId !== chat_id) return;
+
+        if ((newMessageId && newMessageId <= last_read_outbox_message_id) || messageId <= last_read_outbox_message_id) {
+            this.setState({ sendingState: null, unread: false });
+        }
+    };
+
     render() {
-        let stateClassName = 'messagestatus-succeded';
-        if (this.state.sendingState) {
+        const { classes } = this.props;
+        const { sendingState, unread } = this.state;
+
+        let stateClassName = classNames('message-status-succeeded', classes.messageStatusSucceeded);
+        if (sendingState) {
             stateClassName =
-                this.state.sendingState['@type'] === 'messageSendingStateFailed'
-                    ? 'messagestatus-failed'
-                    : 'messagestatus-pending';
+                sendingState['@type'] === 'messageSendingStateFailed'
+                    ? classNames('message-status-failed', classes.messageStatusFailed)
+                    : classNames('message-status-pending', classes.messageStatusPending);
         }
 
-        return this.state.unread && <i className={classNames('messagestatus-icon', stateClassName)} />;
+        return unread && <i className={classNames('message-status-icon', stateClassName)} />;
     }
 }
 
-export default MessageStatus;
+MessageStatus.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    sendingState: PropTypes.object
+};
+
+export default withStyles(styles, { withTheme: true })(MessageStatus);
