@@ -287,6 +287,7 @@ class DialogsList extends React.Component {
             }
         }
 
+        console.log('DialogsList.onLoadNext getChats start', offsetChatId, offsetOrder);
         this.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -297,17 +298,22 @@ class DialogsList extends React.Component {
             this.loading = false;
             TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
         });
-
-        //TODO: replace result with one-way data flow
+        console.log('DialogsList.onLoadNext getChats stop', offsetChatId, offsetOrder);
 
         if (result.chat_ids.length > 0 && result.chat_ids[0] === offsetChatId) {
             result.chat_ids.shift();
         }
 
         if (replace) {
-            this.replaceChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+            this.replaceChats(result.chat_ids, () => {
+                this.loadChatContents(result.chat_ids);
+            });
         } else {
-            this.appendChats(result.chat_ids, () => this.loadChatContents(result.chat_ids));
+            console.log('DialogsList.onLoadNext setState start', offsetChatId, offsetOrder);
+            this.appendChats(result.chat_ids, () => {
+                console.log('DialogsList.onLoadNext setState stop', offsetChatId, offsetOrder);
+                this.loadChatContents(result.chat_ids);
+            });
         }
     };
 
@@ -333,6 +339,8 @@ class DialogsList extends React.Component {
 
     render() {
         const { chats, firstSliceLoaded } = this.state;
+
+        // const dialogs = chats.map((x, index) => <DialogPlaceholder key={x} chatId={x} index={index} showTitle/>);
 
         const dialogs = firstSliceLoaded
             ? chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />)

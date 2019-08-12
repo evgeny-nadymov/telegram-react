@@ -20,7 +20,7 @@ import { SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
-import './SharedDocuments.css';
+import './SharedAudios.css';
 
 const styles = theme => ({
     sharedDocumentsSearchList: {
@@ -28,9 +28,8 @@ const styles = theme => ({
     }
 });
 
-class SharedDocuments extends React.Component {
+class SharedAudios extends React.Component {
     constructor(props) {
-        console.log('SharedDocuments.ctor');
         super(props);
 
         this.listRef = React.createRef();
@@ -44,7 +43,7 @@ class SharedDocuments extends React.Component {
     }
 
     getFilter = () => {
-        return { '@type': 'searchMessagesFilterDocument' };
+        return { '@type': 'searchMessagesFilterAudio' };
     };
 
     getItem = x => {
@@ -60,7 +59,7 @@ class SharedDocuments extends React.Component {
     isValidContent = content => {
         if (!content) return false;
 
-        return content['@type'] === 'messageDocument';
+        return content['@type'] === 'messageAudio';
     };
 
     componentDidMount() {
@@ -149,10 +148,12 @@ class SharedDocuments extends React.Component {
         const { items, migratedItems } = this.state;
 
         const { message } = update;
-        const { chat_id } = message;
+        const { chat_id, content } = message;
 
         if (chat_id !== chatId) return;
-        if (!this.isValidMessage(message)) return;
+        // console.log(`SharedDocuments.onUpdateNewMessage chat_id=${chat_id} message_id=${message.id}`, this.state.items);
+
+        if (this.isValidContent(content)) return;
 
         const store = FileStore.getStore();
         loadMessageContents(store, [message]);
@@ -338,7 +339,6 @@ class SharedDocuments extends React.Component {
         const { classes, t, onClose } = this.props;
         const { items, migratedItems, searchItems } = this.state;
         const { searchText } = this;
-        // console.log('SharedDocuments.render', items, migratedItems, this.state);
 
         const messages = items.concat(migratedItems).map(this.getItem);
         const searchMessages = searchItems.map(this.getItem);
@@ -346,7 +346,7 @@ class SharedDocuments extends React.Component {
         return (
             <>
                 <SharedMediaHeader
-                    title={t('DocumentsTitle')}
+                    title={t('AudioTitle')}
                     onClick={this.handleHeaderClick}
                     onClose={onClose}
                     onSearch={this.handleSearch}
@@ -369,7 +369,7 @@ class SharedDocuments extends React.Component {
     }
 }
 
-SharedDocuments.propTypes = {
+SharedAudios.propTypes = {
     chatId: PropTypes.number.isRequired,
     migratedChatId: PropTypes.number,
     onClose: PropTypes.func.isRequired,
@@ -377,7 +377,7 @@ SharedDocuments.propTypes = {
     minHeight: PropTypes.number
 };
 
-SharedDocuments.defaultProps = {
+SharedAudios.defaultProps = {
     popup: false,
     minHeight: 0
 };
@@ -387,4 +387,4 @@ const enhance = compose(
     withTranslation()
 );
 
-export default enhance(SharedDocuments);
+export default enhance(SharedAudios);

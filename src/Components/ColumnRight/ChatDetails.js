@@ -343,7 +343,8 @@ class ChatDetails extends React.Component {
             classes,
             onClose,
             onOpenGroupInCommon,
-            onOpenSharedDocument,
+            onOpenSharedAudios,
+            onOpenSharedDocuments,
             onOpenSharedMedia,
             popup,
             t
@@ -464,11 +465,11 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                             </List>
-                            <Divider />
                         </>
                     )}
                     {(!isMe || isGroup || (popup && !isGroup)) && (
                         <>
+                            <Divider />
                             <List>
                                 {!isMe && <NotificationsListItem chatId={chatId} />}
                                 {isGroup && <MoreListItem chatId={chatId} />}
@@ -485,7 +486,6 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                             </List>
-                            <Divider />
                         </>
                     )}
                     {(photoCount > 0 ||
@@ -496,6 +496,7 @@ class ChatDetails extends React.Component {
                         voiceAndVideoNoteCount > 0 ||
                         groupInCommonCount > 0) && (
                         <>
+                            <Divider />
                             <List>
                                 {photoCount > 0 && (
                                     <ListItem button className={classes.listItem} onClick={onOpenSharedMedia}>
@@ -526,7 +527,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {documentCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedDocument}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedDocuments}>
                                         <ListItemIcon>
                                             <InsertDriveFileIcon />
                                         </ListItemIcon>
@@ -540,7 +541,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {audioCount > 0 && (
-                                    <ListItem button className={classes.listItem}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedAudios}>
                                         <ListItemIcon>
                                             <HeadsetIcon />
                                         </ListItemIcon>
@@ -601,10 +602,14 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                             </List>
-                            <Divider />
                         </>
                     )}
-                    <List>{items}</List>
+                    {items.length > 0 && (
+                        <>
+                            <Divider />
+                            <List>{items}</List>
+                        </>
+                    )}
                 </div>
             </>
         );

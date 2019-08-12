@@ -110,8 +110,15 @@ pre code {
     min-width: 52px;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
 }
+
+/*.message-left-padding-wrapper {*/
+/*margin-top: 12px;*/
+/*display: flex;*/
+/*flex-direction: row;*/
+/*align-items: center;*/
+/*}*/
 
 .message-right-padding {
     min-width: 32px;

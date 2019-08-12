@@ -7,9 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
 import {
     Dialog,
     DialogActions,
@@ -23,7 +23,8 @@ import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import MainMenuButton from './MainMenuButton';
-import { debounce, isAuthorizationReady, throttle } from '../../Utils/Common';
+import { isAuthorizationReady } from '../../Utils/Common';
+import { ANIMATION_DURATION_200MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
@@ -47,8 +48,6 @@ class DialogsHeader extends React.Component {
             authorizationState: ApplicationStore.getAuthorizationState(),
             open: false
         };
-
-        this.handleInput = debounce(this.handleInput, 250);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -57,7 +56,7 @@ class DialogsHeader extends React.Component {
                 if (this.searchInput.current) {
                     this.searchInput.current.focus();
                 }
-            }, 250);
+            }, ANIMATION_DURATION_200MS);
         }
     }
 

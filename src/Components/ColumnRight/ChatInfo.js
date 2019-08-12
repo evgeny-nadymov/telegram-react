@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
+import SharedAudios from './SharedMedia/SharedAudios';
 import SharedDocuments from './SharedMedia/SharedDocuments';
 import SharedMedia from './SharedMedia';
 import { borderStyle } from '../Theme';
@@ -44,6 +45,7 @@ class ChatInfo extends React.Component {
             migratedChatId: 0,
             userChatId: null,
             openSharedMedia: false,
+            openSharedAudios: false,
             openSharedDocuments: false,
             openGroupInCommon: false,
             counters: null,
@@ -76,6 +78,7 @@ class ChatInfo extends React.Component {
         if (popup) return;
         if (chatId === update.nextChatId) return;
 
+        this.sharedAudios = null;
         this.sharedDocuments = null;
 
         this.setState({
@@ -83,6 +86,7 @@ class ChatInfo extends React.Component {
             migratedChatId: 0,
             userChatId: null,
             openSharedMedia: false,
+            openSharedAudios: false,
             openSharedDocuments: false,
             openGroupInCommon: false,
             counters: ChatStore.getCounters(update.nextChatId),
@@ -171,6 +175,14 @@ class ChatInfo extends React.Component {
         this.setState({ openSharedDocuments: false });
     };
 
+    handleOpenSharedAudios = () => {
+        this.setState({ openSharedAudios: true });
+    };
+
+    handleCloseSharedAudios = () => {
+        this.setState({ openSharedAudios: false });
+    };
+
     render() {
         console.log('ChatDetails.ChatInfo.render', this.state);
         const { classes, className, popup } = this.props;
@@ -180,6 +192,7 @@ class ChatInfo extends React.Component {
             migratedChatId,
             migratedCounters,
             userChatId,
+            openSharedAudios,
             openSharedDocuments,
             openSharedMedia,
             openGroupInCommon
@@ -198,6 +211,18 @@ class ChatInfo extends React.Component {
                     onClose={this.handleCloseSharedMedia}
                 />
             );
+        } else if (openSharedAudios) {
+            this.sharedAudios = this.sharedAudios || (
+                <SharedAudios
+                    chatId={currentChatId}
+                    migratedChatId={migratedChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedAudios}
+                />
+            );
+
+            content = this.sharedAudios;
         } else if (openSharedDocuments) {
             this.sharedDocuments = this.sharedDocuments || (
                 <SharedDocuments
@@ -229,7 +254,8 @@ class ChatInfo extends React.Component {
                     counters={counters}
                     migratedCounters={migratedCounters}
                     onOpenSharedMedia={this.handelOpenSharedMedia}
-                    onOpenSharedDocument={this.handleOpenSharedDocuments}
+                    onOpenSharedAudios={this.handleOpenSharedAudios}
+                    onOpenSharedDocuments={this.handleOpenSharedDocuments}
                     onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onClose={this.handleCloseChatDetails}
                 />

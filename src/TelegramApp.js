@@ -169,7 +169,12 @@ class TelegramApp extends Component {
         const { inactive, authorizationState, databaseExists, fatalError } = this.state;
 
         const loading = t('Loading').replace('...', '');
-        let page = <StubPage title={loading} />;
+        //let page = <StubPage title={loading} />;
+        let page = (
+            <React.Suspense fallback={<StubPage title='' />}>
+                <MainPage />
+            </React.Suspense>
+        );
 
         if (inactive) {
             page = <InactivePage />;

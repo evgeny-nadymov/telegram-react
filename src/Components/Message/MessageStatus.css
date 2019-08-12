@@ -6,7 +6,7 @@
  */
 
 .message-short .message-status-icon {
-    margin-top: 5px;
+    margin-top: 7px;
 }
 
 .message-status-icon {
@@ -18,6 +18,8 @@
     border-radius: 5px;
     opacity: 1;
     margin-left: 6px;
+    align-self: flex-start;
+    margin-top: 19px;
 }
 
 .message-status-failed {

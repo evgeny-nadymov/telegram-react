@@ -18,6 +18,7 @@ import LanguagePicker from './LanguagePicker';
 import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import { WASM_FILE_HASH, WASM_FILE_NAME } from '../../Constants';
 
 const styles = {
     menuIconButton: {
@@ -75,7 +76,9 @@ class MainMenuButton extends React.Component {
     handleCheckUpdates = async () => {
         this.handleMenuClose();
 
-        await update();
+        const result = await fetch(`${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`);
+        console.log('wasm result', result);
+        //await update();
     };
 
     handleAppearance = event => {
