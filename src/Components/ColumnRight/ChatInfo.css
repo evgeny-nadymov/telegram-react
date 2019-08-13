@@ -6,6 +6,7 @@
  */
 
 .right-column {
+    position: relative;
     float: left;
     width: calc(26.7% - 0px);
     margin: 0;

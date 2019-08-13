@@ -226,13 +226,17 @@ class ChatDetails extends React.Component {
     };
 
     loadChatContents = () => {
-        const { chatId } = this.props;
+        const { chatId, popup } = this.props;
 
         const store = FileStore.getStore();
 
         loadChatsContent(store, [chatId]);
         const members = getGroupChatMembers(chatId).map(x => x.user_id);
         loadUsersContent(store, members);
+
+        if (popup) {
+            getChatFullInfo(chatId);
+        }
     };
 
     handleUsernameHint = () => {

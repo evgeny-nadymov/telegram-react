@@ -415,6 +415,13 @@ function historyEquals(first, second) {
     return first === second;
 }
 
+function insertByOrder(array, element, comparator) {
+    let i = 0;
+    for (; i < array.length && comparator(array[i], element) < 0; i++) {}
+
+    return [...array.slice(0, i), element, ...array.slice(i)];
+}
+
 export {
     cleanProgressStatus,
     isConnecting,
@@ -439,5 +446,6 @@ export {
     getDurationString,
     getRandomInt,
     isAppleDevice,
-    historyEquals
+    historyEquals,
+    insertByOrder
 };

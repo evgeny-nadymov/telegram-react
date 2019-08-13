@@ -132,7 +132,7 @@ class SharedDocument extends React.Component {
     };
 
     render() {
-        const { chatId, classes, messageId, t } = this.props;
+        const { chatId, classes, messageId, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -159,7 +159,7 @@ class SharedDocument extends React.Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
-                        <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>
+                        {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
                             <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>
@@ -205,7 +205,8 @@ class SharedDocument extends React.Component {
 
 SharedDocument.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired
+    messageId: PropTypes.number.isRequired,
+    showOpenMessage: PropTypes.number.isRequired
 };
 
 const enhance = compose(

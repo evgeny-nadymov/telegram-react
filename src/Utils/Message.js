@@ -1513,6 +1513,10 @@ function getEmojiMatches(chatId, messageId) {
     return emojiMatches;
 }
 
+function messageComparatorDesc(left, right) {
+    return left.id - right.id;
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1542,5 +1546,6 @@ export {
     getSearchMessagesFilter,
     openMedia,
     getReplyPhotoSize,
-    getEmojiMatches
+    getEmojiMatches,
+    messageComparatorDesc
 };
