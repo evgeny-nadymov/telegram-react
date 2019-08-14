@@ -54,7 +54,7 @@ class SharedMediaBase extends React.Component {
         throw new Error('Virtual method isValidContent is not implemented');
     }
 
-    getItemTemplate = message => {
+    getItemTemplate(message) {
         const { migratedChatId } = this.props;
         const { chat_id, id } = message;
 
@@ -66,7 +66,7 @@ class SharedMediaBase extends React.Component {
                 showOpenMessage={chat_id !== migratedChatId}
             />
         );
-    };
+    }
 
     getSearchFilter() {
         throw new Error('Virtual method getSearchFilter is not implemented');
@@ -436,8 +436,8 @@ class SharedMediaBase extends React.Component {
         const { items, migratedItems, searchItems, searchMigratedItems } = this.state;
         const { searchParams } = this;
 
-        const messages = items.concat(migratedItems).map(this.getItemTemplate);
-        const searchMessages = searchItems.concat(searchMigratedItems).map(this.getItemTemplate);
+        const messages = items.concat(migratedItems).map(x => this.getItemTemplate(x));
+        const searchMessages = searchItems.concat(searchMigratedItems).map(x => this.getItemTemplate(x));
 
         return (
             <>

@@ -13,8 +13,11 @@ import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
 import SharedAudios from './SharedMedia/SharedAudios';
 import SharedDocuments from './SharedMedia/SharedDocuments';
-import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
+import SharedLinks from './SharedMedia/SharedLinks';
 import SharedMedia from './SharedMedia';
+import SharedPhotos from './SharedMedia/SharedPhotos';
+import SharedVideos from './SharedMedia/SharedVideos';
+import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
 import { borderStyle } from '../Theme';
 import { getChatCounters } from '../../Actions/Chat';
 import { getSupergroupId, isSupergroup } from '../../Utils/Chat';
@@ -45,11 +48,14 @@ class ChatInfo extends React.Component {
             chatId: popup ? dialogChatId : chatId,
             migratedChatId: 0,
             userChatId: null,
-            openSharedMedia: false,
+            openGroupInCommon: false,
             openSharedAudios: false,
             openSharedDocuments: false,
+            openSharedLinks: false,
+            openSharedMedia: false,
+            openSharedPhotos: false,
+            openSharedVideos: false,
             openSharedVoiceNotes: false,
-            openGroupInCommon: false,
             counters: null,
             migratedCounters: null
         };
@@ -82,16 +88,23 @@ class ChatInfo extends React.Component {
 
         this.sharedAudios = null;
         this.sharedDocuments = null;
+        this.sharedLinks = null;
+        this.sharedPhotos = null;
+        this.sharedVideos = null;
+        this.sharedVoiceNotes = null;
 
         this.setState({
             chatId: update.nextChatId,
             migratedChatId: 0,
             userChatId: null,
-            openSharedMedia: false,
+            openGroupInCommon: false,
             openSharedAudios: false,
             openSharedDocuments: false,
+            openSharedLinks: false,
+            openSharedMedia: false,
+            openSharedPhotos: false,
+            openSharedVideos: false,
             openSharedVoiceNotes: false,
-            openGroupInCommon: false,
             counters: ChatStore.getCounters(update.nextChatId),
             migratedCounters: null
         });
@@ -138,7 +151,7 @@ class ChatInfo extends React.Component {
         this.setState({ migratedChatId: chat.id, migratedCounters: ChatStore.getCounters(chat.id) });
     };
 
-    handelOpenSharedMedia = () => {
+    handleOpenSharedMedia = () => {
         this.setState({ openSharedMedia: true });
     };
 
@@ -194,6 +207,30 @@ class ChatInfo extends React.Component {
         this.setState({ openSharedVoiceNotes: false });
     };
 
+    handleOpenSharedLinks = () => {
+        this.setState({ openSharedLinks: true });
+    };
+
+    handleCloseSharedLinks = () => {
+        this.setState({ openSharedLinks: false });
+    };
+
+    handleOpenSharedPhotos = () => {
+        this.setState({ openSharedPhotos: true });
+    };
+
+    handleCloseSharedPhotos = () => {
+        this.setState({ openSharedPhotos: false });
+    };
+
+    handleOpenSharedVideos = () => {
+        this.setState({ openSharedVideos: true });
+    };
+
+    handleCloseSharedVideos = () => {
+        this.setState({ openSharedVideos: false });
+    };
+
     render() {
         console.log('ChatDetails.ChatInfo.render', this.state);
         const { classes, className, popup } = this.props;
@@ -205,7 +242,10 @@ class ChatInfo extends React.Component {
             userChatId,
             openSharedAudios,
             openSharedDocuments,
+            openSharedLinks,
             openSharedMedia,
+            openSharedPhotos,
+            openSharedVideos,
             openSharedVoiceNotes,
             openGroupInCommon
         } = this.state;
@@ -247,6 +287,42 @@ class ChatInfo extends React.Component {
             );
 
             content = this.sharedDocuments;
+        } else if (openSharedLinks) {
+            this.sharedLinks = this.sharedLinks || (
+                <SharedLinks
+                    chatId={currentChatId}
+                    migratedChatId={migratedChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedLinks}
+                />
+            );
+
+            content = this.sharedLinks;
+        } else if (openSharedPhotos) {
+            this.sharedPhotos = this.sharedPhotos || (
+                <SharedPhotos
+                    chatId={currentChatId}
+                    migratedChatId={migratedChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedPhotos}
+                />
+            );
+
+            content = this.sharedPhotos;
+        } else if (openSharedVideos) {
+            this.sharedVideos = this.sharedVideos || (
+                <SharedVideos
+                    chatId={currentChatId}
+                    migratedChatId={migratedChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedVideos}
+                />
+            );
+
+            content = this.sharedVideos;
         } else if (openSharedVoiceNotes) {
             this.sharedVoiceNotes = this.sharedVoiceNotes || (
                 <SharedVoiceNotes
@@ -277,11 +353,14 @@ class ChatInfo extends React.Component {
                     backButton={userChatId === chatId}
                     counters={counters}
                     migratedCounters={migratedCounters}
-                    onOpenSharedMedia={this.handelOpenSharedMedia}
+                    onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onOpenSharedAudios={this.handleOpenSharedAudios}
                     onOpenSharedDocuments={this.handleOpenSharedDocuments}
+                    onOpenSharedMedia={this.handleOpenSharedMedia}
+                    onOpenSharedLinks={this.handleOpenSharedLinks}
+                    onOpenSharedPhotos={this.handleOpenSharedPhotos}
+                    onOpenSharedVideos={this.handleOpenSharedVideos}
                     onOpenSharedVoiceNotes={this.handleOpenSharedVoiceNotes}
-                    onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onClose={this.handleCloseChatDetails}
                 />
             );

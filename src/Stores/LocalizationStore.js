@@ -57,7 +57,9 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ViewChannelInfo: 'View channel info',
                     ViewGroupInfo: 'View group info',
                     ViewProfile: 'View profile',
-                    GoToMessage: 'Go to message'
+                    GoToMessage: 'Go to message',
+                    PhotosTitle: 'Photos',
+                    VideosTitle: 'Videos'
                 },
                 emoji: {
                     Search: 'Search',
@@ -102,7 +104,9 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ViewChannelInfo: 'Информация о канале',
                     ViewGroupInfo: 'Информация о группе',
                     ViewProfile: 'Показать профиль',
-                    GoToMessage: 'Перейти к сообщению'
+                    GoToMessage: 'Перейти к сообщению',
+                    PhotosTitle: 'Фотографии',
+                    VideosTitle: 'Видеозаписи'
                 },
                 emoji: {
                     Search: 'Поиск',

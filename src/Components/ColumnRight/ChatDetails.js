@@ -349,7 +349,10 @@ class ChatDetails extends React.Component {
             onOpenGroupInCommon,
             onOpenSharedAudios,
             onOpenSharedDocuments,
+            onOpenSharedLinks,
             onOpenSharedMedia,
+            onOpenSharedPhotos,
+            onOpenSharedVideos,
             onOpenSharedVoiceNotes,
             popup,
             t
@@ -504,7 +507,7 @@ class ChatDetails extends React.Component {
                             <Divider />
                             <List>
                                 {photoCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedMedia}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedPhotos}>
                                         <ListItemIcon>
                                             <PhotoIcon />
                                         </ListItemIcon>
@@ -518,7 +521,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {videoCount > 0 && (
-                                    <ListItem button className={classes.listItem}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedVideos}>
                                         <ListItemIcon>
                                             <VideocamIcon />
                                         </ListItemIcon>
@@ -560,7 +563,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {urlCount > 0 && (
-                                    <ListItem button className={classes.listItem}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedLinks}>
                                         <ListItemIcon>
                                             <InsertLinkIcon />
                                         </ListItemIcon>
@@ -627,10 +630,13 @@ ChatDetails.propTypes = {
     chatId: PropTypes.number.isRequired,
     popup: PropTypes.bool,
     onClose: PropTypes.func,
-    onOpenSharedDocument: PropTypes.func,
+    onOpenGroupInCommon: PropTypes.func,
+    onOpenSharedDocuments: PropTypes.func,
     onOpenSharedMedia: PropTypes.func,
-    onOpenSharedVoiceNotes: PropTypes.func,
-    onOpenGroupInCommon: PropTypes.func
+    onOpenSharedLinks: PropTypes.func,
+    onOpenSharedPhotos: PropTypes.func,
+    onOpenSharedVideos: PropTypes.func,
+    onOpenSharedVoiceNotes: PropTypes.func
 };
 
 const enhance = compose(
