@@ -46,6 +46,10 @@ class SharedMediaBase extends React.Component {
         };
     }
 
+    hasSearch() {
+        return true;
+    }
+
     isValidContent(content) {
         throw new Error('Virtual method isValidContent is not implemented');
     }
@@ -441,7 +445,7 @@ class SharedMediaBase extends React.Component {
                     title={this.getHeader()}
                     onClick={this.handleHeaderClick}
                     onClose={onClose}
-                    onSearch={this.handleSearch}
+                    onSearch={this.hasSearch() ? this.handleSearch : null}
                     onCloseSearch={this.handleCloseSearch}
                 />
                 <div

@@ -350,6 +350,7 @@ class ChatDetails extends React.Component {
             onOpenSharedAudios,
             onOpenSharedDocuments,
             onOpenSharedMedia,
+            onOpenSharedVoiceNotes,
             popup,
             t
         } = this.props;
@@ -573,7 +574,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {voiceAndVideoNoteCount > 0 && (
-                                    <ListItem button className={classes.listItem}>
+                                    <ListItem button className={classes.listItem} onClick={onOpenSharedVoiceNotes}>
                                         <ListItemIcon>
                                             <MicIcon />
                                         </ListItemIcon>
@@ -628,6 +629,7 @@ ChatDetails.propTypes = {
     onClose: PropTypes.func,
     onOpenSharedDocument: PropTypes.func,
     onOpenSharedMedia: PropTypes.func,
+    onOpenSharedVoiceNotes: PropTypes.func,
     onOpenGroupInCommon: PropTypes.func
 };
 

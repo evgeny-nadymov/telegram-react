@@ -103,7 +103,7 @@ class SharedMediaHeader extends React.Component {
     };
 
     render() {
-        const { classes, t, title, onClick, onClose } = this.props;
+        const { classes, t, title, onClick, onClose, onSearch } = this.props;
         const { openSearch } = this.state;
 
         return (
@@ -133,9 +133,11 @@ class SharedMediaHeader extends React.Component {
                         </div>
                     </>
                 )}
-                <IconButton className={classes.headerSearchButton} onMouseDown={this.handleSearch}>
-                    <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
-                </IconButton>
+                {Boolean(onSearch) && (
+                    <IconButton className={classes.headerSearchButton} onMouseDown={this.handleSearch}>
+                        <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
+                    </IconButton>
+                )}
             </div>
         );
     }

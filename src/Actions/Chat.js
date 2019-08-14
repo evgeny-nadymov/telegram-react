@@ -130,7 +130,7 @@ export async function getChatCounters(chatId) {
     const voiceAndVideoNoteCounter = TdLibController.send({
         '@type': 'getChatMessageCount',
         chat_id: chatId,
-        filter: { '@type': 'searchMessagesFilterVoiceAndVideoNote' },
+        filter: { '@type': 'searchMessagesFilterVoiceNote' },
         return_local: false
     })
         .then(result => {

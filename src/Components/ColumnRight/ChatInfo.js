@@ -13,6 +13,7 @@ import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
 import SharedAudios from './SharedMedia/SharedAudios';
 import SharedDocuments from './SharedMedia/SharedDocuments';
+import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
 import SharedMedia from './SharedMedia';
 import { borderStyle } from '../Theme';
 import { getChatCounters } from '../../Actions/Chat';
@@ -47,6 +48,7 @@ class ChatInfo extends React.Component {
             openSharedMedia: false,
             openSharedAudios: false,
             openSharedDocuments: false,
+            openSharedVoiceNotes: false,
             openGroupInCommon: false,
             counters: null,
             migratedCounters: null
@@ -88,6 +90,7 @@ class ChatInfo extends React.Component {
             openSharedMedia: false,
             openSharedAudios: false,
             openSharedDocuments: false,
+            openSharedVoiceNotes: false,
             openGroupInCommon: false,
             counters: ChatStore.getCounters(update.nextChatId),
             migratedCounters: null
@@ -183,6 +186,14 @@ class ChatInfo extends React.Component {
         this.setState({ openSharedAudios: false });
     };
 
+    handleOpenSharedVoiceNotes = () => {
+        this.setState({ openSharedVoiceNotes: true });
+    };
+
+    handleCloseSharedVoiceNotes = () => {
+        this.setState({ openSharedVoiceNotes: false });
+    };
+
     render() {
         console.log('ChatDetails.ChatInfo.render', this.state);
         const { classes, className, popup } = this.props;
@@ -195,6 +206,7 @@ class ChatInfo extends React.Component {
             openSharedAudios,
             openSharedDocuments,
             openSharedMedia,
+            openSharedVoiceNotes,
             openGroupInCommon
         } = this.state;
 
@@ -235,6 +247,18 @@ class ChatInfo extends React.Component {
             );
 
             content = this.sharedDocuments;
+        } else if (openSharedVoiceNotes) {
+            this.sharedVoiceNotes = this.sharedVoiceNotes || (
+                <SharedVoiceNotes
+                    chatId={currentChatId}
+                    migratedChatId={migratedChatId}
+                    popup={popup}
+                    minHeight={minHeight}
+                    onClose={this.handleCloseSharedVoiceNotes}
+                />
+            );
+
+            content = this.sharedVoiceNotes;
         } else if (openGroupInCommon) {
             content = (
                 <GroupsInCommon
@@ -256,6 +280,7 @@ class ChatInfo extends React.Component {
                     onOpenSharedMedia={this.handelOpenSharedMedia}
                     onOpenSharedAudios={this.handleOpenSharedAudios}
                     onOpenSharedDocuments={this.handleOpenSharedDocuments}
+                    onOpenSharedVoiceNotes={this.handleOpenSharedVoiceNotes}
                     onOpenGroupInCommon={this.handleOpenGroupInCommon}
                     onClose={this.handleCloseChatDetails}
                 />
