@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.395",
+  "version": "0.0.397",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "1.4.6",
@@ -26,6 +26,7 @@
     "lottie-web": "^5.5.4",
     "mdi-material-ui": "^6.0.0",
     "notistack": "^0.5.1",
+    "pako": "^1.0.10",
     "prettier": "^1.16.4",
     "prop-types": "^15.6.2",
     "react": "^16.8.5",

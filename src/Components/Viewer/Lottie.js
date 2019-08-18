@@ -13,7 +13,7 @@ import './Lottie.css';
 class Lottie extends React.Component {
     componentDidMount() {
         const { options, eventListeners } = this.props;
-        console.log('Lottie.componentDidMount', eventListeners, this.props);
+        // console.log('Lottie.componentDidMount', eventListeners, this.props);
 
         const {
             loop,
@@ -56,7 +56,7 @@ class Lottie extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
+        // console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
         if (this.props.isStopped) {
             this.stop();
         } else if (this.props.segments) {
@@ -71,7 +71,7 @@ class Lottie extends React.Component {
     }
 
     componentWillUnmount() {
-        console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
+        // console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
         this.deRegisterEvents(this.props.eventListeners);
         this.destroy();
         this.options.animationData = null;
@@ -138,7 +138,7 @@ class Lottie extends React.Component {
     };
 
     render() {
-        const { width, height, ariaRole, ariaLabel, isClickToPauseDisabled, title } = this.props;
+        const { width, height, ariaRole, ariaLabel, isClickToPauseDisabled, title, ...other } = this.props;
 
         const getSize = initial => {
             let size;
@@ -176,6 +176,7 @@ class Lottie extends React.Component {
                 role={ariaRole}
                 aria-label={ariaLabel}
                 tabIndex='0'
+                {...other}
             />
         );
     }
