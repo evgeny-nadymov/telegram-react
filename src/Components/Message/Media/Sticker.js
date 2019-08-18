@@ -76,13 +76,16 @@ class Sticker extends React.Component {
 
     render() {
         const { className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
-        const { thumbnail, sticker, width, height } = source;
+        const { is_animated, thumbnail, sticker, width, height } = source;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
-        const src = getSrc(sticker);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const src = is_animated ? null : getSrc(sticker);
+        const isBlurred = is_animated ? false : isBlurredThumbnail(thumbnail);
 
-        const fitSize = getFitSize({ width: width, height: height }, displaySize);
+        const fitSize = getFitSize(
+            { width: width, height: height },
+            is_animated ? Math.min(128, displaySize) : displaySize
+        );
         if (!fitSize) return null;
 
         const stickerStyle = {

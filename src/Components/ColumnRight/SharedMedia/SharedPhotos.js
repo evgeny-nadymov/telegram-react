@@ -11,7 +11,29 @@ import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import SharedMediaBase from './SharedMediaBase';
+import SharedPhoto from '../../Tile/SharedMedia/SharedPhoto';
+import { openMedia } from '../../../Utils/Message';
 import './SharedPhotos.css';
+
+const styles = theme => ({
+    sharedMediaList: {
+        padding: '6px !important',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start'
+    },
+    sharedMediaSearchList: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
+        padding: '6px !important',
+        display: 'flex',
+        flexWrap: 'wrap',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        alignContent: 'flex-start'
+    }
+});
 
 class SharedPhotos extends SharedMediaBase {
     isValidContent(content) {
@@ -28,8 +50,20 @@ class SharedPhotos extends SharedMediaBase {
         return t('PhotosTitle');
     }
 
-    hasSearch() {
-        return false;
+    getItemTemplate(message) {
+        const { migratedChatId } = this.props;
+        const { chat_id, content, id } = message;
+
+        return (
+            <SharedPhoto
+                key={`chat_id=${chat_id}_message_id=${id}`}
+                chatId={chat_id}
+                messageId={id}
+                photo={content.photo}
+                openMedia={() => openMedia(chat_id, id, false)}
+                showOpenMessage={chat_id !== migratedChatId}
+            />
+        );
     }
 }
 
@@ -47,7 +81,7 @@ SharedPhotos.defaultProps = {
 };
 
 const enhance = compose(
-    withStyles(SharedMediaBase.getStyles),
+    withStyles(styles),
     withTranslation()
 );
 

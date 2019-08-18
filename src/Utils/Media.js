@@ -7,10 +7,10 @@
 
 import { THUMBNAIL_BLURRED_SIZE } from '../Constants';
 
-function isBlurredThumbnail(thumbnail) {
+function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE) {
     if (!thumbnail) return false;
 
-    return Math.max(thumbnail.width, thumbnail.height) < THUMBNAIL_BLURRED_SIZE;
+    return Math.max(thumbnail.width, thumbnail.height) <= blurredSize;
 }
 
 function getAudioTitle(audio) {

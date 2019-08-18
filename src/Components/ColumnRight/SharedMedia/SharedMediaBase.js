@@ -22,6 +22,7 @@ import './SharedMediaBase.css';
 class SharedMediaBase extends React.Component {
     static getStyles(theme) {
         return {
+            sharedMediaList: {},
             sharedMediaSearchList: {
                 background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
             }
@@ -32,6 +33,8 @@ class SharedMediaBase extends React.Component {
         if (new.target === SharedMediaBase) {
             throw new TypeError('Cannot construct SharedMediaBase instances directly');
         }
+
+        // console.log('SharedMediaBase.ctor');
 
         super(props);
 
@@ -202,6 +205,8 @@ class SharedMediaBase extends React.Component {
         const { chatId } = this.props;
         const { completed, filter, items, loading } = params;
 
+        // console.log('SharedMediaBase.onLoadNext', completed, loading);
+
         if (loading) return;
         if (completed) return;
 
@@ -241,6 +246,8 @@ class SharedMediaBase extends React.Component {
     onLoadMigratedNext = async (params, loadIncomplete = true) => {
         const { migratedChatId } = this.props;
         const { filter, loading, migrateCompleted, migratedItems: items } = params;
+
+        // console.log('SharedMediaBase.onLoadMigratedNext', migratedChatId, loading, migrateCompleted);
 
         if (!migratedChatId) return;
         if (loading) return;
@@ -285,11 +292,13 @@ class SharedMediaBase extends React.Component {
         const list = this.listRef.current;
         if (!list) return;
 
+        const { params } = this;
+
         if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
-            if (!this.completed) {
-                this.onLoadNext(this.params);
+            if (params && !params.completed) {
+                this.onLoadNext(params);
             } else {
-                this.onLoadMigratedNext(this.params);
+                this.onLoadMigratedNext(params);
             }
         }
     };
@@ -323,6 +332,8 @@ class SharedMediaBase extends React.Component {
         const { chatId } = this.props;
         const { completed, filter, items, loading, query } = params;
 
+        // console.log('SharedMediaBase.onSearchNext', completed, loading);
+
         if (completed) return;
         if (loading) return;
 
@@ -352,7 +363,7 @@ class SharedMediaBase extends React.Component {
         const store = FileStore.getStore();
         loadMessageContents(store, messages);
 
-        this.setState({ searchItems: params.items });
+        this.setState({ searchItems: params.items, searchMigratedItems: params.migratedItems });
 
         if (params.completed) {
             this.onSearchMigratedNext(params, true);
@@ -364,6 +375,8 @@ class SharedMediaBase extends React.Component {
     onSearchMigratedNext = async (params, loadIncomplete = true) => {
         const { migratedChatId } = this.props;
         const { filter, loading, migratedItems: items, migrateCompleted, query } = params;
+
+        // console.log('SharedMediaBase.onSearchMigratedNext', migratedChatId, loading, migrateCompleted);
 
         if (!migratedChatId) return;
         if (loading) return;
@@ -395,7 +408,7 @@ class SharedMediaBase extends React.Component {
         const store = FileStore.getStore();
         loadMessageContents(store, messages);
 
-        this.setState({ searchMigratedItems: params.migratedItems });
+        this.setState({ searchItems: params.items, searchMigratedItems: params.migratedItems });
 
         if (incompleteResults) {
             this.onSearchMigratedNext(params, false);
@@ -432,7 +445,7 @@ class SharedMediaBase extends React.Component {
     };
 
     render() {
-        const { classes, minHeight, onClose } = this.props;
+        const { classes, minHeight, onClose, popup } = this.props;
         const { items, migratedItems, searchItems, searchMigratedItems } = this.state;
         const { searchParams } = this;
 
@@ -450,9 +463,9 @@ class SharedMediaBase extends React.Component {
                 />
                 <div
                     ref={this.listRef}
-                    className='shared-media-list'
+                    className={classNames('shared-media-list', classes.sharedMediaList)}
                     onScroll={this.handleScroll}
-                    style={{ minHeight }}>
+                    style={{ minHeight: popup ? minHeight : null }}>
                     {messages}
                 </div>
                 {Boolean(searchParams) && (

@@ -11,6 +11,8 @@ import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import SharedMediaBase from './SharedMediaBase';
+import SharedLink from '../../Tile/SharedMedia/SharedLink';
+import { openMedia } from '../../../Utils/Message';
 import './SharedLinks.css';
 
 class SharedLinks extends SharedMediaBase {
@@ -26,6 +28,22 @@ class SharedLinks extends SharedMediaBase {
         const { t } = this.props;
 
         return t('LinksTitle');
+    }
+
+    getItemTemplate(message) {
+        const { migratedChatId } = this.props;
+        const { chat_id, content, id } = message;
+
+        return (
+            <SharedLink
+                key={`chat_id=${chat_id}_message_id=${id}`}
+                chatId={chat_id}
+                messageId={id}
+                webPage={content.web_page}
+                openMedia={() => openMedia(chat_id, id, false)}
+                showOpenMessage={chat_id !== migratedChatId}
+            />
+        );
     }
 }
 

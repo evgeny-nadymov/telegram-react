@@ -21,12 +21,10 @@ class Photo extends React.Component {
         super(props);
 
         const { photo, size, thumbnailSize } = props;
-        const photoSize = getSize(photo.sizes, size);
-        const thumbnail = getSize(photo.sizes, thumbnailSize);
 
         this.state = {
-            photoSize: photoSize,
-            thumbnail: thumbnail
+            photoSize: getSize(photo.sizes, size),
+            thumbSize: getSize(photo.sizes, thumbnailSize)
         };
     }
 
@@ -39,25 +37,25 @@ class Photo extends React.Component {
     }
 
     onClientUpdatePhotoBlob = update => {
-        const { photoSize } = this.state;
+        const { photoSize, thumbSize } = this.state;
         const { fileId } = update;
 
-        if (!photoSize) return;
-
-        if (photoSize.photo.id === fileId) {
+        if (photoSize && photoSize.photo && photoSize.photo.id === fileId) {
+            this.forceUpdate();
+        } else if (thumbSize && thumbSize.photo && thumbSize.photo.id === fileId) {
             this.forceUpdate();
         }
     };
 
     render() {
         const { displaySize, openMedia, showProgress, style } = this.props;
-        const { thumbnail, photoSize } = this.state;
+        const { thumbSize, photoSize } = this.state;
 
         if (!photoSize) return null;
 
         const src = getSrc(photoSize.photo);
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
+        const isBlurred = isBlurredThumbnail(thumbSize);
 
         const fitPhotoSize = getFitSize(photoSize, displaySize);
         if (!fitPhotoSize) return null;
@@ -76,7 +74,7 @@ class Photo extends React.Component {
                     <img
                         className={classNames('photo-image', { 'media-blurred': isBlurred })}
                         draggable={false}
-                        src={thumbnailSrc}
+                        src={thumbSrc}
                         alt=''
                     />
                 )}

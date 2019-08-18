@@ -1,0 +1,68 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.shared-photo {
+    position: relative;
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+@media (min-width: 960px) {
+    .shared-photo {
+        position: relative;
+        flex: 0 0 50%;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        padding: 6px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+}
+
+@media (min-width: 1280px) {
+    .shared-photo {
+        position: relative;
+        flex: 0 0 33%;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        padding: 6px;
+        box-sizing: border-box;
+        cursor: pointer;
+    }
+}
+
+.shared-photo:before {
+    content: ' ';
+    padding-top: 100%;
+    display: table;
+}
+
+.shared-photo-content {
+    flex-grow: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-size: cover;
+    background-position: 50%;
+}
+
+.shared-photo-main-content {
+    width: 100%;
+    height: 100%;
+
+    background-size: cover;
+    background-position: 50%;
+}

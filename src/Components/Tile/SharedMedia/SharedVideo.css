@@ -1,0 +1,31 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.shared-video-meta {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    border-radius: 13px;
+    padding: 0 5px;
+    background: rgba(0, 0, 0, 0.5);
+    font-size: 13px;
+    line-height: normal;
+    user-select: none;
+    color: #ffffff;
+}
+
+.shared-video-wrapper {
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.shared-video-content {
+    height: 100%;
+    background-color: black;
+    background-size: cover;
+    background-position: 50%;
+}
