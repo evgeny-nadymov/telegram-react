@@ -57,6 +57,12 @@ class Sticker extends React.Component {
         return false;
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.sticker !== this.props.sticker) {
+            this.loadContent();
+        }
+    }
+
     componentDidMount() {
         this.loadContent();
 

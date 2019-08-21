@@ -114,16 +114,16 @@ class Lottie extends React.Component {
     registerEvents(eventListeners) {
         if (!eventListeners) return;
 
-        eventListeners.forEach(eventListener => {
-            this.anim.addEventListener(eventListener.eventName, eventListener.callback);
+        eventListeners.forEach(({ eventName, callback }) => {
+            this.anim.addEventListener(eventName, callback);
         });
     }
 
     deRegisterEvents(eventListeners) {
         if (!eventListeners) return;
 
-        eventListeners.forEach(eventListener => {
-            this.anim.removeEventListener(eventListener.eventName, eventListener.callback);
+        eventListeners.forEach(({ eventName, callback }) => {
+            this.anim.removeEventListener(eventName, callback);
         });
     }
 
