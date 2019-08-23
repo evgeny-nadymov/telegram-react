@@ -196,7 +196,10 @@ class SharedLink extends React.Component {
                         let decodedUrl = null;
 
                         switch (x.type['@type']) {
-                            case 'textEntityTypeTextUrl':
+                            case 'textEntityTypeTextUrl': {
+                                url = x.type.url.startsWith('http') ? x.type.url : 'https://' + x.type.url;
+                                break;
+                            }
                             case 'textEntityTypeUrl': {
                                 url = entityText.startsWith('http') ? entityText : 'https://' + entityText;
                                 break;
@@ -311,6 +314,14 @@ class SharedLink extends React.Component {
         );
     }
 }
+
+SharedLink.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    webPage: PropTypes.object,
+
+    openMedia: PropTypes.func
+};
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
