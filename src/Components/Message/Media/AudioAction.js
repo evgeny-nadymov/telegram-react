@@ -152,8 +152,8 @@ class AudioAction extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
-        const { file, timeString } = this.state;
+        const { classes, title } = this.props;
+        const { active, file, timeString } = this.state;
         if (!file) return null;
 
         const isDownloadingActive = file.local && file.local.is_downloading_active;
@@ -172,6 +172,7 @@ class AudioAction extends React.Component {
 
         return (
             <div className={classNames('audio-action', classes.audioAction)}>
+                {!active && <span>{title}</span>}
                 {!isDownloadingCompleted && <span>{`${sizeString}, `}</span>}
                 <span>{timeString}</span>
             </div>
@@ -183,7 +184,9 @@ AudioAction.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     duration: PropTypes.number.isRequired,
-    file: PropTypes.object.isRequired
+    file: PropTypes.object.isRequired,
+
+    title: PropTypes.string
 };
 
 export default withStyles(styles, { withTheme: true })(AudioAction);

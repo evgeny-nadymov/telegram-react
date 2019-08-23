@@ -9,8 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
+import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox/';
 import Dialog from '@material-ui/core/Dialog';
@@ -22,20 +22,23 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
-import Photo from '../../Message/Media/Photo';
-import { accentStyles } from '../../Theme';
-import { openMedia, substring } from '../../../Utils/Message';
+import AudioAction from '../../Message/Media/AudioAction';
+import MediaStatus from '../../Message/Media/MediaStatus';
+import MessageAuthor from '../../Message/MessageAuthor';
+import VoiceNoteTile from '../VoiceNoteTile';
 import { getChatShortTitle, isPrivateChat } from '../../../Utils/Chat';
-import { forwardMessages, openChat } from '../../../Actions/Client';
 import MessageStore from '../../../Stores/MessageStore';
+import './SharedVoiceNote.css';
+import { forwardMessages, openChat } from '../../../Actions/Client';
 import TdLibController from '../../../Controllers/TdLibController';
-import './SharedLink.css';
 
 const styles = theme => ({
-    ...accentStyles(theme)
+    voiceNoteMeta: {
+        color: theme.palette.text.secondary
+    }
 });
 
-class SharedLink extends React.Component {
+class SharedVoiceNote extends React.Component {
     constructor(props) {
         super(props);
 
@@ -132,30 +135,11 @@ class SharedLink extends React.Component {
         });
     };
 
-    isValidEntityType(type) {
-        if (!type) return false;
-
-        return (
-            type.type['@type'] === 'textEntityTypeUrl' ||
-            type.type['@type'] === 'textEntityTypeTextUrl' ||
-            type.type['@type'] === 'textEntityTypeEmailAddress'
-        );
-    }
-
-    getTitleFromUrl(url) {
-        try {
-            const hostname = new URL(url).hostname.split('.');
-            return hostname.length >= 2 ? hostname[hostname.length - 2] : new URL(url).hostname;
-        } catch (error) {
-            console.error('url: ' + url + '\n' + error);
-        }
-
-        return null;
-    }
-
     render() {
-        const { chatId, classes, messageId, webPage, showOpenMessage, t } = this.props;
+        const { chatId, classes, i18n, messageId, voiceNote, openMedia, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
+
+        if (!voiceNote) return null;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -163,95 +147,33 @@ class SharedLink extends React.Component {
         const { can_be_forwarded, can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
         const count = 1;
 
-        let content = null;
-        let { display_url, description, photo, title, url } = webPage || {
-            title: '',
-            description: '',
-            photo: null,
-            url: ''
-        };
-        if (webPage) {
-            title = title || this.getTitleFromUrl(url);
+        const { date, sender_user_id } = message;
+        const dateString = new Date(date * 1000).toLocaleDateString([i18n.language], {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false
+        });
 
-            content = (
-                <>
-                    {url && (
-                        <a className='shared-link-url' href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                            {display_url}
-                        </a>
-                    )}
-                </>
-            );
-        } else {
-            const { text } = message.content;
-            if (text) {
-                const { entities } = text;
-                if (entities && entities.length > 0) {
-                    description = text.text;
-
-                    content = entities.filter(this.isValidEntityType).map(x => {
-                        const entityText = substring(text.text, x.offset, x.offset + x.length);
-
-                        let url = null;
-                        let decodedUrl = null;
-
-                        switch (x.type['@type']) {
-                            case 'textEntityTypeTextUrl':
-                            case 'textEntityTypeUrl': {
-                                url = entityText.startsWith('http') ? entityText : 'https://' + entityText;
-                                break;
-                            }
-                            case 'textEntityTypeEmailAddress':
-                                url = `mailto:${entityText}`;
-                                break;
-                        }
-
-                        try {
-                            decodedUrl = decodeURI(entityText);
-                        } catch (error) {
-                            console.error('entityText: ' + entityText + '\n' + error);
-                            decodedUrl = entityText;
-                        }
-
-                        title = title || this.getTitleFromUrl(url);
-
-                        return (
-                            <a
-                                className='shared-link-url'
-                                href={url}
-                                title={url}
-                                target='_blank'
-                                rel='noopener noreferrer'>
-                                {decodedUrl}
-                            </a>
-                        );
-                    });
-                }
-            }
-        }
-
-        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 8) + 1}`;
+        const { duration, voice: file } = voiceNote;
 
         return (
-            <div className='shared-link' onContextMenu={this.handleContextMenu}>
-                <div className={classNames('shared-link-photo', tileColor)}>
-                    {title.charAt(0)}
-                    {photo && (
-                        <Photo
-                            displaySize={90}
+            <div className='shared-voice-note' onContextMenu={this.handleContextMenu}>
+                <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
+                <div className='voice-note-content'>
+                    <MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} />
+                    <div className={classNames(classes.voiceNoteMeta, 'voice-note-meta')}>
+                        <AudioAction
                             chatId={chatId}
                             messageId={messageId}
-                            photo={photo}
-                            openMedia={openMedia}
-                            showProgress={false}
-                            style={{ width: 48, height: 48, position: 'absolute', top: 0, left: 0 }}
+                            duration={duration}
+                            file={file}
+                            title={`${dateString}, `}
                         />
-                    )}
-                </div>
-                <div className='shared-link-content'>
-                    {title && <div className='web-page-title'>{title}</div>}
-                    {description && <div className='web-page-description'>{description}</div>}
-                    {content}
+                        <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
+                    </div>
                 </div>
                 <Popover
                     open={contextMenu}
@@ -312,9 +234,17 @@ class SharedLink extends React.Component {
     }
 }
 
+SharedVoiceNote.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    voiceNote: PropTypes.object.isRequired,
+
+    openMedia: PropTypes.func
+};
+
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
     withTranslation()
 );
 
-export default enhance(SharedLink);
+export default enhance(SharedVoiceNote);

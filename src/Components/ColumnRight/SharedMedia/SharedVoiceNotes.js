@@ -11,6 +11,8 @@ import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import SharedMediaBase from './SharedMediaBase';
+import SharedVoiceNote from '../../Tile/SharedMedia/SharedVoiceNote';
+import { openMedia } from '../../../Utils/Message';
 import './SharedVoiceNotes.css';
 
 class SharedVoiceNotes extends SharedMediaBase {
@@ -30,6 +32,22 @@ class SharedVoiceNotes extends SharedMediaBase {
 
     hasSearch() {
         return false;
+    }
+
+    getItemTemplate(message) {
+        const { migratedChatId } = this.props;
+        const { chat_id, content, id } = message;
+
+        return (
+            <SharedVoiceNote
+                key={`chat_id=${chat_id}_message_id=${id}`}
+                chatId={chat_id}
+                messageId={id}
+                voiceNote={content.voice_note}
+                openMedia={() => openMedia(chat_id, id, false)}
+                showOpenMessage={chat_id !== migratedChatId}
+            />
+        );
     }
 }
 

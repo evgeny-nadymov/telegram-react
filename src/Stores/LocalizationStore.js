@@ -59,7 +59,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ViewProfile: 'View profile',
                     GoToMessage: 'Go to message',
                     PhotosTitle: 'Photos',
-                    VideosTitle: 'Videos'
+                    VideosTitle: 'Videos',
+                    VoiceTitle: 'Voice messages'
                 },
                 emoji: {
                     Search: 'Search',
@@ -106,7 +107,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ViewProfile: 'Показать профиль',
                     GoToMessage: 'Перейти к сообщению',
                     PhotosTitle: 'Фотографии',
-                    VideosTitle: 'Видеозаписи'
+                    VideosTitle: 'Видеозаписи',
+                    VoiceTitle: 'Голосовые сообщения'
                 },
                 emoji: {
                     Search: 'Поиск',

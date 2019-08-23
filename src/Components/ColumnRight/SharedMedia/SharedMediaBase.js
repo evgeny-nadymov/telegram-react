@@ -178,7 +178,7 @@ class SharedMediaBase extends React.Component {
         const map = new Map(message_ids.map(x => [x, x]));
         const callback = () => {
             if (this.state.items.length + this.state.migratedItems.length < SHARED_MESSAGE_SLICE_LIMIT) {
-                this.onLoadNext();
+                this.onLoadNext(this.params);
             }
         };
 
