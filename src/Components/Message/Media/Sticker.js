@@ -16,6 +16,7 @@ import { STICKER_DISPLAY_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Sticker.css';
 import Lottie from '../../Viewer/Lottie';
+import { inflateBlob } from '../../../Workers/BlobInflator';
 
 class Sticker extends React.Component {
     constructor(props) {
@@ -113,6 +114,7 @@ class Sticker extends React.Component {
 
         let animationData = null;
         try {
+            //const result = await inflateBlob(blob);
             const result = pako.inflate(await new Response(blob).arrayBuffer(), { to: 'string' });
             if (!result) return;
 

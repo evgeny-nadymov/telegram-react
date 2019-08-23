@@ -452,6 +452,8 @@ class SharedMediaBase extends React.Component {
         const messages = items.concat(migratedItems).map(x => this.getItemTemplate(x));
         const searchMessages = searchItems.concat(searchMigratedItems).map(x => this.getItemTemplate(x));
 
+        console.log('SharedMediaBase.render', items, messages);
+
         return (
             <>
                 <SharedMediaHeader

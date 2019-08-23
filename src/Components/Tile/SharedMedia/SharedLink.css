@@ -4,3 +4,56 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.shared-link {
+    position: relative;
+    background: transparent;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+}
+
+.shared-link-photo {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    line-height: 48px;
+    font-size: 19px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    border-radius: 6px;
+}
+
+.shared-link-content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 12px;
+    overflow: hidden;
+}
+
+.shared-link-content .web-page-title {
+    word-wrap: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-transform: capitalize;
+}
+
+.shared-link-content .web-page-description {
+    max-height: 60px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+.shared-link-url {
+    display: block;
+    word-wrap: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}

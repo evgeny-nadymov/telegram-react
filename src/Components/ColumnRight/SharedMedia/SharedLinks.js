@@ -17,7 +17,21 @@ import './SharedLinks.css';
 
 class SharedLinks extends SharedMediaBase {
     isValidContent(content) {
-        return content && content['@type'] === 'messageText';
+        if (!content) return false;
+
+        const { web_page, text } = content;
+        if (web_page) return true;
+        if (!text) return false;
+
+        const { entities } = text;
+        if (!entities) return false;
+
+        return entities.find(
+            x =>
+                x.type['@type'] === 'textEntityTypeUrl' ||
+                x.type['@type'] === 'textEntityTypeTextUrl' ||
+                x.type['@type'] === 'textEntityTypeEmailAddress'
+        );
     }
 
     getSearchFilter() {

@@ -1547,5 +1547,6 @@ export {
     openMedia,
     getReplyPhotoSize,
     getEmojiMatches,
-    messageComparatorDesc
+    messageComparatorDesc,
+    substring
 };

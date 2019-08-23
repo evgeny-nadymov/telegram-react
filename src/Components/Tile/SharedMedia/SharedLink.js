@@ -24,11 +24,12 @@ import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
 import Photo from '../../Message/Media/Photo';
 import { accentStyles } from '../../Theme';
-import { openMedia } from '../../../Utils/Message';
+import { openMedia, substring } from '../../../Utils/Message';
 import { getChatShortTitle, isPrivateChat } from '../../../Utils/Chat';
 import { forwardMessages, openChat } from '../../../Actions/Client';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
+import './SharedLink.css';
 
 const styles = theme => ({
     ...accentStyles(theme)
@@ -131,6 +132,17 @@ class SharedLink extends React.Component {
         });
     };
 
+    isValidEntityType(type) {
+        console.log('SharedLink.isValidEntityType', type);
+        if (!type) return false;
+
+        return (
+            type.type['@type'] === 'textEntityTypeUrl' ||
+            type.type['@type'] === 'textEntityTypeTextUrl' ||
+            type.type['@type'] === 'textEntityTypeEmailAddress'
+        );
+    }
+
     render() {
         const { chatId, classes, messageId, webPage, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
@@ -141,37 +153,86 @@ class SharedLink extends React.Component {
         const { can_be_forwarded, can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
         const count = 1;
 
-        // console.log('SharedLink.render', webPage);
+        let content = null;
+        let { title, description, photo, url } = webPage || { title: '', description: '', photo: null, url: '' };
+        if (webPage) {
+            content = (
+                <>
+                    {url && (
+                        <a className='shared-link-url' href={url} title={url} target='_blank' rel='noopener noreferrer'>
+                            {url}
+                        </a>
+                    )}
+                </>
+            );
+        } else {
+            const { text } = message.content;
+            if (text) {
+                const { entities } = text;
+                if (entities && entities.length > 0) {
+                    description = text.text;
 
-        if (!webPage) return null;
+                    const urls = entities.filter(this.isValidEntityType).map(x => {
+                        const entityText = substring(text.text, x.offset, x.offset + x.length);
 
-        const { site_name, title, description, url, photo } = webPage;
+                        const url = entityText.startsWith('http') ? entityText : 'https://' + entityText;
+                        let decodedUrl;
+                        try {
+                            decodedUrl = decodeURI(entityText);
+                        } catch (error) {
+                            console.error('entityText: ' + entityText + '\n' + error);
+                            decodedUrl = entityText;
+                        }
 
-        if (!photo) return null;
+                        if (!title) {
+                            try {
+                                const hostname = new URL(url).hostname.split('.');
+                                title = hostname.length >= 2 ? hostname[hostname.length - 2] : new URL(url).hostname;
+                            } catch (error) {
+                                console.error('url: ' + url + '\n' + error);
+                            }
+                        }
 
-        const style = {
-            float: 'right',
-            marginLeft: 6,
-            marginBottom: 6
-        };
+                        return (
+                            <a
+                                className='shared-link-url'
+                                href={url}
+                                title={url}
+                                target='_blank'
+                                rel='noopener noreferrer'>
+                                {decodedUrl}
+                            </a>
+                        );
+                    });
+
+                    content = urls;
+                }
+            }
+        }
+
+        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 8) + 1}`;
 
         return (
-            <div className='shared-document' onContextMenu={this.handleContextMenu}>
-                <>
-                    <Photo
-                        displaySize={90}
-                        style={style}
-                        chatId={chatId}
-                        messageId={messageId}
-                        photo={photo}
-                        openMedia={openMedia}
-                    />
-                    {site_name && (
-                        <div className={classNames('web-page-site-name', classes.accentColorMain)}>{site_name}</div>
+            <div className='shared-link' onContextMenu={this.handleContextMenu}>
+                <div className={classNames('shared-link-photo', tileColor)}>
+                    {title.charAt(0)}
+                    {photo && (
+                        <Photo
+                            displaySize={90}
+                            chatId={chatId}
+                            messageId={messageId}
+                            photo={photo}
+                            openMedia={openMedia}
+                            showProgress={false}
+                            style={{ width: 48, height: 48, position: 'absolute', top: 0, left: 0 }}
+                        />
                     )}
+                </div>
+                <div className='shared-link-content'>
                     {title && <div className='web-page-title'>{title}</div>}
                     {description && <div className='web-page-description'>{description}</div>}
-                </>
+                    {content}
+                </div>
                 <Popover
                     open={contextMenu}
                     onClose={this.handleCloseContextMenu}

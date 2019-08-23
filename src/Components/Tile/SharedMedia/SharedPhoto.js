@@ -182,7 +182,9 @@ class SharedPhoto extends React.Component {
                 <div
                     className={classNames('shared-photo-content', classes.sharedPhotoContent)}
                     style={{ backgroundImage: `url(${thumbSrc})` }}>
-                    <div className='shared-photo-main-content' style={{ backgroundImage: `url(${src})` }} />
+                    {src !== thumbSrc && (
+                        <div className='shared-photo-main-content' style={{ backgroundImage: `url(${src})` }} />
+                    )}
                 </div>
                 <Popover
                     open={contextMenu}
