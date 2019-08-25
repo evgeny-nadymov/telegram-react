@@ -16,6 +16,7 @@ import Game from '../Components/Message/Media/Game';
 import Location from '../Components/Message/Media/Location';
 import Photo from '../Components/Message/Media/Photo';
 import Poll from '../Components/Message/Media/Poll';
+import SafeLink from '../Components/Additional/SafeLink';
 import Sticker from '../Components/Message/Media/Sticker';
 import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
@@ -121,43 +122,17 @@ function getFormattedText(text) {
         );
         switch (text.entities[i].type['@type']) {
             case 'textEntityTypeUrl': {
-                let url = entityText.startsWith('http') ? entityText : 'http://' + entityText;
-                let decodedUrl;
-                try {
-                    decodedUrl = decodeURI(entityText);
-                } catch (error) {
-                    console.error('uri: ' + entityText + '\n' + error);
-                    decodedUrl = entityText;
-                }
-
-                result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={url}
-                        title={url}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {decodedUrl}
-                    </a>
-                );
+                result.push(<SafeLink key={text.entities[i].offset} url={entityText} displayText={entityText} />);
                 break;
             }
             case 'textEntityTypeTextUrl': {
-                let url = text.entities[i].type.url.startsWith('http')
-                    ? text.entities[i].type.url
-                    : 'http://' + text.entities[i].type.url;
-                result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={url}
-                        title={url}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {entityText}
-                    </a>
-                );
+                let url = entityText;
+                const { url: typeUrl } = text.entities[i].type;
+                if (typeUrl) {
+                    url = typeUrl;
+                }
+
+                result.push(<SafeLink key={text.entities[i].offset} url={url} displayText={entityText} />);
                 break;
             }
             case 'textEntityTypeBold':
@@ -1548,5 +1523,6 @@ export {
     getReplyPhotoSize,
     getEmojiMatches,
     messageComparatorDesc,
-    substring
+    substring,
+    stopPropagation
 };

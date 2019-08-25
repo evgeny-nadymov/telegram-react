@@ -1,0 +1,134 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
+import { stopPropagation } from '../../Utils/Message';
+import './SafeLink.css';
+
+class SafeLink extends React.Component {
+    constructor(props) {
+        super(props);
+
+        const { url, displayText } = this.props;
+
+        this.state = {
+            prevUrl: url,
+            prevDisplayText: displayText,
+            safe: isUrlSafe(displayText, url),
+            decodedUrl: getDecodedUrl(url),
+            href: getHref(url)
+        };
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        const { displayText, url } = props;
+
+        if (state.prevUrl !== url || state.prevDisplayText !== displayText) {
+            return {
+                prevUrl: url,
+                prevDisplayText: displayText,
+                safe: isUrlSafe(displayText, url),
+                decodedUrl: getDecodedUrl(url),
+                href: getHref(url)
+            };
+        }
+
+        return null;
+    }
+
+    handleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.setState({ confirm: true });
+    };
+
+    handleDialogClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    handleClose = () => {
+        this.setState({ confirm: false });
+    };
+
+    handleDone = () => {
+        this.handleClose();
+
+        const { url } = this.props;
+        if (!url) return;
+
+        const newWindow = window.open();
+        newWindow.opener = null;
+        newWindow.location = url;
+    };
+
+    render() {
+        const { displayText, t, url } = this.props;
+        const { confirm, decodedUrl, href, safe } = this.state;
+
+        if (!url) return null;
+        if (!decodedUrl) return null;
+
+        return (
+            <>
+                {safe ? (
+                    <a
+                        href={href}
+                        title={decodedUrl}
+                        target='_blank'
+                        rel='noopener norefferer'
+                        onClick={stopPropagation}>
+                        {displayText || url}
+                    </a>
+                ) : (
+                    <>
+                        <a title={decodedUrl} onClick={this.handleClick}>
+                            {displayText || url}
+                        </a>
+                        {confirm && (
+                            <Dialog
+                                transitionDuration={0}
+                                open={confirm}
+                                onClose={this.handleClose}
+                                onClick={this.handleDialogClick}
+                                aria-labelledby='confirm-dialog-title'>
+                                <DialogTitle id='confirm-dialog-title'>{t('Confirm')}</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>{'Open this link?'}</DialogContentText>
+                                    <DialogContentText>{decodedUrl}</DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={this.handleClose}>{t('Cancel')}</Button>
+                                    <Button onClick={this.handleDone} color='primary'>
+                                        {t('Open')}
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+                        )}
+                    </>
+                )}
+            </>
+        );
+    }
+}
+
+SafeLink.propTypes = {
+    url: PropTypes.string.isRequired,
+    displayText: PropTypes.string
+};
+
+export default withTranslation()(SafeLink);
