@@ -4,3 +4,10 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.safe-link-content-root {
+    min-width: 300px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+}

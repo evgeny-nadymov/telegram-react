@@ -24,6 +24,7 @@ export const NOTIFICATIONS_DEBOUNCE_DELAY_MS = 500;
 export const PHOTO_BIG_SIZE = 1280;
 export const PHOTO_DISPLAY_SIZE = 260;
 export const PHOTO_DISPLAY_SMALL_SIZE = 65;
+export const PHOTO_DISPLAY_EXTRA_SMALL_SIZE = 40;
 export const PHOTO_SIZE = 320;
 export const PHOTO_THUMBNAIL_SIZE = 90;
 export const POLL_QUESTION_LENGTH = 255;

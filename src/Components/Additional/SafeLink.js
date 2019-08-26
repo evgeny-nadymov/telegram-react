@@ -29,7 +29,8 @@ class SafeLink extends React.Component {
             prevDisplayText: displayText,
             safe: isUrlSafe(displayText, url),
             decodedUrl: getDecodedUrl(url),
-            href: getHref(url)
+            href: getHref(url),
+            confirm: false
         };
     }
 
@@ -42,7 +43,8 @@ class SafeLink extends React.Component {
                 prevDisplayText: displayText,
                 safe: isUrlSafe(displayText, url),
                 decodedUrl: getDecodedUrl(url),
-                href: getHref(url)
+                href: getHref(url),
+                confirm: false
             };
         }
 
@@ -107,9 +109,8 @@ class SafeLink extends React.Component {
                                 onClick={this.handleDialogClick}
                                 aria-labelledby='confirm-dialog-title'>
                                 <DialogTitle id='confirm-dialog-title'>{t('Confirm')}</DialogTitle>
-                                <DialogContent>
-                                    <DialogContentText>{'Open this link?'}</DialogContentText>
-                                    <DialogContentText>{decodedUrl}</DialogContentText>
+                                <DialogContent classes={{ root: 'safe-link-content-root' }}>
+                                    <DialogContentText>{`Open this link?\n\n${decodedUrl}`}</DialogContentText>
                                 </DialogContent>
                                 <DialogActions>
                                     <Button onClick={this.handleClose}>{t('Cancel')}</Button>
