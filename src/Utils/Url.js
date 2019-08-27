@@ -5,8 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-export function getHref(url) {
+export function getHref(url, mail) {
     if (!url) return null;
+
+    if (mail) return url.startsWith('mailto:') ? url : 'mailto:' + url;
 
     return url.startsWith('http') ? url : 'http://' + url;
 }
@@ -23,10 +25,10 @@ export function isUrlSafe(displayText, url) {
     return true;
 }
 
-export function getDecodedUrl(url) {
+export function getDecodedUrl(url, mail) {
     if (!url) return null;
 
-    const href = getHref(url);
+    const href = getHref(url, mail);
 
     try {
         return decodeURI(href);

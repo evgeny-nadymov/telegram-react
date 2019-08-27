@@ -23,10 +23,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
 import Photo from '../../Message/Media/Photo';
+import SafeLink from '../../Additional/SafeLink';
 import { accentStyles } from '../../Theme';
 import { openMedia, substring } from '../../../Utils/Message';
 import { getChatShortTitle, isPrivateChat } from '../../../Utils/Chat';
 import { forwardMessages, openChat } from '../../../Actions/Client';
+import punycode from '../../../Utils/Punycode';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedLink.css';
@@ -144,8 +146,15 @@ class SharedLink extends React.Component {
 
     getTitleFromUrl(url) {
         try {
-            const hostname = new URL(url).hostname.split('.');
-            return hostname.length >= 2 ? hostname[hostname.length - 2] : new URL(url).hostname;
+            url = url.startsWith('http') ? url : 'http://' + url;
+            const decodedUrl = decodeURI(url);
+
+            const hostname = new URL(decodedUrl).hostname.split('.');
+            const domain = hostname.length >= 2 ? hostname[hostname.length - 2] : new URL(decodedUrl).hostname;
+
+            console.log('getTitleFromUrl', punycode);
+
+            return punycode.ToUnicode(domain);
         } catch (error) {
             console.error('url: ' + url + '\n' + error);
         }
@@ -173,61 +182,36 @@ class SharedLink extends React.Component {
         if (webPage) {
             title = title || this.getTitleFromUrl(url);
 
-            content = (
-                <>
-                    {url && (
-                        <a className='shared-link-url' href={url} title={url} target='_blank' rel='noopener noreferrer'>
-                            {display_url}
-                        </a>
-                    )}
-                </>
-            );
+            content = <SafeLink className='shared-link-url' url={url} displayText={display_url} />;
         } else {
             const { text } = message.content;
             if (text) {
                 const { entities } = text;
                 if (entities && entities.length > 0) {
-                    description = text.text;
-
                     content = entities.filter(this.isValidEntityType).map(x => {
                         const entityText = substring(text.text, x.offset, x.offset + x.length);
-
-                        let url = null;
-                        let decodedUrl = null;
+                        let url = entityText;
+                        let mail = false;
 
                         switch (x.type['@type']) {
                             case 'textEntityTypeTextUrl': {
-                                url = x.type.url.startsWith('http') ? x.type.url : 'https://' + x.type.url;
+                                const { url: typeUrl } = x.type;
+                                if (typeUrl) {
+                                    url = typeUrl;
+                                }
                                 break;
                             }
                             case 'textEntityTypeUrl': {
-                                url = entityText.startsWith('http') ? entityText : 'https://' + entityText;
                                 break;
                             }
                             case 'textEntityTypeEmailAddress':
-                                url = `mailto:${entityText}`;
+                                mail = true;
                                 break;
-                        }
-
-                        try {
-                            decodedUrl = decodeURI(entityText);
-                        } catch (error) {
-                            console.error('entityText: ' + entityText + '\n' + error);
-                            decodedUrl = entityText;
                         }
 
                         title = title || this.getTitleFromUrl(url);
 
-                        return (
-                            <a
-                                className='shared-link-url'
-                                href={url}
-                                title={url}
-                                target='_blank'
-                                rel='noopener noreferrer'>
-                                {decodedUrl}
-                            </a>
-                        );
+                        return <SafeLink className='shared-link-url' url={url} displayText={entityText} mail={mail} />;
                     });
                 }
             }

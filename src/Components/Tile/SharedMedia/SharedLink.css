@@ -31,6 +31,9 @@
     flex-shrink: 1;
     margin-left: 12px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .shared-link-content .web-page-title {
@@ -38,6 +41,9 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.shared-link-content .web-page-title:first-letter {
     text-transform: capitalize;
 }
 

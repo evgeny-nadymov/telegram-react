@@ -22,28 +22,28 @@ class SafeLink extends React.Component {
     constructor(props) {
         super(props);
 
-        const { url, displayText } = this.props;
+        const { displayText, mail, url } = props;
 
         this.state = {
             prevUrl: url,
             prevDisplayText: displayText,
             safe: isUrlSafe(displayText, url),
-            decodedUrl: getDecodedUrl(url),
-            href: getHref(url),
+            decodedUrl: getDecodedUrl(url, mail),
+            href: getHref(url, mail),
             confirm: false
         };
     }
 
     static getDerivedStateFromProps(props, state) {
-        const { displayText, url } = props;
+        const { displayText, mail, url } = props;
 
         if (state.prevUrl !== url || state.prevDisplayText !== displayText) {
             return {
                 prevUrl: url,
                 prevDisplayText: displayText,
                 safe: isUrlSafe(displayText, url),
-                decodedUrl: getDecodedUrl(url),
-                href: getHref(url),
+                decodedUrl: getDecodedUrl(url, mail),
+                href: getHref(url, mail),
                 confirm: false
             };
         }
@@ -79,7 +79,7 @@ class SafeLink extends React.Component {
     };
 
     render() {
-        const { displayText, t, url } = this.props;
+        const { className, displayText, t, url } = this.props;
         const { confirm, decodedUrl, href, safe } = this.state;
 
         if (!url) return null;
@@ -89,6 +89,7 @@ class SafeLink extends React.Component {
             <>
                 {safe ? (
                     <a
+                        className={className}
                         href={href}
                         title={decodedUrl}
                         target='_blank'
@@ -98,7 +99,7 @@ class SafeLink extends React.Component {
                     </a>
                 ) : (
                     <>
-                        <a title={decodedUrl} onClick={this.handleClick}>
+                        <a className={className} title={decodedUrl} onClick={this.handleClick}>
                             {displayText || url}
                         </a>
                         {confirm && (
@@ -129,7 +130,8 @@ class SafeLink extends React.Component {
 
 SafeLink.propTypes = {
     url: PropTypes.string.isRequired,
-    displayText: PropTypes.string
+    displayText: PropTypes.string,
+    mail: PropTypes.bool
 };
 
 export default withTranslation()(SafeLink);
