@@ -56,10 +56,8 @@ class Animation extends React.Component {
         const player = this.videoRef.current;
         if (player) {
             if (this.inView && this.focused && !this.openMediaViewer && !this.openProfileMediaViewer) {
-                //console.log('clientUpdate player play message_id=' + this.props.messageId);
                 player.play();
             } else {
-                //console.log('clientUpdate player pause message_id=' + this.props.messageId);
                 player.pause();
             }
         }

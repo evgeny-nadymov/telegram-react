@@ -22,7 +22,7 @@
 }
 
 .sticker-set-dialog-item-sticker {
-    pointer-events: none;
+    /*pointer-events: none;*/
     padding: 6px;
 }
 

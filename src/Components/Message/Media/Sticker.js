@@ -9,18 +9,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import pako from 'pako';
+import Lottie from '../../Viewer/Lottie';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFitSize } from '../../../Utils/Common';
 import { getBlob, getSrc } from '../../../Utils/File';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
+import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
-import Lottie from '../../Viewer/Lottie';
-import { inflateBlob } from '../../../Workers/BlobInflator';
+import ApplicationStore from '../../../Stores/ApplicationStore';
 
 class Sticker extends React.Component {
     constructor(props) {
         super(props);
+
+        this.lottieRef = React.createRef();
 
         this.state = {
             animationDate: null
@@ -67,13 +70,49 @@ class Sticker extends React.Component {
     componentDidMount() {
         this.loadContent();
 
+        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        StickerStore.on('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
     componentWillUnmount() {
+        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
+    }
+
+    onClientUpdateStickerSet = update => {
+        const { stickerSet } = update;
+
+        // if (!this.props.pack) {
+        //     this.openedStickerSet = stickerSet;
+        // }
+        // this.startStopAnimation();
+    };
+
+    onClientUpdateFocusWindow = update => {
+        const { focused } = update;
+        const { is_animated } = this.props.sticker;
+
+        if (!is_animated) return;
+
+        this.focused = focused;
+        this.startStopAnimation();
+    };
+
+    startStopAnimation() {
+        const player = this.lottieRef.current;
+        if (!player) return;
+
+        if (this.paused) {
+            // && this.focused && !this.openedStickerSet)
+            player.play();
+            this.paused = false;
+        } else {
+            this.paused = player.forcePause();
+        }
     }
 
     onClientUpdateStickerBlob = update => {
@@ -103,22 +142,29 @@ class Sticker extends React.Component {
     };
 
     loadContent = async () => {
-        const { blur, sticker: source, preview } = this.props;
+        const { blur, sticker: source, playAnimated, preview } = this.props;
         const { is_animated, thumbnail, sticker } = source;
 
-        if (preview) return;
         if (!is_animated) return;
+        if (preview && !playAnimated) return;
 
         const blob = getBlob(sticker);
         if (!blob) return;
 
         let animationData = null;
         try {
-            //const result = await inflateBlob(blob);
+            // animationData = StickerStore.getAnimationData(blob);
+            // if (animationData) {
+            //     this.setState({ animationData });
+            //     return;
+            // }
+            // console.log('Lottie.inflate start', sticker.id);
             const result = pako.inflate(await new Response(blob).arrayBuffer(), { to: 'string' });
+            // console.log('Lottie.inflate finish', sticker.id);
             if (!result) return;
 
             animationData = JSON.parse(result);
+            // StickerStore.setAnimationData(blob, animationData);
         } catch (err) {
             console.log(err);
         }
@@ -127,10 +173,18 @@ class Sticker extends React.Component {
         this.setState({ animationData });
     };
 
-    handleMouseOver = event => {};
-
     render() {
-        const { className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
+        const {
+            autoplay,
+            playAnimated,
+            className,
+            displaySize,
+            blur,
+            sticker: source,
+            style,
+            openMedia,
+            preview
+        } = this.props;
         const { is_animated, thumbnail, sticker, width, height } = source;
         const { animationData } = this.state;
 
@@ -149,11 +203,12 @@ class Sticker extends React.Component {
 
         const content = is_animated ? (
             <>
-                {animationData && !preview ? (
+                {animationData && (!preview || playAnimated) ? (
                     <Lottie
+                        ref={this.lottieRef}
                         isClickToPauseDisabled={true}
                         options={{
-                            autoplay: true,
+                            autoplay: autoplay,
                             loop: true,
                             animationData: animationData,
                             renderer: 'svg',
@@ -161,10 +216,10 @@ class Sticker extends React.Component {
                                 preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
                                 clearCanvas: false,
                                 progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                hideOnTransparent: true //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
+                                hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
+                                className: 'lottie-svg'
                             }
                         }}
-                        onMouseOver={this.handleMouseOver}
                     />
                 ) : (
                     <img
@@ -203,16 +258,20 @@ Sticker.propTypes = {
     messageId: PropTypes.number,
     sticker: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
+    autoplay: PropTypes.bool,
     blur: PropTypes.bool,
-    displaySize: PropTypes.number
+    displaySize: PropTypes.number,
+    pack: PropTypes.bool
 };
 
 Sticker.defaultProps = {
     chatId: 0,
     messageId: 0,
     openMedia: () => {},
+    autoplay: true,
     blur: true,
-    displaySize: STICKER_DISPLAY_SIZE
+    displaySize: STICKER_DISPLAY_SIZE,
+    pack: false
 };
 
 export default Sticker;

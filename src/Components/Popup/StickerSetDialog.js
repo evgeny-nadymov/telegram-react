@@ -188,8 +188,39 @@ class StickerSetDialog extends React.Component {
         return indexes.map(i => stickers[i]);
     };
 
-    handleMouseOver = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+    // handleMouseOver = event => {
+    //     const stickerId = Number(event.target.dataset.stickerId);
+    //     if (!stickerId) return;
+    //
+    //     if (!this.mouseDown) return;
+    //
+    //     this.setState({ stickerId });
+    //     this.loadPreviewContent(stickerId);
+    // };
+
+    // handleMouseDown = event => {
+    //     const stickerId = Number(event.target.dataset.stickerId);
+    //     if (!stickerId) return;
+    //
+    //     this.setState({ stickerId });
+    //     this.loadPreviewContent(stickerId);
+    //
+    //     this.mouseDown = true;
+    //     document.addEventListener('mouseup', this.handleMouseUp);
+    //
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //     return false;
+    // };
+
+    handleMouseUp = () => {
+        this.setState({ stickerId: 0 });
+        this.mouseDown = false;
+        document.removeEventListener('mouseup', this.handleMouseUp);
+    };
+
+    handleMouseEnter = event => {
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         if (!this.mouseDown) return;
@@ -199,7 +230,7 @@ class StickerSetDialog extends React.Component {
     };
 
     handleMouseDown = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         this.setState({ stickerId });
@@ -211,12 +242,6 @@ class StickerSetDialog extends React.Component {
         event.preventDefault();
         event.stopPropagation();
         return false;
-    };
-
-    handleMouseUp = () => {
-        this.setState({ stickerId: 0 });
-        this.mouseDown = false;
-        document.removeEventListener('mouseup', this.handleMouseUp);
     };
 
     render() {
@@ -231,7 +256,9 @@ class StickerSetDialog extends React.Component {
                 className='sticker-set-dialog-item'
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
-                style={{ width: 76, height: 76 }}>
+                style={{ width: 76, height: 76 }}
+                onMouseEnter={this.handleMouseEnter}
+                onMouseDown={this.handleMouseDown}>
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
@@ -239,6 +266,9 @@ class StickerSetDialog extends React.Component {
                     sticker={x}
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     blur={false}
+                    autoplay={false}
+                    playAnimated={true}
+                    pack={true}
                 />
                 <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
             </div>
@@ -269,8 +299,7 @@ class StickerSetDialog extends React.Component {
                 <DialogContent
                     classes={{ root: classes.contentRoot }}
                     onMouseOver={this.handleMouseOver}
-                    onMouseOut={this.handleMouseOut}
-                    onMouseDown={this.handleMouseDown}>
+                    onMouseOut={this.handleMouseOut}>
                     {items}
                 </DialogContent>
                 <DialogActions className={classNames({ [classes.disablePointerEvents]: Boolean(sticker) })}>

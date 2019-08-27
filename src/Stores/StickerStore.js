@@ -20,6 +20,7 @@ class StickerStore extends EventEmitter {
     reset = () => {
         this.stickerSet = null;
         this.hint = null;
+        this.animationData = new WeakMap();
     };
 
     onUpdate = update => {
@@ -104,6 +105,14 @@ class StickerStore extends EventEmitter {
         TdLibController.removeListener('update', this.onUpdate);
         TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
+
+    getAnimationData(key) {
+        return this.animationData.get(key);
+    }
+
+    setAnimationData(key, data) {
+        this.animationData.set(key, data);
+    }
 }
 
 const store = new StickerStore();

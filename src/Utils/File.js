@@ -1488,6 +1488,7 @@ function loadDraftContent(store, chatId) {
 }
 
 function loadStickerSetContent(store, stickerSet) {
+    console.log('Lottie.loadStickerSetContent');
     if (!stickerSet) return;
 
     const { stickers } = stickerSet;
@@ -1498,7 +1499,12 @@ function loadStickersContent(store, stickers) {
     if (!stickers) return;
 
     stickers.forEach(sticker => {
+        console.log('Lottie.loadStickerThumbnailContent', sticker.sticker.id);
         loadStickerThumbnailContent(store, sticker, null);
+        if (sticker.is_animated) {
+            console.log('Lottie.loadStickerContent', sticker.sticker.id);
+            loadStickerContent(store, sticker, null);
+        }
     });
 }
 

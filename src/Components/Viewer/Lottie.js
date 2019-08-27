@@ -100,11 +100,23 @@ class Lottie extends React.Component {
     }
 
     pause() {
+        console.log('Lottie.pause 0');
         if (this.props.isPaused && !this.anim.isPaused) {
+            console.log('Lottie.pause 1');
             this.anim.pause();
         } else if (!this.props.isPaused && this.anim.isPaused) {
+            console.log('Lottie.pause 2');
             this.anim.pause();
         }
+    }
+
+    forcePause() {
+        if (this.anim.isPaused) {
+            return false;
+        }
+
+        this.anim.pause();
+        return true;
     }
 
     destroy() {
@@ -112,6 +124,8 @@ class Lottie extends React.Component {
     }
 
     registerEvents(eventListeners) {
+        this.anim.addEventListener('loopComplete', this.handleLoopComplete);
+
         if (!eventListeners) return;
 
         eventListeners.forEach(({ eventName, callback }) => {
@@ -120,6 +134,8 @@ class Lottie extends React.Component {
     }
 
     deRegisterEvents(eventListeners) {
+        this.anim.removeEventListener('loopComplete', this.handleLoopComplete);
+
         if (!eventListeners) return;
 
         eventListeners.forEach(({ eventName, callback }) => {
@@ -135,6 +151,36 @@ class Lottie extends React.Component {
         } else {
             this.anim.pause();
         }
+    };
+
+    handleMouseEnter = () => {
+        console.log('Lottie.handleMouseEnter');
+        this.entered = true;
+
+        if (this.props.options.autoplay) return;
+        if (!this.anim) return;
+
+        if (this.anim.isPaused) {
+            this.anim.play();
+            this.loopCount = 0;
+        }
+    };
+
+    handleLoopComplete = () => {
+        if (this.props.options.autoplay) return;
+        if (!this.anim) return;
+
+        if (!this.entered) this.loopCount += 1;
+        if (this.loopCount > 2) {
+            if (!this.anim.isPaused) {
+                this.anim.pause();
+            }
+        }
+    };
+
+    handleMouseOut = () => {
+        console.log('Lottie.handleMouseOut');
+        this.entered = false;
     };
 
     render() {
@@ -177,6 +223,8 @@ class Lottie extends React.Component {
                 aria-label={ariaLabel}
                 tabIndex='0'
                 {...other}
+                onMouseEnter={this.handleMouseEnter}
+                onMouseOut={this.handleMouseOut}
             />
         );
     }
