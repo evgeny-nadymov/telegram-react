@@ -8,16 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import pako from 'pako';
 import Lottie from '../../Viewer/Lottie';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFitSize } from '../../../Utils/Common';
 import { getBlob, getSrc } from '../../../Utils/File';
+import { inflateBlob } from '../../../Workers/BlobInflator';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
+import ApplicationStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
 import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
-import ApplicationStore from '../../../Stores/ApplicationStore';
 
 class Sticker extends React.Component {
     constructor(props) {
@@ -26,8 +26,17 @@ class Sticker extends React.Component {
         this.lottieRef = React.createRef();
 
         this.state = {
-            animationDate: null
+            animationDate: null,
+            hasError: false
         };
+    }
+
+    static getDerivedStateFromError(error) {
+        return { hasError: true };
+    }
+
+    componentDidCatch(error, errorInfo) {
+        console.log('[Sticker] render error', error, errorInfo);
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -159,7 +168,8 @@ class Sticker extends React.Component {
             //     return;
             // }
             // console.log('Lottie.inflate start', sticker.id);
-            const result = pako.inflate(await new Response(blob).arrayBuffer(), { to: 'string' });
+            //const result = pako.inflate(await new Response(blob).arrayBuffer(), { to: 'string' });
+            const result = await inflateBlob(blob);
             // console.log('Lottie.inflate finish', sticker.id);
             if (!result) return;
 
@@ -186,11 +196,35 @@ class Sticker extends React.Component {
             preview
         } = this.props;
         const { is_animated, thumbnail, sticker, width, height } = source;
-        const { animationData } = this.state;
+        const { animationData, hasError } = this.state;
+
+        const isAnimated = is_animated && thumbnail;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(sticker);
         const isBlurred = isBlurredThumbnail(thumbnail);
+
+        if (hasError) {
+            const style = {
+                width: displaySize,
+                height: displaySize
+            };
+
+            if (process.env.NODE_ENV !== 'production') {
+                style.background = '#ff000066';
+            }
+
+            return (
+                <div className={classNames('sticker', className)} style={style} onClick={openMedia}>
+                    <img
+                        className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                        draggable={false}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                </div>
+            );
+        }
 
         const fitSize = getFitSize({ width: width, height: height }, displaySize);
         if (!fitSize) return null;
@@ -201,7 +235,7 @@ class Sticker extends React.Component {
             ...style
         };
 
-        const content = is_animated ? (
+        const content = isAnimated ? (
             <>
                 {animationData && (!preview || playAnimated) ? (
                     <Lottie

@@ -5,26 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-// import { randomString } from './Helpers';
-// import myWorker from './test.worker';
-//
-// const worker = new myWorker();
-// const handlers = { };
-//
-// worker.onmessage = function (e) {
-//     console.log('worker.onmessage', e);
-//     if (!e.data.error) {
-//         handlers[e.data.key].resolve(e.data.json)
-//     } else {
-//         handlers[e.data.key].reject(e.data.msg)
-//     }
-// };
-//
-// export async function inflateBlob (blob) {
-//     const key = randomString();
-//     console.log('worker.inflateBlob', key, blob);
-//     return new Promise((resolve, reject) => {
-//         handlers[key] = { resolve, reject };
-//         worker.postMessage({ key, blob })
-//     })
-// }
+import { randomString } from './Helpers';
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import PakoWorker from './pako.worker';
+
+const worker = new PakoWorker();
+const handlers = {};
+
+worker.onmessage = event => {
+    const { data } = event;
+    if (!data.error) {
+        handlers[data.key].resolve(data.result);
+    } else {
+        handlers[data.key].reject(data.msg);
+    }
+};
+
+export async function inflateBlob(blob) {
+    const key = randomString();
+    return new Promise((resolve, reject) => {
+        handlers[key] = { resolve, reject };
+        worker.postMessage({ key, blob });
+    });
+}
