@@ -18,7 +18,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Typography from '@material-ui/core/Typography';
 import ShareStickerSetButton from './ShareStickerSetButton';
-import Sticker from '../Message/Media/Sticker';
+import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerPreview from '../ColumnMiddle/StickerPreview';
 import { loadStickerContent, loadStickerSetContent } from '../../Utils/File';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
@@ -262,13 +262,12 @@ class StickerSetDialog extends React.Component {
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
-                    preview
                     sticker={x}
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
-                    blur={false}
                     autoplay={false}
-                    playAnimated={true}
-                    pack={true}
+                    blur={false}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
+                    preview
+                    source={StickerSourceEnum.STICKER_SET}
                 />
                 <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
             </div>

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Sticker from '../Message/Media/Sticker';
+import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import { STICKER_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickerPreview.css';
@@ -73,7 +73,11 @@ class StickerPreview extends React.Component {
         return (
             <div className='sticker-preview'>
                 <div className='sticker-preview-emoji'>{emoji}</div>
-                <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
+                <Sticker
+                    sticker={sticker}
+                    displaySize={STICKER_PREVIEW_DISPLAY_SIZE}
+                    source={StickerSourceEnum.PREVIEW}
+                />
             </div>
         );
     }

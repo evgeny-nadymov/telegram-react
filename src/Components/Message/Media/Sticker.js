@@ -16,14 +16,27 @@ import { inflateBlob } from '../../../Workers/BlobInflator';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
+import MessageStore from '../../../Stores/MessageStore';
 import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
+
+export const StickerSourceEnum = Object.freeze({
+    HINTS: 'HINTS',
+    MESSAGE: 'MESSAGE',
+    PICKER_HEADER: 'PICKER_HEADER',
+    PICKER: 'PICKER',
+    PREVIEW: 'PREVIEW',
+    STICKER_SET: 'STICKER_SET',
+    UNKNOWN: 'UNKNOWN'
+});
 
 class Sticker extends React.Component {
     constructor(props) {
         super(props);
 
         this.lottieRef = React.createRef();
+        this.focused = window.hasFocus;
+        this.inView = false;
 
         this.state = {
             animationDate: null,
@@ -82,6 +95,7 @@ class Sticker extends React.Component {
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.on('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
@@ -89,8 +103,18 @@ class Sticker extends React.Component {
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
+
+    onClientUpdateMessagesInView = update => {
+        const { chatId, messageId } = this.props;
+        const key = `${chatId}_${messageId}`;
+
+        this.inView = update.messages.has(key);
+
+        this.startStopAnimation();
+    };
 
     onClientUpdateStickerSet = update => {
         const { stickerSet } = update;
@@ -103,24 +127,24 @@ class Sticker extends React.Component {
 
     onClientUpdateFocusWindow = update => {
         const { focused } = update;
-        const { is_animated } = this.props.sticker;
-
-        if (!is_animated) return;
+        const { is_animated, thumbnail } = this.props.sticker;
+        const isAnimated = is_animated && thumbnail;
+        if (!isAnimated) return;
 
         this.focused = focused;
         this.startStopAnimation();
     };
 
     startStopAnimation() {
+        const { autoplay, sticker } = this.props;
+
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (this.paused) {
-            // && this.focused && !this.openedStickerSet)
+        if (this.focused && this.inView && autoplay) {
             player.play();
-            this.paused = false;
         } else {
-            this.paused = player.forcePause();
+            player.pause();
         }
     }
 
@@ -151,11 +175,12 @@ class Sticker extends React.Component {
     };
 
     loadContent = async () => {
-        const { blur, sticker: source, playAnimated, preview } = this.props;
+        const { blur, sticker: source, preview } = this.props;
         const { is_animated, thumbnail, sticker } = source;
+        const isAnimated = is_animated && thumbnail;
 
-        if (!is_animated) return;
-        if (preview && !playAnimated) return;
+        if (!isAnimated) return;
+        if (preview) return;
 
         const blob = getBlob(sticker);
         if (!blob) return;
@@ -167,10 +192,7 @@ class Sticker extends React.Component {
             //     this.setState({ animationData });
             //     return;
             // }
-            // console.log('Lottie.inflate start', sticker.id);
-            //const result = pako.inflate(await new Response(blob).arrayBuffer(), { to: 'string' });
             const result = await inflateBlob(blob);
-            // console.log('Lottie.inflate finish', sticker.id);
             if (!result) return;
 
             animationData = JSON.parse(result);
@@ -240,7 +262,6 @@ class Sticker extends React.Component {
                 {animationData && (!preview || playAnimated) ? (
                     <Lottie
                         ref={this.lottieRef}
-                        isClickToPauseDisabled={true}
                         options={{
                             autoplay: autoplay,
                             loop: true,
@@ -292,20 +313,24 @@ Sticker.propTypes = {
     messageId: PropTypes.number,
     sticker: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
+
     autoplay: PropTypes.bool,
     blur: PropTypes.bool,
     displaySize: PropTypes.number,
-    pack: PropTypes.bool
+    preview: PropTypes.bool,
+    source: PropTypes.string
 };
 
 Sticker.defaultProps = {
     chatId: 0,
     messageId: 0,
     openMedia: () => {},
+
     autoplay: true,
     blur: true,
     displaySize: STICKER_DISPLAY_SIZE,
-    pack: false
+    preview: false,
+    source: StickerSourceEnum.UNKNOWN
 };
 
 export default Sticker;

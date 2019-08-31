@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Sticker from '../Message/Media/Sticker';
+import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerPreview from './StickerPreview';
 import { borderStyle } from '../Theme';
 import { loadStickerContent, loadStickersContent } from '../../Utils/File';
@@ -246,10 +246,12 @@ class StickersHint extends React.Component {
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
-                    preview
                     sticker={x}
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
+                    autoplay={false}
                     blur={false}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
+                    preview
+                    source={StickerSourceEnum.HINTS}
                 />
             </div>
         ));

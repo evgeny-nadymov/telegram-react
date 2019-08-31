@@ -14,6 +14,7 @@ import Animator from '../../Utils/Animatior';
 import Sticker from './../Message/Media/Sticker';
 import { accentStyles, borderStyle } from '../Theme';
 import { ANIMATION_DURATION_200MS } from '../../Constants';
+import { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerStore from '../../Stores/StickerStore';
 import './StickersPickerHeader.css';
 
@@ -110,10 +111,12 @@ class StickersPickerHeader extends React.Component {
             <Sticker
                 key={x.sticker.id}
                 className='stickers-picker-header-sticker'
-                preview
                 sticker={x}
-                displaySize={32}
+                autoplay={false}
                 blur={false}
+                displaySize={32}
+                preview
+                source={StickerSourceEnum.PICKER_HEADER}
                 openMedia={() => this.handleSelect(x)}
             />
         ));

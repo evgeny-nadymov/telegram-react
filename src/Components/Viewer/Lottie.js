@@ -13,7 +13,6 @@ import './Lottie.css';
 class Lottie extends React.Component {
     componentDidMount() {
         const { options, eventListeners } = this.props;
-        // console.log('Lottie.componentDidMount', eventListeners, this.props);
 
         const {
             loop,
@@ -38,6 +37,7 @@ class Lottie extends React.Component {
         this.options = { ...this.options, ...options };
 
         this.anim = lottie.loadAnimation(this.options);
+        //this.anim.setSubframe(false);
         this.registerEvents(eventListeners);
     }
 
@@ -56,10 +56,7 @@ class Lottie extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        // console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
-        if (this.props.isStopped) {
-            this.stop();
-        } else if (this.props.segments) {
+        if (this.props.segments) {
             this.playSegments();
         } else {
             this.play();
@@ -71,7 +68,6 @@ class Lottie extends React.Component {
     }
 
     componentWillUnmount() {
-        // console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
         this.deRegisterEvents(this.props.eventListeners);
         this.destroy();
         this.options.animationData = null;
@@ -100,27 +96,17 @@ class Lottie extends React.Component {
     }
 
     pause() {
-        console.log('Lottie.pause 0');
-        if (this.props.isPaused && !this.anim.isPaused) {
-            console.log('Lottie.pause 1');
-            this.anim.pause();
-        } else if (!this.props.isPaused && this.anim.isPaused) {
-            console.log('Lottie.pause 2');
+        if (!this.isPaused) {
             this.anim.pause();
         }
-    }
-
-    forcePause() {
-        if (this.anim.isPaused) {
-            return false;
-        }
-
-        this.anim.pause();
-        return true;
     }
 
     destroy() {
         this.anim.destroy();
+    }
+
+    get isPaused() {
+        return this.anim.isPaused;
     }
 
     registerEvents(eventListeners) {
@@ -143,16 +129,6 @@ class Lottie extends React.Component {
         });
     }
 
-    handleClickToPause = () => {
-        // The pause() method is for handling pausing by passing a prop isPaused
-        // This method is for handling the ability to pause by clicking on the animation
-        if (this.anim.isPaused) {
-            this.anim.play();
-        } else {
-            this.anim.pause();
-        }
-    };
-
     handleMouseEnter = () => {
         console.log('Lottie.handleMouseEnter');
         this.entered = true;
@@ -167,6 +143,7 @@ class Lottie extends React.Component {
     };
 
     handleLoopComplete = () => {
+        console.log('[Animation] loopComplete', this.anim);
         if (this.props.options.autoplay) return;
         if (!this.anim) return;
 
@@ -184,7 +161,7 @@ class Lottie extends React.Component {
     };
 
     render() {
-        const { width, height, ariaRole, ariaLabel, isClickToPauseDisabled, title, ...other } = this.props;
+        const { width, height, ariaRole, ariaLabel, title, ...other } = this.props;
 
         const getSize = initial => {
             let size;
@@ -207,8 +184,6 @@ class Lottie extends React.Component {
             ...this.props.style
         };
 
-        const onClickHandler = isClickToPauseDisabled ? () => null : this.handleClickToPause;
-
         return (
             // Bug with eslint rules https://github.com/airbnb/javascript/issues/1374
             // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -217,7 +192,6 @@ class Lottie extends React.Component {
                     this.el = c;
                 }}
                 style={lottieStyles}
-                onClick={onClickHandler}
                 title={title}
                 role={ariaRole}
                 aria-label={ariaLabel}
@@ -235,26 +209,20 @@ Lottie.propTypes = {
     options: PropTypes.object.isRequired,
     height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    isStopped: PropTypes.bool,
-    isPaused: PropTypes.bool,
     speed: PropTypes.number,
     segments: PropTypes.arrayOf(PropTypes.number),
     direction: PropTypes.number,
     ariaRole: PropTypes.string,
     ariaLabel: PropTypes.string,
-    isClickToPauseDisabled: PropTypes.bool,
     title: PropTypes.string,
     style: PropTypes.string
 };
 
 Lottie.defaultProps = {
     eventListeners: [],
-    isStopped: false,
-    isPaused: false,
     speed: 1,
     ariaRole: 'button',
     ariaLabel: 'animation',
-    isClickToPauseDisabled: false,
     title: ''
 };
 

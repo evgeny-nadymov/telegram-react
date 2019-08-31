@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Sticker from '../Message/Media/Sticker';
+import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import './StickerSet.css';
 
@@ -63,9 +63,11 @@ class StickerSet extends React.Component {
                     key={x.sticker.id}
                     className='sticker-set-item-sticker'
                     sticker={x}
-                    preview
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
+                    autoplay={false}
                     blur={false}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
+                    preview
+                    source={StickerSourceEnum.PICKER}
                 />
             </div>
         ));

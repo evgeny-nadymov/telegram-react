@@ -17,7 +17,7 @@ import Location from '../Components/Message/Media/Location';
 import Photo from '../Components/Message/Media/Photo';
 import Poll from '../Components/Message/Media/Poll';
 import SafeLink from '../Components/Additional/SafeLink';
-import Sticker from '../Components/Message/Media/Sticker';
+import Sticker, { StickerSourceEnum } from '../Components/Message/Media/Sticker';
 import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
@@ -295,7 +295,15 @@ function getMedia(message, openMedia) {
         case 'messagePoll':
             return <Poll chatId={chat_id} messageId={id} poll={content.poll} openMedia={openMedia} />;
         case 'messageSticker':
-            return <Sticker chatId={chat_id} messageId={id} sticker={content.sticker} openMedia={openMedia} />;
+            return (
+                <Sticker
+                    chatId={chat_id}
+                    messageId={id}
+                    sticker={content.sticker}
+                    source={StickerSourceEnum.MESSAGE}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageText':
             return null;
         case 'messageVenue':

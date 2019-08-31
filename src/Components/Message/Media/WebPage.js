@@ -16,7 +16,7 @@ import Audio from './Audio';
 import Document from './Document';
 import VoiceNote from './VoiceNote';
 import VideoNote from './VideoNote';
-import Sticker from './Sticker';
+import Sticker, { StickerSourceEnum } from './Sticker';
 import { getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
 import { getSrc } from '../../../Utils/File';
@@ -63,7 +63,16 @@ class WebPage extends React.Component {
         } = web_page;
 
         if (sticker) {
-            return [null, <Sticker chatId={chatId} messageId={messageId} sticker={sticker} openMedia={openMedia} />];
+            return [
+                null,
+                <Sticker
+                    chatId={chatId}
+                    messageId={messageId}
+                    sticker={sticker}
+                    openMedia={openMedia}
+                    source={StickerSourceEnum.MESSAGE}
+                />
+            ];
         }
 
         if (voice_note) {
