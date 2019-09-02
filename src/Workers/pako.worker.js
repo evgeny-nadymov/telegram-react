@@ -15,7 +15,7 @@ self.addEventListener('message', ({ data: { key, blob } }) => {
             const result = pako.inflate(e.target.result, { to: 'string' });
             postMessage({ key, result: result });
         } catch (err) {
-            postMessage({ error: true, msg: err.toString() });
+            postMessage({ key, error: true, msg: err.toString() });
         }
     };
     reader.readAsArrayBuffer(blob);

@@ -161,8 +161,8 @@ class StickersHint extends React.Component {
         return indexes.map(i => stickers[i]);
     };
 
-    handleMouseOver = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+    handleMouseEnter = event => {
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         if (!this.mouseDown) return;
@@ -175,7 +175,7 @@ class StickersHint extends React.Component {
     };
 
     handleMouseDown = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         this.mouseDownStickerId = stickerId;
@@ -242,7 +242,9 @@ class StickersHint extends React.Component {
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
                 style={{ width: STICKER_HINT_DISPLAY_SIZE, height: STICKER_HINT_DISPLAY_SIZE }}
-                onClick={() => this.handleSend(x)}>
+                onClick={() => this.handleSend(x)}
+                onMouseEnter={this.handleMouseEnter}
+                onMouseDown={this.handleMouseDown}>
                 <Sticker
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
@@ -260,11 +262,7 @@ class StickersHint extends React.Component {
         const sticker = stickerIndex !== -1 ? items[stickerIndex] : null;
 
         return (
-            <div
-                ref={this.hintsRef}
-                className={classNames('stickers-hint', classes.borderColor, classes.root)}
-                onMouseOver={this.handleMouseOver}
-                onMouseDown={this.handleMouseDown}>
+            <div ref={this.hintsRef} className={classNames('stickers-hint', classes.borderColor, classes.root)}>
                 {controls}
                 {Boolean(sticker) && showPreview && <StickerPreview sticker={sticker} />}
             </div>

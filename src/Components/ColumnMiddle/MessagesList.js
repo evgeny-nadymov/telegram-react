@@ -131,10 +131,12 @@ class MessagesList extends React.Component {
         // );
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
+            //console.log('[Animation] componentDidUpdate');
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
         } else {
             if (!this.scrollBehaviorNone) {
                 this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
+                //console.log('[Animation] componentDidUpdate handleScrollBehavior');
             }
         }
     }
@@ -792,23 +794,19 @@ class MessagesList extends React.Component {
         this.updateItemsInView();
 
         if (list.scrollTop <= 0) {
-            // console.log('SCROLL HANDLESCROLL onLoadNext');
             this.onLoadNext();
         } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
-            // console.log('SCROLL HANDLESCROLL onLoadPrevious', list.scrollTop, list.offsetHeight, list.scrollHeight, history);
             this.onLoadPrevious();
         }
 
         if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
             if (this.completed && scrollDownVisible) {
                 if (this.prevScrollTop !== list.scrollTop && this.prevScrollTop && this.prevHistory === history) {
-                    // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, this.prevScrollTop, list.scrollTop);
                     this.setState({
                         scrollDownVisible: false,
                         replyHistory: []
                     });
                 } else if (!replyHistory.length) {
-                    // console.log('MessagesList.handleScroll scrollDown', false, this.completed, scrollDownVisible, replyHistory.length);
                     this.setState({
                         scrollDownVisible: false
                     });
@@ -816,7 +814,6 @@ class MessagesList extends React.Component {
             }
         } else {
             if (!scrollDownVisible) {
-                // console.log('MessagesList.handleScroll scrollDownVisible=true');
                 this.setState({ scrollDownVisible: true });
             }
         }

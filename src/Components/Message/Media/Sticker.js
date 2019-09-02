@@ -119,10 +119,8 @@ class Sticker extends React.Component {
     onClientUpdateStickerSet = update => {
         const { stickerSet } = update;
 
-        // if (!this.props.pack) {
-        //     this.openedStickerSet = stickerSet;
-        // }
-        // this.startStopAnimation();
+        this.openedStickerSet = stickerSet;
+        this.startStopAnimation();
     };
 
     onClientUpdateFocusWindow = update => {
@@ -136,12 +134,12 @@ class Sticker extends React.Component {
     };
 
     startStopAnimation() {
-        const { autoplay, sticker } = this.props;
+        const { autoplay } = this.props;
 
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (this.focused && this.inView && autoplay) {
+        if (autoplay && this.focused && this.inView && !this.openedStickerSet) {
             player.play();
         } else {
             player.pause();
@@ -175,12 +173,12 @@ class Sticker extends React.Component {
     };
 
     loadContent = async () => {
-        const { blur, sticker: source, preview } = this.props;
+        const { sticker: source, autoplay } = this.props;
         const { is_animated, thumbnail, sticker } = source;
         const isAnimated = is_animated && thumbnail;
 
+        if (!is_animated) return;
         if (!isAnimated) return;
-        if (preview) return;
 
         const blob = getBlob(sticker);
         if (!blob) return;
@@ -198,25 +196,19 @@ class Sticker extends React.Component {
             animationData = JSON.parse(result);
             // StickerStore.setAnimationData(blob, animationData);
         } catch (err) {
-            console.log(err);
+            console.log('[Sticker] loadContent error', err);
         }
         if (!animationData) return;
 
-        this.setState({ animationData });
+        if (autoplay) {
+            this.setState({ animationData });
+        } else {
+            this.animationData = animationData;
+        }
     };
 
     render() {
-        const {
-            autoplay,
-            playAnimated,
-            className,
-            displaySize,
-            blur,
-            sticker: source,
-            style,
-            openMedia,
-            preview
-        } = this.props;
+        const { autoplay, className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
         const { is_animated, thumbnail, sticker, width, height } = source;
         const { animationData, hasError } = this.state;
 
@@ -259,13 +251,13 @@ class Sticker extends React.Component {
 
         const content = isAnimated ? (
             <>
-                {animationData && (!preview || playAnimated) ? (
+                {animationData && !preview ? (
                     <Lottie
                         ref={this.lottieRef}
                         options={{
                             autoplay: autoplay,
                             loop: true,
-                            animationData: animationData,
+                            animationData,
                             renderer: 'svg',
                             rendererSettings: {
                                 preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property

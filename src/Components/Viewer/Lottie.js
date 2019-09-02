@@ -13,6 +13,7 @@ import './Lottie.css';
 class Lottie extends React.Component {
     componentDidMount() {
         const { options, eventListeners } = this.props;
+        // console.log('Lottie.componentDidMount', eventListeners, this.props);
 
         const {
             loop,
@@ -37,7 +38,6 @@ class Lottie extends React.Component {
         this.options = { ...this.options, ...options };
 
         this.anim = lottie.loadAnimation(this.options);
-        //this.anim.setSubframe(false);
         this.registerEvents(eventListeners);
     }
 
@@ -47,7 +47,7 @@ class Lottie extends React.Component {
             this.options.animationData !== nextProps.options.animationData ||
             this.options.path !== nextProps.options.path
         ) {
-            this.deRegisterEvents(this.props.eventListeners);
+            this.unregisterEvents(this.props.eventListeners);
             this.destroy();
             this.options = { ...this.options, ...nextProps.options };
             this.anim = lottie.loadAnimation(this.options);
@@ -56,19 +56,23 @@ class Lottie extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.segments) {
+        // console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
+        if (this.props.isStopped) {
+            this.stop();
+        } else if (this.props.segments) {
             this.playSegments();
         } else {
             this.play();
         }
 
-        this.pause();
+        //this.pause();
         this.setSpeed();
         this.setDirection();
     }
 
     componentWillUnmount() {
-        this.deRegisterEvents(this.props.eventListeners);
+        // console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
+        this.unregisterEvents(this.props.eventListeners);
         this.destroy();
         this.options.animationData = null;
         this.options.path = null;
@@ -96,17 +100,11 @@ class Lottie extends React.Component {
     }
 
     pause() {
-        if (!this.isPaused) {
-            this.anim.pause();
-        }
+        this.anim.pause();
     }
 
     destroy() {
         this.anim.destroy();
-    }
-
-    get isPaused() {
-        return this.anim.isPaused;
     }
 
     registerEvents(eventListeners) {
@@ -119,7 +117,7 @@ class Lottie extends React.Component {
         });
     }
 
-    deRegisterEvents(eventListeners) {
+    unregisterEvents(eventListeners) {
         this.anim.removeEventListener('loopComplete', this.handleLoopComplete);
 
         if (!eventListeners) return;
@@ -143,7 +141,6 @@ class Lottie extends React.Component {
     };
 
     handleLoopComplete = () => {
-        console.log('[Animation] loopComplete', this.anim);
         if (this.props.options.autoplay) return;
         if (!this.anim) return;
 
