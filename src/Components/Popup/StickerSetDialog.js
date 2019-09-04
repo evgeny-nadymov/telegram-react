@@ -69,9 +69,9 @@ class StickerSetDialog extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { stickerSet, stickerId } = this.state;
+        const { stickerSet, sticker } = this.state;
 
-        return stickerSet !== nextState.stickerSet || stickerId !== nextState.stickerId;
+        return stickerSet !== nextState.stickerSet || sticker !== nextState.sticker;
     }
 
     componentDidMount() {
@@ -213,27 +213,52 @@ class StickerSetDialog extends React.Component {
     //     return false;
     // };
 
+    getSticker(stickerId) {
+        const { stickerSet } = this.state;
+        if (!stickerSet) return null;
+
+        const { stickers } = stickerSet;
+
+        const stickerIndex = stickers.findIndex(x => x.sticker.id === stickerId);
+        return stickerIndex !== -1 ? stickers[stickerIndex] : null;
+    }
+
     handleMouseUp = () => {
-        this.setState({ stickerId: 0 });
+        const sticker = null;
+        this.setState({ sticker });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
         this.mouseDown = false;
         document.removeEventListener('mouseup', this.handleMouseUp);
     };
 
     handleMouseEnter = event => {
         const stickerId = Number(event.currentTarget.dataset.stickerId);
-        if (!stickerId) return;
+        const sticker = this.getSticker(stickerId);
+        if (!sticker) return;
 
         if (!this.mouseDown) return;
 
-        this.setState({ stickerId });
+        this.setState({ sticker });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
         this.loadPreviewContent(stickerId);
     };
 
     handleMouseDown = event => {
         const stickerId = Number(event.currentTarget.dataset.stickerId);
-        if (!stickerId) return;
+        const sticker = this.getSticker(stickerId);
+        if (!sticker) return;
 
-        this.setState({ stickerId });
+        this.setState({ sticker });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
         this.loadPreviewContent(stickerId);
 
         this.mouseDown = true;
@@ -246,7 +271,7 @@ class StickerSetDialog extends React.Component {
 
     render() {
         const { t, classes } = this.props;
-        const { stickerSet, stickerId } = this.state;
+        const { stickerSet, sticker } = this.state;
         if (!stickerSet) return null;
 
         const { title, stickers, is_installed } = stickerSet;
@@ -272,9 +297,6 @@ class StickerSetDialog extends React.Component {
                 <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
             </div>
         ));
-
-        const stickerIndex = stickers.findIndex(x => x.sticker.id === stickerId);
-        const sticker = stickerIndex !== -1 ? stickers[stickerIndex] : null;
 
         return (
             <Dialog
@@ -309,7 +331,7 @@ class StickerSetDialog extends React.Component {
                         {is_installed ? t('StickersRemove') : t('Add')}
                     </Button>
                 </DialogActions>
-                {Boolean(sticker) && <StickerPreview sticker={sticker} />}
+                {<StickerPreview sticker={sticker} />}
             </Dialog>
         );
     }

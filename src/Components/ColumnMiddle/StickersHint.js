@@ -163,29 +163,39 @@ class StickersHint extends React.Component {
 
     handleMouseEnter = event => {
         const stickerId = Number(event.currentTarget.dataset.stickerId);
-        if (!stickerId) return;
+        const sticker = this.getSticker(stickerId);
+        if (!sticker) return;
 
         if (!this.mouseDown) return;
 
         if (this.mouseDownStickerId !== stickerId) {
             this.mouseDownStickerId = null;
         }
-        this.setState({ previewStickerId: stickerId });
+        this.setState({ sticker });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
         this.loadPreviewContent(stickerId);
     };
 
     handleMouseDown = event => {
         const stickerId = Number(event.currentTarget.dataset.stickerId);
-        if (!stickerId) return;
+        const sticker = this.getSticker(stickerId);
+        if (!sticker) return;
 
         this.mouseDownStickerId = stickerId;
         const now = Date.now();
 
-        this.setState({ previewStickerId: stickerId, timestamp: now, showPreview: false, cancelSend: false });
+        this.setState({ sticker, timestamp: now, showPreview: false, cancelSend: false });
         setTimeout(() => {
             const { timestamp } = this.state;
             if (timestamp === now) {
                 this.setState({ showPreview: true, cancelSend: true });
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateStickerPreview',
+                    sticker
+                });
             }
         }, 500);
 
@@ -200,7 +210,12 @@ class StickersHint extends React.Component {
     };
 
     handleMouseUp = () => {
-        this.setState({ previewStickerId: 0, timestamp: 0, showPreview: false });
+        const sticker = null;
+        this.setState({ sticker, timestamp: 0, showPreview: false });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
         this.mouseDown = false;
         document.removeEventListener('mouseup', this.handleMouseUp);
     };
@@ -229,9 +244,16 @@ class StickersHint extends React.Component {
         return items;
     };
 
+    getSticker(stickerId) {
+        const { items } = this.state;
+
+        const stickerIndex = items.findIndex(x => x.sticker.id === stickerId);
+        return stickerIndex !== -1 ? items[stickerIndex] : null;
+    }
+
     render() {
         const { classes } = this.props;
-        const { hint, items, previewStickerId, showPreview } = this.state;
+        const { hint, items, sticker, showPreview } = this.state;
         if (!hint) return null;
         if (!items) return null;
         if (!items.length) return null;
@@ -257,9 +279,6 @@ class StickersHint extends React.Component {
                 />
             </div>
         ));
-
-        const stickerIndex = items.findIndex(x => x.sticker.id === previewStickerId);
-        const sticker = stickerIndex !== -1 ? items[stickerIndex] : null;
 
         return (
             <div ref={this.hintsRef} className={classNames('stickers-hint', classes.borderColor, classes.root)}>

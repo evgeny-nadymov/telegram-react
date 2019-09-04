@@ -100,7 +100,12 @@ class Lottie extends React.Component {
     }
 
     pause() {
-        this.anim.pause();
+        if (!this.anim.isPaused) {
+            this.anim.pause();
+            return true;
+        }
+
+        return false;
     }
 
     destroy() {
@@ -108,6 +113,8 @@ class Lottie extends React.Component {
     }
 
     registerEvents(eventListeners) {
+        if (!this.anim) return;
+
         this.anim.addEventListener('loopComplete', this.handleLoopComplete);
 
         if (!eventListeners) return;
@@ -118,6 +125,8 @@ class Lottie extends React.Component {
     }
 
     unregisterEvents(eventListeners) {
+        if (!this.anim) return;
+
         this.anim.removeEventListener('loopComplete', this.handleLoopComplete);
 
         if (!eventListeners) return;
@@ -128,7 +137,6 @@ class Lottie extends React.Component {
     }
 
     handleMouseEnter = () => {
-        console.log('Lottie.handleMouseEnter');
         this.entered = true;
 
         if (this.props.options.autoplay) return;
@@ -149,11 +157,14 @@ class Lottie extends React.Component {
             if (!this.anim.isPaused) {
                 this.anim.pause();
             }
+
+            if (this.props.onComplete) {
+                this.props.onComplete();
+            }
         }
     };
 
     handleMouseOut = () => {
-        console.log('Lottie.handleMouseOut');
         this.entered = false;
     };
 

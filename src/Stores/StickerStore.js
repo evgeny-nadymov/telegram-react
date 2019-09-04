@@ -91,6 +91,10 @@ class StickerStore extends EventEmitter {
                 this.emit('clientUpdateStickerSetPosition', update);
                 break;
             }
+            case 'clientUpdateStickerPreview': {
+                this.emit('clientUpdateStickerPreview', update);
+                break;
+            }
             default:
                 break;
         }

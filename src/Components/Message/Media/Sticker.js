@@ -37,6 +37,7 @@ class Sticker extends React.Component {
         this.lottieRef = React.createRef();
         this.focused = window.hasFocus;
         this.inView = false;
+        this.stickerPrevew = StickerStore.stickerPreview;
 
         this.state = {
             animationDate: null,
@@ -96,6 +97,7 @@ class Sticker extends React.Component {
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+        StickerStore.on('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.on('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
@@ -104,8 +106,15 @@ class Sticker extends React.Component {
         FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+        StickerStore.removeListener('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
+
+    onClientUpdateStickerPreview = update => {
+        this.stickerPreview = update.sticker;
+
+        this.startStopAnimation();
+    };
 
     onClientUpdateMessagesInView = update => {
         const { chatId, messageId } = this.props;
@@ -139,11 +148,21 @@ class Sticker extends React.Component {
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (autoplay && this.focused && this.inView && !this.openedStickerSet) {
-            player.play();
-        } else {
-            player.pause();
+        if (this.focused && !this.openedStickerSet && !this.stickerPreview) {
+            if (this.paused) {
+                player.play();
+                this.paused = false;
+                return;
+            }
+
+            if (autoplay && this.inView) {
+                player.play();
+                this.paused = false;
+                return;
+            }
         }
+
+        this.paused = player.pause();
     }
 
     onClientUpdateStickerBlob = update => {
@@ -207,6 +226,20 @@ class Sticker extends React.Component {
         }
     };
 
+    handleMouseEnter = event => {
+        const { animationData } = this;
+        if (animationData) {
+            this.setState({ animationData });
+        }
+    };
+
+    handleAnimationComplete = () => {
+        const { animationData } = this.state;
+        if (animationData) {
+            this.setState({ animationData: null });
+        }
+    };
+
     render() {
         const { autoplay, className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
         const { is_animated, thumbnail, sticker, width, height } = source;
@@ -251,7 +284,7 @@ class Sticker extends React.Component {
 
         const content = isAnimated ? (
             <>
-                {animationData && !preview ? (
+                {animationData ? (
                     <Lottie
                         ref={this.lottieRef}
                         options={{
@@ -267,6 +300,7 @@ class Sticker extends React.Component {
                                 className: 'lottie-svg'
                             }
                         }}
+                        onComplete={this.handleAnimationComplete}
                     />
                 ) : (
                     <img
@@ -293,7 +327,11 @@ class Sticker extends React.Component {
         );
 
         return (
-            <div className={classNames('sticker', className)} style={stickerStyle} onClick={openMedia}>
+            <div
+                className={classNames('sticker', className)}
+                style={stickerStyle}
+                onClick={openMedia}
+                onMouseEnter={this.handleMouseEnter}>
                 {content}
             </div>
         );

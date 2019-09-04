@@ -24,6 +24,7 @@
 .sticker-set-dialog-item-sticker {
     /*pointer-events: none;*/
     padding: 6px;
+    cursor: pointer;
 }
 
 .sticker-set-dialog-item-emoji {

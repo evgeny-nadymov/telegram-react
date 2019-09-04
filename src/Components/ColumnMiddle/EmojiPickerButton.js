@@ -185,6 +185,10 @@ class EmojiPickerButton extends React.Component {
 
     handleStickerPreview = sticker => {
         this.setState({ sticker });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerPreview',
+            sticker
+        });
 
         if (!sticker) {
             this.tryClosePicker();
@@ -274,7 +278,7 @@ class EmojiPickerButton extends React.Component {
                         {this.picker}
                         {this.stickersPicker}
                     </div>
-                    <StickerPreview sticker={sticker} />
+                    {Boolean(sticker) && <StickerPreview sticker={sticker} />}
                 </div>
             </>
         );
