@@ -115,8 +115,6 @@ class Lottie extends React.Component {
     registerEvents(eventListeners) {
         if (!this.anim) return;
 
-        this.anim.addEventListener('loopComplete', this.handleLoopComplete);
-
         if (!eventListeners) return;
 
         eventListeners.forEach(({ eventName, callback }) => {
@@ -127,8 +125,6 @@ class Lottie extends React.Component {
     unregisterEvents(eventListeners) {
         if (!this.anim) return;
 
-        this.anim.removeEventListener('loopComplete', this.handleLoopComplete);
-
         if (!eventListeners) return;
 
         eventListeners.forEach(({ eventName, callback }) => {
@@ -136,40 +132,19 @@ class Lottie extends React.Component {
         });
     }
 
-    handleMouseEnter = () => {
-        this.entered = true;
-
-        if (this.props.options.autoplay) return;
-        if (!this.anim) return;
-
-        if (this.anim.isPaused) {
-            this.anim.play();
-            this.loopCount = 0;
-        }
-    };
-
-    handleLoopComplete = () => {
-        if (this.props.options.autoplay) return;
-        if (!this.anim) return;
-
-        if (!this.entered) this.loopCount += 1;
-        if (this.loopCount > 2) {
-            if (!this.anim.isPaused) {
-                this.anim.pause();
-            }
-
-            if (this.props.onComplete) {
-                this.props.onComplete();
-            }
-        }
-    };
-
-    handleMouseOut = () => {
-        this.entered = false;
-    };
-
     render() {
-        const { width, height, ariaRole, ariaLabel, title, ...other } = this.props;
+        const {
+            width,
+            height,
+            ariaRole,
+            ariaLabel,
+            title,
+            eventListeners,
+            onComplete,
+            onMouseEnter,
+            onMouseOut,
+            ...other
+        } = this.props;
 
         const getSize = initial => {
             let size;
@@ -205,8 +180,8 @@ class Lottie extends React.Component {
                 aria-label={ariaLabel}
                 tabIndex='0'
                 {...other}
-                onMouseEnter={this.handleMouseEnter}
-                onMouseOut={this.handleMouseOut}
+                onMouseEnter={onMouseEnter}
+                onMouseOut={onMouseOut}
             />
         );
     }

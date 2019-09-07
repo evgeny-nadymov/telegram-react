@@ -230,8 +230,8 @@ class StickersPicker extends React.Component {
         });
     };
 
-    handleMouseOver = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+    handleMouseEnter = event => {
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         if (!this.mouseDown) return;
@@ -250,7 +250,7 @@ class StickersPicker extends React.Component {
     };
 
     handleMouseDown = event => {
-        const stickerId = Number(event.target.dataset.stickerId);
+        const stickerId = Number(event.currentTarget.dataset.stickerId);
         if (!stickerId) return;
 
         this.mouseDownStickerId = stickerId;
@@ -355,7 +355,7 @@ class StickersPicker extends React.Component {
                 info={x}
                 onSelect={this.handleStickerSelect}
                 onMouseDown={this.handleMouseDown}
-                onMouseOver={this.handleMouseOver}
+                onMouseEnter={this.handleMouseEnter}
             />
         ));
 
