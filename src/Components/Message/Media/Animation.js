@@ -113,15 +113,16 @@ class Animation extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, t } = this.props;
+        const { displaySize, openMedia, t, style } = this.props;
         const { thumbnail, animation, mime_type, width, height } = this.props.animation;
 
         const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
 
-        const style = {
+        const animationStyle = {
             width: fitPhotoSize.width,
-            height: fitPhotoSize.height
+            height: fitPhotoSize.height,
+            ...style
         };
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
@@ -131,14 +132,14 @@ class Animation extends React.Component {
         const isGif = isGifMimeType(mime_type);
 
         return (
-            <div className='animation' style={style} onClick={openMedia}>
+            <div className='animation' style={animationStyle} onClick={openMedia}>
                 {src ? (
                     isGif ? (
-                        <img className='media-viewer-content-image' style={style} src={src} alt='' />
+                        <img className='animation-preview' src={src} alt='' />
                     ) : (
                         <video
                             ref={this.videoRef}
-                            className='media-viewer-content-image'
+                            className='media-viewer-content-animation'
                             src={src}
                             poster={thumbnailSrc}
                             muted
@@ -153,7 +154,6 @@ class Animation extends React.Component {
                     <>
                         <img
                             className={classNames('animation-preview', { 'media-blurred': isBlurred })}
-                            style={style}
                             src={thumbnailSrc}
                             alt=''
                         />
@@ -173,10 +173,10 @@ class Animation extends React.Component {
 }
 
 Animation.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     animation: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired,
+    openMedia: PropTypes.func,
     size: PropTypes.number,
     displaySize: PropTypes.number
 };

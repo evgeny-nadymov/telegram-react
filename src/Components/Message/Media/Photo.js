@@ -85,8 +85,8 @@ class Photo extends React.Component {
 }
 
 Photo.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     photo: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
     showProgress: PropTypes.bool,

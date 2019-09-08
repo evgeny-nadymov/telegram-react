@@ -42,3 +42,9 @@
     overflow: hidden;
     cursor: pointer;
 }
+
+.web-page-button {
+    background-image: url(data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.or….5159727%2C16.7438514%20Z%22%2F%3E%0A%20%20%20%20%3C%2Fg%3E%0A%3C%2Fsvg%3E);
+    background-repeat: no-repeat;
+    background-position: 5px 4px;
+}

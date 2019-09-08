@@ -16,14 +16,16 @@ import './Document.css';
 
 class Document extends React.Component {
     render() {
-        const { document, openMedia } = this.props;
+        const { document, openMedia, width, height } = this.props;
         if (!document) return null;
 
         const { thumbnail, file_name } = document;
         const file = document.document;
 
+        const style = width && height ? { width, height } : null;
+
         return (
-            <div className='document'>
+            <div className='document' style={style}>
                 <DocumentTile
                     thumbnail={thumbnail}
                     file={file}
@@ -50,10 +52,12 @@ class Document extends React.Component {
 }
 
 Document.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     document: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    openMedia: PropTypes.func,
+    width: PropTypes.number,
+    height: PropTypes.number
 };
 
 export default Document;

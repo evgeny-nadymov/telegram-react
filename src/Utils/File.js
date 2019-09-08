@@ -324,7 +324,6 @@ function loadAudioThumbnailContent(store, audio, message) {
 
 function loadAnimationContent(store, animation, message, useFileSize = true) {
     if (!animation) return;
-    if (!message) return;
 
     let { animation: file } = animation;
     if (!file) return;
@@ -335,14 +334,17 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAnimationBlob(message.chat_id, message.id, id),
+        () => FileStore.updateAnimationBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_ANIMATION_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || animation);
             }
         }
     );
@@ -350,7 +352,6 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
 
 function loadAnimationThumbnailContent(store, animation, message) {
     if (!animation) return false;
-    if (!message) return false;
 
     const { thumbnail: photoSize } = animation;
     if (!photoSize) return false;
@@ -364,12 +365,15 @@ function loadAnimationThumbnailContent(store, animation, message) {
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAnimationThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateAnimationThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || animation)
     );
 
     return true;
@@ -529,7 +533,6 @@ function loadBigPhotoContent(store, photo, message) {
 
 function loadPhotoContent(store, photo, message) {
     if (!photo) return;
-    if (!message) return;
 
     const { sizes } = photo;
     if (!sizes) return;
@@ -546,12 +549,15 @@ function loadPhotoContent(store, photo, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+        () => FileStore.updatePhotoBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || photo)
     );
 }
 
@@ -1550,6 +1556,35 @@ function getExtension(fileName) {
     return parts.pop().toLowerCase();
 }
 
+function loadInstantViewContent(instantView) {
+    if (!instantView) return;
+
+    const { page_blocks } = instantView;
+    if (!page_blocks) return;
+
+    const store = FileStore.getStore();
+
+    page_blocks.forEach(pageBlock => loadPageBlockContent(store, pageBlock));
+}
+
+function loadPageBlockContent(store, pageBlock) {
+    if (!pageBlock) return;
+
+    switch (pageBlock['@type']) {
+        case 'pageBlockAnimation': {
+            const { animation } = pageBlock;
+            loadAnimationThumbnailContent(store, animation, null);
+            loadAnimationContent(store, animation, null);
+            break;
+        }
+        case 'pageBlockPhoto': {
+            const { photo } = pageBlock;
+            loadPhotoContent(store, photo, null);
+            break;
+        }
+    }
+}
+
 export {
     getFileSize,
     getSizeString,
@@ -1562,15 +1597,16 @@ export {
     cancelPreloadMediaViewerContent,
     loadProfileMediaViewerContent,
     preloadProfileMediaViewerContent,
-    loadDraftContent,
-    loadUserContent,
     loadChatContent,
     loadChatsContent,
-    loadUsersContent,
+    loadDraftContent,
+    loadInstantViewContent,
     loadStickerContent,
-    loadStickerThumbnailContent,
     loadStickersContent,
     loadStickerSetContent,
+    loadStickerThumbnailContent,
+    loadUserContent,
+    loadUsersContent,
     saveOrDownload,
     download,
     getMediaFile,
