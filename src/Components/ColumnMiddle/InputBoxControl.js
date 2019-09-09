@@ -24,7 +24,7 @@ import CreatePollDialog from '../Popup/CreatePollDialog';
 import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { getSize, readImageSize } from '../../Utils/Common';
+import { getSize, readImageSize, getCharPositionFromEditableDiv } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import { PHOTO_SIZE } from '../../Constants';
@@ -534,32 +534,7 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
-        let editableDiv = this.newMessageRef.current;
-
-        // ToDo move to utils or similar
-        // https://stackoverflow.com/a/3976125/6671811
-        let caretPos = 0;
-        let sel;
-        let range;
-        if (window.getSelection) {
-            sel = window.getSelection();
-            if (sel.rangeCount) {
-                range = sel.getRangeAt(0);
-                if (range.commonAncestorContainer.parentNode == editableDiv) {
-                    caretPos = range.endOffset;
-                }
-            }
-        } else if (document.selection && document.selection.createRange) {
-            range = document.selection.createRange();
-            if (range.parentElement() == editableDiv) {
-                const tempEl = document.createElement("span");
-                editableDiv.insertBefore(tempEl, editableDiv.firstChild);
-                const tempRange = range.duplicate();
-                tempRange.moveToElementText(tempEl);
-                tempRange.setEndPoint("EndToEnd", range);
-                caretPos = tempRange.text.length;
-            }
-        }
+        const caretPos = getCharPositionFromEditableDiv(this.newMessageRef.current);
 
         const text = this.newMessageRef.current.innerText;
         const pre = text.slice(0, caretPos);
