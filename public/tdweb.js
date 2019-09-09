@@ -228,7 +228,7 @@ module.exports = _slicedToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "148e5a1392890b034973.worker.js");
+  return new Worker(__webpack_require__.p + "5bf22bc6b3c8aab8a6e3.worker.js");
 };
 
 /***/ }),
@@ -2158,6 +2158,7 @@ var log = new logger_Logger();
 
 
  //import localforage from 'localforage';
+//import './third_party/broadcastchannel.js';
 
 
 
@@ -2183,7 +2184,8 @@ var src_sleep = function sleep(ms) {
  * 2. Added the method <code>setJsLogVerbosityLevel new_verbosity_level:string = Ok;</code>, which allows to change the verbosity level of tdweb logging.<br>
  * 3. Added the possibility to use blobs as input files via the constructor <code>inputFileBlob data:<JavaScript blob> = InputFile;</code>.<br>
  * 4. The class <code>filePart</code> contains data as a JavaScript blob instead of a base64-encoded string.<br>
- * 5. The methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> and <code>getFileDownloadedPrefixSize</code> are not supported.<br>
+ * 5. The method <code>readFilePart</code> supports only <code>offset == count == 0</code>.<br>
+ * 6. The methods <code>getStorageStatistics</code>, <code>getStorageStatisticsFast</code>, <code>optimizeStorage</code>, <code>addProxy</code> and <code>getFileDownloadedPrefixSize</code> are not supported.<br>
  * <br>
  */
 
@@ -2852,10 +2854,10 @@ function () {
       if (file.arr) {
         var now = Date.now();
 
-        while (this.totalSize > 100000000) {
-          var node = this.lru.getLru(); // immunity for 60 seconds
+        while (this.totalSize > 10000000) {
+          var node = this.lru.getLru(); // immunity for 5 seconds
 
-          if (node.usedAt + 60 * 1000 > now) {
+          if (node.usedAt + 5 * 1000 > now) {
             break;
           }
 
@@ -2932,9 +2934,7 @@ function () {
                     }
                   };
 
-                  request.onerror = function () {
-                    return query.reject(request.error);
-                  };
+                  request.onerror = query.reject;
                 };
 
                 for (_iterator = pending[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {

@@ -16,7 +16,7 @@ import {
     WASM_FILE_HASH,
     WASM_FILE_NAME
 } from '../Constants';
-import TdClient from '@arseny30/tdweb/dist/tdweb';
+import TdClient from 'tdweb/dist/tdweb';
 
 function databaseExists(dbname, callback) {
     var req = indexedDB.open(dbname);
