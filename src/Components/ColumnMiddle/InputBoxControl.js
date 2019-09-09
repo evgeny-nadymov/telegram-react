@@ -534,7 +534,38 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
-        this.newMessageRef.current.innerText += emoji.native;
+        let editableDiv = this.newMessageRef.current;
+
+        // ToDo move to utils or similar
+        // https://stackoverflow.com/a/3976125/6671811
+        let caretPos = 0;
+        let sel;
+        let range;
+        if (window.getSelection) {
+            sel = window.getSelection();
+            if (sel.rangeCount) {
+                range = sel.getRangeAt(0);
+                if (range.commonAncestorContainer.parentNode == editableDiv) {
+                    caretPos = range.endOffset;
+                }
+            }
+        } else if (document.selection && document.selection.createRange) {
+            range = document.selection.createRange();
+            if (range.parentElement() == editableDiv) {
+                const tempEl = document.createElement("span");
+                editableDiv.insertBefore(tempEl, editableDiv.firstChild);
+                const tempRange = range.duplicate();
+                tempRange.moveToElementText(tempEl);
+                tempRange.setEndPoint("EndToEnd", range);
+                caretPos = tempRange.text.length;
+            }
+        }
+
+        const text = this.newMessageRef.current.innerText;
+        const pre = text.slice(0, caretPos);
+        const post = text.slice(caretPos);
+
+        this.newMessageRef.current.innerText = pre + emoji.native + post;
         this.handleInput();
     };
 
