@@ -13,7 +13,7 @@ function List(props) {
     return (
         <ul>
             {props.items.map(x => (
-                <ListItem label={x.label} page_blocks={x.page_blocks} />
+                <ListItem label={x.label} pageBlocks={x.page_blocks} />
             ))}
         </ul>
     );

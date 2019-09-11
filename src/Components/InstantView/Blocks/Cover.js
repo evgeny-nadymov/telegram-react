@@ -9,13 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getPageBlock } from '../../../Utils/InstantView';
 
-function ListItem(props) {
-    return <li>{props.pageBlocks.map(getPageBlock)}</li>;
+function Cover(props) {
+    return getPageBlock(props.cover);
 }
 
-ListItem.propTypes = {
-    label: PropTypes.string.isRequired,
-    pageBlocks: PropTypes.array.isRequired
+Cover.propTypes = {
+    cover: PropTypes.object.isRequired
 };
 
-export default ListItem;
+export default Cover;

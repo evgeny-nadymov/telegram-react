@@ -11,6 +11,7 @@ import { getProfilePhoto } from './User';
 import { getLocationId } from './Message';
 import {
     FILE_PRIORITY,
+    IV_PHOTO_DISPLAY_SIZE,
     LOCATION_HEIGHT,
     LOCATION_SCALE,
     LOCATION_WIDTH,
@@ -505,7 +506,6 @@ async function loadLocationContent(store, location, message) {
 
 function loadBigPhotoContent(store, photo, message) {
     if (!photo) return;
-    if (!message) return;
 
     const { sizes } = photo;
     if (!sizes) return;
@@ -522,22 +522,25 @@ function loadBigPhotoContent(store, photo, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+        () => FileStore.updatePhotoBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || photo)
     );
 }
 
-function loadPhotoContent(store, photo, message) {
+function loadPhotoContent(store, photo, message, displaySize = PHOTO_SIZE) {
     if (!photo) return;
 
     const { sizes } = photo;
     if (!sizes) return;
 
-    const photoSize = getPhotoSize(sizes);
+    const photoSize = getPhotoSize(sizes, displaySize);
     if (!photoSize) return;
 
     let { photo: file } = photoSize;
@@ -1580,6 +1583,21 @@ function loadPageBlockContent(store, pageBlock) {
         case 'pageBlockPhoto': {
             const { photo } = pageBlock;
             loadPhotoContent(store, photo, null);
+            break;
+        }
+        case 'pageBlockCollage': {
+            const { page_blocks } = pageBlock;
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockList': {
+            const { items } = pageBlock;
+            items.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockListItem': {
+            const { page_blocks } = pageBlock;
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
             break;
         }
     }

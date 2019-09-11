@@ -71,3 +71,4 @@ export const PLAYER_PROGRESS_TIMEOUT_MS = 250;
 export const REPLACE_PREFIX = '/telegram-react';
 export const WASM_FILE_NAME = '305190114ea29c2106d05e4565ac3641.wasm';
 export const WASM_FILE_HASH = '305190114ea29c2106d05e4565ac3641';
+export const IV_PHOTO_DISPLAY_SIZE = 400;

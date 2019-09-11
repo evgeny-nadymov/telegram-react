@@ -9,13 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Caption from './Caption';
 import MediaPhoto from '../../../Components/Message/Media/Photo';
+import { IV_PHOTO_DISPLAY_SIZE, PHOTO_DISPLAY_SIZE } from '../../../Constants';
 
 function Photo(props) {
     const { photo, caption, url } = props;
 
     return (
         <>
-            <MediaPhoto photo={photo} style={{ margin: '0 auto' }} />
+            <MediaPhoto photo={photo} displaySize={PHOTO_DISPLAY_SIZE} style={{ margin: '0 auto' }} />
             {caption && <Caption text={caption.text} credit={caption.credit} />}
         </>
     );

@@ -13,15 +13,19 @@ import RichText from '../RichText/RichText';
 function AuthorDate(props) {
     const { author, publishDate } = props;
 
-    const d = new Date(publishDate * 1000);
+    const d = publishDate > 0 ? new Date(publishDate * 1000) : null;
 
     return (
         <address>
             <a rel='author'>
                 <RichText text={author} />
             </a>
-            {' • '}
-            <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>
+            {d && (
+                <>
+                    {' • '}
+                    <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>
+                </>
+            )}
         </address>
     );
 }

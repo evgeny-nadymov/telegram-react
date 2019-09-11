@@ -146,8 +146,8 @@ class Animation extends React.Component {
                             autoPlay
                             loop
                             playsInline
-                            width={style.width}
-                            height={style.height}
+                            width={animationStyle.width}
+                            height={animationStyle.height}
                         />
                     )
                 ) : (

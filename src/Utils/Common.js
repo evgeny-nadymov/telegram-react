@@ -127,8 +127,8 @@ function getPhotoThumbnailSize(sizes) {
     return getSize(sizes, PHOTO_THUMBNAIL_SIZE);
 }
 
-function getPhotoSize(sizes) {
-    return getSize(sizes, PHOTO_SIZE);
+function getPhotoSize(sizes, displaySize = PHOTO_SIZE) {
+    return getSize(sizes, displaySize);
 }
 
 function getSize(sizes, dimension) {

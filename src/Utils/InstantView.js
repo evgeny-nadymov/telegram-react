@@ -10,6 +10,8 @@ import Anchor from '../Components/InstantView/Blocks/Anchor';
 import Animation from '../Components/InstantView/Blocks/Animation';
 import AuthorDate from '../Components/InstantView/Blocks/AuthorDate';
 import BlockQuote from '../Components/InstantView/Blocks/Blockquote';
+import Collage from '../Components/InstantView/Blocks/Collage';
+import Cover from '../Components/InstantView/Blocks/Cover';
 import Divider from '../Components/InstantView/Blocks/Divider';
 import Footer from '../Components/InstantView/Blocks/Footer';
 import Header from '../Components/InstantView/Blocks/Header';
@@ -19,6 +21,7 @@ import Paragraph from '../Components/InstantView/Blocks/Paragraph';
 import Photo from '../Components/InstantView/Blocks/Photo';
 import Preformatted from '../Components/InstantView/Blocks/Preformatted';
 import PullQuote from '../Components/InstantView/Blocks/PullQuote';
+import Slideshow from '../Components/InstantView/Blocks/Slideshow';
 import Subheader from '../Components/InstantView/Blocks/Subheader';
 import Subtitle from '../Components/InstantView/Blocks/Subtitle';
 import Title from '../Components/InstantView/Blocks/Title';
@@ -54,6 +57,12 @@ export function getPageBlock(block) {
         case 'pageBlockBlockQuote': {
             return <BlockQuote credit={block.credit} text={block.text} />;
         }
+        case 'pageBlockCollage': {
+            return <Collage pageBlocks={block.page_blocks} caption={block.caption} />;
+        }
+        case 'pageBlockCover': {
+            return <Cover cover={block.cover} />;
+        }
         case 'pageBlockDivider': {
             return <Divider />;
         }
@@ -67,7 +76,7 @@ export function getPageBlock(block) {
             return <List items={block.items} />;
         }
         case 'pageBlockListItem': {
-            return <ListItem label={block.label} page_blocks={block.page_blocks} />;
+            return <ListItem label={block.label} pageBlocks={block.page_blocks} />;
         }
         case 'pageBlockParagraph': {
             return <Paragraph text={block.text} />;
@@ -80,6 +89,9 @@ export function getPageBlock(block) {
         }
         case 'pageBlockPullQuote': {
             return <PullQuote credit={block.credit} text={block.text} />;
+        }
+        case 'pageBlockSlideshow': {
+            return <Slideshow pageBlocks={block.page_blocks} caption={block.caption} />;
         }
         case 'pageBlockSubheader': {
             return <Subheader subheader={block.subheader} />;
