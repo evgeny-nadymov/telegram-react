@@ -9,13 +9,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Document from '../../Message/Media/Document';
 import RichText from './RichText';
+import ArrowDownwardIcon from '@material-ui/core/SvgIcon/SvgIcon';
+import DocumentTile from '../../Tile/DocumentTile';
 
-class Icon extends React.Component {
-    render() {
-        const { document, height, width } = this.props;
+function Icon(props) {
+    const { document, height, width } = props;
+    if (!document) return null;
 
-        return <Document document={document} height={height} width={width} />;
-    }
+    const { thumbnail, document: file } = document;
+
+    return <DocumentTile thumbnail={thumbnail} file={file} width={width} height={height} />;
 }
 
 Icon.propTypes = {

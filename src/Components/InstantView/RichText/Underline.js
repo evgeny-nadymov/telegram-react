@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Underline extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <ins>
-                <RichText text={text} />
-            </ins>
-        );
-    }
+function Underline(props) {
+    return (
+        <ins>
+            <RichText text={props.text} />
+        </ins>
+    );
 }
 
 Underline.propTypes = {

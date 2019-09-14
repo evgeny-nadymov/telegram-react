@@ -9,16 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Url extends React.Component {
-    render() {
-        const { text, url } = this.props;
+function Url(props) {
+    const { text, url } = props;
 
-        return (
-            <a href={url}>
-                <RichText text={text} />
-            </a>
-        );
-    }
+    return (
+        <a href={url}>
+            <RichText text={text} />
+        </a>
+    );
 }
 
 Url.propTypes = {

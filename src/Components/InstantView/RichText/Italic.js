@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Italic extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <i>
-                <RichText text={text} />
-            </i>
-        );
-    }
+function Italic(props) {
+    return (
+        <i>
+            <RichText text={props.text} />
+        </i>
+    );
 }
 
 Italic.propTypes = {

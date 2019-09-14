@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Anchor extends React.Component {
-    render() {
-        const { name, text } = this.props;
-
-        return (
-            <a id={name}>
-                <RichText text={text} />
-            </a>
-        );
-    }
+function Anchor(props) {
+    return (
+        <a id={props.name}>
+            <RichText text={props.text} />
+        </a>
+    );
 }
 
 Anchor.propTypes = {

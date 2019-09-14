@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Marked extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <mark>
-                <RichText text={text} />
-            </mark>
-        );
-    }
+function Marked(props) {
+    return (
+        <mark>
+            <RichText text={props.text} />
+        </mark>
+    );
 }
 
 Marked.propTypes = {

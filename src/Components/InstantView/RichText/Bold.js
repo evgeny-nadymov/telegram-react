@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Bold extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <b>
-                <RichText text={text} />
-            </b>
-        );
-    }
+function Bold(props) {
+    return (
+        <b>
+            <RichText text={props.text} />
+        </b>
+    );
 }
 
 Bold.propTypes = {

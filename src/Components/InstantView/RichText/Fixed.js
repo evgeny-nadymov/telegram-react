@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Fixed extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <code>
-                <RichText text={text} />
-            </code>
-        );
-    }
+function Fixed(props) {
+    return (
+        <code>
+            <RichText text={props.text} />
+        </code>
+    );
 }
 
 Fixed.propTypes = {

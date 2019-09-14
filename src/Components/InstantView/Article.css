@@ -314,3 +314,7 @@ article.cached_page p {
 *[data-block]:hover:after {
     display: block;
 }
+
+ul.related-articles address {
+    margin: 0;
+}

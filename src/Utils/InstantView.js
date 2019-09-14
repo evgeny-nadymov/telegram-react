@@ -12,15 +12,19 @@ import AuthorDate from '../Components/InstantView/Blocks/AuthorDate';
 import BlockQuote from '../Components/InstantView/Blocks/Blockquote';
 import Collage from '../Components/InstantView/Blocks/Collage';
 import Cover from '../Components/InstantView/Blocks/Cover';
+import Details from '../Components/InstantView/Blocks/Details';
 import Divider from '../Components/InstantView/Blocks/Divider';
 import Footer from '../Components/InstantView/Blocks/Footer';
 import Header from '../Components/InstantView/Blocks/Header';
+import Kicker from '../Components/InstantView/Blocks/Kicker';
 import List from '../Components/InstantView/Blocks/List';
 import ListItem from '../Components/InstantView/Blocks/ListItem';
 import Paragraph from '../Components/InstantView/Blocks/Paragraph';
 import Photo from '../Components/InstantView/Blocks/Photo';
 import Preformatted from '../Components/InstantView/Blocks/Preformatted';
 import PullQuote from '../Components/InstantView/Blocks/PullQuote';
+import RelatedArticle from '../Components/InstantView/Blocks/RelatedArticle';
+import RelatedArticles from '../Components/InstantView/Blocks/RelatedArticles';
 import Slideshow from '../Components/InstantView/Blocks/Slideshow';
 import Subheader from '../Components/InstantView/Blocks/Subheader';
 import Subtitle from '../Components/InstantView/Blocks/Subtitle';
@@ -31,6 +35,7 @@ import Fixed from '../Components/InstantView/RichText/Fixed';
 import Icon from '../Components/InstantView/RichText/Icon';
 import Italic from '../Components/InstantView/RichText/Italic';
 import Marked from '../Components/InstantView/RichText/Marked';
+import PhoneNumber from '../Components/InstantView/RichText/PhoneNumber';
 import Plain from '../Components/InstantView/RichText/Plain';
 import Strikethrough from '../Components/InstantView/RichText/Strikethrough';
 import Subscript from '../Components/InstantView/RichText/Subscript';
@@ -63,6 +68,9 @@ export function getPageBlock(block) {
         case 'pageBlockCover': {
             return <Cover cover={block.cover} />;
         }
+        case 'pageBlockDetails': {
+            return <Details header={block.header} pageBlocks={block.page_blocks} isOpen={block.is_open} />;
+        }
         case 'pageBlockDivider': {
             return <Divider />;
         }
@@ -71,6 +79,9 @@ export function getPageBlock(block) {
         }
         case 'pageBlockHeader': {
             return <Header header={block.header} />;
+        }
+        case 'pageBlockKicker': {
+            return <Kicker kicker={block.kicker} />;
         }
         case 'pageBlockList': {
             return <List items={block.items} />;
@@ -89,6 +100,21 @@ export function getPageBlock(block) {
         }
         case 'pageBlockPullQuote': {
             return <PullQuote credit={block.credit} text={block.text} />;
+        }
+        case 'pageBlockRelatedArticle': {
+            return (
+                <RelatedArticle
+                    url={block.url}
+                    title={block.title}
+                    description={block.description}
+                    photo={block.photo}
+                    author={block.author}
+                    publishDate={block.publish_date}
+                />
+            );
+        }
+        case 'pageBlockRelatedArticles': {
+            return <RelatedArticles header={block.header} articles={block.articles} />;
         }
         case 'pageBlockSlideshow': {
             return <Slideshow pageBlocks={block.page_blocks} caption={block.caption} />;
@@ -144,6 +170,11 @@ export function getRichText(richText) {
 
             return <Marked text={text} />;
         }
+        case 'richTextPhoneNumber': {
+            const { phone_number, text } = richText;
+
+            return <PhoneNumber phoneNumber={phone_number} text={text} />;
+        }
         case 'richTextPlain': {
             const { text } = richText;
 
@@ -181,5 +212,5 @@ export function getRichText(richText) {
         }
     }
 
-    return null;
+    return `[${richText['@type']}]`;
 }

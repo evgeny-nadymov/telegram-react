@@ -9,16 +9,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-function Strikethrough(props) {
+function PhoneNumber(props) {
     return (
-        <del>
+        <a href={`tel:${props.phoneNumber}`}>
             <RichText text={props.text} />
-        </del>
+        </a>
     );
 }
 
-Strikethrough.propTypes = {
+PhoneNumber.propTypes = {
+    phoneNumber: PropTypes.string.isRequired,
     text: PropTypes.object.isRequired
 };
 
-export default Strikethrough;
+export default PhoneNumber;

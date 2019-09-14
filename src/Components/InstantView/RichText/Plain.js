@@ -8,12 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class Plain extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return text;
-    }
+function Plain(props) {
+    return props.text;
 }
 
 Plain.propTypes = {

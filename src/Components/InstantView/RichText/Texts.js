@@ -9,18 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Texts extends React.Component {
-    render() {
-        const { texts } = this.props;
-
-        return (
-            <>
-                {texts.map(x => (
-                    <RichText text={x} />
-                ))}
-            </>
-        );
-    }
+function Texts(props) {
+    return (
+        <>
+            {props.texts.map(x => (
+                <RichText text={x} />
+            ))}
+        </>
+    );
 }
 
 Texts.propTypes = {

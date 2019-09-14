@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Superscript extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <sup>
-                <RichText text={text} />
-            </sup>
-        );
-    }
+function Superscript(props) {
+    return (
+        <sup>
+            <RichText text={props.text} />
+        </sup>
+    );
 }
 
 Superscript.propTypes = {

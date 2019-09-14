@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class Subscript extends React.Component {
-    render() {
-        const { text } = this.props;
-
-        return (
-            <sub>
-                <RichText text={text} />
-            </sub>
-        );
-    }
+function Subscript(props) {
+    return (
+        <sub>
+            <RichText text={props.text} />
+        </sub>
+    );
 }
 
 Subscript.propTypes = {

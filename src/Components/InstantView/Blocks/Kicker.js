@@ -7,18 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import RichText from './RichText';
+import RichText from '../RichText/RichText';
 
-function Strikethrough(props) {
+function Kicker(props) {
+    const { kicker } = props;
     return (
-        <del>
-            <RichText text={props.text} />
-        </del>
+        <h6 className='kicker'>
+            <RichText text={kicker} />
+        </h6>
     );
 }
 
-Strikethrough.propTypes = {
-    text: PropTypes.object.isRequired
+Kicker.propTypes = {
+    kicker: PropTypes.object.isRequired
 };
 
-export default Strikethrough;
+export default Kicker;

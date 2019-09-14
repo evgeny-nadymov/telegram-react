@@ -14,18 +14,17 @@ function AuthorDate(props) {
     const { author, publishDate } = props;
 
     const d = publishDate > 0 ? new Date(publishDate * 1000) : null;
+    if (!author && !d) return null;
 
     return (
         <address>
-            <a rel='author'>
-                <RichText text={author} />
-            </a>
-            {d && (
-                <>
-                    {' • '}
-                    <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>
-                </>
+            {author && (
+                <a rel='author'>
+                    <RichText text={author} />
+                </a>
             )}
+            {author && d && ' • '}
+            {d && <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>}
         </address>
     );
 }

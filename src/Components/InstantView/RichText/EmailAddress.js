@@ -9,16 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
 
-class EmailAddress extends React.Component {
-    render() {
-        const { emailAddress, text } = this.props;
-
-        return (
-            <a href={`mailto:${emailAddress}`}>
-                <RichText text={text} />
-            </a>
-        );
-    }
+function EmailAddress(props) {
+    return (
+        <a href={`mailto:${props.emailAddress}`}>
+            <RichText text={props.text} />
+        </a>
+    );
 }
 
 EmailAddress.propTypes = {
