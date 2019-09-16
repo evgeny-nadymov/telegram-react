@@ -4,32 +4,32 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "27ccfe14c36221eef94a8fcc37403f54",
+    "revision": "b37c00db55fa6dd0a951e4d382d50452",
     "url": "/telegram-react/index.html"
   },
   {
-    "revision": "6e57a90e64dc87050134",
-    "url": "/telegram-react/static/css/3.78fc8126.chunk.css"
+    "revision": "7ee71e0e0c69039342e3",
+    "url": "/telegram-react/static/css/3.6f0a90c8.chunk.css"
   },
   {
     "revision": "0081d0e986ef70f2bc4d",
     "url": "/telegram-react/static/css/5.1b8f2a33.chunk.css"
   },
   {
-    "revision": "dfef37845ee19cf902a3",
+    "revision": "920d1b493cefc08bff7b",
     "url": "/telegram-react/static/css/main.e7809975.chunk.css"
   },
   {
-    "revision": "dee475f8c3293cd61a25",
-    "url": "/telegram-react/static/js/2.58f4f7cf.chunk.js"
+    "revision": "c5f3898dbf94d28eaf51",
+    "url": "/telegram-react/static/js/2.24c0f955.chunk.js"
   },
   {
-    "revision": "6e57a90e64dc87050134",
-    "url": "/telegram-react/static/js/3.97cb9c9c.chunk.js"
+    "revision": "7ee71e0e0c69039342e3",
+    "url": "/telegram-react/static/js/3.d497c090.chunk.js"
   },
   {
-    "revision": "a39ef53e2948606b6dd4",
-    "url": "/telegram-react/static/js/4.9bd59ef9.chunk.js"
+    "revision": "98da5157b5141b8280a5",
+    "url": "/telegram-react/static/js/4.cadcf78d.chunk.js"
   },
   {
     "revision": "0081d0e986ef70f2bc4d",
@@ -40,12 +40,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/6.0007a6d8.chunk.js"
   },
   {
-    "revision": "dfef37845ee19cf902a3",
-    "url": "/telegram-react/static/js/main.87305391.chunk.js"
+    "revision": "920d1b493cefc08bff7b",
+    "url": "/telegram-react/static/js/main.6925d587.chunk.js"
   },
   {
-    "revision": "42f4ba064e41847a2f89",
-    "url": "/telegram-react/static/js/runtime~main.cf191ef3.js"
+    "revision": "ae548f5fe2a08e1656be",
+    "url": "/telegram-react/static/js/runtime~main.9c3a46b1.js"
   },
   {
     "revision": "5b7ac6f843c4f6909eaf8d7c07179ebd",
