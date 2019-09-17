@@ -11,6 +11,7 @@ import { getProfilePhoto } from './User';
 import { getLocationId } from './Message';
 import {
     FILE_PRIORITY,
+    IV_PHOTO_DISPLAY_SIZE,
     LOCATION_HEIGHT,
     LOCATION_SCALE,
     LOCATION_WIDTH,
@@ -324,7 +325,6 @@ function loadAudioThumbnailContent(store, audio, message) {
 
 function loadAnimationContent(store, animation, message, useFileSize = true) {
     if (!animation) return;
-    if (!message) return;
 
     let { animation: file } = animation;
     if (!file) return;
@@ -335,14 +335,17 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAnimationBlob(message.chat_id, message.id, id),
+        () => FileStore.updateAnimationBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_ANIMATION_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || animation);
             }
         }
     );
@@ -350,7 +353,6 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
 
 function loadAnimationThumbnailContent(store, animation, message) {
     if (!animation) return false;
-    if (!message) return false;
 
     const { thumbnail: photoSize } = animation;
     if (!photoSize) return false;
@@ -364,12 +366,15 @@ function loadAnimationThumbnailContent(store, animation, message) {
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAnimationThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateAnimationThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || animation)
     );
 
     return true;
@@ -501,7 +506,6 @@ async function loadLocationContent(store, location, message) {
 
 function loadBigPhotoContent(store, photo, message) {
     if (!photo) return;
-    if (!message) return;
 
     const { sizes } = photo;
     if (!sizes) return;
@@ -518,23 +522,25 @@ function loadBigPhotoContent(store, photo, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+        () => FileStore.updatePhotoBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || photo)
     );
 }
 
-function loadPhotoContent(store, photo, message) {
+function loadPhotoContent(store, photo, message, displaySize = PHOTO_SIZE) {
     if (!photo) return;
-    if (!message) return;
 
     const { sizes } = photo;
     if (!sizes) return;
 
-    const photoSize = getPhotoSize(sizes);
+    const photoSize = getPhotoSize(sizes, displaySize);
     if (!photoSize) return;
 
     let { photo: file } = photoSize;
@@ -546,12 +552,15 @@ function loadPhotoContent(store, photo, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updatePhotoBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+        () => FileStore.updatePhotoBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || photo)
     );
 }
 
@@ -1461,6 +1470,10 @@ function loadChatContent(store, chatId) {
     if (!chat) return;
 
     const { photo } = chat;
+    loadChatPhotoContent(store, photo, chat.id);
+}
+
+function loadChatPhotoContent(store, photo, chatId) {
     if (!photo) return;
 
     const { small: file } = photo;
@@ -1550,6 +1563,245 @@ function getExtension(fileName) {
     return parts.pop().toLowerCase();
 }
 
+function loadInstantViewContent(instantView) {
+    if (!instantView) return;
+
+    const { page_blocks } = instantView;
+    if (!page_blocks) return;
+
+    const store = FileStore.getStore();
+
+    page_blocks.forEach(pageBlock => loadPageBlockContent(store, pageBlock));
+}
+
+function loadPageBlockContent(store, b) {
+    if (!b) return;
+
+    switch (b['@type']) {
+        case 'pageBlockAnchor': {
+            break;
+        }
+        case 'pageBlockAnimation': {
+            const { animation, caption } = b;
+
+            loadAnimationThumbnailContent(store, animation, null);
+            loadAnimationContent(store, animation, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
+        case 'pageBlockAudio': {
+            const { audio, caption } = b;
+
+            loadAudioThumbnailContent(store, audio, null);
+            loadAudioContent(store, audio, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
+        case 'pageBlockAuthorDate': {
+            const { author } = b;
+
+            loadRichTextContent(store, author);
+            break;
+        }
+        case 'pageBlockBlockQuote': {
+            const { text, credit } = b;
+
+            loadRichTextContent(store, text);
+            loadRichTextContent(store, credit);
+            break;
+        }
+        // actually not a pageBlock child but load content in the same way
+        case 'pageBlockCaption': {
+            const { text, credit } = b;
+
+            loadRichTextContent(store, text);
+            loadRichTextContent(store, credit);
+            break;
+        }
+        case 'pageBlockChatLink': {
+            const { photo } = b;
+
+            loadChatPhotoContent(store, photo, 0);
+            break;
+        }
+        case 'pageBlockCollage': {
+            const { page_blocks, caption } = b;
+
+            loadPageBlockContent(store, caption);
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockCover': {
+            const { cover } = b;
+
+            loadPageBlockContent(store, cover);
+            break;
+        }
+        case 'pageBlockDetails': {
+            const { header, page_blocks } = b;
+
+            loadPageBlockContent(store, header);
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockDivider': {
+            break;
+        }
+        case 'pageBlockEmbedded': {
+            const { poster_photo, caption } = b;
+
+            loadPhotoContent(store, poster_photo, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
+        case 'pageBlockEmbeddedPost': {
+            const { author_photo, page_blocks, caption } = b;
+
+            loadPhotoContent(store, author_photo, null);
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            loadPageBlockContent(store, caption);
+            break;
+        }
+        case 'pageBlockFooter': {
+            const { footer } = b;
+
+            loadRichTextContent(store, footer);
+            break;
+        }
+        case 'pageBlockHeader': {
+            const { header } = b;
+
+            loadRichTextContent(store, header);
+            break;
+        }
+        case 'pageBlockKicker': {
+            const { kicker } = b;
+
+            loadRichTextContent(store, kicker);
+            break;
+        }
+        case 'pageBlockList': {
+            const { items } = b;
+
+            items.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        // actually not a pageBlock child but load content in the same way
+        case 'pageBlockListItem': {
+            const { page_blocks } = b;
+
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockMap': {
+            const { location, caption } = b;
+
+            loadLocationContent(store, location, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
+        case 'pageBlockParagraph': {
+            const { text } = b;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'pageBlockPhoto': {
+            const { photo } = b;
+
+            loadPhotoContent(store, photo, null);
+            break;
+        }
+        case 'pageBlockPreformatted': {
+            const { text } = b;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'pageBlockPullQuote': {
+            const { text, credit } = b;
+
+            loadRichTextContent(store, text);
+            loadRichTextContent(store, credit);
+            break;
+        }
+        case 'pageBlockRelatedArticles': {
+            const { header, articles } = b;
+
+            loadRichTextContent(store, header);
+            articles.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        // actually not a pageBlock child but load content in the same way
+        case 'pageBlockRelatedArticle': {
+            const { photo } = b;
+
+            loadPhotoContent(store, photo, null);
+            break;
+        }
+        case 'pageBlockSlideshow': {
+            const { page_blocks, caption } = b;
+
+            loadPageBlockContent(store, caption);
+            page_blocks.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        case 'pageBlockSubheader': {
+            const { subheader } = b;
+
+            loadRichTextContent(store, subheader);
+            break;
+        }
+        case 'pageBlockSubtitle': {
+            const { subtitle } = b;
+
+            loadRichTextContent(store, subtitle);
+            break;
+        }
+        case 'pageBlockTable': {
+            const { caption, cells } = b;
+
+            loadPageBlockContent(store, caption);
+            cells.forEach(x => loadPageBlockContent(store, x));
+            break;
+        }
+        // actually not a pageBlock child but load content in the same way
+        case 'pageBlockTableCell': {
+            const { text } = b;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'pageBlockTitle': {
+            const { title } = b;
+
+            loadRichTextContent(store, title);
+            break;
+        }
+        case 'pageBlockVideo': {
+            const { video, caption } = b;
+
+            loadVideoThumbnailContent(store, video, null);
+            loadVideoContent(store, video, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
+    }
+}
+
+function loadRichTextContent(store, t) {
+    if (!t) return;
+
+    switch (t['@type']) {
+        case 'richTextIcon': {
+            const { document } = t;
+
+            loadDocumentContent(store, document, null, false);
+            break;
+        }
+    }
+}
+
 export {
     getFileSize,
     getSizeString,
@@ -1562,15 +1814,16 @@ export {
     cancelPreloadMediaViewerContent,
     loadProfileMediaViewerContent,
     preloadProfileMediaViewerContent,
-    loadDraftContent,
-    loadUserContent,
     loadChatContent,
     loadChatsContent,
-    loadUsersContent,
+    loadDraftContent,
+    loadInstantViewContent,
     loadStickerContent,
-    loadStickerThumbnailContent,
     loadStickersContent,
     loadStickerSetContent,
+    loadStickerThumbnailContent,
+    loadUserContent,
+    loadUsersContent,
     saveOrDownload,
     download,
     getMediaFile,

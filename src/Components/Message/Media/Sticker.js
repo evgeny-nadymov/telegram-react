@@ -37,7 +37,10 @@ class Sticker extends React.Component {
         this.lottieRef = React.createRef();
         this.focused = window.hasFocus;
         this.inView = false;
-        this.stickerPrevew = StickerStore.stickerPreview;
+        this.stickerPreview = StickerStore.stickerPreview;
+        this.mediaViewerContent = ApplicationStore.mediaViewerContent;
+        this.profileMediaViewerContent = ApplicationStore.profileMediaViewerContent;
+        this.dialogChatId = ApplicationStore.dialogChatId;
 
         this.state = {
             animationDate: null,
@@ -93,7 +96,10 @@ class Sticker extends React.Component {
     componentDidMount() {
         this.loadContent();
 
+        ApplicationStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
@@ -102,13 +108,37 @@ class Sticker extends React.Component {
     }
 
     componentWillUnmount() {
+        ApplicationStore.removeListener('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
         ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.removeListener(
+            'clientUpdateProfileMediaViewerContent',
+            this.onClientUpdateProfileMediaViewerContent
+        );
         FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.removeListener('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
+
+    onClientUpdateDialogChatId = update => {
+        this.dialogChatId = ApplicationStore.dialogChatId;
+
+        this.startStopAnimation();
+    };
+
+    onClientUpdateMediaViewerContent = update => {
+        this.mediaViewerContent = ApplicationStore.mediaViewerContent;
+
+        this.startStopAnimation();
+    };
+
+    onClientUpdateProfileMediaViewerContent = update => {
+        this.profileMediaViewerContent = ApplicationStore.profileMediaViewerContent;
+
+        this.startStopAnimation();
+    };
 
     onClientUpdateStickerPreview = update => {
         this.stickerPreview = update.sticker;
@@ -129,6 +159,7 @@ class Sticker extends React.Component {
         const { stickerSet } = update;
 
         this.openedStickerSet = stickerSet;
+
         this.startStopAnimation();
     };
 
@@ -148,20 +179,39 @@ class Sticker extends React.Component {
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (this.focused && !this.openedStickerSet && !this.stickerPreview) {
-            if (this.paused) {
+        if (
+            this.focused &&
+            !this.stickerPreview &&
+            !this.mediaViewerContent &&
+            !this.profileMediaViewerContent &&
+            !this.dialogChatId
+        ) {
+            if (this.entered) {
+                console.log('[Sticker] play 1');
                 player.play();
-                this.paused = false;
+                this.pause = false;
                 return;
             }
 
-            if (autoplay && this.inView) {
-                player.play();
-                this.paused = false;
-                return;
+            console.log('[Sticker] startStopAnimation', this.openedStickerSet);
+            if (!this.openedStickerSet) {
+                if (this.paused) {
+                    console.log('[Sticker] play 2');
+                    player.play();
+                    this.paused = false;
+                    return;
+                }
+
+                if (autoplay && this.inView) {
+                    console.log('[Sticker] play 3');
+                    player.play();
+                    this.paused = false;
+                    return;
+                }
             }
         }
 
+        console.log('[Sticker] pause');
         this.paused = player.pause();
     }
 
@@ -228,16 +278,45 @@ class Sticker extends React.Component {
 
     handleMouseEnter = event => {
         const { animationData } = this;
+        console.log('[Sticker] handleMouseEnter', animationData);
         if (animationData) {
-            this.setState({ animationData });
+            this.setState({ animationData }, () => {
+                this.handleAnimationMouseEnter();
+            });
         }
     };
 
-    handleAnimationComplete = () => {
-        const { animationData } = this.state;
-        if (animationData) {
-            this.setState({ animationData: null });
+    handleAnimationMouseEnter = () => {
+        console.log('[Sticker] handleAnimationMouseEnter 1');
+        if (this.props.autoplay) return;
+
+        this.entered = true;
+
+        const player = this.lottieRef.current;
+        if (!player) return;
+
+        console.log('[Sticker] handleAnimationMouseEnter 2');
+        this.loopCount = 0;
+        this.startStopAnimation();
+    };
+
+    handleAnimationLoopComplete = () => {
+        if (this.props.autoplay) return;
+
+        const player = this.lottieRef.current;
+        if (!player) return;
+
+        if (!this.entered) this.loopCount += 1;
+        if (this.loopCount > 2) {
+            const { animationData } = this.state;
+            if (animationData) {
+                this.setState({ animationData: null });
+            }
         }
+    };
+
+    handleAnimationMouseOut = () => {
+        this.entered = false;
     };
 
     render() {
@@ -300,7 +379,13 @@ class Sticker extends React.Component {
                                 className: 'lottie-svg'
                             }
                         }}
-                        onComplete={this.handleAnimationComplete}
+                        eventListeners={[
+                            {
+                                eventName: 'loopComplete',
+                                callback: this.handleAnimationLoopComplete
+                            }
+                        ]}
+                        onMouseOut={this.handleAnimationMouseOut}
                     />
                 ) : (
                     <img

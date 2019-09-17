@@ -81,3 +81,10 @@ export function setProfileMediaViewerContent(content) {
         content
     });
 }
+
+export function setInstantViewContent(content) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateInstantViewContent',
+        content
+    });
+}

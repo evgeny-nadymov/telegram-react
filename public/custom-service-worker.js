@@ -4,7 +4,7 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-// import TdClient from '@arseny30/tdweb/dist/tdweb';
+// import TdClient from 'tdweb/dist/tdweb';
 // import packageJson from '../package';
 // importScripts('./tdweb.js');
 // importScripts('./subworkers.js');

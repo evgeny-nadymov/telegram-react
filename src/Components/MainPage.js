@@ -25,6 +25,7 @@ import UserStore from '../Stores/UserStore';
 import ApplicationStore from '../Stores/ApplicationStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
+import InstantViewer from './InstantView/InstantViewer';
 
 const styles = theme => ({
     page: {
@@ -43,7 +44,8 @@ class MainPage extends React.Component {
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
             mediaViewerContent: ApplicationStore.mediaViewerContent,
             profileMediaViewerContent: ApplicationStore.profileMediaViewerContent,
-            forwardInfo: null
+            forwardInfo: null,
+            instantViewContent: null
         };
 
         /*this.store = localForage.createInstance({
@@ -61,6 +63,7 @@ class MainPage extends React.Component {
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
+        ApplicationStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
     }
 
     componentWillUnmount() {
@@ -74,7 +77,16 @@ class MainPage extends React.Component {
             this.onClientUpdateProfileMediaViewerContent
         );
         ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
+        ApplicationStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
     }
+
+    onClientUpdateInstantViewContent = update => {
+        const { content } = update;
+
+        this.setState({
+            instantViewContent: content
+        });
+    };
 
     onClientUpdateOpenChat = update => {
         const { chatId, messageId, popup } = update;
@@ -152,7 +164,13 @@ class MainPage extends React.Component {
 
     render() {
         const { classes } = this.props;
-        const { isChatDetailsVisible, mediaViewerContent, profileMediaViewerContent, forwardInfo } = this.state;
+        const {
+            instantViewContent,
+            isChatDetailsVisible,
+            mediaViewerContent,
+            profileMediaViewerContent,
+            forwardInfo
+        } = this.state;
 
         return (
             <>
@@ -162,6 +180,7 @@ class MainPage extends React.Component {
                     {isChatDetailsVisible && <ChatInfo />}
                 </div>
                 <Footer />
+                {instantViewContent && <InstantViewer {...instantViewContent} />}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
                 {forwardInfo && <ForwardDialog {...forwardInfo} />}

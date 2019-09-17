@@ -46,7 +46,7 @@ class StickerSet extends React.Component {
     }
 
     render() {
-        const { classes, info, onSelect, onMouseDown, onMouseOver } = this.props;
+        const { classes, info, onSelect, onMouseDown, onMouseEnter } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
@@ -57,11 +57,10 @@ class StickerSet extends React.Component {
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
                 onClick={() => onSelect(x)}
-                onMouseDown={onMouseDown}
-                onMouseOver={onMouseOver}>
+                onMouseEnter={onMouseEnter}
+                onMouseDown={onMouseDown}>
                 <Sticker
                     key={x.sticker.id}
-                    className='sticker-set-item-sticker'
                     sticker={x}
                     autoplay={false}
                     blur={false}
