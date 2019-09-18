@@ -17,7 +17,7 @@ function Photo(props) {
     return (
         <>
             <MediaPhoto photo={photo} displaySize={PHOTO_DISPLAY_SIZE} style={{ margin: '0 auto' }} />
-            {caption && <Caption text={caption.text} credit={caption.credit} />}
+            <Caption text={caption.text} credit={caption.credit} />
         </>
     );
 }

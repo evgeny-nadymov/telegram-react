@@ -8,13 +8,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from '../RichText/RichText';
+import { isEmptyText } from '../../../Utils/InstantView';
 
 function Caption(props) {
     const { text, credit } = props;
+
+    const hasText = !isEmptyText(text);
+    const hastCredit = !isEmptyText(credit);
+    if (!hasText && !hastCredit) return null;
+
     return (
         <figcaption>
-            <RichText text={text} />
-            {credit && (
+            {hasText && <RichText text={text} />}
+            {hastCredit && (
                 <cite>
                     <RichText text={credit} />
                 </cite>

@@ -16,7 +16,7 @@ function Animation(props) {
     return (
         <>
             <MediaAnimation animation={animation} style={{ margin: '0 auto' }} />
-            {caption && <Caption text={caption.text} credit={caption.credit} />}
+            <Caption text={caption.text} credit={caption.credit} />
         </>
     );
 }

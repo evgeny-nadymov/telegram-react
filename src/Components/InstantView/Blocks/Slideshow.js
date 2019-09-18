@@ -16,7 +16,7 @@ function Slideshow(props) {
     return (
         <div className='slideshow'>
             {pageBlocks.map(getPageBlock)}
-            {caption && <Caption text={caption.text} credit={caption.credit} />}
+            <Caption text={caption.text} credit={caption.credit} />
         </div>
     );
 }

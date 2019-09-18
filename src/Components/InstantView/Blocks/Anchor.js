@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ListItem from './ListItem';
+import RichText from '../RichText/RichText';
 
 function Anchor(props) {
     return <a id={props.name} />;

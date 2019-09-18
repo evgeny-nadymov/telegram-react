@@ -200,9 +200,9 @@ article table.f th {
     min-height: 10px;
 }
 
-img,
-video,
-iframe {
+article img,
+article video,
+article iframe {
     max-width: 100%;
     max-height: 400px;
     vertical-align: top;
@@ -214,7 +214,7 @@ iframe {
 .collage img {
     margin: 0 6px 6px 0;
 }
-audio {
+article audio {
     width: 100%;
     vertical-align: top;
     margin: 0 0 16px;
@@ -232,27 +232,27 @@ audio {
     top: 0;
     left: 0;
 }
-figure {
+article figure {
     margin: 0 0 16px;
     padding: 0;
     text-align: center;
 }
-figure.nowide {
+article figure.nowide {
     margin-left: 18px;
     margin-right: 18px;
 }
-figure.nowide figcaption {
+article figure.nowide figcaption {
     padding-left: 0;
     padding-right: 0;
 }
-figcaption {
+article figcaption {
     font-size: 15px;
     color: #79828b;
     padding: 6px 18px 0;
     line-height: 26px;
     text-align: left;
 }
-figcaption > cite {
+article figcaption > cite {
     font-family: 'Helvetica Neue';
     font-size: 12px;
     display: block;
@@ -260,24 +260,24 @@ figcaption > cite {
     padding: 0 0 2px;
     font-style: normal;
 }
-footer {
+article footer {
     margin: 12px 18px;
     color: #79828b;
 }
 
-section {
+article section {
     display: table;
     width: 100%;
     height: 100%;
 }
-section > aside {
+article section > aside {
     display: table-cell;
     vertical-align: middle;
     text-align: center;
     color: #999;
     font-size: 24px;
 }
-section > aside > cite {
+article section > aside > cite {
     display: block;
     font-size: 14px;
     padding: 10px 0 0;

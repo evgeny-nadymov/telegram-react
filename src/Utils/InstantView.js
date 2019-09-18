@@ -14,6 +14,9 @@ import Collage from '../Components/InstantView/Blocks/Collage';
 import Cover from '../Components/InstantView/Blocks/Cover';
 import Details from '../Components/InstantView/Blocks/Details';
 import Divider from '../Components/InstantView/Blocks/Divider';
+import Embedded from '../Components/InstantView/Blocks/Embedded';
+import EmbeddedPost from '../Components/InstantView/Blocks/EmbeddedPost';
+import ErrorHandler from '../Components/InstantView/Blocks/ErrorHandler';
 import Footer from '../Components/InstantView/Blocks/Footer';
 import Header from '../Components/InstantView/Blocks/Header';
 import Kicker from '../Components/InstantView/Blocks/Kicker';
@@ -40,6 +43,7 @@ import Plain from '../Components/InstantView/RichText/Plain';
 import Strikethrough from '../Components/InstantView/RichText/Strikethrough';
 import Subscript from '../Components/InstantView/RichText/Subscript';
 import Superscript from '../Components/InstantView/RichText/Superscript';
+import TextAnchor from '../Components/InstantView/RichText/Anchor';
 import Texts from '../Components/InstantView/RichText/Texts';
 import Underline from '../Components/InstantView/RichText/Underline';
 import Url from '../Components/InstantView/RichText/Url';
@@ -47,62 +51,108 @@ import Url from '../Components/InstantView/RichText/Url';
 export function getPageBlock(block) {
     if (!block) return null;
 
+    let element = null;
     switch (block['@type']) {
         case 'pageBlockAnchor': {
-            return <Anchor name={block.name} />;
+            element = <Anchor name={block.name} />;
+            break;
         }
         case 'pageBlockAnimation': {
-            return (
+            element = (
                 <Animation caption={block.caption} animation={block.animation} need_autoplay={block.need_autoplay} />
             );
+            break;
         }
         case 'pageBlockAuthorDate': {
-            return <AuthorDate author={block.author} publishDate={block.publish_date} />;
+            element = <AuthorDate author={block.author} publishDate={block.publish_date} />;
+            break;
         }
         case 'pageBlockBlockQuote': {
-            return <BlockQuote credit={block.credit} text={block.text} />;
+            element = <BlockQuote credit={block.credit} text={block.text} />;
+            break;
         }
         case 'pageBlockCollage': {
-            return <Collage pageBlocks={block.page_blocks} caption={block.caption} />;
+            element = <Collage pageBlocks={block.page_blocks} caption={block.caption} />;
+            break;
         }
         case 'pageBlockCover': {
-            return <Cover cover={block.cover} />;
+            element = <Cover cover={block.cover} />;
+            break;
         }
         case 'pageBlockDetails': {
-            return <Details header={block.header} pageBlocks={block.page_blocks} isOpen={block.is_open} />;
+            element = <Details header={block.header} pageBlocks={block.page_blocks} isOpen={block.is_open} />;
+            break;
         }
         case 'pageBlockDivider': {
-            return <Divider />;
+            element = <Divider />;
+            break;
+        }
+        case 'pageBlockEmbedded': {
+            element = (
+                <Embedded
+                    url={block.url}
+                    html={block.html}
+                    posterPhoto={block.poster_photo}
+                    width={block.width}
+                    height={block.height}
+                    caption={block.caption}
+                    isFullWidth={block.is_full_width}
+                    allowScrolling={block.allow_scrolling}
+                />
+            );
+            break;
+        }
+        case 'pageBlockEmbeddedPost': {
+            element = (
+                <EmbeddedPost
+                    url={block.url}
+                    author={block.author}
+                    authorPhoto={block.author_photo}
+                    date={block.date}
+                    pageBlocks={block.page_blocks}
+                    caption={block.caption}
+                />
+            );
+            break;
         }
         case 'pageBlockFooter': {
-            return <Footer footer={block.footer} />;
+            element = <Footer footer={block.footer} />;
+            break;
         }
         case 'pageBlockHeader': {
-            return <Header header={block.header} />;
+            element = <Header header={block.header} />;
+            break;
         }
         case 'pageBlockKicker': {
-            return <Kicker kicker={block.kicker} />;
+            element = <Kicker kicker={block.kicker} />;
+            break;
         }
         case 'pageBlockList': {
-            return <List items={block.items} />;
+            element = <List items={block.items} />;
+            break;
         }
         case 'pageBlockListItem': {
-            return <ListItem label={block.label} pageBlocks={block.page_blocks} />;
+            element = <ListItem label={block.label} pageBlocks={block.page_blocks} />;
+            break;
         }
         case 'pageBlockParagraph': {
-            return <Paragraph text={block.text} />;
+            element = <Paragraph text={block.text} />;
+            break;
         }
         case 'pageBlockPhoto': {
-            return <Photo caption={block.caption} photo={block.photo} url={block.url} />;
+            element = <Photo caption={block.caption} photo={block.photo} url={block.url} />;
+            break;
         }
         case 'pageBlockPreformatted': {
-            return <Preformatted text={block.text} language={block.language} />;
+            element = <Preformatted text={block.text} language={block.language} />;
+            break;
         }
         case 'pageBlockPullQuote': {
-            return <PullQuote credit={block.credit} text={block.text} />;
+            element = <PullQuote credit={block.credit} text={block.text} />;
+            break;
         }
         case 'pageBlockRelatedArticle': {
-            return (
+            element = (
                 <RelatedArticle
                     url={block.url}
                     title={block.title}
@@ -112,33 +162,47 @@ export function getPageBlock(block) {
                     publishDate={block.publish_date}
                 />
             );
+            break;
         }
         case 'pageBlockRelatedArticles': {
-            return <RelatedArticles header={block.header} articles={block.articles} />;
+            element = <RelatedArticles header={block.header} articles={block.articles} />;
+            break;
         }
         case 'pageBlockSlideshow': {
-            return <Slideshow pageBlocks={block.page_blocks} caption={block.caption} />;
+            element = <Slideshow pageBlocks={block.page_blocks} caption={block.caption} />;
+            break;
         }
         case 'pageBlockSubheader': {
-            return <Subheader subheader={block.subheader} />;
+            element = <Subheader subheader={block.subheader} />;
+            break;
         }
         case 'pageBlockSubtitle': {
-            return <Subtitle subtitle={block.subtitle} />;
+            element = <Subtitle subtitle={block.subtitle} />;
+            break;
         }
         case 'pageBlockTitle': {
-            return <Title title={block.title} />;
+            element = <Title title={block.title} />;
+            break;
         }
+    }
+
+    if (element) {
+        return <ErrorHandler>{element}</ErrorHandler>;
     }
 
     return <div>{`[${block['@type']}]`}</div>;
 }
 
 export function getRichText(richText) {
+    if (!richText) {
+        return null;
+    }
+
     switch (richText['@type']) {
         case 'richTextAnchor': {
             const { name, text } = richText;
 
-            return <Anchor text={text} name={name} />;
+            return <TextAnchor text={text} name={name} />;
         }
         case 'richTextBold': {
             const { text } = richText;
@@ -213,4 +277,86 @@ export function getRichText(richText) {
     }
 
     return `[${richText['@type']}]`;
+}
+
+export function isEmptyText(richText) {
+    if (!richText) return true;
+
+    switch (richText['@type']) {
+        case 'richTextAnchor': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextBold': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextEmailAddress': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextFixed': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextIcon': {
+            return true;
+        }
+        case 'richTextItalic': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextMarked': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextPhoneNumber': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextPlain': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextStrikethrough': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextSubscript': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextSuperscript': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTexts': {
+            const { texts } = richText;
+
+            return texts.every(isEmptyText);
+        }
+        case 'richTextUnderline': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+        case 'richTextUrl': {
+            const { text } = richText;
+
+            return isEmptyText(text);
+        }
+    }
+
+    return false;
 }
