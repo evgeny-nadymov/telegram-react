@@ -17,17 +17,38 @@ import FileStore from '../../../Stores/FileStore';
 class Icon extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
     }
 
     componentWillUnmount() {
         FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.removeListener('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
     }
 
     onClientUpdateDocumentThumbnailBlob = update => {
-        const { thumbnail } = this.props;
+        const { document } = this.props;
+        if (!document) return;
+
+        const { thumbnail } = document;
         if (!thumbnail) return;
 
         const file = thumbnail.photo;
+        if (!file) return;
+
+        const { fileId } = update;
+
+        if (file.id !== fileId) {
+            return;
+        }
+
+        this.forceUpdate();
+    };
+
+    onClientUpdateDocumentBlob = update => {
+        const { document } = this.props;
+        if (!document) return;
+
+        const file = document.document;
         if (!file) return;
 
         const { fileId } = update;
@@ -45,10 +66,11 @@ class Icon extends React.Component {
 
         const { thumbnail, document: file } = document;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const src = getSrc(file);
 
         return (
             <img
-                src={thumbnailSrc}
+                src={src || thumbnailSrc}
                 width={width > 0 ? width : null}
                 height={height > 0 ? height : null}
                 draggable={false}

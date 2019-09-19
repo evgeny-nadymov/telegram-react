@@ -393,7 +393,6 @@ function loadContactContent(store, contact, message) {
 
 function loadDocumentContent(store, document, message, useFileSize = true) {
     if (!document) return;
-    if (!message) return;
 
     let { document: file } = document;
     if (!file) return;
@@ -404,22 +403,25 @@ function loadDocumentContent(store, document, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateDocumentBlob(message.chat_id, message.id, id),
+        () => FileStore.updateDocumentBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_DOCUMENT_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || document);
             }
         }
     );
 }
 
 function loadDocumentThumbnailContent(store, document, message) {
+    console.log('[IV] loadDocumentThumbnailContent', document, message);
     if (!document) return false;
-    if (!message) return false;
 
     const { thumbnail: photoSize } = document;
     if (!photoSize) return false;
@@ -433,12 +435,16 @@ function loadDocumentThumbnailContent(store, document, message) {
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
+    console.log('[IV] loadDocumentThumbnailContent getLocalFile', document, message);
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateDocumentThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateDocumentThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || document)
     );
 
     return true;
@@ -1793,10 +1799,95 @@ function loadRichTextContent(store, t) {
     if (!t) return;
 
     switch (t['@type']) {
+        case 'richTextAnchor': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextBold': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextEmailAddress': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextFixed': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
         case 'richTextIcon': {
             const { document } = t;
 
+            loadDocumentThumbnailContent(store, document, null);
             loadDocumentContent(store, document, null, false);
+            break;
+        }
+        case 'richTextItalic': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextMarked': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextPhoneNumber': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextPlain': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTexts': {
+            const { texts } = t;
+
+            texts.forEach(x => loadRichTextContent(store, x));
+            break;
+        }
+        case 'richTextStrikethrough': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextSubscript': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextSuperscript': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextUnderline': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
+            break;
+        }
+        case 'richTextUrl': {
+            const { text } = t;
+
+            loadRichTextContent(store, text);
             break;
         }
     }
