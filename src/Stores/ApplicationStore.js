@@ -8,6 +8,7 @@
 import { EventEmitter } from 'events';
 import ActionScheduler from '../Utils/ActionScheduler';
 import { closeChat } from '../Actions/Client';
+import { subscribeNotifications } from '../registerServiceWorker';
 import TdLibController from '../Controllers/TdLibController';
 
 class ApplicationStore extends EventEmitter {
@@ -90,6 +91,7 @@ class ApplicationStore extends EventEmitter {
                     case 'authorizationStateReady':
                         this.loggingOut = false;
                         this.setPhoneNumberRequest = null;
+                        subscribeNotifications();
                         break;
                     case 'authorizationStateClosing':
                         break;

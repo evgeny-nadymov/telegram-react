@@ -89,20 +89,20 @@ async function registerValidSW(swUrl) {
                 }
             };
         };
-
-        await subscribeNotifications(registration);
     } catch (error) {
         console.error('[SW] Error during service worker registration: ', error);
     }
 }
 
-async function subscribeNotifications(registration) {
+export async function subscribeNotifications() {
     try {
+        const registration = await navigator.serviceWorker.ready;
+
         let pushSubscription = await registration.pushManager.getSubscription();
         if (pushSubscription) await pushSubscription.unsubscribe();
 
         pushSubscription = await registration.pushManager.subscribe({ userVisibleOnly: true });
-        console.log('[SW] Received PushSubscription: ', JSON.stringify(pushSubscription));
+        console.log('[SW] Received push subscription: ', JSON.stringify(pushSubscription));
 
         const { endpoint } = pushSubscription;
         const p256dh_base64url = arrayBufferToBase64(pushSubscription.getKey('p256dh'));
@@ -152,7 +152,7 @@ async function checkValidServiceWorker(swUrl) {
 
 export async function unregister() {
     if ('serviceWorker' in navigator) {
-        let registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.ready;
 
         await registration.unregister();
     }
@@ -160,7 +160,7 @@ export async function unregister() {
 
 export async function update() {
     if ('serviceWorker' in navigator) {
-        let registration = await navigator.serviceWorker.ready;
+        const registration = await navigator.serviceWorker.ready;
 
         await registration.update();
     }
