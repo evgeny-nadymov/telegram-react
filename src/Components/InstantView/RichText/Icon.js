@@ -60,6 +60,10 @@ class Icon extends React.Component {
         this.forceUpdate();
     };
 
+    emptyPlaceholderSrc(width, height) {
+        return `data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"%3E%3C/svg%3E`;
+    }
+
     render() {
         const { document, height, width } = this.props;
         if (!document) return null;
@@ -70,7 +74,7 @@ class Icon extends React.Component {
 
         return (
             <img
-                src={src || thumbnailSrc}
+                src={src || thumbnailSrc || this.emptyPlaceholderSrc(1, 1)}
                 width={width > 0 ? width : null}
                 height={height > 0 ? height : null}
                 draggable={false}
