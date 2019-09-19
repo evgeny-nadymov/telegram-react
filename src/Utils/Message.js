@@ -122,7 +122,11 @@ function getFormattedText(text) {
         );
         switch (text.entities[i].type['@type']) {
             case 'textEntityTypeUrl': {
-                result.push(<SafeLink key={text.entities[i].offset} url={entityText} displayText={entityText} />);
+                result.push(
+                    <SafeLink key={text.entities[i].offset} url={entityText}>
+                        {entityText}
+                    </SafeLink>
+                );
                 break;
             }
             case 'textEntityTypeTextUrl': {
@@ -132,7 +136,11 @@ function getFormattedText(text) {
                     url = typeUrl;
                 }
 
-                result.push(<SafeLink key={text.entities[i].offset} url={url} displayText={entityText} />);
+                result.push(
+                    <SafeLink key={text.entities[i].offset} url={url}>
+                        {entityText}
+                    </SafeLink>
+                );
                 break;
             }
             case 'textEntityTypeBold':

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
@@ -37,11 +38,6 @@ const forwardIconStyle = {
 
 const deleteIconStyle = {
     padding: 20,
-    color: 'white'
-};
-
-const navigationIconStyle = {
-    padding: 35,
     color: 'white'
 };
 
@@ -341,13 +337,13 @@ class ProfileMediaViewer extends React.Component {
         const { big: file } = photo;
 
         return (
-            <div className='media-viewer'>
+            <div className={classNames('media-viewer', 'media-viewer-default')}>
                 {deleteConfirmation}
                 <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
                         <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
-                            <NavigateBeforeIcon fontSize='large' style={navigationIconStyle} />
+                            <NavigateBeforeIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
 
@@ -357,10 +353,10 @@ class ProfileMediaViewer extends React.Component {
 
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>
-                            <CloseIcon fontSize='large' style={navigationIconStyle} />
+                            <CloseIcon fontSize='large' />
                         </MediaViewerButton>
                         <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
-                            <NavigateNextIcon fontSize='large' style={navigationIconStyle} />
+                            <NavigateNextIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
                 </div>

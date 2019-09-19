@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import dateFormat from 'dateformat';
+import SafeLink from '../../Additional/SafeLink';
 
 function RelatedArticle(props) {
     const { author, description, publishDate } = props;
@@ -18,7 +19,7 @@ function RelatedArticle(props) {
 
     return (
         <li>
-            <a href={props.url}>{props.title}</a>
+            <SafeLink url={props.url}>{props.title}</SafeLink>
             {hasAuthorDate && (
                 <address>
                     {author}

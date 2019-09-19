@@ -182,7 +182,11 @@ class SharedLink extends React.Component {
         if (webPage) {
             title = title || this.getTitleFromUrl(url);
 
-            content = <SafeLink className='shared-link-url' url={url} displayText={display_url} />;
+            content = (
+                <SafeLink className='shared-link-url' url={url}>
+                    {display_url}
+                </SafeLink>
+            );
         } else {
             const { text } = message.content;
             if (text) {
@@ -211,7 +215,11 @@ class SharedLink extends React.Component {
 
                         title = title || this.getTitleFromUrl(url);
 
-                        return <SafeLink className='shared-link-url' url={url} displayText={entityText} mail={mail} />;
+                        return (
+                            <SafeLink className='shared-link-url' url={url} mail={mail}>
+                                {entityText}
+                            </SafeLink>
+                        );
                     });
                 }
             }

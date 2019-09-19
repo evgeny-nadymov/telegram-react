@@ -6,22 +6,23 @@
  */
 
 .media-viewer-button {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.5;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    padding: 35px;
 }
 
 .media-viewer-button-disabled {
-  cursor: default;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.15;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.15;
 }
 
 .media-viewer-button:hover {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.2);
 }

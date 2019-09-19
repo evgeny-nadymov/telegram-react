@@ -8,15 +8,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from './RichText';
+import SafeLink from '../../Additional/SafeLink';
+import TdLibController from '../../../Controllers/TdLibController';
 
-function Url(props) {
-    const { text, url } = props;
+class Url extends React.Component {
+    handleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
 
-    return (
-        <a href={url}>
-            <RichText text={text} />
-        </a>
-    );
+        const { url } = this.props;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenUrl',
+            url
+        });
+    };
+
+    render() {
+        const { text, url } = this.props;
+
+        return (
+            <SafeLink url={url}>
+                <RichText text={text} />
+            </SafeLink>
+        );
+    }
 }
 
 Url.propTypes = {

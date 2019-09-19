@@ -420,7 +420,6 @@ function loadDocumentContent(store, document, message, useFileSize = true) {
 }
 
 function loadDocumentThumbnailContent(store, document, message) {
-    console.log('[IV] loadDocumentThumbnailContent', document, message);
     if (!document) return false;
 
     const { thumbnail: photoSize } = document;
@@ -438,7 +437,6 @@ function loadDocumentThumbnailContent(store, document, message) {
     const chatId = message ? message.chat_id : 0;
     const messageId = message ? message.id : 0;
 
-    console.log('[IV] loadDocumentThumbnailContent getLocalFile', document, message);
     FileStore.getLocalFile(
         store,
         file,
@@ -452,7 +450,6 @@ function loadDocumentThumbnailContent(store, document, message) {
 
 function loadGameContent(store, game, message, useFileSize = true) {
     if (!game) return;
-    if (!message) return;
 
     const { animation } = game;
 
@@ -461,7 +458,6 @@ function loadGameContent(store, game, message, useFileSize = true) {
 
 function loadGameThumbnailContent(store, game, message) {
     if (!game) return false;
-    if (!message) return false;
 
     const { photo, animation } = game;
     if (loadAnimationThumbnailContent(store, animation, message)) {
@@ -656,7 +652,6 @@ function loadStickerThumbnailContent(store, sticker, message) {
 
 function loadVideoContent(store, video, message, useFileSize = true) {
     if (!video) return;
-    if (!message) return;
 
     let { video: file } = video;
     if (!file) return;
@@ -667,14 +662,17 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateVideoBlob(message.chat_id, message.id, id),
+        () => FileStore.updateVideoBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_VIDEO_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || video);
             }
         }
     );
@@ -682,7 +680,6 @@ function loadVideoContent(store, video, message, useFileSize = true) {
 
 function loadVideoThumbnailContent(store, video, message) {
     if (!video) return false;
-    if (!message) return false;
 
     const { thumbnail: photoSize } = video;
     if (!photoSize) return false;
@@ -696,12 +693,15 @@ function loadVideoThumbnailContent(store, video, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateVideoThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateVideoThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || video)
     );
 
     return true;
@@ -709,7 +709,6 @@ function loadVideoThumbnailContent(store, video, message) {
 
 function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
     if (!videoNote) return;
-    if (!message) return;
 
     let { video: file } = videoNote;
     if (!file) return;
@@ -720,14 +719,17 @@ function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateVideoNoteBlob(message.chat_id, message.id, id),
+        () => FileStore.updateVideoNoteBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_VIDEONOTE_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || videoNote);
             }
         }
     );
@@ -735,7 +737,6 @@ function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
 
 function loadVideoNoteThumbnailContent(store, videoNote, message) {
     if (!videoNote) return false;
-    if (!message) return false;
 
     const { thumbnail: photoSize } = videoNote;
     if (!photoSize) return false;
@@ -749,12 +750,15 @@ function loadVideoNoteThumbnailContent(store, videoNote, message) {
     const blob = FileStore.getBlob(id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateVideoNoteThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateVideoNoteThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || videoNote)
     );
 
     return true;
@@ -762,7 +766,6 @@ function loadVideoNoteThumbnailContent(store, videoNote, message) {
 
 function loadVoiceNoteContent(store, voiceNote, message, useFileSize = true) {
     if (!voiceNote) return;
-    if (!message) return;
 
     let { voice: file } = voiceNote;
     if (!file) return;
@@ -773,14 +776,17 @@ function loadVoiceNoteContent(store, voiceNote, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateVoiceNoteBlob(message.chat_id, message.id, id),
+        () => FileStore.updateVoiceNoteBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_VOICENOTE_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || voiceNote);
             }
         }
     );

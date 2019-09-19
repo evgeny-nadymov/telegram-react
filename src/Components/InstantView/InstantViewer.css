@@ -13,4 +13,21 @@
     left: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+}
+
+.instant-viewer-left-column {
+    min-width: 105px;
+}
+
+.instant-viewer-content-column {
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.instant-viewer-right-column {
+    color: white;
+    min-width: 105px;
+    display: flex;
+    flex-direction: column;
 }

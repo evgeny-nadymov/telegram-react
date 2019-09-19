@@ -67,19 +67,34 @@ class SafeLink extends React.Component {
         this.setState({ confirm: false });
     };
 
-    handleDone = () => {
+    handleDone = event => {
         this.handleClose();
 
-        const { url } = this.props;
+        const { url, onClick } = this.props;
         if (!url) return;
 
-        const newWindow = window.open();
-        newWindow.opener = null;
-        newWindow.location = url;
+        if (onClick) {
+            onClick(event);
+        } else {
+            const newWindow = window.open();
+            newWindow.opener = null;
+            newWindow.location = url;
+        }
+    };
+
+    handleSafeClick = event => {
+        event.stopPropagation();
+
+        const { onClick } = this.props;
+
+        if (onClick) {
+            event.preventDefault();
+            onClick(event);
+        }
     };
 
     render() {
-        const { className, displayText, t, url } = this.props;
+        const { className, children, t, url } = this.props;
         const { confirm, decodedUrl, href, safe } = this.state;
 
         if (!url) return null;
@@ -94,13 +109,13 @@ class SafeLink extends React.Component {
                         title={decodedUrl}
                         target='_blank'
                         rel='noopener norefferer'
-                        onClick={stopPropagation}>
-                        {displayText || url}
+                        onClick={this.handleSafeClick}>
+                        {children || url}
                     </a>
                 ) : (
                     <>
                         <a className={className} title={decodedUrl} onClick={this.handleClick}>
-                            {displayText || url}
+                            {children || url}
                         </a>
                         {confirm && (
                             <Dialog
@@ -131,7 +146,8 @@ class SafeLink extends React.Component {
 SafeLink.propTypes = {
     url: PropTypes.string.isRequired,
     displayText: PropTypes.string,
-    mail: PropTypes.bool
+    mail: PropTypes.bool,
+    onClick: PropTypes.func
 };
 
 export default withTranslation()(SafeLink);

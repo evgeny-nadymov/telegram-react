@@ -63,10 +63,6 @@ const iconStyle = {
     padding: 20
 };
 
-const navigationIconStyle = {
-    padding: 35
-};
-
 class MediaViewer extends React.Component {
     constructor(props) {
         super(props);
@@ -926,7 +922,7 @@ class MediaViewer extends React.Component {
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
                         <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
-                            <NavigateBeforeIcon fontSize='large' style={navigationIconStyle} />
+                            <NavigateBeforeIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
 
@@ -942,10 +938,10 @@ class MediaViewer extends React.Component {
 
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>
-                            <CloseIcon fontSize='large' style={navigationIconStyle} />
+                            <CloseIcon fontSize='large' />
                         </MediaViewerButton>
                         <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
-                            <NavigateNextIcon fontSize='large' style={navigationIconStyle} />
+                            <NavigateNextIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
                 </div>
