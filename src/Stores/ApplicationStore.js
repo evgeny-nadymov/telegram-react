@@ -35,6 +35,7 @@ class ApplicationStore extends EventEmitter {
         this.connectionState = null;
         this.isChatDetailsVisible = false;
         this.mediaViewerContent = null;
+        this.instantViewerContent = null;
         this.profileMediaViewerContent = null;
         this.dragging = false;
         this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
@@ -194,7 +195,14 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateInstantViewContent': {
+                const { content } = update;
+                this.instantViewerContent = content;
+
                 this.emit('clientUpdateInstantViewContent', update);
+                break;
+            }
+            case 'clientUpdateInstantViewUrl': {
+                this.emit('clientUpdateInstantViewUrl', update);
                 break;
             }
             case 'clientUpdateMediaViewerContent': {

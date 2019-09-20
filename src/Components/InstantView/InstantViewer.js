@@ -15,6 +15,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Article from './Article';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
 import { setInstantViewContent } from '../../Actions/Client';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import './InstantViewer.css';
 
 const styles = theme => ({
@@ -31,13 +32,76 @@ const styles = theme => ({
 });
 
 class InstantViewer extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.articleRef = React.createRef();
+        this.instantViewerRef = React.createRef();
+    }
+
     componentDidMount() {
         document.addEventListener('keydown', this.onKeyDown, false);
+        ApplicationStore.on('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown, false);
+        ApplicationStore.removeListener('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
     }
+
+    onClientUpdateInstantViewUrl = update => {
+        console.log('[IV] clientUpdateInstantViewUrl', update);
+        const { url } = update;
+        const { instantViewerContent } = ApplicationStore;
+        const activeInstantView = instantViewerContent !== null ? instantViewerContent.instantView : null;
+        const { instantView } = this.props;
+
+        if (activeInstantView !== instantView) return;
+
+        if (instantView && url.startsWith(instantView.url)) {
+            const hash = new URL(url).hash;
+            if (url.indexOf('#') === url.length - 1) {
+                this.instantViewerRef.current.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+
+                return;
+            } else if (hash) {
+                const hiddenElement = document.getElementById(hash.substr(1));
+                if (hiddenElement) {
+                    const details = [];
+                    let finished = false;
+                    let currentElement = hiddenElement;
+                    do {
+                        currentElement = currentElement.parentNode;
+                        if (currentElement) {
+                            if (currentElement.nodeName === 'DETAILS') {
+                                details.push(currentElement);
+                            } else if (currentElement.nodeName === 'ARTICLE') {
+                                finished = true;
+                            }
+                        } else {
+                            finished = true;
+                        }
+                    } while (!finished);
+
+                    details.forEach(x => (x.open = true));
+
+                    hiddenElement.scrollIntoView({
+                        block: 'center',
+                        behavior: 'smooth'
+                    });
+
+                    return;
+                }
+            }
+        }
+
+        const newWindow = window.open();
+        newWindow.opener = null;
+        newWindow.location = url;
+    };
 
     onKeyDown = event => {
         if (event.keyCode === 27) {
@@ -51,14 +115,13 @@ class InstantViewer extends React.Component {
 
     render() {
         const { classes, instantView } = this.props;
-        console.log('[IV] InstantViewer.render', instantView);
         if (!instantView) return null;
 
         return (
-            <div className={classNames('instant-viewer', classes.instantViewer)}>
+            <div ref={this.instantViewerRef} className={classNames('instant-viewer', classes.instantViewer)}>
                 <div className='instant-viewer-left-column' />
                 <div className='instant-viewer-content-column'>
-                    <Article content={instantView} />
+                    <Article ref={this.articleRef} content={instantView} />
                 </div>
                 <div className='instant-viewer-right-column'>
                     <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>

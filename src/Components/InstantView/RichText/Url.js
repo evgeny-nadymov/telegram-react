@@ -19,7 +19,7 @@ class Url extends React.Component {
         const { url } = this.props;
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateOpenUrl',
+            '@type': 'clientUpdateInstantViewUrl',
             url
         });
     };
@@ -28,7 +28,7 @@ class Url extends React.Component {
         const { text, url } = this.props;
 
         return (
-            <SafeLink url={url}>
+            <SafeLink url={url} onClick={this.handleClick}>
                 <RichText text={text} />
             </SafeLink>
         );
