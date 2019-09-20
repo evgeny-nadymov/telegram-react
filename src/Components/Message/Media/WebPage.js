@@ -181,9 +181,8 @@ class WebPage extends React.Component {
             force_full: true
         });
 
-        loadInstantViewContent(result);
-
         console.log('[IV] open', result);
+        loadInstantViewContent(result);
         setInstantViewContent({ instantView: result });
     };
 

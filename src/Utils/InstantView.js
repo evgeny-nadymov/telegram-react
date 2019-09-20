@@ -47,6 +47,8 @@ import TextAnchor from '../Components/InstantView/RichText/Anchor';
 import Texts from '../Components/InstantView/RichText/Texts';
 import Underline from '../Components/InstantView/RichText/Underline';
 import Url from '../Components/InstantView/RichText/Url';
+import Table from '../Components/InstantView/Blocks/Table';
+import TableCell from '../Components/InstantView/Blocks/TableCell';
 
 export function getPageBlock(block) {
     if (!block) return null;
@@ -178,6 +180,30 @@ export function getPageBlock(block) {
         }
         case 'pageBlockSubtitle': {
             element = <Subtitle subtitle={block.subtitle} />;
+            break;
+        }
+        case 'pageBlockTable': {
+            element = (
+                <Table
+                    caption={block.caption}
+                    cells={block.cells}
+                    isBordered={block.is_bordered}
+                    isStriped={block.is_striped}
+                />
+            );
+            break;
+        }
+        case 'pageBlockTableCell': {
+            element = (
+                <TableCell
+                    text={block.text}
+                    isHeader={block.is_header}
+                    colspan={block.colspan}
+                    rowspan={block.rowspan}
+                    align={block.align}
+                    valign={block.valign}
+                />
+            );
             break;
         }
         case 'pageBlockTitle': {
@@ -359,4 +385,40 @@ export function isEmptyText(richText) {
     }
 
     return false;
+}
+
+export function getHorizontalAlignment(align) {
+    if (!align) return null;
+
+    switch (align['@type']) {
+        case 'pageBlockHorizontalAlignmentCenter': {
+            return 'center';
+        }
+        case 'pageBlockHorizontalAlignmentLeft': {
+            return 'left';
+        }
+        case 'pageBlockHorizontalAlignmentRight': {
+            return 'right';
+        }
+    }
+
+    return null;
+}
+
+export function getVerticalAlignment(valign) {
+    if (!valign) return null;
+
+    switch (valign['@type']) {
+        case 'pageBlockVerticalAlignmentBottom': {
+            return 'bottom';
+        }
+        case 'pageBlockVerticalAlignmentMiddle': {
+            return 'middle';
+        }
+        case 'pageBlockVerticalAlignmentTop': {
+            return 'top';
+        }
+    }
+
+    return null;
 }

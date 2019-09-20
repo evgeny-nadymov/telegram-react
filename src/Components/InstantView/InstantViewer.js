@@ -16,7 +16,9 @@ import Article from './Article';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
 import { setInstantViewContent } from '../../Actions/Client';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
+import { loadInstantViewContent } from '../../Utils/File';
 
 const styles = theme => ({
     instantViewer: {
@@ -49,7 +51,7 @@ class InstantViewer extends React.Component {
         ApplicationStore.removeListener('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
     }
 
-    onClientUpdateInstantViewUrl = update => {
+    onClientUpdateInstantViewUrl = async update => {
         console.log('[IV] clientUpdateInstantViewUrl', update);
         const { url } = update;
         const { instantViewerContent } = ApplicationStore;
@@ -61,47 +63,90 @@ class InstantViewer extends React.Component {
         if (instantView && url.startsWith(instantView.url)) {
             const hash = new URL(url).hash;
             if (url.indexOf('#') === url.length - 1) {
-                this.instantViewerRef.current.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                this.scrollTop('smooth');
 
                 return;
-            } else if (hash) {
-                const hiddenElement = document.getElementById(hash.substr(1));
-                if (hiddenElement) {
-                    const details = [];
-                    let finished = false;
-                    let currentElement = hiddenElement;
-                    do {
-                        currentElement = currentElement.parentNode;
-                        if (currentElement) {
-                            if (currentElement.nodeName === 'DETAILS') {
-                                details.push(currentElement);
-                            } else if (currentElement.nodeName === 'ARTICLE') {
-                                finished = true;
-                            }
-                        } else {
-                            finished = true;
-                        }
-                    } while (!finished);
-
-                    details.forEach(x => (x.open = true));
-
-                    hiddenElement.scrollIntoView({
-                        block: 'center',
-                        behavior: 'smooth'
-                    });
-
-                    return;
-                }
+            } else if (hash && this.scrollToHash(hash, 'smooth')) {
+                return;
             }
         }
 
-        const newWindow = window.open();
-        newWindow.opener = null;
-        newWindow.location = url;
+        try {
+            const result = await TdLibController.send({
+                '@type': 'getWebPageInstantView',
+                url,
+                force_full: true
+            });
+
+            console.log('[IV] open', result);
+            loadInstantViewContent(result);
+            setInstantViewContent({ instantView: result });
+        } catch {
+            const newWindow = window.open();
+            newWindow.opener = null;
+            newWindow.location = url;
+        }
     };
+
+    scrollToHash(hash, behavior) {
+        if (!hash) return false;
+
+        const hiddenElement = document.getElementById(hash.substr(1));
+        if (hiddenElement) {
+            const details = [];
+            let finished = false;
+            let currentElement = hiddenElement;
+            do {
+                currentElement = currentElement.parentNode;
+                if (currentElement) {
+                    if (currentElement.nodeName === 'DETAILS') {
+                        details.push(currentElement);
+                    } else if (currentElement.nodeName === 'ARTICLE') {
+                        finished = true;
+                    }
+                } else {
+                    finished = true;
+                }
+            } while (!finished);
+
+            details.forEach(x => (x.open = true));
+
+            hiddenElement.scrollIntoView({
+                block: 'center',
+                behavior
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+
+    scrollTop(behavior) {
+        this.instantViewerRef.current.scrollTo({
+            top: 0,
+            behavior
+        });
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { instantView, url } = this.props;
+        console.log('[IV] componentDidUpdate', instantView.url, instantView.url === prevProps.instantView.url);
+
+        if (prevProps.instantView.url !== instantView.url) {
+            const hash = new URL(instantView.url).hash;
+            if (instantView.url.indexOf('#') === instantView.url.length - 1) {
+                console.log('[IV] componentDidUpdate scrollTop 1');
+                this.scrollTop('auto');
+            } else if (hash) {
+                console.log('[IV] componentDidUpdate scrollToHash', hash);
+                this.scrollToHash(hash, 'auto');
+            } else {
+                console.log('[IV] componentDidUpdate scrollTop 2');
+                this.scrollTop('auto');
+            }
+        }
+    }
 
     onKeyDown = event => {
         if (event.keyCode === 27) {

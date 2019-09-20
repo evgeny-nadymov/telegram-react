@@ -1773,8 +1773,8 @@ function loadPageBlockContent(store, b) {
         case 'pageBlockTable': {
             const { caption, cells } = b;
 
-            loadPageBlockContent(store, caption);
-            cells.forEach(x => loadPageBlockContent(store, x));
+            loadRichTextContent(store, caption);
+            cells.forEach(row => row.forEach(x => loadPageBlockContent(store, x)));
             break;
         }
         // actually not a pageBlock child but load content in the same way

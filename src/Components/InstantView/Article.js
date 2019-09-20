@@ -14,10 +14,10 @@ function Article(props) {
     const { content } = props;
     if (!content) return null;
 
-    const { page_blocks } = content;
+    const { page_blocks, is_rtl } = content;
     if (!page_blocks) return;
 
-    return <article>{page_blocks.map(getPageBlock)}</article>;
+    return <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map(getPageBlock)}</article>;
 }
 
 Article.propTypes = {

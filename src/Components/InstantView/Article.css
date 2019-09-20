@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 article {
+    white-space: pre-wrap;
     font-family: 'Helvetica Neue';
     font-size: 17px;
     line-height: 25px;
