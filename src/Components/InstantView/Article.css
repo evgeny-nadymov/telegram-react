@@ -4,6 +4,7 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
 article {
     white-space: pre-wrap;
     font-family: 'Helvetica Neue';
@@ -51,6 +52,12 @@ article address a[href] {
 }
 article a[href] {
     text-decoration: none;
+}
+article .location {
+    margin: 6px auto;
+}
+article .photo {
+    margin: 6px auto;
 }
 /*article a[name] {
   position: absolute !important;

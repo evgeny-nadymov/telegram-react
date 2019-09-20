@@ -49,6 +49,7 @@ import Underline from '../Components/InstantView/RichText/Underline';
 import Url from '../Components/InstantView/RichText/Url';
 import Table from '../Components/InstantView/Blocks/Table';
 import TableCell from '../Components/InstantView/Blocks/TableCell';
+import Map from '../Components/InstantView/Blocks/Map';
 
 export function getPageBlock(block) {
     if (!block) return null;
@@ -135,6 +136,18 @@ export function getPageBlock(block) {
         }
         case 'pageBlockListItem': {
             element = <ListItem label={block.label} pageBlocks={block.page_blocks} />;
+            break;
+        }
+        case 'pageBlockMap': {
+            element = (
+                <Map
+                    location={block.location}
+                    zoom={block.zoom}
+                    width={block.width}
+                    height={block.height}
+                    caption={block.caption}
+                />
+            );
             break;
         }
         case 'pageBlockParagraph': {

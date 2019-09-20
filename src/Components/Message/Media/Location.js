@@ -12,6 +12,7 @@ import { getLocationId } from '../../../Utils/Message';
 import { getSrc } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './Location.css';
+import { LOCATION_HEIGHT, LOCATION_WIDTH } from '../../../Constants';
 
 class Location extends React.Component {
     componentDidMount() {
@@ -36,7 +37,7 @@ class Location extends React.Component {
     };
 
     render() {
-        const { location } = this.props;
+        const { location, style } = this.props;
         if (!location) return null;
 
         const locationId = getLocationId(location);
@@ -46,24 +47,32 @@ class Location extends React.Component {
         const { longitude, latitude } = location;
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
 
+        const locationStyle = {
+            width: LOCATION_WIDTH,
+            height: LOCATION_HEIGHT,
+            ...style
+        };
+
         return (
-            <a href={source} target='_blank' rel='noopener noreferrer'>
-                <div className='location-wrapper'>
-                    <img className='location-image' draggable={false} alt={source} src={src} />
-                    <div className='location-icon'>
-                        <RoomIcon fontSize='large' color='primary' />
+            <div className='location' style={locationStyle}>
+                <a href={source} target='_blank' rel='noopener noreferrer'>
+                    <div className='location-wrapper'>
+                        <img className='location-image' draggable={false} alt={source} src={src} />
+                        <div className='location-icon'>
+                            <RoomIcon fontSize='large' color='primary' />
+                        </div>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
         );
     }
 }
 
 Location.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     location: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    openMedia: PropTypes.func
 };
 
 export default Location;

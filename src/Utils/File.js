@@ -470,7 +470,6 @@ function loadGameThumbnailContent(store, game, message) {
 
 async function loadLocationContent(store, location, message) {
     if (!location) return;
-    if (!message) return;
 
     const locationId = getLocationId(location);
     if (!locationId) return;
@@ -484,7 +483,7 @@ async function loadLocationContent(store, location, message) {
             width: LOCATION_WIDTH,
             height: LOCATION_HEIGHT,
             scale: LOCATION_SCALE,
-            chat_id: message.chat_id
+            chat_id: message ? message.chat_id : 0
         });
         FileStore.setLocationFile(locationId, file);
 
@@ -497,12 +496,15 @@ async function loadLocationContent(store, location, message) {
     const blob = FileStore.getBlob(file.id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateLocationBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message)
+        () => FileStore.updateLocationBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || location)
     );
 }
 
