@@ -50,8 +50,83 @@ import Url from '../Components/InstantView/RichText/Url';
 import Table from '../Components/InstantView/Blocks/Table';
 import TableCell from '../Components/InstantView/Blocks/TableCell';
 import Map from '../Components/InstantView/Blocks/Map';
+import Audio from '../Components/InstantView/Blocks/Audio';
+import { download } from './File';
+import FileStore from '../Stores/FileStore';
+import TdLibController from '../Controllers/TdLibController';
+import ChatLink from '../Components/InstantView/Blocks/ChatLink';
+import Video from '../Components/InstantView/Blocks/Video';
 
-export function getPageBlock(block) {
+export function openInstantViewMedia(media, block, instantView, fileCancel) {
+    console.log('[IV] openIVMedia', media);
+
+    if (!media) return;
+
+    const chatId = 0;
+    const messageId = 0;
+
+    switch (media['@type']) {
+        case 'animation': {
+            let { animation: file } = media;
+            if (!file) return;
+
+            file = FileStore.get(file.id) || file;
+            if (fileCancel && file.local.is_downloading_active) {
+                FileStore.cancelGetRemoteFile(file.id, media);
+                return;
+            } else if (fileCancel && file.remote.is_uploading_active) {
+                FileStore.cancelUploadFile(file.id, media);
+                return;
+            } else {
+                download(file, media, FileStore.updateAnimationBlob(chatId, messageId, file.id));
+            }
+            break;
+        }
+        case 'audio': {
+            let { audio: file } = media;
+            if (!file) return;
+
+            file = FileStore.get(file.id) || file;
+            if (fileCancel && file.local.is_downloading_active) {
+                FileStore.cancelGetRemoteFile(file.id, media);
+                return;
+            } else if (fileCancel && file.remote.is_uploading_active) {
+                FileStore.cancelUploadFile(file.id, media);
+                return;
+            } else {
+                download(file, media, FileStore.updateAudioBlob(chatId, messageId, file.id));
+            }
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaActive',
+                instantView,
+                block
+            });
+            break;
+        }
+        case 'photo': {
+            break;
+        }
+        case 'video': {
+            let { video: file } = media;
+            if (!file) return;
+
+            file = FileStore.get(file.id) || file;
+            if (fileCancel && file.local.is_downloading_active) {
+                FileStore.cancelGetRemoteFile(file.id, media);
+                return;
+            } else if (fileCancel && file.remote.is_uploading_active) {
+                FileStore.cancelUploadFile(file.id, media);
+                return;
+            } else {
+                download(file, media, FileStore.updateVideoBlob(chatId, messageId, file.id));
+            }
+            break;
+        }
+    }
+}
+
+export function getPageBlock(block, iv) {
     if (!block) return null;
 
     let element = null;
@@ -62,7 +137,22 @@ export function getPageBlock(block) {
         }
         case 'pageBlockAnimation': {
             element = (
-                <Animation caption={block.caption} animation={block.animation} need_autoplay={block.need_autoplay} />
+                <Animation
+                    caption={block.caption}
+                    animation={block.animation}
+                    needAutoplay={block.need_autoplay}
+                    openMedia={() => openInstantViewMedia(block.animation, block, iv, true)}
+                />
+            );
+            break;
+        }
+        case 'pageBlockAudio': {
+            element = (
+                <Audio
+                    caption={block.caption}
+                    audio={block.audio}
+                    openMedia={() => openInstantViewMedia(block.audio, block, iv, true)}
+                />
             );
             break;
         }
@@ -76,6 +166,10 @@ export function getPageBlock(block) {
         }
         case 'pageBlockCollage': {
             element = <Collage pageBlocks={block.page_blocks} caption={block.caption} />;
+            break;
+        }
+        case 'pageBlockChatLink': {
+            element = <ChatLink title={block.title} photo={block.photo} username={block.username} />;
             break;
         }
         case 'pageBlockCover': {
@@ -155,7 +249,14 @@ export function getPageBlock(block) {
             break;
         }
         case 'pageBlockPhoto': {
-            element = <Photo caption={block.caption} photo={block.photo} url={block.url} />;
+            element = (
+                <Photo
+                    caption={block.caption}
+                    photo={block.photo}
+                    url={block.url}
+                    openMedia={() => openInstantViewMedia(block.photo, block, iv, true)}
+                />
+            );
             break;
         }
         case 'pageBlockPreformatted': {
@@ -221,6 +322,18 @@ export function getPageBlock(block) {
         }
         case 'pageBlockTitle': {
             element = <Title title={block.title} />;
+            break;
+        }
+        case 'pageBlockVideo': {
+            element = (
+                <Video
+                    caption={block.caption}
+                    video={block.video}
+                    needAutoplay={block.need_autoplay}
+                    isLooped={block.is_looped}
+                    openMedia={() => openInstantViewMedia(block.video, block, iv, true)}
+                />
+            );
             break;
         }
     }

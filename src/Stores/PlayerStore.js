@@ -50,6 +50,8 @@ class PlayerStore extends EventEmitter {
         this.message = null;
         this.time = null;
         this.videoStream = null;
+        this.instantView = null;
+        this.pageBlock = null;
     };
 
     addTdLibListener = () => {
@@ -91,25 +93,27 @@ class PlayerStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateMediaClose': {
-                this.playlist = null;
-                this.message = null;
-                this.time = null;
-                this.videoStream = null;
+                this.reset();
 
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateMediaActive': {
-                const { chatId, messageId } = update;
+                const { chatId, messageId, instantView, pageBlock } = update;
 
                 const message = MessageStore.get(chatId, messageId);
-                if (!message) return;
+                if (message) {
+                    this.message = message;
+                    this.emit(update['@type'], update);
+                    this.getPlaylist(chatId, messageId);
 
-                this.message = message;
+                    return;
+                } else if (instantView && pageBlock) {
+                    this.instantView = instantView;
+                    this.pageBlock = pageBlock;
+                    this.emit(update['@type'], update);
+                }
 
-                this.emit(update['@type'], update);
-
-                this.getPlaylist(chatId, messageId);
                 break;
             }
             case 'clientUpdateMediaVolume': {

@@ -7,15 +7,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withIV } from '../IVContext';
 import Caption from './Caption';
 import { getPageBlock } from '../../../Utils/InstantView';
 
 function Collage(props) {
-    const { pageBlocks, caption } = props;
+    const { pageBlocks, caption, iv } = props;
 
     return (
         <div className='collage'>
-            {pageBlocks.map(getPageBlock)}
+            {pageBlocks.map(x => getPageBlock(x, iv))}
             <Caption text={caption.text} credit={caption.credit} />
         </div>
     );
@@ -26,4 +27,4 @@ Collage.propTypes = {
     caption: PropTypes.object.isRequired
 };
 
-export default Collage;
+export default withIV(Collage);

@@ -7,18 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withIV } from '../IVContext';
 import RichText from '../RichText/RichText';
 import { getPageBlock } from '../../../Utils/InstantView';
 
 function Details(props) {
-    const { header, pageBlocks, isOpen } = props;
+    const { header, pageBlocks, isOpen, iv } = props;
 
     return (
         <details open={isOpen}>
             <summary>
                 <RichText text={header} />
             </summary>
-            {pageBlocks.map(getPageBlock)}
+            {pageBlocks.map(x => getPageBlock(x, iv))}
         </details>
     );
 }
@@ -29,4 +30,4 @@ Details.propTypes = {
     isOpen: PropTypes.bool.isRequired
 };
 
-export default Details;
+export default withIV(Details);

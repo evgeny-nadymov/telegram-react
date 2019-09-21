@@ -7,15 +7,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getPageBlock } from '../../../Utils/InstantView';
+import { withIV } from '../IVContext';
 import Caption from './Caption';
+import { getPageBlock } from '../../../Utils/InstantView';
 
 function Slideshow(props) {
-    const { pageBlocks, caption } = props;
+    const { pageBlocks, caption, iv } = props;
 
     return (
         <div className='slideshow'>
-            {pageBlocks.map(getPageBlock)}
+            {pageBlocks.map(x => getPageBlock(x, iv))}
             <Caption text={caption.text} credit={caption.credit} />
         </div>
     );
@@ -26,4 +27,4 @@ Slideshow.propTypes = {
     caption: PropTypes.object.isRequired
 };
 
-export default Slideshow;
+export default withIV(Slideshow);

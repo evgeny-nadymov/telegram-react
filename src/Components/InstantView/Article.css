@@ -53,9 +53,11 @@ article address a[href] {
 article a[href] {
     text-decoration: none;
 }
-article .location {
-    margin: 6px auto;
+article .document,
+article .audio {
+    margin: 6px 18px;
 }
+article .location,
 article .photo {
     margin: 6px auto;
 }

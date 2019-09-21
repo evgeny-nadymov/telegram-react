@@ -181,8 +181,8 @@ class AudioAction extends React.Component {
 }
 
 AudioAction.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     duration: PropTypes.number.isRequired,
     file: PropTypes.object.isRequired,
 

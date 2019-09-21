@@ -19,6 +19,7 @@ import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
 import { loadInstantViewContent } from '../../Utils/File';
+import IVContext from './IVContext';
 
 const styles = theme => ({
     instantViewer: {
@@ -166,7 +167,9 @@ class InstantViewer extends React.Component {
             <div ref={this.instantViewerRef} className={classNames('instant-viewer', classes.instantViewer)}>
                 <div className='instant-viewer-left-column' />
                 <div className='instant-viewer-content-column'>
-                    <Article ref={this.articleRef} content={instantView} />
+                    <IVContext.Provider value={instantView}>
+                        <Article ref={this.articleRef} />
+                    </IVContext.Provider>
                 </div>
                 <div className='instant-viewer-right-column'>
                     <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>
@@ -177,6 +180,10 @@ class InstantViewer extends React.Component {
         );
     }
 }
+
+InstantViewer.propTypes = {
+    instantView: PropTypes.object.isRequired
+};
 
 const enhance = compose(
     withStyles(styles),

@@ -8,24 +8,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Caption from './Caption';
-import MediaAnimation from '../../../Components/Message/Media/Animation';
+import MediaVideo from '../../../Components/Message/Media/Video';
 
-function Animation(props) {
-    const { animation, caption, need_autoplay, openMedia } = props;
+function Video(props) {
+    const { video, caption, needAutoplay, isLooped, openMedia } = props;
 
     return (
         <>
-            <MediaAnimation animation={animation} style={{ margin: '0 auto' }} openMedia={openMedia} />
+            <MediaVideo video={video} style={{ margin: '0 auto' }} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </>
     );
 }
 
-Animation.propTypes = {
-    animation: PropTypes.object.isRequired,
+Video.propTypes = {
+    video: PropTypes.object.isRequired,
     caption: PropTypes.object.isRequired,
     needAutoplay: PropTypes.bool.isRequired,
+    isLooped: PropTypes.bool.isRequired,
     openMedia: PropTypes.func
 };
 
-export default Animation;
+export default Video;

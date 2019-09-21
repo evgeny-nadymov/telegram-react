@@ -7,25 +7,25 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import MediaAudio from '../../Message/Media/Audio';
+import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import Caption from './Caption';
-import MediaAnimation from '../../../Components/Message/Media/Animation';
 
-function Animation(props) {
-    const { animation, caption, need_autoplay, openMedia } = props;
+function Audio(props) {
+    const { audio, caption, openMedia } = props;
 
     return (
         <>
-            <MediaAnimation animation={animation} style={{ margin: '0 auto' }} openMedia={openMedia} />
+            <MediaAudio audio={audio} displaySize={PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </>
     );
 }
 
-Animation.propTypes = {
-    animation: PropTypes.object.isRequired,
+Audio.propTypes = {
+    audio: PropTypes.object.isRequired,
     caption: PropTypes.object.isRequired,
-    needAutoplay: PropTypes.bool.isRequired,
     openMedia: PropTypes.func
 };
 
-export default Animation;
+export default Audio;

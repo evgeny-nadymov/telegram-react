@@ -7,16 +7,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withIV } from '../IVContext';
 import Caption from './Caption';
 import { getPageBlock } from '../../../Utils/InstantView';
 
 function EmbeddedPost(props) {
-    const { url, author, authorPhoto, date, pageBlocks, caption } = props;
-    const hasCaption = caption && caption.text && caption.credit;
+    const { url, author, authorPhoto, date, pageBlocks, caption, iv } = props;
+
     return (
         <figure>
-            {pageBlocks.map(getPageBlock)}
-            {hasCaption && <Caption text={caption.text} credit={caption.credit} />}
+            {pageBlocks.map(x => getPageBlock(x, iv))}
+            <Caption text={caption.text} credit={caption.credit} />
         </figure>
     );
 }
@@ -30,4 +31,4 @@ EmbeddedPost.propTypes = {
     caption: PropTypes.object.isRequired
 };
 
-export default EmbeddedPost;
+export default withIV(EmbeddedPost);

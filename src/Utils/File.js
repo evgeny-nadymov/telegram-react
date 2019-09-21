@@ -272,7 +272,6 @@ function loadReplyContents(store, messages) {
 
 function loadAudioContent(store, audio, message, useFileSize = true) {
     if (!audio) return;
-    if (!message) return;
 
     let { audio: file } = audio;
     if (!file) return;
@@ -283,14 +282,17 @@ function loadAudioContent(store, audio, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAudioBlob(message.chat_id, message.id, id),
+        () => FileStore.updateAudioBlob(chatId, messageId, id),
         () => {
             if (!useFileSize || (size && size < PRELOAD_AUDIO_SIZE)) {
-                FileStore.getRemoteFile(id, FILE_PRIORITY, message);
+                FileStore.getRemoteFile(id, FILE_PRIORITY, message || audio);
             }
         }
     );
@@ -298,7 +300,6 @@ function loadAudioContent(store, audio, message, useFileSize = true) {
 
 function loadAudioThumbnailContent(store, audio, message) {
     if (!audio) return false;
-    if (!message) return false;
 
     const { album_cover_thumbnail: photoSize } = audio;
     if (!photoSize) return false;
@@ -312,12 +313,15 @@ function loadAudioThumbnailContent(store, audio, message) {
     const blob = FileStore.getBlob(file.id);
     if (blob) return true;
 
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
     FileStore.getLocalFile(
         store,
         file,
         null,
-        () => FileStore.updateAudioThumbnailBlob(message.chat_id, message.id, id),
-        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message)
+        () => FileStore.updateAudioThumbnailBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || audio)
     );
 
     return true;
@@ -1721,9 +1725,10 @@ function loadPageBlockContent(store, b) {
             break;
         }
         case 'pageBlockPhoto': {
-            const { photo } = b;
+            const { photo, caption } = b;
 
             loadPhotoContent(store, photo, null);
+            loadPageBlockContent(store, caption);
             break;
         }
         case 'pageBlockPreformatted': {

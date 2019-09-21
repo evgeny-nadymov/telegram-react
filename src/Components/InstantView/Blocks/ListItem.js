@@ -7,10 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withIV } from '../IVContext';
 import { getPageBlock } from '../../../Utils/InstantView';
 
 function ListItem(props) {
-    return <li>{props.pageBlocks.map(getPageBlock)}</li>;
+    return <li>{props.pageBlocks.map(x => getPageBlock(x, props.iv))}</li>;
 }
 
 ListItem.propTypes = {
@@ -18,4 +19,4 @@ ListItem.propTypes = {
     pageBlocks: PropTypes.array.isRequired
 };
 
-export default ListItem;
+export default withIV(ListItem);

@@ -853,10 +853,10 @@ function openAnimation(animation, message, fileCancel) {
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
+    } else {
+        // download file at loadMediaViewerContent instead
+        // download(file, message, FileStore.updateAnimationBlob(chat_id, id, file.id));
     }
-
-    // download file at loadMediaViewerContent instead
-    // download(file, message, FileStore.updateAnimationBlob(chat_id, id, file.id));
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateActiveAnimation',

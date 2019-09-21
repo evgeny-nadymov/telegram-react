@@ -7,11 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withIV } from '../IVContext';
 import RichText from '../RichText/RichText';
 import { getPageBlock, isEmptyText } from '../../../Utils/InstantView';
 
 function Table(props) {
-    const { caption, cells, isBordered, isStriped } = props;
+    const { caption, cells, isBordered, isStriped, iv } = props;
 
     return (
         <table striped={isStriped ? '' : null} border={isBordered ? 1 : 0}>
@@ -21,7 +22,7 @@ function Table(props) {
                 </caption>
             )}
             {cells.map(row => {
-                return <tr>{row.map(getPageBlock)}</tr>;
+                return <tr>{row.map(x => getPageBlock(x, iv))}</tr>;
             })}
         </table>
     );
@@ -34,4 +35,4 @@ Table.propTypes = {
     isStriped: PropTypes.bool.isRequired
 };
 
-export default Table;
+export default withIV(Table);

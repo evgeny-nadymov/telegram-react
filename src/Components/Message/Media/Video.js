@@ -37,15 +37,16 @@ class Video extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia } = this.props;
+        const { displaySize, openMedia, style } = this.props;
         const { thumbnail, video, width, height, duration } = this.props.video;
 
         const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
 
-        const style = {
+        const videoStyle = {
             width: fitPhotoSize.width,
-            height: fitPhotoSize.height
+            height: fitPhotoSize.height,
+            ...style
         };
 
         const file = thumbnail ? thumbnail.photo : null;
@@ -54,13 +55,8 @@ class Video extends React.Component {
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         return (
-            <div className='video' style={style} onClick={openMedia}>
-                <img
-                    className={classNames('video-preview', { 'media-blurred': isBlurred })}
-                    style={style}
-                    src={src}
-                    alt=''
-                />
+            <div className='video' style={videoStyle} onClick={openMedia}>
+                <img className={classNames('video-preview', { 'media-blurred': isBlurred })} src={src} alt='' />
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
@@ -71,8 +67,8 @@ class Video extends React.Component {
 }
 
 Video.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     video: PropTypes.object.isRequired,
     openMedia: PropTypes.func.isRequired,
     size: PropTypes.number,
