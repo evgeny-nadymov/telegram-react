@@ -146,20 +146,32 @@ article footer hr {
 }
 article ul {
     margin: 18px;
-    padding-left: 22px; /*16px*/
-    /*list-style: none;*/
+    padding-left: 22px;
+    list-style: none;
 }
+article li p {
+    min-height: 25px;
+}
+article ul li::before {
+    content: attr(data-before);
+    position: absolute;
+    text-align: right;
+    width: 1.5em;
+    margin-left: -2em;
+    margin-right: 0.5em;
+}
+
 /*article ul > li {
-  padding-left: 6px;
-  position: relative;
+padding-left: 6px;
+position: relative;
 }
 article ul > li:before {
-  content: '\2022';
-  position: absolute;
-  display: block;
-  font-size: 163%;
-  left: -19px;
-  top: 1px;
+content: '\2022';
+position: absolute;
+display: block;
+font-size: 163%;
+left: -19px;
+top: 1px;
 }*/
 article ol {
     margin: 18px;
