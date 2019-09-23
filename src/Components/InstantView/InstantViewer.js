@@ -12,6 +12,7 @@ import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import Article from './Article';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
 import { setInstantViewContent } from '../../Actions/Client';
@@ -25,6 +26,12 @@ const styles = theme => ({
     instantViewer: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
+    },
+    backButton: {
+        color: theme.palette.text.secondary,
+        position: 'fixed',
+        top: 0,
+        left: 0
     },
     closeButton: {
         color: theme.palette.text.secondary,
@@ -159,13 +166,19 @@ class InstantViewer extends React.Component {
         setInstantViewContent(null);
     }
 
+    handleBack() {}
+
     render() {
         const { classes, instantView } = this.props;
         if (!instantView) return null;
 
         return (
             <div ref={this.instantViewerRef} className={classNames('instant-viewer', classes.instantViewer)}>
-                <div className='instant-viewer-left-column' />
+                <div className='instant-viewer-left-column'>
+                    <MediaViewerButton className={classes.backButton} onClick={this.handleBack}>
+                        <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
+                    </MediaViewerButton>
+                </div>
                 <div className='instant-viewer-content-column'>
                     <IVContext.Provider value={instantView}>
                         <Article ref={this.articleRef} />

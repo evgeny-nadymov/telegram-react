@@ -68,6 +68,14 @@ article .photo {
   margin: -3px 0;
   left: 0; right: 0;
 }*/
+article > details {
+    margin: 0 18px;
+}
+article mark {
+    background: #fff8cc;
+    border-radius: 3px;
+    padding: 0 3px;
+}
 article p {
     margin: 0 0 12px;
 }

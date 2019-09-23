@@ -553,28 +553,6 @@ class MediaViewer extends React.Component {
 
     handleDelete = () => {
         this.handleDialogOpen();
-        return;
-
-        const { chatId, messageId } = this.props;
-        const { currentMessageId } = this.state;
-
-        const message = MessageStore.get(chatId, currentMessageId);
-        if (!message) return;
-        if (!message.content) return;
-
-        const { photo } = message.content;
-        if (photo) {
-            const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-            if (photoSize) {
-                let file = photoSize.photo;
-                file = FileStore.get(file.id) || file;
-                if (file) {
-                    const store = FileStore.getReadWriteStore();
-
-                    FileStore.deleteLocalFile(store, file);
-                }
-            }
-        }
     };
 
     hasPreviousMedia = index => {
