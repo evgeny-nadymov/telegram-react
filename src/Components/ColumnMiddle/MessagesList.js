@@ -69,6 +69,7 @@ class MessagesList extends React.Component {
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
 
+        this.defferedActions = [];
         this.itemsMap = new Map();
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
@@ -204,6 +205,7 @@ class MessagesList extends React.Component {
         MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
@@ -220,11 +222,20 @@ class MessagesList extends React.Component {
         MessageStore.removeListener('clientUpdateOpenReply', this.onClientUpdateOpenReply);
         ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
         ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
 
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateFocusWindow = update => {
+        const { focused } = update;
+        if (focused) {
+            this.defferedActions.forEach(x => x());
+            this.defferedActions = [];
+        }
+    };
 
     onClientUpdateOpenReply = update => {
         const { chatId, messageId } = update;
@@ -339,7 +350,7 @@ class MessagesList extends React.Component {
 
         const store = FileStore.getStore();
         loadMessageContents(store, [message]);
-        MessagesList.viewMessages([message]);
+        this.viewMessages([message]);
     };
 
     onUpdateNewMessage = update => {
@@ -363,7 +374,7 @@ class MessagesList extends React.Component {
 
         const store = FileStore.getStore();
         loadMessageContents(store, history);
-        MessagesList.viewMessages(history);
+        this.viewMessages(history);
     };
 
     onUpdateDeleteMessages = update => {
@@ -430,6 +441,7 @@ class MessagesList extends React.Component {
         this.loading = false;
         this.completed = false;
         this.loadMigratedHistory = false;
+        this.defferedActions = [];
 
         if (chat) {
             TdLibController.send({
@@ -503,7 +515,7 @@ class MessagesList extends React.Component {
             // load files
             const store = FileStore.getStore();
             loadMessageContents(store, result.messages);
-            MessagesList.viewMessages(result.messages);
+            this.viewMessages(result.messages);
 
             loadChatsContent(store, [chatId]);
             loadDraftContent(store, chatId);
@@ -527,16 +539,24 @@ class MessagesList extends React.Component {
         }
     }
 
-    static viewMessages(messages) {
+    viewMessages(messages) {
         if (!messages) return;
         if (messages.length === 0) return;
         if (!messages[0].chat_id) return;
 
-        TdLibController.send({
-            '@type': 'viewMessages',
-            chat_id: messages[0].chat_id,
-            message_ids: messages.map(x => x.id)
-        });
+        const viewAction = () => {
+            TdLibController.send({
+                '@type': 'viewMessages',
+                chat_id: messages[0].chat_id,
+                message_ids: messages.map(x => x.id)
+            });
+        };
+
+        if (window.hasFocus) {
+            viewAction();
+        } else {
+            this.defferedActions.push(viewAction);
+        }
     }
 
     cancelLoadMessageContents(messages) {
@@ -626,7 +646,7 @@ class MessagesList extends React.Component {
 
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        MessagesList.viewMessages(result.messages);
+        this.viewMessages(result.messages);
 
         return result;
     };
@@ -682,7 +702,7 @@ class MessagesList extends React.Component {
 
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        MessagesList.viewMessages(result.messages);
+        this.viewMessages(result.messages);
     };
 
     onLoadPrevious = async () => {
@@ -734,7 +754,7 @@ class MessagesList extends React.Component {
 
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        MessagesList.viewMessages(result.messages);
+        this.viewMessages(result.messages);
 
         return result;
     };
@@ -1048,7 +1068,7 @@ class MessagesList extends React.Component {
         // load files
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
-        MessagesList.viewMessages(result.messages);
+        this.viewMessages(result.messages);
 
         this.loadIncompleteHistory(result);
     };
