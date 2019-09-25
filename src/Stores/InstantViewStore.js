@@ -26,7 +26,30 @@ class InstantViewStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-            case 'clientUpdateInstantView': {
+            case 'clientUpdateInstantViewContent': {
+                const { content } = update;
+
+                if (content) {
+                    this.items.push(content.instantView);
+                } else {
+                    this.items = [];
+                }
+
+                this.emit('clientUpdateInstantViewContent', update);
+
+                break;
+            }
+            case 'clientUpdatePrevInstantView': {
+                this.items.pop();
+                const prevInstantView = this.items.pop();
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateInstantViewContent',
+                    content: {
+                        instantView: prevInstantView
+                    }
+                });
+
                 break;
             }
             default:
@@ -44,12 +67,12 @@ class InstantViewStore extends EventEmitter {
         TdLibController.removeListener('clientUpdate', this.onClientUpdate);
     };
 
-    get(groupId) {
-        return this.items.get(groupId);
+    hasPrev() {
+        return this.items.length > 1;
     }
 
-    set(group) {
-        this.items.set(group.id, group);
+    getCurrent() {
+        return this.items.length > 0 ? this.items[this.items.length - 1] : null;
     }
 }
 

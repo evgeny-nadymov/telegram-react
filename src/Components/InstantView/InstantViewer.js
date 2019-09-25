@@ -14,13 +14,14 @@ import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import Article from './Article';
+import IVContext from './IVContext';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
+import { loadInstantViewContent } from '../../Utils/File';
 import { setInstantViewContent } from '../../Actions/Client';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
-import { loadInstantViewContent } from '../../Utils/File';
-import IVContext from './IVContext';
 
 const styles = theme => ({
     instantViewer: {
@@ -62,11 +63,10 @@ class InstantViewer extends React.Component {
     onClientUpdateInstantViewUrl = async update => {
         console.log('[IV] clientUpdateInstantViewUrl', update);
         const { url } = update;
-        const { instantViewerContent } = ApplicationStore;
-        const activeInstantView = instantViewerContent !== null ? instantViewerContent.instantView : null;
+        const active = InstantViewStore.getCurrent();
         const { instantView } = this.props;
 
-        if (activeInstantView !== instantView) return;
+        if (active !== instantView) return;
 
         if (instantView && url.startsWith(instantView.url)) {
             const hash = new URL(url).hash;
@@ -166,18 +166,26 @@ class InstantViewer extends React.Component {
         setInstantViewContent(null);
     }
 
-    handleBack() {}
+    handleBack() {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePrevInstantView'
+        });
+    }
 
     render() {
         const { classes, instantView } = this.props;
         if (!instantView) return null;
 
+        const hasPrev = InstantViewStore.hasPrev();
+
         return (
             <div ref={this.instantViewerRef} className={classNames('instant-viewer', classes.instantViewer)}>
                 <div className='instant-viewer-left-column'>
-                    <MediaViewerButton className={classes.backButton} onClick={this.handleBack}>
-                        <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
-                    </MediaViewerButton>
+                    {hasPrev && (
+                        <MediaViewerButton className={classes.backButton} onClick={this.handleBack}>
+                            <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
+                        </MediaViewerButton>
+                    )}
                 </div>
                 <div className='instant-viewer-content-column'>
                     <IVContext.Provider value={instantView}>

@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -17,15 +17,16 @@ import ChatInfo from './ColumnRight/ChatInfo';
 import Dialogs from './ColumnLeft/Dialogs';
 import DialogDetails from './ColumnMiddle/DialogDetails';
 import Footer from './Footer';
+import InstantViewer from './InstantView/InstantViewer';
 import MediaViewer from './Viewer/MediaViewer';
 import ProfileMediaViewer from './Viewer/ProfileMediaViewer';
 import { highlightMessage } from '../Actions/Client';
-import ChatStore from '../Stores/ChatStore';
-import UserStore from '../Stores/UserStore';
 import ApplicationStore from '../Stores/ApplicationStore';
+import ChatStore from '../Stores/ChatStore';
+import InstantViewStore from '../Stores/InstantViewStore';
+import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
-import InstantViewer from './InstantView/InstantViewer';
 
 const styles = theme => ({
     page: {
@@ -63,7 +64,7 @@ class MainPage extends React.Component {
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
-        ApplicationStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
+        InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
     }
 
     componentWillUnmount() {
@@ -77,7 +78,7 @@ class MainPage extends React.Component {
             this.onClientUpdateProfileMediaViewerContent
         );
         ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
-        ApplicationStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
+        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
     }
 
     onClientUpdateInstantViewContent = update => {
