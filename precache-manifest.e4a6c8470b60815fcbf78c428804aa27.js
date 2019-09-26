@@ -4,19 +4,19 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "c08fd381b252ef117920185d8e1c1e2a",
+    "revision": "7f5b14b44b6fa0e939e7f0edfa0c356b",
     "url": "/telegram-react/index.html"
   },
   {
-    "revision": "b3cedd125de2dcb559d0",
-    "url": "/telegram-react/static/css/3.77304d1e.chunk.css"
+    "revision": "d6f54884f42ccdf12fa1",
+    "url": "/telegram-react/static/css/3.4fd4f679.chunk.css"
   },
   {
-    "revision": "e57da15c51b4d4404e5a",
+    "revision": "812aac513b447c942d7c",
     "url": "/telegram-react/static/css/5.1b8f2a33.chunk.css"
   },
   {
-    "revision": "0194873a2caa1336f47d",
+    "revision": "e2948f085e6fd805b6ab",
     "url": "/telegram-react/static/css/main.cae0fa68.chunk.css"
   },
   {
@@ -24,28 +24,28 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/2.12a2c18d.chunk.js"
   },
   {
-    "revision": "b3cedd125de2dcb559d0",
-    "url": "/telegram-react/static/js/3.843e5a72.chunk.js"
+    "revision": "d6f54884f42ccdf12fa1",
+    "url": "/telegram-react/static/js/3.8fcd85d0.chunk.js"
   },
   {
     "revision": "b1c58d4ab1fba41d3d47",
     "url": "/telegram-react/static/js/4.3a0c7373.chunk.js"
   },
   {
-    "revision": "e57da15c51b4d4404e5a",
-    "url": "/telegram-react/static/js/5.c62b7bb4.chunk.js"
+    "revision": "812aac513b447c942d7c",
+    "url": "/telegram-react/static/js/5.7792644d.chunk.js"
   },
   {
     "revision": "6bcea8e2dfe450d05324",
     "url": "/telegram-react/static/js/6.f4883415.chunk.js"
   },
   {
-    "revision": "0194873a2caa1336f47d",
-    "url": "/telegram-react/static/js/main.6412921e.chunk.js"
+    "revision": "e2948f085e6fd805b6ab",
+    "url": "/telegram-react/static/js/main.4eccd28f.chunk.js"
   },
   {
-    "revision": "5a1865c860aa179e0ec0",
-    "url": "/telegram-react/static/js/runtime~main.5c3f782b.js"
+    "revision": "049840d2a44218eb2242",
+    "url": "/telegram-react/static/js/runtime~main.73d1a714.js"
   },
   {
     "revision": "5b7ac6f843c4f6909eaf8d7c07179ebd",
