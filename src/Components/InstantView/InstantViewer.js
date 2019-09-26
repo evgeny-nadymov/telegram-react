@@ -155,10 +155,15 @@ class InstantViewer extends React.Component {
     }
 
     scrollTop(behavior) {
-        this.instantViewerRef.current.scrollTo({
-            top: 0,
-            behavior
-        });
+        const element = this.instantViewerRef.current;
+
+        element.scrollTop = Math.min(element.scrollTop, 50);
+        setTimeout(() => {
+            element.scrollTo({
+                top: 0,
+                behavior
+            });
+        }, 50);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -192,9 +197,7 @@ class InstantViewer extends React.Component {
 
     handleBack = () => {
         const { hasPrev, hasScroll } = this.state;
-        const element = this.instantViewerRef.current;
         if (hasScroll) {
-            element.scrollTop = Math.min(element.scrollTop, 50);
             this.scrollTop('smooth');
             return;
         }
@@ -203,7 +206,10 @@ class InstantViewer extends React.Component {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdatePrevInstantView'
             });
+            return;
         }
+
+        this.handleClose();
     };
 
     handleScroll = () => {
@@ -224,18 +230,16 @@ class InstantViewer extends React.Component {
                 className={classNames('instant-viewer', classes.instantViewer)}
                 onScroll={this.handleScroll}>
                 <div className='instant-viewer-left-column' onClick={this.handleBack}>
-                    {(hasPrev || hasScroll) && (
-                        <MediaViewerButton
-                            className={classes.leftButton}
-                            style={{ alignItems: 'flex-start' }}
-                            onClick={this.handleBack}>
-                            {hasScroll ? (
-                                <ExpandLessIcon className='media-viewer-button-icon' fontSize='large' />
-                            ) : (
-                                <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
-                            )}
-                        </MediaViewerButton>
-                    )}
+                    <MediaViewerButton
+                        className={classes.leftButton}
+                        style={{ alignItems: 'flex-start' }}
+                        onClick={this.handleBack}>
+                        {hasScroll ? (
+                            <ExpandLessIcon className='media-viewer-button-icon' fontSize='large' />
+                        ) : (
+                            <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
+                        )}
+                    </MediaViewerButton>
                 </div>
                 <div className='instant-viewer-content-column'>
                     <div>

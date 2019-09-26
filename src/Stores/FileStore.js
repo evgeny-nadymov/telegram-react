@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { getLocationId } from '../Utils/Message';
-import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
+import { FILE_PRIORITY, IV_LOCATION_HEIGHT, IV_LOCATION_WIDTH, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
 const useReadFile = true;
@@ -157,6 +157,10 @@ class FileStore extends EventEmitter {
                 }
                 case 'message': {
                     this.handleMessage(store, item, file, arr);
+                    break;
+                }
+                case 'pageBlockMap': {
+                    this.handlePageBlockMap(store, item, file, arr, null);
                     break;
                 }
                 case 'photo': {
@@ -469,6 +473,26 @@ class FileStore extends EventEmitter {
                     arr,
                     () => this.updateLocationBlob(chatId, messageId, file.id),
                     () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj || location)
+                );
+            }
+        }
+    };
+
+    handlePageBlockMap = (store, pageBlockMap, file, arr, obj) => {
+        const chatId = obj ? obj.chat_id : 0;
+        const messageId = obj ? obj.id : 0;
+
+        const { location } = pageBlockMap;
+        const locationId = getLocationId(location, IV_LOCATION_WIDTH, IV_LOCATION_HEIGHT);
+        if (locationId) {
+            const source = this.getLocationFile(locationId);
+            if (source && source.id === file.id) {
+                this.getLocalFile(
+                    store,
+                    source,
+                    arr,
+                    () => this.updateLocationBlob(chatId, messageId, file.id),
+                    () => this.getRemoteFile(file.id, THUMBNAIL_PRIORITY, obj || pageBlockMap)
                 );
             }
         }

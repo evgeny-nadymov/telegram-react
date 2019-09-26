@@ -384,6 +384,13 @@ function between(item, first, last, inclusive = false) {
     return inclusive ? item >= first && item <= last : item > first && item < last;
 }
 
+function clamp(item, first, last) {
+    if (item < first) return first;
+    if (item > last) return last;
+
+    return item;
+}
+
 function getDurationString(secondsTotal) {
     let hours = Math.floor(secondsTotal / 3600);
     let minutes = Math.floor((secondsTotal - hours * 3600) / 60);
@@ -443,6 +450,7 @@ export {
     arrayBufferToBase64,
     isAuthorizationReady,
     between,
+    clamp,
     getDurationString,
     getRandomInt,
     isAppleDevice,

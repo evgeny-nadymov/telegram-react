@@ -10,9 +10,9 @@ import PropTypes from 'prop-types';
 import RoomIcon from '@material-ui/icons/Room';
 import { getLocationId } from '../../../Utils/Message';
 import { getSrc } from '../../../Utils/File';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import './Location.css';
-import { LOCATION_HEIGHT, LOCATION_WIDTH } from '../../../Constants';
 
 class Location extends React.Component {
     componentDidMount() {
@@ -25,10 +25,11 @@ class Location extends React.Component {
 
     onClientUpdateLocationBlob = update => {
         const { fileId } = update;
-        const { location } = this.props;
+        const { location, width, height, zoom, scale } = this.props;
 
-        const locationId = getLocationId(location);
+        const locationId = getLocationId(location, width, height, zoom, scale);
         const file = FileStore.getLocationFile(locationId);
+        console.log('[IV] onClientUpdateLocationBlob', update, file, this.props);
         if (!file) return;
 
         if (file.id === fileId) {
@@ -37,10 +38,10 @@ class Location extends React.Component {
     };
 
     render() {
-        const { location, style } = this.props;
+        const { location, width, height, zoom, scale, style } = this.props;
         if (!location) return null;
 
-        const locationId = getLocationId(location);
+        const locationId = getLocationId(location, width, height, zoom, scale);
         const file = FileStore.getLocationFile(locationId);
         const src = getSrc(file);
 
@@ -48,8 +49,8 @@ class Location extends React.Component {
         const source = `https://maps.google.com/?q=${latitude},${longitude}`;
 
         const locationStyle = {
-            width: LOCATION_WIDTH,
-            height: LOCATION_HEIGHT,
+            width,
+            height,
             ...style
         };
 
@@ -72,7 +73,19 @@ Location.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
     location: PropTypes.object.isRequired,
-    openMedia: PropTypes.func
+    openMedia: PropTypes.func,
+
+    width: PropTypes.number,
+    height: PropTypes.number,
+    zoom: PropTypes.number,
+    scale: PropTypes.number
+};
+
+Location.defaultProps = {
+    width: LOCATION_WIDTH,
+    height: LOCATION_HEIGHT,
+    zoom: LOCATION_ZOOM,
+    scale: LOCATION_SCALE
 };
 
 export default Location;

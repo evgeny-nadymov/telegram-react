@@ -570,11 +570,17 @@ function isMediaContent(content) {
     return content['@type'] === 'messagePhoto';
 }
 
-function getLocationId(location) {
+function getLocationId(
+    location,
+    width = LOCATION_WIDTH,
+    height = LOCATION_HEIGHT,
+    zoom = LOCATION_ZOOM,
+    scale = LOCATION_SCALE
+) {
     if (!location) return null;
 
     const { longitude, latitude } = location;
-    return `loc=${latitude},${longitude}&size=${LOCATION_WIDTH},${LOCATION_HEIGHT}&scale=${LOCATION_SCALE}&zoom=${LOCATION_ZOOM}`;
+    return `loc=${latitude},${longitude}&size=${width},${height}&scale=${scale}&zoom=${zoom}`;
 }
 
 function isVideoMessage(chatId, messageId) {

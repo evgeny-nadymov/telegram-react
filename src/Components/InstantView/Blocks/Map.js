@@ -7,10 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Caption from './Caption';
 import Location from '../../Message/Media/Location';
+import { IV_LOCATION_HEIGHT, IV_LOCATION_WIDTH } from '../../../Constants';
 
 function Map(props) {
-    return <Location location={props.location} />;
+    const { location, caption } = props;
+
+    return (
+        <>
+            <Location width={IV_LOCATION_WIDTH} height={IV_LOCATION_HEIGHT} location={location} />
+            <Caption text={caption.text} credit={caption.credit} />
+        </>
+    );
 }
 
 Map.propTypes = {

@@ -11,7 +11,8 @@ import { getProfilePhoto } from './User';
 import { getLocationId } from './Message';
 import {
     FILE_PRIORITY,
-    IV_PHOTO_DISPLAY_SIZE,
+    IV_LOCATION_HEIGHT,
+    IV_LOCATION_WIDTH,
     IV_PHOTO_SIZE,
     LOCATION_HEIGHT,
     LOCATION_SCALE,
@@ -473,6 +474,47 @@ function loadGameThumbnailContent(store, game, message) {
     return true;
 }
 
+async function loadPageBlockMapContent(store, pageBlockMap, message) {
+    if (!pageBlockMap) return;
+
+    const { location } = pageBlockMap;
+    const locationId = getLocationId(location, IV_LOCATION_WIDTH, IV_LOCATION_HEIGHT);
+    if (!locationId) return;
+
+    let file = FileStore.getLocationFile(locationId);
+    if (!file) {
+        file = await TdLibController.send({
+            '@type': 'getMapThumbnailFile',
+            location,
+            width: IV_LOCATION_WIDTH,
+            height: IV_LOCATION_HEIGHT,
+            zoom: LOCATION_ZOOM,
+            scale: LOCATION_SCALE,
+            chat_id: message ? message.chat_id : 0
+        });
+        FileStore.setLocationFile(locationId, file);
+
+        store = FileStore.getStore();
+    }
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(file.id);
+    if (blob) return;
+
+    const chatId = message ? message.chat_id : 0;
+    const messageId = message ? message.id : 0;
+
+    FileStore.getLocalFile(
+        store,
+        file,
+        null,
+        () => FileStore.updateLocationBlob(chatId, messageId, id),
+        () => FileStore.getRemoteFile(id, FILE_PRIORITY, message || pageBlockMap)
+    );
+}
+
 async function loadLocationContent(store, location, message) {
     if (!location) return;
 
@@ -483,10 +525,10 @@ async function loadLocationContent(store, location, message) {
     if (!file) {
         file = await TdLibController.send({
             '@type': 'getMapThumbnailFile',
-            location: location,
-            zoom: LOCATION_ZOOM,
+            location,
             width: LOCATION_WIDTH,
             height: LOCATION_HEIGHT,
+            zoom: LOCATION_ZOOM,
             scale: LOCATION_SCALE,
             chat_id: message ? message.chat_id : 0
         });
@@ -1713,9 +1755,9 @@ function loadPageBlockContent(store, b) {
             break;
         }
         case 'pageBlockMap': {
-            const { location, caption } = b;
+            const { caption } = b;
 
-            loadLocationContent(store, location, null);
+            loadPageBlockMapContent(store, b, null);
             loadPageBlockContent(store, caption);
             break;
         }
