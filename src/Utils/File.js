@@ -12,6 +12,7 @@ import { getLocationId } from './Message';
 import {
     FILE_PRIORITY,
     IV_PHOTO_DISPLAY_SIZE,
+    IV_PHOTO_SIZE,
     LOCATION_HEIGHT,
     LOCATION_SCALE,
     LOCATION_WIDTH,
@@ -1727,7 +1728,7 @@ function loadPageBlockContent(store, b) {
         case 'pageBlockPhoto': {
             const { photo, caption } = b;
 
-            loadPhotoContent(store, photo, null);
+            loadPhotoContent(store, photo, null, IV_PHOTO_SIZE);
             loadPageBlockContent(store, caption);
             break;
         }

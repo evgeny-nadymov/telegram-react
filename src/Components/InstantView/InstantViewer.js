@@ -17,7 +17,7 @@ import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import Article from './Article';
 import IVContext from './IVContext';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
-import { loadInstantViewContent } from '../../Utils/File';
+import { openInstantView } from '../../Actions/InstantView';
 import { setInstantViewContent } from '../../Actions/Client';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -117,21 +117,7 @@ class InstantViewer extends React.Component {
             }
         }
 
-        try {
-            const result = await TdLibController.send({
-                '@type': 'getWebPageInstantView',
-                url,
-                force_full: true
-            });
-
-            console.log('[IV] open', result);
-            loadInstantViewContent(result);
-            setInstantViewContent({ instantView: result });
-        } catch {
-            const newWindow = window.open();
-            newWindow.opener = null;
-            newWindow.location = url;
-        }
+        openInstantView(url);
     };
 
     scrollToHash(hash, behavior) {
@@ -206,7 +192,9 @@ class InstantViewer extends React.Component {
 
     handleBack = () => {
         const { hasPrev, hasScroll } = this.state;
+        const element = this.instantViewerRef.current;
         if (hasScroll) {
+            element.scrollTop = Math.min(element.scrollTop, 50);
             this.scrollTop('smooth');
             return;
         }

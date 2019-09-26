@@ -21,9 +21,10 @@ import Sticker, { StickerSourceEnum } from './Sticker';
 import Video from './Video';
 import VideoNote from './VideoNote';
 import VoiceNote from './VoiceNote';
-import { getSize } from '../../../Utils/Common';
 import { accentStyles } from '../../Theme';
-import { getSrc, loadInstantViewContent } from '../../../Utils/File';
+import { getSize } from '../../../Utils/Common';
+import { getSrc } from '../../../Utils/File';
+import { openInstantView } from '../../../Actions/InstantView';
 import {
     PHOTO_DISPLAY_EXTRA_SMALL_SIZE,
     PHOTO_DISPLAY_SIZE,
@@ -31,9 +32,7 @@ import {
     PHOTO_SIZE
 } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
-import TdLibController from '../../../Controllers/TdLibController';
 import './WebPage.css';
-import { setInstantViewContent } from '../../../Actions/Client';
 
 const styles = theme => ({
     ...accentStyles(theme),
@@ -175,15 +174,7 @@ class WebPage extends React.Component {
 
         const { url } = web_page;
 
-        const result = await TdLibController.send({
-            '@type': 'getWebPageInstantView',
-            url,
-            force_full: true
-        });
-
-        console.log('[IV] open', result);
-        loadInstantViewContent(result);
-        setInstantViewContent({ instantView: result });
+        openInstantView(url);
     };
 
     getWebPage = () => {

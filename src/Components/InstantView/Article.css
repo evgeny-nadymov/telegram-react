@@ -59,7 +59,7 @@ article .audio {
 }
 article .location,
 article .photo {
-    margin: 6px auto;
+    margin: 0 auto 6px;
 }
 /*article a[name] {
   position: absolute !important;
@@ -237,7 +237,7 @@ article img,
 article video,
 article iframe {
     max-width: 100%;
-    max-height: 400px;
+    max-height: 800px;
     vertical-align: top;
 }
 .autosize iframe {
