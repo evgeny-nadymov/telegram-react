@@ -22,7 +22,7 @@ class MediaViewerButton extends React.Component {
     };
 
     render() {
-        const { disabled, grow, children, className } = this.props;
+        const { disabled, grow, children, className, style } = this.props;
 
         const cx = classNames(
             disabled ? 'media-viewer-button-disabled' : 'media-viewer-button',
@@ -31,7 +31,7 @@ class MediaViewerButton extends React.Component {
         );
 
         return (
-            <div className={cx} onClick={this.handleClick}>
+            <div className={cx} style={style} onClick={this.handleClick}>
                 {children}
             </div>
         );

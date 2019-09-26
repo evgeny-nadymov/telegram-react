@@ -39,7 +39,13 @@ class InstantViewStore extends EventEmitter {
 
                 break;
             }
+            case 'clientUpdateInstantViewUrl': {
+                this.emit('clientUpdateInstantViewUrl', update);
+                break;
+            }
             case 'clientUpdatePrevInstantView': {
+                if (this.items.length <= 1) return;
+
                 this.items.pop();
                 const prevInstantView = this.items.pop();
 

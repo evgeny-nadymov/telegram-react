@@ -11,14 +11,16 @@ import { withIV } from './IVContext';
 import { getPageBlock } from '../../Utils/InstantView';
 import './Article.css';
 
-function Article(props) {
-    const { iv } = props;
-    if (!iv) return null;
+class Article extends React.PureComponent {
+    render() {
+        const { iv } = this.props;
+        if (!iv) return null;
 
-    const { page_blocks, is_rtl } = iv;
-    if (!page_blocks) return;
+        const { page_blocks, is_rtl } = iv;
+        if (!page_blocks) return;
 
-    return <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map(x => getPageBlock(x, iv))}</article>;
+        return <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map(x => getPageBlock(x, iv))}</article>;
+    }
 }
 
 Article.propTypes = {
