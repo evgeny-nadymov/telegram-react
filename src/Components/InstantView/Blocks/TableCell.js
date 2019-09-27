@@ -8,10 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import RichText from '../RichText/RichText';
-import { getHorizontalAlignment, getVerticalAlignment } from '../../../Utils/InstantView';
+import { getHorizontalAlignment, getVerticalAlignment, isEmptyText } from '../../../Utils/InstantView';
 
 function TableCell(props) {
     const { text, isHeader, colspan, rowspan, align, valign } = props;
+    if (isEmptyText(text)) return null;
 
     const attributes = {
         colSpan: colspan,
