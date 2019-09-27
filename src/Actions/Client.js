@@ -68,6 +68,14 @@ export function selectMessage(chatId, messageId, selected) {
     });
 }
 
+export function setInstantViewViewerContent(content) {
+    console.log('[IV] setInstantViewViewerContent');
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateInstantViewViewerContent',
+        content
+    });
+}
+
 export function setMediaViewerContent(content) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaViewerContent',

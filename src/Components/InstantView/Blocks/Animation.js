@@ -9,13 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Caption from './Caption';
 import MediaAnimation from '../../../Components/Message/Media/Animation';
+import { IV_PHOTO_DISPLAY_SIZE } from '../../../Constants';
 
 function Animation(props) {
     const { animation, caption, need_autoplay, openMedia } = props;
 
     return (
         <>
-            <MediaAnimation animation={animation} style={{ margin: '0 auto' }} openMedia={openMedia} />
+            <MediaAnimation animation={animation} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </>
     );

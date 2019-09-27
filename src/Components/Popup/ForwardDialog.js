@@ -18,13 +18,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
+import { getInputMediaContent } from '../../Utils/Media';
 import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -195,12 +194,29 @@ class ForwardDialog extends React.Component {
     handleSend = () => {
         this.handleClose();
 
-        const { chatId, messageIds, photoSize, link } = this.props;
-        if (!chatId && !messageIds && !messageIds && !photoSize && !link) return;
+        const { chatId, messageIds, photoSize, media, link } = this.props;
+        if (!chatId && !messageIds && !messageIds && !photoSize && !media && !link) return;
 
         const text = this.getInnerText(this.messageRef.current);
 
         this.targetChats.forEach(targetChatId => {
+            if (media) {
+                const content = getInputMediaContent(media, text);
+                if (content) {
+                    TdLibController.send({
+                        '@type': 'sendMessage',
+                        chat_id: targetChatId,
+                        reply_to_message_id: 0,
+                        disable_notifications: false,
+                        from_background: false,
+                        reply_markup: null,
+                        input_message_content: content
+                    });
+                }
+
+                return;
+            }
+
             if (link) {
                 if (text) {
                     TdLibController.send({
@@ -512,7 +528,8 @@ class ForwardDialog extends React.Component {
 ForwardDialog.propTypes = {
     chatId: PropTypes.number,
     messageIds: PropTypes.array,
-    photoSize: PropTypes.object
+    photoSize: PropTypes.object,
+    media: PropTypes.object
 };
 
 const enhance = compose(

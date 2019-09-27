@@ -12,11 +12,11 @@ import MediaPhoto from '../../../Components/Message/Media/Photo';
 import { IV_PHOTO_DISPLAY_SIZE, IV_PHOTO_SIZE, PHOTO_DISPLAY_SIZE } from '../../../Constants';
 
 function Photo(props) {
-    const { photo, caption, url } = props;
+    const { photo, caption, url, openMedia } = props;
 
     return (
         <>
-            <MediaPhoto photo={photo} size={IV_PHOTO_SIZE} displaySize={IV_PHOTO_DISPLAY_SIZE} />
+            <MediaPhoto photo={photo} size={IV_PHOTO_SIZE} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </>
     );
@@ -25,7 +25,8 @@ function Photo(props) {
 Photo.propTypes = {
     photo: PropTypes.object.isRequired,
     caption: PropTypes.object.isRequired,
-    url: PropTypes.string.isRequired
+    url: PropTypes.string.isRequired,
+    openMedia: PropTypes.func
 };
 
 export default Photo;

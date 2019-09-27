@@ -57,7 +57,7 @@ class Photo extends React.Component {
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
         const isBlurred = isBlurredThumbnail(thumbSize);
 
-        const fitPhotoSize = getFitSize(photoSize, displaySize);
+        const fitPhotoSize = getFitSize(photoSize, displaySize, false);
         if (!fitPhotoSize) return null;
 
         const photoStyle = {

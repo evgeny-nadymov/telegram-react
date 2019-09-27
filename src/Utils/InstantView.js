@@ -56,6 +56,7 @@ import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
 import ChatLink from '../Components/InstantView/Blocks/ChatLink';
 import Video from '../Components/InstantView/Blocks/Video';
+import { setInstantViewViewerContent, setMediaViewerContent } from '../Actions/Client';
 
 export function openInstantViewMedia(media, block, instantView, fileCancel) {
     console.log('[IV] openIVMedia', media);
@@ -80,6 +81,12 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
             } else {
                 download(file, media, FileStore.updateAnimationBlob(chatId, messageId, file.id));
             }
+
+            setInstantViewViewerContent({
+                media,
+                block,
+                instantView
+            });
             break;
         }
         case 'audio': {
@@ -105,6 +112,11 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
             break;
         }
         case 'photo': {
+            setInstantViewViewerContent({
+                media,
+                block,
+                instantView
+            });
             break;
         }
         case 'video': {
@@ -121,6 +133,12 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
             } else {
                 download(file, media, FileStore.updateVideoBlob(chatId, messageId, file.id));
             }
+
+            setInstantViewViewerContent({
+                media,
+                block,
+                instantView
+            });
             break;
         }
     }
@@ -456,7 +474,7 @@ export function isEmptyText(richText) {
             return isEmptyText(text);
         }
         case 'richTextIcon': {
-            return true;
+            return false;
         }
         case 'richTextItalic': {
             const { text } = richText;

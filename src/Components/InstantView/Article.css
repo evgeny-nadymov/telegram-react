@@ -58,7 +58,8 @@ article .audio {
     margin: 6px 18px;
 }
 article .location,
-article .photo {
+article .photo,
+article .animation {
     margin: 0 auto 6px;
 }
 /*article a[name] {
@@ -156,6 +157,9 @@ article ul {
     margin: 18px;
     padding-left: 22px;
     list-style: none;
+}
+article ul.related-articles {
+    list-style: disc;
 }
 article li p {
     min-height: 25px;

@@ -15,10 +15,12 @@ import CloseIcon from '@material-ui/icons/Close';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import Article from './Article';
+import InstantViewMediaViewer from '../Viewer/InstantViewMediaViewer';
 import IVContext from './IVContext';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
 import { openInstantView } from '../../Actions/InstantView';
-import { setInstantViewContent } from '../../Actions/Client';
+import { setInstantViewContent, setInstantViewViewerContent } from '../../Actions/Client';
+import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
@@ -50,19 +52,17 @@ class InstantViewer extends React.Component {
         this.articleRef = React.createRef();
         this.instantViewerRef = React.createRef();
 
-        this.state = {
-            hasPrev: InstantViewStore.hasPrev(),
-            hasScroll: false,
-            prevInstantView: props.instantView
-        };
+        this.state = {};
     }
 
     static getDerivedStateFromProps(props, state) {
         if (props.instantView !== state.prevInstantView) {
             return {
+                prevInstantView: props.instantView,
                 hasPrev: InstantViewStore.hasPrev(),
                 hasScroll: false,
-                prevInstantView: props.instantView
+                media: null,
+                text: null
             };
         }
 
@@ -71,7 +71,7 @@ class InstantViewer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { instantView } = this.props;
-        const { hasScroll, hasPrev } = this.state;
+        const { hasScroll, hasPrev, media, text } = this.state;
 
         if (instantView !== nextProps.instantView) {
             return true;
@@ -85,18 +85,45 @@ class InstantViewer extends React.Component {
             return true;
         }
 
+        if (media !== nextState.media) {
+            return true;
+        }
+
+        if (text !== nextState.text) {
+            return true;
+        }
+
         return false;
     }
 
     componentDidMount() {
         document.addEventListener('keydown', this.onKeyDown, false);
         InstantViewStore.on('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
+        InstantViewStore.on('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
     }
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown, false);
         InstantViewStore.removeListener('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
+        InstantViewStore.removeListener(
+            'clientUpdateInstantViewViewerContent',
+            this.onClientUpdateInstantViewViewerContent
+        );
     }
+
+    onClientUpdateInstantViewViewerContent = update => {
+        const { content } = update;
+        if (!content) {
+            this.setState({ media: null, text: null });
+            return;
+        }
+
+        const { media, text, instantView } = content;
+
+        if (this.props.instantView !== instantView) return;
+
+        this.setState({ media, text });
+    };
 
     onClientUpdateInstantViewUrl = async update => {
         console.log('[IV] clientUpdateInstantViewUrl', update);
@@ -187,6 +214,13 @@ class InstantViewer extends React.Component {
 
     onKeyDown = event => {
         if (event.keyCode === 27) {
+            const { media } = this.state;
+
+            if (media) {
+                setInstantViewViewerContent(null);
+                return;
+            }
+
             this.handleClose();
         }
     };
@@ -221,39 +255,42 @@ class InstantViewer extends React.Component {
 
     render() {
         const { classes, instantView } = this.props;
-        const { hasPrev, hasScroll } = this.state;
+        const { hasPrev, hasScroll, media, text } = this.state;
         if (!instantView) return null;
 
         return (
-            <div
-                ref={this.instantViewerRef}
-                className={classNames('instant-viewer', classes.instantViewer)}
-                onScroll={this.handleScroll}>
-                <div className='instant-viewer-left-column' onClick={this.handleBack}>
-                    <MediaViewerButton
-                        className={classes.leftButton}
-                        style={{ alignItems: 'flex-start' }}
-                        onClick={this.handleBack}>
-                        {hasScroll ? (
-                            <ExpandLessIcon className='media-viewer-button-icon' fontSize='large' />
-                        ) : (
-                            <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
-                        )}
-                    </MediaViewerButton>
-                </div>
-                <div className='instant-viewer-content-column'>
-                    <div>
-                        <IVContext.Provider value={instantView}>
-                            <Article ref={this.articleRef} />
-                        </IVContext.Provider>
+            <>
+                <div
+                    ref={this.instantViewerRef}
+                    className={classNames('instant-viewer', classes.instantViewer)}
+                    onScroll={this.handleScroll}>
+                    <div className='instant-viewer-left-column' onClick={this.handleBack}>
+                        <MediaViewerButton
+                            className={classes.leftButton}
+                            style={{ alignItems: 'flex-start' }}
+                            onClick={this.handleBack}>
+                            {hasScroll ? (
+                                <ExpandLessIcon className='media-viewer-button-icon' fontSize='large' />
+                            ) : (
+                                <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
+                            )}
+                        </MediaViewerButton>
+                    </div>
+                    <div className='instant-viewer-content-column'>
+                        <div>
+                            <IVContext.Provider value={instantView}>
+                                <Article ref={this.articleRef} />
+                            </IVContext.Provider>
+                        </div>
+                    </div>
+                    <div className='instant-viewer-right-column'>
+                        <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>
+                            <CloseIcon className='media-viewer-button-icon' fontSize='large' />
+                        </MediaViewerButton>
                     </div>
                 </div>
-                <div className='instant-viewer-right-column'>
-                    <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>
-                        <CloseIcon className='media-viewer-button-icon' fontSize='large' />
-                    </MediaViewerButton>
-                </div>
-            </div>
+                {media && <InstantViewMediaViewer media={media} size={IV_PHOTO_SIZE} text={text} />}
+            </>
         );
     }
 }

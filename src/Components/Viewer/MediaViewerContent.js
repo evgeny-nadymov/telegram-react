@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
-import { getMediaFile, getMediaPreviewFile } from '../../Utils/File';
+import { getAnimationData, getMediaFile, getMediaPreviewFile } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
@@ -25,33 +25,10 @@ class MediaViewerContent extends React.Component {
     constructor(props) {
         super(props);
 
+        this.state = {};
+
         this.videoRef = React.createRef();
         this.lottieRef = React.createRef();
-
-        const { chatId, messageId, size } = this.props;
-
-        let [width, height, file] = getMediaFile(chatId, messageId, size);
-        file = FileStore.get(file.id) || file;
-
-        let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
-        thumbnail = thumbnail ? FileStore.get(thumbnail.id) || thumbnail : null;
-
-        const message = MessageStore.get(chatId, messageId);
-        const text = getText(message);
-
-        this.state = {
-            speed: 1,
-            prevChatId: chatId,
-            prevMessageId: messageId,
-            isPlaying: false,
-            width: width,
-            height: height,
-            file: file,
-            text: text,
-            thumbnailWidth: thumbnailWidth,
-            thumbnailHeight: thumbnailHeight,
-            thumbnail: thumbnail
-        };
 
         this.updateAnimationData();
     }
@@ -70,17 +47,18 @@ class MediaViewerContent extends React.Component {
             const text = getText(message);
 
             return {
-                speed: 1,
                 prevChatId: chatId,
                 prevMessageId: messageId,
+
+                speed: 1,
                 isPlaying: false,
-                width: width,
-                height: height,
-                file: file,
-                text: text,
-                thumbnailWidth: thumbnailWidth,
-                thumbnailHeight: thumbnailHeight,
-                thumbnail: thumbnail
+                width,
+                height,
+                file,
+                text,
+                thumbnailWidth,
+                thumbnailHeight,
+                thumbnail
             };
         }
 
@@ -124,37 +102,16 @@ class MediaViewerContent extends React.Component {
     };
 
     updateAnimationData = async () => {
-        const { chatId, messageId, size } = this.props;
+        const { chatId, messageId } = this.props;
 
         if (!isLottieMessage(chatId, messageId)) {
             return;
         }
 
-        const [width, height, file] = getMediaFile(chatId, messageId, size);
-        const animationData = await this.getAnimationData(file);
+        const { file } = this.state;
+        const animationData = await getAnimationData(file);
 
         this.setState({ animationData });
-    };
-
-    getAnimationData = file => {
-        return new Promise(resolve => {
-            if (!file) {
-                resolve(null);
-                return;
-            }
-
-            const blob = FileStore.getBlob(file.id);
-            if (!blob) {
-                resolve(null);
-                return;
-            }
-
-            const fileReader = new FileReader();
-            fileReader.onload = event => resolve(JSON.parse(event.target.result));
-            fileReader.onerror = () => resolve(null);
-            fileReader.onabort = () => resolve(null);
-            fileReader.readAsText(blob);
-        });
     };
 
     onClientUpdateMediaBlob = update => {
@@ -216,10 +173,10 @@ class MediaViewerContent extends React.Component {
             animationData,
             width,
             height,
-            thumbnailWidth,
-            thumbnailHeight,
             file,
             text,
+            thumbnailWidth,
+            thumbnailHeight,
             thumbnail,
             isPlaying
         } = this.state;
@@ -235,6 +192,7 @@ class MediaViewerContent extends React.Component {
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
         const isLottie = isLottieMessage(chatId, messageId);
+
         let videoWidth = width;
         let videoHeight = height;
         if (Math.max(videoWidth, videoHeight) > 640) {

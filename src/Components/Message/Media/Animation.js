@@ -116,7 +116,7 @@ class Animation extends React.Component {
         const { displaySize, openMedia, t, style } = this.props;
         const { thumbnail, animation, mime_type, width, height } = this.props.animation;
 
-        const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
+        const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
         if (!fitPhotoSize) return null;
 
         const animationStyle = {

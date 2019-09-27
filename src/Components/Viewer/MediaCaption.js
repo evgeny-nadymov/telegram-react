@@ -12,10 +12,6 @@ import MessageStore from '../../Stores/MessageStore';
 import './MediaCaption.css';
 
 class MediaCaption extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     handleClick = event => {
         event.stopPropagation();
     };

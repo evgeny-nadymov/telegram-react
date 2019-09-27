@@ -11,17 +11,17 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import CloseIcon from '@material-ui/icons/Close';
+import DeleteIcon from '@material-ui/icons/Delete';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import CloseIcon from '@material-ui/icons/Close';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import ReplyIcon from '@material-ui/icons/Reply';
-import DeleteIcon from '@material-ui/icons/Delete';
 import InvertColorsIcon from '@material-ui/icons/InvertColors';
 import SlowMotionVideoIcon from '@material-ui/icons/SlowMotionVideo';
 import MediaViewerControl from '../Tile/MediaViewerControl';
@@ -37,7 +37,7 @@ import {
     getMediaFile,
     loadMediaViewerContent,
     preloadMediaViewerContent,
-    saveOrDownload
+    saveMedia
 } from '../../Utils/File';
 import {
     filterDuplicateMessages,
@@ -47,10 +47,8 @@ import {
     isVideoMessage
 } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
-import { PHOTO_SIZE, PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
+import { PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
-import FileStore from '../../Stores/FileStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
 
@@ -408,65 +406,6 @@ class MediaViewer extends React.Component {
         }
     };
 
-    saveAnimation = (animation, message) => {
-        if (!message) return;
-        const { chat_id, id } = message;
-
-        if (!animation) return;
-
-        const { animation: file, file_name } = animation;
-        if (!file) return;
-
-        const { id: fileId } = file;
-
-        saveOrDownload(file, file_name || id, message, () => FileStore.updateAnimationBlob(chat_id, id, fileId));
-    };
-
-    saveDocument = (document, message) => {
-        if (!message) return;
-        const { chat_id, id } = message;
-
-        if (!document) return;
-
-        const { document: file, file_name } = document;
-        if (!file) return;
-
-        const { id: fileId } = file;
-
-        saveOrDownload(file, file_name || id, message, () => FileStore.updateDocumentBlob(chat_id, id, fileId));
-    };
-
-    saveVideo = (video, message) => {
-        if (!message) return;
-        const { chat_id, id } = message;
-
-        if (!video) return;
-
-        const { video: file, file_name } = video;
-        if (!file) return;
-
-        const { id: fileId } = file;
-
-        saveOrDownload(file, file_name || id, message, () => FileStore.updateVideoBlob(chat_id, id, fileId));
-    };
-
-    savePhoto = (photo, message) => {
-        if (!message) return;
-        const { chat_id, id } = message;
-
-        if (!photo) return;
-
-        const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-        if (!photoSize) return;
-
-        const { photo: file } = photoSize;
-        if (!file) return;
-
-        const { id: fileId } = file;
-
-        saveOrDownload(file, file.id + '.jpg', message, () => FileStore.updatePhotoBlob(chat_id, id, fileId));
-    };
-
     handleSave = () => {
         const { chatId } = this.props;
         const { currentMessageId } = this.state;
@@ -477,29 +416,30 @@ class MediaViewer extends React.Component {
         const { content } = message;
         if (!content) return;
 
+        let media = null;
         switch (content['@type']) {
             case 'messageAnimation': {
                 const { animation } = content;
 
-                this.saveAnimation(animation, message);
+                media = animation;
                 break;
             }
             case 'messageChatChangePhoto': {
                 const { photo } = content;
 
-                this.savePhoto(photo, message);
+                media = photo;
                 break;
             }
             case 'messageDocument': {
                 const { document } = content;
 
-                this.saveDocument(document, message);
+                media = document;
                 break;
             }
             case 'messagePhoto': {
                 const { photo } = content;
 
-                this.savePhoto(photo, message);
+                media = photo;
                 break;
             }
             case 'messageText': {
@@ -509,33 +449,35 @@ class MediaViewer extends React.Component {
                 const { animation, document, photo, video } = web_page;
 
                 if (animation) {
-                    this.saveAnimation(animation, message);
-                    return;
+                    media = animation;
+                    break;
                 }
 
                 if (document) {
-                    this.saveDocument(document, message);
-                    return;
+                    media = document;
+                    break;
                 }
 
                 if (photo) {
-                    this.savePhoto(photo, message);
-                    return;
+                    media = photo;
+                    break;
                 }
 
                 if (video) {
-                    this.saveVideo(video, message);
-                    return;
+                    media = video;
+                    break;
                 }
                 break;
             }
             case 'messageVideo': {
                 const { video } = content;
 
-                this.saveVideo(video, message);
+                media = video;
                 break;
             }
         }
+
+        saveMedia(media, message);
     };
 
     handleForward = () => {
