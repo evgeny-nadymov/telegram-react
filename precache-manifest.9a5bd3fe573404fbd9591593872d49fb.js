@@ -4,19 +4,19 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "75be09179b8dc9c348446f8a2b133454",
+    "revision": "acb67dd3f446608f0a6de2a489625c53",
     "url": "/telegram-react/index.html"
   },
   {
-    "revision": "e2ccea94c6bb13bab9e6",
+    "revision": "1f20b19ff7d34ed1f5c1",
     "url": "/telegram-react/static/css/3.4fd4f679.chunk.css"
   },
   {
-    "revision": "4565efa1cb6a7c05915c",
+    "revision": "e580a687a2c239019a2d",
     "url": "/telegram-react/static/css/5.1b8f2a33.chunk.css"
   },
   {
-    "revision": "883e565d9cec55f20cf7",
+    "revision": "f8725107a907903f0312",
     "url": "/telegram-react/static/css/main.4eccf634.chunk.css"
   },
   {
@@ -24,28 +24,28 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/2.678718e2.chunk.js"
   },
   {
-    "revision": "e2ccea94c6bb13bab9e6",
-    "url": "/telegram-react/static/js/3.5d50bc97.chunk.js"
+    "revision": "1f20b19ff7d34ed1f5c1",
+    "url": "/telegram-react/static/js/3.c79204a4.chunk.js"
   },
   {
     "revision": "9e3a43214ac4c5da637a",
     "url": "/telegram-react/static/js/4.719613f4.chunk.js"
   },
   {
-    "revision": "4565efa1cb6a7c05915c",
-    "url": "/telegram-react/static/js/5.6264ac35.chunk.js"
+    "revision": "e580a687a2c239019a2d",
+    "url": "/telegram-react/static/js/5.3764d335.chunk.js"
   },
   {
     "revision": "6bcea8e2dfe450d05324",
     "url": "/telegram-react/static/js/6.f4883415.chunk.js"
   },
   {
-    "revision": "883e565d9cec55f20cf7",
-    "url": "/telegram-react/static/js/main.0bf1f5d1.chunk.js"
+    "revision": "f8725107a907903f0312",
+    "url": "/telegram-react/static/js/main.e68b972d.chunk.js"
   },
   {
-    "revision": "1ef4c192a7e6b16b7fee",
-    "url": "/telegram-react/static/js/runtime~main.725633f9.js"
+    "revision": "15080d35ce4c3abb8b05",
+    "url": "/telegram-react/static/js/runtime~main.e9183970.js"
   },
   {
     "revision": "5b7ac6f843c4f6909eaf8d7c07179ebd",
