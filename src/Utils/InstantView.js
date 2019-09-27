@@ -51,12 +51,12 @@ import Table from '../Components/InstantView/Blocks/Table';
 import TableCell from '../Components/InstantView/Blocks/TableCell';
 import Map from '../Components/InstantView/Blocks/Map';
 import Audio from '../Components/InstantView/Blocks/Audio';
-import { download } from './File';
-import FileStore from '../Stores/FileStore';
-import TdLibController from '../Controllers/TdLibController';
 import ChatLink from '../Components/InstantView/Blocks/ChatLink';
 import Video from '../Components/InstantView/Blocks/Video';
-import { setInstantViewViewerContent, setMediaViewerContent } from '../Actions/Client';
+import { download } from './File';
+import { setInstantViewViewerContent } from '../Actions/Client';
+import FileStore from '../Stores/FileStore';
+import TdLibController from '../Controllers/TdLibController';
 
 export function openInstantViewMedia(media, block, instantView, fileCancel) {
     console.log('[IV] openIVMedia', media);

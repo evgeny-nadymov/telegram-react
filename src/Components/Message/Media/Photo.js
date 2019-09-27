@@ -20,12 +20,20 @@ class Photo extends React.Component {
     constructor(props) {
         super(props);
 
-        const { photo, size, thumbnailSize } = props;
+        this.state = {};
+    }
 
-        this.state = {
-            photoSize: getSize(photo.sizes, size),
-            thumbSize: getSize(photo.sizes, thumbnailSize)
-        };
+    static getDerivedStateFromProps(props, state) {
+        const { photo, size, thumbnailSize } = props;
+        if (photo !== state.prevPhoto) {
+            return {
+                prevPhoto: photo,
+                photoSize: getSize(photo.sizes, size),
+                thumbSize: getSize(photo.sizes, thumbnailSize)
+            };
+        }
+
+        return null;
     }
 
     componentDidMount() {
