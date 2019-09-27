@@ -184,30 +184,49 @@ class InstantViewer extends React.Component {
     scrollTop(behavior) {
         const element = this.instantViewerRef.current;
 
-        element.scrollTop = Math.min(element.scrollTop, 50);
-        setTimeout(() => {
-            element.scrollTo({
-                top: 0,
-                behavior
-            });
-        }, 50);
+        switch (behavior) {
+            case 'smooth': {
+                element.scrollTop = Math.min(element.scrollTop, 100);
+                setTimeout(() => {
+                    element.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }, 50);
+                break;
+            }
+            default: {
+                element.scrollTo({
+                    top: 0,
+                    behavior
+                });
+            }
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { instantView, url } = this.props;
         console.log('[IV] componentDidUpdate', instantView.url, instantView.url === prevProps.instantView.url);
 
+        const hash = new URL(instantView.url).hash;
         if (prevProps.instantView.url !== instantView.url) {
-            const hash = new URL(instantView.url).hash;
             if (instantView.url.indexOf('#') === instantView.url.length - 1) {
-                console.log('[IV] componentDidUpdate scrollTop 1');
+                console.log('[IV] componentDidUpdate scrollTop auto');
                 this.scrollTop('auto');
             } else if (hash) {
                 console.log('[IV] componentDidUpdate scrollToHash', hash);
                 this.scrollToHash(hash, 'auto');
             } else {
-                console.log('[IV] componentDidUpdate scrollTop 2');
+                console.log('[IV] componentDidUpdate scrollTop auto');
                 this.scrollTop('auto');
+            }
+        } else {
+            if (hash) {
+                console.log('[IV] componentDidUpdate scrollToHash', hash);
+                this.scrollToHash(hash, 'auto');
+            } else {
+                console.log('[IV] componentDidUpdate scrollTop smooth');
+                this.scrollTop('smooth');
             }
         }
     }

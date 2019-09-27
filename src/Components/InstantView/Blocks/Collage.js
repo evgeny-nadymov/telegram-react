@@ -16,7 +16,7 @@ function Collage(props) {
 
     return (
         <div className='collage'>
-            {pageBlocks.map(x => getPageBlock(x, iv))}
+            {pageBlocks.map((x, index) => getPageBlock(x, iv, index))}
             <Caption text={caption.text} credit={caption.credit} />
         </div>
     );

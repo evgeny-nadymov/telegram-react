@@ -12,8 +12,8 @@ import ListItem from './ListItem';
 function List(props) {
     return (
         <ul>
-            {props.items.map(x => (
-                <ListItem label={x.label} pageBlocks={x.page_blocks} />
+            {props.items.map((x, index) => (
+                <ListItem key={index} label={x.label} pageBlocks={x.page_blocks} />
             ))}
         </ul>
     );

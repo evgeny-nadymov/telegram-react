@@ -29,7 +29,6 @@ class Location extends React.Component {
 
         const locationId = getLocationId(location, width, height, zoom, scale);
         const file = FileStore.getLocationFile(locationId);
-        console.log('[IV] onClientUpdateLocationBlob', update, file, this.props);
         if (!file) return;
 
         if (file.id === fileId) {

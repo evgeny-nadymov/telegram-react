@@ -19,6 +19,7 @@ function RelatedArticles(props) {
             <ul className='related-articles'>
                 {props.articles.map(x => (
                     <RelatedArticle
+                        key={x.url}
                         url={x.url}
                         title={x.title}
                         description={x.description}

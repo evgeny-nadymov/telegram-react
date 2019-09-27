@@ -19,7 +19,9 @@ class Article extends React.PureComponent {
         const { page_blocks, is_rtl } = iv;
         if (!page_blocks) return;
 
-        return <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map(x => getPageBlock(x, iv))}</article>;
+        return (
+            <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map((x, index) => getPageBlock(x, iv, index))}</article>
+        );
     }
 }
 

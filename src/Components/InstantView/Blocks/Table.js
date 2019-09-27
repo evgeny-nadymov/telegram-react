@@ -22,7 +22,7 @@ function Table(props) {
                 </caption>
             )}
             {cells.map(row => {
-                return <tr>{row.map(x => getPageBlock(x, iv))}</tr>;
+                return <tr>{row.map((x, index) => getPageBlock(x, iv, index))}</tr>;
             })}
         </table>
     );

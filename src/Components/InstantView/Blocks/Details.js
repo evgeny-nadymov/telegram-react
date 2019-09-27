@@ -19,7 +19,7 @@ function Details(props) {
             <summary>
                 <RichText text={header} />
             </summary>
-            {pageBlocks.map(x => getPageBlock(x, iv))}
+            {pageBlocks.map((x, index) => getPageBlock(x, iv, index))}
         </details>
     );
 }
