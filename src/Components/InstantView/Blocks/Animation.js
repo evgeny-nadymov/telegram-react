@@ -23,7 +23,7 @@ function Animation(props) {
 }
 
 Animation.propTypes = {
-    animation: PropTypes.object.isRequired,
+    animation: PropTypes.object,
     caption: PropTypes.object.isRequired,
     needAutoplay: PropTypes.bool.isRequired,
     openMedia: PropTypes.func

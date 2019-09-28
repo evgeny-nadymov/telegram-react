@@ -155,7 +155,7 @@ class Audio extends React.Component {
 Audio.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
-    audio: PropTypes.object.isRequired,
+    audio: PropTypes.object,
     openMedia: PropTypes.func
 };
 

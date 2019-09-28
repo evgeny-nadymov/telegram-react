@@ -25,7 +25,7 @@ function EmbeddedPost(props) {
 EmbeddedPost.propTypes = {
     url: PropTypes.string.isRequired,
     author: PropTypes.string.isRequired,
-    authorPhoto: PropTypes.object.isRequired,
+    authorPhoto: PropTypes.object,
     date: PropTypes.number.isRequired,
     pageBlocks: PropTypes.array.isRequired,
     caption: PropTypes.object.isRequired

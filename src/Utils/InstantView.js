@@ -144,19 +144,18 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
     }
 }
 
-export function getPageBlock(block, iv, key = null) {
+export function getPageBlock(block, iv, key = undefined) {
     if (!block) return null;
 
     let element = null;
     switch (block['@type']) {
         case 'pageBlockAnchor': {
-            element = <Anchor key={key} name={block.name} />;
+            element = <Anchor name={block.name} />;
             break;
         }
         case 'pageBlockAnimation': {
             element = (
                 <Animation
-                    key={key}
                     caption={block.caption}
                     animation={block.animation}
                     needAutoplay={block.need_autoplay}
@@ -168,7 +167,6 @@ export function getPageBlock(block, iv, key = null) {
         case 'pageBlockAudio': {
             element = (
                 <Audio
-                    key={key}
                     caption={block.caption}
                     audio={block.audio}
                     openMedia={() => openInstantViewMedia(block.audio, block, iv, true)}
@@ -177,37 +175,36 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockAuthorDate': {
-            element = <AuthorDate key={key} author={block.author} publishDate={block.publish_date} />;
+            element = <AuthorDate author={block.author} publishDate={block.publish_date} />;
             break;
         }
         case 'pageBlockBlockQuote': {
-            element = <BlockQuote key={key} credit={block.credit} text={block.text} />;
+            element = <BlockQuote credit={block.credit} text={block.text} />;
             break;
         }
         case 'pageBlockCollage': {
-            element = <Collage key={key} pageBlocks={block.page_blocks} caption={block.caption} />;
+            element = <Collage pageBlocks={block.page_blocks} caption={block.caption} />;
             break;
         }
         case 'pageBlockChatLink': {
-            element = <ChatLink key={key} title={block.title} photo={block.photo} username={block.username} />;
+            element = <ChatLink title={block.title} photo={block.photo} username={block.username} />;
             break;
         }
         case 'pageBlockCover': {
-            element = <Cover key={key} cover={block.cover} />;
+            element = <Cover cover={block.cover} />;
             break;
         }
         case 'pageBlockDetails': {
-            element = <Details key={key} header={block.header} pageBlocks={block.page_blocks} isOpen={block.is_open} />;
+            element = <Details header={block.header} pageBlocks={block.page_blocks} isOpen={block.is_open} />;
             break;
         }
         case 'pageBlockDivider': {
-            element = <Divider key={key} />;
+            element = <Divider />;
             break;
         }
         case 'pageBlockEmbedded': {
             element = (
                 <Embedded
-                    key={key}
                     url={block.url}
                     html={block.html}
                     posterPhoto={block.poster_photo}
@@ -223,7 +220,6 @@ export function getPageBlock(block, iv, key = null) {
         case 'pageBlockEmbeddedPost': {
             element = (
                 <EmbeddedPost
-                    key={key}
                     url={block.url}
                     author={block.author}
                     authorPhoto={block.author_photo}
@@ -235,29 +231,28 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockFooter': {
-            element = <Footer key={key} footer={block.footer} />;
+            element = <Footer footer={block.footer} />;
             break;
         }
         case 'pageBlockHeader': {
-            element = <Header key={key} header={block.header} />;
+            element = <Header header={block.header} />;
             break;
         }
         case 'pageBlockKicker': {
-            element = <Kicker key={key} kicker={block.kicker} />;
+            element = <Kicker kicker={block.kicker} />;
             break;
         }
         case 'pageBlockList': {
-            element = <List key={key} items={block.items} />;
+            element = <List items={block.items} />;
             break;
         }
         case 'pageBlockListItem': {
-            element = <ListItem key={key} label={block.label} pageBlocks={block.page_blocks} />;
+            element = <ListItem label={block.label} pageBlocks={block.page_blocks} />;
             break;
         }
         case 'pageBlockMap': {
             element = (
                 <Map
-                    key={key}
                     location={block.location}
                     zoom={block.zoom}
                     width={block.width}
@@ -268,13 +263,12 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockParagraph': {
-            element = <Paragraph key={key} text={block.text} />;
+            element = <Paragraph text={block.text} />;
             break;
         }
         case 'pageBlockPhoto': {
             element = (
                 <Photo
-                    key={key}
                     caption={block.caption}
                     photo={block.photo}
                     url={block.url}
@@ -284,17 +278,16 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockPreformatted': {
-            element = <Preformatted key={key} text={block.text} language={block.language} />;
+            element = <Preformatted text={block.text} language={block.language} />;
             break;
         }
         case 'pageBlockPullQuote': {
-            element = <PullQuote key={key} credit={block.credit} text={block.text} />;
+            element = <PullQuote credit={block.credit} text={block.text} />;
             break;
         }
         case 'pageBlockRelatedArticle': {
             element = (
                 <RelatedArticle
-                    key={key}
                     url={block.url}
                     title={block.title}
                     description={block.description}
@@ -306,25 +299,24 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockRelatedArticles': {
-            element = <RelatedArticles key={key} header={block.header} articles={block.articles} />;
+            element = <RelatedArticles header={block.header} articles={block.articles} />;
             break;
         }
         case 'pageBlockSlideshow': {
-            element = <Slideshow key={key} pageBlocks={block.page_blocks} caption={block.caption} />;
+            element = <Slideshow pageBlocks={block.page_blocks} caption={block.caption} />;
             break;
         }
         case 'pageBlockSubheader': {
-            element = <Subheader key={key} subheader={block.subheader} />;
+            element = <Subheader subheader={block.subheader} />;
             break;
         }
         case 'pageBlockSubtitle': {
-            element = <Subtitle key={key} subtitle={block.subtitle} />;
+            element = <Subtitle subtitle={block.subtitle} />;
             break;
         }
         case 'pageBlockTable': {
             element = (
                 <Table
-                    key={key}
                     caption={block.caption}
                     cells={block.cells}
                     isBordered={block.is_bordered}
@@ -336,7 +328,6 @@ export function getPageBlock(block, iv, key = null) {
         case 'pageBlockTableCell': {
             element = (
                 <TableCell
-                    key={key}
                     text={block.text}
                     isHeader={block.is_header}
                     colspan={block.colspan}
@@ -348,13 +339,12 @@ export function getPageBlock(block, iv, key = null) {
             break;
         }
         case 'pageBlockTitle': {
-            element = <Title key={key} title={block.title} />;
+            element = <Title title={block.title} />;
             break;
         }
         case 'pageBlockVideo': {
             element = (
                 <Video
-                    key={key}
                     caption={block.caption}
                     video={block.video}
                     needAutoplay={block.need_autoplay}
@@ -367,7 +357,7 @@ export function getPageBlock(block, iv, key = null) {
     }
 
     if (element) {
-        return <ErrorHandler>{element}</ErrorHandler>;
+        return <ErrorHandler key={key}>{element}</ErrorHandler>;
     }
 
     return <div>{`[${block['@type']}]`}</div>;

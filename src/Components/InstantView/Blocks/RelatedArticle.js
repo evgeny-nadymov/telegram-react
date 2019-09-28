@@ -55,7 +55,7 @@ RelatedArticle.propTypes = {
     url: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    photo: PropTypes.object.isRequired,
+    photo: PropTypes.object,
     author: PropTypes.string.isRequired,
     publishDate: PropTypes.number.isRequired
 };

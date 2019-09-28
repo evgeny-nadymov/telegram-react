@@ -21,9 +21,11 @@ function Table(props) {
                     <RichText text={caption} />
                 </caption>
             )}
-            {cells.map(row => {
-                return <tr>{row.map((x, index) => getPageBlock(x, iv, index))}</tr>;
-            })}
+            <tbody>
+                {cells.map((row, rowIndex) => {
+                    return <tr key={rowIndex}>{row.map((x, index) => getPageBlock(x, iv, index))}</tr>;
+                })}
+            </tbody>
         </table>
     );
 }

@@ -209,24 +209,26 @@ class InstantViewer extends React.Component {
         console.log('[IV] componentDidUpdate', instantView.url, instantView.url === prevProps.instantView.url);
 
         const hash = new URL(instantView.url).hash;
-        if (prevProps.instantView.url !== instantView.url) {
-            if (instantView.url.indexOf('#') === instantView.url.length - 1) {
-                console.log('[IV] componentDidUpdate scrollTop auto');
-                this.scrollTop('auto');
-            } else if (hash) {
-                console.log('[IV] componentDidUpdate scrollToHash', hash);
-                this.scrollToHash(hash, 'auto');
+        if (prevProps.instantView !== instantView) {
+            if (prevProps.instantView.url !== instantView.url) {
+                if (instantView.url.indexOf('#') === instantView.url.length - 1) {
+                    console.log('[IV] componentDidUpdate scrollTop auto');
+                    this.scrollTop('auto');
+                } else if (hash) {
+                    console.log('[IV] componentDidUpdate scrollToHash', hash);
+                    this.scrollToHash(hash, 'auto');
+                } else {
+                    console.log('[IV] componentDidUpdate scrollTop auto');
+                    this.scrollTop('auto');
+                }
             } else {
-                console.log('[IV] componentDidUpdate scrollTop auto');
-                this.scrollTop('auto');
-            }
-        } else {
-            if (hash) {
-                console.log('[IV] componentDidUpdate scrollToHash', hash);
-                this.scrollToHash(hash, 'auto');
-            } else {
-                console.log('[IV] componentDidUpdate scrollTop smooth');
-                this.scrollTop('smooth');
+                if (hash) {
+                    console.log('[IV] componentDidUpdate scrollToHash', hash);
+                    this.scrollToHash(hash, 'auto');
+                } else {
+                    console.log('[IV] componentDidUpdate scrollTop smooth');
+                    this.scrollTop('smooth');
+                }
             }
         }
     }

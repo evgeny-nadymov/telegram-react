@@ -12,8 +12,8 @@ import RichText from './RichText';
 function Texts(props) {
     return (
         <>
-            {props.texts.map(x => (
-                <RichText text={x} />
+            {props.texts.map((x, index) => (
+                <RichText key={index} text={x} />
             ))}
         </>
     );

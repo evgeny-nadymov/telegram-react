@@ -30,7 +30,7 @@ function Embedded(props) {
 Embedded.propTypes = {
     url: PropTypes.string.isRequired,
     html: PropTypes.string.isRequired,
-    posterPhoto: PropTypes.object.isRequired,
+    posterPhoto: PropTypes.object,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     caption: PropTypes.object.isRequired,

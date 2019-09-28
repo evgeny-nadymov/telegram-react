@@ -22,7 +22,7 @@ function Video(props) {
 }
 
 Video.propTypes = {
-    video: PropTypes.object.isRequired,
+    video: PropTypes.object,
     caption: PropTypes.object.isRequired,
     needAutoplay: PropTypes.bool.isRequired,
     isLooped: PropTypes.bool.isRequired,

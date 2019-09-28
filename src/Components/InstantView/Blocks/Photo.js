@@ -23,7 +23,7 @@ function Photo(props) {
 }
 
 Photo.propTypes = {
-    photo: PropTypes.object.isRequired,
+    photo: PropTypes.object,
     caption: PropTypes.object.isRequired,
     url: PropTypes.string.isRequired,
     openMedia: PropTypes.func

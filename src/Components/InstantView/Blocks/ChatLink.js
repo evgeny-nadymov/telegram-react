@@ -14,7 +14,7 @@ function ChatLink(props) {
 
 ChatLink.propTypes = {
     title: PropTypes.string.isRequired,
-    photo: PropTypes.object.isRequired,
+    photo: PropTypes.object,
     username: PropTypes.string.isRequired
 };
 

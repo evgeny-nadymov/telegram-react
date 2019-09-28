@@ -23,7 +23,7 @@ function Audio(props) {
 }
 
 Audio.propTypes = {
-    audio: PropTypes.object.isRequired,
+    audio: PropTypes.object,
     caption: PropTypes.object.isRequired,
     openMedia: PropTypes.func
 };

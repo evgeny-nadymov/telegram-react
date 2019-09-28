@@ -11,7 +11,7 @@ import { withIV } from '../IVContext';
 import { getPageBlock } from '../../../Utils/InstantView';
 
 function ListItem(props) {
-    return <li data-before={props.label}>{props.pageBlocks.map(x => getPageBlock(x, props.iv))}</li>;
+    return <li data-before={props.label}>{props.pageBlocks.map((x, index) => getPageBlock(x, props.iv, index))}</li>;
 }
 
 ListItem.propTypes = {
