@@ -239,7 +239,7 @@ class InstantViewMediaViewerContent extends React.Component {
 InstantViewMediaViewerContent.propTypes = {
     media: PropTypes.object.isRequired,
     size: PropTypes.number.isRequired,
-    text: PropTypes.object.isRequired
+    text: PropTypes.object
 };
 
 export default InstantViewMediaViewerContent;

@@ -6,25 +6,52 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
+import ReactIframeResizer from 'react-iframe-resizer-super';
 import PropTypes from 'prop-types';
 import Caption from './Caption';
 
-function Embedded(props) {
-    const { url, html, width, height, caption, isFullWidth, allowScrolling } = props;
-    return (
-        <figure>
-            <iframe
-                src={url ? url : null}
-                srcDoc={url ? null : html}
-                width={width > 0 ? width : null}
-                height={height > 0 ? height : null}
-                allowFullScreen={isFullWidth}
-                scrolling={allowScrolling ? 'auto' : 'no'}
-                frameBorder={0}
-            />
-            <Caption text={caption.text} credit={caption.credit} />
-        </figure>
-    );
+class Embedded extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.iframeRef = React.createRef();
+    }
+
+    render() {
+        const { url, html, width, height, caption, isFullWidth, allowScrolling } = this.props;
+
+        const options = {
+            scrolling: true
+        };
+
+        const hasWidthHeight = width > 0 && height > 0;
+
+        return (
+            <figure>
+                {hasWidthHeight ? (
+                    <iframe
+                        ref={this.iframeRef}
+                        src={url ? url : null}
+                        srcDoc={url ? null : html}
+                        width={width > 0 ? width : null}
+                        height={height > 0 ? height : null}
+                        allowFullScreen={isFullWidth}
+                        scrolling={allowScrolling ? 'auto' : 'no'}
+                        frameBorder={0}
+                    />
+                ) : (
+                    <ReactIframeResizer
+                        content={html}
+                        src={url}
+                        iframeResizerOptions={options}
+                        style={{ width: '100%' }}
+                    />
+                )}
+                <Caption text={caption.text} credit={caption.credit} />
+            </figure>
+        );
+    }
 }
 
 Embedded.propTypes = {

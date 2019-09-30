@@ -4,7 +4,6 @@
   "version": "0.0.431",
   "private": true,
   "dependencies": {
-    "tdweb": "1.5.0",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
     "@material-ui/lab": "^3.0.0-alpha.30",
@@ -34,10 +33,12 @@
     "react-dom": "^16.9.0",
     "react-file-download": "^0.3.5",
     "react-i18next": "^10.6.0",
+    "react-iframe-resizer-super": "^0.2.2",
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.1.1",
     "recompose": "^0.30.0",
     "sw-precache-cra": "^1.0.0-alpha.2",
+    "tdweb": "1.5.0",
     "universal-cookie": "^3.1.0"
   },
   "lint-staged": {
