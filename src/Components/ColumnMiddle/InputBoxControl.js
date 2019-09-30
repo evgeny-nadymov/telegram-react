@@ -24,7 +24,7 @@ import CreatePollDialog from '../Popup/CreatePollDialog';
 import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { getSize, readImageSize } from '../../Utils/Common';
+import { getSize, readImageSize, getCharPositionFromEditableDiv } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import { PHOTO_SIZE } from '../../Constants';
@@ -534,7 +534,13 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
-        this.newMessageRef.current.innerText += emoji.native;
+        const caretPos = getCharPositionFromEditableDiv(this.newMessageRef.current);
+
+        const text = this.newMessageRef.current.innerText;
+        const pre = text.slice(0, caretPos);
+        const post = text.slice(caretPos);
+
+        this.newMessageRef.current.innerText = pre + emoji.native + post;
         this.handleInput();
     };
 

@@ -38,6 +38,7 @@
     "react-scripts": "^3.1.1",
     "recompose": "^0.30.0",
     "sw-precache-cra": "^1.0.0-alpha.2",
+    "tdweb": "^1.4.3",
     "universal-cookie": "^3.1.0"
   },
   "lint-staged": {

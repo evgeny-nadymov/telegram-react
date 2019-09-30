@@ -429,6 +429,35 @@ function insertByOrder(array, element, comparator) {
     return [...array.slice(0, i), element, ...array.slice(i)];
 }
 
+// https://stackoverflow.com/a/3976125/6671811
+function getCharPositionFromEditableDiv(editableDiv) {
+    let caretPos = 0;
+    let sel;
+    let range;
+
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            if (range.commonAncestorContainer.parentNode == editableDiv) {
+                caretPos = range.endOffset;
+            }
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        if (range.parentElement() == editableDiv) {
+            const tempEl = document.createElement("span");
+            editableDiv.insertBefore(tempEl, editableDiv.firstChild);
+            const tempRange = range.duplicate();
+            tempRange.moveToElementText(tempEl);
+            tempRange.setEndPoint("EndToEnd", range);
+            caretPos = tempRange.text.length;
+        }
+    }
+
+    return caretPos;
+}
+
 export {
     cleanProgressStatus,
     isConnecting,
@@ -455,5 +484,6 @@ export {
     getRandomInt,
     isAppleDevice,
     historyEquals,
-    insertByOrder
+    insertByOrder,
+    getCharPositionFromEditableDiv
 };
