@@ -105,7 +105,7 @@ article > p {
 article pre {
     font-family: Menlo;
     margin: 14px 0;
-    padding: 7px 0;
+    padding: 7px 12px;
     background: #f5f8fc;
     font-size: 16px;
     white-space: pre-wrap;

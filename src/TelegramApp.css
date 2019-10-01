@@ -32,6 +32,12 @@ strong {
     font-weight: 700;
 }
 
+mark {
+    background-color: #fff8cc;
+    border-radius: 3px;
+    padding: 0 3px;
+}
+
 #root {
     height: 100%;
     width: 100%;

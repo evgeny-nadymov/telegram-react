@@ -58,7 +58,7 @@ import { setInstantViewViewerContent } from '../Actions/Client';
 import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
 
-export function openInstantViewMedia(media, block, instantView, fileCancel) {
+export function openInstantViewMedia(media, caption, block, instantView, fileCancel) {
     console.log('[IV] openIVMedia', media);
 
     if (!media) return;
@@ -84,6 +84,7 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
 
             setInstantViewViewerContent({
                 media,
+                caption,
                 block,
                 instantView
             });
@@ -114,6 +115,7 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
         case 'photo': {
             setInstantViewViewerContent({
                 media,
+                caption,
                 block,
                 instantView
             });
@@ -136,6 +138,7 @@ export function openInstantViewMedia(media, block, instantView, fileCancel) {
 
             setInstantViewViewerContent({
                 media,
+                caption,
                 block,
                 instantView
             });
@@ -159,7 +162,7 @@ export function getPageBlock(block, iv, key = undefined) {
                     caption={block.caption}
                     animation={block.animation}
                     needAutoplay={block.need_autoplay}
-                    openMedia={() => openInstantViewMedia(block.animation, block, iv, true)}
+                    openMedia={() => openInstantViewMedia(block.animation, block.caption, block, iv, true)}
                 />
             );
             break;
@@ -169,7 +172,7 @@ export function getPageBlock(block, iv, key = undefined) {
                 <Audio
                     caption={block.caption}
                     audio={block.audio}
-                    openMedia={() => openInstantViewMedia(block.audio, block, iv, true)}
+                    openMedia={() => openInstantViewMedia(block.audio, block.caption, block, iv, true)}
                 />
             );
             break;
@@ -272,7 +275,7 @@ export function getPageBlock(block, iv, key = undefined) {
                     caption={block.caption}
                     photo={block.photo}
                     url={block.url}
-                    openMedia={() => openInstantViewMedia(block.photo, block, iv, true)}
+                    openMedia={() => openInstantViewMedia(block.photo, block.caption, block, iv, true)}
                 />
             );
             break;
@@ -349,7 +352,7 @@ export function getPageBlock(block, iv, key = undefined) {
                     video={block.video}
                     needAutoplay={block.need_autoplay}
                     isLooped={block.is_looped}
-                    openMedia={() => openInstantViewMedia(block.video, block, iv, true)}
+                    openMedia={() => openInstantViewMedia(block.video, block.caption, block, iv, true)}
                 />
             );
             break;

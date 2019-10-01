@@ -15,6 +15,7 @@ import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
+import Caption from '../InstantView/Blocks/Caption';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -230,7 +231,7 @@ class InstantViewMediaViewerContent extends React.Component {
             <div className='media-viewer-content'>
                 {content}
                 <FileProgress file={file} zIndex={2} />
-                {text && text.length > 0 && <MediaCaption text={text} />}
+                <MediaCaption text={<Caption text={text.text} credit={text.credit} />} />
             </div>
         );
     }

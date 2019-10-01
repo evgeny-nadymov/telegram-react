@@ -114,15 +114,15 @@ class InstantViewer extends React.Component {
     onClientUpdateInstantViewViewerContent = update => {
         const { content } = update;
         if (!content) {
-            this.setState({ media: null, text: null });
+            this.setState({ media: null, caption: null });
             return;
         }
 
-        const { media, text, instantView } = content;
+        const { media, caption, instantView } = content;
 
         if (this.props.instantView !== instantView) return;
 
-        this.setState({ media, text });
+        this.setState({ media, caption });
     };
 
     onClientUpdateInstantViewUrl = async update => {
@@ -276,7 +276,7 @@ class InstantViewer extends React.Component {
 
     render() {
         const { classes, instantView } = this.props;
-        const { hasPrev, hasScroll, media, text } = this.state;
+        const { hasPrev, hasScroll, media, caption } = this.state;
         if (!instantView) return null;
 
         return (
@@ -310,7 +310,7 @@ class InstantViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                 </div>
-                {media && <InstantViewMediaViewer media={media} size={IV_PHOTO_SIZE} text={text} />}
+                {media && <InstantViewMediaViewer media={media} size={IV_PHOTO_SIZE} text={caption} />}
             </>
         );
     }

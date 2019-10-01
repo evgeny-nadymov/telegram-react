@@ -4,7 +4,7 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-.media-caption{
+.media-caption {
     position: absolute;
     bottom: 12px;
     max-width: 600px;
@@ -13,8 +13,12 @@
     border-radius: 6px;
 }
 
-.media-caption-text{
+.media-caption-text {
     margin: 12px;
     text-align: center;
     overflow-wrap: break-word;
+}
+
+.media-caption-text figcaption cite {
+    display: block;
 }
