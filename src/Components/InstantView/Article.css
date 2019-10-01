@@ -59,7 +59,8 @@ article .audio {
 }
 article .location,
 article .photo,
-article .animation {
+article .animation,
+article .video {
     margin: 0 auto 6px;
 }
 /*article a[name] {

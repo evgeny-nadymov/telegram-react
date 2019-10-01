@@ -9,13 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Caption from './Caption';
 import MediaVideo from '../../../Components/Message/Media/Video';
+import { IV_PHOTO_DISPLAY_SIZE } from '../../../Constants';
 
 function Video(props) {
     const { video, caption, needAutoplay, isLooped, openMedia } = props;
 
     return (
         <>
-            <MediaVideo video={video} style={{ margin: '0 auto' }} openMedia={openMedia} />
+            <MediaVideo video={video} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </>
     );
