@@ -6,52 +6,37 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import ReactIframeResizer from 'react-iframe-resizer-super';
 import PropTypes from 'prop-types';
+import ReactIframeResizer from 'react-iframe-resizer-super';
 import Caption from './Caption';
 
-class Embedded extends React.Component {
-    constructor(props) {
-        super(props);
+function Embedded(props) {
+    const { url, html, width, height, caption, isFullWidth, allowScrolling } = props;
 
-        this.iframeRef = React.createRef();
-    }
+    const options = {
+        scrolling: true
+    };
 
-    render() {
-        const { url, html, width, height, caption, isFullWidth, allowScrolling } = this.props;
+    const hasWidthHeight = width > 0 && height > 0;
 
-        const options = {
-            scrolling: true
-        };
-
-        const hasWidthHeight = width > 0 && height > 0;
-
-        return (
-            <figure>
-                {hasWidthHeight ? (
-                    <iframe
-                        ref={this.iframeRef}
-                        src={url ? url : null}
-                        srcDoc={url ? null : html}
-                        width={width > 0 ? width : null}
-                        height={height > 0 ? height : null}
-                        allowFullScreen={isFullWidth}
-                        scrolling={allowScrolling ? 'auto' : 'no'}
-                        frameBorder={0}
-                    />
-                ) : (
-                    <ReactIframeResizer
-                        content={html}
-                        src={url}
-                        iframeResizerOptions={options}
-                        style={{ width: '100%' }}
-                    />
-                )}
-                <Caption text={caption.text} credit={caption.credit} />
-            </figure>
-        );
-    }
+    return (
+        <figure>
+            {hasWidthHeight ? (
+                <iframe
+                    src={url ? url : null}
+                    srcDoc={url ? null : html}
+                    width={width > 0 ? width : null}
+                    height={height > 0 ? height : null}
+                    allowFullScreen={isFullWidth}
+                    scrolling={allowScrolling ? 'auto' : 'no'}
+                    frameBorder={0}
+                />
+            ) : (
+                <ReactIframeResizer content={html} src={url} iframeResizerOptions={options} style={{ width: '100%' }} />
+            )}
+            <Caption text={caption.text} credit={caption.credit} />
+        </figure>
+    );
 }
 
 Embedded.propTypes = {
