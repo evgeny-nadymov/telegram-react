@@ -20,20 +20,20 @@ article h2 {
     font-family: 'Georgia';
     font-size: 28px;
     line-height: 31px;
-    margin: 21px 18px 12px;
+    margin: 21px 0 12px;
     font-weight: normal;
 }
 article h2 {
     font-size: 24px;
     line-height: 30px;
-    margin: -6px 18px 12px;
+    margin: -6px 0 12px;
     color: #777;
 }
 article h6.kicker {
     font-family: 'Helvetica Neue';
     font-size: 14px;
     line-height: 17px;
-    margin: 21px 18px 12px;
+    margin: 21px 0 12px;
     font-weight: 500;
     color: #79828b;
 }
@@ -43,7 +43,7 @@ article h6.kicker + h1 {
 article address {
     font-size: 15px;
     color: #79828b;
-    margin: 12px 18px 21px;
+    margin: 12px 0 21px;
     font-style: normal;
 }
 article address a,
@@ -55,7 +55,7 @@ article a[href] {
 }
 article .document,
 article .audio {
-    margin: 6px 18px;
+    margin: 6px 0;
 }
 article .location,
 article .photo,
@@ -77,6 +77,10 @@ article blockquote figure {
 article blockquote figcaption {
     text-align: left;
 }
+
+article blockquote address {
+    margin: 0 0 12px 0;
+}
 /*article a[name] {
   position: absolute !important;
   display: block;
@@ -85,7 +89,7 @@ article blockquote figcaption {
   left: 0; right: 0;
 }*/
 article > details {
-    margin: 0 18px;
+    margin: 0 0;
 }
 article mark {
     background: #fff8cc;
@@ -96,12 +100,12 @@ article p {
     margin: 0 0 12px;
 }
 article > p {
-    margin: 0 18px 12px;
+    margin: 0 0 12px;
 }
 article pre {
     font-family: Menlo;
     margin: 14px 0;
-    padding: 7px 18px;
+    padding: 7px 0;
     background: #f5f8fc;
     font-size: 16px;
     white-space: pre-wrap;
@@ -115,16 +119,16 @@ article h4 {
     font-family: 'Georgia';
     font-size: 24px;
     line-height: 30px;
-    margin: 18px 18px 9px;
+    margin: 18px 0 9px;
     font-weight: normal;
 }
 article h4 {
     font-size: 19px;
-    margin: 18px 18px 7px;
+    margin: 18px 0 7px;
 }
 article blockquote {
     font-family: 'Georgia';
-    margin: 18px 18px 16px;
+    margin: 18px 0 16px;
     padding-left: 22px;
     position: relative;
     font-style: italic;
@@ -143,8 +147,8 @@ article blockquote:before {
 }
 article aside {
     font-family: 'Georgia';
-    margin: 18px 18px 16px;
-    padding: 0 18px;
+    margin: 18px 0 16px;
+    padding: 0 0;
     text-align: center;
     font-style: italic;
 }
@@ -169,7 +173,7 @@ article footer hr {
     margin: 18px auto 16px;
 }
 article ul {
-    margin: 18px;
+    margin: 18px 0;
     padding-left: 22px;
     list-style: none;
 }
@@ -201,7 +205,7 @@ left: -19px;
 top: 1px;
 }*/
 article ol {
-    margin: 18px;
+    margin: 18px 0;
     padding-left: 18px;
 }
 article ol > li {
@@ -219,7 +223,7 @@ article figure blockquote {
 
 article table {
     width: 100%;
-    margin: 0 18px 12px;
+    margin: 0 0 12px;
     border-collapse: collapse;
 }
 article table tr {
@@ -289,8 +293,8 @@ article figure {
     text-align: center;
 }
 article figure.nowide {
-    margin-left: 18px;
-    margin-right: 18px;
+    margin-left: 0;
+    margin-right: 0;
 }
 article figure.nowide figcaption {
     padding-left: 0;
@@ -299,7 +303,7 @@ article figure.nowide figcaption {
 article figcaption {
     font-size: 15px;
     color: #79828b;
-    padding: 6px 18px 0;
+    padding: 6px 0 0;
     line-height: 26px;
     text-align: center;
 }
@@ -312,7 +316,7 @@ article figcaption > cite {
     font-style: normal;
 }
 article footer {
-    margin: 12px 18px;
+    margin: 12px 0;
     color: #79828b;
 }
 

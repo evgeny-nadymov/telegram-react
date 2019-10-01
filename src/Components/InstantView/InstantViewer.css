@@ -23,6 +23,7 @@
 .instant-viewer-content-column {
     flex-shrink: 1;
     flex-grow: 1;
+    padding: 0 18px;
 }
 
 .instant-viewer-right-column {
