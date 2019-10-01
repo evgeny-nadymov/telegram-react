@@ -63,6 +63,20 @@ article .animation,
 article .video {
     margin: 0 auto 6px;
 }
+
+article blockquote .location,
+article blockquote .photo,
+article blockquote .animation,
+article blockquote .video {
+    margin: 0 0 6px;
+}
+
+article blockquote figure {
+    text-align: left;
+}
+article blockquote figcaption {
+    text-align: left;
+}
 /*article a[name] {
   position: absolute !important;
   display: block;
@@ -242,7 +256,6 @@ article img,
 article video,
 article iframe {
     max-width: 100%;
-    max-height: 800px;
     vertical-align: top;
 }
 .autosize iframe {

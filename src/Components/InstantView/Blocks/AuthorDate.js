@@ -34,8 +34,8 @@ function AuthorDate(props) {
 }
 
 AuthorDate.propTypes = {
-    author: PropTypes.object.isRequired,
-    publishDate: PropTypes.number.isRequired
+    author: PropTypes.object,
+    publishDate: PropTypes.number
 };
 
 export default AuthorDate;

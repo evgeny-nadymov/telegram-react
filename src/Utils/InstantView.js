@@ -368,6 +368,10 @@ export function getRichText(richText) {
         return null;
     }
 
+    if (richText instanceof String) {
+        return richText;
+    }
+
     switch (richText['@type']) {
         case 'richTextAnchor': {
             const { name, text } = richText;

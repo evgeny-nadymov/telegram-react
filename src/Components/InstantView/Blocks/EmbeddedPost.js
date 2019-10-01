@@ -10,15 +10,21 @@ import PropTypes from 'prop-types';
 import { withIV } from '../IVContext';
 import Caption from './Caption';
 import { getPageBlock } from '../../../Utils/InstantView';
+import AuthorDate from './AuthorDate';
+import RichText from '../RichText/RichText';
 
 function EmbeddedPost(props) {
     const { url, author, authorPhoto, date, pageBlocks, caption, iv } = props;
 
     return (
-        <figure>
-            {pageBlocks.map((x, index) => getPageBlock(x, iv, index))}
-            <Caption text={caption.text} credit={caption.credit} />
-        </figure>
+        <blockquote>
+            <figure>
+                {Boolean(author) && <h3>{author}</h3>}
+                <AuthorDate author={null} publishDate={date} />
+                {pageBlocks.map((x, index) => getPageBlock(x, iv, index))}
+                <Caption text={caption.text} credit={caption.credit} />
+            </figure>
+        </blockquote>
     );
 }
 

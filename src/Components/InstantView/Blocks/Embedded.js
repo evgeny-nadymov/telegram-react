@@ -14,7 +14,7 @@ function Embedded(props) {
     const { url, html, width, height, caption, isFullWidth, allowScrolling } = props;
 
     const options = {
-        scrolling: true
+        scrolling: allowScrolling
     };
 
     const hasWidthHeight = width > 0 && height > 0;
