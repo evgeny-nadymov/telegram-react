@@ -13,10 +13,10 @@ export function isValidAnimatedSticker(sticker, chatId, messageId) {
     if (!sticker.is_animated) return false;
 
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
-
-    const { sending_state } = message;
-    if (sending_state && !sticker.set_id) return false;
+    if (message) {
+        const { sending_state } = message;
+        if (sending_state && !sticker.set_id) return false;
+    }
 
     return true;
 }
