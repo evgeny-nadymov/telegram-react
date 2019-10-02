@@ -6,6 +6,20 @@
  */
 
 import { THUMBNAIL_BLURRED_SIZE } from '../Constants';
+import MessageStore from '../Stores/MessageStore';
+
+export function isValidAnimatedSticker(sticker, chatId, messageId) {
+    if (!sticker) return false;
+    if (!sticker.is_animated) return false;
+
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { sending_state } = message;
+    if (sending_state && !sticker.set_id) return false;
+
+    return true;
+}
 
 export function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE) {
     if (!thumbnail) return false;

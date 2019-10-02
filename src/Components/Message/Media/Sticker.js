@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Lottie from '../../Viewer/Lottie';
-import { isBlurredThumbnail } from '../../../Utils/Media';
+import { isBlurredThumbnail, isValidAnimatedSticker } from '../../../Utils/Media';
 import { getFitSize } from '../../../Utils/Common';
 import { getBlob, getSrc } from '../../../Utils/File';
 import { inflateBlob } from '../../../Workers/BlobInflator';
@@ -165,8 +165,9 @@ class Sticker extends React.Component {
 
     onClientUpdateFocusWindow = update => {
         const { focused } = update;
-        const { is_animated, thumbnail } = this.props.sticker;
-        const isAnimated = is_animated && thumbnail;
+        const { chatId, messageId, sticker } = this.props;
+
+        const isAnimated = isValidAnimatedSticker(sticker, chatId, messageId);
         if (!isAnimated) return;
 
         this.focused = focused;
@@ -242,9 +243,9 @@ class Sticker extends React.Component {
     };
 
     loadContent = async () => {
-        const { sticker: source, autoplay } = this.props;
-        const { is_animated, thumbnail, sticker } = source;
-        const isAnimated = is_animated && thumbnail;
+        const { chatId, messageId, sticker: source, autoplay } = this.props;
+        const { is_animated, sticker } = source;
+        const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
         if (!is_animated) return;
         if (!isAnimated) return;
@@ -320,11 +321,22 @@ class Sticker extends React.Component {
     };
 
     render() {
-        const { autoplay, className, displaySize, blur, sticker: source, style, openMedia, preview } = this.props;
-        const { is_animated, thumbnail, sticker, width, height } = source;
+        const {
+            chatId,
+            messageId,
+            autoplay,
+            className,
+            displaySize,
+            blur,
+            sticker: source,
+            style,
+            openMedia,
+            preview
+        } = this.props;
+        const { thumbnail, sticker, width, height } = source;
         const { animationData, hasError } = this.state;
 
-        const isAnimated = is_animated && thumbnail;
+        const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(sticker);
