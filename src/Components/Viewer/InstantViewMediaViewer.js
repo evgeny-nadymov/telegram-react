@@ -154,7 +154,7 @@ class InstantViewMediaViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                     <div className='media-viewer-content-column'>
-                        <InstantViewMediaViewerContent media={media} size={size} text={caption} url={url} />
+                        <InstantViewMediaViewerContent media={media} size={size} caption={caption} url={url} />
                     </div>
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>

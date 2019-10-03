@@ -16,6 +16,8 @@ import FileStore from '../../Stores/FileStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import Caption from '../InstantView/Blocks/Caption';
+import { isEmptyText } from '../../Utils/InstantView';
+import SafeLink from '../Additional/SafeLink';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -229,7 +231,16 @@ class InstantViewMediaViewerContent extends React.Component {
             <div className='media-viewer-content'>
                 {content}
                 <FileProgress file={file} zIndex={2} />
-                {caption && <MediaCaption text={<Caption text={caption.text} credit={caption.credit} />} />}
+                {caption && (!isEmptyText(caption.text) || !isEmptyText(caption.credit) || url) && (
+                    <MediaCaption
+                        text={
+                            <>
+                                <Caption text={caption.text} credit={caption.credit} />
+                                <SafeLink url={url} />
+                            </>
+                        }
+                    />
+                )}
             </div>
         );
     }
