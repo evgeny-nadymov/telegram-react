@@ -24,6 +24,8 @@ import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
+import { itemsInView, throttle } from '../../Utils/Common';
+import { getInnerBlocks } from '../../Utils/InstantView';
 
 const styles = theme => ({
     instantViewer: {
@@ -53,6 +55,8 @@ class InstantViewer extends React.Component {
         this.instantViewerRef = React.createRef();
 
         this.state = {};
+
+        this.updateItemsInView = throttle(this.updateItemsInView, 500);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -97,6 +101,8 @@ class InstantViewer extends React.Component {
     }
 
     componentDidMount() {
+        this.handleScroll();
+
         document.addEventListener('keydown', this.onKeyDown, false);
         InstantViewStore.on('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
         InstantViewStore.on('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
@@ -230,6 +236,8 @@ class InstantViewer extends React.Component {
                     this.scrollTop('smooth');
                 }
             }
+
+            this.handleScroll();
         }
     }
 
@@ -272,7 +280,32 @@ class InstantViewer extends React.Component {
         this.setState({
             hasScroll: element.scrollTop > 50
         });
+
+        this.updateItemsInView();
     };
+
+    updateItemsInView() {
+        const { instantView } = this.props;
+        if (!instantView) return;
+
+        const { page_blocks } = instantView;
+
+        const blocks = new Map();
+        const items = itemsInView(this.instantViewerRef, this.articleRef);
+
+        for (let i = 0; i < items.length; i++) {
+            const block = page_blocks[items[i]];
+            blocks.set(block, block);
+
+            const innerBlocks = getInnerBlocks(block);
+            innerBlocks.forEach(x => blocks.set(x, x));
+        }
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateBlocksInView',
+            blocks
+        });
+    }
 
     render() {
         const { classes, instantView } = this.props;

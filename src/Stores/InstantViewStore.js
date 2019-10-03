@@ -26,6 +26,10 @@ class InstantViewStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateBlocksInView': {
+                this.emit('clientUpdateBlocksInView', update);
+                break;
+            }
             case 'clientUpdateInstantViewContent': {
                 const { content } = update;
 
@@ -44,6 +48,10 @@ class InstantViewStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateInstantViewViewerContent': {
+                const { content } = update;
+
+                this.viewerContent = content;
+
                 this.emit('clientUpdateInstantViewViewerContent', update);
                 break;
             }

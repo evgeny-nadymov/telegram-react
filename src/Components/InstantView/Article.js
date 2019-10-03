@@ -7,20 +7,26 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from 'recompose';
+import { withSaveRef } from '../../Utils/HOC';
 import { withIV } from './IVContext';
 import { getPageBlock } from '../../Utils/InstantView';
 import './Article.css';
 
 class Article extends React.PureComponent {
     render() {
-        const { iv } = this.props;
+        const { forwardedRef, iv } = this.props;
         if (!iv) return null;
 
         const { page_blocks, is_rtl } = iv;
         if (!page_blocks) return;
 
+        const blocks = page_blocks.map((x, index) => getPageBlock(x, iv, index));
+
         return (
-            <article dir={is_rtl ? 'rtl' : 'ltr'}>{page_blocks.map((x, index) => getPageBlock(x, iv, index))}</article>
+            <article ref={forwardedRef} dir={is_rtl ? 'rtl' : 'ltr'}>
+                {blocks}
+            </article>
         );
     }
 }
@@ -30,4 +36,9 @@ Article.propTypes = {
     messageId: PropTypes.number
 };
 
-export default withIV(Article);
+const enhance = compose(
+    withSaveRef(),
+    withIV
+);
+
+export default enhance(Article);

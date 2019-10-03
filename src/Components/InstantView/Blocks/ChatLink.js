@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 function ChatLink(props) {
-    return null;
+    return <div />;
 }
 
 ChatLink.propTypes = {

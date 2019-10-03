@@ -12,17 +12,24 @@ import MediaAnimation from '../../../Components/Message/Media/Animation';
 import { IV_PHOTO_DISPLAY_SIZE } from '../../../Constants';
 
 function Animation(props) {
-    const { animation, caption, need_autoplay, openMedia } = props;
+    const { animation, block, caption, need_autoplay, openMedia } = props;
 
     return (
-        <>
-            <MediaAnimation animation={animation} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
+        <figure>
+            <MediaAnimation
+                iv={true}
+                pageBlock={block}
+                animation={animation}
+                displaySize={IV_PHOTO_DISPLAY_SIZE}
+                openMedia={openMedia}
+            />
             <Caption text={caption.text} credit={caption.credit} />
-        </>
+        </figure>
     );
 }
 
 Animation.propTypes = {
+    block: PropTypes.object.isRequired,
     animation: PropTypes.object,
     caption: PropTypes.object.isRequired,
     needAutoplay: PropTypes.bool.isRequired,

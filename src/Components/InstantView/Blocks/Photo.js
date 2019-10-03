@@ -15,10 +15,10 @@ function Photo(props) {
     const { photo, caption, url, openMedia } = props;
 
     return (
-        <>
+        <figure>
             <MediaPhoto photo={photo} size={IV_PHOTO_SIZE} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
-        </>
+        </figure>
     );
 }
 

@@ -15,10 +15,10 @@ function Map(props) {
     const { location, caption } = props;
 
     return (
-        <>
+        <figure>
             <Location width={IV_LOCATION_WIDTH} height={IV_LOCATION_HEIGHT} location={location} />
             <Caption text={caption.text} credit={caption.credit} />
-        </>
+        </figure>
     );
 }
 

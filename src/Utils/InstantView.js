@@ -159,6 +159,7 @@ export function getPageBlock(block, iv, key = undefined) {
         case 'pageBlockAnimation': {
             element = (
                 <Animation
+                    block={block}
                     caption={block.caption}
                     animation={block.animation}
                     needAutoplay={block.need_autoplay}
@@ -572,4 +573,118 @@ export function getVerticalAlignment(valign) {
     }
 
     return null;
+}
+
+export function getInnerBlocks(block) {
+    if (!block) return [];
+
+    switch (block['@type']) {
+        case 'pageBlockAnchor': {
+            return [];
+        }
+        case 'pageBlockAnimation': {
+            return [block.caption];
+        }
+        case 'pageBlockAudio': {
+            return [block.caption];
+        }
+        case 'pageBlockAuthorDate': {
+            return [];
+        }
+        case 'pageBlockBlockQuote': {
+            return [];
+        }
+        case 'pageBlockChatLink': {
+            return [];
+        }
+        case 'pageBlockCollage': {
+            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([], innerBlocks);
+        }
+        case 'pageBlockCover': {
+            return [block.cover];
+        }
+        case 'pageBlockDetails': {
+            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([], innerBlocks);
+        }
+        case 'pageBlockDivider': {
+            return [];
+        }
+        case 'pageBlockEmbedded': {
+            return [block.caption];
+        }
+        case 'pageBlockEmbeddedPost': {
+            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([block.caption], innerBlocks);
+        }
+        case 'pageBlockFooter': {
+            return [];
+        }
+        case 'pageBlockHeader': {
+            return [];
+        }
+        case 'pageBlockKicker': {
+            return [];
+        }
+        case 'pageBlockList': {
+            const innerBlocks = block.items.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([], innerBlocks);
+        }
+        case 'pageBlockListItem': {
+            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([], innerBlocks);
+        }
+        case 'pageBlockMap': {
+            return [block.caption];
+        }
+        case 'pageBlockParagraph': {
+            return [];
+        }
+        case 'pageBlockPhoto': {
+            return [block.caption];
+        }
+        case 'pageBlockPreformatted': {
+            return [];
+        }
+        case 'pageBlockPullQuote': {
+            return [];
+        }
+        case 'pageBlockRelatedArticle': {
+            return [];
+        }
+        case 'pageBlockRelatedArticles': {
+            return [...block.articles];
+        }
+        case 'pageBlockSlideshow': {
+            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+
+            return [].concat.apply([block.caption], innerBlocks);
+        }
+        case 'pageBlockSubheader': {
+            return [];
+        }
+        case 'pageBlockSubtitle': {
+            return [];
+        }
+        case 'pageBlockTable': {
+            return [...block.cells];
+        }
+        case 'pageBlockTableCell': {
+            return [];
+        }
+        case 'pageBlockTitle': {
+            return [];
+        }
+        case 'pageBlockVideo': {
+            return [block.caption];
+        }
+    }
+
+    return [];
 }

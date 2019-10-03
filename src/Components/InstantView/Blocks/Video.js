@@ -15,10 +15,10 @@ function Video(props) {
     const { video, caption, needAutoplay, isLooped, openMedia } = props;
 
     return (
-        <>
+        <figure>
             <MediaVideo video={video} displaySize={IV_PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
-        </>
+        </figure>
     );
 }
 

@@ -15,10 +15,10 @@ function Audio(props) {
     const { audio, caption, openMedia } = props;
 
     return (
-        <>
+        <figure>
             <MediaAudio audio={audio} displaySize={PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
-        </>
+        </figure>
     );
 }
 
