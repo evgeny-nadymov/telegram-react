@@ -19,6 +19,7 @@ import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
+import InstantViewStore from '../../../Stores/InstantViewStore';
 
 export const StickerSourceEnum = Object.freeze({
     HINTS: 'HINTS',
@@ -35,11 +36,12 @@ class Sticker extends React.Component {
         super(props);
 
         this.lottieRef = React.createRef();
-        this.focused = window.hasFocus;
+        this.windowFocused = window.hasFocus;
         this.inView = false;
         this.stickerPreview = StickerStore.stickerPreview;
-        this.mediaViewerContent = ApplicationStore.mediaViewerContent;
-        this.profileMediaViewerContent = ApplicationStore.profileMediaViewerContent;
+        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
+        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+        this.openIV = Boolean(InstantViewStore.getCurrent());
         this.dialogChatId = ApplicationStore.dialogChatId;
 
         this.state = {
@@ -100,6 +102,7 @@ class Sticker extends React.Component {
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
@@ -115,12 +118,19 @@ class Sticker extends React.Component {
             'clientUpdateProfileMediaViewerContent',
             this.onClientUpdateProfileMediaViewerContent
         );
+        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
         MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.removeListener('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
+
+    onClientUpdateInstantViewContent = update => {
+        this.openIV = Boolean(InstantViewStore.getCurrent());
+
+        this.startStopAnimation();
+    };
 
     onClientUpdateDialogChatId = update => {
         this.dialogChatId = ApplicationStore.dialogChatId;
@@ -129,13 +139,13 @@ class Sticker extends React.Component {
     };
 
     onClientUpdateMediaViewerContent = update => {
-        this.mediaViewerContent = ApplicationStore.mediaViewerContent;
+        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
 
         this.startStopAnimation();
     };
 
     onClientUpdateProfileMediaViewerContent = update => {
-        this.profileMediaViewerContent = ApplicationStore.profileMediaViewerContent;
+        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
 
         this.startStopAnimation();
     };
@@ -170,7 +180,7 @@ class Sticker extends React.Component {
         const isAnimated = isValidAnimatedSticker(sticker, chatId, messageId);
         if (!isAnimated) return;
 
-        this.focused = focused;
+        this.windowFocused = focused;
         this.startStopAnimation();
     };
 
@@ -181,10 +191,11 @@ class Sticker extends React.Component {
         if (!player) return;
 
         if (
-            this.focused &&
+            this.windowFocused &&
             !this.stickerPreview &&
-            !this.mediaViewerContent &&
-            !this.profileMediaViewerContent &&
+            !this.openMediaViewer &&
+            !this.openProfileMediaViewer &&
+            !this.openIV &&
             !this.dialogChatId
         ) {
             if (this.entered) {

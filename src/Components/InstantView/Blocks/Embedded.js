@@ -10,33 +10,82 @@ import PropTypes from 'prop-types';
 import ReactIframeResizer from 'react-iframe-resizer-super';
 import Caption from './Caption';
 
-function Embedded(props) {
-    const { url, html, width, height, caption, isFullWidth, allowScrolling } = props;
+class Embedded extends React.Component {
+    state = {};
 
-    const options = {
-        scrolling: allowScrolling
-    };
+    static getDerivedStateFromProps(props, state) {
+        if (props.url !== state.prevUrl || props.html !== state.prevHtml) {
+            return {
+                url: null,
+                html: null,
+                prevUrl: props.url,
+                prevHtml: props.html
+            };
+        }
 
-    const hasWidthHeight = width > 0 && height > 0;
+        return null;
+    }
 
-    return (
-        <figure>
-            {hasWidthHeight ? (
-                <iframe
-                    src={url ? url : null}
-                    srcDoc={url ? null : html}
-                    width={width > 0 ? width : null}
-                    height={height > 0 ? height : null}
-                    allowFullScreen={isFullWidth}
-                    scrolling={allowScrolling ? 'auto' : 'no'}
-                    frameBorder={0}
-                />
-            ) : (
-                <ReactIframeResizer content={html} src={url} iframeResizerOptions={options} style={{ width: '100%' }} />
-            )}
-            <Caption text={caption.text} credit={caption.credit} />
-        </figure>
-    );
+    componentDidMount() {
+        this.setIframeSource();
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { url, html } = this.props;
+
+        if (url !== prevProps.url || html !== prevProps.html) {
+            this.setIframeSource();
+        }
+    }
+
+    setIframeSource() {
+        const { url, html } = this.props;
+
+        this.setState({
+            url,
+            html
+        });
+    }
+
+    render() {
+        const { url, html } = this.state;
+        const { width, height, caption, isFullWidth, allowScrolling } = this.props;
+
+        const options = {
+            scrolling: allowScrolling
+        };
+
+        const hasWidthHeight = width > 0 && height > 0;
+        const hasSource = Boolean(url) || Boolean(html);
+
+        return (
+            <figure>
+                {hasSource && (
+                    <>
+                        {hasWidthHeight ? (
+                            <iframe
+                                src={url ? url : null}
+                                srcDoc={url ? null : html}
+                                width={width > 0 ? width : null}
+                                height={height > 0 ? height : null}
+                                allowFullScreen={isFullWidth}
+                                scrolling={allowScrolling ? 'auto' : 'no'}
+                                frameBorder={0}
+                            />
+                        ) : (
+                            <ReactIframeResizer
+                                content={html}
+                                src={url}
+                                iframeResizerOptions={options}
+                                style={{ width: '100%' }}
+                            />
+                        )}
+                    </>
+                )}
+                <Caption text={caption.text} credit={caption.credit} />
+            </figure>
+        );
+    }
 }
 
 Embedded.propTypes = {

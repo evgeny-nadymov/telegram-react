@@ -22,6 +22,7 @@ import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import './VideoNote.css';
+import InstantViewStore from '../../../Stores/InstantViewStore';
 
 const circleStyle = {
     circle: 'video-note-progress-circle'
@@ -47,10 +48,11 @@ class VideoNote extends React.Component {
             videoDuration: active && time ? time.duration : 0.0
         };
 
-        this.focused = window.hasFocus;
+        this.windowFocused = window.hasFocus;
         this.inView = false;
         this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
         this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+        this.openIV = Boolean(InstantViewStore.getCurrent());
     }
 
     updateVideoSrc() {
@@ -96,6 +98,7 @@ class VideoNote extends React.Component {
         ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
 
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
@@ -115,6 +118,7 @@ class VideoNote extends React.Component {
             'clientUpdateProfileMediaViewerContent',
             this.onClientUpdateProfileMediaViewerContent
         );
+        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
 
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaCaptureStream', this.onClientUpdateMediaCaptureStream);
@@ -125,18 +129,28 @@ class VideoNote extends React.Component {
     startStopPlayer = () => {
         const player = this.videoRef.current;
         if (player) {
-            if (this.inView && this.focused && !this.openMediaViewer && !this.openProfileMediaViewer) {
-                //console.log('clientUpdate player play message_id=' + this.props.messageId);
+            if (
+                this.inView &&
+                this.windowFocused &&
+                !this.openMediaViewer &&
+                !this.openProfileMediaViewer &&
+                !this.openIV
+            ) {
                 player.play();
             } else {
                 if (this.state.active) {
                     return;
                 }
 
-                //console.log('clientUpdate player pause message_id=' + this.props.messageId);
                 player.pause();
             }
         }
+    };
+
+    onClientUpdateInstantViewContent = update => {
+        this.openIV = Boolean(InstantViewStore.getCurrent());
+
+        this.startStopPlayer();
     };
 
     onClientUpdateProfileMediaViewerContent = update => {
@@ -152,7 +166,7 @@ class VideoNote extends React.Component {
     };
 
     onClientUpdateFocusWindow = update => {
-        this.focused = update.focused;
+        this.windowFocused = update.focused;
 
         this.startStopPlayer();
     };
