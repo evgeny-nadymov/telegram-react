@@ -11,19 +11,18 @@ import './MediaViewerFooterText.css';
 
 class MediaViewerFooterText extends React.Component {
     render() {
-        const { title, subtitle } = this.props;
+        const { title, subtitle, style } = this.props;
 
         return (
-            <div className="media-viewer-footer-text">
-                <div className="media-viewer-footer-text-wrapper">
+            <div className='media-viewer-footer-text' style={style}>
+                <div className='media-viewer-footer-text-wrapper'>
                     <span>{title}</span>
-                    {
-                        Boolean(subtitle) && (
-                            <span>
-                                &nbsp;
-                                {subtitle}
-                            </span>
-                        )}
+                    {Boolean(subtitle) && (
+                        <span>
+                            &nbsp;
+                            {subtitle}
+                        </span>
+                    )}
                 </div>
             </div>
         );

@@ -66,7 +66,8 @@ class InstantViewer extends React.Component {
                 hasPrev: InstantViewStore.hasPrev(),
                 hasScroll: false,
                 media: null,
-                text: null
+                caption: null,
+                url: null
             };
         }
 
@@ -75,7 +76,7 @@ class InstantViewer extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { instantView } = this.props;
-        const { hasScroll, hasPrev, media, text } = this.state;
+        const { hasScroll, hasPrev, media, caption, url } = this.state;
 
         if (instantView !== nextProps.instantView) {
             return true;
@@ -93,7 +94,11 @@ class InstantViewer extends React.Component {
             return true;
         }
 
-        if (text !== nextState.text) {
+        if (caption !== nextState.caption) {
+            return true;
+        }
+
+        if (url !== nextState.url) {
             return true;
         }
 
@@ -120,15 +125,15 @@ class InstantViewer extends React.Component {
     onClientUpdateInstantViewViewerContent = update => {
         const { content } = update;
         if (!content) {
-            this.setState({ media: null, caption: null });
+            this.setState({ media: null, caption: null, url: null });
             return;
         }
 
-        const { media, caption, instantView } = content;
+        const { media, caption, url, instantView } = content;
 
         if (this.props.instantView !== instantView) return;
 
-        this.setState({ media, caption });
+        this.setState({ media, caption, url });
     };
 
     onClientUpdateInstantViewUrl = async update => {
@@ -309,11 +314,11 @@ class InstantViewer extends React.Component {
 
     render() {
         const { classes, instantView } = this.props;
-        const { hasPrev, hasScroll, media, caption } = this.state;
+        const { hasPrev, hasScroll, media, caption, url } = this.state;
         if (!instantView) return null;
 
         return (
-            <>
+            <IVContext.Provider value={instantView}>
                 <div
                     ref={this.instantViewerRef}
                     className={classNames('instant-viewer', classes.instantViewer)}
@@ -332,9 +337,7 @@ class InstantViewer extends React.Component {
                     </div>
                     <div className='instant-viewer-content-column'>
                         <div>
-                            <IVContext.Provider value={instantView}>
-                                <Article ref={this.articleRef} />
-                            </IVContext.Provider>
+                            <Article ref={this.articleRef} />
                         </div>
                     </div>
                     <div className='instant-viewer-right-column'>
@@ -343,8 +346,8 @@ class InstantViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                 </div>
-                {media && <InstantViewMediaViewer media={media} size={IV_PHOTO_SIZE} text={caption} />}
-            </>
+                {media && <InstantViewMediaViewer media={media} size={IV_PHOTO_SIZE} caption={caption} url={url} />}
+            </IVContext.Provider>
         );
     }
 }

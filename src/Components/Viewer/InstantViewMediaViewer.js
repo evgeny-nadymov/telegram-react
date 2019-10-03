@@ -8,8 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { compose } from 'recompose';
+import { withIV } from '../InstantView/IVContext';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
+import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
 import ReplyIcon from '@material-ui/icons/Reply';
 import InstantViewMediaViewerContent from './InstantViewMediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
@@ -20,6 +24,7 @@ import { getViewerFile, saveMedia } from '../../Utils/File';
 import { setInstantViewViewerContent } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
+import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
 
 const forwardIconStyle = {
     padding: 20,
@@ -27,6 +32,75 @@ const forwardIconStyle = {
 };
 
 class InstantViewMediaViewer extends React.Component {
+    state = {
+        index: -1,
+        hasPreviousMedia: false,
+        hasNextMedia: false,
+        blocks: []
+    };
+
+    componentDidMount() {
+        this.loadContent();
+    }
+
+    loadContent() {
+        const { iv, media } = this.props;
+
+        const blocks = getValidMediaBlocks(iv);
+        const index = blocks.findIndex(x => getBlockMedia(x) === media);
+
+        this.setState({
+            blocks,
+            index,
+            hasPreviousMedia: this.hasPreviousMedia(index, blocks),
+            hasNextMedia: this.hasNextMedia(index, blocks)
+        });
+    }
+
+    hasPreviousMedia(index, blocks) {
+        if (index === -1) return false;
+
+        const nextIndex = index + 1;
+        return nextIndex < blocks.length;
+    }
+
+    handlePrevious = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const { index, blocks } = this.state;
+        const nextIndex = index + 1;
+
+        this.setState({
+            index: nextIndex,
+            hasPreviousMedia: this.hasPreviousMedia(nextIndex, blocks),
+            hasNextMedia: this.hasNextMedia(nextIndex, blocks)
+        });
+    };
+
+    hasNextMedia(index, blocks) {
+        if (index === -1) return false;
+
+        const nextIndex = index - 1;
+        return nextIndex >= 0;
+    }
+
+    handleNext = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const { index, blocks } = this.state;
+        const nextIndex = index - 1;
+
+        this.setState({
+            index: nextIndex,
+            hasPreviousMedia: this.hasPreviousMedia(nextIndex, blocks),
+            hasNextMedia: this.hasNextMedia(nextIndex, blocks)
+        });
+    };
+
     handleClose = () => {
         setInstantViewViewerContent(null);
     };
@@ -47,7 +121,15 @@ class InstantViewMediaViewer extends React.Component {
     };
 
     render() {
-        const { media, size, t, text } = this.props;
+        const { size, t } = this.props;
+        const { index, blocks, hasNextMedia, hasPreviousMedia } = this.state;
+        if (!blocks) return null;
+        if (index === -1) return null;
+
+        const block = blocks[index];
+        const media = getBlockMedia(block);
+        const caption = getBlockCaption(block);
+        const url = getBlockUrl(block);
 
         const [width, height, file] = getViewerFile(media, size);
 
@@ -60,31 +142,36 @@ class InstantViewMediaViewer extends React.Component {
         } else if (media['@type'] === 'animation') {
             title = t('AttachGif');
         }
+        const maxCount = blocks.length;
 
         return (
             <div className={classNames('instant-view-media-viewer', 'media-viewer-default')}>
                 <div className='media-viewer-wrapper'>
                     <div className='media-viewer-left-column'>
-                        {/*<div className='media-viewer-button-placeholder' />*/}
-                        {/*<MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>*/}
-                        {/*    <NavigateBeforeIcon fontSize='large' />*/}
-                        {/*</MediaViewerButton>*/}
+                        <div className='media-viewer-button-placeholder' />
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                            <NavigateBeforeIcon fontSize='large' />
+                        </MediaViewerButton>
                     </div>
                     <div className='media-viewer-content-column'>
-                        <InstantViewMediaViewerContent media={media} size={size} text={text} />
+                        <InstantViewMediaViewerContent media={media} size={size} text={caption} url={url} />
                     </div>
                     <div className='media-viewer-right-column'>
                         <MediaViewerButton onClick={this.handleClose}>
                             <CloseIcon fontSize='large' />
                         </MediaViewerButton>
-                        {/*<MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>*/}
-                        {/*    <NavigateNextIcon fontSize='large' />*/}
-                        {/*</MediaViewerButton>*/}
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                            <NavigateNextIcon fontSize='large' />
+                        </MediaViewerButton>
                     </div>
                 </div>
 
                 <div className='media-viewer-footer'>
-                    <MediaViewerFooterText title={title} subtitle={null} />
+                    <MediaViewerFooterText
+                        title={title}
+                        subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
+                        style={{ marginLeft: 128 }}
+                    />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
                     <MediaViewerFooterButton title={t('Forward')} onClick={this.handleForward}>
                         <ReplyIcon style={forwardIconStyle} />
@@ -98,7 +185,12 @@ class InstantViewMediaViewer extends React.Component {
 InstantViewMediaViewer.propTypes = {
     media: PropTypes.object.isRequired,
     size: PropTypes.number.isRequired,
-    text: PropTypes.object.isRequired
+    caption: PropTypes.object.isRequired
 };
 
-export default withTranslation()(InstantViewMediaViewer);
+const enhance = compose(
+    withTranslation(),
+    withIV
+);
+
+export default enhance(InstantViewMediaViewer);

@@ -27,7 +27,7 @@ class InstantViewMediaViewerContent extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        const { media, size, text } = props;
+        const { media, size, caption, url } = props;
 
         if (media !== state.prevMedia) {
             let [width, height, file] = getViewerFile(media, size);
@@ -44,7 +44,6 @@ class InstantViewMediaViewerContent extends React.Component {
                 width,
                 height,
                 file,
-                text,
                 thumbnailWidth,
                 thumbnailHeight,
                 thumbnail
@@ -89,11 +88,10 @@ class InstantViewMediaViewerContent extends React.Component {
     };
 
     render() {
-        console.log('[IV] IVMediaViewerContent.render', this.props);
-        const { media } = this.props;
+        const { media, caption, url } = this.props;
         if (!media) return null;
 
-        const { width, height, file, text, thumbnailWidth, thumbnailHeight, thumbnail, isPlaying } = this.state;
+        const { width, height, file, thumbnailWidth, thumbnailHeight, thumbnail, isPlaying } = this.state;
         if (!file) return null;
 
         const blob = FileStore.getBlob(file.id) || file.blob;
@@ -231,7 +229,7 @@ class InstantViewMediaViewerContent extends React.Component {
             <div className='media-viewer-content'>
                 {content}
                 <FileProgress file={file} zIndex={2} />
-                <MediaCaption text={<Caption text={text.text} credit={text.credit} />} />
+                {caption && <MediaCaption text={<Caption text={caption.text} credit={caption.credit} />} />}
             </div>
         );
     }
@@ -240,7 +238,8 @@ class InstantViewMediaViewerContent extends React.Component {
 InstantViewMediaViewerContent.propTypes = {
     media: PropTypes.object.isRequired,
     size: PropTypes.number.isRequired,
-    text: PropTypes.object
+    caption: PropTypes.object,
+    url: PropTypes.string
 };
 
 export default InstantViewMediaViewerContent;

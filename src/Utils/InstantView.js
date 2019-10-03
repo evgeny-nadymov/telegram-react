@@ -598,7 +598,7 @@ export function getInnerBlocks(block) {
             return [];
         }
         case 'pageBlockCollage': {
-            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.page_blocks.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([], innerBlocks);
         }
@@ -606,7 +606,7 @@ export function getInnerBlocks(block) {
             return [block.cover];
         }
         case 'pageBlockDetails': {
-            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.page_blocks.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([], innerBlocks);
         }
@@ -617,7 +617,7 @@ export function getInnerBlocks(block) {
             return [block.caption];
         }
         case 'pageBlockEmbeddedPost': {
-            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.page_blocks.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([block.caption], innerBlocks);
         }
@@ -631,12 +631,12 @@ export function getInnerBlocks(block) {
             return [];
         }
         case 'pageBlockList': {
-            const innerBlocks = block.items.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.items.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([], innerBlocks);
         }
         case 'pageBlockListItem': {
-            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.page_blocks.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([], innerBlocks);
         }
@@ -662,7 +662,7 @@ export function getInnerBlocks(block) {
             return [...block.articles];
         }
         case 'pageBlockSlideshow': {
-            const innerBlocks = block.page_blocks.forEach(x => getInnerBlocks(x));
+            const innerBlocks = block.page_blocks.map(x => [x, ...getInnerBlocks(x)]);
 
             return [].concat.apply([block.caption], innerBlocks);
         }
@@ -687,4 +687,87 @@ export function getInnerBlocks(block) {
     }
 
     return [];
+}
+
+export function getBlockMedia(block) {
+    if (!block) return null;
+
+    switch (block['@type']) {
+        case 'pageBlockAnimation': {
+            return block.animation;
+        }
+        case 'pageBlockPhoto': {
+            return block.photo;
+        }
+        case 'pageBlockVideo': {
+            return block.video;
+        }
+    }
+
+    return null;
+}
+
+export function getBlockCaption(block) {
+    if (!block) return null;
+
+    switch (block['@type']) {
+        case 'pageBlockAnimation': {
+            return block.caption;
+        }
+        case 'pageBlockPhoto': {
+            return block.caption;
+        }
+        case 'pageBlockVideo': {
+            return block.caption;
+        }
+    }
+
+    return null;
+}
+
+export function getBlockUrl(block) {
+    if (!block) return null;
+
+    switch (block['@type']) {
+        case 'pageBlockPhoto': {
+            return block.url;
+        }
+    }
+
+    return null;
+}
+
+export function isValidMediaBlock(block) {
+    if (!block) return false;
+
+    switch (block['@type']) {
+        case 'pageBlockAnimation': {
+            return true;
+        }
+        case 'pageBlockPhoto': {
+            return true;
+        }
+        case 'pageBlockVideo': {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export function getValidMediaBlocks(iv) {
+    if (!iv) return [];
+
+    const { page_blocks } = iv;
+
+    const blocks = [];
+    page_blocks.forEach(x => {
+        blocks.push(x);
+        const innerBlocks = getInnerBlocks(x);
+        innerBlocks.forEach(i => {
+            blocks.push(i);
+        });
+    });
+
+    return blocks.filter(isValidMediaBlock);
 }
