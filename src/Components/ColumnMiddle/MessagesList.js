@@ -37,7 +37,8 @@ const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
     SCROLL_TO_UNREAD: 'SCROLL_TO_UNREAD',
     SCROLL_TO_MESSAGE: 'SCROLL_TO_MESSAGE',
-    KEEP_SCROLL_POSITION: 'KEEP_SCROLL_POSITION'
+    KEEP_SCROLL_POSITION: 'KEEP_SCROLL_POSITION',
+    NONE: 'NONE'
 });
 
 const styles = theme => ({
@@ -93,8 +94,6 @@ class MessagesList extends React.Component {
     }
 
     getSnapshotBeforeUpdate(prevProps, prevState) {
-        const { chatId, messageId } = this.props;
-
         const list = this.listRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = list;
 
@@ -112,6 +111,7 @@ class MessagesList extends React.Component {
         //     list.offsetHeight=${offsetHeight}`
         // );
 
+        console.log('[ml] getSnapshotBeforeUpdate', snapshot);
         this.snapshot = snapshot;
         return snapshot;
     }
@@ -121,10 +121,10 @@ class MessagesList extends React.Component {
         const { scrollDownVisible } = this.state;
 
         const list = this.listRef.current;
+
         // console.log(
-        //     `MessagesList.componentDidUpdate
-        //     chat_id=${chatId} message_id=${messageId}
-        //     prevProps.chat_id=${prevProps.chatId} prevProps.message_id=${prevProps.messageId}
+        //     `[ml] componentDidUpdate
+        //     scrollBehaviorNone=${this.scrollBehaviorNone}
         //     scrollDownVisible=${scrollDownVisible}
         //     list.scrollTop=${list.scrollTop}
         //     list.scrollHeight=${list.scrollHeight}
@@ -360,16 +360,14 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
-        const scrollBehavior = message.is_outgoing
-            ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM
-            : ScrollBehaviorEnum.KEEP_SCROLL_POSITION;
+        const scrollBehavior = message.is_outgoing ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
         const newState = message.is_outgoing ? { scrollDownVisible: false } : {};
 
         const history = [message];
+        this.scrollBehaviorNone = true;
         this.insertPrevious(filterMessages(history), newState, () => {
-            if (scrollBehavior !== ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
-                this.handleScrollBehavior(scrollBehavior, this.snapshot);
-            }
+            this.scrollBehaviorNone = false;
+            this.handleScrollBehavior(scrollBehavior, this.snapshot);
         });
 
         const store = FileStore.getStore();
@@ -807,9 +805,15 @@ class MessagesList extends React.Component {
     }
 
     handleScroll = () => {
-        // console.log('MessagesList.handleScroll');
         const { scrollDownVisible, replyHistory, history } = this.state;
         const list = this.listRef.current;
+
+        // console.log(
+        //     `[ml] handleScroll
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
         this.updateItemsInView();
 
@@ -851,12 +855,11 @@ class MessagesList extends React.Component {
         };
 
         // console.log(
-        //     `MessagesList.handleScrollBehavior
-        //     chatId=${chatId} messageId=${messageId}
+        //     `[ml] handleScrollBehavior
         //     scrollBehavior=${scrollBehavior}
         //     snapshot.scrollTop=${scrollTop}
-        //     snapshot.scrollHeight=${scrollHeight}
-        //     snapshot.offsetHeight=${offsetHeight}`
+        //     snapshot.offsetHeight=${offsetHeight}
+        //     snapshot.scrollHeight=${scrollHeight}`
         // );
 
         switch (scrollBehavior) {
@@ -876,17 +879,18 @@ class MessagesList extends React.Component {
                 this.keepScrollPosition(snapshot);
                 break;
             }
+            case ScrollBehaviorEnum.NONE: {
+                break;
+            }
         }
     };
 
     keepScrollPosition = snapshot => {
-        const { chatId, messageId } = this.props;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         const list = this.listRef.current;
 
         // console.log(
-        //     `MessagesList.keepScrollPosition before
-        //     chatId=${chatId} messageId=${messageId}
+        //     `[ml] keepScrollPosition before
         //     list.scrollTop=${list.scrollTop}
         //     list.offsetHeight=${list.offsetHeight}
         //     list.scrollHeight=${list.scrollHeight}`
@@ -895,8 +899,7 @@ class MessagesList extends React.Component {
         list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
 
         // console.log(
-        //     `MessagesList.keepScrollPosition after
-        //     chatId=${chatId} messageId=${messageId}
+        //     `[ml] keepScrollPosition after
         //     list.scrollTop=${list.scrollTop}
         //     list.offsetHeight=${list.offsetHeight}
         //     list.scrollHeight=${list.scrollHeight}`
