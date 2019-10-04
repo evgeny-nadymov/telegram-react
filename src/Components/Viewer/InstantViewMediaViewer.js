@@ -20,11 +20,11 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
+import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
 import { getViewerFile, saveMedia } from '../../Utils/File';
 import { setInstantViewViewerContent } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
-import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
 
 const forwardIconStyle = {
     padding: 20,

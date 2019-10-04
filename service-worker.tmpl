@@ -159,14 +159,14 @@ self.addEventListener('fetch', function(event) {
 
     // If shouldRespond was set to true at any point, then call
     // event.respondWith(), using the appropriate cache key.
-    console.log("[SW] fetch url " + url, shouldRespond);
+    // console.log("[SW] fetch url " + url, shouldRespond);
     if (shouldRespond) {
       event.respondWith(
         caches.open(cacheName).then(function(cache) {
           return cache.match(urlsToCacheKeys.get(url)).then(function(response) {
             if (response) {
               let url = event.request.url;
-                console.log("[SW] found cached url " + url);
+                // console.log("[SW] found cached url " + url);
                 /*if (url.indexOf(".wasm") > -1) {
                   console.log("[SW] wasm not modified");
                   let responseInit = {

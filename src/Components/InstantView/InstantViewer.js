@@ -106,6 +106,7 @@ class InstantViewer extends React.Component {
     }
 
     componentDidMount() {
+        this.mounted = true;
         this.handleScroll();
 
         document.addEventListener('keydown', this.onKeyDown, false);
@@ -114,6 +115,7 @@ class InstantViewer extends React.Component {
     }
 
     componentWillUnmount() {
+        this.mounted = false;
         document.removeEventListener('keydown', this.onKeyDown, false);
         InstantViewStore.removeListener('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
         InstantViewStore.removeListener(
@@ -290,6 +292,8 @@ class InstantViewer extends React.Component {
     };
 
     updateItemsInView() {
+        if (!this.mounted) return;
+
         const { instantView } = this.props;
         if (!instantView) return;
 

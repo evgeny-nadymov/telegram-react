@@ -360,7 +360,13 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
-        const scrollBehavior = message.is_outgoing ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
+        const list = this.listRef.current;
+
+        let scrollBehavior = message.is_outgoing ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
+            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+        }
+
         const newState = message.is_outgoing ? { scrollDownVisible: false } : {};
 
         const history = [message];
