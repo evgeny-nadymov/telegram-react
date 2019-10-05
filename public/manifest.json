@@ -6,6 +6,11 @@
       "src": "favicon.ico",
       "sizes": "32x32",
       "type": "image/png"
+    },
+    {
+      "src": "500px-Telegram_logo.png",
+      "sizes": "500x500",
+      "type": "image/png"
     }
   ],
   "start_url": "./index.html",
