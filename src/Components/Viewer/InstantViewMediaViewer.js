@@ -149,7 +149,7 @@ class InstantViewMediaViewer extends React.Component {
                 <div className='media-viewer-wrapper'>
                     <div className='media-viewer-left-column'>
                         <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
                             <NavigateBeforeIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
@@ -160,7 +160,7 @@ class InstantViewMediaViewer extends React.Component {
                         <MediaViewerButton onClick={this.handleClose}>
                             <CloseIcon fontSize='large' />
                         </MediaViewerButton>
-                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
                             <NavigateNextIcon fontSize='large' />
                         </MediaViewerButton>
                     </div>
@@ -169,7 +169,7 @@ class InstantViewMediaViewer extends React.Component {
                 <div className='media-viewer-footer'>
                     <MediaViewerFooterText
                         title={title}
-                        subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
+                        subtitle={maxCount && index >= 0 ? `${index + 1} of ${maxCount}` : null}
                         style={{ marginLeft: 128 }}
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />

@@ -15,23 +15,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
-import { stopPropagation } from '../../Utils/Message';
 import './SafeLink.css';
 
 class SafeLink extends React.Component {
     constructor(props) {
         super(props);
 
-        const { displayText, mail, url } = props;
-
-        this.state = {
-            prevUrl: url,
-            prevDisplayText: displayText,
-            safe: isUrlSafe(displayText, url),
-            decodedUrl: getDecodedUrl(url, mail),
-            href: getHref(url, mail),
-            confirm: false
-        };
+        this.state = {};
     }
 
     static getDerivedStateFromProps(props, state) {

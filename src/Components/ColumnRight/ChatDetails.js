@@ -110,9 +110,9 @@ class ChatDetails extends React.Component {
         const list = this.chatDetailsListRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = list;
         const snapshot = {
-            scrollTop: scrollTop,
-            scrollHeight: scrollHeight,
-            offsetHeight: offsetHeight
+            scrollTop,
+            scrollHeight,
+            offsetHeight
         };
 
         // console.log(
@@ -153,7 +153,7 @@ class ChatDetails extends React.Component {
         const list = this.chatDetailsListRef.current;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         if (prevProps.chatId === chatId) {
-            list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+            list.scrollTop = scrollTop;
         } else {
             list.scrollTop = 0;
         }

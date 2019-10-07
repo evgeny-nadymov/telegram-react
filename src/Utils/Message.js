@@ -14,6 +14,7 @@ import Contact from '../Components/Message/Media/Contact';
 import Document from '../Components/Message/Media/Document';
 import Game from '../Components/Message/Media/Game';
 import Location from '../Components/Message/Media/Location';
+import MentionLink from '../Components/Additional/MentionLink';
 import Photo from '../Components/Message/Media/Photo';
 import Poll from '../Components/Message/Media/Poll';
 import SafeLink from '../Components/Additional/SafeLink';
@@ -22,7 +23,7 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
-import { setMediaViewerContent } from '../Actions/Client';
+import { openChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getPhotoSize, getSize } from './Common';
@@ -31,7 +32,6 @@ import { getAudioTitle } from './Media';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
-import ApplicationStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
@@ -161,19 +161,16 @@ function getFormattedText(text) {
                 break;
             case 'textEntityTypeMention':
                 result.push(
-                    <a key={text.entities[i].offset} onClick={stopPropagation} href={`#/im?p=${entityText}`}>
+                    <MentionLink key={text.entities[i].offset} username={entityText}>
                         {entityText}
-                    </a>
+                    </MentionLink>
                 );
                 break;
             case 'textEntityTypeMentionName':
                 result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`#/im?p=u${text.entities[i].type.user_id}`}>
+                    <MentionLink key={text.entities[i].offset} userId={text.entities[i].type.user_id}>
                         {entityText}
-                    </a>
+                    </MentionLink>
                 );
                 break;
             case 'textEntityTypeHashtag':
