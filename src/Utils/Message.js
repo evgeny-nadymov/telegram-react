@@ -23,7 +23,7 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
-import { openChat, setMediaViewerContent } from '../Actions/Client';
+import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getPhotoSize, getSize } from './Common';
@@ -32,6 +32,7 @@ import { getAudioTitle } from './Media';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
+import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
@@ -100,6 +101,15 @@ function substring(text, start, end) {
 
 function stopPropagation(event) {
     event.stopPropagation();
+}
+
+function searchCurrentChatByHashtag(event, hashtag) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const { chatId } = AppStore;
+
+    searchChat(chatId, hashtag);
 }
 
 function getFormattedText(text) {
@@ -174,12 +184,8 @@ function getFormattedText(text) {
                 );
                 break;
             case 'textEntityTypeHashtag':
-                let hashtag = entityText.length > 0 && entityText[0] === '#' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`tg://search_hashtag?hashtag=${hashtag}`}>
+                    <a key={text.entities[i].offset} onClick={event => searchCurrentChatByHashtag(event, entityText)}>
                         {entityText}
                     </a>
                 );

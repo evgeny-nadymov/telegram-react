@@ -15,8 +15,9 @@ import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
 import HeaderCommand from './HeaderCommand';
 import HeaderProgress from './HeaderProgress';
-import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
+import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
+import { searchChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
@@ -266,7 +267,7 @@ class Header extends Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        ApplicationStore.searchChat(chatId);
+        searchChat(chatId);
     };
 
     localize = str => {

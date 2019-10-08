@@ -53,6 +53,10 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.query !== this.state.query) {
+            return true;
+        }
+
         return false;
     }
 
@@ -79,9 +83,12 @@ class Dialogs extends Component {
     };
 
     onClientUpdateSearchChat = update => {
+        const { chatId, query } = update;
+
         this.setState({
             openSearch: true,
-            searchChatId: update.chatId,
+            searchChatId: chatId,
+            query,
             searchText: null
         });
     };
@@ -121,13 +128,14 @@ class Dialogs extends Component {
 
     handleSearchTextChange = text => {
         this.setState({
-            searchText: text
+            searchText: text,
+            query: null
         });
     };
 
     render() {
         const { classes } = this.props;
-        const { isChatDetailsVisible, openSearch, searchChatId, searchText } = this.state;
+        const { isChatDetailsVisible, openSearch, searchChatId, searchText, query } = this.state;
 
         return (
             <div
@@ -135,6 +143,7 @@ class Dialogs extends Component {
                     'dialogs-third-column': isChatDetailsVisible
                 })}>
                 <DialogsHeader
+                    text={query}
                     openSearch={openSearch}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}

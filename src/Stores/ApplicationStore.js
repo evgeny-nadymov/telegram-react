@@ -207,6 +207,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateProfileMediaViewerContent', update);
                 break;
             }
+            case 'clientUpdateSearchChat': {
+                this.emit('clientUpdateSearchChat', update);
+                break;
+            }
             case 'clientUpdateSetPhone': {
                 const { phone } = update;
 
@@ -335,10 +339,6 @@ class ApplicationStore extends EventEmitter {
 
     getMessageId() {
         return this.messageId;
-    }
-
-    searchChat(chatId) {
-        this.emit('clientUpdateSearchChat', { chatId: chatId });
     }
 
     changeChatDetailsVisibility(visibility) {

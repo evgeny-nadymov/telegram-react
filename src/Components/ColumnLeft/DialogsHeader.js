@@ -24,8 +24,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import MainMenuButton from './MainMenuButton';
 import { isAuthorizationReady } from '../../Utils/Common';
-import { ANIMATION_DURATION_200MS } from '../../Constants';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import { ANIMATION_DURATION_100MS } from '../../Constants';
+import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
 
@@ -42,30 +42,51 @@ class DialogsHeader extends React.Component {
     constructor(props) {
         super(props);
 
-        this.searchInput = React.createRef();
+        this.searchInputRef = React.createRef();
 
         this.state = {
-            authorizationState: ApplicationStore.getAuthorizationState(),
+            authorizationState: AppStore.getAuthorizationState(),
             open: false
         };
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.props.openSearch && this.props.openSearch !== prevProps.openSearch) {
-            setTimeout(() => {
-                if (this.searchInput.current) {
-                    this.searchInput.current.focus();
+        const { openSearch, text, onSearchTextChange } = this.props;
+
+        if (openSearch) {
+            const searchInput = this.searchInputRef.current;
+
+            if (prevProps.text !== text && text) {
+                if (searchInput) {
+                    searchInput.innerText = text;
+                    if (searchInput.childNodes.length > 0) {
+                        const range = document.createRange();
+                        range.setStart(searchInput.childNodes[0], searchInput.childNodes[0].length);
+                        range.collapse(true);
+
+                        const selection = window.getSelection();
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                    searchInput.focus();
+                    onSearchTextChange(text);
                 }
-            }, ANIMATION_DURATION_200MS);
+            } else if (openSearch !== prevProps.openSearch) {
+                setTimeout(() => {
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }, ANIMATION_DURATION_100MS);
+            }
         }
     }
 
     componentDidMount() {
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     onUpdateAuthorizationState = update => {
@@ -100,14 +121,17 @@ class DialogsHeader extends React.Component {
     };
 
     handleKeyUp = () => {
-        const innerText = this.searchInput.current.innerText;
-        const innerHTML = this.searchInput.current.innerHTML;
+        const { onSearchTextChange } = this.props;
+        const searchInput = this.searchInputRef.current;
+
+        const innerText = searchInput.innerText;
+        const innerHTML = searchInput.innerHTML;
 
         if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.searchInput.current.innerHTML = '';
+            searchInput.innerHTML = '';
         }
 
-        ApplicationStore.emit('clientUpdateSearchText', { text: innerText });
+        onSearchTextChange(innerText);
     };
 
     handlePaste = event => {
@@ -154,9 +178,8 @@ class DialogsHeader extends React.Component {
                         <div className='header-search-input grow'>
                             <div
                                 id='header-search-inputbox'
-                                ref={this.searchInput}
+                                ref={this.searchInputRef}
                                 placeholder={t('Search')}
-                                key={Date()}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
@@ -178,6 +201,7 @@ class DialogsHeader extends React.Component {
 }
 
 DialogsHeader.propTypes = {
+    text: PropTypes.string,
     openSearch: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,

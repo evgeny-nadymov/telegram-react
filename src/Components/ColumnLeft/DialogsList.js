@@ -299,6 +299,12 @@ class DialogsList extends React.Component {
             TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
         });
         console.log('DialogsList.onLoadNext getChats stop', offsetChatId, offsetOrder);
+        // TdLibController.send({
+        //     '@type': 'getChats',
+        //     offset_chat_id: offsetChatId,
+        //     offset_order: offsetOrder,
+        //     limit: CHAT_SLICE_LIMIT + 100
+        // });
 
         if (result.chat_ids.length > 0 && result.chat_ids[0] === offsetChatId) {
             result.chat_ids.shift();

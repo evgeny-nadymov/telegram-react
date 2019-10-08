@@ -96,3 +96,11 @@ export function setInstantViewContent(content) {
         content
     });
 }
+
+export function searchChat(chatId, query = null) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateSearchChat',
+        chatId,
+        query
+    });
+}

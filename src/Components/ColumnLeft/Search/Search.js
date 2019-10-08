@@ -24,7 +24,6 @@ import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
 import { USERNAME_LENGTH_MIN } from '../../../Constants';
-import ApplicationStore from '../../../Stores/ApplicationStore';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -37,7 +36,7 @@ const styles = theme => ({
         margin: '8px 12px 8px 0'
     },
     listItem: {
-        padding: '0px'
+        padding: 0
     },
     search: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
@@ -49,59 +48,22 @@ class Search extends React.Component {
         super(props);
 
         this.listRef = React.createRef();
-
-        const { chatId, text } = this.props;
-
-        this.state = {
-            prevPropsChatId: chatId,
-            prevPropsText: text,
-
-            top: null,
-            recentlyFound: null,
-            local: null,
-            global: null,
-            messages: null
-        };
+        this.state = {};
     }
 
-    static getDerivedStateFromProps(props, state) {
-        if (props.chatId !== state.prevPropsChatId || props.text !== state.prevPropsText) {
-            return {
-                prevPropsChatId: props.chatId,
-                prevPropsText: props.text,
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { text } = this.props;
 
-                top: null,
-                recentlyFound: null,
-                local: null,
-                global: null,
-                messages: null
-            };
+        if (prevProps.text !== text) {
+            const trimmedText = text ? text.trim() : '';
+
+            if (!trimmedText) {
+                this.loadContent();
+            } else {
+                this.searchText(trimmedText);
+            }
         }
-
-        return null;
     }
-
-    componentDidMount() {
-        this.loadContent();
-
-        ApplicationStore.on('clientUpdateSearchText', this.onClientUpdateSearchText);
-    }
-
-    componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateSearchText', this.onClientUpdateSearchText);
-    }
-
-    onClientUpdateSearchText = update => {
-        const { text } = update;
-
-        const trimmedText = text.trim();
-
-        if (!trimmedText) {
-            this.loadContent();
-        } else {
-            this.searchText(trimmedText);
-        }
-    };
 
     concatSearchResults = results => {
         const arr = [];
