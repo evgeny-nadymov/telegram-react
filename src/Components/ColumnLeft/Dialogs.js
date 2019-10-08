@@ -26,13 +26,15 @@ class Dialogs extends Component {
     constructor(props) {
         super(props);
 
-        this.dialogsList = React.createRef();
+        this.dialogsListRef = React.createRef();
+        this.dialogsHeaderRef = React.createRef();
 
         this.state = {
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
             openSearch: false,
             searchChatId: 0,
-            searchText: null
+            searchText: null,
+            query: null
         };
     }
 
@@ -50,10 +52,6 @@ class Dialogs extends Component {
         }
 
         if (nextState.searchText !== this.state.searchText) {
-            return true;
-        }
-
-        if (nextState.query !== this.state.query) {
             return true;
         }
 
@@ -83,18 +81,25 @@ class Dialogs extends Component {
     };
 
     onClientUpdateSearchChat = update => {
-        const { chatId, query } = update;
+        const { chatId: searchChatId, query } = update;
+        const header = this.dialogsHeaderRef.current;
 
-        this.setState({
-            openSearch: true,
-            searchChatId: chatId,
-            query,
-            searchText: null
-        });
+        this.setState(
+            {
+                openSearch: true,
+                searchChatId,
+                searchText: null
+            },
+            () => {
+                if (header) {
+                    header.setInitQuery(query);
+                }
+            }
+        );
     };
 
     handleHeaderClick = () => {
-        this.dialogsList.current.scrollToTop();
+        this.dialogsListRef.current.scrollToTop();
     };
 
     handleSearch = visible => {
@@ -135,7 +140,7 @@ class Dialogs extends Component {
 
     render() {
         const { classes } = this.props;
-        const { isChatDetailsVisible, openSearch, searchChatId, searchText, query } = this.state;
+        const { isChatDetailsVisible, openSearch, searchChatId, searchText } = this.state;
 
         return (
             <div
@@ -143,14 +148,14 @@ class Dialogs extends Component {
                     'dialogs-third-column': isChatDetailsVisible
                 })}>
                 <DialogsHeader
-                    text={query}
+                    ref={this.dialogsHeaderRef}
                     openSearch={openSearch}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
                 />
                 <div className='dialogs-content'>
-                    <DialogsList ref={this.dialogsList} />
+                    <DialogsList ref={this.dialogsListRef} />
                     {openSearch && (
                         <Search
                             chatId={searchChatId}

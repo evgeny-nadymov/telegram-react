@@ -28,6 +28,7 @@ import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 
 const styles = {
     headerIconButton: {
@@ -50,28 +51,32 @@ class DialogsHeader extends React.Component {
         };
     }
 
+    setInitQuery(query) {
+        const { onSearchTextChange } = this.props;
+
+        const searchInput = this.searchInputRef.current;
+        if (searchInput) {
+            searchInput.innerText = query;
+            if (searchInput.childNodes.length > 0) {
+                const range = document.createRange();
+                range.setStart(searchInput.childNodes[0], searchInput.childNodes[0].length);
+                range.collapse(true);
+
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+            searchInput.focus();
+            onSearchTextChange(query);
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { openSearch, text, onSearchTextChange } = this.props;
 
         if (openSearch) {
             const searchInput = this.searchInputRef.current;
-
-            if (prevProps.text !== text && text) {
-                if (searchInput) {
-                    searchInput.innerText = text;
-                    if (searchInput.childNodes.length > 0) {
-                        const range = document.createRange();
-                        range.setStart(searchInput.childNodes[0], searchInput.childNodes[0].length);
-                        range.collapse(true);
-
-                        const selection = window.getSelection();
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                    }
-                    searchInput.focus();
-                    onSearchTextChange(text);
-                }
-            } else if (openSearch !== prevProps.openSearch) {
+            if (openSearch !== prevProps.openSearch) {
                 setTimeout(() => {
                     if (searchInput) {
                         searchInput.focus();
@@ -201,7 +206,6 @@ class DialogsHeader extends React.Component {
 }
 
 DialogsHeader.propTypes = {
-    text: PropTypes.string,
     openSearch: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
@@ -209,8 +213,10 @@ DialogsHeader.propTypes = {
 };
 
 const enhance = compose(
+    withSaveRef(),
     withTranslation(),
-    withStyles(styles)
+    withStyles(styles),
+    withRestoreRef()
 );
 
 export default enhance(DialogsHeader);
