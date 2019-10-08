@@ -41,7 +41,21 @@ class InstantViewMediaViewer extends React.Component {
 
     componentDidMount() {
         this.loadContent();
+
+        document.addEventListener('keydown', this.onKeyDown, false);
     }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.onKeyDown, false);
+    }
+
+    onKeyDown = event => {
+        if (event.keyCode === 39) {
+            this.handlePrevious();
+        } else if (event.keyCode === 37) {
+            this.handleNext();
+        }
+    };
 
     loadContent() {
         const { iv, media } = this.props;
@@ -72,6 +86,8 @@ class InstantViewMediaViewer extends React.Component {
         const { index, blocks } = this.state;
         const nextIndex = index + 1;
 
+        if (!this.hasPreviousMedia(index, blocks)) return;
+
         this.setState({
             index: nextIndex,
             hasPreviousMedia: this.hasPreviousMedia(nextIndex, blocks),
@@ -93,6 +109,8 @@ class InstantViewMediaViewer extends React.Component {
 
         const { index, blocks } = this.state;
         const nextIndex = index - 1;
+
+        if (!this.hasNextMedia(index, blocks)) return;
 
         this.setState({
             index: nextIndex,

@@ -72,7 +72,7 @@ class DialogsHeader extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { openSearch, text, onSearchTextChange } = this.props;
+        const { openSearch, text } = this.props;
 
         if (openSearch) {
             const searchInput = this.searchInputRef.current;

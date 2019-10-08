@@ -81,13 +81,18 @@ class Dialogs extends Component {
     };
 
     onClientUpdateSearchChat = update => {
-        const { chatId: searchChatId, query } = update;
-        const header = this.dialogsHeaderRef.current;
+        const { chatId, query } = update;
+        const { openSearch, searchChatId, searchText } = this.state;
 
+        if (openSearch && chatId === searchChatId && query === searchText) {
+            return;
+        }
+
+        const header = this.dialogsHeaderRef.current;
         this.setState(
             {
                 openSearch: true,
-                searchChatId,
+                searchChatId: chatId,
                 searchText: null
             },
             () => {
