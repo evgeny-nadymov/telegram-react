@@ -4,11 +4,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "03fd6ed55db02b5effa2fd844e1ccf0b",
+    "revision": "724cb403798df52f12325b6b7c409c6b",
     "url": "/telegram-react/index.html"
   },
   {
-    "revision": "167861af02183afb5c8f",
+    "revision": "c66b4336abd3e5705f0d",
     "url": "/telegram-react/static/css/4.f8bcd4a3.chunk.css"
   },
   {
@@ -16,20 +16,20 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/5.1b8f2a33.chunk.css"
   },
   {
-    "revision": "528081aec90af5aa87dd",
+    "revision": "82bfea77f0f51167f83b",
     "url": "/telegram-react/static/css/main.360eb0e8.chunk.css"
   },
   {
-    "revision": "ed110bd0c4c951a8e16d",
-    "url": "/telegram-react/static/js/2.70fbe348.chunk.js"
+    "revision": "2b6934edbff70a9187b0",
+    "url": "/telegram-react/static/js/2.ca0e92ec.chunk.js"
   },
   {
-    "revision": "45697179a11c59808e15",
-    "url": "/telegram-react/static/js/3.dd5515d2.chunk.js"
+    "revision": "52a4d2b8ef67f89b781e",
+    "url": "/telegram-react/static/js/3.669ce12a.chunk.js"
   },
   {
-    "revision": "167861af02183afb5c8f",
-    "url": "/telegram-react/static/js/4.5f2f723c.chunk.js"
+    "revision": "c66b4336abd3e5705f0d",
+    "url": "/telegram-react/static/js/4.78e5103c.chunk.js"
   },
   {
     "revision": "ecbbee7484d912a3aa9e",
@@ -40,12 +40,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/6.1ef6335e.chunk.js"
   },
   {
-    "revision": "528081aec90af5aa87dd",
-    "url": "/telegram-react/static/js/main.c86a50ad.chunk.js"
+    "revision": "82bfea77f0f51167f83b",
+    "url": "/telegram-react/static/js/main.8a65d4e4.chunk.js"
   },
   {
-    "revision": "e31c869ffd337af904be",
-    "url": "/telegram-react/static/js/runtime~main.7fc8cbf6.js"
+    "revision": "9ef009edea5a7519227a",
+    "url": "/telegram-react/static/js/runtime~main.af4a2dd3.js"
   },
   {
     "revision": "5b7ac6f843c4f6909eaf8d7c07179ebd",
