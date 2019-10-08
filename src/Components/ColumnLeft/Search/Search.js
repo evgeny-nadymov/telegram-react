@@ -51,17 +51,27 @@ class Search extends React.Component {
         this.state = {};
     }
 
+    componentDidMount() {
+        const { text } = this.props;
+
+        this.searchOrLoadContent(text);
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { text } = this.props;
 
         if (prevProps.text !== text) {
-            const trimmedText = text ? text.trim() : '';
+            this.searchOrLoadContent(text);
+        }
+    }
 
-            if (!trimmedText) {
-                this.loadContent();
-            } else {
-                this.searchText(trimmedText);
-            }
+    searchOrLoadContent(text) {
+        const trimmedText = text ? text.trim() : '';
+
+        if (!trimmedText) {
+            this.loadContent();
+        } else {
+            this.searchText(trimmedText);
         }
     }
 
