@@ -350,10 +350,6 @@ window.hasFocus = true;
 window.onblur = function() {
     keyMap.clear();
 
-    const { authorizationState } = ApplicationStore;
-
-    if (!authorizationState) return;
-
     window.hasFocus = false;
 
     TdLibController.clientUpdate({
@@ -365,10 +361,6 @@ window.onblur = function() {
 // set online on page get focus
 window.onfocus = function() {
     keyMap.clear();
-
-    const { authorizationState } = ApplicationStore;
-
-    if (!authorizationState) return;
 
     window.hasFocus = true;
 

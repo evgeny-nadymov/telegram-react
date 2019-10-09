@@ -116,18 +116,35 @@ class NotificationStore extends EventEmitter {
 
                 break;
             }
+            case 'updateDeleteMessages': {
+                const { windowFocused } = this;
+                if (!windowFocused) {
+                    const { chat_id, message_ids, is_permanent } = update;
+                    if (is_permanent && message_ids.length > 0) {
+                        const chatMap = this.newMessages.get(chat_id);
+                        if (chatMap) {
+                            const filterMap = new Map(message_ids.map(id => [id, id]));
+
+                            const newChatMap = new Map([...chatMap].filter(([id, m]) => !filterMap.has(id)));
+                            if (newChatMap.size < chatMap.size) {
+                                this.newMessages.set(chat_id, newChatMap);
+                                this.updateTimer();
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
             case 'updateNewMessage': {
                 const { windowFocused } = this;
                 if (!windowFocused) {
                     const { message } = update;
-
                     const { chat_id, id } = message;
-                    let chatMap = this.newMessages.get(chat_id);
-                    if (!chatMap) {
-                        chatMap = new Map();
-                        this.newMessages.set(chat_id, chatMap);
-                    }
+
+                    const chatMap = this.newMessages.get(chat_id) || new Map();
                     chatMap.set(id, message);
+                    this.newMessages.set(chat_id, chatMap);
                     this.updateTimer();
                 }
 
