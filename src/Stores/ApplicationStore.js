@@ -29,7 +29,6 @@ class ApplicationStore extends EventEmitter {
         this.dialogChatId = 0;
         this.messageId = null;
         this.statistics = new Map();
-        this.scopeNotificationSettings = new Map();
         this.authorizationState = null;
         this.defaultPhone = null;
         this.connectionState = null;
@@ -122,12 +121,6 @@ class ApplicationStore extends EventEmitter {
             }
             case 'updateConnectionState': {
                 this.connectionState = update.state;
-
-                this.emit(update['@type'], update);
-                break;
-            }
-            case 'updateScopeNotificationSettings': {
-                this.setNotificationSettings(update.scope['@type'], update.notification_settings);
 
                 this.emit(update['@type'], update);
                 break;
@@ -354,14 +347,6 @@ class ApplicationStore extends EventEmitter {
         return this.authorizationState;
     }
 
-    getNotificationSettings(scope) {
-        return this.scopeNotificationSettings.get(scope);
-    }
-
-    setNotificationSettings(scope, notificationSettings) {
-        return this.scopeNotificationSettings.set(scope, notificationSettings);
-    }
-
     getDragging = () => {
         return this.dragging;
     };
@@ -378,5 +363,5 @@ class ApplicationStore extends EventEmitter {
 }
 
 const store = new ApplicationStore();
-window.application = store;
+window.app = store;
 export default store;

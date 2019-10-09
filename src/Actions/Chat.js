@@ -32,7 +32,7 @@ export function toggleChatNotificationSettings(chatId, isMuted) {
     const { notification_settings } = chat;
     if (!notification_settings) return;
 
-    const isMutedPrev = isChatMuted(chat);
+    const isMutedPrev = isChatMuted(chatId);
     if (isMutedPrev === isMuted) {
         return;
     }

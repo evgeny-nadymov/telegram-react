@@ -19,9 +19,16 @@ class UserTile extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            loaded: false
-        };
+        if (process.env.NODE_ENV !== 'production') {
+            this.state = {
+                user: UserStore.get(this.props.userId),
+                loaded: false
+            };
+        } else {
+            this.state = {
+                loaded: false
+            };
+        }
     }
 
     shouldComponentUpdate(nextProps, nextState) {

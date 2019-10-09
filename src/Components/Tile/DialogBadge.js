@@ -14,8 +14,8 @@ import {
     showChatUnreadMentionCount,
     showChatUnreadMessageIcon
 } from '../../Utils/Chat';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
+import NotificationStore from '../../Stores/NotificationStore';
 import './DialogBadge.css';
 
 const styles = theme => ({
@@ -54,7 +54,7 @@ class DialogBadge extends React.Component {
         ChatStore.on('updateChatReadOutbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.on('updateMessageMentionRead', this.onUpdate);
-        ApplicationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        NotificationStore.on('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     componentWillUnmount() {
@@ -68,7 +68,7 @@ class DialogBadge extends React.Component {
         ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
-        ApplicationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        NotificationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     onClientUpdateClearHistory = update => {
@@ -127,7 +127,7 @@ class DialogBadge extends React.Component {
         const showUnreadMessageIcon = showChatUnreadMessageIcon(chatId);
         const showUnreadMentionCount = showChatUnreadMentionCount(chatId);
         const showUnreadCount = showChatUnreadCount(chatId);
-        const isMuted = isChatMuted(chat);
+        const isMuted = isChatMuted(chatId);
 
         return (
             <>

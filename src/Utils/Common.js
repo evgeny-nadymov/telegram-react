@@ -272,6 +272,9 @@ function getLetters(title) {
     if (title.length === 0) return null;
 
     const split = title.split(' ');
+    if (split.length === 1) {
+        return getFirstLetter(split[0]);
+    }
     if (split.length > 1) {
         return getFirstLetter(split[0]) + getFirstLetter(split[1]);
     }

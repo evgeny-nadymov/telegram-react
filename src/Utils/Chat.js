@@ -13,11 +13,11 @@ import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
 import { getContent } from './Message';
 import { isServiceMessage } from './ServiceMessage';
-import UserStore from '../Stores/UserStore';
-import ChatStore from '../Stores/ChatStore';
 import BasicGroupStore from '../Stores/BasicGroupStore';
+import ChatStore from '../Stores/ChatStore';
+import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
-import ApplicationStore from '../Stores/ApplicationStore';
+import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 function getGroupChatTypingString(inputTypingManager) {
@@ -244,43 +244,87 @@ function isChatUnread(chatId) {
     return is_marked_as_unread || unread_count > 0;
 }
 
-function isChatMuted(chat) {
-    return getChatMuteFor(chat) > 0;
+function isChatMuted(chatId) {
+    return getChatMuteFor(chatId) > 0;
 }
 
-function getChatMuteFor(chat) {
+function getChatMuteFor(chatId) {
+    const chat = ChatStore.get(chatId);
     if (!chat) return 0;
 
-    if (chat.use_default_mute_for) {
-        switch (chat.type) {
-            case 'chatTypePrivate':
-            case 'chatTypeSecret': {
-                const notificationSettings = ApplicationStore.getNotificationSettings(
-                    'notificationSettingsScopePrivateChats'
-                );
-                if (notificationSettings) {
-                    return notificationSettings.mute_for;
-                }
+    const { notification_settings } = chat;
+    if (!notification_settings) return 0;
 
-                return 0;
-            }
-            case 'chatTypeBasicGroup':
-            case 'chatTypeSupergroup': {
-                const notificationSettings = ApplicationStore.getNotificationSettings(
-                    'notificationSettingsScopeGroupChats'
-                );
-                if (notificationSettings) {
-                    return notificationSettings.mute_for;
-                }
+    const { use_default_mute_for, mute_for } = notification_settings;
 
-                return 0;
-            }
-        }
-    } else {
-        if (!chat.notification_settings) return 0;
+    if (use_default_mute_for) {
+        const settings = getScopeNotificationSettings(chatId);
 
-        return chat.notification_settings.mute_for;
+        return settings ? settings.mute_for : false;
     }
+
+    return mute_for;
+}
+
+export function getChatDisablePinnedMessageNotifications(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { notification_settings } = chat;
+    if (!chat) return false;
+
+    const {
+        use_default_disable_pinned_message_notifications,
+        disable_pinned_message_notifications
+    } = notification_settings;
+    if (use_default_disable_pinned_message_notifications) {
+        const settings = getScopeNotificationSettings(chatId);
+
+        return settings ? settings.disable_pinned_message_notifications : false;
+    }
+
+    return disable_pinned_message_notifications;
+}
+
+export function getChatDisableMentionNotifications(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { notification_settings } = chat;
+    if (!notification_settings) return false;
+
+    const { use_default_disable_mention_notifications, disable_mention_notifications } = notification_settings;
+    if (use_default_disable_mention_notifications) {
+        const settings = getScopeNotificationSettings(chatId);
+
+        return settings ? settings.disable_mention_notifications : false;
+    }
+
+    return disable_mention_notifications;
+}
+
+export function getScopeNotificationSettings(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return NotificationStore.settings.get('notificationSettingsScopePrivateChats');
+        }
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            let settings = null;
+            if (isChannelChat(chatId)) {
+                settings = NotificationStore.settings.get('notificationSettingsScopeChannelChats');
+            } else {
+                settings = NotificationStore.settings.get('notificationSettingsScopeGroupChats');
+            }
+            return settings;
+        }
+    }
+
+    return null;
 }
 
 function getMessageDate(message) {

@@ -183,12 +183,8 @@ class Dialog extends Component {
         this.handleCloseContextMenu(event);
 
         const { chatId } = this.props;
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
 
-        const isMuted = isChatMuted(chat);
-
-        toggleChatNotificationSettings(chatId, !isMuted);
+        toggleChatNotificationSettings(chatId, !isChatMuted(chatId));
     };
 
     canPinChats = async chatId => {
@@ -294,7 +290,7 @@ class Dialog extends Component {
         const { is_pinned } = chat;
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
-        const isMuted = isChatMuted(chat);
+        const isMuted = isChatMuted(chatId);
         const isUnread = isChatUnread(chatId);
         return (
             <div

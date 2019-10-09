@@ -299,9 +299,9 @@ class Search extends React.Component {
         ]);
 
         this.setState({
-            top: top,
-            recentlyFound: recentlyFound,
-            savedMessages: savedMessages,
+            top,
+            recentlyFound,
+            savedMessages,
             local: null,
             global: null,
             messages: null
