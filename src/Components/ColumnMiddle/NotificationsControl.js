@@ -9,7 +9,7 @@ import React from 'react';
 import { isChatMuted } from '../../Utils/Chat';
 import { debounce } from '../../Utils/Common';
 import { toggleChatNotificationSettings } from '../../Actions/Chat';
-import { NOTIFICATIONS_DEBOUNCE_DELAY_MS } from '../../Constants';
+import { NOTIFICATION_DEBOUNCE_DELAY_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import NotificationStore from '../../Stores/NotificationStore';
 
@@ -26,7 +26,7 @@ class NotificationsControl extends React.Component {
 
         this.debouncedSetChatNotificationSettings = debounce(
             this.setChatNotificationSettings,
-            NOTIFICATIONS_DEBOUNCE_DELAY_MS
+            NOTIFICATION_DEBOUNCE_DELAY_MS
         );
     }
 

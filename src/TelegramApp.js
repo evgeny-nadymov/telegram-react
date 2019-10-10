@@ -347,6 +347,7 @@ document.addEventListener('keydown', async event => {
 window.hasFocus = true;
 
 // set offline on page lost focus
+// console.log('[ns] window.onblur attach');
 window.onblur = function() {
     keyMap.clear();
 
@@ -359,6 +360,7 @@ window.onblur = function() {
 };
 
 // set online on page get focus
+// console.log('[ns] window.onfocus attach');
 window.onfocus = function() {
     keyMap.clear();
 

@@ -244,6 +244,10 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateFocusWindow': {
+                if (!this.authorizationState) {
+                    break;
+                }
+
                 TdLibController.send({
                     '@type': 'setOption',
                     name: 'online',

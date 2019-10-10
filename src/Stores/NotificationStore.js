@@ -7,7 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { isMessageMuted } from '../Utils/Message';
-import { APP_NAME } from '../Constants';
+import { APP_NAME, NOTIFICATION_AUDIO_DELAY_MS } from '../Constants';
 import ChatStore from './ChatStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -31,6 +31,7 @@ class NotificationStore extends EventEmitter {
         this.settings = new Map();
         this.windowFocused = true;
         this.timerHandler = null;
+        this.nextSoundAt = new Date();
     };
 
     getUnreadCount() {
@@ -138,6 +139,7 @@ class NotificationStore extends EventEmitter {
             }
             case 'updateNewMessage': {
                 const { windowFocused } = this;
+                // console.log('[ns] updateNewMessage', windowFocused);
                 if (!windowFocused) {
                     const { message } = update;
                     const { chat_id, id } = message;
@@ -146,6 +148,19 @@ class NotificationStore extends EventEmitter {
                     chatMap.set(id, message);
                     this.newMessages.set(chat_id, chatMap);
                     this.updateTimer();
+
+                    if (!isMessageMuted(message)) {
+                        const now = new Date();
+                        if (now > this.nextSoundAt) {
+                            // console.log('[ns] audio play');
+                            const audio = new Audio('sound_a.mp3');
+                            audio.play();
+
+                            const nextSoundAt = new Date();
+                            nextSoundAt.setMilliseconds(nextSoundAt.getMilliseconds() + NOTIFICATION_AUDIO_DELAY_MS);
+                            this.nextSoundAt = nextSoundAt;
+                        }
+                    }
                 }
 
                 break;
@@ -172,6 +187,7 @@ class NotificationStore extends EventEmitter {
         switch (update['@type']) {
             case 'clientUpdateFocusWindow': {
                 const { focused } = update;
+                // console.log('[ns] clientUpdateFocusWindow', update);
 
                 this.windowFocused = focused;
                 if (focused) {
