@@ -4,11 +4,11 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "e26c22861172e3e99eac8ec46f7f00db",
+    "revision": "74d230e9041faf1b2ad2e59c0f7f09e0",
     "url": "/telegram-react/index.html"
   },
   {
-    "revision": "75c911a416537b60ecdd",
+    "revision": "780cf24588dca28f5d18",
     "url": "/telegram-react/static/css/4.f8bcd4a3.chunk.css"
   },
   {
@@ -16,20 +16,20 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/5.1b8f2a33.chunk.css"
   },
   {
-    "revision": "39991630805ad23c7b09",
+    "revision": "2c51685a32353fe11638",
     "url": "/telegram-react/static/css/main.360eb0e8.chunk.css"
   },
   {
-    "revision": "acb56361aab87bfcc530",
-    "url": "/telegram-react/static/js/2.64dcdf7e.chunk.js"
+    "revision": "c2b36729ddd0648e967e",
+    "url": "/telegram-react/static/js/2.242fb68a.chunk.js"
   },
   {
-    "revision": "fe3393c84e07ff8111e3",
-    "url": "/telegram-react/static/js/3.8dc2fa01.chunk.js"
+    "revision": "7065fa18e23b4ef33ae4",
+    "url": "/telegram-react/static/js/3.482ed59b.chunk.js"
   },
   {
-    "revision": "75c911a416537b60ecdd",
-    "url": "/telegram-react/static/js/4.eecdb321.chunk.js"
+    "revision": "780cf24588dca28f5d18",
+    "url": "/telegram-react/static/js/4.7625d3af.chunk.js"
   },
   {
     "revision": "964df01ed3ea87907d7b",
@@ -40,12 +40,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/6.2161a4d6.chunk.js"
   },
   {
-    "revision": "39991630805ad23c7b09",
-    "url": "/telegram-react/static/js/main.b97fe947.chunk.js"
+    "revision": "2c51685a32353fe11638",
+    "url": "/telegram-react/static/js/main.788d7347.chunk.js"
   },
   {
-    "revision": "5ba42d07e9b891727a68",
-    "url": "/telegram-react/static/js/runtime~main.3f9d7ecc.js"
+    "revision": "bd1136db6544293d6943",
+    "url": "/telegram-react/static/js/runtime~main.7a0978e8.js"
   },
   {
     "revision": "5b7ac6f843c4f6909eaf8d7c07179ebd",
