@@ -51,6 +51,7 @@ class DialogBadge extends React.Component {
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatNotificationSettings', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
+        ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatReadOutbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.on('updateMessageMentionRead', this.onUpdate);
@@ -65,6 +66,7 @@ class DialogBadge extends React.Component {
         ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
         ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
+        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
         ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
