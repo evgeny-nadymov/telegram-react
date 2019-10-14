@@ -67,14 +67,15 @@ class DocumentTile extends React.Component {
         const { loaded } = this.state;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
-        const className = classNames('tile-photo', { 'document-tile-background': !thumbnailSrc });
         const tileLoaded = thumbnailSrc && loaded;
 
         return (
-            <div className='document-tile' onClick={openMedia}>
+            <div
+                className={classNames('document-tile', { 'document-tile-background': !thumbnailSrc })}
+                onClick={openMedia}>
                 {!tileLoaded && <div className={classes.background} />}
                 {thumbnailSrc && (
-                    <img className={className} src={thumbnailSrc} onLoad={this.handleLoad} draggable={false} alt='' />
+                    <img className='tile-photo' src={thumbnailSrc} onLoad={this.handleLoad} draggable={false} alt='' />
                 )}
                 {file && (
                     <FileProgress

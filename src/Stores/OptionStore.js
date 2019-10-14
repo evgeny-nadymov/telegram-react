@@ -38,7 +38,9 @@ class OptionStore extends EventEmitter {
                 break;
             }
             case 'updateOption':
-                this.items.set(update.name, update.value);
+                const { name, value } = update;
+
+                this.set(name, value);
 
                 this.emit('updateOption', update);
                 break;
@@ -61,6 +63,10 @@ class OptionStore extends EventEmitter {
 
     get(name) {
         return this.items.get(name);
+    }
+
+    set(name, value) {
+        this.items.set(name, value);
     }
 }
 

@@ -300,6 +300,7 @@ class Message extends Component {
     };
 
     render() {
+        // console.log('[m] render', this.props.messageId);
         const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
         const { emojiMatches, selected, highlighted } = this.state;
 

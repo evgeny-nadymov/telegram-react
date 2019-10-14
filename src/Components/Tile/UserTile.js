@@ -171,16 +171,17 @@ class UserTile extends Component {
         const tileLoaded = src && loaded;
 
         const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
-        const className = classNames('tile-photo', { [tileColor]: !tileLoaded }, { pointer: onSelect });
 
         return (
-            <div className='user-tile' onClick={this.handleSelect}>
+            <div
+                className={classNames('user-tile', { [tileColor]: !tileLoaded }, { pointer: onSelect })}
+                onClick={this.handleSelect}>
                 {!tileLoaded && (
-                    <div className={className}>
+                    <div className='tile-photo'>
                         <span className='tile-text'>{letters}</span>
                     </div>
                 )}
-                {src && <img className={className} src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
+                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
             </div>
         );
     }

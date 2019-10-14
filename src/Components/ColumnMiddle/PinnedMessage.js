@@ -30,13 +30,11 @@ import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
+import AppStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
     ...accentStyles(theme),
     ...borderStyle(theme),
-    iconButton: {
-        // padding: 4
-    },
     pinnedMessage: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
@@ -50,13 +48,7 @@ class PinnedMessage extends React.Component {
     constructor(props) {
         super(props);
 
-        const chat = ChatStore.get(props.chatId);
-        this.state = {
-            prevPropsChatId: props.chatId,
-            clientData: ChatStore.getClientData(props.chatId),
-            messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0,
-            confirm: false
-        };
+        this.state = {};
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -87,14 +79,24 @@ class PinnedMessage extends React.Component {
     componentDidMount() {
         this.loadContent();
 
-        ChatStore.on('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
+        AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
+        ChatStore.on('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
-        ChatStore.removeListener('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
+        AppStore.off('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
+        ChatStore.off('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
+        ChatStore.off('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
     }
+
+    onClientUpdateDialogsReady = update => {
+        const { messageId } = this.state;
+
+        if (messageId) {
+            this.loadContent();
+        }
+    };
 
     onClientUpdateSetChatClientData = update => {
         const { chatId, clientData } = update;
@@ -105,12 +107,12 @@ class PinnedMessage extends React.Component {
     };
 
     onUpdateChatPinnedMessage = update => {
-        const { chat_id, pinned_message_id } = update;
+        const { chat_id, pinned_message_id: messageId } = update;
         const { chatId } = this.props;
 
         if (chatId !== chat_id) return;
 
-        this.setState({ messageId: pinned_message_id });
+        this.setState({ messageId });
     };
 
     loadContent = () => {
@@ -137,14 +139,18 @@ class PinnedMessage extends React.Component {
                 this.forceUpdate();
             })
             .catch(error => {
-                const deletedMessage = {
-                    '@type': 'deletedMessage',
-                    chat_id: chatId,
-                    id: messageId,
-                    content: null
-                };
-                MessageStore.set(deletedMessage);
-                this.forceUpdate();
+                const { code, message } = error;
+                if (message !== 'Chat not found') {
+                    const deletedMessage = {
+                        '@type': 'deletedMessage',
+                        chat_id: chatId,
+                        id: messageId,
+                        content: null
+                    };
+
+                    MessageStore.set(deletedMessage);
+                    this.forceUpdate();
+                }
             });
     };
 
@@ -263,7 +269,7 @@ class PinnedMessage extends React.Component {
                             </div>
                         </div>
                         <div className='pinned-message-delete-button'>
-                            <IconButton className={classes.iconButton} onClick={this.handleDelete}>
+                            <IconButton onClick={this.handleDelete}>
                                 <CloseIcon />
                             </IconButton>
                         </div>

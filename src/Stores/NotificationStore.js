@@ -27,6 +27,7 @@ class NotificationStore extends EventEmitter {
         this.chatStore = ChatStore;
         this.messageStore = MessageStore;
 
+        this.appInactive = false;
         this.newMessages = new Map();
         this.settings = new Map();
         this.windowFocused = true;
@@ -85,13 +86,26 @@ class NotificationStore extends EventEmitter {
             document.title = title;
             document.getElementById('favicon').href = 'favicon_unread.ico';
         } else {
-            document.title = APP_NAME;
+            document.title = APP_NAME + (this.appInactive ? ': Zzz…' : '');
             document.getElementById('favicon').href = 'favicon.ico';
         }
     };
 
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
             case 'updateChatReadInbox': {
                 const { windowFocused } = this;
                 if (!windowFocused) {
@@ -185,6 +199,12 @@ class NotificationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateAppInactive': {
+                this.appInactive = true;
+                this.newMessages = new Map();
+                this.updateTimer();
+                break;
+            }
             case 'clientUpdateFocusWindow': {
                 const { focused } = update;
                 // console.log('[ns] clientUpdateFocusWindow', update);

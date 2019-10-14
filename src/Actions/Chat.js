@@ -9,6 +9,16 @@ import ChatStore from '../Stores/ChatStore';
 import { isChatMuted } from '../Utils/Chat';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
 
+export async function getChat(chatId) {
+    const chat = TdLibController.send({
+        '@type': 'getChat',
+        chat_id: chatId
+    });
+    ChatStore.set(chat);
+
+    return chat;
+}
+
 export function toggleChatIsPinned(chatId, isPinned) {
     TdLibController.send({
         '@type': 'toggleChatIsPinned',

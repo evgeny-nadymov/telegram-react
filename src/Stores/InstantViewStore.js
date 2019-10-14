@@ -22,7 +22,25 @@ class InstantViewStore extends EventEmitter {
         this.items = [];
     };
 
-    onUpdate = update => {};
+    onUpdate = update => {
+        switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateClosed': {
+                        this.reset();
+                        break;
+                    }
+                }
+
+                break;
+            }
+            default:
+                break;
+        }
+    };
 
     onClientUpdate = update => {
         switch (update['@type']) {

@@ -199,23 +199,23 @@ class Sticker extends React.Component {
             !this.dialogChatId
         ) {
             if (this.entered) {
-                console.log('[Sticker] play 1');
+                // console.log('[Sticker] play 1');
                 player.play();
                 this.pause = false;
                 return;
             }
 
-            console.log('[Sticker] startStopAnimation', this.openedStickerSet);
+            // console.log('[Sticker] startStopAnimation', this.openedStickerSet);
             if (!this.openedStickerSet) {
                 if (this.paused) {
-                    console.log('[Sticker] play 2');
+                    // console.log('[Sticker] play 2');
                     player.play();
                     this.paused = false;
                     return;
                 }
 
                 if (autoplay && this.inView) {
-                    console.log('[Sticker] play 3');
+                    // console.log('[Sticker] play 3');
                     player.play();
                     this.paused = false;
                     return;
@@ -223,7 +223,7 @@ class Sticker extends React.Component {
             }
         }
 
-        console.log('[Sticker] pause');
+        // console.log('[Sticker] pause');
         this.paused = player.pause();
     }
 
@@ -290,7 +290,7 @@ class Sticker extends React.Component {
 
     handleMouseEnter = event => {
         const { animationData } = this;
-        console.log('[Sticker] handleMouseEnter', animationData);
+        // console.log('[Sticker] handleMouseEnter', animationData);
         if (animationData) {
             this.setState({ animationData }, () => {
                 this.handleAnimationMouseEnter();
@@ -299,7 +299,7 @@ class Sticker extends React.Component {
     };
 
     handleAnimationMouseEnter = () => {
-        console.log('[Sticker] handleAnimationMouseEnter 1');
+        // console.log('[Sticker] handleAnimationMouseEnter 1');
         if (this.props.autoplay) return;
 
         this.entered = true;
@@ -307,7 +307,7 @@ class Sticker extends React.Component {
         const player = this.lottieRef.current;
         if (!player) return;
 
-        console.log('[Sticker] handleAnimationMouseEnter 2');
+        // console.log('[Sticker] handleAnimationMouseEnter 2');
         this.loopCount = 0;
         this.startStopAnimation();
     };

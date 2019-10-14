@@ -225,6 +225,17 @@ class SharedMediaBase extends React.Component {
             params.loading = false;
         });
 
+        TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: fromMessageId,
+            offset: 0,
+            limit: SHARED_MESSAGE_SLICE_LIMIT * 2,
+            filter
+        });
+
         const { messages } = result;
         params.completed = messages.length === 0 || messages.total_count === 0;
         params.items = items.concat(messages.filter(this.isValidMessage));

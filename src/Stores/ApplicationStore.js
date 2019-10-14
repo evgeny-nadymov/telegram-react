@@ -24,6 +24,7 @@ class ApplicationStore extends EventEmitter {
 
     reset = () => {
         this.dialogsReady = false;
+        this.cacheLoaded = false;
         this.setPhoneNumberRequest = null;
         this.chatId = 0;
         this.dialogChatId = 0;
@@ -99,7 +100,10 @@ class ApplicationStore extends EventEmitter {
 
                         if (!this.loggingOut) {
                             document.title += ': Zzz…';
-                            this.emit('clientUpdateAppInactive');
+
+                            TdLibController.clientUpdate({
+                                '@type': 'clientUpdateAppInactive'
+                            });
                         } else {
                             TdLibController.init();
                         }
@@ -162,6 +166,15 @@ class ApplicationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateAppInactive': {
+                this.emit('clientUpdateAppInactive');
+                break;
+            }
+            case 'clientUpdateCacheLoaded': {
+                this.cacheLoaded = true;
+                this.emit('clientUpdateCacheLoaded');
+                break;
+            }
             case 'clientUpdateChatId': {
                 const extendedUpdate = {
                     '@type': 'clientUpdateChatId',

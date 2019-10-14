@@ -714,12 +714,13 @@ class FileStore extends EventEmitter {
             }
 
             (async file => {
+                // console.log('[fs] readFile file_id=' + file.id);
                 const response = await TdLibController.send({
                     '@type': 'readFile',
                     file_id: file.id
                 });
 
-                console.log(`readFile result file_id=${file.id}`, file, response);
+                // console.log(`[fs] readFile result file_id=${file.id}`, file, response);
                 this.setBlob(file.id, response.data);
             })(file).then(callback, faultCallback);
 

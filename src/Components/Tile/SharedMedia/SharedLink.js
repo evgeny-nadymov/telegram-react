@@ -50,6 +50,32 @@ class SharedLink extends React.Component {
         };
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
+
+        if (nextState.contextMenu !== contextMenu) {
+            return true;
+        }
+
+        if (nextState.left !== left) {
+            return true;
+        }
+
+        if (nextState.top !== top) {
+            return true;
+        }
+
+        if (nextState.openDeleteDialog !== openDeleteDialog) {
+            return true;
+        }
+
+        if (nextState.revoke !== revoke) {
+            return true;
+        }
+
+        return false;
+    }
+
     handleOpenMessage = event => {
         this.handleCloseContextMenu(event);
 

@@ -12,9 +12,8 @@ import Footer from './Footer';
 import Header from './Header';
 import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
-import PinnedMessage from './PinnedMessage';
 import StickerSetDialog from '../Popup/StickerSetDialog';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import './DialogDetails.css';
 
 class DialogDetails extends Component {
@@ -22,20 +21,21 @@ class DialogDetails extends Component {
         super(props);
 
         this.state = {
-            chatId: ApplicationStore.getChatId(),
-            messageId: ApplicationStore.getMessageId(),
+            chatId: AppStore.getChatId(),
+            messageId: AppStore.getMessageId(),
             selectedCount: 0
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextState.chatId !== this.state.chatId) {
+        const { chatId, messageId, selectedCount } = this.state;
+        if (nextState.chatId !== chatId) {
             return true;
         }
-        if (nextState.messageId !== this.state.messageId) {
+        if (nextState.messageId !== messageId) {
             return true;
         }
-        if (nextState.selectedCount !== this.state.selectedItems) {
+        if (nextState.selectedCount !== selectedCount) {
             return true;
         }
 
@@ -43,13 +43,13 @@ class DialogDetails extends Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
-        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     onUpdateChatDetailsVisibility = update => {
@@ -109,7 +109,7 @@ class DialogDetails extends Component {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { chatId, messageId, selectedCount } = this.state;
-        const { isChatDetailsVisible } = ApplicationStore;
+        const { isChatDetailsVisible } = AppStore;
 
         return (
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>

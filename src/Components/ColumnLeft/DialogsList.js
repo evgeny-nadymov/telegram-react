@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
+import CacheManager from '../../Workers/CacheManager';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
 import { CHAT_SLICE_LIMIT } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
-import { orderCompare } from '../../Utils/Common';
-import ChatStore from '../../Stores/ChatStore';
+import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
+import AppStore from '../../Stores/ApplicationStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
-import SupergroupStore from '../../Stores/SupergroupStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import CacheStore from '../../Stores/CacheStore';
+import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
+import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
 
@@ -29,9 +31,11 @@ class DialogsList extends React.Component {
 
         this.state = {
             chats: [],
-            authorizationState: ApplicationStore.getAuthorizationState(),
-            connectionState: ApplicationStore.getConnectionState(),
-            fistSliceLoaded: false
+            authorizationState: AppStore.getAuthorizationState(),
+            connectionState: AppStore.getConnectionState(),
+            fistSliceLoaded: false,
+            cacheLoaded: false,
+            cacheChats: null
         };
     }
 
@@ -41,6 +45,10 @@ class DialogsList extends React.Component {
         }
 
         if (nextState.firstSliceLoaded !== this.state.firstSliceLoaded) {
+            return true;
+        }
+
+        if (nextState.cacheLoaded !== this.state.cacheLoaded) {
             return true;
         }
 
@@ -62,26 +70,25 @@ class DialogsList extends React.Component {
 
     componentDidMount() {
         this.loadFirstSlice();
+        this.loadCache();
 
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
-        // ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
-        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsPinned', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.on('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
         ChatStore.on('clientUpdateLeaveChat', this.onClientUpdateLeaveChat);
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
-        // ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatOrder', this.onUpdateChatOrder);
-        ChatStore.removeListener('clientUpdateLeaveChat', this.onClientUpdateLeaveChat);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ChatStore.off('updateChatDraftMessage', this.onUpdate);
+        ChatStore.off('updateChatIsPinned', this.onUpdate);
+        ChatStore.off('updateChatLastMessage', this.onUpdate);
+        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.off('clientUpdateLeaveChat', this.onClientUpdateLeaveChat);
     }
 
     onClientUpdateLeaveChat = update => {
@@ -95,9 +102,9 @@ class DialogsList extends React.Component {
     };
 
     onUpdateAuthorizationState = update => {
-        const { authorization_state } = update;
+        const { authorization_state: authorizationState } = update;
 
-        this.setState({ authorizationState: authorization_state }, () => this.loadFirstSlice());
+        this.setState({ authorizationState }, () => this.loadFirstSlice());
     };
 
     onFastUpdatingComplete = update => {
@@ -126,9 +133,30 @@ class DialogsList extends React.Component {
 
     loadFirstSlice = async () => {
         const { authorizationState } = this.state;
-        if (authorizationState && authorizationState['@type'] === 'authorizationStateReady') {
-            await FileStore.initDB(() => this.onLoadNext());
+        if (isAuthorizationReady(authorizationState)) {
+            await FileStore.initDB(() => this.onLoadNext(true));
         }
+    };
+
+    saveCache = () => {
+        const chatIds = this.state.chats.slice(0, 25);
+        CacheStore.saveChats(chatIds);
+    };
+
+    loadCache = async () => {
+        const cacheChats = await CacheStore.getChats();
+        if (!cacheChats) return;
+
+        this.setState({
+            cacheLoaded: true,
+            cacheChats
+        });
+
+        this.loadChatContents(cacheChats.map(x => x.id));
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCacheLoaded'
+        });
     };
 
     onUpdateChatOrder = update => {
@@ -142,9 +170,9 @@ class DialogsList extends React.Component {
         }
 
         // unselect deleted chat
-        if (update.chat_id === ApplicationStore.getChatId()) {
+        if (update.chat_id === AppStore.getChatId()) {
             TdLibController.setChatId(0);
-            ApplicationStore.changeChatDetailsVisibility(false);
+            AppStore.changeChatDetailsVisibility(false);
         }
 
         let chatIds = [];
@@ -237,6 +265,7 @@ class DialogsList extends React.Component {
 
         this.reorderChats(chatIds, newChatIds, () => {
             this.loadChatContents(newChatIds);
+            this.saveCache();
         });
     };
 
@@ -246,6 +275,7 @@ class DialogsList extends React.Component {
         });
 
         if (!DialogsList.isDifferentOrder(this.state.chats, orderedChatIds)) {
+            callback();
             return;
         }
 
@@ -296,7 +326,9 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
-            TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
+            if (replace) {
+                TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
+            }
         });
         console.log('DialogsList.onLoadNext getChats stop', offsetChatId, offsetOrder);
         // TdLibController.send({
@@ -313,6 +345,7 @@ class DialogsList extends React.Component {
         if (replace) {
             this.replaceChats(result.chat_ids, () => {
                 this.loadChatContents(result.chat_ids);
+                this.saveCache();
             });
         } else {
             console.log('DialogsList.onLoadNext setState start', offsetChatId, offsetOrder);
@@ -344,13 +377,16 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { chats, firstSliceLoaded } = this.state;
+        const { chats, firstSliceLoaded, cacheLoaded, cacheChats } = this.state;
 
-        // const dialogs = chats.map((x, index) => <DialogPlaceholder key={x} chatId={x} index={index} showTitle/>);
-
-        const dialogs = firstSliceLoaded
-            ? chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />)
-            : Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
+        let dialogs = null;
+        if (firstSliceLoaded) {
+            dialogs = chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
+        } else if (cacheLoaded) {
+            dialogs = cacheChats.map(x => <Dialog key={x.id} chatId={x.id} hidden={this.hiddenChats.has(x.id)} />);
+        } else {
+            dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
+        }
 
         return (
             <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>

@@ -17,14 +17,15 @@ import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/Common';
+import { getChat } from '../../Actions/Chat';
+import { throttle, getPhotoSize, itemsInView, historyEquals, isAuthorizationReady } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage, openChat } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S } from '../../Constants';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -103,15 +104,7 @@ class MessagesList extends React.Component {
             offsetHeight
         };
 
-        // console.log(
-        //     `MessagesList.getSnapshotBeforeUpdate
-        //     chatId=${chatId} messageId=${messageId}
-        //     list.scrollTop=${scrollTop}
-        //     list.scrollHeight=${scrollHeight}
-        //     list.offsetHeight=${offsetHeight}`
-        // );
-
-        console.log('[ml] getSnapshotBeforeUpdate', snapshot);
+        // console.log('[ml] getSnapshotBeforeUpdate', snapshot);
         this.snapshot = snapshot;
         return snapshot;
     }
@@ -132,12 +125,10 @@ class MessagesList extends React.Component {
         // );
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
-            //console.log('[Animation] componentDidUpdate');
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
         } else {
             if (!this.scrollBehaviorNone) {
                 this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
-                //console.log('[Animation] componentDidUpdate handleScrollBehavior');
             }
         }
     }
@@ -196,38 +187,78 @@ class MessagesList extends React.Component {
     }
 
     componentDidMount() {
+        AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
+        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
+        MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
+        MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
-        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
-        MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
-        MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
-        ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
-        ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
-        MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
-        MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
-        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateSelection);
-        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateSelection);
-        MessageStore.removeListener('clientUpdateOpenReply', this.onClientUpdateOpenReply);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdateChatLastMessage);
-        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-
-        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
-        PlayerStore.removeListener('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
-        PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.off('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
+        ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.off('updateChatLastMessage', this.onUpdateChatLastMessage);
+        MessageStore.off('clientUpdateClearSelection', this.onClientUpdateSelection);
+        MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateSelection);
+        MessageStore.off('clientUpdateOpenReply', this.onClientUpdateOpenReply);
+        MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
+        MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
+        PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
+        PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateDialogsReady = async update => {
+        await FileStore.initDB(async () => {
+            const { chatId, messageId } = this.props;
+            if (chatId) {
+                const chat = ChatStore.get(chatId);
+                if (chat) {
+                    const { type } = chat;
+                    switch (type['@type']) {
+                        case 'chatTypePrivate':
+                        case 'chatTypeSecret': {
+                            await TdLibController.send({
+                                '@type': 'createPrivateChat',
+                                user_id: type.user_id,
+                                force: false
+                            });
+                            break;
+                        }
+                        case 'chatTypeBasicGroup': {
+                            await TdLibController.send({
+                                '@type': 'createBasicGroupChat',
+                                basic_group_id: type.basic_group_id,
+                                force: false
+                            });
+                            break;
+                        }
+                        case 'chatTypeSupergroup': {
+                            await TdLibController.send({
+                                '@type': 'createSupergroupChat',
+                                supergroup_id: type.supergroup_id,
+                                force: false
+                            });
+                            break;
+                        }
+                    }
+                    this.handleSelectChat(chatId, 0, messageId, 0);
+                }
+            }
+        });
+    };
 
     onClientUpdateFocusWindow = update => {
         const { focused } = update;
@@ -1089,7 +1120,7 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (!canSendFiles(chatId)) return;
 
-        ApplicationStore.setDragging(true);
+        AppStore.setDragging(true);
     };
 
     handleScrollDownClick = event => {
