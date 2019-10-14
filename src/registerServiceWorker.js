@@ -5,10 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { arrayBufferToBase64 } from './Utils/Common';
+import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
 import Cookies from 'universal-cookie';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ApplicationStore from './Stores/ApplicationStore';
+import NotificationStore from './Stores/NotificationStore';
 import TdLibController from './Controllers/TdLibController';
 
 // In production, we register a service worker to serve assets from local cache.
@@ -110,7 +111,7 @@ export async function subscribeNotifications() {
 
         if (endpoint && p256dh_base64url && auth_base64url) {
             const { authorizationState } = ApplicationStore;
-            if (authorizationState && authorizationState['@type'] === 'authorizationStateReady') {
+            if (isAuthorizationReady(authorizationState)) {
                 await TdLibController.send({
                     '@type': 'registerDevice',
                     device_token: {
@@ -125,6 +126,7 @@ export async function subscribeNotifications() {
         }
     } catch (error) {
         console.error('[SW] Error during service worker push subscription: ', error);
+        NotificationStore.enableSound = true;
     }
 }
 

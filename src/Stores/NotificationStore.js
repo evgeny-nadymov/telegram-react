@@ -33,6 +33,7 @@ class NotificationStore extends EventEmitter {
         this.windowFocused = true;
         this.timerHandler = null;
         this.nextSoundAt = new Date();
+        this.enableSound = false;
     };
 
     getUnreadCount() {
@@ -163,7 +164,7 @@ class NotificationStore extends EventEmitter {
                     this.newMessages.set(chat_id, chatMap);
                     this.updateTimer();
 
-                    if (!isMessageMuted(message)) {
+                    if (!isMessageMuted(message) && this.enableSound) {
                         const now = new Date();
                         if (now > this.nextSoundAt) {
                             // console.log('[ns] audio play');
