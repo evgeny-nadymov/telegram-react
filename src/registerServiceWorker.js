@@ -112,16 +112,17 @@ export async function subscribeNotifications() {
         if (endpoint && p256dh_base64url && auth_base64url) {
             const { authorizationState } = ApplicationStore;
             if (isAuthorizationReady(authorizationState)) {
-                await TdLibController.send({
+                const result = await TdLibController.send({
                     '@type': 'registerDevice',
                     device_token: {
                         '@type': 'deviceTokenWebPush',
-                        endpoint: endpoint,
-                        p256dh_base64url: p256dh_base64url,
-                        auth_base64url: auth_base64url
+                        endpoint,
+                        p256dh_base64url,
+                        auth_base64url
                     },
                     other_user_ids: []
                 });
+                console.log('[SW] registerDevice result', result);
             }
         }
     } catch (error) {

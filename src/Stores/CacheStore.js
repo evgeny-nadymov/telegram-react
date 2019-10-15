@@ -44,7 +44,11 @@ class CacheStore extends EventEmitter {
                         this.reset();
                         break;
                     }
-                    case 'authorizationStateLoggingOut': {
+                    case 'authorizationStateLoggingOut':
+                    case 'authorizationStateWaitCode':
+                    case 'authorizationStateWaitPhoneNumber':
+                    case 'authorizationStateWaitPassword':
+                    case 'authorizationStateWaitRegistration': {
                         CacheManager.clear();
                         break;
                     }

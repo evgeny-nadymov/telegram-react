@@ -161,11 +161,11 @@ class TdLibController extends EventEmitter {
             return this.client
                 .send(request)
                 .then(result => {
-                    console.log('receive', result);
+                    console.log('receive result', result);
                     return result;
                 })
                 .catch(error => {
-                    console.error('catch', error);
+                    console.error('catch error', error);
 
                     throw error;
                 });
