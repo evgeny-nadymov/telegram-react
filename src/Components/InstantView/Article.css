@@ -103,11 +103,8 @@ article > p {
     margin: 0 0 12px;
 }
 article pre {
-    font-family: Menlo;
-    margin: 14px 0;
-    padding: 7px 12px;
-    background: #f5f8fc;
-    font-size: 16px;
+    margin: 12px 0;
+    padding: 6px 12px;
     white-space: pre-wrap;
     word-wrap: break-word;
 }

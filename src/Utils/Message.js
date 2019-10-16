@@ -207,12 +207,7 @@ function getFormattedText(text) {
             }
             case 'textEntityTypePhoneNumber': {
                 result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        href={`tel:${entityText}`}
-                        onClick={stopPropagation}
-                        target='_blank'
-                        rel='noopener noreferrer'>
+                    <a key={text.entities[i].offset} href={`tel:${entityText}`} onClick={stopPropagation}>
                         {entityText}
                     </a>
                 );

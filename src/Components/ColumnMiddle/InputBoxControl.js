@@ -627,16 +627,14 @@ class InputBoxControl extends Component {
                             <div
                                 id='inputbox-message'
                                 ref={this.newMessageRef}
-                                key={new Date()}
                                 placeholder={t('Message')}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
                                 onKeyUp={this.handleKeyUp}
                                 onPaste={this.handlePaste}
-                                onInput={this.handleInput}>
-                                {content}
-                            </div>
+                                onInput={this.handleInput}
+                            />
                         </div>
                         <div className='inputbox-right-column'>
                             <input

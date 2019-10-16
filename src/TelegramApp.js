@@ -39,6 +39,15 @@ const styles = theme => ({
         },
         code: {
             color: theme.palette.primary.dark
+        },
+        pre: {
+            borderColor: theme.palette.divider,
+            color: theme.palette.primary.dark,
+            // background: theme.palette.primary.main + '11'
+            '&::selection': {
+                color: theme.palette.text.primary,
+                backgroundColor: 'highlight'
+            }
         }
     }
 });

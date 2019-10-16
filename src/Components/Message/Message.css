@@ -29,20 +29,19 @@ code {
 }
 
 pre {
-    margin-bottom: 0;
-    overflow: auto;
-    padding: 3px;
-    border: 1px solid #eee;
-    max-height: none;
-    font-size: inherit;
+    font-size: 90%;
+    font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
 
-    display: block;
-    line-height: 1.42857143;
-    word-break: break-all;
-    word-wrap: break-word;
-    color: #333;
-    background-color: #f5f5f5;
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding: 6px 12px;
+    border-style: solid;
+    border-width: 1px;
     border-radius: 4px;
+
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 pre code {
