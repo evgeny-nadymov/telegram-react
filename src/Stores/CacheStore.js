@@ -6,6 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
+import { debounce } from '../Utils/Common';
 import CacheManager from '../Workers/CacheManager';
 import BasicGroupStore from './BasicGroupStore';
 import ChatStore from './ChatStore';
@@ -14,7 +15,6 @@ import OptionStore from './OptionStore';
 import SupergroupStore from './SupergroupStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import { debounce } from '../Utils/Common';
 
 class CacheStore extends EventEmitter {
     constructor() {

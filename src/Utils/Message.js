@@ -31,7 +31,7 @@ import {
     isChatMuted
 } from './Chat';
 import { openUser } from './../Actions/Client';
-import { getPhotoSize, getSize } from './Common';
+import { getPhotoSize } from './Common';
 import { download, saveOrDownload } from './File';
 import { getAudioTitle } from './Media';
 import { getServiceMessageContent } from './ServiceMessage';
@@ -108,13 +108,13 @@ function stopPropagation(event) {
     event.stopPropagation();
 }
 
-function searchCurrentChatByHashtag(event, hashtag) {
+function searchCurrentChat(event, text) {
     event.stopPropagation();
     event.preventDefault();
 
     const { chatId } = AppStore;
 
-    searchChat(chatId, hashtag);
+    searchChat(chatId, text);
 }
 
 function getFormattedText(text) {
@@ -136,11 +136,97 @@ function getFormattedText(text) {
             text.entities[i].offset + text.entities[i].length
         );
         switch (text.entities[i].type['@type']) {
-            case 'textEntityTypeUrl': {
+            case 'textEntityTypeBold': {
+                result.push(<strong key={text.entities[i].offset}>{entityText}</strong>);
+                break;
+            }
+            case 'textEntityTypeBotCommand': {
+                const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <SafeLink key={text.entities[i].offset} url={entityText}>
+                    <a
+                        key={text.entities[i].offset}
+                        onClick={stopPropagation}
+                        href={`tg://bot_command?command=${command}&bot=`}>
                         {entityText}
-                    </SafeLink>
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeCashtag': {
+                result.push(
+                    <a key={text.entities[i].offset} onClick={event => searchCurrentChat(event, entityText)}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeCode': {
+                result.push(<code key={text.entities[i].offset}>{entityText}</code>);
+                break;
+            }
+            case 'textEntityTypeEmailAddress': {
+                result.push(
+                    <a
+                        key={text.entities[i].offset}
+                        href={`mailto:${entityText}`}
+                        onClick={stopPropagation}
+                        target='_blank'
+                        rel='noopener noreferrer'>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeHashtag': {
+                result.push(
+                    <a key={text.entities[i].offset} onClick={event => searchCurrentChat(event, entityText)}>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypeItalic': {
+                result.push(<em key={text.entities[i].offset}>{entityText}</em>);
+                break;
+            }
+            case 'textEntityTypeMentionName': {
+                result.push(
+                    <MentionLink key={text.entities[i].offset} userId={text.entities[i].type.user_id}>
+                        {entityText}
+                    </MentionLink>
+                );
+                break;
+            }
+            case 'textEntityTypeMention': {
+                result.push(
+                    <MentionLink key={text.entities[i].offset} username={entityText}>
+                        {entityText}
+                    </MentionLink>
+                );
+                break;
+            }
+            case 'textEntityTypePhoneNumber': {
+                result.push(
+                    <a
+                        key={text.entities[i].offset}
+                        href={`tel:${entityText}`}
+                        onClick={stopPropagation}
+                        target='_blank'
+                        rel='noopener noreferrer'>
+                        {entityText}
+                    </a>
+                );
+                break;
+            }
+            case 'textEntityTypePre': {
+                result.push(<pre key={text.entities[i].offset}>{entityText}</pre>);
+                break;
+            }
+            case 'textEntityTypePreCode': {
+                result.push(
+                    <pre key={text.entities[i].offset}>
+                        <code>{entityText}</code>
+                    </pre>
                 );
                 break;
             }
@@ -158,66 +244,14 @@ function getFormattedText(text) {
                 );
                 break;
             }
-            case 'textEntityTypeBold':
-                result.push(<strong key={text.entities[i].offset}>{entityText}</strong>);
-                break;
-            case 'textEntityTypeItalic':
-                result.push(<em key={text.entities[i].offset}>{entityText}</em>);
-                break;
-            case 'textEntityTypeCode':
-                result.push(<code key={text.entities[i].offset}>{entityText}</code>);
-                break;
-            case 'textEntityTypePre':
+            case 'textEntityTypeUrl': {
                 result.push(
-                    <pre key={text.entities[i].offset}>
-                        <code>{entityText}</code>
-                    </pre>
-                );
-                break;
-            case 'textEntityTypeMention':
-                result.push(
-                    <MentionLink key={text.entities[i].offset} username={entityText}>
+                    <SafeLink key={text.entities[i].offset} url={entityText}>
                         {entityText}
-                    </MentionLink>
+                    </SafeLink>
                 );
                 break;
-            case 'textEntityTypeMentionName':
-                result.push(
-                    <MentionLink key={text.entities[i].offset} userId={text.entities[i].type.user_id}>
-                        {entityText}
-                    </MentionLink>
-                );
-                break;
-            case 'textEntityTypeHashtag':
-                result.push(
-                    <a key={text.entities[i].offset} onClick={event => searchCurrentChatByHashtag(event, entityText)}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            case 'textEntityTypeEmailAddress':
-                result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`mailto:${entityText}`}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {entityText}
-                    </a>
-                );
-                break;
-            case 'textEntityTypeBotCommand':
-                let command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
-                result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`tg://bot_command?command=${command}&bot=`}>
-                        {entityText}
-                    </a>
-                );
-                break;
+            }
             default:
                 result.push(entityText);
                 break;
