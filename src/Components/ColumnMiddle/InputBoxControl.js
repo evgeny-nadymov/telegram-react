@@ -534,7 +534,8 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
-        this.newMessageRef.current.innerText += emoji.native;
+        document.execCommand('insertText', false, emoji.native);
+        this.newMessageRef.current.focus();
         this.handleInput();
     };
 
