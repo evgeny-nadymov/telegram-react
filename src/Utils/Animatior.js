@@ -31,15 +31,20 @@ class Animator {
     draw = now => {
         const { stopped, duration, start, options } = this;
 
-        if (stopped) return;
-        if (now - start >= duration) this.stopped = true;
+        if (now - start > duration && options.every(x => x.to === x.last)) {
+            this.stopped = true;
+        }
 
-        const p = (now - start) / duration;
+        if (stopped) return;
+
+        const time = Math.min(now - start, duration);
+        const p = time / duration;
         const val = Animator.outSine(p);
 
         options.forEach(x => {
             const { from, to, func } = x;
-            func(from + (to - from) * val);
+            x.last = from + (to - from) * val;
+            func(x.last);
         });
 
         this.id = requestAnimationFrame(this.draw);
