@@ -8,9 +8,18 @@
 .sticker-set-title {
     position: sticky;
     top: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
-.sticker-set-title span {
+.sticker-set-title-wrapper {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.sticker-set-title-wrapper span {
     display: block;
     width: 100%;
     padding: 6px;
@@ -25,4 +34,7 @@
 .sticker-set-item {
     background: transparent;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

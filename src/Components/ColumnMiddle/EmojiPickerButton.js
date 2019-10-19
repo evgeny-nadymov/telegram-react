@@ -17,7 +17,7 @@ import { Picker as EmojiPicker } from 'emoji-mart';
 import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
 import { isAppleDevice } from '../../Utils/Common';
-import { loadStickerThumbnailContent, loadStickerSetContent } from '../../Utils/File';
+import { loadStickerThumbnailContent, loadStickerSetContent, loadRecentStickersContent } from '../../Utils/File';
 import { EMOJI_PICKER_TIMEOUT_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -90,6 +90,11 @@ class EmojiPickerButton extends React.Component {
     loadStickerSets = async () => {
         if (this.sets) return;
 
+        this.recent = await TdLibController.send({
+            '@type': 'getRecentStickers',
+            is_attached: false
+        });
+
         this.stickerSets = await TdLibController.send({
             '@type': 'getInstalledStickerSets',
             is_masks: false
@@ -110,6 +115,8 @@ class EmojiPickerButton extends React.Component {
         const node = this.stickersPickerRef.current;
 
         const store = FileStore.getStore();
+        loadRecentStickersContent(store, this.recent);
+
         const previewSets = this.sets.slice(0, 5).reverse();
         previewSets.forEach(x => {
             loadStickerSetContent(store, x);
@@ -146,6 +153,8 @@ class EmojiPickerButton extends React.Component {
     };
 
     handlePaperMouseLeave = () => {
+        // return;
+
         this.paperEnter = false;
         setTimeout(() => {
             this.tryClosePicker();
@@ -164,7 +173,7 @@ class EmojiPickerButton extends React.Component {
         const stickersPicker = this.stickersPickerRef.current;
         const { tab } = this.state;
 
-        stickersPicker.loadContent(this.stickerSets, this.sets);
+        stickersPicker.loadContent(this.recent, this.stickerSets, this.sets);
 
         this.setState({ tab: 1 });
         if (tab === 1) {

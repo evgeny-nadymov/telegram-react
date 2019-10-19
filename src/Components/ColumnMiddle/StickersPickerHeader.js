@@ -70,7 +70,8 @@ class StickersPickerHeader extends React.Component {
         if (animator) {
             animator.stop();
         }
-        this.animator = new Animator(ANIMATION_DURATION_200MS, [
+
+        this.animator = new Animator(0, [
             {
                 from: scrollFrom,
                 to: scrollTo,
@@ -85,7 +86,13 @@ class StickersPickerHeader extends React.Component {
                 func: left => (anchorNode.style.left = left + 'px')
             }
         ]);
-        this.animator.start();
+
+        setTimeout(() => {
+            if (!this.animator) return;
+
+            this.animator.start();
+        }, 0);
+        // this.animator.start();
     };
 
     handleWheel = event => {
@@ -112,6 +119,7 @@ class StickersPickerHeader extends React.Component {
                 key={x.sticker.id}
                 className='stickers-picker-header-sticker'
                 sticker={x}
+                play={false}
                 autoplay={false}
                 blur={false}
                 displaySize={32}

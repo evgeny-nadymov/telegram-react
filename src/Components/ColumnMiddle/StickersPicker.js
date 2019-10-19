@@ -8,12 +8,16 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import { compose } from 'recompose';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { withTranslation } from 'react-i18next';
 import StickerSet from './StickerSet';
 import StickersPickerHeader from './StickersPickerHeader';
 import { debounce, throttle } from '../../Utils/Common';
 import { loadStickerContent, loadStickerSetContent } from '../../Utils/File';
 import { getNeighborStickersFromSets, getStickers } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
+import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickersPicker.css';
 
@@ -26,6 +30,7 @@ class StickersPicker extends React.Component {
         this.loadedSets = new Map();
 
         this.state = {
+            recent: null,
             stickerSets: null,
             sets: [],
             headerStickers: [],
@@ -38,7 +43,11 @@ class StickersPicker extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { position, stickerSets, sets, showPreview } = this.state;
+        const { position, recent, stickerSets, sets, showPreview } = this.state;
+
+        if (nextState.recent !== recent) {
+            return true;
+        }
 
         if (nextState.stickerSets !== stickerSets) {
             return true;
@@ -59,12 +68,55 @@ class StickersPicker extends React.Component {
         return false;
     }
 
+    componentDidMount() {
+        StickerStore.on('updateInstalledStickerSets', this.onUpdateInstalledStickerSets);
+        StickerStore.on('updateRecentStickers', this.onUpdateRecentStickers);
+    }
+
+    componentWillUnmount() {
+        StickerStore.off('updateInstalledStickerSets', this.onUpdateInstalledStickerSets);
+        StickerStore.off('updateRecentStickers', this.onUpdateRecentStickers);
+    }
+
+    onUpdateInstalledStickerSets = update => {
+        const { is_masks, sticker_set_ids } = update;
+        if (!is_masks) return;
+
+        this.filterSets();
+    };
+
+    onUpdateRecentStickers = update => {
+        this.reloadRecentContent();
+    };
+
+    filterSets(sticker_set_ids) {
+        const { sets, stickerSets } = this.state;
+    }
+
+    async reloadRecentContent() {
+        const recent = await TdLibController.send({
+            '@type': 'getRecentStickers',
+            is_attached: false
+        });
+
+        this.setState({
+            recent
+        });
+    }
+
     scrollTop = () => {
         this.scrollRef.current.scrollTop = 0;
     };
 
-    loadContent = async (stickerSets, sets) => {
-        if (this.state.stickerSets) return;
+    loadContent = async (recent, stickerSets, sets) => {
+        // console.log('[sp] loadContent', recent, stickerSets, sets);
+
+        if (!recent) {
+            recent = await TdLibController.send({
+                '@type': 'getRecentStickers',
+                is_attached: false
+            });
+        }
 
         if (!sets) {
             const result = await TdLibController.send({
@@ -92,9 +144,12 @@ class StickersPicker extends React.Component {
             }
             return preview;
         }, []);
+
         this.setState({
+            recent,
             stickerSets,
             sets: slicedSets,
+            fullSets: sets,
             headerStickers
         });
         this.setsLength = slicedSets.length;
@@ -207,17 +262,18 @@ class StickersPicker extends React.Component {
             );
         });
 
-        const result = await Promise.all(promises).finally(() => (this.loadingChunk = false));
+        const result = await Promise.all(promises).finally(() => {
+            this.loadingChunk = false;
+        });
 
         this.setsLength += result.length;
-        let concatSets = sets.concat(result);
-        this.setState({ sets: concatSets });
+        this.setState({ sets: sets.concat(result) });
     };
 
     loadPreviewContent = stickerId => {
-        const { sets } = this.state;
+        const { recent, sets } = this.state;
 
-        const sticker = getStickers(sets).find(x => x.sticker.id === stickerId);
+        const sticker = getStickers([recent].concat(sets)).find(x => x.sticker.id === stickerId);
         if (!sticker) return;
 
         const store = FileStore.getStore();
@@ -243,9 +299,9 @@ class StickersPicker extends React.Component {
         this.loadPreviewContent(stickerId);
 
         const { onPreview } = this.props;
-        const { sets } = this.state;
+        const { recent, sets } = this.state;
 
-        const sticker = getStickers(sets).find(x => x.sticker.id === stickerId);
+        const sticker = getStickers([recent].concat(sets)).find(x => x.sticker.id === stickerId);
         onPreview(sticker);
     };
 
@@ -262,9 +318,9 @@ class StickersPicker extends React.Component {
             if (timestamp === now) {
                 this.setState({ showPreview: true, cancelSend: true }, () => {
                     const { onPreview } = this.props;
-                    const { sets } = this.state;
+                    const { recent, sets } = this.state;
 
-                    const sticker = getStickers(sets).find(x => x.sticker.id === stickerId);
+                    const sticker = getStickers([recent].concat(sets)).find(x => x.sticker.id === stickerId);
                     onPreview(sticker);
                 });
             }
@@ -340,12 +396,29 @@ class StickersPicker extends React.Component {
         }
     };
 
-    render() {
-        const { stickerSets, sets, headerStickers } = this.state;
-        if (!stickerSets) return null;
+    handleDeleteRecent = () => {
+        TdLibController.send({
+            '@type': 'clearRecentStickers',
+            is_attached: false
+        });
+    };
 
-        if (!sets) return null;
-        if (!sets.length) return null;
+    handleDeleteStickerSet = id => {
+        TdLibController.send({
+            '@type': 'changeStickerSet',
+            set_id: id,
+            is_installed: false
+        });
+    };
+
+    render() {
+        const { t } = this.props;
+        const { recent, stickerSets, sets, headerStickers } = this.state;
+        // console.log('[sp] render', recent, stickerSets, sets);
+        // if (!stickerSets) return null;
+        //
+        // if (!sets) return null;
+        // if (!sets.length) return null;
 
         this.itemsMap.clear();
         const items = sets.map(x => (
@@ -359,10 +432,27 @@ class StickersPicker extends React.Component {
             />
         ));
 
+        const recentInfo =
+            recent && recent.stickers.length > 0
+                ? {
+                      stickers: recent.stickers,
+                      title: t('RecentStickers')
+                  }
+                : null;
+
         return (
             <div className='stickers-picker'>
                 <StickersPickerHeader onSelect={this.handleSelectSet} stickers={headerStickers} />
                 <div ref={this.scrollRef} className='stickers-picker-scroll' onScroll={this.handleScroll}>
+                    {Boolean(recentInfo) && (
+                        <StickerSet
+                            info={recentInfo}
+                            onSelect={this.handleStickerSelect}
+                            onMouseDown={this.handleMouseDown}
+                            onMouseEnter={this.handleMouseEnter}
+                            onDeleteClick={this.handleDeleteRecent}
+                        />
+                    )}
                     {items}
                 </div>
             </div>
@@ -375,4 +465,10 @@ StickersPicker.propTypes = {
     onPreview: PropTypes.func.isRequired
 };
 
-export default StickersPicker;
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(StickersPicker);

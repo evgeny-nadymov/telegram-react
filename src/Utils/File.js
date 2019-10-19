@@ -1712,8 +1712,14 @@ function loadDraftContent(store, chatId) {
     loadReplies(store, chatId, [reply_to_message_id]);
 }
 
+export function loadRecentStickersContent(store, recent) {
+    if (!recent) return;
+
+    const { stickers } = recent;
+    loadStickersContent(store, stickers);
+}
+
 function loadStickerSetContent(store, stickerSet) {
-    console.log('Lottie.loadStickerSetContent');
     if (!stickerSet) return;
 
     const { stickers } = stickerSet;

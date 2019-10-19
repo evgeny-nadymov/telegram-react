@@ -50,6 +50,10 @@ class StickerStore extends EventEmitter {
                 this.emit('updateInstalledStickerSets', update);
                 break;
             }
+            case 'updateRecentStickers': {
+                this.emit('updateRecentStickers', update);
+                break;
+            }
             default:
                 break;
         }

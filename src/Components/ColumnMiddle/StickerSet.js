@@ -9,6 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
+import IconButton from '@material-ui/core/IconButton';
+import ClearIcon from '@material-ui/icons/Clear';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import './StickerSet.css';
@@ -27,6 +29,11 @@ const styles = theme => ({
             background: theme.palette.type === 'dark' ? '#303030' : '#f4f4f4',
             borderRadius: 6
         }
+    },
+    iconRoot: {
+        fontSize: 16,
+        padding: 4,
+        margin: '4px 8px 4px 4px'
     }
 });
 
@@ -46,7 +53,7 @@ class StickerSet extends React.Component {
     }
 
     render() {
-        const { classes, info, onSelect, onMouseDown, onMouseEnter } = this.props;
+        const { classes, info, onSelect, onMouseDown, onMouseEnter, onDeleteClick } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
@@ -74,7 +81,18 @@ class StickerSet extends React.Component {
         return (
             <div className='sticker-set'>
                 <div className={classNames('sticker-set-title', classes.title)}>
-                    <span>{title}</span>
+                    <div className='sticker-set-title-wrapper'>
+                        <span>{title}</span>
+                    </div>
+                    {onDeleteClick && (
+                        <IconButton
+                            aria-label='delete'
+                            classes={{ root: classes.iconRoot }}
+                            size='small'
+                            onClick={onDeleteClick}>
+                            <ClearIcon fontSize='inherit' />
+                        </IconButton>
+                    )}
                 </div>
                 <div className='sticker-set-content'>{items}</div>
             </div>
@@ -85,7 +103,8 @@ class StickerSet extends React.Component {
 StickerSet.propTypes = {
     info: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
-    onMouseDown: PropTypes.func.isRequired
+    onMouseDown: PropTypes.func.isRequired,
+    onDeleteClick: PropTypes.func
 };
 
 export default withStyles(styles, { withTheme: true })(StickerSet);

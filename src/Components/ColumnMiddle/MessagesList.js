@@ -948,6 +948,9 @@ class MessagesList extends React.Component {
         const { history } = this.state;
         const list = this.listRef.current;
 
+        const chat = ChatStore.get(chatId);
+        const pinnedMessageMargin = chat && chat.pinned_message_id ? 55 : 0;
+
         // console.log(
         //     `MessagesList.scrollToUnread before
         //     chatId=${chatId} messageId=${messageId}
@@ -962,7 +965,7 @@ class MessagesList extends React.Component {
             let item = ReactDOM.findDOMNode(itemComponent);
             if (item) {
                 if (itemComponent.props.showUnreadSeparator) {
-                    list.scrollTop = item.offsetTop; // + unread messages margin-top
+                    list.scrollTop = item.offsetTop - pinnedMessageMargin; // + unread messages margin-top
                     scrolled = true;
                     break;
                 }

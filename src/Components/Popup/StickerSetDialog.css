@@ -19,6 +19,9 @@
 .sticker-set-dialog-item {
     background: transparent;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .sticker-set-dialog-item-sticker {

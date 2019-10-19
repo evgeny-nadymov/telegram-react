@@ -254,12 +254,13 @@ class Sticker extends React.Component {
     };
 
     loadContent = async () => {
-        const { chatId, messageId, sticker: source, autoplay } = this.props;
+        const { chatId, messageId, sticker: source, autoplay, play } = this.props;
         const { is_animated, sticker } = source;
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
         if (!is_animated) return;
         if (!isAnimated) return;
+        if (!play) return;
 
         const blob = getBlob(sticker);
         if (!blob) return;
@@ -453,6 +454,7 @@ Sticker.propTypes = {
     openMedia: PropTypes.func,
 
     autoplay: PropTypes.bool,
+    play: PropTypes.bool,
     blur: PropTypes.bool,
     displaySize: PropTypes.number,
     preview: PropTypes.bool,
@@ -465,6 +467,7 @@ Sticker.defaultProps = {
     openMedia: () => {},
 
     autoplay: true,
+    play: true,
     blur: true,
     displaySize: STICKER_DISPLAY_SIZE,
     preview: false,
