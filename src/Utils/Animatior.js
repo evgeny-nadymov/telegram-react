@@ -38,7 +38,7 @@ class Animator {
         if (stopped) return;
 
         const time = Math.min(now - start, duration);
-        const p = time / duration;
+        const p = duration === 0 ? 1.0 : time / duration;
         const val = Animator.outSine(p);
 
         options.forEach(x => {
