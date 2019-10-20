@@ -8,6 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
+import PinIcon from 'mdi-material-ui/Pin';
 import {
     isChatMuted,
     showChatUnreadCount,
@@ -25,7 +26,11 @@ const styles = theme => ({
     dialogBadgeMuted: {
         background: theme.palette.type === 'dark' ? theme.palette.text.disabled : '#d8d8d8'
     },
-    unreadIcon: {}
+    unreadIcon: {},
+    pinIcon: {
+        color: theme.palette.text.secondary,
+        fontSize: 18
+    }
 });
 
 class DialogBadge extends React.Component {
@@ -150,7 +155,7 @@ class DialogBadge extends React.Component {
                     </div>
                 )}
                 {is_pinned && !showUnreadMessageIcon && !showUnreadCount && !showUnreadMentionCount && (
-                    <i className='dialog-badge-pinned' />
+                    <PinIcon className={classNames(classes.pinIcon, 'dialog-badge-pinned')} />
                 )}
             </>
         );

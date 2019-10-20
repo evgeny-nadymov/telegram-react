@@ -20,7 +20,8 @@
 
 .dialog-active .dialog-content,
 .dialog-active .dialog-content-accent,
-.dialog-active .dialog-content-draft {
+.dialog-active .dialog-content-draft,
+.dialog-active .dialog-badge-pinned {
     color: #fff;
 }
 

@@ -32,17 +32,8 @@
 }
 
 .dialog-badge-pinned {
-    display: inline-block;
-    float: right;
-    min-width: 14px;
-    height: 14px;
-    overflow: hidden;
-    margin-bottom: 4px;
     margin-left: 6px;
-    background: url(../../Assets/Icons/General_2x.png);
-    background-position: -13px -916px;
-    background-size: 40px 948px;
-    transform: translateY(3px);
+    transform: rotateZ(45deg);
 }
 
 .dialog-badge-unread {
