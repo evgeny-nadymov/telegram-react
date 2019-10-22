@@ -24,6 +24,7 @@ import CreatePollDialog from '../Popup/CreatePollDialog';
 import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
+import { getEntities } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
@@ -280,14 +281,14 @@ class InputBoxControl extends Component {
                 }
             };
 
-            return { chatId: chatId, draftMessage: draftMessage };
+            return { chatId, draftMessage };
         }
 
         return null;
     };
 
     handleSubmit = () => {
-        let text = this.getInputText();
+        let text = this.newMessageRef.current.innerHTML;
 
         this.newMessageRef.current.innerText = null;
         this.newMessageRef.current.textContent = null;
@@ -297,12 +298,15 @@ class InputBoxControl extends Component {
         if (!text) return;
         if (!text.trim()) return;
 
+        const textWithEntities = getEntities(text);
+        console.log('[sm] textWithEntities', textWithEntities);
+
         const content = {
             '@type': 'inputMessageText',
             text: {
                 '@type': 'formattedText',
-                text: text,
-                entities: null
+                text: textWithEntities.text,
+                entities: textWithEntities.entities
             },
             disable_web_page_preview: false,
             clear_draft: true
@@ -386,14 +390,86 @@ class InputBoxControl extends Component {
         typingManager.setTyping({ '@type': 'chatActionTyping' });
     };
 
-    handleKeyDown = e => {
+    handleClear = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+    };
+
+    handleBold = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+        document.execCommand('bold', false, null);
+    };
+
+    handleItalic = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+        document.execCommand('italic', false, null);
+    };
+
+    handleUnderline = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+        document.execCommand('underline', false, null);
+    };
+
+    handleStrikeThrough = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+        document.execCommand('strikeThrough', false, null);
+    };
+
+    handleUrl = () => {};
+
+    handleKeyDown = event => {
         const innerText = this.newMessageRef.current.innerText;
         const innerHTML = this.newMessageRef.current.innerHTML;
         this.innerHTML = innerHTML;
 
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
             this.handleSubmit();
+            return;
+        }
+
+        if (event.repeat) return;
+
+        if ((event.ctrlKey || event.metaKey) && !event.shiftKey) {
+            if (!event.altKey) {
+                switch (event.keyCode) {
+                    case 66: {
+                        // cmd + b
+                        this.handleBold();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
+                    case 73: {
+                        // cmd + i
+                        this.handleItalic();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
+                    case 75: {
+                        // cmd + k
+                        this.handleUrl();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
+                }
+            } else {
+                switch (event.keyCode) {
+                    case 192: {
+                        // alt + cmd + n
+                        this.handleClear();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
+                }
+            }
         }
     };
 

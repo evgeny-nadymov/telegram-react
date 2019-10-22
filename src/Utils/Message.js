@@ -122,6 +122,7 @@ function getFormattedText(text) {
     if (!text.text) return null;
     if (!text.entities) return text.text;
 
+    let removeNewLineAfterPre = false;
     let result = [];
     let index = 0;
     for (let i = 0; i < text.entities.length; i++) {
@@ -135,6 +136,10 @@ function getFormattedText(text) {
             text.entities[i].offset,
             text.entities[i].offset + text.entities[i].length
         );
+        if (removeNewLineAfterPre && entityText.length > 0 && entityText[0] === '\n') {
+            entityText = entityText.substr(1);
+        }
+
         switch (text.entities[i].type['@type']) {
             case 'textEntityTypeBold': {
                 result.push(<strong key={text.entities[i].offset}>{entityText}</strong>);
@@ -215,6 +220,7 @@ function getFormattedText(text) {
             }
             case 'textEntityTypePre': {
                 result.push(<pre key={text.entities[i].offset}>{entityText}</pre>);
+                removeNewLineAfterPre = true;
                 break;
             }
             case 'textEntityTypePreCode': {
@@ -223,6 +229,7 @@ function getFormattedText(text) {
                         <code>{entityText}</code>
                     </pre>
                 );
+                removeNewLineAfterPre = true;
                 break;
             }
             case 'textEntityTypeTextUrl': {
@@ -257,6 +264,9 @@ function getFormattedText(text) {
 
     if (index < text.text.length) {
         let afterEntityText = text.text.substring(index);
+        if (removeNewLineAfterPre && afterEntityText.length > 0 && afterEntityText[0] === '\n') {
+            afterEntityText = afterEntityText.substr(1);
+        }
         if (afterEntityText) {
             result.push(afterEntityText);
         }
@@ -1570,6 +1580,323 @@ export function isMessageMuted(message) {
     }
 
     return isChatMuted(chat_id);
+}
+
+function checkInclusion(index, entities) {
+    if (!entities) return false;
+    if (!entities.length) return false;
+
+    for (let i = 0; i < entities.length; i++) {
+        if (index >= entities[i].offset && index < entities[i].offset + entities[i].length) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function checkIntersection(startIndex, endIndex, entities) {
+    if (!entities) return false;
+    if (!entities.length) return false;
+
+    for (let i = 0; i < entities.length; i++) {
+        if (startIndex <= entities[i].offset && entities[i].offset + entities[i].length - 1 <= endIndex) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function checkEntity(startIndex, endIndex, entities) {
+    return (
+        !checkInclusion(startIndex, entities) &&
+        !checkInclusion(endIndex, entities) &&
+        !checkIntersection(startIndex, endIndex, entities)
+    );
+}
+
+function removeOffsetAfter(start, countToRemove, entities) {
+    if (!entities) return;
+    if (!entities.length) return;
+
+    entities.forEach(e => {
+        if (e.offset > start) {
+            e.offset -= countToRemove;
+        }
+    });
+}
+
+function removeEntities(startIndex, endIndex, entities) {
+    if (!entities) return;
+    if (!entities.length) return;
+
+    for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        const entityStart = entity.offset;
+        const entityEnd = entity.offset + entity.length - 1;
+        if (
+            (startIndex <= entityStart && entityStart <= endIndex) ||
+            (startIndex <= entityEnd && entityEnd <= endIndex) ||
+            (entityStart < startIndex && endIndex > entityEnd)
+        ) {
+            entities.splice(i--, 1);
+        }
+    }
+}
+
+// based on code from official Android Telegram client
+// https://github.com/DrKLO/Telegram/blob/28eb8dfd0ef959fd5ad7d5d22f1d32879707c0a0/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L3782
+export function getEntities(text) {
+    const entities = [];
+    if (!text) return { text, entities };
+
+    console.log(`[ge] start text=${text}`);
+
+    let index = -1; // first index of end tag
+    let lastIndex = 0; // last index of end tag
+    let start = -1; // first index of start tag
+    let isPre = false;
+    const mono = '`';
+    const pre = '```';
+    const bold = '**';
+    const italic = '__';
+
+    // 0 looking for html entities
+    const result = new DOMParser().parseFromString(text, 'text/html');
+    let offset = 0;
+    let length = 0;
+    let finalText = '';
+    result.body.childNodes.forEach(node => {
+        const { textContent, nodeName } = node;
+
+        length = textContent.length;
+        finalText += textContent;
+
+        if (!checkEntity(offset, offset + length - 1, entities)) {
+            return;
+        }
+
+        switch (nodeName) {
+            case '#text': {
+                offset += length;
+                break;
+            }
+            case 'A': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeTextUrl' },
+                    url: node.href,
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'B': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeBold' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'I': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeItalic' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            default: {
+                offset += length;
+                break;
+            }
+        }
+    });
+    text = finalText;
+    console.log(`[ge] HTML nodes text=${text}`, entities);
+
+    // 1 looking for ``` and ` in order to find mono and pre entities
+    while ((index = text.indexOf(isPre ? pre : mono, lastIndex)) !== -1) {
+        if (start === -1) {
+            // find start tag
+            isPre = text.length - index > 2 && text[index + 1] === mono && text[index + 2] === mono;
+            start = index;
+            lastIndex = index + (isPre ? 3 : 1);
+        } else {
+            // find end tag
+            for (let i = index + (isPre ? 3 : 1); i < text.length; i++) {
+                if (text[i] === mono) {
+                    index++;
+                } else {
+                    break;
+                }
+            }
+
+            lastIndex = index + (isPre ? 3 : 1);
+            if (isPre) {
+                // add pre tag
+
+                // clean space and new line symbol before start tag
+                const firstChar = start > 0 ? text[start - 1] : 0;
+                let replacedFirst = firstChar === ' ' || firstChar === '\xA0' || firstChar === '\n';
+                let startText = text.substring(0, start - (replacedFirst ? 1 : 0));
+
+                const contentText = text.substring(start + 3, index);
+
+                // clean space and new line symbol after end tag
+                const lastChar = index + 3 < text.length ? text[index + 3] : 0;
+                const replacedLast = lastChar === ' ' || lastChar === '\xA0' || lastChar === '\n';
+                let endText = text.substring(index + 3 + (replacedLast ? 1 : 0), text.length);
+
+                // add new line before pre
+                if (startText.length > 0) {
+                    startText += '\n';
+                } else {
+                    replacedFirst = true;
+                }
+
+                // add new line after pre
+                if (endText.length > 0) {
+                    endText = '\n' + endText;
+                }
+
+                if (contentText.length > 0) {
+                    offset = start + (replacedFirst ? 0 : 1);
+                    length = index - start - 3 + (replacedFirst ? 0 : 1);
+
+                    text = startText + contentText + endText;
+
+                    const entity = {
+                        '@type': 'textEntity',
+                        offset,
+                        length,
+                        language: '',
+                        type: { '@type': 'textEntityTypePre' },
+                        textContent: text.substring(offset, offset + length)
+                    };
+                    removeEntities(offset, offset + length - 1 + 6);
+                    removeOffsetAfter(offset + length, 6, entities);
+                    entities.push(entity);
+                    lastIndex -= 6;
+                }
+            } else {
+                // add code tag
+                if (start + 1 !== index) {
+                    offset = start;
+                    length = index - start - 1;
+
+                    text =
+                        text.substring(0, start) +
+                        text.substring(start + 1, index) +
+                        text.substring(index + 1, text.length);
+
+                    const entity = {
+                        '@type': 'textEntity',
+                        offset,
+                        length,
+                        type: { '@type': 'textEntityTypeCode' },
+                        textContent: text.substring(offset, offset + length)
+                    };
+                    removeEntities(offset, offset + length - 1 + 2);
+                    removeOffsetAfter(offset + length, 2, entities);
+                    entities.push(entity);
+                    lastIndex -= 2;
+                }
+            }
+
+            start = -1;
+            isPre = false;
+        }
+    }
+
+    // 1.1 case when ``` is one ` mono symbol
+    if (start !== -1 && isPre) {
+        offset = start;
+        length = 1;
+
+        if (checkEntity(offset, offset + length + 2 - 1, entities)) {
+            text = text.substring(0, start) + text.substring(start + 2, text.length);
+
+            const entity = {
+                '@type': 'textEntity',
+                offset,
+                length,
+                type: { '@type': 'textEntityTypeCode' },
+                textContent: text.substring(offset, offset + length)
+            };
+            removeEntities(offset, offset + length - 1 + 2);
+            removeOffsetAfter(offset + length, 2, entities);
+            entities.push(entity);
+        }
+    }
+
+    console.log(`[ge] pre and code text=${text}`, entities);
+    // 2 looking for bold, italic entities
+    for (let c = 0; c < 2; c++) {
+        lastIndex = 0;
+        start = -1;
+        const checkString = c === 0 ? bold : italic;
+        const checkChar = c === 0 ? '*' : '_';
+        while ((index = text.indexOf(checkString, lastIndex)) !== -1) {
+            if (start === -1) {
+                const prevChar = index === 0 ? ' ' : text[index - 1];
+                if (
+                    !checkInclusion(index, entities) &&
+                    (prevChar === ' ' || prevChar === '\xA0' || prevChar === '\n')
+                ) {
+                    start = index;
+                }
+                lastIndex = index + 2;
+            } else {
+                for (let a = index + 2; a < text.length; a++) {
+                    if (text[a] === checkChar) {
+                        index++;
+                    } else {
+                        break;
+                    }
+                }
+                lastIndex = index + 2;
+                if (checkInclusion(index, entities) || checkIntersection(start, index, entities)) {
+                    start = -1;
+                    continue;
+                }
+                if (start + 2 !== index) {
+                    offset = start;
+                    length = index - start - 2;
+                    text =
+                        text.substring(0, start) +
+                        text.substring(start + 2, index) +
+                        text.substring(index + 2, text.length);
+
+                    const entity = {
+                        '@type': 'textEntity',
+                        offset,
+                        length,
+                        language: '',
+                        type: { '@type': c === 0 ? 'textEntityTypeBold' : 'textEntityTypeItalic' },
+                        textContent: text.substring(offset, offset + length)
+                    };
+                    removeOffsetAfter(offset + length, 4, entities);
+                    entities.push(entity);
+                    lastIndex -= 4;
+                }
+                start = -1;
+            }
+        }
+    }
+    console.log(`[ge] result text=${text}`, entities);
+
+    return { text, entities };
 }
 
 export {
