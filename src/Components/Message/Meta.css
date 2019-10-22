@@ -9,6 +9,8 @@
     user-select: none;
     font-size: 0.85em;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 .meta-views {
@@ -16,13 +18,5 @@
 }
 
 .meta-views-icon {
-    display: inline-block;
-    width: 15px;
-    height: 11px;
-    vertical-align: baseline;
-    background-image: url(../../Assets/Icons/General_2x.png);
-    background-size: 40px 948px;
-    background-repeat: no-repeat;
-    background-position: -12px -850px;
-    transform: translateY(1px);
+    font-size: 15px;
 }

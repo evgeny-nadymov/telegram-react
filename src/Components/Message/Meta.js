@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import { withTranslation } from 'react-i18next';
 import { getDate, getDateHint } from '../../Utils/Message';
 import './Meta.css';
@@ -35,7 +36,7 @@ class Meta extends React.Component {
                 <span>&nbsp;</span>
                 {views > 0 && (
                     <>
-                        <i className='meta-views-icon' />
+                        <VisibilityIcon className='meta-views-icon' />
                         <span className='meta-views'>
                             &nbsp;
                             {views}
