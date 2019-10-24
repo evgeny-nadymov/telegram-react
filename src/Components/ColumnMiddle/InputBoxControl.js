@@ -26,7 +26,7 @@ import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getEntities } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
-import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import { PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
@@ -59,7 +59,6 @@ class InputBoxControl extends Component {
 
         const chatId = ApplicationStore.getChatId();
 
-        this.innerHTML = null;
         this.state = {
             chatId: chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
@@ -95,8 +94,6 @@ class InputBoxControl extends Component {
     }
 
     componentDidMount() {
-        //console.log('Perf componentDidMount');
-
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
@@ -110,9 +107,9 @@ class InputBoxControl extends Component {
         const newChatDraftMessage = this.getNewChatDraftMessage(this.state.chatId, this.state.replyToMessageId);
         this.setChatDraftMessage(newChatDraftMessage);
 
-        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
-        MessageStore.removeListener('clientUpdateReply', this.onClientUpdateReply);
-        StickerStore.removeListener('clientUpdateStickerSend', this.onClientUpdateStickerSend);
+        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
+        StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
     }
 
     onClientUpdateStickerSend = update => {
@@ -124,7 +121,6 @@ class InputBoxControl extends Component {
 
         this.newMessageRef.current.innerText = null;
         this.newMessageRef.current.textContent = null;
-        this.innerHTML = null;
 
         const content = {
             '@type': 'inputMessageSticker',
@@ -176,7 +172,6 @@ class InputBoxControl extends Component {
         const { chatId } = this.state;
         if (chatId === update.nextChatId) return;
 
-        this.innerHTML = null;
         this.setState({
             chatId: update.nextChatId,
             replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
@@ -192,10 +187,8 @@ class InputBoxControl extends Component {
         const draft = getChatDraft(chatId);
         if (draft) {
             element.innerText = draft.text;
-            this.innerHTML = draft.text;
         } else {
             element.innerText = null;
-            this.innerHTML = null;
         }
     };
 
@@ -249,42 +242,32 @@ class InputBoxControl extends Component {
     };
 
     getNewChatDraftMessage = (chatId, replyToMessageId) => {
-        let chat = ChatStore.get(chatId);
+        const chat = ChatStore.get(chatId);
         if (!chat) return;
-        const newDraft = this.getInputText();
 
-        let previousDraft = '';
-        let previousReplyToMessageId = 0;
         const { draft_message } = chat;
-        if (draft_message && draft_message.input_message_text && draft_message.input_message_text.text) {
-            const { reply_to_message_id, input_message_text } = draft_message;
-
-            previousReplyToMessageId = reply_to_message_id;
-            if (input_message_text && input_message_text.text) {
-                previousDraft = input_message_text.text.text;
+        const { innerHTML } = this.newMessageRef.current;
+        const { text, entities } = getEntities(innerHTML);
+        const draftMessage = {
+            '@type': 'draftMessage',
+            reply_to_message_id: replyToMessageId,
+            input_message_text: {
+                '@type': 'inputMessageText',
+                text: {
+                    '@type': 'formattedText',
+                    text,
+                    entities
+                },
+                disable_web_page_preview: true,
+                clear_draft: false
             }
+        };
+
+        if (draftEquals(draft_message, draftMessage)) {
+            return null;
         }
 
-        if (newDraft !== previousDraft || replyToMessageId !== previousReplyToMessageId) {
-            const draftMessage = {
-                '@type': 'draftMessage',
-                reply_to_message_id: replyToMessageId,
-                input_message_text: {
-                    '@type': 'inputMessageText',
-                    text: {
-                        '@type': 'formattedText',
-                        text: newDraft,
-                        entities: null
-                    },
-                    disable_web_page_preview: true,
-                    clear_draft: false
-                }
-            };
-
-            return { chatId, draftMessage };
-        }
-
-        return null;
+        return { chatId, draftMessage };
     };
 
     handleSubmit = () => {
@@ -292,7 +275,6 @@ class InputBoxControl extends Component {
 
         this.newMessageRef.current.innerText = null;
         this.newMessageRef.current.textContent = null;
-        this.innerHTML = null;
         this.handleInput();
 
         if (!text) return;
@@ -422,10 +404,6 @@ class InputBoxControl extends Component {
     handleUrl = () => {};
 
     handleKeyDown = event => {
-        const innerText = this.newMessageRef.current.innerText;
-        const innerHTML = this.newMessageRef.current.innerHTML;
-        this.innerHTML = innerHTML;
-
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             this.handleSubmit();
@@ -530,7 +508,6 @@ class InputBoxControl extends Component {
         if (plainText) {
             event.preventDefault();
             document.execCommand('insertHTML', false, plainText);
-            this.innerHTML = plainText;
             return;
         }
     };
@@ -681,8 +658,6 @@ class InputBoxControl extends Component {
     render() {
         const { classes, t } = this.props;
         const { chatId, replyToMessageId, openPasteDialog } = this.state;
-
-        const content = this.innerHTML !== null ? this.innerHTML : null;
 
         return (
             <>

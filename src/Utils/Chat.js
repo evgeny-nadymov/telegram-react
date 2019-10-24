@@ -20,6 +20,64 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function draftEquals(draft1, draft2) {
+    if (!draft1 && !draft2) return true;
+    if (draft1 && !draft2) return false;
+    if (draft2 && !draft1) return false;
+
+    const { input_message_text: inputMessageText1, reply_to_message_id: replyToMessageId1 } = draft1;
+    const { input_message_text: inputMessageText2, reply_to_message_id: replyToMessageId2 } = draft2;
+
+    if (replyToMessageId1 !== replyToMessageId2) {
+        return false;
+    }
+
+    if (inputMessageText1['@type'] !== inputMessageText2['@type']) {
+        return false;
+    }
+
+    if (inputMessageText1['@type'] !== 'inputMessageText') {
+        return true;
+    }
+
+    const { text: formattedText1, disable_web_page_preview: disableWebPagePreview1 } = inputMessageText1;
+    const { text: formattedText2, disable_web_page_preview: disableWebPagePreview2 } = inputMessageText2;
+
+    if (disableWebPagePreview1 !== disableWebPagePreview2) {
+        return false;
+    }
+
+    if (!formattedText1 && !formattedText2) return true;
+    if (formattedText1 && !formattedText2) return false;
+    if (formattedText2 && !formattedText1) return false;
+
+    const { text: text1, entities: entities1 } = formattedText1;
+    const { text: text2, entities: entities2 } = formattedText2;
+
+    if (text1 !== text2) {
+        return false;
+    }
+
+    return entitiesEquals(entities1, entities2);
+}
+
+function entitiesEquals(entities1, entities2) {
+    if (!entities1 && !entities2) return true;
+    if (entities1 && !entities2) return false;
+    if (entities2 && !entities1) return false;
+
+    if (entities1.length !== entities2.length) {
+        return false;
+    }
+
+    const map = new Map();
+    entities1.forEach(x => {
+        map.set(`${x.type['@type']}_${x.offset}_${x.length}`, x);
+    });
+
+    return entities2.every(x => map.has(`${x.type['@type']}_${x.offset}_${x.length}`));
+}
+
 function getGroupChatTypingString(inputTypingManager) {
     if (!inputTypingManager) return null;
 
