@@ -127,14 +127,15 @@ class DialogsHeader extends React.Component {
 
     handleKeyUp = () => {
         const { onSearchTextChange } = this.props;
-        const searchInput = this.searchInputRef.current;
 
-        const innerText = searchInput.innerText;
-        const innerHTML = searchInput.innerHTML;
+        const element = this.searchInputRef.current;
+        if (!element) return;
 
-        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            searchInput.innerHTML = '';
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
+        const { innerText } = element;
 
         onSearchTextChange(innerText);
     };
@@ -143,7 +144,7 @@ class DialogsHeader extends React.Component {
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
         }
     };
 

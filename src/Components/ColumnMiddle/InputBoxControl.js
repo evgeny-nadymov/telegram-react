@@ -8,9 +8,9 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import emojiRegex from 'emoji-regex';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
+import emojiRegex from 'emoji-regex';
 import SendIcon from '@material-ui/icons/Send';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -18,21 +18,21 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Popup/CreatePollDialog';
-import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { getEntities } from '../../Utils/Message';
-import { getSize, readImageSize } from '../../Utils/Common';
-import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
+import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { getEntities, getNodes } from '../../Utils/Message';
+import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
-import MessageStore from '../../Stores/MessageStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
+import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
@@ -57,13 +57,27 @@ class InputBoxControl extends Component {
         this.attachPhotoRef = React.createRef();
         this.newMessageRef = React.createRef();
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
 
         this.state = {
-            chatId: chatId,
+            chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
             openPasteDialog: false
         };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        this.setChatDraftMessage(snapshot);
+
+        if (prevState.chatId !== this.state.chatId) {
+            this.loadDraft();
+        }
+    }
+
+    getSnapshotBeforeUpdate(prevProps, prevState) {
+        if (prevState.chatId === this.state.chatId) return null;
+
+        return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -93,24 +107,54 @@ class InputBoxControl extends Component {
         return false;
     }
 
-    componentDidMount() {
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
-        MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
-        StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
-
-        this.setInputFocus();
+    loadDraft() {
         this.setDraft();
+        this.setInputFocus();
         this.handleInput();
     }
 
-    componentWillUnmount() {
-        const newChatDraftMessage = this.getNewChatDraftMessage(this.state.chatId, this.state.replyToMessageId);
-        this.setChatDraftMessage(newChatDraftMessage);
+    saveDraft() {
+        const { chatId, replyToMessageId } = this.state;
 
-        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        const draftMessage = this.getNewChatDraftMessage(chatId, replyToMessageId);
+        this.setChatDraftMessage(draftMessage);
+    }
+
+    componentDidMount() {
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ChatStore.on('updateChatDraftMessage', this.onUpdateChatDraftMessage);
+        MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
+
+        this.loadDraft();
+    }
+
+    componentWillUnmount() {
+        this.saveDraft();
+
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ChatStore.off('updateChatDraftMessage', this.onUpdateChatDraftMessage);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
     }
+
+    onClientUpdateFocusWindow = update => {
+        const { focused } = update;
+        if (focused) return;
+
+        this.saveDraft();
+    };
+
+    onUpdateChatDraftMessage = update => {
+        const { chat_id } = update;
+        const { chatId } = this.state;
+
+        if (chatId !== chat_id) return;
+
+        this.loadDraft();
+    };
 
     onClientUpdateStickerSend = update => {
         const { sticker: item } = update;
@@ -120,7 +164,6 @@ class InputBoxControl extends Component {
         if (!sticker) return;
 
         this.newMessageRef.current.innerText = null;
-        this.newMessageRef.current.textContent = null;
 
         const content = {
             '@type': 'inputMessageSticker',
@@ -186,46 +229,59 @@ class InputBoxControl extends Component {
 
         const draft = getChatDraft(chatId);
         if (draft) {
-            element.innerText = draft.text;
+            const { text, entities } = draft;
+
+            try {
+                const nodes = getNodes(text, entities);
+                element.innerHTML = null;
+                nodes.forEach(x => {
+                    element.appendChild(x);
+                });
+            } catch (e) {
+                element.innerText = draft.text;
+            }
+
+            this.setState({
+                replyToMessageId: getChatDraftReplyToMessageId(chatId)
+            });
         } else {
             element.innerText = null;
         }
     };
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        //console.log('Perf componentDidUpdate');
-        this.setChatDraftMessage(snapshot);
-
-        if (prevState.chatId !== this.state.chatId) {
-            this.setInputFocus();
-            this.setDraft();
-            this.handleInput();
-        }
-    }
-
-    getSnapshotBeforeUpdate(prevProps, prevState) {
-        if (prevState.chatId === this.state.chatId) return null;
-
-        return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
-    }
-
     setInputFocus = () => {
         setTimeout(() => {
-            if (this.newMessageRef.current) {
-                const element = this.newMessageRef.current;
+            const element = this.newMessageRef.current;
+            if (!element) return;
 
-                if (element.childNodes.length > 0) {
-                    const range = document.createRange();
-                    range.setStart(element.childNodes[0], element.childNodes[0].length);
-                    range.collapse(true);
+            const textNode = this.findLastTextNode(element);
+            if (textNode) {
+                const range = document.createRange();
+                range.setStart(textNode, textNode.length);
+                range.collapse(true);
 
-                    const selection = window.getSelection();
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                }
-                element.focus();
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
             }
+
+            element.focus();
         }, 100);
+    };
+
+    findLastTextNode = element => {
+        if (element.nodeType === Node.TEXT_NODE) {
+            return element;
+        }
+
+        for (let i = element.childNodes.length - 1; i >= 0; i--) {
+            const textNode = this.findLastTextNode(element.childNodes[i]);
+            if (textNode) {
+                return textNode;
+            }
+        }
+
+        return null;
     };
 
     setChatDraftMessage = chatDraftMessage => {
@@ -271,24 +327,25 @@ class InputBoxControl extends Component {
     };
 
     handleSubmit = () => {
-        let text = this.newMessageRef.current.innerHTML;
+        const element = this.newMessageRef.current;
+        if (!element) return;
 
-        this.newMessageRef.current.innerText = null;
-        this.newMessageRef.current.textContent = null;
+        const { innerHTML } = this.newMessageRef.current;
+
+        element.innerText = null;
         this.handleInput();
 
-        if (!text) return;
-        if (!text.trim()) return;
+        if (!innerHTML) return;
+        if (!innerHTML.trim()) return;
 
-        const textWithEntities = getEntities(text);
-        console.log('[sm] textWithEntities', textWithEntities);
+        const { text, entities } = getEntities(innerHTML);
 
         const content = {
             '@type': 'inputMessageText',
             text: {
                 '@type': 'formattedText',
-                text: textWithEntities.text,
-                entities: textWithEntities.entities
+                text,
+                entities
             },
             disable_web_page_preview: false,
             clear_draft: true
@@ -339,36 +396,24 @@ class InputBoxControl extends Component {
         this.attachDocumentRef.current.value = '';
     };
 
-    getInputText() {
-        let innerText = this.newMessageRef.current.innerText;
-        let innerHTML = this.newMessageRef.current.innerHTML;
-
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.newMessageRef.current.innerHTML = '';
-        }
-
-        return innerText;
-    }
-
     handleKeyUp = () => {
         const { chatId } = this.state;
-
-        if (isMeChat(chatId)) return;
-
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        const innerText = this.newMessageRef.current.innerText;
-        const innerHTML = this.newMessageRef.current.innerHTML;
+        const element = this.newMessageRef.current;
+        if (!element) return;
 
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.newMessageRef.current.innerHTML = '';
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
+        const { innerText } = element;
 
         if (!innerText) return;
+        if (isMeChat(chatId)) return;
 
         const typingManager = chat.OutputTypingManager || (chat.OutputTypingManager = new OutputTypingManager(chat.id));
-
         typingManager.setTyping({ '@type': 'chatActionTyping' });
     };
 
@@ -507,7 +552,7 @@ class InputBoxControl extends Component {
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
             return;
         }
     };
@@ -552,9 +597,9 @@ class InputBoxControl extends Component {
         if (!content) return;
 
         try {
-            await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
+            await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
 
-            let result = await TdLibController.send({
+            const result = await TdLibController.send({
                 '@type': 'sendMessage',
                 chat_id: chatId,
                 reply_to_message_id: replyToMessageId,
@@ -563,11 +608,7 @@ class InputBoxControl extends Component {
 
             this.setState({ replyToMessageId: 0 }, () => {
                 if (clearDraft) {
-                    const newChatDraftMessage = this.getNewChatDraftMessage(
-                        this.state.chatId,
-                        this.state.replyToMessageId
-                    );
-                    this.setChatDraftMessage(newChatDraftMessage);
+                    this.saveDraft();
                 }
             });
             //MessageStore.set(result);

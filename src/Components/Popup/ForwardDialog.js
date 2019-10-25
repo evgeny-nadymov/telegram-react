@@ -339,13 +339,12 @@ class ForwardDialog extends React.Component {
         this.forceUpdate();
     };
 
-    getInnerText = div => {
-        const innerText = div.innerText;
-        const innerHTML = div.innerHTML;
-
-        if (innerText && innerText === '\n' && innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            div.innerHTML = '';
+    getInnerText = element => {
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
+        const { innerText } = element;
 
         return innerText;
     };
@@ -359,12 +358,15 @@ class ForwardDialog extends React.Component {
     handleSearchKeyUp = () => {
         const { chatIds, savedMessages } = this.state;
 
-        const innerHTML = this.searchRef.current.innerHTML;
-        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.searchRef.current.innerHTML = '';
+        const element = this.searchRef.current;
+        if (!element) return;
+
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
 
-        const innerText = this.getInnerText(this.searchRef.current).trim();
+        const innerText = this.getInnerText(element).trim();
         if (!innerText) {
             this.setState({ searchText: null, searchResults: [] });
             return;
@@ -391,14 +393,17 @@ class ForwardDialog extends React.Component {
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
         }
     };
 
     handleMessageKeyUp = () => {
-        const innerHTML = this.messageRef.current.innerHTML;
-        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.messageRef.current.innerHTML = '';
+        const element = this.messageRef.current;
+        if (!element) return;
+
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
     };
 
@@ -406,7 +411,7 @@ class ForwardDialog extends React.Component {
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
         }
     };
 

@@ -34,6 +34,7 @@ import { openUser } from './../Actions/Client';
 import { getPhotoSize } from './Common';
 import { download, saveOrDownload } from './File';
 import { getAudioTitle } from './Media';
+import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
@@ -1645,6 +1646,126 @@ function removeEntities(startIndex, endIndex, entities) {
     }
 }
 
+function addTextNode(offset, length, text, nodes) {
+    const node = document.createTextNode(text.substr(offset, length));
+    nodes.push(node);
+}
+
+export function getNodes(text, entities) {
+    if (!text) return [];
+
+    entities = (entities || []).sort((a, b) => {
+        if (a.offset - b.offset !== 0) {
+            return a.offset - b.offset;
+        }
+
+        return b.length - a.length;
+    });
+
+    let nodes = [];
+    let offset = 0;
+    let prevEntity = null;
+    entities.forEach(x => {
+        if (x.offset - offset > 0) {
+            addTextNode(offset, x.offset - offset, text, nodes);
+            offset = x.offset;
+        }
+
+        if (!(prevEntity && checkInclusion(x.offset, [prevEntity]))) {
+            switch (x.type['@type']) {
+                case 'textEntityTypeBold': {
+                    const node = document.createElement('b');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
+                    break;
+                }
+                case 'textEntityTypeBotCommand': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeCashtag': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeCode': {
+                    const node = document.createTextNode('`' + text.substr(x.offset, x.length) + '`');
+                    nodes.push(node);
+                    break;
+                }
+                case 'textEntityTypeEmailAddress': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeHashtag': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeItalic': {
+                    const node = document.createElement('i');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
+                    break;
+                }
+                case 'textEntityTypeMention': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeMentionName': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypePhoneNumber': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypePre': {
+                    const node = document.createTextNode('```' + text.substr(x.offset, x.length) + '```');
+                    nodes.push(node);
+                    break;
+                }
+                case 'textEntityTypePreCode': {
+                    const node = document.createTextNode('```' + text.substr(x.offset, x.length) + '```');
+                    nodes.push(node);
+                    break;
+                }
+                case 'textEntityTypeTextUrl': {
+                    try {
+                        const { url } = x.type;
+
+                        const node = document.createElement('a');
+                        node.href = getDecodedUrl(url, false);
+                        node.title = getDecodedUrl(url, false);
+                        node.target = '_blank';
+                        node.rel = 'noopener norefferer';
+                        node.innerText = text.substr(x.offset, x.length);
+                        nodes.push(node);
+                    } catch {
+                        addTextNode(x.offset, x.length, text, nodes);
+                    }
+                    break;
+                }
+                case 'textEntityTypeUrl': {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                default: {
+                    addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+            }
+
+            prevEntity = x;
+            offset += x.length;
+        }
+    });
+
+    if (offset < text.length) {
+        addTextNode(offset, text.length - offset, text, nodes);
+    }
+
+    return nodes;
+}
+
 // based on code from official Android Telegram client
 // https://github.com/DrKLO/Telegram/blob/28eb8dfd0ef959fd5ad7d5d22f1d32879707c0a0/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L3782
 export function getEntities(text) {
@@ -1687,14 +1808,14 @@ export function getEntities(text) {
                     '@type': 'textEntity',
                     offset,
                     length,
-                    type: { '@type': 'textEntityTypeTextUrl' },
-                    url: node.href,
+                    type: { '@type': 'textEntityTypeTextUrl', url: node.href },
                     textContent: finalText.substring(offset, offset + length)
                 });
                 offset += length;
                 break;
             }
-            case 'B': {
+            case 'B':
+            case 'STRONG': {
                 entities.push({
                     '@type': 'textEntity',
                     offset,
@@ -1705,12 +1826,35 @@ export function getEntities(text) {
                 offset += length;
                 break;
             }
-            case 'I': {
+            case 'CODE': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeCode' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'I':
+            case 'EM': {
                 entities.push({
                     '@type': 'textEntity',
                     offset,
                     length,
                     type: { '@type': 'textEntityTypeItalic' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'PRE': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypePre' },
                     textContent: finalText.substring(offset, offset + length)
                 });
                 offset += length;

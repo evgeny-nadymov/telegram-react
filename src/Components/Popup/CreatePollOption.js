@@ -198,7 +198,7 @@ class CreatePollOption extends React.Component {
         if (innerText.length - selectionString.length + pasteText.length > maxLength) {
             pasteText = pasteText.substr(0, maxLength - innerText.length + selectionString.length);
         }
-        document.execCommand('insertHTML', false, pasteText);
+        document.execCommand('insertText', false, pasteText);
     };
 
     render() {

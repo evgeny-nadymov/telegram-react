@@ -81,12 +81,14 @@ class SharedMediaHeader extends React.Component {
     };
 
     handleKeyUp = () => {
-        const innerText = this.searchInputRef.current.innerText;
-        const innerHTML = this.searchInputRef.current.innerHTML;
+        const element = this.searchInputRef.current;
+        if (!element) return;
 
-        if (innerHTML && (innerHTML === '<br>' || innerHTML === '<div><br></div>')) {
-            this.searchInputRef.current.innerHTML = '';
+        const { innerHTML } = element;
+        if (innerHTML === '<br>' || innerHTML === '<div><br></div>') {
+            element.innerHTML = null;
         }
+        const { innerText } = element;
 
         const { onSearch } = this.props;
         if (!onSearch) return;
@@ -98,7 +100,7 @@ class SharedMediaHeader extends React.Component {
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
         }
     };
 
