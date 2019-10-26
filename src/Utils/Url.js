@@ -5,6 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import punycode from './Punycode';
+
 export function getHref(url, mail) {
     if (!url) return null;
 
@@ -31,7 +33,12 @@ export function getDecodedUrl(url, mail) {
     const href = getHref(url, mail);
 
     try {
-        return decodeURI(href);
+        let decodedHref = decodeURI(href);
+
+        const domain = decodedHref.match(/^https?:\/\/([^\/:?#]+)(?:[\/:?#]|$)/i)[1];
+        decodedHref = decodedHref.replace(domain, punycode.ToUnicode(domain));
+
+        return decodedHref;
     } catch (error) {
         console.log('SafeLink.getDecodedUrl error ', url, error);
     }
