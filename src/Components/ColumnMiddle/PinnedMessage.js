@@ -281,7 +281,7 @@ class PinnedMessage extends React.Component {
                         open
                         onClose={this.handleClose}
                         aria-labelledby='unpin-message-confirmation'>
-                        <DialogTitle id='unpin-message-confirmation'>{t('AppName')}</DialogTitle>
+                        <DialogTitle id='unpin-message-confirmation'>{t('Confirm')}</DialogTitle>
                         <DialogContent>
                             <DialogContentText>{t('UnpinMessageAlert')}</DialogContentText>
                         </DialogContent>

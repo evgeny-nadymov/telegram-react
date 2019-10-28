@@ -233,7 +233,7 @@ class ForwardDialog extends React.Component {
                                 text: text,
                                 entities: null
                             },
-                            disable_web_page_preview: true,
+                            disable_web_page_preview: false,
                             clear_draft: false
                         }
                     });
@@ -253,7 +253,7 @@ class ForwardDialog extends React.Component {
                             text: link,
                             entities: null
                         },
-                        disable_web_page_preview: true,
+                        disable_web_page_preview: false,
                         clear_draft: false
                     }
                 });
@@ -309,7 +309,7 @@ class ForwardDialog extends React.Component {
                             text: text,
                             entities: null
                         },
-                        disable_web_page_preview: true,
+                        disable_web_page_preview: false,
                         clear_draft: false
                     }
                 });

@@ -12,20 +12,17 @@ import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import emojiRegex from 'emoji-regex';
 import SendIcon from '@material-ui/icons/Send';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Popup/CreatePollDialog';
 import InputBoxHeader from './InputBoxHeader';
+import PasteFilesDialog from '../Popup/PasteFilesDialog';
+import UpdateDraftDialog from '../Popup/UpdateDraftDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { borderStyle } from '../Theme';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { findLastTextNode } from '../../Utils/DOM';
 import { getEntities, getNodes } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
@@ -61,28 +58,13 @@ class InputBoxControl extends Component {
 
         this.state = {
             chatId,
-            replyToMessageId: getChatDraftReplyToMessageId(chatId),
-            openPasteDialog: false
+            replyToMessageId: getChatDraftReplyToMessageId(chatId)
         };
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        this.setChatDraftMessage(snapshot);
-
-        if (prevState.chatId !== this.state.chatId) {
-            this.loadDraft();
-        }
-    }
-
-    getSnapshotBeforeUpdate(prevProps, prevState) {
-        if (prevState.chatId === this.state.chatId) return null;
-
-        return this.getNewChatDraftMessage(prevState.chatId, prevState.replyToMessageId);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, t } = this.props;
-        const { chatId, replyToMessageId, openPasteDialog } = this.state;
+        const { chatId, newDraft, files, replyToMessageId } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -96,11 +78,15 @@ class InputBoxControl extends Component {
             return true;
         }
 
-        if (nextState.replyToMessageId !== replyToMessageId) {
+        if (nextState.newDraft !== newDraft) {
             return true;
         }
 
-        if (nextState.openPasteDialog !== openPasteDialog) {
+        if (nextState.files !== files) {
+            return true;
+        }
+
+        if (nextState.replyToMessageId !== replyToMessageId) {
             return true;
         }
 
@@ -116,7 +102,7 @@ class InputBoxControl extends Component {
     saveDraft() {
         const { chatId, replyToMessageId } = this.state;
 
-        const draftMessage = this.getNewChatDraftMessage(chatId, replyToMessageId);
+        const draftMessage = this.getDraftMessage(chatId, replyToMessageId);
         this.setChatDraftMessage(draftMessage);
     }
 
@@ -148,12 +134,20 @@ class InputBoxControl extends Component {
     };
 
     onUpdateChatDraftMessage = update => {
-        const { chat_id } = update;
-        const { chatId } = this.state;
+        const { chat_id, draft_message } = update;
+        const { chatId, replyToMessageId } = this.state;
 
         if (chatId !== chat_id) return;
 
         this.loadDraft();
+        // const currentDraft = this.getDraftMessage(chatId, replyToMessageId);
+        // if (!currentDraft || draftEquals(draft_message, currentDraft.draftMessage)) {
+        //     this.loadDraft();
+        // } else {
+        //     this.setState({
+        //         newDraft: { chatId: chat_id, draftMessage: draft_message }
+        //     });
+        // }
     };
 
     onClientUpdateStickerSend = update => {
@@ -215,11 +209,16 @@ class InputBoxControl extends Component {
         const { chatId } = this.state;
         if (chatId === update.nextChatId) return;
 
-        this.setState({
-            chatId: update.nextChatId,
-            replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
-            openPasteDialog: false
-        });
+        this.saveDraft();
+        this.setState(
+            {
+                chatId: update.nextChatId,
+                replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId)
+            },
+            () => {
+                this.loadDraft();
+            }
+        );
     };
 
     setDraft = () => {
@@ -254,7 +253,7 @@ class InputBoxControl extends Component {
             const element = this.newMessageRef.current;
             if (!element) return;
 
-            const textNode = this.findLastTextNode(element);
+            const textNode = findLastTextNode(element);
             if (textNode) {
                 const range = document.createRange();
                 range.setStart(textNode, textNode.length);
@@ -267,21 +266,6 @@ class InputBoxControl extends Component {
 
             element.focus();
         }, 100);
-    };
-
-    findLastTextNode = element => {
-        if (element.nodeType === Node.TEXT_NODE) {
-            return element;
-        }
-
-        for (let i = element.childNodes.length - 1; i >= 0; i--) {
-            const textNode = this.findLastTextNode(element.childNodes[i]);
-            if (textNode) {
-                return textNode;
-            }
-        }
-
-        return null;
     };
 
     setChatDraftMessage = chatDraftMessage => {
@@ -297,27 +281,30 @@ class InputBoxControl extends Component {
         });
     };
 
-    getNewChatDraftMessage = (chatId, replyToMessageId) => {
+    getDraftMessage = (chatId, replyToMessageId) => {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
         const { draft_message } = chat;
         const { innerHTML } = this.newMessageRef.current;
         const { text, entities } = getEntities(innerHTML);
-        const draftMessage = {
-            '@type': 'draftMessage',
-            reply_to_message_id: replyToMessageId,
-            input_message_text: {
-                '@type': 'inputMessageText',
-                text: {
-                    '@type': 'formattedText',
-                    text,
-                    entities
-                },
-                disable_web_page_preview: true,
-                clear_draft: false
-            }
-        };
+        const draftMessage =
+            text.length > 0 || entities.length > 0
+                ? {
+                      '@type': 'draftMessage',
+                      reply_to_message_id: replyToMessageId,
+                      input_message_text: {
+                          '@type': 'inputMessageText',
+                          text: {
+                              '@type': 'formattedText',
+                              text,
+                              entities
+                          },
+                          disable_web_page_preview: false,
+                          clear_draft: false
+                      }
+                  }
+                : null;
 
         if (draftEquals(draft_message, draftMessage)) {
             return null;
@@ -330,7 +317,7 @@ class InputBoxControl extends Component {
         const element = this.newMessageRef.current;
         if (!element) return;
 
-        const { innerHTML } = this.newMessageRef.current;
+        const { innerHTML } = element;
 
         element.innerText = null;
         this.handleInput();
@@ -396,7 +383,7 @@ class InputBoxControl extends Component {
         this.attachDocumentRef.current.value = '';
     };
 
-    handleKeyUp = () => {
+    setTyping() {
         const { chatId } = this.state;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
@@ -415,7 +402,70 @@ class InputBoxControl extends Component {
 
         const typingManager = chat.OutputTypingManager || (chat.OutputTypingManager = new OutputTypingManager(chat.id));
         typingManager.setTyping({ '@type': 'chatActionTyping' });
-    };
+    }
+
+    setHints() {
+        const innerText = this.newMessageRef.current.innerText;
+        if (!innerText || innerText.length > 11) {
+            const { hint } = StickerStore;
+            if (hint) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateLocalStickersHint',
+                    hint: null
+                });
+            }
+
+            return;
+        }
+
+        const t0 = performance.now();
+        const regex = emojiRegex();
+        let match = regex.exec(innerText);
+        const t1 = performance.now();
+        console.log('Matched ' + (t1 - t0) + 'ms', match);
+        if (!match || innerText !== match[0]) {
+            const { hint } = StickerStore;
+            if (hint) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateLocalStickersHint',
+                    hint: null
+                });
+            }
+
+            return;
+        }
+
+        const timestamp = Date.now();
+        TdLibController.send({
+            '@type': 'getStickers',
+            emoji: match[0],
+            limit: 100
+        }).then(stickers => {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateLocalStickersHint',
+                hint: {
+                    timestamp,
+                    emoji: match[0],
+                    stickers
+                }
+            });
+        });
+
+        TdLibController.send({
+            '@type': 'searchStickers',
+            emoji: match[0],
+            limit: 100
+        }).then(stickers => {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateRemoteStickersHint',
+                hint: {
+                    timestamp,
+                    emoji: match[0],
+                    stickers
+                }
+            });
+        });
+    }
 
     handleClear = () => {
         document.execCommand('removeFormat', false, null);
@@ -449,44 +499,52 @@ class InputBoxControl extends Component {
     handleUrl = () => {};
 
     handleKeyDown = event => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
+
+        if (key === 'Enter' && !shiftKey) {
             event.preventDefault();
             this.handleSubmit();
             return;
         }
 
-        if (event.repeat) return;
-
-        if ((event.ctrlKey || event.metaKey) && !event.shiftKey) {
-            if (!event.altKey) {
-                switch (event.keyCode) {
+        if ((ctrlKey || metaKey) && !shiftKey) {
+            if (!altKey) {
+                switch (keyCode) {
                     case 66: {
                         // cmd + b
-                        this.handleBold();
+                        if (!repeat) {
+                            this.handleBold();
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     }
                     case 73: {
                         // cmd + i
-                        this.handleItalic();
+                        if (!repeat) {
+                            this.handleItalic();
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     }
                     case 75: {
                         // cmd + k
-                        this.handleUrl();
+                        if (!repeat) {
+                            this.handleUrl();
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     }
                 }
             } else {
-                switch (event.keyCode) {
+                switch (keyCode) {
                     case 192: {
                         // alt + cmd + n
-                        this.handleClear();
+                        if (!repeat) {
+                            this.handleClear();
+                        }
                         event.preventDefault();
                         event.stopPropagation();
                         break;
@@ -544,8 +602,7 @@ class InputBoxControl extends Component {
         if (files.length > 0) {
             event.preventDefault();
 
-            this.files = files;
-            this.setState({ openPasteDialog: true });
+            this.setState({ files });
             return;
         }
 
@@ -557,10 +614,8 @@ class InputBoxControl extends Component {
         }
     };
 
-    handlePasteContinue = () => {
-        this.handleClosePaste();
-
-        const files = this.files;
+    handlePasteConfirm = () => {
+        const { files } = this.state;
         if (!files) return;
         if (!files.length) return;
 
@@ -568,11 +623,23 @@ class InputBoxControl extends Component {
             this.handleSendDocument(file);
         });
 
-        this.files = null;
+        this.handlePasteCancel();
     };
 
-    handleClosePaste = () => {
-        this.setState({ openPasteDialog: false });
+    handlePasteCancel = () => {
+        this.setState({ files: null });
+    };
+
+    handleUpdateDraftConfirm = () => {
+        const { newDraft } = this.state;
+        if (!newDraft) return;
+
+        this.loadDraft();
+        this.handleUpdateDraftCancel();
+    };
+
+    handleUpdateDraftCancel = () => {
+        this.setState({ newDraft: null });
     };
 
     handleSendingMessage = (message, blob) => {
@@ -634,71 +701,13 @@ class InputBoxControl extends Component {
     };
 
     handleInput = async event => {
-        const innerText = this.newMessageRef.current.innerText;
-        if (!innerText || innerText.length > 11) {
-            const { hint } = StickerStore;
-            if (hint) {
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateLocalStickersHint',
-                    hint: null
-                });
-            }
-
-            return;
-        }
-
-        const t0 = performance.now();
-        const regex = emojiRegex();
-        let match = regex.exec(innerText);
-        const t1 = performance.now();
-        console.log('Matched ' + (t1 - t0) + 'ms', match);
-        if (!match || innerText !== match[0]) {
-            const { hint } = StickerStore;
-            if (hint) {
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateLocalStickersHint',
-                    hint: null
-                });
-            }
-
-            return;
-        }
-
-        const timestamp = Date.now();
-        TdLibController.send({
-            '@type': 'getStickers',
-            emoji: match[0],
-            limit: 100
-        }).then(stickers => {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateLocalStickersHint',
-                hint: {
-                    timestamp,
-                    emoji: match[0],
-                    stickers
-                }
-            });
-        });
-
-        TdLibController.send({
-            '@type': 'searchStickers',
-            emoji: match[0],
-            limit: 100
-        }).then(stickers => {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateRemoteStickersHint',
-                hint: {
-                    timestamp,
-                    emoji: match[0],
-                    stickers
-                }
-            });
-        });
+        this.setTyping();
+        this.setHints();
     };
 
     render() {
         const { classes, t } = this.props;
-        const { chatId, replyToMessageId, openPasteDialog } = this.state;
+        const { chatId, replyToMessageId, files, newDraft } = this.state;
 
         return (
             <>
@@ -723,7 +732,6 @@ class InputBoxControl extends Component {
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
-                                onKeyUp={this.handleKeyUp}
                                 onPaste={this.handlePaste}
                                 onInput={this.handleInput}
                             />
@@ -765,28 +773,8 @@ class InputBoxControl extends Component {
                     </div>
                 </div>
                 {!isPrivateChat(chatId) && <CreatePollDialog onSend={this.handleSendPoll} />}
-                <Dialog
-                    transitionDuration={0}
-                    open={openPasteDialog}
-                    onClose={this.handleClosePaste}
-                    aria-labelledby='delete-dialog-title'>
-                    <DialogTitle id='delete-dialog-title'>{t('AppName')}</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            {this.files && this.files.length > 1
-                                ? 'Are you sure you want to send files?'
-                                : 'Are you sure you want to send file?'}
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClosePaste} color='primary'>
-                            {t('Cancel')}
-                        </Button>
-                        <Button onClick={this.handlePasteContinue} color='primary'>
-                            {t('Ok')}
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+                <PasteFilesDialog files={files} onConfirm={this.handlePasteConfirm} onCancel={this.handlePasteCancel} />
+                {/*<UpdateDraftDialog draft={newDraft} onConfirm={this.handleUpdateDraftConfirm} onCancel={this.handleUpdateDraftCancel}/>*/}
             </>
         );
     }

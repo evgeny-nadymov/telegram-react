@@ -48,6 +48,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     Next: 'Next',
                     InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
                     More: 'More',
+                    SendFileConfirmation: 'Are you sure you want to send file?',
+                    SendFilesConfirmation: 'Are you sure you want to send files?',
                     SendMessage: 'Send Message',
                     ChatInfo: 'Chat Info',
                     ChannelInfo: 'Channel Info',
@@ -60,7 +62,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     GoToMessage: 'Go to message',
                     PhotosTitle: 'Photos',
                     VideosTitle: 'Videos',
-                    VoiceTitle: 'Voice messages'
+                    VoiceTitle: 'Voice messages',
+                    UpdateDraftConfirmation: 'Are you sure you want to update draft?'
                 },
                 emoji: {
                     Search: 'Search',
@@ -96,6 +99,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     InvalidPhoneNumber:
                         'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
                     More: 'Ещё',
+                    SendFileConfirmation: 'Вы действительно хотите отправить файл?',
+                    SendFilesConfirmation: 'Вы действительно хотите отправить файлы?',
                     SendMessage: 'Отправить сообщение',
                     ChatInfo: 'Информация о чате',
                     ChannelInfo: 'Информация о канале',
@@ -108,7 +113,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     GoToMessage: 'Перейти к сообщению',
                     PhotosTitle: 'Фотографии',
                     VideosTitle: 'Видеозаписи',
-                    VoiceTitle: 'Голосовые сообщения'
+                    VoiceTitle: 'Голосовые сообщения',
+                    UpdateDraftConfirmation: 'Вы действительно хотите обновить черновик сообщения?'
                 },
                 emoji: {
                     Search: 'Поиск',

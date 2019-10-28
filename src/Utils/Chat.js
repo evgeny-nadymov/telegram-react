@@ -40,12 +40,8 @@ export function draftEquals(draft1, draft2) {
         return true;
     }
 
-    const { text: formattedText1, disable_web_page_preview: disableWebPagePreview1 } = inputMessageText1;
-    const { text: formattedText2, disable_web_page_preview: disableWebPagePreview2 } = inputMessageText2;
-
-    if (disableWebPagePreview1 !== disableWebPagePreview2) {
-        return false;
-    }
+    const { text: formattedText1 } = inputMessageText1;
+    const { text: formattedText2 } = inputMessageText2;
 
     if (!formattedText1 && !formattedText2) return true;
     if (formattedText1 && !formattedText2) return false;
@@ -1281,7 +1277,6 @@ function getChatDraftReplyToMessageId(chatId) {
         }
     }
 
-    console.log('getChatDraft', replyToMessageId);
     return replyToMessageId;
 }
 

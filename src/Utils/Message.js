@@ -1772,6 +1772,8 @@ export function getEntities(text) {
     const entities = [];
     if (!text) return { text, entities };
 
+    text = text.split('<br>').join('\n');
+
     console.log(`[ge] start text=${text}`);
 
     let index = -1; // first index of end tag
@@ -1824,6 +1826,9 @@ export function getEntities(text) {
                     textContent: finalText.substring(offset, offset + length)
                 });
                 offset += length;
+                break;
+            }
+            case 'BR': {
                 break;
             }
             case 'CODE': {
@@ -1895,7 +1900,13 @@ export function getEntities(text) {
                 let replacedFirst = firstChar === ' ' || firstChar === '\xA0' || firstChar === '\n';
                 let startText = text.substring(0, start - (replacedFirst ? 1 : 0));
 
-                const contentText = text.substring(start + 3, index);
+                // remove first line break in pre content
+                let replacedContentNewLine = false;
+                let contentText = text.substring(start + 3, index);
+                if (contentText.length > 0 && contentText[0] === '\n') {
+                    contentText = contentText.substring(1);
+                    replacedContentNewLine = true;
+                }
 
                 // clean space and new line symbol after end tag
                 const lastChar = index + 3 < text.length ? text[index + 3] : 0;
@@ -1916,7 +1927,7 @@ export function getEntities(text) {
 
                 if (contentText.length > 0) {
                     offset = start + (replacedFirst ? 0 : 1);
-                    length = index - start - 3 + (replacedFirst ? 0 : 1);
+                    length = index - start - 3 - (replacedContentNewLine ? 1 : 0) + (replacedFirst ? 0 : 1);
 
                     text = startText + contentText + endText;
 

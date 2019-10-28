@@ -154,7 +154,7 @@ class DialogsHeader extends React.Component {
 
         const confirmLogoutDialog = open ? (
             <Dialog transitionDuration={0} open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
-                <DialogTitle id='form-dialog-title'>{t('AppName')}</DialogTitle>
+                <DialogTitle id='form-dialog-title'>{t('Confirm')}</DialogTitle>
                 <DialogContent>
                     <DialogContentText className={classes.dialogText}>{t('AreYouSureLogout')}</DialogContentText>
                 </DialogContent>
