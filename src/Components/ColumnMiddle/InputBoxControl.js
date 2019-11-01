@@ -16,6 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Popup/CreatePollDialog';
+import EditUrlDialog from '../Popup/EditUrlDialog';
 import InputBoxHeader from './InputBoxHeader';
 import PasteFilesDialog from '../Popup/PasteFilesDialog';
 import UpdateDraftDialog from '../Popup/UpdateDraftDialog';
@@ -60,11 +61,27 @@ class InputBoxControl extends Component {
             chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId)
         };
+
+        document.addEventListener(
+            'selectionchange',
+            () => {
+                console.log('selection change: ', document.getSelection());
+                if (document.activeElement === this.newMessageRef.current) {
+                    this.handleSelect();
+                }
+            },
+            true
+        );
     }
+
+    handleSelect = event => {
+        this.selection = document.getSelection();
+        this.range = this.selection.getRangeAt(0);
+    };
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId } = this.state;
+        const { chatId, newDraft, files, replyToMessageId, openEditUrl } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -87,6 +104,10 @@ class InputBoxControl extends Component {
         }
 
         if (nextState.replyToMessageId !== replyToMessageId) {
+            return true;
+        }
+
+        if (nextState.openEditUrl !== openEditUrl) {
             return true;
         }
 
@@ -213,7 +234,8 @@ class InputBoxControl extends Component {
         this.setState(
             {
                 chatId: update.nextChatId,
-                replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId)
+                replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
+                openEditUrl: false
             },
             () => {
                 this.loadDraft();
@@ -496,7 +518,9 @@ class InputBoxControl extends Component {
         document.execCommand('strikeThrough', false, null);
     };
 
-    handleUrl = () => {};
+    handleUrl = () => {
+        this.openEditUrlDialog();
+    };
 
     handleKeyDown = event => {
         const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
@@ -705,9 +729,125 @@ class InputBoxControl extends Component {
         this.setHints();
     };
 
+    openEditUrlDialog = () => {
+        let defaultText = '';
+        let defaultUrl = '';
+
+        const { selection, range } = this;
+        if (range) {
+            const { startContainer, endContainer } = range;
+            if (startContainer === endContainer) {
+                const { parentElement } = startContainer;
+                if (parentElement && parentElement.nodeName === 'A') {
+                    defaultText = parentElement.innerText;
+                    defaultUrl = parentElement.href;
+                }
+            }
+        }
+
+        if (!defaultText && selection && !selection.isCollapsed) {
+            defaultText = selection.toString();
+        }
+
+        this.setState({
+            openEditUrl: true,
+            defaultUrl,
+            defaultText
+        });
+    };
+
+    closeEditUrlDialog = () => {
+        this.setState(
+            {
+                openEditUrl: false
+            },
+            () => {
+                this.restoreSelection();
+            }
+        );
+    };
+
+    restoreSelection = () => {
+        if (!this.range) {
+            this.focusInput();
+            return;
+        }
+
+        const selection = document.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(this.range);
+
+        this.newMessageRef.current.focus();
+    };
+
+    focusInput = () => {
+        const element = this.newMessageRef.current;
+        if (!element) return;
+        if (!element.childNodes.length) {
+            element.focus();
+            return;
+        }
+
+        const lastTextNode = this.findLastTextNode(element);
+        if (!lastTextNode) {
+            return;
+        }
+
+        const range = document.createRange();
+        range.setStart(lastTextNode, lastTextNode.length);
+        range.collapse(true);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        element.focus();
+    };
+
+    handleCancel = () => {
+        this.closeEditUrlDialog();
+    };
+
+    handleDone = (text, url) => {
+        this.closeEditUrlDialog();
+        setTimeout(() => {
+            // edit current link node
+            const { range } = this;
+            if (range) {
+                const { startContainer, endContainer } = range;
+                if (startContainer && startContainer === endContainer) {
+                    const { parentNode } = startContainer;
+                    if (parentNode && parentNode.nodeName === 'A') {
+                        parentNode.href = url;
+                        parentNode.title = url;
+                        parentNode.innerText = text;
+
+                        // move cursor to end of editing node
+                        const { lastChild } = parentNode;
+                        if (lastChild) {
+                            const range = document.createRange();
+                            range.setStart(lastChild, lastChild.textContent.length);
+                            range.setEnd(lastChild, lastChild.textContent.length);
+
+                            const selection = document.getSelection();
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // replace selected text with new link node
+            const link = `<a href=${url} title=${url} rel='noopener norefferer' target='_blank'>${text}</a>`;
+            document.execCommand('removeFormat', false, null);
+            document.execCommand('insertHTML', false, link);
+        }, 0);
+    };
+
     render() {
         const { classes, t } = this.props;
-        const { chatId, replyToMessageId, files, newDraft } = this.state;
+        const { chatId, replyToMessageId, files, newDraft, defaultText, defaultUrl, openEditUrl } = this.state;
 
         return (
             <>
@@ -775,6 +915,13 @@ class InputBoxControl extends Component {
                 {!isPrivateChat(chatId) && <CreatePollDialog onSend={this.handleSendPoll} />}
                 <PasteFilesDialog files={files} onConfirm={this.handlePasteConfirm} onCancel={this.handlePasteCancel} />
                 {/*<UpdateDraftDialog draft={newDraft} onConfirm={this.handleUpdateDraftConfirm} onCancel={this.handleUpdateDraftCancel}/>*/}
+                <EditUrlDialog
+                    open={openEditUrl}
+                    defaultText={defaultText}
+                    defaultUrl={defaultUrl}
+                    onDone={this.handleDone}
+                    onCancel={this.handleCancel}
+                />
             </>
         );
     }
