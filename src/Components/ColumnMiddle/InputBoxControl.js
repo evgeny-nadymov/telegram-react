@@ -65,7 +65,7 @@ class InputBoxControl extends Component {
         document.addEventListener(
             'selectionchange',
             () => {
-                console.log('selection change: ', document.getSelection());
+                // console.log('selection change: ', document.getSelection());
                 if (document.activeElement === this.newMessageRef.current) {
                     this.handleSelect();
                 }
@@ -788,7 +788,7 @@ class InputBoxControl extends Component {
             return;
         }
 
-        const lastTextNode = this.findLastTextNode(element);
+        const lastTextNode = findLastTextNode(element);
         if (!lastTextNode) {
             return;
         }

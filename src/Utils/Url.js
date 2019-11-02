@@ -55,7 +55,7 @@ export function hasRTLOSymbol(url) {
 }
 
 const regExpDomainExplicit = new RegExp(
-    '(?<![\\w\\$\\-\\_%=\\.])(?:([a-zA-Z]+)://)((?:[A-Za-z' +
+    '([\\w\\$\\-\\_%=\\.])(?:([a-zA-Z]+)://)((?:[A-Za-z' +
         '\xD0\x90-\xD0\xAF\xD0\x81' +
         '\xD0\xB0-\xD1\x8F\xD1\x91' +
         '0-9\\-\\_]+\\.){0,10}([A-Za-z' +
@@ -63,7 +63,7 @@ const regExpDomainExplicit = new RegExp(
         '\\-\\d]{2,22})(\\:\\d+)?)'
 );
 const regExpDomain = new RegExp(
-    '(?<![\\w\\$\\-\\_%=\\.])(?:([a-zA-Z]+)://)?((?:[A-Za-z' +
+    '([\\w\\$\\-\\_%=\\.])(?:([a-zA-Z]+)://)?((?:[A-Za-z' +
         '\xD0\x90-\xD0\xAF\xD0\x81' +
         '\xD0\xB0-\xD1\x8F\xD1\x91' +
         '0-9\\-\\_]+\\.){1,10}([A-Za-z' +
@@ -74,6 +74,8 @@ const regExpProtocol = new RegExp('^([a-zA-Z]+)://');
 
 // https://github.com/telegramdesktop/tdesktop/blob/4e80d54be130eca76129f2c4995fe685d1014442/Telegram/SourceFiles/base/qthelp_url.cpp#L105
 export function validateUrl(value) {
+    // value = punycode.ToASCII(value);
+
     const trimmed = value.trim();
     if (!trimmed) {
         return null;
