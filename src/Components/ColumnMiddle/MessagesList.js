@@ -24,7 +24,7 @@ import { filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage, openChat } from '../../Actions/Client';
-import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S } from '../../Constants';
+import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -854,13 +854,13 @@ class MessagesList extends React.Component {
 
         this.updateItemsInView();
 
-        if (list.scrollTop <= 0) {
+        if (list.scrollTop <= SCROLL_PRECISION) {
             this.onLoadNext();
-        } else if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
+        } else if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             this.onLoadPrevious();
         }
 
-        if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             if (this.completed && scrollDownVisible) {
                 if (this.prevScrollTop !== list.scrollTop && this.prevScrollTop && this.prevHistory === history) {
                     this.setState({

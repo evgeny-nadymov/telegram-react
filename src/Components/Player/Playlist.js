@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { getMedia, openMedia } from '../../Utils/Message';
 import { borderStyle } from '../Theme';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { SCROLL_PRECISION } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Playlist.css';
@@ -176,11 +177,11 @@ class Playlist extends React.Component {
         const list = this.listRef.current;
         if (!list) return;
 
-        if (list.scrollTop === 0) {
+        if (list.scrollTop <= SCROLL_PRECISION) {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateMediaPlaylistNext'
             });
-        } else if (list.scrollHeight === list.scrollTop + list.offsetHeight) {
+        } else if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateMediaPlaylistPrev'
             });

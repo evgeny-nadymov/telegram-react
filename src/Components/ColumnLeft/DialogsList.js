@@ -9,7 +9,7 @@ import React from 'react';
 import CacheManager from '../../Workers/CacheManager';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
-import { CHAT_SLICE_LIMIT } from '../../Constants';
+import { CHAT_SLICE_LIMIT, SCROLL_PRECISION } from '../../Constants';
 import { loadChatsContent } from '../../Utils/File';
 import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
@@ -297,7 +297,7 @@ class DialogsList extends React.Component {
     handleScroll = () => {
         const list = this.listRef.current;
 
-        if (list && list.scrollTop + list.offsetHeight >= list.scrollHeight) {
+        if (list && list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             this.onLoadNext();
         }
     };

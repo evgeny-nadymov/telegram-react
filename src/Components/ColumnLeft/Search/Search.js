@@ -23,7 +23,7 @@ import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
-import { USERNAME_LENGTH_MIN } from '../../../Constants';
+import { SCROLL_PRECISION, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -354,7 +354,7 @@ class Search extends React.Component {
     handleScroll = () => {
         const list = this.listRef.current;
 
-        if (list.scrollTop + list.offsetHeight === list.scrollHeight) {
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             this.onLoadPrevious();
         }
     };

@@ -13,7 +13,7 @@ import SharedMediaHeader from './SharedMediaHeader';
 import { between, insertByOrder } from '../../../Utils/Common';
 import { loadMessageContents } from '../../../Utils/File';
 import { messageComparatorDesc } from '../../../Utils/Message';
-import { SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
+import { SCROLL_PRECISION, SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
@@ -305,7 +305,7 @@ class SharedMediaBase extends React.Component {
 
         const { params } = this;
 
-        if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             if (params && !params.completed) {
                 this.onLoadNext(params);
             } else {
@@ -330,7 +330,7 @@ class SharedMediaBase extends React.Component {
         const { searchParams } = this;
         if (!searchParams) return;
 
-        if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             if (!searchParams.completed) {
                 this.onSearchNext(searchParams);
             } else {
