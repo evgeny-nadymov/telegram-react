@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - 'lts/*'
+before_install:
+  - echo node=$(node -v)
+  - echo npm=$(npm -v)
+  - echo yarn=$(yarn -v)
+install:
+  - yarn
+script:
+  - npm run build
