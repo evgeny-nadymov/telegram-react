@@ -497,24 +497,44 @@ class InputBoxControl extends Component {
     handleBold = () => {
         document.execCommand('removeFormat', false, null);
         document.execCommand('unlink', false, null);
+
         document.execCommand('bold', false, null);
     };
 
     handleItalic = () => {
         document.execCommand('removeFormat', false, null);
         document.execCommand('unlink', false, null);
+
         document.execCommand('italic', false, null);
+    };
+
+    handleMono = () => {
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('unlink', false, null);
+
+        let text = '';
+        const { selection } = this;
+        if (selection && !selection.isCollapsed) {
+            text = selection.toString();
+        }
+
+        if (!text) return;
+        text = `<code>${text}</code>`;
+        document.execCommand('removeFormat', false, null);
+        document.execCommand('insertHTML', false, text);
     };
 
     handleUnderline = () => {
         document.execCommand('removeFormat', false, null);
         document.execCommand('unlink', false, null);
+
         document.execCommand('underline', false, null);
     };
 
     handleStrikeThrough = () => {
         document.execCommand('removeFormat', false, null);
         document.execCommand('unlink', false, null);
+
         document.execCommand('strikeThrough', false, null);
     };
 
@@ -564,6 +584,15 @@ class InputBoxControl extends Component {
                 }
             } else {
                 switch (keyCode) {
+                    case 75: {
+                        // alt + cmd + k
+                        if (!event.repeat) {
+                            this.handleMono();
+                        }
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     case 192: {
                         // alt + cmd + n
                         if (!repeat) {
