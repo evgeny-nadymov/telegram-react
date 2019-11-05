@@ -17,6 +17,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { openChat, openUser } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './MentionLink.css';
+import { isGroupChat } from '../../Utils/Chat';
 
 class MentionLink extends React.Component {
     constructor(props) {
@@ -55,7 +56,11 @@ class MentionLink extends React.Component {
             });
 
             if (chat) {
-                openChat(chat.id, null, popup);
+                if (isGroupChat(chat.id)) {
+                    openChat(chat.id, null, false);
+                } else {
+                    openChat(chat.id, null, popup);
+                }
             }
         }
     };

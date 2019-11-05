@@ -279,30 +279,23 @@ function getFormattedText(text) {
 function getText(message) {
     if (!message) return null;
 
-    let text = [];
+    let result = [];
 
     const { content } = message;
+    if (!content) return result;
 
-    if (
-        content &&
-        content['@type'] === 'messageText' &&
-        content.text &&
-        content.text['@type'] === 'formattedText' &&
-        content.text.text
-    ) {
-        text = getFormattedText(content.text);
-    } else {
-        //text.push('[' + message.content['@type'] + ']');//JSON.stringify(x);
-        if (content && content.caption && content.caption['@type'] === 'formattedText' && content.caption.text) {
-            text.push('\n');
-            let formattedText = getFormattedText(content.caption);
-            if (formattedText) {
-                text = text.concat(formattedText);
-            }
+    const { text, caption } = content;
+
+    if (text && text['@type'] === 'formattedText' && text.text) {
+        result = getFormattedText(text);
+    } else if (caption && caption['@type'] === 'formattedText' && caption.text) {
+        const formattedText = getFormattedText(caption);
+        if (formattedText) {
+            result = result.concat(formattedText);
         }
     }
 
-    return text;
+    return result;
 }
 
 function getWebPage(message) {
@@ -2052,6 +2045,22 @@ export function getEntities(text) {
     console.log(`[ge] result text=${text}`, entities);
 
     return { text, entities };
+}
+
+export function canMessageBeEdited(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { can_be_edited, content } = message;
+    if (!can_be_edited) return false;
+
+    switch (content['@type']) {
+        case 'messageText': {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 export {
