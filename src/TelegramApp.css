@@ -53,7 +53,7 @@ mark {
 
 .page {
     height: calc(100% - 23px);
-    max-width: 1010px;
+    max-width: 100%;
     min-width: 300px;
     margin: 0 auto;
     box-shadow: 0 1px 0 #dfe5ec;
