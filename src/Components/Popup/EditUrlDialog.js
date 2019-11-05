@@ -136,11 +136,9 @@ class EditUrlDialog extends React.Component {
     };
 
     render() {
-        const { open, defaultUrl, defaultText } = this.props;
+        const { open, defaultUrl, defaultText, t } = this.props;
         const { textError, urlError } = this.state;
         if (!open) return null;
-
-        const t = k => k;
 
         return (
             <Dialog
