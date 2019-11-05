@@ -2063,6 +2063,15 @@ export function canMessageBeEdited(chatId, messageId) {
     return false;
 }
 
+export function showMessageForward(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { forward_info, content } = message;
+
+    return forward_info && content && content['@type'] !== 'messageSticker' && content['@type'] !== 'messageAudio';
+}
+
 export {
     getAuthor,
     getTitle,

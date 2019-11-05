@@ -20,7 +20,15 @@ import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
-import { getEmojiMatches, getText, getMedia, getUnread, getWebPage, openMedia } from '../../Utils/Message';
+import {
+    getEmojiMatches,
+    getText,
+    getMedia,
+    getUnread,
+    getWebPage,
+    openMedia,
+    showMessageForward
+} from '../../Utils/Message';
 import { canSendMessages } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage, openReply } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
@@ -323,6 +331,8 @@ class Message extends Component {
             );
         }
 
+        const showForward = showMessageForward(chatId, messageId);
+
         const messageClassName = classNames('message', classes.message, {
             'message-selected': selected,
             [classes.messageSelected]: selected,
@@ -354,10 +364,10 @@ class Message extends Component {
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {showTitle && !forward_info && (
+                            {showTitle && !showForward && (
                                 <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
                             )}
-                            {forward_info && <Forward forwardInfo={forward_info} />}
+                            {showForward && <Forward forwardInfo={forward_info} />}
                             {showTitle && meta}
                         </div>
                         {Boolean(reply_to_message_id) && (
