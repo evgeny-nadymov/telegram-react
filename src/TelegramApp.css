@@ -53,9 +53,8 @@ mark {
 
 .page {
     height: calc(100% - 23px);
-    max-width: 1010px;
+    width: 100%;
     min-width: 300px;
-    margin: 0 auto;
     box-shadow: 0 1px 0 #dfe5ec;
     border-left: 1px solid #dfe5ec;
     border-right: 1px solid #dfe5ec;
@@ -65,7 +64,6 @@ mark {
 }
 
 .page-third-column {
-    max-width: 1440px;
 }
 
 .accent-color {
