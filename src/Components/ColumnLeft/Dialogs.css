@@ -7,7 +7,7 @@
 
 .dialogs {
     float: left;
-    width: calc(36% - 0px);
+    width: calc(20% - 0px);
     margin: 0;
     box-sizing: border-box;
     border-right-width: 1px;
