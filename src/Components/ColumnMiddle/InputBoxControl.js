@@ -466,7 +466,7 @@ class InputBoxControl extends Component {
             text,
             entities
         };
-        const content = {
+        const inputContent = {
             '@type': 'inputMessageText',
             text: formattedText,
             disable_web_page_preview: false,
@@ -482,12 +482,12 @@ class InputBoxControl extends Component {
 
             const { text, caption } = content;
             if (text) {
-                this.editMessageText(content, result => {});
+                this.editMessageText(inputContent, result => {});
             } else if (caption) {
                 this.editMessageCaption(formattedText, result => {});
             }
         } else {
-            this.sendMessage(content, false, result => {});
+            this.sendMessage(inputContent, false, result => {});
         }
     };
 
@@ -905,20 +905,22 @@ class InputBoxControl extends Component {
         if (!editMessageId) return;
         if (!content) return;
 
-        const result = await TdLibController.send({
-            '@type': 'editMessageText',
-            chat_id: chatId,
-            message_id: editMessageId,
-            input_message_content: content
-        });
+        try {
+            const result = await TdLibController.send({
+                '@type': 'editMessageText',
+                chat_id: chatId,
+                message_id: editMessageId,
+                input_message_content: content
+            });
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateEditMessage',
-            chatId,
-            messageId: 0
-        });
-
-        callback(result);
+            callback(result);
+        } finally {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateEditMessage',
+                chatId,
+                messageId: 0
+            });
+        }
     }
 
     sendMessage = async (content, clearDraft, callback) => {

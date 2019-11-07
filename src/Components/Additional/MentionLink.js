@@ -75,12 +75,14 @@ class MentionLink extends React.Component {
     };
 
     render() {
-        const { children, t, username } = this.props;
+        const { children, t, title, username } = this.props;
         const { error } = this.state;
 
         return (
             <>
-                <a onClick={this.handleClick}>{children}</a>
+                <a title={title} onClick={this.handleClick}>
+                    {children}
+                </a>
                 {error && (
                     <Dialog
                         transitionDuration={0}
@@ -105,6 +107,7 @@ class MentionLink extends React.Component {
 MentionLink.propTypes = {
     userId: PropTypes.number,
     username: PropTypes.string,
+    title: PropTypes.string,
     popup: PropTypes.bool
 };
 

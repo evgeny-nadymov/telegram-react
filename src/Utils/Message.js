@@ -196,8 +196,12 @@ function getFormattedText(text) {
                 break;
             }
             case 'textEntityTypeMentionName': {
+                const user = UserStore.get(text.entities[i].type.user_id);
                 result.push(
-                    <MentionLink key={text.entities[i].offset} userId={text.entities[i].type.user_id}>
+                    <MentionLink
+                        key={text.entities[i].offset}
+                        userId={text.entities[i].type.user_id}
+                        title={getUserFullName(user)}>
                         {entityText}
                     </MentionLink>
                 );
@@ -1704,7 +1708,24 @@ export function getNodes(text, entities) {
                     break;
                 }
                 case 'textEntityTypeMentionName': {
-                    addTextNode(x.offset, x.length, text, nodes);
+                    try {
+                        const { user_id } = x.type;
+                        const user = UserStore.get(user_id);
+                        if (user) {
+                            const node = document.createElement('a');
+                            // node.href = getDecodedUrl(url, false);
+                            node.title = getUserFullName(user);
+                            // node.target = '_blank';
+                            // node.rel = 'noopener norefferer';
+                            node.dataset.userId = user_id;
+                            node.innerText = text.substr(x.offset, x.length);
+                            nodes.push(node);
+                        } else {
+                            addTextNode(x.offset, x.length, text, nodes);
+                        }
+                    } catch {
+                        addTextNode(x.offset, x.length, text, nodes);
+                    }
                     break;
                 }
                 case 'textEntityTypePhoneNumber': {
@@ -1799,13 +1820,23 @@ export function getEntities(text) {
                 break;
             }
             case 'A': {
-                entities.push({
-                    '@type': 'textEntity',
-                    offset,
-                    length,
-                    type: { '@type': 'textEntityTypeTextUrl', url: node.href },
-                    textContent: finalText.substring(offset, offset + length)
-                });
+                if (node.dataset.userId) {
+                    entities.push({
+                        '@type': 'textEntity',
+                        offset,
+                        length,
+                        type: { '@type': 'textEntityTypeMentionName', user_id: node.dataset.userId },
+                        textContent: finalText.substring(offset, offset + length)
+                    });
+                } else if (node.href) {
+                    entities.push({
+                        '@type': 'textEntity',
+                        offset,
+                        length,
+                        type: { '@type': 'textEntityTypeTextUrl', url: node.href },
+                        textContent: finalText.substring(offset, offset + length)
+                    });
+                }
                 offset += length;
                 break;
             }
