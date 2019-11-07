@@ -22,6 +22,50 @@ class EditUrlDialog extends React.Component {
         this.state = {};
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { defaultText, defaultUrl, open } = this.props;
+
+        if (open && prevProps.open !== open) {
+            setTimeout(() => {
+                const text = this.textInputRef.current;
+                const url = this.urlInputRef.current;
+
+                if (!text) return;
+                if (!url) return;
+
+                if (!defaultText) {
+                    text.focus();
+                } else if (!defaultUrl) {
+                    url.focus();
+                } else {
+                    text.focus();
+                    text.select();
+                }
+            }, 0);
+        }
+    }
+
+    componentDidMount() {
+        // const { defaultText, defaultUrl } = this.props;
+        //
+        // const text = this.textInputRef.current;
+        // const url = this.urlInputRef.current;
+        //
+        // if (!text) return;
+        // if (!url) return;
+        //
+        // setTimeout(() => {
+        //     if (!defaultText) {
+        //         text.focus();
+        //     } else if (!defaultUrl) {
+        //         url.focus();
+        //     } else {
+        //         text.focus();
+        //         // text.select();
+        //     }
+        // }, 0);
+    }
+
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { defaultText, defaultUrl, onDone, onCancel, open } = this.props;
         const { textError, urlError } = this.state;
@@ -154,7 +198,6 @@ class EditUrlDialog extends React.Component {
                             inputRef={this.textInputRef}
                             label={t('Text')}
                             margin='normal'
-                            autoFocus={true}
                             autoComplete='off'
                             defaultValue={defaultText}
                             error={textError}
@@ -189,8 +232,8 @@ class EditUrlDialog extends React.Component {
 
 EditUrlDialog.propTypes = {
     open: PropTypes.bool.isRequired,
-    defaultText: PropTypes.string.isRequired,
-    defaultUrl: PropTypes.string.isRequired,
+    defaultText: PropTypes.string,
+    defaultUrl: PropTypes.string,
     onDone: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired
 };
