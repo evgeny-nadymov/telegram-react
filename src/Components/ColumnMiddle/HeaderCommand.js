@@ -9,32 +9,31 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
+import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox/';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox/';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { borderStyle } from '../Theme';
+import { canMessageBeEdited } from '../../Utils/Message';
 import { canSendMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
 import { forwardMessages } from '../../Actions/Client';
+import AppStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderCommand.css';
 
 const styles = theme => ({
     buttonLeft: {
-        margin: '14px 0 14px 14px',
-        minWidth: '100px'
+        margin: '14px 0 14px 14px'
     },
     buttonRight: {
-        margin: '14px 14px 14px 0',
-        minWidth: '100px'
+        margin: '14px 14px 14px 0'
     },
     ...borderStyle(theme)
 });
@@ -121,14 +120,24 @@ class HeaderCommand extends React.Component {
 
         this.handleCancel();
 
-        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
+        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId, messageId });
+    };
+
+    handleEdit = () => {
+        if (MessageStore.selectedItems.size !== 1) return;
+
+        const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+
+        this.handleCancel();
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateEditMessage', chatId, messageId });
     };
 
     render() {
         const { classes, t, count } = this.props;
         const { openDeleteDialog, canBeDeletedForAllUsers, revoke } = this.state;
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
 
         let canBeDeleted = true;
         for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
@@ -157,6 +166,11 @@ class HeaderCommand extends React.Component {
         }
 
         const canBeReplied = count === 1 && canSendMessages(chatId);
+        let canBeEdited = false;
+        if (count === 1) {
+            const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+            canBeEdited = canMessageBeEdited(chatId, messageId);
+        }
 
         return (
             <>
@@ -174,6 +188,11 @@ class HeaderCommand extends React.Component {
                     {canBeReplied && (
                         <Button color='primary' className={classes.buttonLeft} onClick={this.handleReply}>
                             {t('Reply')}
+                        </Button>
+                    )}
+                    {canBeEdited && (
+                        <Button color='primary' className={classes.buttonLeft} onClick={this.handleEdit}>
+                            {t('Edit')}
                         </Button>
                     )}
                     <div className='header-command-space' />
@@ -206,10 +225,10 @@ class HeaderCommand extends React.Component {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleCloseDelete} color='primary'>
-                            Cancel
+                            {t('Cancel')}
                         </Button>
                         <Button onClick={this.handleDeleteContinue} color='primary'>
-                            Ok
+                            {t('Ok')}
                         </Button>
                     </DialogActions>
                 </Dialog>

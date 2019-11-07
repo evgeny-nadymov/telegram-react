@@ -11,9 +11,10 @@ import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import emojiRegex from 'emoji-regex';
-import SendIcon from '@material-ui/icons/Send';
+import DoneIcon from '@material-ui/icons/Done';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
+import SendIcon from '@material-ui/icons/Send';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Popup/CreatePollDialog';
 import EditUrlDialog from '../Popup/EditUrlDialog';
@@ -59,29 +60,24 @@ class InputBoxControl extends Component {
 
         this.state = {
             chatId,
-            replyToMessageId: getChatDraftReplyToMessageId(chatId)
+            replyToMessageId: getChatDraftReplyToMessageId(chatId),
+            editMessageId: 0
         };
 
         document.addEventListener(
             'selectionchange',
             () => {
-                // console.log('selection change: ', document.getSelection());
                 if (document.activeElement === this.newMessageRef.current) {
-                    this.handleSelect();
+                    this.saveSelection();
                 }
             },
             true
         );
     }
 
-    handleSelect = event => {
-        this.selection = document.getSelection();
-        this.range = this.selection.getRangeAt(0);
-    };
-
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, openEditUrl } = this.state;
+        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditUrl } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -107,6 +103,10 @@ class InputBoxControl extends Component {
             return true;
         }
 
+        if (nextState.editMessageId !== editMessageId) {
+            return true;
+        }
+
         if (nextState.openEditUrl !== openEditUrl) {
             return true;
         }
@@ -121,17 +121,29 @@ class InputBoxControl extends Component {
     }
 
     saveDraft() {
-        const { chatId, replyToMessageId } = this.state;
+        const { chatId, editMessageId, replyToMessageId } = this.state;
 
-        const draftMessage = this.getDraftMessage(chatId, replyToMessageId);
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        let innerHTML = null;
+        if (editMessageId) {
+            innerHTML = this.beforeEditText ? this.beforeEditText.innerHTML : null;
+        } else {
+            innerHTML = element.innerHTML;
+        }
+
+        const draftMessage = this.getDraftMessage(chatId, replyToMessageId, innerHTML);
         this.setChatDraftMessage(draftMessage);
     }
 
     componentDidMount() {
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatDraftMessage);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         this.loadDraft();
@@ -141,10 +153,83 @@ class InputBoxControl extends Component {
         this.saveDraft();
 
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatDraftMessage);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
+        MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
+    }
+
+    onUpdateDeleteMessages = update => {
+        const { chatId, editMessageId } = this.state;
+        const { chat_id, message_ids, is_permanent } = update;
+
+        if (!editMessageId) return;
+        if (!is_permanent) return;
+        if (chatId !== chat_id) return;
+        if (message_ids.indexOf(editMessageId) === -1) return;
+
+        this.handleCancel();
+    };
+
+    onClientUpdateEditMessage = update => {
+        const { chatId, messageId } = update;
+        if (this.state.chatId !== chatId) return;
+
+        if (!messageId) {
+            this.restoreDraftAndSelection();
+        } else {
+            this.saveDraftAndSelection();
+        }
+
+        this.setState(
+            {
+                editMessageId: messageId
+            },
+            () => {
+                this.setEditMessage();
+                this.handleInput();
+                this.focusInput();
+            }
+        );
+    };
+
+    restoreDraftAndSelection() {
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        const { beforeEditText } = this;
+
+        if (beforeEditText) {
+            element.innerHTML = beforeEditText.innerHTML;
+
+            if (!beforeEditText.range) {
+                this.focusInput();
+                return;
+            }
+
+            const selection = document.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(beforeEditText.range);
+
+            element.focus();
+        } else {
+            element.innerHTML = null;
+            this.focusInput();
+        }
+
+        this.handleInput();
+    }
+
+    saveDraftAndSelection() {
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        this.beforeEditText = {
+            innerHTML: element.innerHTML,
+            range: this.range
+        };
     }
 
     onClientUpdateFocusWindow = update => {
@@ -155,20 +240,12 @@ class InputBoxControl extends Component {
     };
 
     onUpdateChatDraftMessage = update => {
-        const { chat_id, draft_message } = update;
-        const { chatId, replyToMessageId } = this.state;
+        const { chat_id } = update;
+        const { chatId } = this.state;
 
         if (chatId !== chat_id) return;
 
         this.loadDraft();
-        // const currentDraft = this.getDraftMessage(chatId, replyToMessageId);
-        // if (!currentDraft || draftEquals(draft_message, currentDraft.draftMessage)) {
-        //     this.loadDraft();
-        // } else {
-        //     this.setState({
-        //         newDraft: { chatId: chat_id, draftMessage: draft_message }
-        //     });
-        // }
     };
 
     onClientUpdateStickerSend = update => {
@@ -178,7 +255,7 @@ class InputBoxControl extends Component {
         const { sticker, thumbnail, width, height } = item;
         if (!sticker) return;
 
-        this.newMessageRef.current.innerText = null;
+        this.restoreSelection();
 
         const content = {
             '@type': 'inputMessageSticker',
@@ -203,7 +280,7 @@ class InputBoxControl extends Component {
             };
         }
 
-        this.onSendInternal(content, true, result => {});
+        this.sendMessage(content, false, result => {});
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateLocalStickersHint',
@@ -231,10 +308,12 @@ class InputBoxControl extends Component {
         if (chatId === update.nextChatId) return;
 
         this.saveDraft();
+        this.beforeEditText = null;
         this.setState(
             {
                 chatId: update.nextChatId,
                 replyToMessageId: getChatDraftReplyToMessageId(update.nextChatId),
+                editMessageId: 0,
                 openEditUrl: false
             },
             () => {
@@ -248,20 +327,9 @@ class InputBoxControl extends Component {
 
         const element = this.newMessageRef.current;
 
-        const draft = getChatDraft(chatId);
-        if (draft) {
-            const { text, entities } = draft;
-
-            try {
-                const nodes = getNodes(text, entities);
-                element.innerHTML = null;
-                nodes.forEach(x => {
-                    element.appendChild(x);
-                });
-            } catch (e) {
-                element.innerText = draft.text;
-            }
-
+        const formattedText = getChatDraft(chatId);
+        if (formattedText) {
+            this.setFormattedText(formattedText);
             this.setState({
                 replyToMessageId: getChatDraftReplyToMessageId(chatId)
             });
@@ -269,6 +337,47 @@ class InputBoxControl extends Component {
             element.innerText = null;
         }
     };
+
+    setEditMessage() {
+        const { chatId, editMessageId } = this.state;
+
+        const message = MessageStore.get(chatId, editMessageId);
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        const { text } = content;
+        if (!text) return;
+
+        const element = this.newMessageRef.current;
+
+        if (text) {
+            this.setFormattedText(text);
+        } else {
+            element.innerText = null;
+        }
+    }
+
+    setFormattedText(formattedText) {
+        const element = this.newMessageRef.current;
+
+        if (!formattedText) {
+            element.innerText = null;
+            return;
+        }
+
+        const { text, entities } = formattedText;
+        try {
+            const nodes = getNodes(text, entities);
+            element.innerHTML = null;
+            nodes.forEach(x => {
+                element.appendChild(x);
+            });
+        } catch (e) {
+            element.innerText = text;
+        }
+    }
 
     setInputFocus = () => {
         setTimeout(() => {
@@ -303,15 +412,14 @@ class InputBoxControl extends Component {
         });
     };
 
-    getDraftMessage = (chatId, replyToMessageId) => {
+    getDraftMessage = (chatId, replyToMessageId, innerHTML) => {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
         const { draft_message } = chat;
-        const { innerHTML } = this.newMessageRef.current;
         const { text, entities } = getEntities(innerHTML);
         const draftMessage =
-            text.length > 0 || entities.length > 0
+            (text && text.length > 0) || entities.length > 0
                 ? {
                       '@type': 'draftMessage',
                       reply_to_message_id: replyToMessageId,
@@ -336,6 +444,7 @@ class InputBoxControl extends Component {
     };
 
     handleSubmit = () => {
+        const { editMessageId } = this.state;
         const element = this.newMessageRef.current;
         if (!element) return;
 
@@ -360,7 +469,11 @@ class InputBoxControl extends Component {
             clear_draft: true
         };
 
-        this.onSendInternal(content, false, result => {});
+        if (editMessageId) {
+            this.editMessageText(content, result => {});
+        } else {
+            this.sendMessage(content, false, result => {});
+        }
     };
 
     handleAttachPoll = () => {
@@ -427,8 +540,9 @@ class InputBoxControl extends Component {
     }
 
     setHints() {
+        const { editMessageId } = this.state;
         const innerText = this.newMessageRef.current.innerText;
-        if (!innerText || innerText.length > 11) {
+        if (!innerText || innerText.length > 11 || editMessageId) {
             const { hint } = StickerStore;
             if (hint) {
                 TdLibController.clientUpdate({
@@ -542,67 +656,103 @@ class InputBoxControl extends Component {
         this.openEditUrlDialog();
     };
 
-    handleKeyDown = event => {
-        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
-
-        if (key === 'Enter' && !shiftKey) {
-            event.preventDefault();
-            this.handleSubmit();
-            return;
+    handleCancel = () => {
+        const { chatId, editMessageId } = this.state;
+        if (editMessageId) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateEditMessage',
+                chatId,
+                messageId: 0
+            });
         }
+    };
 
-        if ((ctrlKey || metaKey) && !shiftKey) {
-            if (!altKey) {
-                switch (keyCode) {
-                    case 66: {
-                        // cmd + b
-                        if (!repeat) {
-                            this.handleBold();
-                        }
+    handleKeyDown = event => {
+        const { altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey } = event;
+
+        // console.log('[im] keyDown', keyCode);
+        switch (keyCode) {
+            // enter
+            case 13: {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    if (!repeat) this.handleSubmit();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            // esc
+            case 27: {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    if (!repeat) this.handleCancel();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            // arrow up
+            case 38: {
+                if (!repeat && !altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const element = this.newMessageRef.current;
+                    if (element && !element.innerText) {
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateTryEditMessage'
+                        });
+
                         event.preventDefault();
                         event.stopPropagation();
-                        break;
-                    }
-                    case 73: {
-                        // cmd + i
-                        if (!repeat) {
-                            this.handleItalic();
-                        }
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    }
-                    case 75: {
-                        // cmd + k
-                        if (!repeat) {
-                            this.handleUrl();
-                        }
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
                     }
                 }
-            } else {
-                switch (keyCode) {
-                    case 75: {
-                        // alt + cmd + k
-                        if (!event.repeat) {
-                            this.handleMono();
-                        }
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    }
-                    case 192: {
-                        // alt + cmd + n
-                        if (!repeat) {
-                            this.handleClear();
-                        }
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    }
+                break;
+            }
+            // cmd + b
+            case 66: {
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
+                    if (!repeat) this.handleBold();
+
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
+                break;
+            }
+            // cmd + i
+            case 73: {
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
+                    if (!repeat) this.handleItalic();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            case 75: {
+                // cmd + k
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
+                    if (!repeat) this.handleUrl();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                // alt + cmd + k
+                else if (altKey && (ctrlKey || metaKey) && !shiftKey) {
+                    if (!repeat) this.handleMono();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            // alt + cmd + n
+            case 192: {
+                if (altKey && (ctrlKey || metaKey) && !shiftKey) {
+                    if (!repeat) this.handleClear();
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
             }
         }
     };
@@ -617,7 +767,7 @@ class InputBoxControl extends Component {
             height: file.photoHeight
         };
 
-        this.onSendInternal(content, true, result => {
+        this.sendMessage(content, true, result => {
             const cachedMessage = MessageStore.get(result.chat_id, result.id);
             if (cachedMessage != null) {
                 this.handleSendingMessage(cachedMessage, file);
@@ -628,7 +778,7 @@ class InputBoxControl extends Component {
     };
 
     handleSendPoll = poll => {
-        this.onSendInternal(poll, true, () => {});
+        this.sendMessage(poll, true, () => {});
     };
 
     handleSendDocument = file => {
@@ -639,7 +789,7 @@ class InputBoxControl extends Component {
             document: { '@type': 'inputFileBlob', name: file.name, data: file }
         };
 
-        this.onSendInternal(content, true, result => FileStore.uploadFile(result.content.document.document.id, result));
+        this.sendMessage(content, true, result => FileStore.uploadFile(result.content.document.document.id, result));
     };
 
     handlePaste = event => {
@@ -710,7 +860,30 @@ class InputBoxControl extends Component {
         }
     };
 
-    onSendInternal = async (content, clearDraft, callback) => {
+    async editMessageText(content, callback) {
+        const { chatId, editMessageId } = this.state;
+
+        if (!chatId) return;
+        if (!editMessageId) return;
+        if (!content) return;
+
+        const result = await TdLibController.send({
+            '@type': 'editMessageText',
+            chat_id: chatId,
+            message_id: editMessageId,
+            input_message_content: content
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateEditMessage',
+            chatId,
+            messageId: 0
+        });
+
+        callback(result);
+    }
+
+    sendMessage = async (content, clearDraft, callback) => {
         const { chatId, replyToMessageId } = this.state;
 
         if (!chatId) return;
@@ -796,18 +969,25 @@ class InputBoxControl extends Component {
         );
     };
 
-    restoreSelection = () => {
-        if (!this.range) {
+    saveSelection() {
+        this.selection = document.getSelection();
+        this.range = this.selection.getRangeAt(0);
+    }
+
+    restoreSelection() {
+        const { range } = this;
+
+        if (!range) {
             this.focusInput();
             return;
         }
 
         const selection = document.getSelection();
         selection.removeAllRanges();
-        selection.addRange(this.range);
+        selection.addRange(range);
 
         this.newMessageRef.current.focus();
-    };
+    }
 
     focusInput = () => {
         const element = this.newMessageRef.current;
@@ -833,11 +1013,11 @@ class InputBoxControl extends Component {
         element.focus();
     };
 
-    handleCancel = () => {
+    handleCancelEditUrl = () => {
         this.closeEditUrlDialog();
     };
 
-    handleDone = (text, url) => {
+    handleDoneEditUrl = (text, url) => {
         this.closeEditUrlDialog();
         setTimeout(() => {
             // edit current link node
@@ -876,12 +1056,21 @@ class InputBoxControl extends Component {
 
     render() {
         const { classes, t } = this.props;
-        const { chatId, replyToMessageId, files, newDraft, defaultText, defaultUrl, openEditUrl } = this.state;
+        const {
+            chatId,
+            editMessageId,
+            replyToMessageId,
+            files,
+            newDraft,
+            defaultText,
+            defaultUrl,
+            openEditUrl
+        } = this.state;
 
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader chatId={chatId} messageId={replyToMessageId} />
+                    <InputBoxHeader chatId={chatId} messageId={replyToMessageId} editMessageId={editMessageId} />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
                             <React.Suspense
@@ -936,7 +1125,7 @@ class InputBoxControl extends Component {
                                 className={classes.iconButton}
                                 aria-label='Send'
                                 onClick={this.handleSubmit}>
-                                <SendIcon />
+                                {editMessageId ? <DoneIcon /> : <SendIcon />}
                             </IconButton>
                         </div>
                     </div>
@@ -948,8 +1137,8 @@ class InputBoxControl extends Component {
                     open={openEditUrl}
                     defaultText={defaultText}
                     defaultUrl={defaultUrl}
-                    onDone={this.handleDone}
-                    onCancel={this.handleCancel}
+                    onDone={this.handleDoneEditUrl}
+                    onCancel={this.handleCancelEditUrl}
                 />
             </>
         );

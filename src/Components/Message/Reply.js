@@ -61,10 +61,11 @@ class Reply extends React.Component {
 
     render() {
         const { classes, t, chatId, messageId } = this.props;
+        let { title } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
 
-        let title = !message ? null : getTitle(message);
+        title = title || getTitle(message);
         let content = !message ? t('Loading') : getContent(message, t);
         const photoSize = getReplyPhotoSize(chatId, messageId);
 
@@ -95,6 +96,7 @@ class Reply extends React.Component {
 Reply.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
+    title: PropTypes.string,
     onClick: PropTypes.func
 };
 
