@@ -25,7 +25,7 @@ import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { borderStyle } from '../Theme';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { findLastTextNode } from '../../Utils/DOM';
-import { getEntities, getNodes } from '../../Utils/Message';
+import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -1109,6 +1109,8 @@ class InputBoxControl extends Component {
             openEditUrl
         } = this.state;
 
+        const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
+
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
@@ -1133,7 +1135,7 @@ class InputBoxControl extends Component {
                             <div
                                 id='inputbox-message'
                                 ref={this.newMessageRef}
-                                placeholder={t('Message')}
+                                placeholder={isMediaEditing ? t('Caption') : t('Message')}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
@@ -1157,12 +1159,14 @@ class InputBoxControl extends Component {
                                 accept='image/*'
                                 onChange={this.handleAttachPhotoComplete}
                             />
-                            <AttachButton
-                                chatId={chatId}
-                                onAttachPhoto={this.handleAttachPhoto}
-                                onAttachDocument={this.handleAttachDocument}
-                                onAttachPoll={this.handleAttachPoll}
-                            />
+                            {!Boolean(editMessageId) && (
+                                <AttachButton
+                                    chatId={chatId}
+                                    onAttachPhoto={this.handleAttachPhoto}
+                                    onAttachDocument={this.handleAttachDocument}
+                                    onAttachPoll={this.handleAttachPoll}
+                                />
+                            )}
 
                             {/*<IconButton>*/}
                             {/*<KeyboardVoiceIcon />*/}

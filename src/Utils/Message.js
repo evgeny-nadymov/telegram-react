@@ -2065,6 +2065,15 @@ export function showMessageForward(chatId, messageId) {
     return forward_info && content && content['@type'] !== 'messageSticker' && content['@type'] !== 'messageAudio';
 }
 
+export function isTextMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+
+    return content && content['@type'] === 'messageText';
+}
+
 export {
     getAuthor,
     getTitle,
