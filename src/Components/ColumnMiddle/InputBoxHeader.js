@@ -67,7 +67,7 @@ class InputBoxHeader extends React.Component {
     };
 
     render() {
-        const { classes, chatId, messageId, editMessageId, t } = this.props;
+        const { classes, chatId, messageId, editMessageId, t, onClick } = this.props;
         if (!chatId) return null;
         if (!messageId && !editMessageId) return null;
 
@@ -81,6 +81,7 @@ class InputBoxHeader extends React.Component {
                         chatId={chatId}
                         messageId={messageId || editMessageId}
                         title={editMessageId ? t('EditMessage') : null}
+                        onClick={onClick}
                     />
                 </div>
                 <div className='inputbox-header-right-column'>
@@ -96,7 +97,8 @@ class InputBoxHeader extends React.Component {
 InputBoxHeader.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    editMessageId: PropTypes.number
+    editMessageId: PropTypes.number,
+    onClick: PropTypes.func
 };
 
 const enhance = compose(

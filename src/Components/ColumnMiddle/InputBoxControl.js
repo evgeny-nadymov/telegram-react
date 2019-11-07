@@ -67,6 +67,7 @@ class InputBoxControl extends Component {
         document.addEventListener(
             'selectionchange',
             () => {
+                // console.log('[ed] selectionchange', document.activeElement);
                 if (document.activeElement === this.newMessageRef.current) {
                     this.saveSelection();
                 }
@@ -347,13 +348,15 @@ class InputBoxControl extends Component {
         const { content } = message;
         if (!content) return;
 
-        const { text } = content;
-        if (!text) return;
+        const { text, caption } = content;
+        if (!text && !caption) return;
 
         const element = this.newMessageRef.current;
 
         if (text) {
             this.setFormattedText(text);
+        } else if (caption) {
+            this.setFormattedText(caption);
         } else {
             element.innerText = null;
         }
@@ -444,7 +447,7 @@ class InputBoxControl extends Component {
     };
 
     handleSubmit = () => {
-        const { editMessageId } = this.state;
+        const { chatId, editMessageId } = this.state;
         const element = this.newMessageRef.current;
         if (!element) return;
 
@@ -458,19 +461,31 @@ class InputBoxControl extends Component {
 
         const { text, entities } = getEntities(innerHTML);
 
+        const formattedText = {
+            '@type': 'formattedText',
+            text,
+            entities
+        };
         const content = {
             '@type': 'inputMessageText',
-            text: {
-                '@type': 'formattedText',
-                text,
-                entities
-            },
+            text: formattedText,
             disable_web_page_preview: false,
             clear_draft: true
         };
 
         if (editMessageId) {
-            this.editMessageText(content, result => {});
+            const editedMessage = MessageStore.get(chatId, editMessageId);
+            if (!editedMessage) return;
+
+            const { content } = editedMessage;
+            if (!content) return;
+
+            const { text, caption } = content;
+            if (text) {
+                this.editMessageText(content, result => {});
+            } else if (caption) {
+                this.editMessageCaption(formattedText, result => {});
+            }
         } else {
             this.sendMessage(content, false, result => {});
         }
@@ -860,6 +875,29 @@ class InputBoxControl extends Component {
         }
     };
 
+    async editMessageCaption(caption, callback) {
+        const { chatId, editMessageId } = this.state;
+
+        if (!chatId) return;
+        if (!editMessageId) return;
+        if (!caption) return;
+
+        const result = await TdLibController.send({
+            '@type': 'editMessageCaption',
+            chat_id: chatId,
+            message_id: editMessageId,
+            caption
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateEditMessage',
+            chatId,
+            messageId: 0
+        });
+
+        callback(result);
+    }
+
     async editMessageText(content, callback) {
         const { chatId, editMessageId } = this.state;
 
@@ -921,8 +959,8 @@ class InputBoxControl extends Component {
     handleEmojiSelect = emoji => {
         if (!emoji) return;
 
+        this.restoreSelection();
         document.execCommand('insertText', false, emoji.native);
-        this.newMessageRef.current.focus();
         this.handleInput();
     };
 
@@ -1054,6 +1092,10 @@ class InputBoxControl extends Component {
         }, 0);
     };
 
+    handleHeaderClick = () => {
+        setTimeout(() => this.restoreSelection(), 0);
+    };
+
     render() {
         const { classes, t } = this.props;
         const {
@@ -1070,7 +1112,12 @@ class InputBoxControl extends Component {
         return (
             <>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader chatId={chatId} messageId={replyToMessageId} editMessageId={editMessageId} />
+                    <InputBoxHeader
+                        chatId={chatId}
+                        messageId={replyToMessageId}
+                        editMessageId={editMessageId}
+                        onClick={this.handleHeaderClick}
+                    />
                     <div className='inputbox-wrapper'>
                         <div className='inputbox-left-column'>
                             <React.Suspense

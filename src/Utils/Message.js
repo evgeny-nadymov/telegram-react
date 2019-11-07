@@ -2051,16 +2051,9 @@ export function canMessageBeEdited(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
-    const { can_be_edited, content } = message;
-    if (!can_be_edited) return false;
+    const { can_be_edited } = message;
 
-    switch (content['@type']) {
-        case 'messageText': {
-            return true;
-        }
-    }
-
-    return false;
+    return can_be_edited;
 }
 
 export function showMessageForward(chatId, messageId) {
