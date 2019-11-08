@@ -20,7 +20,7 @@ import StickersHint from './StickersHint';
 import { getChat } from '../../Actions/Chat';
 import { throttle, getPhotoSize, itemsInView, historyEquals, isAuthorizationReady } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
-import { filterDuplicateMessages, filterMessages } from '../../Utils/Message';
+import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage, openChat } from '../../Actions/Client';
@@ -194,6 +194,7 @@ class MessagesList extends React.Component {
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
+        MessageStore.on('clientUpdateTryEditMessage', this.onClientUpdateTryEditMessage);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
@@ -211,6 +212,7 @@ class MessagesList extends React.Component {
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateOpenReply', this.onClientUpdateOpenReply);
+        MessageStore.off('clientUpdateTryEditMessage', this.onClientUpdateTryEditMessage);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
@@ -219,6 +221,23 @@ class MessagesList extends React.Component {
         PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateTryEditMessage = update => {
+        const { history } = this.state;
+
+        for (let i = history.length - 1; i >= 0; i--) {
+            const message = history[i];
+            if (canMessageBeEdited(message.chat_id, message.id)) {
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEditMessage',
+                    chatId: message.chat_id,
+                    messageId: message.id
+                });
+
+                return;
+            }
+        }
+    };
 
     onClientUpdateDialogsReady = async update => {
         await FileStore.initDB(async () => {

@@ -712,6 +712,9 @@ class InputBoxControl extends Component {
                 if (!repeat && !altKey && !ctrlKey && !metaKey && !shiftKey) {
                     const element = this.newMessageRef.current;
                     if (element && !element.innerText) {
+                        const { editMessageId } = this.state;
+                        if (editMessageId) return;
+
                         TdLibController.clientUpdate({
                             '@type': 'clientUpdateTryEditMessage'
                         });
