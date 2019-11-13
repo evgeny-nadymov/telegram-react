@@ -317,7 +317,7 @@ class DialogsList extends React.Component {
             }
         }
 
-        console.log('DialogsList.onLoadNext getChats start', offsetChatId, offsetOrder);
+        // console.log('DialogsList.onLoadNext getChats start', offsetChatId, offsetOrder);
         this.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -330,7 +330,7 @@ class DialogsList extends React.Component {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
             }
         });
-        console.log('DialogsList.onLoadNext getChats stop', offsetChatId, offsetOrder);
+        // console.log('DialogsList.onLoadNext getChats stop', offsetChatId, offsetOrder);
         // TdLibController.send({
         //     '@type': 'getChats',
         //     offset_chat_id: offsetChatId,
@@ -348,9 +348,9 @@ class DialogsList extends React.Component {
                 this.saveCache();
             });
         } else {
-            console.log('DialogsList.onLoadNext setState start', offsetChatId, offsetOrder);
+            // console.log('DialogsList.onLoadNext setState start', offsetChatId, offsetOrder);
             this.appendChats(result.chat_ids, () => {
-                console.log('DialogsList.onLoadNext setState stop', offsetChatId, offsetOrder);
+                // console.log('DialogsList.onLoadNext setState stop', offsetChatId, offsetOrder);
                 this.loadChatContents(result.chat_ids);
             });
         }

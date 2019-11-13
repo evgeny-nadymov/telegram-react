@@ -10,10 +10,6 @@ import Button from '@material-ui/core/Button/Button';
 import './AppInactiveControl.css';
 
 class AppInactiveControl extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     static handleReload() {
         window.location.reload();
     }
@@ -22,7 +18,12 @@ class AppInactiveControl extends React.Component {
         return (
             <div className='app-inactive'>
                 <div className='app-inactive-wrapper'>
-                    <a className='app-inactive-image' onClick={AppInactiveControl.handleReload} />
+                    <img
+                        className='app-inactive-image'
+                        src='Manytabs_2x.png'
+                        alt=''
+                        onClick={AppInactiveControl.handleReload}
+                    />
                     <h3 className='app-inactive-title'>Such error, many tabs</h3>
                     <div className='app-inactive-description'>
                         Telegram supports only one active tab with the app.

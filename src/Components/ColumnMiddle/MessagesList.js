@@ -31,6 +31,7 @@ import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
+import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
 
@@ -222,11 +223,37 @@ class MessagesList extends React.Component {
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
-    onClientUpdateTryEditMessage = update => {
-        const { history } = this.state;
+    onClientUpdateTryEditMessage = async update => {
+        if (this.completed) {
+            const { history } = this.state;
 
-        for (let i = history.length - 1; i >= 0; i--) {
-            const message = history[i];
+            for (let i = history.length - 1; i >= 0; i--) {
+                const message = history[i];
+                if (canMessageBeEdited(message.chat_id, message.id)) {
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateEditMessage',
+                        chatId: message.chat_id,
+                        messageId: message.id
+                    });
+
+                    return;
+                }
+            }
+        }
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: this.props.chatId,
+            query: '',
+            sender_user_id: UserStore.getMyId(),
+            from_message_id: 0,
+            offset: 0,
+            limit: 100,
+            filter: { '@type': 'searchMessagesFilterEmpty' }
+        });
+
+        for (let i = 0; i < result.messages.length; i++) {
+            const message = result.messages[i];
             if (canMessageBeEdited(message.chat_id, message.id)) {
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateEditMessage',

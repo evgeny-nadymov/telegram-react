@@ -82,12 +82,16 @@ class CacheStore extends EventEmitter {
     };
 
     async getChats() {
-        // console.log('[cm] loadCache 1 start');
-        this.cache = await CacheManager.load('cache');
-        // console.log('[cm] loadCache 1 stop', cache);
-        // console.log('[fs] loadCache 2 start');
-        // const cache2 = await CacheManager.load('cache');
-        // console.log('[fs] loadCache 2 stop', cache2);
+        // console.log('[cm] getChats start');
+        const promises = [];
+        promises.push(CacheManager.load('cache').catch(error => null));
+        promises.push(CacheManager.load('files').catch(error => null));
+        const [cache, files] = await Promise.all(promises);
+        this.cache = cache;
+        if (this.cache) {
+            this.cache.files = files || [];
+        }
+        // console.log('[cm] getChats result', this.cache);
         if (!this.cache) return null;
 
         this.parseCache(this.cache);
@@ -101,8 +105,8 @@ class CacheStore extends EventEmitter {
 
         const { chats, users, basicGroups, supergroups, files, options } = cache;
 
-        (files || []).forEach(([id, blob]) => {
-            FileStore.setBlob(id, blob);
+        (files || []).forEach(({ id, url }) => {
+            FileStore.setDataUrl(id, url);
         });
 
         (users || []).forEach(x => {
@@ -197,10 +201,33 @@ class CacheStore extends EventEmitter {
         this.saveChatsInternal();
     }
 
-    saveChatsInternal() {
-        // console.log('[cm] saveChatsInternal', this.chatIds);
+    async saveChatsInternal() {
         const cache = this.getCache(this.chatIds);
-        CacheManager.save('cache', cache);
+        const files = cache.files;
+        cache.files = [];
+        // console.log('[cm] save cache', cache);
+        await CacheManager.save('cache', cache);
+
+        const promises = [];
+        files.forEach(x => {
+            const [id, blob] = x;
+            promises.push(
+                new Promise((resolve, reject) => {
+                    const fileReader = new FileReader();
+                    fileReader.readAsDataURL(blob);
+                    fileReader.onload = e => {
+                        resolve({ id, url: e.target.result });
+                    };
+                    fileReader.onerror = e => {
+                        resolve(null);
+                    };
+                })
+            );
+        });
+        // console.log('[cm] save files start', files);
+        const results = await Promise.all(promises);
+        // console.log('[cm] save files', results);
+        await CacheManager.save('files', results);
     }
 
     clear() {
@@ -208,8 +235,8 @@ class CacheStore extends EventEmitter {
 
         const { files } = this.cache;
 
-        files.forEach(([id, blob]) => {
-            FileStore.deleteBlob(id);
+        files.forEach(({ id, url }) => {
+            FileStore.deleteDataUrl(id);
         });
     }
 }

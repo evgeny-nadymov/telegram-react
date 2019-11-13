@@ -29,6 +29,7 @@ class FileStore extends EventEmitter {
         //this.transactionCount = 0;
         this.db = null;
         this.urls = new WeakMap();
+        this.dataUrls = new Map();
         this.items = new Map();
         this.blobItems = new Map();
         this.locationItems = new Map();
@@ -645,28 +646,28 @@ class FileStore extends EventEmitter {
 
             return;*/
         if (this.db) {
-            console.log('[FileStore] db exists');
+            // console.log('[FileStore] db exists');
             if (callback) callback();
             return;
         }
 
         if (this.initiatingDB) {
-            console.log('[FileStore] add callback');
+            // console.log('[FileStore] add callback');
             if (callback) this.callbacks.push(callback);
             return;
         }
 
-        console.log('[FileStore] start initDB');
+        // console.log('[FileStore] start initDB');
         if (callback) this.callbacks.push(callback);
 
         this.initiatingDB = true;
         this.db = await this.openDB().catch(error => console.log('[FileStore] initDB error', error));
         this.initiatingDB = false;
 
-        console.log('[FileStore] stop initDB');
+        // console.log('[FileStore] stop initDB');
 
         if (this.callbacks.length) {
-            console.log('[FileStore] invoke callbacks count=' + this.callbacks.length);
+            // console.log('[FileStore] invoke callbacks count=' + this.callbacks.length);
             for (let i = 0; i < this.callbacks.length; i++) {
                 this.callbacks[i]();
             }
@@ -860,6 +861,26 @@ class FileStore extends EventEmitter {
         this.locationItems.set(locationId, file.id);
 
         this.set(file);
+    };
+
+    getDataUrl = id => {
+        if (!id) {
+            return null;
+        }
+
+        if (this.dataUrls.has(id)) {
+            return this.dataUrls.get(id);
+        }
+
+        return null;
+    };
+
+    setDataUrl = (id, dataUrl) => {
+        this.dataUrls.set(id, dataUrl);
+    };
+
+    deleteDataUrl = id => {
+        this.dataUrls.delete(id);
     };
 
     getBlobUrl = blob => {

@@ -18,6 +18,7 @@ import { borderStyle } from './Theme';
 import DialogPlaceholder from './Tile/DialogPlaceholder';
 import Footer from './Footer';
 import HeaderProgress from './ColumnMiddle/HeaderProgress';
+import Placeholder from './ColumnMiddle/Placeholder';
 import './ColumnMiddle/Header.css';
 import './ColumnLeft/Dialogs.css';
 import './ColumnMiddle/DialogDetails.css';
@@ -37,7 +38,8 @@ const styles = theme => ({
     },
     background: {
         background: theme.palette.type === 'dark' ? theme.palette.grey[900] : 'transparent',
-        flex: '1 1 auto'
+        flex: '1 1 auto',
+        position: 'relative'
     },
     ...borderStyle(theme)
 });
@@ -79,7 +81,9 @@ class StubPage extends React.Component {
                                 {Boolean(title) && <HeaderProgress />}
                             </div>
                         </div>
-                        <div className={classes.background} />
+                        <div className={classes.background}>
+                            <Placeholder />
+                        </div>
                     </div>
                 </div>
                 <Footer />

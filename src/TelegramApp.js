@@ -8,7 +8,9 @@
 import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
 import { compose } from 'recompose';
+import withLanguage from './Language';
 import withStyles from '@material-ui/core/styles/withStyles';
+import withTheme from './Theme';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -17,12 +19,13 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import packageJson from '../package.json';
-import withLanguage from './Language';
-import withTheme from './Theme';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import InactivePage from './Components/InactivePage';
+import NativeAppPage from './Components/NativeAppPage';
+import MainPage from './Components/MainPage';
 import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
+import { isMobile } from './Utils/Common';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
@@ -30,7 +33,7 @@ import ApplicationStore from './Stores/ApplicationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
-const MainPage = React.lazy(() => import('./Components/MainPage'));
+// const MainPage = React.lazy(() => import('./Components/MainPage'));
 
 const styles = theme => ({
     '@global': {
@@ -62,7 +65,8 @@ class TelegramApp extends Component {
             authorizationState: null,
             databaseExists: true,
             inactive: false,
-            fatalError: false
+            fatalError: false,
+            nativeMobile: isMobile()
         };
     }
 
@@ -175,17 +179,20 @@ class TelegramApp extends Component {
 
     render() {
         const { t } = this.props;
-        const { inactive, authorizationState, databaseExists, fatalError } = this.state;
+        const { inactive, nativeMobile, authorizationState, databaseExists, fatalError } = this.state;
 
         const loading = t('Loading').replace('...', '');
-        //let page = <StubPage title={loading} />;
-        let page = (
-            <React.Suspense fallback={<StubPage title='' />}>
-                <MainPage />
-            </React.Suspense>
-        );
+        // let page = <StubPage title={loading} />;
+        let page = <MainPage />;
+        //     (
+        //     <React.Suspense fallback={<StubPage title='' />}>
+        //         <MainPage />
+        //     </React.Suspense>
+        // );
 
-        if (inactive) {
+        if (nativeMobile) {
+            page = <NativeAppPage />;
+        } else if (inactive) {
             page = <InactivePage />;
         } else if (authorizationState) {
             switch (authorizationState['@type']) {
@@ -193,11 +200,12 @@ class TelegramApp extends Component {
                 case 'authorizationStateClosing':
                 case 'authorizationStateLoggingOut':
                 case 'authorizationStateReady': {
-                    page = (
-                        <React.Suspense fallback={<StubPage title='' />}>
-                            <MainPage />
-                        </React.Suspense>
-                    );
+                    page = <MainPage />;
+                    // page = (
+                    //     <React.Suspense fallback={<StubPage title='' />}>
+                    //         <MainPage />
+                    //     </React.Suspense>
+                    // );
                     break;
                 }
                 case 'authorizationStateWaitCode':
@@ -226,6 +234,8 @@ class TelegramApp extends Component {
                 }
             }
         }
+
+        // console.log('[cm] TelegramApp.render', page);
 
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>

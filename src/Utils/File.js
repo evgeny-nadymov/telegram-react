@@ -1591,6 +1591,9 @@ function loadChatFileContent(store, file, chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return;
 
+    const dataUrl = FileStore.getDataUrl(id);
+    if (dataUrl) return;
+
     const blob = file.blob || FileStore.getBlob(id);
     if (blob) return;
 
@@ -1744,6 +1747,9 @@ function isGifMimeType(mimeType) {
 }
 
 function getSrc(file) {
+    const dataUrl = file && FileStore.getDataUrl(file.id);
+    if (dataUrl) return dataUrl;
+
     const blob = getBlob(file);
 
     return FileStore.getBlobUrl(blob) || '';

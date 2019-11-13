@@ -8,17 +8,17 @@
 import React from 'react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
-import AppInactiveControl from './Additional/AppInactiveControl';
 import Footer from './Footer';
+import NativeAppControl from './Additional/NativeAppControl';
 
 const styles = theme => ({
     page: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
+        background: '#FFFFFF',
+        color: '#000000'
     }
 });
 
-class InactivePage extends React.Component {
+class NativeAppPage extends React.Component {
     render() {
         const { classes } = this.props;
 
@@ -26,7 +26,7 @@ class InactivePage extends React.Component {
             <>
                 <div className='header-wrapper' />
                 <div className={classNames(classes.page, 'page')}>
-                    <AppInactiveControl />
+                    <NativeAppControl />
                 </div>
                 <Footer />
             </>
@@ -34,4 +34,4 @@ class InactivePage extends React.Component {
     }
 }
 
-export default withStyles(styles)(InactivePage);
+export default withStyles(styles)(NativeAppPage);

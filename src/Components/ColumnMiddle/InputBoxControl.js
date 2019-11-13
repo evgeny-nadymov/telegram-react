@@ -455,6 +455,11 @@ class InputBoxControl extends Component {
 
         element.innerText = null;
         this.handleInput();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateEditMessage',
+            chatId,
+            messageId: 0
+        });
 
         if (!innerHTML) return;
         if (!innerHTML.trim()) return;
@@ -892,12 +897,6 @@ class InputBoxControl extends Component {
             caption
         });
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateEditMessage',
-            chatId,
-            messageId: 0
-        });
-
         callback(result);
     }
 
@@ -918,11 +917,6 @@ class InputBoxControl extends Component {
 
             callback(result);
         } finally {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateEditMessage',
-                chatId,
-                messageId: 0
-            });
         }
     }
 
@@ -980,13 +974,59 @@ class InputBoxControl extends Component {
 
         const { selection, range } = this;
         if (range) {
-            const { startContainer, endContainer } = range;
+            let { startContainer, endContainer } = range;
             if (startContainer === endContainer) {
                 const { parentElement } = startContainer;
                 if (parentElement && parentElement.nodeName === 'A') {
                     defaultText = parentElement.innerText;
                     defaultUrl = parentElement.href;
                 }
+            } else {
+                // let { parentNode: startParent } = startContainer;
+                // let { parentNode: endParent } = endContainer;
+                //
+                // console.log('[eu] range', range, startParent, endParent);
+                //
+                // if (startParent.nodeName !== 'DIV') {
+                //     startContainer = startParent;
+                //     startParent = startParent.parentNode;
+                // }
+                // if (endParent.nodeName !== 'DIV') {
+                //     endContainer = endParent;
+                //     endParent = endParent.parentNode;
+                // }
+                //
+                // console.log('[eu] parent', startParent, endParent);
+                //
+                // if (startParent === endParent) {
+                //     let startNode = null;
+                //     let url = null;
+                //     for (let i = 0; i < startParent.childNodes.length; i++) {
+                //         const node = startParent.childNodes[i];
+                //         if (!startNode) {
+                //             if (node === startContainer) startNode = startContainer;
+                //             else if (node === endContainer) startNode = endContainer;
+                //         }
+                //
+                //         if (node.nodeName === 'A') {
+                //             if (!url) {
+                //                 url = node.href;
+                //             } else {
+                //                 url = null;
+                //                 break;
+                //             }
+                //         }
+                //
+                //         if (startNode && startNode !== node) {
+                //             if (node === startContainer) break;
+                //             else if (node === endContainer) break;
+                //         }
+                //     }
+                //
+                //     if (url) {
+                //         defaultUrl = url;
+                //     }
+                // }
             }
         }
 

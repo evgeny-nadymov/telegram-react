@@ -118,41 +118,48 @@ function searchCurrentChat(event, text) {
     searchChat(chatId, text);
 }
 
-function getFormattedText(text) {
-    if (text['@type'] !== 'formattedText') return null;
-    if (!text.text) return null;
-    if (!text.entities) return text.text;
+function getFormattedText(formattedText) {
+    if (formattedText['@type'] !== 'formattedText') return null;
 
-    let removeNewLineAfterPre = false;
+    const { text, entities } = formattedText;
+    if (!text) return null;
+    if (!entities) return text;
+
+    let deleteLineBreakAfterPre = false;
     let result = [];
     let index = 0;
-    for (let i = 0; i < text.entities.length; i++) {
-        let beforeEntityText = substring(text.text, index, text.entities[i].offset);
-        if (beforeEntityText) {
-            result.push(beforeEntityText);
+    for (let i = 0; i < entities.length; i++) {
+        const entity = entities[i];
+        const { offset, length, type } = entity;
+
+        let textBefore = substring(text, index, offset);
+        const textBeforeLength = textBefore.length;
+        if (textBefore) {
+            if (deleteLineBreakAfterPre && textBefore.length > 0 && textBefore[0] === '\n') {
+                textBefore = textBefore.substr(1);
+                deleteLineBreakAfterPre = false;
+            }
+            if (textBefore) {
+                result.push(textBefore);
+            }
         }
 
-        let entityText = substring(
-            text.text,
-            text.entities[i].offset,
-            text.entities[i].offset + text.entities[i].length
-        );
-        if (removeNewLineAfterPre && entityText.length > 0 && entityText[0] === '\n') {
+        const entityKey = offset;
+        let entityText = substring(text, offset, offset + length);
+        if (deleteLineBreakAfterPre && entityText.length > 0 && entityText[0] === '\n') {
             entityText = entityText.substr(1);
+            deleteLineBreakAfterPre = false;
         }
 
-        switch (text.entities[i].type['@type']) {
+        switch (type['@type']) {
             case 'textEntityTypeBold': {
-                result.push(<strong key={text.entities[i].offset}>{entityText}</strong>);
+                result.push(<strong key={entityKey}>{entityText}</strong>);
                 break;
             }
             case 'textEntityTypeBotCommand': {
                 const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`tg://bot_command?command=${command}&bot=`}>
+                    <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
                         {entityText}
                     </a>
                 );
@@ -160,20 +167,20 @@ function getFormattedText(text) {
             }
             case 'textEntityTypeCashtag': {
                 result.push(
-                    <a key={text.entities[i].offset} onClick={event => searchCurrentChat(event, entityText)}>
+                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
                         {entityText}
                     </a>
                 );
                 break;
             }
             case 'textEntityTypeCode': {
-                result.push(<code key={text.entities[i].offset}>{entityText}</code>);
+                result.push(<code key={entityKey}>{entityText}</code>);
                 break;
             }
             case 'textEntityTypeEmailAddress': {
                 result.push(
                     <a
-                        key={text.entities[i].offset}
+                        key={entityKey}
                         href={`mailto:${entityText}`}
                         onClick={stopPropagation}
                         target='_blank'
@@ -185,23 +192,20 @@ function getFormattedText(text) {
             }
             case 'textEntityTypeHashtag': {
                 result.push(
-                    <a key={text.entities[i].offset} onClick={event => searchCurrentChat(event, entityText)}>
+                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
                         {entityText}
                     </a>
                 );
                 break;
             }
             case 'textEntityTypeItalic': {
-                result.push(<em key={text.entities[i].offset}>{entityText}</em>);
+                result.push(<em key={entityKey}>{entityText}</em>);
                 break;
             }
             case 'textEntityTypeMentionName': {
-                const user = UserStore.get(text.entities[i].type.user_id);
+                const user = UserStore.get(type.user_id);
                 result.push(
-                    <MentionLink
-                        key={text.entities[i].offset}
-                        userId={text.entities[i].type.user_id}
-                        title={getUserFullName(user)}>
+                    <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(user)}>
                         {entityText}
                     </MentionLink>
                 );
@@ -209,7 +213,7 @@ function getFormattedText(text) {
             }
             case 'textEntityTypeMention': {
                 result.push(
-                    <MentionLink key={text.entities[i].offset} username={entityText}>
+                    <MentionLink key={entityKey} username={entityText}>
                         {entityText}
                     </MentionLink>
                 );
@@ -217,35 +221,31 @@ function getFormattedText(text) {
             }
             case 'textEntityTypePhoneNumber': {
                 result.push(
-                    <a key={text.entities[i].offset} href={`tel:${entityText}`} onClick={stopPropagation}>
+                    <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
                         {entityText}
                     </a>
                 );
                 break;
             }
             case 'textEntityTypePre': {
-                result.push(<pre key={text.entities[i].offset}>{entityText}</pre>);
-                removeNewLineAfterPre = true;
+                result.push(<pre key={entityKey}>{entityText}</pre>);
+                deleteLineBreakAfterPre = true;
                 break;
             }
             case 'textEntityTypePreCode': {
                 result.push(
-                    <pre key={text.entities[i].offset}>
+                    <pre key={entityKey}>
                         <code>{entityText}</code>
                     </pre>
                 );
-                removeNewLineAfterPre = true;
+                deleteLineBreakAfterPre = true;
                 break;
             }
             case 'textEntityTypeTextUrl': {
-                let url = entityText;
-                const { url: typeUrl } = text.entities[i].type;
-                if (typeUrl) {
-                    url = typeUrl;
-                }
+                const url = type.url ? type.url : entityText;
 
                 result.push(
-                    <SafeLink key={text.entities[i].offset} url={url}>
+                    <SafeLink key={entityKey} url={url}>
                         {entityText}
                     </SafeLink>
                 );
@@ -253,7 +253,7 @@ function getFormattedText(text) {
             }
             case 'textEntityTypeUrl': {
                 result.push(
-                    <SafeLink key={text.entities[i].offset} url={entityText}>
+                    <SafeLink key={entityKey} url={entityText}>
                         {entityText}
                     </SafeLink>
                 );
@@ -264,16 +264,16 @@ function getFormattedText(text) {
                 break;
         }
 
-        index += beforeEntityText.length + entityText.length;
+        index += textBeforeLength + entity.length;
     }
 
-    if (index < text.text.length) {
-        let afterEntityText = text.text.substring(index);
-        if (removeNewLineAfterPre && afterEntityText.length > 0 && afterEntityText[0] === '\n') {
-            afterEntityText = afterEntityText.substr(1);
+    if (index < text.length) {
+        let textAfter = text.substring(index);
+        if (deleteLineBreakAfterPre && textAfter.length > 0 && textAfter[0] === '\n') {
+            textAfter = textAfter.substr(1);
         }
-        if (afterEntityText) {
-            result.push(afterEntityText);
+        if (textAfter) {
+            result.push(textAfter);
         }
     }
 
@@ -1625,6 +1625,17 @@ function removeOffsetAfter(start, countToRemove, entities) {
     });
 }
 
+function addOffsetAfter(start, countToAdd, entities) {
+    if (!entities) return;
+    if (!entities.length) return;
+
+    entities.forEach(e => {
+        if (e.offset > start) {
+            e.offset += countToAdd;
+        }
+    });
+}
+
 function removeEntities(startIndex, endIndex, entities) {
     if (!entities) return;
     if (!entities.length) return;
@@ -1788,10 +1799,10 @@ export function getEntities(text) {
 
     text = text.split('<br>').join('\n');
 
-    console.log(`[ge] start text=${text}`);
+    // console.log(`[ge] start text=${text}`);
 
     let index = -1; // first index of end tag
-    let lastIndex = 0; // last index of end tag
+    let lastIndex = 0; // first index after end tag
     let start = -1; // first index of start tag
     let isPre = false;
     const mono = '`';
@@ -1896,7 +1907,7 @@ export function getEntities(text) {
         }
     });
     text = finalText;
-    console.log(`[ge] HTML nodes text=${text}`, entities);
+    // console.log(`[ge] HTML nodes text=${text}`, entities);
 
     // 1 looking for ``` and ` in order to find mono and pre entities
     while ((index = text.indexOf(isPre ? pre : mono, lastIndex)) !== -1) {
@@ -1919,41 +1930,15 @@ export function getEntities(text) {
             if (isPre) {
                 // add pre tag
 
-                // clean space and new line symbol before start tag
-                const firstChar = start > 0 ? text[start - 1] : 0;
-                let replacedFirst = firstChar === ' ' || firstChar === '\xA0' || firstChar === '\n';
-                let startText = text.substring(0, start - (replacedFirst ? 1 : 0));
+                let textBefore = text.substring(0, start);
+                let textContent = text.substring(start + 3, index);
+                let textAfter = text.substring(index + 3, text.length);
 
-                // remove first line break in pre content
-                let replacedContentNewLine = false;
-                let contentText = text.substring(start + 3, index);
-                if (contentText.length > 0 && contentText[0] === '\n') {
-                    contentText = contentText.substring(1);
-                    replacedContentNewLine = true;
-                }
+                if (textContent.length > 0) {
+                    offset = start;
+                    length = index - start - 3;
 
-                // clean space and new line symbol after end tag
-                const lastChar = index + 3 < text.length ? text[index + 3] : 0;
-                const replacedLast = lastChar === ' ' || lastChar === '\xA0' || lastChar === '\n';
-                let endText = text.substring(index + 3 + (replacedLast ? 1 : 0), text.length);
-
-                // add new line before pre
-                if (startText.length > 0) {
-                    startText += '\n';
-                } else {
-                    replacedFirst = true;
-                }
-
-                // add new line after pre
-                if (endText.length > 0) {
-                    endText = '\n' + endText;
-                }
-
-                if (contentText.length > 0) {
-                    offset = start + (replacedFirst ? 0 : 1);
-                    length = index - start - 3 - (replacedContentNewLine ? 1 : 0) + (replacedFirst ? 0 : 1);
-
-                    text = startText + contentText + endText;
+                    text = textBefore + textContent + textAfter;
 
                     const entity = {
                         '@type': 'textEntity',
@@ -1967,6 +1952,61 @@ export function getEntities(text) {
                     removeOffsetAfter(offset + length, 6, entities);
                     entities.push(entity);
                     lastIndex -= 6;
+
+                    // clean text before
+                    if (textBefore.length > 0) {
+                        const lastChar = textBefore[textBefore.length - 1];
+                        if (lastChar !== '\n') {
+                            if (lastChar === ' ' || lastChar === '\xA0') {
+                                textBefore = textBefore.substr(0, textBefore.length - 1) + '\n';
+                                text = textBefore + textContent + textAfter;
+                            } else {
+                                textBefore += '\n';
+                                text = textBefore + textContent + textAfter;
+                                addOffsetAfter(offset - 1, 1, entities);
+                                lastIndex += 1;
+                            }
+                        }
+                    }
+
+                    // clean text after
+                    if (textAfter.length > 0) {
+                        const firstChar = textAfter[0];
+                        if (firstChar !== '\n') {
+                            if (firstChar === ' ' || firstChar === '\xA0') {
+                                textAfter = '\n' + textAfter.substr(1);
+                                text = textBefore + textContent + textAfter;
+                            } else {
+                                textAfter = '\n' + textAfter;
+                                text = textBefore + textContent + textAfter;
+                                addOffsetAfter(offset + length - 1, 1, entities);
+                                lastIndex += 1;
+                            }
+                        }
+                    }
+
+                    // clean text content
+                    if (textContent.length > 2) {
+                        if (textContent[0] === '\n') {
+                            textContent = textContent.substring(1);
+                            text = textBefore + textContent + textAfter;
+                            entity.length -= 1;
+                            entity.textContent = textContent;
+                            removeOffsetAfter(entity.offset + entity.length - 1, 1, entities);
+                            lastIndex -= 1;
+                        }
+                    }
+
+                    if (textContent.length > 2) {
+                        if (textContent[textContent.length - 1] === '\n') {
+                            textContent = textContent.substring(0, textContent.length - 1);
+                            text = textBefore + textContent + textAfter;
+                            entity.length -= 1;
+                            entity.textContent = textContent;
+                            removeOffsetAfter(entity.offset + entity.length - 1, 1, entities);
+                            lastIndex -= 1;
+                        }
+                    }
                 }
             } else {
                 // add code tag
@@ -2019,7 +2059,7 @@ export function getEntities(text) {
         }
     }
 
-    console.log(`[ge] pre and code text=${text}`, entities);
+    // console.log(`[ge] pre and code text=${text}`, entities);
     // 2 looking for bold, italic entities
     for (let c = 0; c < 2; c++) {
         lastIndex = 0;
@@ -2073,7 +2113,7 @@ export function getEntities(text) {
             }
         }
     }
-    console.log(`[ge] result text=${text}`, entities);
+    // console.log(`[ge] result text=${text}`, entities);
 
     return { text, entities };
 }

@@ -70,10 +70,10 @@ class Placeholder extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, force } = this.props;
         const { chatId, dialogsReady, cacheLoaded } = this.state;
         if (chatId) return null;
-        if (!dialogsReady && !cacheLoaded) return null;
+        // if (!dialogsReady && !cacheLoaded) return null;
 
         return (
             <div className='placeholder'>
@@ -85,7 +85,5 @@ class Placeholder extends React.Component {
         );
     }
 }
-
-Placeholder.propTypes = {};
 
 export default withTranslation()(Placeholder);

@@ -8,6 +8,41 @@
 import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+export function isMobile() {
+    return isAndroid() || isIOS() || isWindowsPhone();
+}
+
+export function isIOS() {
+    const iDevices = ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'];
+
+    if (!!navigator.platform && iDevices.indexOf(navigator.platform) > -1) {
+        return true;
+    }
+
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+export function isAndroid() {
+    const ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf('android') > -1;
+}
+
+export function isWindowsPhone() {
+    if (navigator.userAgent.match(/Windows Phone/i)) {
+        return true;
+    }
+
+    if (navigator.userAgent.match(/iemobile/i)) {
+        return true;
+    }
+
+    if (navigator.userAgent.match(/WPDesktop/i)) {
+        return true;
+    }
+
+    return false;
+}
+
 function isAppleDevice() {
     const iDevices = ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod', 'MacIntel'];
 
