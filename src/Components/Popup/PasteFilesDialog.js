@@ -58,7 +58,7 @@ class PasteFilesDialog extends React.Component {
 }
 
 PasteFilesDialog.propTypes = {
-    files: PropTypes.array.isRequired,
+    files: PropTypes.array,
     onConfirm: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired
 };

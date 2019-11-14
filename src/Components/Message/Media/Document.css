@@ -42,7 +42,7 @@
     flex-shrink: 1;
     margin-left: 12px;
     overflow: hidden;
-    height: 48px;
+    max-height: 48px;
 }
 
 .document-title {

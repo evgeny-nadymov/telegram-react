@@ -1,0 +1,64 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.edit-media-dialog-content {
+    flex: 1 1 auto;
+    display: flex;
+    position: relative;
+    border-top-width: 1px;
+    border-top-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#edit-media-dialog-caption {
+    box-shadow: 0 0 0 0;
+    max-height: 150px;
+    max-width: 324px;
+    min-height: 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 24px 12px 24px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+[contenteditable='true']#edit-media-dialog-caption br {
+    display: none;
+}
+
+#edit-media-dialog-caption::before {
+    /*content: attr(placeholder);*/
+    color: #8e9396;
+    pointer-events: none;
+    transform: translateX(20px);
+    will-change: transform;
+    opacity: 0;
+    /*position: absolute;*/
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+#edit-media-dialog-caption:empty::before {
+    content: attr(placeholder);
+    transform: translateX(0px);
+    opacity: 0.75;
+}
+
+#edit-media-dialog-caption:empty:active::before,
+#edit-media-dialog-caption:empty:focus::before {
+    opacity: 0.75;
+}
+
+#edit-media-dialog-caption:focus {
+    border: 0;
+    outline: none;
+    box-shadow: 0 0 0 0;
+}

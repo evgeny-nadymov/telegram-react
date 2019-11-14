@@ -8,6 +8,32 @@
 import { THUMBNAIL_BLURRED_SIZE } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 
+export function isEditedMedia(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return;
+
+    const { content } = message;
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            return true;
+        }
+        case 'messageAudio': {
+            return true;
+        }
+        case 'messageDocument': {
+            return true;
+        }
+        case 'messagePhoto': {
+            return true;
+        }
+        case 'messageVideo': {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function isValidAnimatedSticker(sticker, chatId, messageId) {
     if (!sticker) return false;
     if (!sticker.is_animated) return false;

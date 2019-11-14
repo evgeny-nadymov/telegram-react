@@ -24,7 +24,7 @@ import UpdateDraftDialog from '../Popup/UpdateDraftDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { borderStyle } from '../Theme';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
-import { findLastTextNode } from '../../Utils/DOM';
+import { findLastTextNode, focusInput } from '../../Utils/DOM';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
@@ -35,6 +35,8 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
+import EditMediaDialog from '../Popup/EditMediaDialog';
+import { isEditedMedia } from '../../Utils/Media';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -78,7 +80,7 @@ class InputBoxControl extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditUrl } = this.state;
+        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -109,6 +111,10 @@ class InputBoxControl extends Component {
         }
 
         if (nextState.openEditUrl !== openEditUrl) {
+            return true;
+        }
+
+        if (nextState.openEditMedia !== openEditMedia) {
             return true;
         }
 
@@ -186,12 +192,15 @@ class InputBoxControl extends Component {
 
         this.setState(
             {
-                editMessageId: messageId
+                editMessageId: messageId,
+                openEditMedia: messageId !== 0 && isEditedMedia(chatId, messageId)
             },
             () => {
-                this.setEditMessage();
-                this.handleInput();
-                this.focusInput();
+                if (!this.state.openEditMedia) {
+                    this.setEditMessage();
+                    this.handleInput();
+                    this.focusInput();
+                }
             }
         );
     };
@@ -385,20 +394,8 @@ class InputBoxControl extends Component {
     setInputFocus = () => {
         setTimeout(() => {
             const element = this.newMessageRef.current;
-            if (!element) return;
 
-            const textNode = findLastTextNode(element);
-            if (textNode) {
-                const range = document.createRange();
-                range.setStart(textNode, textNode.length);
-                range.collapse(true);
-
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-
-            element.focus();
+            focusInput(element);
         }, 100);
     };
 
@@ -539,7 +536,7 @@ class InputBoxControl extends Component {
     };
 
     setTyping() {
-        const { chatId } = this.state;
+        const { chatId, editMessageId } = this.state;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -554,6 +551,7 @@ class InputBoxControl extends Component {
 
         if (!innerText) return;
         if (isMeChat(chatId)) return;
+        if (editMessageId) return;
 
         const typingManager = chat.OutputTypingManager || (chat.OutputTypingManager = new OutputTypingManager(chat.id));
         typingManager.setTyping({ '@type': 'chatActionTyping' });
@@ -690,7 +688,6 @@ class InputBoxControl extends Component {
     handleKeyDown = event => {
         const { altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey } = event;
 
-        // console.log('[im] keyDown', keyCode);
         switch (keyCode) {
             // enter
             case 13: {
@@ -981,52 +978,6 @@ class InputBoxControl extends Component {
                     defaultText = parentElement.innerText;
                     defaultUrl = parentElement.href;
                 }
-            } else {
-                // let { parentNode: startParent } = startContainer;
-                // let { parentNode: endParent } = endContainer;
-                //
-                // console.log('[eu] range', range, startParent, endParent);
-                //
-                // if (startParent.nodeName !== 'DIV') {
-                //     startContainer = startParent;
-                //     startParent = startParent.parentNode;
-                // }
-                // if (endParent.nodeName !== 'DIV') {
-                //     endContainer = endParent;
-                //     endParent = endParent.parentNode;
-                // }
-                //
-                // console.log('[eu] parent', startParent, endParent);
-                //
-                // if (startParent === endParent) {
-                //     let startNode = null;
-                //     let url = null;
-                //     for (let i = 0; i < startParent.childNodes.length; i++) {
-                //         const node = startParent.childNodes[i];
-                //         if (!startNode) {
-                //             if (node === startContainer) startNode = startContainer;
-                //             else if (node === endContainer) startNode = endContainer;
-                //         }
-                //
-                //         if (node.nodeName === 'A') {
-                //             if (!url) {
-                //                 url = node.href;
-                //             } else {
-                //                 url = null;
-                //                 break;
-                //             }
-                //         }
-                //
-                //         if (startNode && startNode !== node) {
-                //             if (node === startContainer) break;
-                //             else if (node === endContainer) break;
-                //         }
-                //     }
-                //
-                //     if (url) {
-                //         defaultUrl = url;
-                //     }
-                // }
             }
         }
 
@@ -1131,11 +1082,30 @@ class InputBoxControl extends Component {
             }
 
             // replace selected text with new link node
-            const link = `<a href=${url} title=${url} rel='noopener norefferer' target='_blank'>${text}</a>`;
+            const link = `<a href=${url} title=${url} rel='noopener noreferrer' target='_blank'>${text}</a>`;
             document.execCommand('removeFormat', false, null);
             document.execCommand('insertHTML', false, link);
         }, 0);
     };
+
+    handleCancelEditMedia = () => {
+        this.closeEditMediaDialog();
+    };
+
+    handleDoneEditMedia = caption => {
+        this.editMessageCaption(caption, () => {});
+    };
+
+    closeEditMediaDialog() {
+        this.setState(
+            {
+                openEditMedia: false
+            },
+            () => {
+                this.restoreSelection();
+            }
+        );
+    }
 
     handleHeaderClick = () => {
         setTimeout(() => this.restoreSelection(), 0);
@@ -1151,7 +1121,8 @@ class InputBoxControl extends Component {
             newDraft,
             defaultText,
             defaultUrl,
-            openEditUrl
+            openEditUrl,
+            openEditMedia
         } = this.state;
 
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
@@ -1162,7 +1133,7 @@ class InputBoxControl extends Component {
                     <InputBoxHeader
                         chatId={chatId}
                         messageId={replyToMessageId}
-                        editMessageId={editMessageId}
+                        editMessageId={openEditMedia ? 0 : editMessageId}
                         onClick={this.handleHeaderClick}
                     />
                     <div className='inputbox-wrapper'>
@@ -1235,6 +1206,13 @@ class InputBoxControl extends Component {
                     defaultUrl={defaultUrl}
                     onDone={this.handleDoneEditUrl}
                     onCancel={this.handleCancelEditUrl}
+                />
+                <EditMediaDialog
+                    open={openEditMedia}
+                    chatId={chatId}
+                    messageId={editMessageId}
+                    onDone={this.handleDoneEditMedia}
+                    onCancel={this.handleCancelEditMedia}
                 />
             </>
         );

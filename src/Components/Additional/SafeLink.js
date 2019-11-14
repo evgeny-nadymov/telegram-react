@@ -98,7 +98,7 @@ class SafeLink extends React.Component {
                         href={href}
                         title={decodedUrl}
                         target='_blank'
-                        rel='noopener norefferer'
+                        rel='noopener noreferrer'
                         onClick={this.handleSafeClick}>
                         {children || url}
                     </a>

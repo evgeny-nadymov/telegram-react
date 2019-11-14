@@ -231,7 +231,7 @@ class EditUrlDialog extends React.Component {
 }
 
 EditUrlDialog.propTypes = {
-    open: PropTypes.bool.isRequired,
+    open: PropTypes.bool,
     defaultText: PropTypes.string,
     defaultUrl: PropTypes.string,
     onDone: PropTypes.func.isRequired,

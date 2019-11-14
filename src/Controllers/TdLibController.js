@@ -45,8 +45,8 @@ class TdLibController extends EventEmitter {
             mode: 'wasm'
         };
 
-        this.disableLog = false;
-        this.localStorage = false;
+        this.disableLog = true;
+        this.localStorage = true;
 
         this.setMaxListeners(Infinity);
     }

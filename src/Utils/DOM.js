@@ -19,3 +19,20 @@ export function findLastTextNode(element) {
 
     return null;
 }
+
+export function focusInput(element) {
+    if (!element) return;
+
+    const textNode = findLastTextNode(element);
+    if (textNode) {
+        const range = document.createRange();
+        range.setStart(textNode, textNode.length);
+        range.collapse(true);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    element.focus();
+}

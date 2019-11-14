@@ -1727,7 +1727,7 @@ export function getNodes(text, entities) {
                             // node.href = getDecodedUrl(url, false);
                             node.title = getUserFullName(user);
                             // node.target = '_blank';
-                            // node.rel = 'noopener norefferer';
+                            // node.rel = 'noopener noreferrer';
                             node.dataset.userId = user_id;
                             node.innerText = text.substr(x.offset, x.length);
                             nodes.push(node);
@@ -1761,7 +1761,7 @@ export function getNodes(text, entities) {
                         node.href = getDecodedUrl(url, false);
                         node.title = getDecodedUrl(url, false);
                         node.target = '_blank';
-                        node.rel = 'noopener norefferer';
+                        node.rel = 'noopener noreferrer';
                         node.innerText = text.substr(x.offset, x.length);
                         nodes.push(node);
                     } catch {

@@ -84,52 +84,52 @@ class Message extends Component {
         const { contextMenu, selected, highlighted, emojiMatches } = this.state;
 
         if (nextProps.theme !== theme) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.chatId !== chatId) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.messageId !== messageId) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.sendingState !== sendingState) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextProps.showTitle !== showTitle) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.contextMenu !== contextMenu) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.selected !== selected) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.highlighted !== highlighted) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
         if (nextState.emojiMatches !== emojiMatches) {
-            console.log('Message.shouldComponentUpdate true');
+            // console.log('Message.shouldComponentUpdate true');
             return true;
         }
 
