@@ -51,8 +51,7 @@
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "size": "react-app-rewired build --stats && npx webpack-bundle-analyzer ./build/bundle-stats.json",
-    "sw-precache-cra-list-config": "sw-precache-cra --list-config"
+    "stats": "react-app-rewired build --bundle-report && npx webpack-bundle-analyzer ./build/bundle-stats.json"
   },
   "devDependencies": {
     "customize-cra": "^0.5.0",
