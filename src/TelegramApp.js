@@ -30,6 +30,7 @@ import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import ApplicationStore from './Stores/ApplicationStore';
+import AuthorizationStore from './Stores/AuthorizationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
@@ -62,6 +63,7 @@ class TelegramApp extends Component {
         console.log(`Start Telegram Web ${packageJson.version}`);
 
         this.state = {
+            prevAuthorizationState: AuthorizationStore.current,
             authorizationState: null,
             databaseExists: true,
             inactive: false,
@@ -179,7 +181,22 @@ class TelegramApp extends Component {
 
     render() {
         const { t } = this.props;
-        const { inactive, nativeMobile, authorizationState, databaseExists, fatalError } = this.state;
+        const { inactive, nativeMobile, databaseExists, fatalError } = this.state;
+        let { authorizationState, prevAuthorizationState } = this.state;
+        const state = authorizationState;
+        if (
+            !authorizationState ||
+            authorizationState['@type'] === 'authorizationStateWaitEncryptionKey' ||
+            authorizationState['@type'] === 'authorizationStateWaitTdlibParameters'
+        ) {
+            if (prevAuthorizationState) {
+                authorizationState = prevAuthorizationState;
+            } else {
+                authorizationState = {
+                    '@type': 'authorizationStateWaitPhoneNumber'
+                };
+            }
+        }
 
         const loading = t('Loading').replace('...', '');
         // let page = <StubPage title={loading} />;
@@ -235,7 +252,16 @@ class TelegramApp extends Component {
             }
         }
 
-        // console.log('[cm] TelegramApp.render', page);
+        console.log(
+            'TelegramApp.render',
+            state,
+            prevAuthorizationState,
+            authorizationState,
+            'nativeMobile=' + nativeMobile,
+            'inactive=' + inactive,
+            'db=' + databaseExists,
+            page
+        );
 
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>
