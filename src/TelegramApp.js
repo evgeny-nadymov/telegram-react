@@ -22,7 +22,6 @@ import packageJson from '../package.json';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
-import MainPage from './Components/MainPage';
 import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
 import { isMobile } from './Utils/Common';
@@ -34,6 +33,7 @@ import AuthorizationStore from './Stores/AuthorizationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
+import MainPage from './Components/MainPage';
 // const MainPage = React.lazy(() => import('./Components/MainPage'));
 
 const styles = theme => ({
@@ -199,7 +199,6 @@ class TelegramApp extends Component {
         }
 
         const loading = t('Loading').replace('...', '');
-        // let page = <StubPage title={loading} />;
         let page = <MainPage />;
         //     (
         //     <React.Suspense fallback={<StubPage title='' />}>
@@ -217,12 +216,6 @@ class TelegramApp extends Component {
                 case 'authorizationStateClosing':
                 case 'authorizationStateLoggingOut':
                 case 'authorizationStateReady': {
-                    page = <MainPage />;
-                    // page = (
-                    //     <React.Suspense fallback={<StubPage title='' />}>
-                    //         <MainPage />
-                    //     </React.Suspense>
-                    // );
                     break;
                 }
                 case 'authorizationStateWaitCode':
@@ -252,16 +245,16 @@ class TelegramApp extends Component {
             }
         }
 
-        console.log(
-            'TelegramApp.render',
-            state,
-            prevAuthorizationState,
-            authorizationState,
-            'nativeMobile=' + nativeMobile,
-            'inactive=' + inactive,
-            'db=' + databaseExists,
-            page
-        );
+        // console.log(
+        //     'TelegramApp.render',
+        //     state,
+        //     prevAuthorizationState,
+        //     authorizationState,
+        //     'nativeMobile=' + nativeMobile,
+        //     'inactive=' + inactive,
+        //     'db=' + databaseExists,
+        //     page
+        // );
 
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>

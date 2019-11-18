@@ -33,7 +33,7 @@ module.exports = override(
     config => addWebpackBundleAnalyzer(config,{
         // analyzerMode: 'static',
         // reportFilename: 'report.html',
-        openAnalyzer: false,
+        openAnalyzer: true,
         generateStatsFile: true,
         statsFilename: 'bundle-stats.json'
     }),

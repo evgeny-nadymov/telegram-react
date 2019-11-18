@@ -36,7 +36,7 @@ class Meta extends React.Component {
                 <span>&ensp;</span>
                 {views > 0 && (
                     <>
-                        <VisibilityIcon className='meta-views-icon' />
+                        <VisibilityIcon fontSize='inherit' className='meta-views-icon' />
                         <span className='meta-views'>
                             &nbsp;
                             {views}

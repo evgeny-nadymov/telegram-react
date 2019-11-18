@@ -355,7 +355,7 @@ class ForwardDialog extends React.Component {
         }
     };
 
-    handleSearchKeyUp = () => {
+    handleSearchKeyUp = async () => {
         const { chatIds, savedMessages } = this.state;
 
         const element = this.searchRef.current;
@@ -368,7 +368,7 @@ class ForwardDialog extends React.Component {
 
         const innerText = this.getInnerText(element).trim();
         if (!innerText) {
-            this.setState({ searchText: null, searchResults: [] });
+            this.setState({ searchText: null, searchResults: [], globalSearchResults: [] });
             return;
         }
 
@@ -376,7 +376,7 @@ class ForwardDialog extends React.Component {
         const cyrillicText = getCyrillicInput(innerText);
 
         const chatsSource = savedMessages
-            ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
+            ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id && canSendMessages(x)))
             : chatIds;
 
         const searchResults = chatsSource.filter(
@@ -386,7 +386,21 @@ class ForwardDialog extends React.Component {
                 (cyrillicText && this.hasSearchText(x, cyrillicText))
         );
 
-        this.setState({ searchText: innerText, searchResults: searchResults });
+        this.setState({ searchText: innerText, searchResults });
+
+        const result = await TdLibController.send({
+            '@type': 'searchChatsOnServer',
+            query: innerText,
+            limit: 100
+        });
+
+        if (this.state.searchText !== innerText) {
+            return;
+        }
+
+        this.setState({
+            globalSearchResults: result.chat_ids
+        });
     };
 
     handleSearchPaste = event => {
@@ -451,10 +465,17 @@ class ForwardDialog extends React.Component {
 
     render() {
         const { classes, t } = this.props;
-        const { chatIds, searchText, searchResults, savedMessages, publicMessageLink } = this.state;
+        const {
+            chatIds,
+            searchText,
+            searchResults,
+            globalSearchResults,
+            savedMessages,
+            publicMessageLink
+        } = this.state;
 
         const chatsSource = savedMessages
-            ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id)).filter(x => canSendMessages(x))
+            ? [savedMessages.id].concat(chatIds.filter(x => x !== savedMessages.id && canSendMessages(x)))
             : chatIds;
 
         const chats = chatsSource.map(x => (
@@ -466,14 +487,23 @@ class ForwardDialog extends React.Component {
             />
         ));
 
-        const foundChats = (searchResults || []).map(x => (
-            <ForwardTargetChat
-                key={x}
-                chatId={x}
-                selected={this.targetChats.has(x)}
-                onSelect={() => this.handleChangeSelection(x)}
-            />
-        ));
+        const searchResultsMap = new Map((searchResults || []).map(x => [x, x]));
+        const filteredResults = (globalSearchResults || []).filter(
+            x => x !== savedMessages.id && canSendMessages(x) && !searchResultsMap.has(x)
+        );
+
+        const foundChats = (searchResults || [])
+            .concat(filteredResults)
+            .map(x => (
+                <ForwardTargetChat
+                    key={x}
+                    chatId={x}
+                    selected={this.targetChats.has(x)}
+                    onSelect={() => this.handleChangeSelection(x)}
+                />
+            ));
+
+        console.log('[fd] render', searchResults, globalSearchResults);
 
         return (
             <Dialog
