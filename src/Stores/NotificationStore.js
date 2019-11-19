@@ -40,7 +40,7 @@ class NotificationStore extends EventEmitter {
         let unreadCount = 0;
         this.newMessages.forEach(chat => {
             chat.forEach(m => {
-                if (!isMessageMuted(m)) {
+                if (!m.is_outgoing && !isMessageMuted(m)) {
                     unreadCount++;
                 }
             });
@@ -164,7 +164,7 @@ class NotificationStore extends EventEmitter {
                     this.newMessages.set(chat_id, chatMap);
                     this.updateTimer();
 
-                    if (!isMessageMuted(message) && this.enableSound) {
+                    if (!message.is_outgoing && !isMessageMuted(message) && this.enableSound) {
                         const now = new Date();
                         if (now > this.nextSoundAt) {
                             // console.log('[ns] audio play');
