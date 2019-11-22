@@ -14,12 +14,13 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
+import EditUrlDialog from './EditUrlDialog';
 import { borderStyle } from '../Theme';
 import { focusInput } from '../../Utils/DOM';
 import { getEntities, getMedia, getNodes } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
-import './EditMediaDialog.css';
 import TdLibController from '../../Controllers/TdLibController';
+import './EditMediaDialog.css';
 
 const styles = theme => ({
     ...borderStyle(theme)
@@ -29,7 +30,23 @@ class EditMediaDialog extends React.Component {
         super(props);
 
         this.captionRef = React.createRef();
+
+        this.state = {};
     }
+
+    componentDidMount() {
+        document.addEventListener('selectionchange', this.handleSelectionChange, true);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('selectionchange', this.handleSelectionChange);
+    }
+
+    handleSelectionChange = () => {
+        if (document.activeElement === this.captionRef.current) {
+            this.saveSelection();
+        }
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId, open } = this.props;
@@ -315,9 +332,52 @@ class EditMediaDialog extends React.Component {
         }
     }
 
+    handleCancelEditUrl = () => {
+        this.closeEditUrlDialog();
+    };
+
+    handleDoneEditUrl = (text, url) => {
+        this.closeEditUrlDialog();
+        setTimeout(() => {
+            // edit current link node
+            const { range } = this;
+            if (range) {
+                const { startContainer, endContainer } = range;
+                if (startContainer && startContainer === endContainer) {
+                    const { parentNode } = startContainer;
+                    if (parentNode && parentNode.nodeName === 'A') {
+                        parentNode.href = url;
+                        parentNode.title = url;
+                        parentNode.innerText = text;
+
+                        // move cursor to end of editing node
+                        const { lastChild } = parentNode;
+                        if (lastChild) {
+                            const range = document.createRange();
+                            range.setStart(lastChild, lastChild.textContent.length);
+                            range.setEnd(lastChild, lastChild.textContent.length);
+
+                            const selection = document.getSelection();
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // replace selected text with new link node
+            const link = `<a href=${url} title=${url} rel='noopener noreferrer' target='_blank'>${text}</a>`;
+            document.execCommand('removeFormat', false, null);
+            document.execCommand('insertHTML', false, link);
+        }, 0);
+    };
+
     render() {
         const { classes, chatId, messageId, open, t } = this.props;
         if (!open) return null;
+
+        const { defaultText, defaultUrl, openEditUrl } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return;
@@ -351,6 +411,13 @@ class EditMediaDialog extends React.Component {
                         {t('Edit')}
                     </Button>
                 </DialogActions>
+                <EditUrlDialog
+                    open={openEditUrl}
+                    defaultText={defaultText}
+                    defaultUrl={defaultUrl}
+                    onDone={this.handleDoneEditUrl}
+                    onCancel={this.handleCancelEditUrl}
+                />
             </Dialog>
         );
     }

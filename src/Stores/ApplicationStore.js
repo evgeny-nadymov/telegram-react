@@ -190,8 +190,8 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
-            case 'clientUpdateDatabaseExists': {
-                this.emit('clientUpdateDatabaseExists', update);
+            case 'clientUpdateTdLibDatabaseExists': {
+                this.emit('clientUpdateTdLibDatabaseExists', update);
                 break;
             }
             case 'clientUpdateDialogsReady': {

@@ -58,7 +58,7 @@ class TdLibController extends EventEmitter {
         const dbName = useTestDC ? 'tdlib_test' : 'tdlib';
 
         databaseExists(dbName, exists => {
-            this.clientUpdate({ '@type': 'clientUpdateDatabaseExists', exists });
+            this.clientUpdate({ '@type': 'clientUpdateTdLibDatabaseExists', exists });
 
             let options = {
                 logVerbosityLevel: verbosity,

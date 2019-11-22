@@ -65,7 +65,7 @@ class TelegramApp extends Component {
         this.state = {
             prevAuthorizationState: AuthorizationStore.current,
             authorizationState: null,
-            databaseExists: true,
+            tdlibDatabaseExists: false,
             inactive: false,
             fatalError: false,
             nativeMobile: isMobile()
@@ -82,7 +82,7 @@ class TelegramApp extends Component {
         TdLibController.addListener('update', this.onUpdate);
 
         ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
-        ApplicationStore.on('clientUpdateDatabaseExists', this.onClientUpdateDatabaseExists);
+        ApplicationStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
     }
@@ -91,12 +91,12 @@ class TelegramApp extends Component {
         TdLibController.removeListener('update', this.onUpdate);
 
         ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
-        ApplicationStore.removeListener('clientUpdateDatabaseExists', this.onClientUpdateDatabaseExists);
+        ApplicationStore.removeListener('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
         ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
     }
 
-    onClientUpdateDatabaseExists = update => {
+    onClientUpdateTdLibDatabaseExists = update => {
         const { exists } = update;
 
         if (!exists) {
@@ -104,7 +104,7 @@ class TelegramApp extends Component {
                 authorizationState: {
                     '@type': 'authorizationStateWaitTdlib'
                 },
-                databaseExists: exists
+                tdlibDatabaseExists: exists
             });
         }
     };
@@ -181,7 +181,7 @@ class TelegramApp extends Component {
 
     render() {
         const { t } = this.props;
-        const { inactive, nativeMobile, databaseExists, fatalError } = this.state;
+        const { inactive, nativeMobile, tdlibDatabaseExists, fatalError } = this.state;
         let { authorizationState, prevAuthorizationState } = this.state;
         const state = authorizationState;
         if (
@@ -191,7 +191,13 @@ class TelegramApp extends Component {
         ) {
             if (prevAuthorizationState) {
                 authorizationState = prevAuthorizationState;
-            } else {
+            }
+            // else if (tdlibDatabaseExists) {
+            //     authorizationState = {
+            //         '@type': 'authorizationStateReady'
+            //     }
+            // }
+            else {
                 authorizationState = {
                     '@type': 'authorizationStateWaitPhoneNumber'
                 };
@@ -231,30 +237,29 @@ class TelegramApp extends Component {
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {
-                    if (!databaseExists) {
-                        page = (
-                            <AuthFormControl
-                                authorizationState={authorizationState}
-                                onChangePhone={this.handleChangePhone}
-                            />
-                        );
-                    }
+                    // if (!tdlibDatabaseExists) {
+                    //     page = (
+                    //         <AuthFormControl
+                    //             authorizationState={authorizationState}
+                    //             onChangePhone={this.handleChangePhone}
+                    //         />
+                    //     );
+                    // }
 
                     break;
                 }
             }
         }
 
-        // console.log(
-        //     'TelegramApp.render',
-        //     state,
-        //     prevAuthorizationState,
-        //     authorizationState,
-        //     'nativeMobile=' + nativeMobile,
-        //     'inactive=' + inactive,
-        //     'db=' + databaseExists,
-        //     page
-        // );
+        console.log(
+            'TelegramApp.render',
+            state,
+            prevAuthorizationState,
+            'nativeMobile=' + nativeMobile,
+            'inactive=' + inactive,
+            'tdlibDb=' + tdlibDatabaseExists,
+            page
+        );
 
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>
