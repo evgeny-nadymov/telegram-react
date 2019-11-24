@@ -11,7 +11,6 @@
     height: 48px;
     border-radius: 50%;
     flex-shrink: 0;
-    cursor: pointer;
 }
 
 .document-tile-background {

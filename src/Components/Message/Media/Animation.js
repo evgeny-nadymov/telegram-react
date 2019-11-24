@@ -179,7 +179,7 @@ class Animation extends React.Component {
         const isGif = isGifMimeType(mime_type);
 
         return (
-            <div className='animation' style={animationStyle} onClick={openMedia}>
+            <div className={classNames('animation', { pointer: openMedia })} style={animationStyle} onClick={openMedia}>
                 {src ? (
                     isGif ? (
                         <img className='animation-preview' src={src} alt='' />

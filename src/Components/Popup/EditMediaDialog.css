@@ -15,6 +15,7 @@
     border-bottom-style: solid;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    cursor: default;
 }
 
 #edit-media-dialog-caption {

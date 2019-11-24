@@ -71,7 +71,11 @@ class DocumentTile extends React.Component {
 
         return (
             <div
-                className={classNames('document-tile', { 'document-tile-background': !thumbnailSrc })}
+                className={classNames(
+                    'document-tile',
+                    { 'document-tile-background': !thumbnailSrc },
+                    { pointer: openMedia }
+                )}
                 onClick={openMedia}>
                 {!tileLoaded && <div className={classes.background} />}
                 {thumbnailSrc && (

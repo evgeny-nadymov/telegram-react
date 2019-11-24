@@ -75,7 +75,7 @@ class Photo extends React.Component {
         };
 
         return (
-            <div className='photo' style={photoStyle} onClick={openMedia}>
+            <div className={classNames('photo', { pointer: openMedia })} style={photoStyle} onClick={openMedia}>
                 {src ? (
                     <img className='photo-image' draggable={false} src={src} alt='' />
                 ) : (

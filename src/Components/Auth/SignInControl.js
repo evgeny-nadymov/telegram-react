@@ -111,10 +111,10 @@ class SignInControl extends React.Component {
         if (!languagePackId) return;
 
         const { value } = languagePackId;
-        if (value === i18n.language) {
-            this.setState({ suggestedLanguage: null });
-            return;
-        }
+        // if (value === i18n.language) {
+        //     this.setState({ suggestedLanguage: null });
+        //     return;
+        // }
 
         LocalizationStore.loadLanguage(value).then(() => {
             this.setState({ suggestedLanguage: value });
@@ -167,13 +167,14 @@ class SignInControl extends React.Component {
         if (!i18n) return;
         if (!suggestedLanguage) return;
 
-        this.setState({ suggestedLanguage: i18n.language });
+        const nextLanguage =
+            suggestedLanguage === i18n.language ? LocalizationStore.defaultLanguage : suggestedLanguage;
 
-        TdLibController.clientUpdate({ '@type': 'clientUpdateLanguageChange', language: suggestedLanguage });
+        TdLibController.clientUpdate({ '@type': 'clientUpdateLanguageChange', language: nextLanguage });
     };
 
     render() {
-        const { defaultPhone, classes, t } = this.props;
+        const { defaultPhone, classes, i18n, t } = this.props;
         const { connecting, loading, error, suggestedLanguage } = this.state;
 
         let errorString = '';
@@ -187,6 +188,8 @@ class SignInControl extends React.Component {
         }
 
         const title = connecting ? cleanProgressStatus(t('Connecting')) : t('YourPhone');
+        const nextLanguage =
+            suggestedLanguage === i18n.language ? LocalizationStore.defaultLanguage : suggestedLanguage;
 
         return (
             <FormControl fullWidth>
@@ -204,6 +207,7 @@ class SignInControl extends React.Component {
                     id='phoneNumber'
                     label=''
                     margin='normal'
+                    autoComplete='off'
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
                     defaultValue={defaultPhone}
@@ -220,7 +224,7 @@ class SignInControl extends React.Component {
                     </Button>
                     <Typography className={classes.continueAtLanguage}>
                         <Link onClick={this.handleChangeLanguage}>
-                            {Boolean(suggestedLanguage) ? t('ContinueOnThisLanguage', { lng: suggestedLanguage }) : ' '}
+                            {Boolean(nextLanguage) ? t('ContinueOnThisLanguage', { lng: nextLanguage }) : ' '}
                         </Link>
                     </Typography>
                 </div>

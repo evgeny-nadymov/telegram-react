@@ -55,7 +55,7 @@ class Video extends React.Component {
         const isBlurred = isBlurredThumbnail(thumbnail);
 
         return (
-            <div className='video' style={videoStyle} onClick={openMedia}>
+            <div className={classNames('video', { pointer: openMedia })} style={videoStyle} onClick={openMedia}>
                 <img className={classNames('video-preview', { 'media-blurred': isBlurred })} src={src} alt='' />
                 <div className='video-play'>
                     <PlayArrowIcon />
@@ -70,7 +70,7 @@ Video.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
     video: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired,
+    openMedia: PropTypes.func,
     size: PropTypes.number,
     displaySize: PropTypes.number
 };

@@ -9,7 +9,6 @@
     border-radius: 6px;
     transform: translateZ(0);
     overflow: hidden;
-    cursor: pointer;
     position: relative;
     color: white;
 }

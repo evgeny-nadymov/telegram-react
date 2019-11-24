@@ -321,7 +321,7 @@ function readImageSize(file, callback) {
     let useBlob = false;
     // Create a new FileReader instance
     // https://developer.mozilla.org/en/docs/Web/API/FileReader
-    var reader = new FileReader();
+    const reader = new FileReader();
 
     // Once a file is successfully readed:
     reader.addEventListener('load', function() {
@@ -332,7 +332,7 @@ function readImageSize(file, callback) {
         // Since the File Object does not hold the size of an image
         // we need to create a new image and assign it's src, so when
         // the image is loaded we can calculate it's width and height:
-        var image = new Image();
+        const image = new Image();
         image.addEventListener('load', function() {
             // Concatenate our HTML image info
             // var imageInfo = file.name    +' '+ // get the value of `name` from the `file` Obj

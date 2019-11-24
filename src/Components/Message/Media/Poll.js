@@ -201,7 +201,7 @@ Poll.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     poll: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    openMedia: PropTypes.func
 };
 
 export default withTranslation()(Poll);

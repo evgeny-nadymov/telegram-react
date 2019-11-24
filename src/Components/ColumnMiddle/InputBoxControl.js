@@ -506,7 +506,7 @@ class InputBoxControl extends Component {
     };
 
     handleAttachPhotoComplete = () => {
-        let files = this.attachPhotoRef.current.files;
+        const files = this.attachPhotoRef.current.files;
         if (files.length === 0) return;
 
         Array.from(files).forEach(file => {
@@ -525,7 +525,7 @@ class InputBoxControl extends Component {
     };
 
     handleAttachDocumentComplete = () => {
-        let files = this.attachDocumentRef.current.files;
+        const files = this.attachDocumentRef.current.files;
         if (files.length === 0) return;
 
         Array.from(files).forEach(file => {
@@ -880,6 +880,25 @@ class InputBoxControl extends Component {
         }
     };
 
+    async editMessageMedia(content, callback) {
+        const { chatId, editMessageId } = this.state;
+        console.log('[em] editMessageMedia start', chatId, editMessageId, content);
+
+        if (!chatId) return;
+        if (!editMessageId) return;
+        if (!content) return;
+
+        console.log('[em] editMessageMedia send', content);
+        const result = await TdLibController.send({
+            '@type': 'editMessageMedia',
+            chat_id: chatId,
+            message_id: editMessageId,
+            input_message_content: content
+        });
+
+        callback(result);
+    }
+
     async editMessageCaption(caption, callback) {
         const { chatId, editMessageId } = this.state;
 
@@ -1092,7 +1111,12 @@ class InputBoxControl extends Component {
         this.closeEditMediaDialog();
     };
 
-    handleDoneEditMedia = caption => {
+    handleDoneEditMedia = (caption, content) => {
+        if (content) {
+            this.editMessageMedia(content, () => {});
+            return;
+        }
+
         this.editMessageCaption(caption, () => {});
     };
 

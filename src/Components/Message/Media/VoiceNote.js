@@ -47,7 +47,7 @@ VoiceNote.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     voiceNote: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired
+    openMedia: PropTypes.func
 };
 
 export default withStyles(styles, { withTheme: true })(VoiceNote);

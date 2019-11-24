@@ -82,7 +82,7 @@ Game.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     game: PropTypes.object.isRequired,
-    openMedia: PropTypes.func.isRequired,
+    openMedia: PropTypes.func,
 
     size: PropTypes.number,
     displaySize: PropTypes.number

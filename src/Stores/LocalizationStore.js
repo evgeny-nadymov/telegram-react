@@ -88,7 +88,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ConnectingToProxy: 'Connecting to proxy...',
                     Loading: 'Loading...',
                     Updating: 'Updating...',
-                    WaitingForNetwork: 'Waiting for network...'
+                    WaitingForNetwork: 'Waiting for network...',
+                    ContinueOnThisLanguage: 'Continue in English'
                 }
             },
             ru: {
@@ -140,7 +141,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ConnectingToProxy: 'Подключение к прокси...',
                     Loading: 'Загрузка...',
                     Updating: 'Обновление...',
-                    WaitingForNetwork: 'Ожидание сети...'
+                    WaitingForNetwork: 'Ожидание сети...',
+                    ContinueOnThisLanguage: 'Продолжить на русском'
                 }
             }
         },
@@ -173,6 +175,7 @@ class LocalizationStore extends EventEmitter {
     constructor() {
         super();
 
+        this.defaultLanguage = defaultLanguage;
         this.i18n = i18n;
         this.cache = cache;
 

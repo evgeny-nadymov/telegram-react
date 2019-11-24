@@ -251,15 +251,15 @@ class TelegramApp extends Component {
             }
         }
 
-        console.log(
-            'TelegramApp.render',
-            state,
-            prevAuthorizationState,
-            'nativeMobile=' + nativeMobile,
-            'inactive=' + inactive,
-            'tdlibDb=' + tdlibDatabaseExists,
-            page
-        );
+        // console.log(
+        //     'TelegramApp.render',
+        //     state,
+        //     prevAuthorizationState,
+        //     'nativeMobile=' + nativeMobile,
+        //     'inactive=' + inactive,
+        //     'tdlibDb=' + tdlibDatabaseExists,
+        //     page
+        // );
 
         return (
             <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>

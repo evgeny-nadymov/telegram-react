@@ -14,22 +14,39 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
+import EditIcon from '@material-ui/icons/Edit';
+import IconButton from '@material-ui/core/IconButton';
 import EditUrlDialog from './EditUrlDialog';
 import { borderStyle } from '../Theme';
 import { focusInput } from '../../Utils/DOM';
 import { getEntities, getMedia, getNodes } from '../../Utils/Message';
+import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EditMediaDialog.css';
+import { readImageSize } from '../../Utils/Common';
 
 const styles = theme => ({
-    ...borderStyle(theme)
+    ...borderStyle(theme),
+    editButton: {
+        position: 'absolute',
+        top: 30,
+        right: 30,
+        padding: 6,
+        color: 'white',
+        fontSize: 18,
+        background: 'rgba(0, 0, 0, 0.25)',
+        '&:hover': {
+            background: 'rgba(0, 0, 0, 0.25)'
+        }
+    }
 });
 class EditMediaDialog extends React.Component {
     constructor(props) {
         super(props);
 
         this.captionRef = React.createRef();
+        this.editMediaRef = React.createRef();
 
         this.state = {};
     }
@@ -51,6 +68,9 @@ class EditMediaDialog extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId, open } = this.props;
         if (open && open !== prevProps.open) {
+            this.file = null;
+            this.media = null;
+
             const message = MessageStore.get(chatId, messageId);
             if (!message) return;
 
@@ -106,11 +126,6 @@ class EditMediaDialog extends React.Component {
         const { innerHTML } = element;
 
         element.innerText = null;
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateEditMessage',
-            chatId,
-            messageId: 0
-        });
 
         const { text, entities } = getEntities(innerHTML);
 
@@ -120,7 +135,37 @@ class EditMediaDialog extends React.Component {
             entities
         };
 
-        onDone(caption);
+        console.log('[em] onDone', this.file);
+        let content = null;
+        if (this.file) {
+            readImageSize(this.file, result => {
+                content = {
+                    '@type': 'inputMessagePhoto',
+                    photo: { '@type': 'inputFileBlob', name: result.name, data: result },
+                    width: result.photoWidth,
+                    height: result.photoHeight,
+                    caption
+                };
+                console.log('[em] onDone content', content);
+                onDone(null, content);
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEditMessage',
+                    chatId,
+                    messageId: 0
+                });
+            });
+            this.file = null;
+        } else {
+            console.log('[em] onDone caption', caption);
+            onDone(caption, null);
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateEditMessage',
+                chatId,
+                messageId: 0
+            });
+        }
     };
 
     handleCancel = () => {
@@ -373,6 +418,68 @@ class EditMediaDialog extends React.Component {
         }, 0);
     };
 
+    handleEditMedia = event => {
+        const element = this.editMediaRef.current;
+        if (!element) return;
+
+        element.click();
+    };
+
+    handleEditMediaComplete = event => {
+        const element = this.editMediaRef.current;
+        if (!element) return;
+
+        const { files } = element;
+        if (files.length === 0) return;
+
+        Array.from(files).forEach(file => {
+            this.file = file;
+            this.getMediaFromFile(file, result => {
+                this.media = result;
+                this.forceUpdate();
+            });
+            console.log('[em] file', file);
+        });
+
+        element.value = '';
+    };
+
+    getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    getMediaFromFile(file, callback) {
+        if (!file) {
+            callback(null);
+        }
+
+        if (file.type.startsWith('image')) {
+            readImageSize(file, result => {
+                const fileId = -this.getRandomInt(1, 1000000);
+                FileStore.setBlob(fileId, result);
+
+                callback({
+                    '@type': 'messagePhoto',
+                    photo: {
+                        '@type': 'photo',
+                        has_stickers: false,
+                        minithumbnail: null,
+                        sizes: [
+                            {
+                                '@type': 'photoSize',
+                                photo: { '@type': 'file', id: fileId },
+                                width: result.photoWidth,
+                                height: result.photoHeight
+                            }
+                        ]
+                    }
+                });
+            });
+        } else {
+            callback(null);
+        }
+    }
+
     render() {
         const { classes, chatId, messageId, open, t } = this.props;
         if (!open) return null;
@@ -382,7 +489,7 @@ class EditMediaDialog extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return;
 
-        const media = getMedia(message, () => {});
+        const media = getMedia({ content: this.media }) || getMedia(message, null);
 
         return (
             <Dialog
@@ -392,6 +499,21 @@ class EditMediaDialog extends React.Component {
                 aria-labelledby='edit-media-dialog-title'>
                 <div className={classNames(classes.borderColor, 'edit-media-dialog-content')}>
                     <div style={{ margin: 24 }}>{media}</div>
+                    <IconButton
+                        disableRipple={true}
+                        aria-label={t('Edit')}
+                        className={classes.editButton}
+                        size='small'
+                        onClick={this.handleEditMedia}>
+                        <EditIcon fontSize='inherit' />
+                    </IconButton>
+                    <input
+                        ref={this.editMediaRef}
+                        className='inputbox-attach-button'
+                        type='file'
+                        accept='image/*'
+                        onChange={this.handleEditMediaComplete}
+                    />
                 </div>
                 <div
                     ref={this.captionRef}
