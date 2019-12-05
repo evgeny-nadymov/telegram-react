@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import { getFitSize, getDurationString } from '../../../Utils/Common';
-import { getFileSize } from '../../../Utils/File';
+import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import FileStore from '../../../Stores/FileStore';
@@ -38,7 +38,7 @@ class Video extends React.Component {
 
     render() {
         const { displaySize, openMedia, style } = this.props;
-        const { thumbnail, video, width, height, duration } = this.props.video;
+        const { minithumbnail, thumbnail, video, width, height, duration } = this.props.video;
 
         const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
         if (!fitPhotoSize) return null;
@@ -49,14 +49,17 @@ class Video extends React.Component {
             ...style
         };
 
-        const file = thumbnail ? thumbnail.photo : null;
-        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
-        const src = FileStore.getBlobUrl(blob);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
         return (
             <div className={classNames('video', { pointer: openMedia })} style={videoStyle} onClick={openMedia}>
-                <img className={classNames('video-preview', { 'media-blurred': isBlurred })} src={src} alt='' />
+                <img
+                    className={classNames('video-preview', { 'media-blurred': isBlurred })}
+                    src={thumbnailSrc || miniSrc}
+                    alt=''
+                />
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>

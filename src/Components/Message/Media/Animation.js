@@ -176,7 +176,7 @@ class Animation extends React.Component {
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(animation);
 
-        const isBlurred = miniSrc || isBlurredThumbnail(thumbnail);
+        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
         const isGif = isGifMimeType(mime_type);
 
         return (
