@@ -619,10 +619,13 @@ function loadPhotoThumbnailContent(store, photo, message) {
     if (!photo) return false;
     if (!message) return false;
 
-    const photoSize = getPhotoThumbnailSize(photo.sizes);
-    if (!photoSize) return false;
+    const thumbSize = getPhotoThumbnailSize(photo.sizes);
+    if (!thumbSize) return false;
 
-    let { photo: file } = photoSize;
+    const photoSize = getPhotoSize(photo.sizes);
+    if (photoSize === thumbSize) return;
+
+    let { photo: file } = thumbSize;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;

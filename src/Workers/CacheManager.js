@@ -7,7 +7,7 @@
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import CacheWorker from './cache.worker';
 import { randomString } from './Helpers';
-import { set, get, clear } from 'idb-keyval';
+import { set, get, del, clear } from 'idb-keyval';
 import TdLibController from '../Controllers/TdLibController';
 
 class CacheManager {
@@ -88,6 +88,14 @@ class CacheManager {
 
         //const store = localforage.createInstance({ name: 'telegram' });
         //await store.setItem(key, cache);
+    }
+
+    async remove(key) {
+        if (TdLibController.localStorage) {
+            localStorage.removeItem(key);
+        } else {
+            await del(key);
+        }
     }
 
     async clear() {

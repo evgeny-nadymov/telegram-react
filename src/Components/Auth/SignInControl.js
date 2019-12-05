@@ -18,6 +18,7 @@ import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { cleanProgressStatus, isConnecting, isValidPhoneNumber } from '../../Utils/Common';
+import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
@@ -47,11 +48,12 @@ class SignInControl extends React.Component {
     state = {
         connecting: isConnecting(ApplicationStore.connectionState),
         error: null,
-        loading: false
+        loading: false,
+        suggestedLanguage: localStorage.getItem(KEY_SUGGESTED_LANGUAGE_PACK_ID)
     };
 
     componentDidMount() {
-        this.handleSuggestedLanguagePackId();
+        this.setSuggestedLanguagePackId();
 
         ApplicationStore.on('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
         ApplicationStore.on('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
@@ -99,11 +101,11 @@ class SignInControl extends React.Component {
         const { name } = update;
 
         if (name === 'suggested_language_pack_id') {
-            this.handleSuggestedLanguagePackId();
+            this.setSuggestedLanguagePackId();
         }
     };
 
-    handleSuggestedLanguagePackId = () => {
+    setSuggestedLanguagePackId = async () => {
         const { i18n } = this.props;
         if (!i18n) return;
 
@@ -111,14 +113,10 @@ class SignInControl extends React.Component {
         if (!languagePackId) return;
 
         const { value } = languagePackId;
-        // if (value === i18n.language) {
-        //     this.setState({ suggestedLanguage: null });
-        //     return;
-        // }
 
-        LocalizationStore.loadLanguage(value).then(() => {
-            this.setState({ suggestedLanguage: value });
-        });
+        await LocalizationStore.loadLanguage(value);
+
+        this.setState({ suggestedLanguage: value });
     };
 
     handleNext = () => {

@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import TdLibController from '../Controllers/TdLibController';
+import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../Constants';
 
 class OptionStore extends EventEmitter {
     constructor() {
@@ -41,6 +42,10 @@ class OptionStore extends EventEmitter {
                 const { name, value } = update;
 
                 this.set(name, value);
+
+                if (name === KEY_SUGGESTED_LANGUAGE_PACK_ID) {
+                    localStorage.setItem(name, value.value);
+                }
 
                 this.emit('updateOption', update);
                 break;

@@ -29,7 +29,8 @@ class Photo extends React.Component {
             return {
                 prevPhoto: photo,
                 photoSize: getSize(photo.sizes, size),
-                thumbSize: getSize(photo.sizes, thumbnailSize)
+                thumbSize: getSize(photo.sizes, thumbnailSize),
+                minithumbnail: photo ? photo.minithumbnail : null
             };
         }
 
@@ -41,7 +42,7 @@ class Photo extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     onClientUpdatePhotoBlob = update => {
@@ -57,13 +58,14 @@ class Photo extends React.Component {
 
     render() {
         const { displaySize, openMedia, showProgress, style } = this.props;
-        const { thumbSize, photoSize } = this.state;
+        const { thumbSize, photoSize, minithumbnail } = this.state;
 
         if (!photoSize) return null;
 
-        const src = getSrc(photoSize.photo);
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
-        const isBlurred = isBlurredThumbnail(thumbSize);
+        const src = getSrc(photoSize.photo);
+        const isBlurred = miniSrc || (thumbSrc && isBlurredThumbnail(thumbSize));
 
         const fitPhotoSize = getFitSize(photoSize, displaySize, false);
         if (!fitPhotoSize) return null;
@@ -76,16 +78,12 @@ class Photo extends React.Component {
 
         return (
             <div className={classNames('photo', { pointer: openMedia })} style={photoStyle} onClick={openMedia}>
-                {src ? (
-                    <img className='photo-image' draggable={false} src={src} alt='' />
-                ) : (
-                    <img
-                        className={classNames('photo-image', { 'media-blurred': isBlurred })}
-                        draggable={false}
-                        src={thumbSrc}
-                        alt=''
-                    />
-                )}
+                <img
+                    className={classNames('photo-image', { 'media-blurred': !src && isBlurred })}
+                    draggable={false}
+                    src={src || thumbSrc || miniSrc}
+                    alt=''
+                />
                 {showProgress && <FileProgress file={photoSize.photo} download upload cancelButton />}
             </div>
         );

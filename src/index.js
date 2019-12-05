@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
+// import TelegramApp from './Components/Auth/TestPage';
 import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
 import Cookies from 'universal-cookie';

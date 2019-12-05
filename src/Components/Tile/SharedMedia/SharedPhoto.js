@@ -54,7 +54,8 @@ class SharedPhoto extends React.Component {
             revoke: false,
 
             photoSize: getSize(photo.sizes, size),
-            thumbSize: getSize(photo.sizes, thumbnailSize)
+            thumbSize: getSize(photo.sizes, thumbnailSize),
+            minithumbnail: photo.minithumbnail
         };
     }
 
@@ -163,7 +164,7 @@ class SharedPhoto extends React.Component {
 
     render() {
         const { chatId, messageId, classes, openMedia, style, showOpenMessage, t } = this.props;
-        const { thumbSize, photoSize, contextMenu, left, top, openDeleteDialog, revoke } = this.state;
+        const { minithumbnail, thumbSize, photoSize, contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -173,15 +174,16 @@ class SharedPhoto extends React.Component {
 
         if (!photoSize) return null;
 
-        const src = getSrc(photoSize.photo);
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
-        const isBlurred = isBlurredThumbnail(thumbSize);
+        const src = getSrc(photoSize.photo);
+        const isBlurred = miniSrc || (thumbSize && isBlurredThumbnail(thumbSize));
 
         return (
             <div className='shared-photo' style={style} onClick={openMedia} onContextMenu={this.handleContextMenu}>
                 <div
                     className={classNames('shared-photo-content', classes.sharedPhotoContent)}
-                    style={{ backgroundImage: `url(${thumbSrc})` }}>
+                    style={{ backgroundImage: `url(${thumbSrc || miniSrc})` }}>
                     {src !== thumbSrc && (
                         <div className='shared-photo-main-content' style={{ backgroundImage: `url(${src})` }} />
                     )}

@@ -19,6 +19,7 @@ export const IV_LOCATION_WIDTH = 600;
 export const IV_PHOTO_SIZE = 800;
 export const IV_PHOTO_DISPLAY_SIZE = 600;
 export const KEY_AUTH_STATE = 'auth';
+export const KEY_SUGGESTED_LANGUAGE_PACK_ID = 'suggested_language_pack_id';
 export const LOCATION_HEIGHT = 150;
 export const LOCATION_SCALE = 2;
 export const LOCATION_WIDTH = 300;

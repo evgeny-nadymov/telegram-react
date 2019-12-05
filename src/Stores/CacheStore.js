@@ -49,7 +49,8 @@ class CacheStore extends EventEmitter {
                     case 'authorizationStateWaitPhoneNumber':
                     case 'authorizationStateWaitPassword':
                     case 'authorizationStateWaitRegistration': {
-                        CacheManager.clear();
+                        CacheManager.remove('cache');
+                        CacheManager.remove('files');
                         break;
                     }
                 }
