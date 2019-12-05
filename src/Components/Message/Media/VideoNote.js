@@ -306,7 +306,7 @@ class VideoNote extends React.Component {
     render() {
         const { displaySize, chatId, messageId, openMedia } = this.props;
         const { active, currentTime, videoDuration } = this.state;
-        const { thumbnail, video, duration } = this.props.videoNote;
+        const { minithumbnail, thumbnail, video, duration } = this.props.videoNote;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -314,9 +314,10 @@ class VideoNote extends React.Component {
         const style = { width: 200, height: 200 };
         if (!style) return null;
 
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(video);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
         let progress = 0;
         if (videoDuration && currentTime) {
@@ -334,7 +335,7 @@ class VideoNote extends React.Component {
                         <video
                             ref={this.videoRef}
                             className={classNames('media-viewer-content-image', 'video-note-round')}
-                            poster={thumbnailSrc}
+                            poster={thumbnailSrc || miniSrc}
                             muted
                             autoPlay
                             loop
@@ -368,7 +369,7 @@ class VideoNote extends React.Component {
                             <img
                                 className={classNames('animation-preview', { 'media-blurred': isBlurred })}
                                 style={style}
-                                src={thumbnailSrc}
+                                src={thumbnailSrc || miniSrc}
                                 alt=''
                             />
                         </div>

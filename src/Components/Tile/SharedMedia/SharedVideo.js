@@ -157,7 +157,7 @@ class SharedVideo extends React.Component {
 
     render() {
         const { chatId, messageId, classes, openMedia, style, showOpenMessage, t } = this.props;
-        const { thumbnail, video, width, height, duration } = this.props.video;
+        const { minithumbnail, thumbnail, video, width, height, duration } = this.props.video;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -166,15 +166,16 @@ class SharedVideo extends React.Component {
         const { can_be_forwarded, can_be_deleted_only_for_self, can_be_deleted_for_all_users } = message;
         const count = 1;
 
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbnail ? thumbnail.photo : null);
-        const isBlurred = isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90);
+        const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90) : Boolean(miniSrc);
 
         return (
             <div className='shared-photo' style={style} onClick={openMedia} onContextMenu={this.handleContextMenu}>
                 <div className='shared-video-wrapper'>
                     <div
                         className={classNames('shared-video-content', { 'media-blurred': isBlurred })}
-                        style={{ backgroundImage: `url(${thumbSrc})` }}
+                        style={{ backgroundImage: `url(${thumbSrc || miniSrc})` }}
                     />
                     <div className='shared-video-meta'>{getDurationString(duration)}</div>
                 </div>
