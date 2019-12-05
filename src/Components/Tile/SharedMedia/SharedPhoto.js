@@ -177,7 +177,7 @@ class SharedPhoto extends React.Component {
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
         const src = getSrc(photoSize.photo);
-        const isBlurred = miniSrc || (thumbSize && isBlurredThumbnail(thumbSize));
+        const isBlurred = miniSrc || isBlurredThumbnail(thumbSize);
 
         return (
             <div className='shared-photo' style={style} onClick={openMedia} onContextMenu={this.handleContextMenu}>

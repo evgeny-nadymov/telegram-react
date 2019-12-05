@@ -161,7 +161,7 @@ class Animation extends React.Component {
 
     render() {
         const { displaySize, openMedia, t, style } = this.props;
-        const { thumbnail, animation, mime_type, width, height } = this.props.animation;
+        const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
 
         const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
         if (!fitPhotoSize) return null;
@@ -172,10 +172,11 @@ class Animation extends React.Component {
             ...style
         };
 
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(animation);
 
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const isBlurred = miniSrc || isBlurredThumbnail(thumbnail);
         const isGif = isGifMimeType(mime_type);
 
         return (
@@ -188,7 +189,7 @@ class Animation extends React.Component {
                             ref={this.videoRef}
                             className='media-viewer-content-animation'
                             src={src}
-                            poster={thumbnailSrc}
+                            poster={thumbnailSrc || miniSrc}
                             muted
                             autoPlay
                             loop
@@ -201,7 +202,7 @@ class Animation extends React.Component {
                     <>
                         <img
                             className={classNames('animation-preview', { 'media-blurred': isBlurred })}
-                            src={thumbnailSrc}
+                            src={thumbnailSrc || miniSrc}
                             alt=''
                         />
                         <div className='animation-meta'>{getFileSize(animation)}</div>

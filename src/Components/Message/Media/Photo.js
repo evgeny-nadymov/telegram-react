@@ -65,7 +65,7 @@ class Photo extends React.Component {
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
         const src = getSrc(photoSize.photo);
-        const isBlurred = miniSrc || (thumbSrc && isBlurredThumbnail(thumbSize));
+        const isBlurred = miniSrc || isBlurredThumbnail(thumbSize);
 
         const fitPhotoSize = getFitSize(photoSize, displaySize, false);
         if (!fitPhotoSize) return null;
