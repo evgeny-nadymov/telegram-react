@@ -63,28 +63,24 @@ class DocumentTile extends React.Component {
     };
 
     render() {
-        const { classes, thumbnail, file, icon, completeIcon, openMedia } = this.props;
+        const { classes, minithumbnail, thumbnail, file, icon, completeIcon, openMedia } = this.props;
         const { loaded } = this.state;
 
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const tileLoaded = thumbnailSrc && loaded;
+        const src = thumbnailSrc || miniSrc;
 
         return (
             <div
-                className={classNames(
-                    'document-tile',
-                    { 'document-tile-background': !thumbnailSrc },
-                    { pointer: openMedia }
-                )}
+                className={classNames('document-tile', { 'document-tile-background': !src }, { pointer: openMedia })}
                 onClick={openMedia}>
                 {!tileLoaded && <div className={classes.background} />}
-                {thumbnailSrc && (
-                    <img className='tile-photo' src={thumbnailSrc} onLoad={this.handleLoad} draggable={false} alt='' />
-                )}
+                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
                 {file && (
                     <FileProgress
                         file={file}
-                        thumbnailSrc={thumbnailSrc}
+                        thumbnailSrc={src}
                         download
                         upload
                         cancelButton
@@ -99,6 +95,7 @@ class DocumentTile extends React.Component {
 }
 
 DocumentTile.propTypes = {
+    minithumbnail: PropTypes.object,
     thumbnail: PropTypes.object,
     file: PropTypes.object,
     openMedia: PropTypes.func,

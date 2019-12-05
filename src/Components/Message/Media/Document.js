@@ -19,7 +19,7 @@ class Document extends React.Component {
         const { document, openMedia, width, height } = this.props;
         if (!document) return null;
 
-        const { thumbnail, file_name } = document;
+        const { minithumbnail, thumbnail, file_name } = document;
         const file = document.document;
 
         const style = width && height ? { width, height } : null;
@@ -27,6 +27,7 @@ class Document extends React.Component {
         return (
             <div className='document' style={style}>
                 <DocumentTile
+                    minithumbnail={minithumbnail}
                     thumbnail={thumbnail}
                     file={file}
                     openMedia={openMedia}
