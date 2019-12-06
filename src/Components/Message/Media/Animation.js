@@ -201,7 +201,10 @@ class Animation extends React.Component {
                 ) : (
                     <>
                         <img
-                            className={classNames('animation-preview', { 'media-blurred': isBlurred })}
+                            className={classNames('animation-preview', {
+                                'media-blurred': isBlurred,
+                                'media-mini-blurred': !src && !thumbnailSrc && isBlurred
+                            })}
                             src={thumbnailSrc || miniSrc}
                             alt=''
                         />

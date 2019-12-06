@@ -22,7 +22,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ReplyTile from '../Tile/ReplyTile';
 import { accentStyles, borderStyle } from '../Theme';
 import { canPinMessages } from '../../Utils/Chat';
-import { getContent, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
+import { getContent, getReplyMinithumbnail, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
 import { loadMessageContents } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
@@ -243,6 +243,7 @@ class PinnedMessage extends React.Component {
 
         let content = !message ? t('Loading') : getContent(message, t);
         const photoSize = getReplyPhotoSize(chatId, messageId);
+        const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         if (isDeletedMessage(message)) {
             content = t('DeletedMessage');
@@ -255,7 +256,14 @@ class PinnedMessage extends React.Component {
                     onClick={this.handleClick}>
                     <div className='pinned-message-wrapper'>
                         <div className={classNames('reply-border', classes.accentBackgroundLight)} />
-                        {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
+                        {photoSize && (
+                            <ReplyTile
+                                chatId={chatId}
+                                messageId={messageId}
+                                photoSize={photoSize}
+                                minithumbnail={minithumbnail}
+                            />
+                        )}
                         <div className='pinned-message-content'>
                             <div className={classNames('pinned-message-content-title', classes.accentColorMain)}>
                                 {t('PinnedMessage')}

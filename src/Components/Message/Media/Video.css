@@ -26,6 +26,11 @@
     filter: blur(2px);
 }
 
+.media-mini-blurred {
+    filter: blur(4px);
+    /*transform: scale(1.05);*/
+}
+
 .video-play {
     width: 48px;
     height: 48px;

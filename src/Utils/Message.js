@@ -1388,6 +1388,116 @@ function isDeletedMessage(message) {
     return message && message['@type'] === 'deletedMessage';
 }
 
+export function getReplyMinithumbnail(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (!animation) return null;
+
+            const { minithumbnail } = animation;
+            return minithumbnail || null;
+        }
+        case 'messageAudio': {
+            return null;
+        }
+        case 'messageChatChangePhoto': {
+            const { photo } = content;
+            if (!photo) return null;
+
+            return photo.minithumbnail || null;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (!document) return null;
+
+            const { minithumbnail } = document;
+            return minithumbnail || null;
+        }
+        case 'messageGame': {
+            const { game } = content;
+            if (!game) return null;
+
+            const { animation, photo } = game;
+            if (animation) {
+                const { minithumbnail } = animation;
+                if (minithumbnail) {
+                    return minithumbnail;
+                }
+            }
+
+            if (photo) {
+                return photo.minithumbnail || null;
+            }
+
+            return null;
+        }
+        case 'messagePhoto': {
+            const { photo } = content;
+            if (!photo) return null;
+
+            return photo.minithumbnail || null;
+        }
+        case 'messageSticker': {
+            return null;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, audio, document, photo, sticker, video, video_note } = web_page;
+                if (photo) {
+                    return photo.minithumbnail || null;
+                }
+                if (animation) {
+                    const { minithumbnail } = animation;
+                    return minithumbnail || null;
+                }
+                if (audio) {
+                    return null;
+                }
+                if (document) {
+                    const { minithumbnail } = document;
+                    return minithumbnail || null;
+                }
+                if (sticker) {
+                    return null;
+                }
+                if (video) {
+                    const { minithumbnail } = video;
+                    return minithumbnail || null;
+                }
+                if (video_note) {
+                    const { minithumbnail } = video_note;
+                    return minithumbnail || null;
+                }
+            }
+
+            break;
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (!video) return null;
+
+            const { minithumbnail } = video;
+            return minithumbnail || null;
+        }
+        case 'messageVideoNote': {
+            const { video_note } = content;
+            if (!video_note) return null;
+
+            const { minithumbnail } = video_note;
+            return minithumbnail || null;
+        }
+    }
+
+    return null;
+}
+
 function getReplyPhotoSize(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;

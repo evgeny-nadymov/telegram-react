@@ -12,7 +12,7 @@ import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ReplyTile from '../Tile/ReplyTile';
-import { getContent, getTitle, isDeletedMessage, getReplyPhotoSize } from '../../Utils/Message';
+import { getContent, getTitle, isDeletedMessage, getReplyPhotoSize, getReplyMinithumbnail } from '../../Utils/Message';
 import { accentStyles } from '../Theme';
 import { openChat } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
@@ -68,6 +68,7 @@ class Reply extends React.Component {
         title = title || getTitle(message);
         let content = !message ? t('Loading') : getContent(message, t);
         const photoSize = getReplyPhotoSize(chatId, messageId);
+        const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         if (isDeletedMessage(message)) {
             title = null;
@@ -78,7 +79,14 @@ class Reply extends React.Component {
             <div className='reply' onMouseDown={this.handleOpen} onClick={this.handleClick}>
                 <div className='reply-wrapper'>
                     <div className={classNames('reply-border', classes.accentBackgroundLight)} />
-                    {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
+                    {photoSize && (
+                        <ReplyTile
+                            chatId={chatId}
+                            messageId={messageId}
+                            photoSize={photoSize}
+                            minithumbnail={minithumbnail}
+                        />
+                    )}
                     <div className='reply-content'>
                         {title && (
                             <div className={classNames('reply-content-title', classes.accentColorMain)}>{title}</div>

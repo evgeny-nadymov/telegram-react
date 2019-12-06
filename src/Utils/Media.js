@@ -50,7 +50,7 @@ export function isValidAnimatedSticker(sticker, chatId, messageId) {
 export function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE) {
     if (!thumbnail) return false;
 
-    return Math.max(thumbnail.width, thumbnail.height) <= blurredSize;
+    return Math.max(thumbnail.width, thumbnail.height) < blurredSize;
 }
 
 export function getAudioTitle(audio) {

@@ -48,14 +48,15 @@ class ReplyTile extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, photoSize } = this.props;
+        const { chatId, messageId, photoSize, minithumbnail } = this.props;
         if (!photoSize) return null;
 
         const { photo } = photoSize;
         if (!photo) return null;
 
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const src = getSrc(photo);
-        const isBlurred = isBlurredThumbnail(photo);
+        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize);
         const isVideoNote = hasVideoNote(chatId, messageId);
 
         return (
@@ -65,10 +66,11 @@ class ReplyTile extends React.Component {
                         'reply-tile-photo',
                         { 'reply-tile-photo-round': isVideoNote },
                         { 'reply-tile-photo-loading': !src },
-                        { 'media-blurred': isBlurred }
+                        { 'media-blurred': src && isBlurred },
+                        { 'media-mini-blurred': !src && miniSrc && isBlurred }
                     )}
                     draggable={false}
-                    src={src}
+                    src={src || miniSrc}
                     alt=''
                 />
             </div>
@@ -79,7 +81,8 @@ class ReplyTile extends React.Component {
 ReplyTile.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    photoSize: PropTypes.object.isRequired
+    photoSize: PropTypes.object,
+    minithumbnail: PropTypes.object
 };
 
 export default ReplyTile;

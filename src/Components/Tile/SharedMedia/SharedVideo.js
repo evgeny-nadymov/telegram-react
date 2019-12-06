@@ -174,7 +174,10 @@ class SharedVideo extends React.Component {
             <div className='shared-photo' style={style} onClick={openMedia} onContextMenu={this.handleContextMenu}>
                 <div className='shared-video-wrapper'>
                     <div
-                        className={classNames('shared-video-content', { 'media-blurred': isBlurred })}
+                        className={classNames('shared-video-content', {
+                            'media-blurred': isBlurred,
+                            'media-mini-blurred': !thumbSrc && isBlurred
+                        })}
                         style={{ backgroundImage: `url(${thumbSrc || miniSrc})` }}
                     />
                     <div className='shared-video-meta'>{getDurationString(duration)}</div>

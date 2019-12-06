@@ -56,7 +56,10 @@ class Video extends React.Component {
         return (
             <div className={classNames('video', { pointer: openMedia })} style={videoStyle} onClick={openMedia}>
                 <img
-                    className={classNames('video-preview', { 'media-blurred': isBlurred })}
+                    className={classNames('video-preview', {
+                        'media-blurred': isBlurred,
+                        'media-mini-blurred': !thumbnailSrc && isBlurred
+                    })}
                     src={thumbnailSrc || miniSrc}
                     alt=''
                 />

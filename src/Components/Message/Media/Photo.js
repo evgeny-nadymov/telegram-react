@@ -79,7 +79,10 @@ class Photo extends React.Component {
         return (
             <div className={classNames('photo', { pointer: openMedia })} style={photoStyle} onClick={openMedia}>
                 <img
-                    className={classNames('photo-image', { 'media-blurred': !src && isBlurred })}
+                    className={classNames('photo-image', {
+                        'media-blurred': !src && isBlurred,
+                        'media-mini-blurred': !src && !thumbSrc && isBlurred
+                    })}
                     draggable={false}
                     src={src || thumbSrc || miniSrc}
                     alt=''
