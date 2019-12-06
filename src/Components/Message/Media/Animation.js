@@ -60,18 +60,15 @@ class Animation extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
-        FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
-        AppStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        AppStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        AppStore.removeListener('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
-        MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
-        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
-        InstantViewStore.removeListener(
-            'clientUpdateInstantViewViewerContent',
-            this.onClientUpdateInstantViewViewerContent
-        );
-        InstantViewStore.removeListener('clientUpdateBlocksInView', this.onClientUpdateBlocksInView);
+        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
+        FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        MessageStore.off('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+        InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
+        InstantViewStore.off('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
+        InstantViewStore.off('clientUpdateBlocksInView', this.onClientUpdateBlocksInView);
     }
 
     startStopPlayer = () => {
@@ -144,7 +141,9 @@ class Animation extends React.Component {
         if (!animation) return;
 
         if (animation.id === fileId) {
-            this.forceUpdate();
+            this.forceUpdate(() => {
+                this.startStopPlayer();
+            });
         }
     };
 
