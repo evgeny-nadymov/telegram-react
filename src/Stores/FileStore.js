@@ -818,15 +818,22 @@ class FileStore extends EventEmitter {
         console.log('[perf] uploadFile file_id=' + fileId);
     }
 
-    cancelUploadFile(fileId, obj) {
+    async cancelUploadFile(fileId, obj) {
         if (this.uploads.has(fileId)) {
             this.uploads.delete(fileId);
             console.log('cancel_upload_message id=' + obj.id);
-            TdLibController.send({
+            await TdLibController.send({
                 '@type': 'deleteMessages',
                 chat_id: obj.chat_id,
                 message_ids: [obj.id],
                 revoke: true
+            });
+
+            TdLibController.emit('update', {
+                '@type': 'updateDeleteMessages',
+                chat_id: obj.chat_id,
+                message_ids: [obj.id],
+                is_permanent: true
             });
         }
     }
