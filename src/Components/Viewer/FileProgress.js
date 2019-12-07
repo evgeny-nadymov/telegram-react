@@ -95,12 +95,42 @@ class FileProgress extends React.Component {
         FileStore.removeListener('updateFile', this.onUpdateFile);
     }
 
+    fileEquals(file1, file2) {
+        if (file1 === file2 && file1 === null) return true;
+        if (file1 !== null && file2 === null) return false;
+        if (file1 === null && file2 !== null) return false;
+
+        const { local: local1, remote: remote1 } = file1;
+        const { local: local2, remote: remote2 } = file2;
+
+        if (local1.can_be_deleted !== local2.can_be_deleted) return false;
+        if (local1.can_be_downloaded !== local2.can_be_downloaded) return false;
+        if (local1.download_offset !== local2.download_offset) return false;
+        if (local1.downloaded_prefix_size !== local2.downloaded_prefix_size) return false;
+        if (local1.downloaded_size !== local2.downloaded_size) return false;
+        if (local1.is_downloading_active !== local2.is_downloading_active) return false;
+        if (local1.is_downloading_completed !== local2.is_downloading_completed) return false;
+        if (local1.path !== local2.path) return false;
+
+        if (remote1.id !== remote2.id) return false;
+        if (remote1.is_uploading_active !== remote2.is_uploading_active) return false;
+        if (remote1.is_uploading_completed !== remote2.is_uploading_completed) return false;
+        if (remote1.uploaded_size !== remote2.uploaded_size) return false;
+
+        return true;
+    }
+
     onUpdateFile = update => {
         const currentFile = this.state.file;
         const nextFile = update.file;
 
         if (currentFile && currentFile.id === nextFile.id) {
-            this.setState({ file: nextFile, prevFile: currentFile });
+            if (this.fileEquals(nextFile, currentFile)) {
+                // console.log('[fp] update equals', nextFile, currentFile);
+            } else {
+                // console.log('[fp] update', nextFile, currentFile);
+                this.setState({ file: nextFile, prevFile: currentFile });
+            }
         }
     };
 
@@ -210,7 +240,7 @@ class FileProgress extends React.Component {
             !isActive;
 
         // console.log(
-        //     `FileProgress.render \\
+        //     `[fp]] render \\
         //     id=${file.id} showProgress=${inProgress} progress=${progress} \\
         //     was_active=${wasActive} is_active=${isActive} is_completed=${isCompleted} \\
         //     progress_size=${progressSize} size=${size} complete_animation=${this.completeAnimation} \\
