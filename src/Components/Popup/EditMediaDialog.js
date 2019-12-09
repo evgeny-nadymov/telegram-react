@@ -146,7 +146,6 @@ class EditMediaDialog extends React.Component {
                     height: result.photoHeight,
                     caption
                 };
-                console.log('[em] onDone content', content);
                 onDone(null, content);
 
                 TdLibController.clientUpdate({
@@ -157,7 +156,6 @@ class EditMediaDialog extends React.Component {
             });
             this.file = null;
         } else {
-            console.log('[em] onDone caption', caption);
             onDone(caption, null);
 
             TdLibController.clientUpdate({

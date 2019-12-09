@@ -7,6 +7,14 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import withStyles from '@material-ui/core/styles/withStyles';
@@ -16,14 +24,21 @@ import MainMenuButton from './MainMenuButton';
 import HeaderCommand from './HeaderCommand';
 import HeaderProgress from './HeaderProgress';
 import { borderStyle } from '../Theme';
-import { getChatSubtitle, getChatTitle, isAccentChatSubtitle, isMeChat } from '../../Utils/Chat';
-import { searchChat } from '../../Actions/Client';
+import {
+    getChatShortTitle,
+    getChatSubtitle,
+    getChatTitle,
+    isAccentChatSubtitle,
+    isPrivateChat
+} from '../../Utils/Chat';
+import { clearSelection, searchChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import MessageStore from '../../Stores/MessageStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './Header.css';
 
 const styles = theme => ({
@@ -56,8 +71,8 @@ class Header extends Component {
         super(props);
 
         this.state = {
-            authorizationState: ApplicationStore.getAuthorizationState(),
-            connectionState: ApplicationStore.getConnectionState()
+            authorizationState: AppStore.getAuthorizationState(),
+            connectionState: AppStore.getConnectionState()
         };
     }
 
@@ -78,9 +93,10 @@ class Header extends Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.on('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
 
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
@@ -97,26 +113,74 @@ class Header extends Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.off('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
 
-        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
-        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
+        MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
 
-        ChatStore.removeListener('updateChatOnlineMemberCount', this.onUpdateChatOnlineMemberCount);
-        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
-        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
-        ChatStore.removeListener('updateUserChatAction', this.onUpdateUserChatAction);
-        UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
-        SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
-        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
-        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
+        ChatStore.off('updateChatOnlineMemberCount', this.onUpdateChatOnlineMemberCount);
+        ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
+        UserStore.off('updateUserStatus', this.onUpdateUserStatus);
+        ChatStore.off('updateUserChatAction', this.onUpdateUserChatAction);
+        UserStore.off('updateUserFullInfo', this.onUpdateUserFullInfo);
+        BasicGroupStore.off('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        SupergroupStore.off('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+        BasicGroupStore.off('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.off('updateSupergroup', this.onUpdateSupergroup);
     }
 
+    onClientUpdateDeleteMessages = update => {
+        const { chatId, messageIds } = update;
+
+        let canBeDeletedForAllUsers = true;
+        for (let messageId of messageIds) {
+            const message = MessageStore.get(chatId, messageId);
+            if (!message) {
+                canBeDeletedForAllUsers = false;
+                break;
+            }
+            if (!message.can_be_deleted_for_all_users) {
+                canBeDeletedForAllUsers = false;
+                break;
+            }
+        }
+
+        this.setState({
+            openDeleteDialog: true,
+            chatId,
+            messageIds,
+            canBeDeletedForAllUsers: canBeDeletedForAllUsers,
+            revoke: canBeDeletedForAllUsers
+        });
+    };
+
+    handleRevokeChange = () => {
+        this.setState({ revoke: !this.state.revoke });
+    };
+
+    handleCloseDelete = () => {
+        this.setState({ openDeleteDialog: false });
+    };
+
+    handleDeleteContinue = () => {
+        const { revoke, chatId, messageIds } = this.state;
+
+        clearSelection();
+        this.handleCloseDelete();
+
+        TdLibController.send({
+            '@type': 'deleteMessages',
+            chat_id: chatId,
+            message_ids: messageIds,
+            revoke: revoke
+        });
+    };
+
     onUpdateChatOnlineMemberCount = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
         if (chat.id !== update.chat_id) return;
 
@@ -140,7 +204,7 @@ class Header extends Component {
     };
 
     onUpdateChatTitle = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
         if (chat.id !== update.chat_id) return;
 
@@ -148,7 +212,7 @@ class Header extends Component {
     };
 
     onUpdateUserStatus = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
         if (!chat.type) return;
 
@@ -182,7 +246,7 @@ class Header extends Component {
     };
 
     onUpdateUserChatAction = update => {
-        const currentChatId = ApplicationStore.getChatId();
+        const currentChatId = AppStore.getChatId();
 
         if (currentChatId === update.chat_id) {
             this.forceUpdate();
@@ -190,7 +254,7 @@ class Header extends Component {
     };
 
     onUpdateBasicGroup = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
 
         if (
@@ -203,7 +267,7 @@ class Header extends Component {
     };
 
     onUpdateSupergroup = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
 
         if (
@@ -216,7 +280,7 @@ class Header extends Component {
     };
 
     onUpdateBasicGroupFullInfo = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
 
         if (
@@ -229,7 +293,7 @@ class Header extends Component {
     };
 
     onUpdateSupergroupFullInfo = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
 
         if (
@@ -242,7 +306,7 @@ class Header extends Component {
     };
 
     onUpdateUserFullInfo = update => {
-        const chat = ChatStore.get(ApplicationStore.getChatId());
+        const chat = ChatStore.get(AppStore.getChatId());
         if (!chat) return;
 
         if (
@@ -255,15 +319,15 @@ class Header extends Component {
     };
 
     openChatDetails = () => {
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        ApplicationStore.changeChatDetailsVisibility(true);
+        AppStore.changeChatDetailsVisibility(true);
     };
 
     handleSearchChat = () => {
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -280,13 +344,24 @@ class Header extends Component {
 
     render() {
         const { classes, t } = this.props;
-        const { authorizationState, connectionState, selectionCount } = this.state;
+        const {
+            authorizationState,
+            connectionState,
+            selectionCount,
+            openDeleteDialog,
+            canBeDeletedForAllUsers,
+            revoke,
+            messageIds
+        } = this.state;
 
+        const count = messageIds ? messageIds.length : 0;
+
+        let control = null;
         if (selectionCount) {
-            return <HeaderCommand count={selectionCount} />;
+            control = <HeaderCommand count={selectionCount} />;
         }
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
 
         const isAccentSubtitle = isAccentChatSubtitle(chatId);
@@ -355,7 +430,7 @@ class Header extends Component {
             showProgressAnimation = true;
         }
 
-        return (
+        control = control || (
             <div className={classNames(classes.borderColor, 'header-details')}>
                 <div
                     className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
@@ -382,6 +457,44 @@ class Header extends Component {
                     </>
                 )}
             </div>
+        );
+
+        return (
+            <>
+                {control}
+                <Dialog
+                    transitionDuration={0}
+                    open={openDeleteDialog}
+                    onClose={this.handleCloseDelete}
+                    aria-labelledby='delete-dialog-title'>
+                    <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            {count === 1
+                                ? 'Are you sure you want to delete 1 message?'
+                                : `Are you sure you want to delete ${count} messages?`}
+                        </DialogContentText>
+                        {canBeDeletedForAllUsers && (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />
+                                }
+                                label={
+                                    isPrivateChat(chatId) ? `Delete for ${getChatShortTitle(chatId)}` : 'Delete for all'
+                                }
+                            />
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCloseDelete} color='primary'>
+                            {t('Cancel')}
+                        </Button>
+                        <Button onClick={this.handleDeleteContinue} color='primary'>
+                            {t('Ok')}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </>
         );
     }
 }

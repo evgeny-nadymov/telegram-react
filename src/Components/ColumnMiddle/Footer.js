@@ -100,7 +100,7 @@ class Footer extends React.Component {
                             return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
                         }
                         case 'chatMemberStatusCreator': {
-                            return <InputBoxControl />;
+                            return basicGroup.status.is_member ? <InputBoxControl /> : null;
                         }
                         case 'chatMemberStatusLeft': {
                             return null;
@@ -141,7 +141,7 @@ class Footer extends React.Component {
                             return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
                         }
                         case 'chatMemberStatusCreator': {
-                            return <InputBoxControl />;
+                            return supergroup.status.is_member ? <InputBoxControl /> : null;
                         }
                         case 'chatMemberStatusLeft': {
                             return <FooterCommand command='join' onCommand={this.handleJoin} />;

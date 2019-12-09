@@ -160,7 +160,6 @@ class ChatDetails extends React.Component {
     }
 
     componentDidMount() {
-        console.log('ChatDetails.componentDidMount');
         this.loadContent();
 
         UserStore.on('updateUserStatus', this.onUpdateUserStatus);
@@ -361,7 +360,6 @@ class ChatDetails extends React.Component {
         let { counters, migratedCounters } = this.props;
         counters = counters || [0, 0, 0, 0, 0, 0];
         migratedCounters = migratedCounters || [0, 0, 0, 0, 0, 0];
-        console.log('ChatDetails.render counters', counters, migratedCounters);
 
         const [photoCount, videoCount, documentCount, audioCount, urlCount, voiceAndVideoNoteCount] = counters.map(
             (el, i) => el + migratedCounters[i]

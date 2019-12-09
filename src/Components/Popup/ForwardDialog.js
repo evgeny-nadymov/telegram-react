@@ -32,6 +32,7 @@ import MessageStore from '../../Stores/MessageStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ForwardDialog.css';
+import { clearSelection } from '../../Actions/Client';
 
 const styles = theme => ({
     close: {
@@ -193,6 +194,7 @@ class ForwardDialog extends React.Component {
 
     handleSend = () => {
         this.handleClose();
+        clearSelection();
 
         const { chatId, messageIds, photoSize, media, link } = this.props;
         if (!chatId && !messageIds && !messageIds && !photoSize && !media && !link) return;
@@ -502,8 +504,6 @@ class ForwardDialog extends React.Component {
                     onSelect={() => this.handleChangeSelection(x)}
                 />
             ));
-
-        console.log('[fd] render', searchResults, globalSearchResults);
 
         return (
             <Dialog

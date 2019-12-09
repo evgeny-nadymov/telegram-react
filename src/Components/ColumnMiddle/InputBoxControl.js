@@ -576,7 +576,7 @@ class InputBoxControl extends Component {
         const regex = emojiRegex();
         let match = regex.exec(innerText);
         const t1 = performance.now();
-        console.log('Matched ' + (t1 - t0) + 'ms', match);
+        // console.log('Matched ' + (t1 - t0) + 'ms', match);
         if (!match || innerText !== match[0]) {
             const { hint } = StickerStore;
             if (hint) {

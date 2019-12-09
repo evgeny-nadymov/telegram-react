@@ -27,17 +27,36 @@ import {
     getUnread,
     getWebPage,
     openMedia,
-    showMessageForward
+    showMessageForward,
+    canMessageBeEdited
 } from '../../Utils/Message';
-import { canSendMessages } from '../../Utils/Chat';
-import { openUser, openChat, selectMessage, openReply } from '../../Actions/Client';
+import { canPinMessages, canSendMessages } from '../../Utils/Chat';
+import {
+    openUser,
+    openChat,
+    selectMessage,
+    openReply,
+    forwardMessages,
+    replyMessage,
+    editMessage,
+    clearSelection,
+    deleteMessages
+} from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
+import Popover from '@material-ui/core/Popover';
+import MenuList from '@material-ui/core/MenuList';
+import MenuItem from '@material-ui/core/MenuItem';
+import ChatStore from '../../Stores/ChatStore';
+import { pinMessage } from '../../Actions/Message';
 
 const styles = theme => ({
     message: {
         backgroundColor: 'transparent'
+    },
+    menuListRoot: {
+        minWidth: 150
     },
     messageAuthorColor: {
         color: theme.palette.primary.main
@@ -307,10 +326,96 @@ class Message extends Component {
         openReply(chatId, messageId);
     };
 
+    handleContextMenu = async event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { contextMenu } = this.state;
+
+        if (contextMenu) {
+            this.setState({ contextMenu: false });
+        } else {
+            if (MessageStore.selectedItems.size > 1) {
+                return;
+            }
+
+            const left = event.clientX;
+            const top = event.clientY;
+
+            this.setState({
+                contextMenu: true,
+                left,
+                top
+            });
+        }
+    };
+
+    handleCloseContextMenu = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        this.setState({ contextMenu: false });
+    };
+
+    handleReply = event => {
+        const { chatId, messageId } = this.props;
+
+        clearSelection();
+        this.handleCloseContextMenu(event);
+
+        replyMessage(chatId, messageId);
+    };
+
+    handlePin = event => {
+        const { chatId, messageId } = this.props;
+
+        clearSelection();
+        this.handleCloseContextMenu(event);
+
+        pinMessage(chatId, messageId);
+    };
+
+    handleForward = event => {
+        const { chatId, messageId } = this.props;
+
+        clearSelection();
+        this.handleCloseContextMenu(event);
+
+        forwardMessages(chatId, [messageId]);
+    };
+
+    handleEdit = event => {
+        const { chatId, messageId } = this.props;
+
+        clearSelection();
+        this.handleCloseContextMenu(event);
+
+        editMessage(chatId, messageId);
+    };
+
+    handleSelect = event => {
+        const { chatId, messageId } = this.props;
+
+        this.handleCloseContextMenu(event);
+
+        selectMessage(chatId, messageId, true);
+    };
+
+    handleDelete = event => {
+        const { chatId, messageId } = this.props;
+
+        this.handleCloseContextMenu(event);
+
+        deleteMessages(chatId, [messageId]);
+    };
+
     render() {
         // console.log('[m] render', this.props.messageId);
         const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
-        const { emojiMatches, selected, highlighted } = this.state;
+        const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -342,6 +447,13 @@ class Message extends Component {
 
         const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;
 
+        const canBeReplied = canSendMessages(chatId);
+        const canBePinned = canPinMessages(chatId);
+        const canBeForwarded = message.can_be_forwarded;
+        const canBeDeleted = message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users;
+        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
+        const canBeEdited = canMessageBeEdited(chatId, messageId);
+
         return (
             <div
                 className={messageClassName}
@@ -349,7 +461,8 @@ class Message extends Component {
                 onMouseOut={this.handleMouseOut}
                 onMouseDown={this.handleMouseDown}
                 onClick={this.handleSelection}
-                onAnimationEnd={this.handleAnimationEnd}>
+                onAnimationEnd={this.handleAnimationEnd}
+                onContextMenu={this.handleContextMenu}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <div className='message-left-padding'>
@@ -386,6 +499,29 @@ class Message extends Component {
                     </div>
                     {!showTitle && meta}
                 </div>
+                <Popover
+                    open={contextMenu}
+                    onClose={this.handleCloseContextMenu}
+                    anchorReference='anchorPosition'
+                    anchorPosition={{ top, left }}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                    }}
+                    onMouseDown={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                        {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
+                        {canBePinned && <MenuItem onClick={this.handlePin}>{t('Pin')}</MenuItem>}
+                        {canBeSelected && <MenuItem onClick={this.handleSelect}>{t('Select')}</MenuItem>}
+                        {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
+                        {canBeEdited && <MenuItem onClick={this.handleEdit}>{t('Edit')}</MenuItem>}
+                        {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
+                    </MenuList>
+                </Popover>
             </div>
         );
     }

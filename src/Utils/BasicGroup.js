@@ -12,7 +12,12 @@ function getBasicGroupStatus(basicGroup, chatId) {
 
     const { status, member_count: count } = basicGroup;
 
-    if (status && (status['@type'] === 'chatMemberStatusBanned' || status['@type'] === 'chatMemberStatusLeft')) {
+    if (
+        status &&
+        (status['@type'] === 'chatMemberStatusBanned' ||
+            status['@type'] === 'chatMemberStatusLeft' ||
+            (status['@type'] === 'chatMemberStatusCreator' && !status.is_member))
+    ) {
         return 'group is inaccessible';
     }
 

@@ -39,8 +39,6 @@ class PollPercentage extends React.Component {
         const { closed, theme, value } = this.props;
         const { animated } = this.state;
 
-        console.log('PollPercentage.shouldComponentUpdate start');
-
         if (closed !== nextProps.closed) {
             return true;
         }
@@ -57,7 +55,6 @@ class PollPercentage extends React.Component {
             return true;
         }
 
-        console.log('PollPercentage.shouldComponentUpdate end with false');
         return false;
     }
 
@@ -86,7 +83,6 @@ class PollPercentage extends React.Component {
     }
 
     updateAnimation = () => {
-        console.log('PollPercentage.updateAnimation');
         this.stopAnimation();
 
         this.handle = requestAnimationFrame(this.onAnimationFrame);
@@ -101,7 +97,6 @@ class PollPercentage extends React.Component {
 
     onAnimationFrame = () => {
         const { startTime, from, to } = this.state;
-        console.log('PollPercentage.onAnimationFrame');
 
         const timePassed = Date.now() - startTime;
 

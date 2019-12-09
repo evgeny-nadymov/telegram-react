@@ -47,6 +47,8 @@ class Reply extends React.Component {
     };
 
     handleOpen = event => {
+        if (event.button !== 0) return;
+
         event.stopPropagation();
 
         const { chatId, messageId, onClick } = this.props;

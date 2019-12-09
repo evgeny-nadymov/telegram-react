@@ -198,6 +198,10 @@ class MessageStore extends EventEmitter {
         }
     };
 
+    hasSelectedMessage(chatId, messageId) {
+        return this.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
+    }
+
     addTdLibListener = () => {
         TdLibController.addListener('update', this.onUpdate);
         TdLibController.addListener('clientUpdate', this.onClientUpdate);

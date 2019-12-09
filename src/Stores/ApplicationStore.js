@@ -194,6 +194,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateTdLibDatabaseExists', update);
                 break;
             }
+            case 'clientUpdateDeleteMessages': {
+                this.emit('clientUpdateDeleteMessages', update);
+                break;
+            }
             case 'clientUpdateDialogsReady': {
                 this.dialogsReady = true;
                 this.emit('clientUpdateDialogsReady', update);
