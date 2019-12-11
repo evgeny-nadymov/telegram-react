@@ -886,6 +886,7 @@ function loadMessageContents(store, messages) {
                     const { photo } = content;
 
                     loadPhotoContent(store, photo, message);
+                    loadBigPhotoContent(store, photo, message);
                     break;
                 }
                 case 'messageContact': {

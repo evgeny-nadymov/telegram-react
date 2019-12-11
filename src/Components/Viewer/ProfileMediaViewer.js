@@ -110,7 +110,7 @@ class ProfileMediaViewer extends React.Component {
         const photo = getPhotoFromChat(chatId);
         loadProfileMediaViewerContent(chatId, [photo]);
 
-        this.loadHistory();
+        this.loadHistory(photo);
 
         document.addEventListener('keydown', this.onKeyDown, false);
     }
@@ -132,7 +132,7 @@ class ProfileMediaViewer extends React.Component {
         }
     };
 
-    loadHistory = async () => {
+    loadHistory = async photo => {
         const { chatId } = this.props;
 
         if (!isPrivateChat(chatId)) return;
@@ -144,7 +144,8 @@ class ProfileMediaViewer extends React.Component {
             limit: 100
         });
 
-        this.history = result.photos;
+        result.photos.shift();
+        this.history = [photo, ...result.photos];
         this.firstSliceLoaded = result.photos.length === 0;
 
         const index = 0;

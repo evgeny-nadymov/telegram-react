@@ -20,7 +20,8 @@ import SharedVideos from './SharedMedia/SharedVideos';
 import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
 import { borderStyle } from '../Theme';
 import { getChatCounters } from '../../Actions/Chat';
-import { getSupergroupId, isSupergroup } from '../../Utils/Chat';
+import { getPhotoFromChat, getSupergroupId, isSupergroup } from '../../Utils/Chat';
+import { loadProfileMediaViewerContent } from '../../Utils/File';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -62,7 +63,7 @@ class ChatInfo extends React.Component {
     }
 
     componentDidMount() {
-        console.log('ChatDetails.ChatInfo.componentDidMount');
+        // console.log('ChatDetails.ChatInfo.componentDidMount');
         this.loadContent(this.state.chatId);
 
         ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
@@ -113,6 +114,10 @@ class ChatInfo extends React.Component {
     loadContent = chatId => {
         this.loadChatCounters(chatId);
         this.loadMigratedCounters(chatId);
+
+        const photo = getPhotoFromChat(chatId);
+        if (!photo) return;
+        loadProfileMediaViewerContent(chatId, [photo]);
     };
 
     loadChatCounters = async chatId => {
@@ -125,7 +130,6 @@ class ChatInfo extends React.Component {
     };
 
     loadMigratedCounters = async chatId => {
-        console.log('ChatInfo.loadMigratedCounters');
         if (!isSupergroup(chatId)) return;
 
         const fullInfo = SupergroupStore.getFullInfo(getSupergroupId(chatId));
@@ -142,7 +146,6 @@ class ChatInfo extends React.Component {
 
         if (!chat) return;
 
-        console.log('ChatInfo.loadMigratedCounters chat', chat);
         const counters = await getChatCounters(chat.id);
         ChatStore.setCounters(chat.id, counters);
 

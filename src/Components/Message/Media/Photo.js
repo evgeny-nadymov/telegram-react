@@ -76,17 +76,21 @@ class Photo extends React.Component {
             ...style
         };
 
+        const hasSrc = Boolean(src || thumbSrc || miniSrc);
+
         return (
             <div className={classNames('photo', { pointer: openMedia })} style={photoStyle} onClick={openMedia}>
-                <img
-                    className={classNames('photo-image', {
-                        'media-blurred': !src && isBlurred,
-                        'media-mini-blurred': !src && !thumbSrc && isBlurred
-                    })}
-                    draggable={false}
-                    src={src || thumbSrc || miniSrc}
-                    alt=''
-                />
+                {hasSrc && (
+                    <img
+                        className={classNames('photo-image', {
+                            'media-blurred': !src && isBlurred,
+                            'media-mini-blurred': !src && !thumbSrc && isBlurred
+                        })}
+                        draggable={false}
+                        src={src || thumbSrc || miniSrc}
+                        alt=''
+                    />
+                )}
                 {showProgress && <FileProgress file={photoSize.photo} download upload cancelButton />}
             </div>
         );

@@ -194,10 +194,14 @@ function getUserStatusOrder(user) {
     }
 }
 
-function getProfilePhoto(userProfilePhoto) {
-    if (!userProfilePhoto) return null;
+function getProfilePhoto(photo) {
+    if (!photo) return null;
 
-    const { id, sizes } = userProfilePhoto;
+    if (photo['@type'] === 'profilePhoto') {
+        return photo;
+    }
+
+    const { id, sizes } = photo;
     if (!sizes) return null;
     if (!sizes.length) return null;
 
@@ -206,7 +210,7 @@ function getProfilePhoto(userProfilePhoto) {
 
     return {
         '@type': 'profilePhoto',
-        id: id,
+        id,
         small: smallPhotoSize.photo,
         big: bigPhotoSize.photo
     };
