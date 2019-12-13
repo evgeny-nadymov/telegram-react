@@ -24,3 +24,10 @@ export function pinMessage(chatId, messageId, disableNotification = false) {
         disable_notification: disableNotification
     });
 }
+
+export function unpinMessage(chatId) {
+    TdLibController.send({
+        '@type': 'unpinChatMessage',
+        chat_id: chatId
+    });
+}

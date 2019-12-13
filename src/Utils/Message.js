@@ -2255,6 +2255,13 @@ export function isTextMessage(chatId, messageId) {
     return content && content['@type'] === 'messageText';
 }
 
+export function isMessagePinned(chatId, messageId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    return chat.pinned_message_id === messageId;
+}
+
 export {
     getAuthor,
     getTitle,

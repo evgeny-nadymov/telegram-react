@@ -28,7 +28,8 @@ import {
     getWebPage,
     openMedia,
     showMessageForward,
-    canMessageBeEdited
+    canMessageBeEdited,
+    isMessagePinned
 } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import {
@@ -49,7 +50,7 @@ import Popover from '@material-ui/core/Popover';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import ChatStore from '../../Stores/ChatStore';
-import { pinMessage } from '../../Actions/Message';
+import { pinMessage, unpinMessage } from '../../Actions/Message';
 
 const styles = theme => ({
     message: {
@@ -375,7 +376,11 @@ class Message extends Component {
         clearSelection();
         this.handleCloseContextMenu(event);
 
-        pinMessage(chatId, messageId);
+        if (isMessagePinned(chatId, messageId)) {
+            unpinMessage(chatId);
+        } else {
+            pinMessage(chatId, messageId);
+        }
     };
 
     handleForward = event => {
@@ -449,6 +454,7 @@ class Message extends Component {
 
         const canBeReplied = canSendMessages(chatId);
         const canBePinned = canPinMessages(chatId);
+        const isPinned = isMessagePinned(chatId, messageId);
         const canBeForwarded = message.can_be_forwarded;
         const canBeDeleted = message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users;
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
@@ -515,7 +521,9 @@ class Message extends Component {
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
-                        {canBePinned && <MenuItem onClick={this.handlePin}>{t('Pin')}</MenuItem>}
+                        {canBePinned && (
+                            <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>
+                        )}
                         {canBeSelected && <MenuItem onClick={this.handleSelect}>{t('Select')}</MenuItem>}
                         {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {canBeEdited && <MenuItem onClick={this.handleEdit}>{t('Edit')}</MenuItem>}
