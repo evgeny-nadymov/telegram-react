@@ -21,12 +21,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { borderStyle } from '../Theme';
 import { canMessageBeEdited } from '../../Utils/Message';
-import { canSendMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { canSendMessages, getChatShortTitle, isPrivateChat, isSupergroup, canPinMessages } from '../../Utils/Chat';
 import { forwardMessages } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderCommand.css';
+import { pinMessage } from '../../Actions/Message';
 
 const styles = theme => ({
     buttonLeft: {
@@ -113,6 +114,15 @@ class HeaderCommand extends React.Component {
         forwardMessages(id, messageIds);
     };
 
+    handlePin = () => {
+        let id;
+        const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+
+        this.handleCancel();
+
+        pinMessage(chatId, messageId);
+    };
+
     handleReply = () => {
         if (MessageStore.selectedItems.size !== 1) return;
 
@@ -172,6 +182,8 @@ class HeaderCommand extends React.Component {
             canBeEdited = canMessageBeEdited(chatId, messageId);
         }
 
+        let canBePinned = count === 1 && canPinMessages(chatId);
+
         return (
             <>
                 <div className={classNames(classes.borderColor, 'header-command')}>
@@ -193,6 +205,11 @@ class HeaderCommand extends React.Component {
                     {canBeEdited && (
                         <Button color='primary' className={classes.buttonLeft} onClick={this.handleEdit}>
                             {t('Edit')}
+                        </Button>
+                    )}
+                    {canBePinned && (
+                        <Button color='primary' className={classes.buttonLeft} onClick={this.handlePin}>
+                            {t('Pin')}
                         </Button>
                     )}
                     <div className='header-command-space' />

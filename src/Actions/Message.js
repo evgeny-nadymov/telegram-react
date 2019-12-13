@@ -15,3 +15,12 @@ export function viewMessages(chatId, messageIds, forceRead) {
         force_read: forceRead
     });
 }
+
+export function pinMessage(chatId, messageId, disableNotification) {
+    TdLibController.send({
+        '@type': 'pinChatMessage',
+        chat_id: chatId,
+        message_id: messageId,
+        disable_notification: disableNotification
+    });
+}
