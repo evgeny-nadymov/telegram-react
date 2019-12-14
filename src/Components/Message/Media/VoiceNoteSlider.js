@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Slider from '@material-ui/lab/Slider';
+import Slider from '@material-ui/core/Slider';
 import { PLAYER_PROGRESS_TIMEOUT_MS } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './VoiceNoteSlider.css';

@@ -97,7 +97,6 @@ export function clearSelection() {
 }
 
 export function setInstantViewViewerContent(content) {
-    console.log('[IV] setInstantViewViewerContent');
     TdLibController.clientUpdate({
         '@type': 'clientUpdateInstantViewViewerContent',
         content

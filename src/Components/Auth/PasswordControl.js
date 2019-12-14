@@ -34,7 +34,7 @@ const styles = theme => ({
         margin: '16px 0 8px 0'
     },
     withoutLabel: {
-        marginTop: theme.spacing.unit * 3
+        marginTop: theme.spacing(3)
     },
     textField: {
         flexBasis: 200

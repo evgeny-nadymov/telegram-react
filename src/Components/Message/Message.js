@@ -386,7 +386,6 @@ class Message extends Component {
     handleForward = event => {
         const { chatId, messageId } = this.props;
 
-        clearSelection();
         this.handleCloseContextMenu(event);
 
         forwardMessages(chatId, [messageId]);

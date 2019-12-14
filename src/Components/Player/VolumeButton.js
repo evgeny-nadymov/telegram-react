@@ -13,7 +13,7 @@ import VolumeDownIcon from '@material-ui/icons/VolumeDown';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import IconButton from '@material-ui/core/IconButton';
-import Slider from '@material-ui/lab/Slider';
+import Slider from '@material-ui/core/Slider';
 import { borderStyle } from '../Theme';
 import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
@@ -30,12 +30,6 @@ const styles = theme => ({
         width: 28,
         padding: '13px 0',
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    },
-    slider: {
-        padding: '0 13px'
-    },
-    thumb: {
-        opacity: 0
     },
     ...borderStyle(theme)
 });
@@ -201,14 +195,14 @@ class VolumeButton extends React.Component {
                             borderStyle: 'solid'
                         }}>
                         <Slider
-                            classes={{ container: classes.slider, thumb: classes.thumb }}
                             min={0}
                             max={1}
+                            step={0.01}
                             value={value}
                             onChange={this.handleChange}
                             onDragStart={this.handleDragStart}
                             onDragEnd={this.handleDragEnd}
-                            vertical
+                            orientation='vertical'
                         />
                     </div>
                 </div>

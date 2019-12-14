@@ -8,6 +8,25 @@
 import { THUMBNAIL_BLURRED_SIZE } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 
+export function getCallTitle(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content, is_outgoing } = message;
+    if (content['@type'] !== 'messageCall') return null;
+
+    const { discard_reason, duration } = content;
+    if (is_outgoing) {
+        return discard_reason['@type'] === 'callDiscardReasonMissed' ? 'Cancelled Call' : 'Outgoing Call';
+    } else if (discard_reason['@type'] === 'callDiscardReasonMissed') {
+        return 'Missed Call';
+    } else if (discard_reason['@type'] === 'callDiscardReasonDeclined') {
+        return 'Declined Call';
+    }
+
+    return 'Incoming Call';
+}
+
 export function isEditedMedia(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;

@@ -27,10 +27,10 @@ import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
     formControl: {
-        margin: theme.spacing.unit * 3
+        margin: theme.spacing(3)
     },
     group: {
-        margin: `${theme.spacing.unit}px 0`
+        margin: `${theme.spacing(1)}px 0`
     },
     redRoot: {
         color: red[600],

@@ -135,7 +135,6 @@ class EditMediaDialog extends React.Component {
             entities
         };
 
-        console.log('[em] onDone', this.file);
         let content = null;
         if (this.file) {
             readImageSize(this.file, result => {
@@ -436,7 +435,6 @@ class EditMediaDialog extends React.Component {
                 this.media = result;
                 this.forceUpdate();
             });
-            console.log('[em] file', file);
         });
 
         element.value = '';

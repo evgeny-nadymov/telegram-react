@@ -44,6 +44,7 @@ import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import Call from '../Components/Message/Media/Call';
 
 function getAuthor(message) {
     if (!message) return null;
@@ -335,6 +336,16 @@ function getMedia(message, openMedia) {
             return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
         case 'messageAudio':
             return <Audio chatId={chat_id} messageId={id} audio={content.audio} openMedia={openMedia} />;
+        case 'messageCall':
+            return (
+                <Call
+                    chatId={chat_id}
+                    messageId={id}
+                    duraton={content.duration}
+                    discardReason={content.discard_reason}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageContact':
             return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
         case 'messageDocument':

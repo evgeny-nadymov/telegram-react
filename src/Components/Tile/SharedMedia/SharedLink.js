@@ -178,8 +178,6 @@ class SharedLink extends React.Component {
             const hostname = new URL(decodedUrl).hostname.split('.');
             const domain = hostname.length >= 2 ? hostname[hostname.length - 2] : new URL(decodedUrl).hostname;
 
-            console.log('getTitleFromUrl', punycode);
-
             return punycode.ToUnicode(domain);
         } catch (error) {
             console.error('url: ' + url + '\n' + error);

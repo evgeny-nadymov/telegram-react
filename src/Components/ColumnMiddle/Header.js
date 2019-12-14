@@ -72,7 +72,8 @@ class Header extends Component {
 
         this.state = {
             authorizationState: AppStore.getAuthorizationState(),
-            connectionState: AppStore.getConnectionState()
+            connectionState: AppStore.getConnectionState(),
+            openDeleteDialog: false
         };
     }
 
