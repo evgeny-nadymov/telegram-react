@@ -68,17 +68,14 @@ class MainPage extends React.Component {
     }
 
     componentWillUnmount() {
-        UserStore.removeListener('clientUpdateOpenUser', this.onClientUpdateOpenUser);
-        ChatStore.removeListener('clientUpdateOpenChat', this.onClientUpdateOpenChat);
+        UserStore.off('clientUpdateOpenUser', this.onClientUpdateOpenUser);
+        ChatStore.off('clientUpdateOpenChat', this.onClientUpdateOpenChat);
 
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.removeListener(
-            'clientUpdateProfileMediaViewerContent',
-            this.onClientUpdateProfileMediaViewerContent
-        );
-        ApplicationStore.removeListener('clientUpdateForward', this.onClientUpdateForward);
-        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
+        ApplicationStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        ApplicationStore.off('clientUpdateForward', this.onClientUpdateForward);
+        InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
     }
 
     onClientUpdateInstantViewContent = update => {

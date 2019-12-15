@@ -24,7 +24,7 @@ import { setProfileMediaViewerContent } from '../../Actions/Client';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -144,8 +144,6 @@ class ProfileMediaViewer extends React.Component {
             limit: 100
         });
 
-        //result.photos.shift();
-        //this.history = [photo, ...result.photos];
         this.history = result.photos;
         this.firstSliceLoaded = result.photos.length === 0;
 
@@ -190,8 +188,6 @@ class ProfileMediaViewer extends React.Component {
 
     handleForward = () => {
         const { chatId } = this.props;
-        if (!isPrivateChat(chatId)) return;
-
         const { currentIndex, totalCount } = this.state;
 
         let index = -1;
@@ -199,25 +195,57 @@ class ProfileMediaViewer extends React.Component {
             index = currentIndex;
         }
 
-        if (index < 0 || index >= this.history.length) return;
-        const photo = getProfilePhoto(this.history[index]);
-        if (!photo) return;
+        let inputFile = null;
+        let inputMessagePhoto = null;
+        const inHistory = this.history && index >= 0 && index < this.history.length;
+        if (inHistory) {
+            const photo = getProfilePhoto(this.history[index]);
+            if (!photo) return;
 
-        let { big: file } = photo;
-        file = FileStore.get(file.id) || file;
-        if (!file) return;
+            let { big: file } = photo;
+            if (!file) return;
 
-        const photoSize = {
-            '@type': 'photoSize',
-            type: 'c',
-            photo: file,
-            width: 640,
-            height: 640
+            inputFile = {
+                '@type': 'inputFileId',
+                id: file.id
+            };
+        } else {
+            const chatPhoto = getPhotoFromChat(chatId);
+            if (!chatPhoto) return;
+
+            const { big: file } = chatPhoto;
+            if (!file) return;
+
+            const blob = FileStore.getBlob(file.id);
+            if (!blob) return;
+
+            inputFile = {
+                '@type': 'inputFileBlob',
+                data: blob,
+                name: ''
+            };
+        }
+
+        if (!inputFile) return;
+
+        const inputMessageContent = {
+            '@type': 'inputMessagePhoto',
+            photo: inputFile,
+            thumbnail: null,
+            added_sticker_file_ids: [],
+            width: PROFILE_PHOTO_BIG_SIZE,
+            height: PROFILE_PHOTO_BIG_SIZE,
+            caption: {
+                '@type': 'formattedText',
+                text: '',
+                entities: null
+            },
+            ttl: 0
         };
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateForward',
-            info: { photoSize }
+            info: { inputMessageContent }
         });
     };
 
@@ -369,14 +397,9 @@ class ProfileMediaViewer extends React.Component {
                         subtitle={totalCount && index >= 0 ? `${index + 1} of ${totalCount}` : null}
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
-                    {isPrivateChat(chatId) && (
-                        <MediaViewerFooterButton
-                            title={t('Forward')}
-                            disabled={!inHistory}
-                            onClick={this.handleForward}>
-                            <ReplyIcon style={forwardIconStyle} />
-                        </MediaViewerFooterButton>
-                    )}
+                    <MediaViewerDownloadButton title={t('Forward')} fileId={file.id} onClick={this.handleForward}>
+                        <ReplyIcon style={forwardIconStyle} />
+                    </MediaViewerDownloadButton>
                     <MediaViewerFooterButton title={t('Delete')} disabled onClick={this.handleDelete}>
                         <DeleteIcon style={deleteIconStyle} />
                     </MediaViewerFooterButton>

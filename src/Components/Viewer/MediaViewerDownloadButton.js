@@ -81,12 +81,12 @@ class MediaViewerDownloadButton extends React.Component {
     };
 
     render() {
-        const { title } = this.props;
+        const { title, children } = this.props;
         const { disabled } = this.state;
 
         return (
             <MediaViewerFooterButton disabled={disabled} title={title} onClick={this.handleClick}>
-                <SaveIcon style={iconStyle} />
+                {children || <SaveIcon style={iconStyle} />}
             </MediaViewerFooterButton>
         );
     }

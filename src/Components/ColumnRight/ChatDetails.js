@@ -169,10 +169,10 @@ class ChatDetails extends React.Component {
     }
 
     componentWillUnmount() {
-        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
-        UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
-        SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+        UserStore.off('updateUserStatus', this.onUpdateUserStatus);
+        UserStore.off('updateUserFullInfo', this.onUpdateUserFullInfo);
+        BasicGroupStore.off('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        SupergroupStore.off('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
     onUpdateBasicGroupFullInfo = update => {

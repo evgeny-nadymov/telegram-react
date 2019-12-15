@@ -46,7 +46,7 @@ class ChatInfoDialog extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateDialogChatId', this.handleClientUpdateDialogChatId);
+        ApplicationStore.off('clientUpdateDialogChatId', this.handleClientUpdateDialogChatId);
     }
 
     handleClientUpdateDialogChatId = update => {

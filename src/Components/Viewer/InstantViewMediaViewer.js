@@ -25,6 +25,7 @@ import { getViewerFile, saveMedia } from '../../Utils/File';
 import { setInstantViewViewerContent } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
+import { getInputMediaContent } from '../../Utils/Media';
 
 const forwardIconStyle = {
     padding: 20,
@@ -126,9 +127,12 @@ class InstantViewMediaViewer extends React.Component {
     handleForward = () => {
         const { media } = this.props;
 
+        const inputMessageContent = getInputMediaContent(media, null);
+        if (!inputMessageContent) return;
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateForward',
-            info: { media }
+            info: { inputMessageContent }
         });
     };
 

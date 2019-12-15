@@ -23,7 +23,6 @@ import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
-import { getInputMediaContent } from '../../Utils/Media';
 import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -196,49 +195,40 @@ class ForwardDialog extends React.Component {
         this.handleClose();
         clearSelection();
 
-        const { chatId, messageIds, photoSize, media, link } = this.props;
-        if (!chatId && !messageIds && !messageIds && !photoSize && !media && !link) return;
+        const { chatId, messageIds, inputMessageContent } = this.props;
+        if (!chatId && !messageIds && !inputMessageContent) return;
 
         const text = this.getInnerText(this.messageRef.current);
 
         this.targetChats.forEach(targetChatId => {
-            if (media) {
-                const content = getInputMediaContent(media, text);
-                if (content) {
-                    TdLibController.send({
-                        '@type': 'sendMessage',
-                        chat_id: targetChatId,
-                        reply_to_message_id: 0,
-                        disable_notifications: false,
-                        from_background: false,
-                        reply_markup: null,
-                        input_message_content: content
-                    });
-                }
-
-                return;
-            }
-
-            if (link) {
+            if (inputMessageContent) {
                 if (text) {
-                    TdLibController.send({
-                        '@type': 'sendMessage',
-                        chat_id: targetChatId,
-                        reply_to_message_id: 0,
-                        disable_notifications: false,
-                        from_background: false,
-                        reply_markup: null,
-                        input_message_content: {
-                            '@type': 'inputMessageText',
-                            text: {
-                                '@type': 'formattedText',
-                                text: text,
-                                entities: null
-                            },
-                            disable_web_page_preview: false,
-                            clear_draft: false
-                        }
-                    });
+                    if ('caption' in inputMessageContent) {
+                        inputMessageContent.caption = {
+                            '@type': 'formattedText',
+                            text,
+                            entities: null
+                        };
+                    } else {
+                        TdLibController.send({
+                            '@type': 'sendMessage',
+                            chat_id: targetChatId,
+                            reply_to_message_id: 0,
+                            disable_notifications: false,
+                            from_background: false,
+                            reply_markup: null,
+                            input_message_content: {
+                                '@type': 'inputMessageText',
+                                text: {
+                                    '@type': 'formattedText',
+                                    text,
+                                    entities: null
+                                },
+                                disable_web_page_preview: false,
+                                clear_draft: false
+                            }
+                        });
+                    }
                 }
 
                 TdLibController.send({
@@ -248,22 +238,13 @@ class ForwardDialog extends React.Component {
                     disable_notifications: false,
                     from_background: false,
                     reply_markup: null,
-                    input_message_content: {
-                        '@type': 'inputMessageText',
-                        text: {
-                            '@type': 'formattedText',
-                            text: link,
-                            entities: null
-                        },
-                        disable_web_page_preview: false,
-                        clear_draft: false
-                    }
+                    input_message_content: inputMessageContent
                 });
 
                 return;
             }
 
-            const size = photoSize || this.getForwardPhotoSize(chatId, messageIds);
+            const size = this.getForwardPhotoSize(chatId, messageIds);
             if (size) {
                 const { width, height, photo } = size;
 
@@ -286,7 +267,7 @@ class ForwardDialog extends React.Component {
                         height: height,
                         caption: {
                             '@type': 'formattedText',
-                            text: text,
+                            text,
                             entities: null
                         },
                         ttl: 0
@@ -308,7 +289,7 @@ class ForwardDialog extends React.Component {
                         '@type': 'inputMessageText',
                         text: {
                             '@type': 'formattedText',
-                            text: text,
+                            text,
                             entities: null
                         },
                         disable_web_page_preview: false,
@@ -563,8 +544,7 @@ class ForwardDialog extends React.Component {
 ForwardDialog.propTypes = {
     chatId: PropTypes.number,
     messageIds: PropTypes.array,
-    photoSize: PropTypes.object,
-    media: PropTypes.object
+    inputMessageContent: PropTypes.object
 };
 
 const enhance = compose(

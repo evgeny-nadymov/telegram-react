@@ -1036,34 +1036,37 @@ class MessagesList extends React.Component {
         const { history } = this.state;
         const list = this.listRef.current;
 
-        // console.log(
-        //     `MessagesList.scrollToMessage before
-        //     chatId=${chatId} messageId=${messageId}
-        //     list.scrollTop=${list.scrollTop}
-        //     list.offsetHeight=${list.offsetHeight}
-        //     list.scrollHeight=${list.scrollHeight}`
-        // );
+        console.log(
+            `MessagesList.scrollToMessage before
+            chatId=${chatId} messageId=${messageId}
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`,
+            this.itemsMap
+        );
 
         let scrolled = false;
         for (let i = 0; i < history.length; i++) {
-            let itemComponent = this.itemsMap.get(i);
-            let item = ReactDOM.findDOMNode(itemComponent);
-            if (item) {
+            const itemComponent = this.itemsMap.get(i);
+            console.log('MessagesList.itemComponent', i, itemComponent);
+            const node = ReactDOM.findDOMNode(itemComponent);
+            if (node) {
+                console.log('MessagesList.node', i, node);
                 if (itemComponent.props.messageId === messageId) {
-                    list.scrollTop = item.offsetTop - list.offsetHeight / 2.0;
+                    list.scrollTop = node.offsetTop - list.offsetHeight / 2.0;
                     scrolled = true;
                     break;
                 }
             }
         }
 
-        // console.log(
-        //     `MessagesList.scrollToMessage after
-        //     chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
-        //     list.scrollTop=${list.scrollTop}
-        //     list.offsetHeight=${list.offsetHeight}
-        //     list.scrollHeight=${list.scrollHeight}`
-        // );
+        console.log(
+            `MessagesList.scrollToMessage after
+            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
+            list.scrollTop=${list.scrollTop}
+            list.offsetHeight=${list.offsetHeight}
+            list.scrollHeight=${list.scrollHeight}`
+        );
 
         if (!scrolled) {
             this.scrollToBottom();
@@ -1238,7 +1241,10 @@ class MessagesList extends React.Component {
                       m = (
                           <Message
                               key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                              ref={el => this.itemsMap.set(i, el)}
+                              ref={el => {
+                                  this.itemsMap.set(i, el);
+                                  console.log('MessagesList.setRef', i);
+                              }}
                               chatId={x.chat_id}
                               messageId={x.id}
                               sendingState={x.sending_state}

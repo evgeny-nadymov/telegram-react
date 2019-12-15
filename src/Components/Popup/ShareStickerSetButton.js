@@ -115,9 +115,20 @@ class ShareStickerSetButton extends React.Component {
             stickerSet: null
         });
 
+        const inputMessageContent = {
+            '@type': 'inputMessageText',
+            text: {
+                '@type': 'formattedText',
+                text: link,
+                entities: null
+            },
+            disable_web_page_preview: false,
+            clear_draft: false
+        };
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateForward',
-            info: { link }
+            info: { inputMessageContent }
         });
     };
 
