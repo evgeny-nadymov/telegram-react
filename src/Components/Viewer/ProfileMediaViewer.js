@@ -144,8 +144,9 @@ class ProfileMediaViewer extends React.Component {
             limit: 100
         });
 
-        result.photos.shift();
-        this.history = [photo, ...result.photos];
+        //result.photos.shift();
+        //this.history = [photo, ...result.photos];
+        this.history = result.photos;
         this.firstSliceLoaded = result.photos.length === 0;
 
         const index = 0;
@@ -333,7 +334,7 @@ class ProfileMediaViewer extends React.Component {
 
         const deleteConfirmation = null;
         const inHistory = index >= 0 && index < this.history.length;
-        const photo = inHistory ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+        const photo = inHistory && index !== 0 ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
         const userProfilePhoto = inHistory ? this.history[index] : null;
         const { big: file } = photo;
 

@@ -118,6 +118,7 @@ class StickersPickerHeader extends React.Component {
             <Sticker
                 key={x.sticker.id}
                 className='stickers-picker-header-sticker'
+                style={{ width: 32, height: 32 }}
                 sticker={x}
                 play={false}
                 autoplay={false}
