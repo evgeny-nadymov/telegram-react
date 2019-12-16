@@ -42,14 +42,22 @@ class ChatInfoDialog extends React.Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateDialogChatId', this.handleClientUpdateDialogChatId);
+        ApplicationStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateDialogChatId', this.handleClientUpdateDialogChatId);
+        ApplicationStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
-    handleClientUpdateDialogChatId = update => {
+    onClientUpdateMediaViewerContent = update => {
+        if (ApplicationStore.mediaViewerContent) {
+            this.handleClose();
+        }
+    };
+
+    onClientUpdateDialogChatId = update => {
         const { chatId } = update;
 
         this.setState({ chatId });
