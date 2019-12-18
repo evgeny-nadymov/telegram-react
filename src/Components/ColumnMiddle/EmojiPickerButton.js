@@ -153,7 +153,7 @@ class EmojiPickerButton extends React.Component {
     };
 
     handlePaperMouseLeave = () => {
-        return;
+        // return;
 
         this.paperEnter = false;
         setTimeout(() => {

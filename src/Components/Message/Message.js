@@ -51,6 +51,7 @@ import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import ChatStore from '../../Stores/ChatStore';
 import { pinMessage, unpinMessage } from '../../Actions/Message';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 
 const styles = theme => ({
     message: {
@@ -74,7 +75,7 @@ const styles = theme => ({
         to: { backgroundColor: 'transparent' }
     },
     messageHighlighted: {
-        animation: 'highlighted 4s ease-out'
+        animation: '$highlighted 4s ease-out'
     }
 });
 
@@ -535,8 +536,10 @@ class Message extends Component {
 }
 
 const enhance = compose(
+    withSaveRef(),
     withStyles(styles, { withTheme: true }),
-    withTranslation()
+    withTranslation(),
+    withRestoreRef()
 );
 
 export default enhance(Message);

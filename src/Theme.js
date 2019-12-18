@@ -70,7 +70,7 @@ function withTheme(WrappedComponent) {
             const { theme } = this.state;
 
             return (
-                <StylesProvider injectFirst>
+                <StylesProvider>
                     <MuiThemeProvider theme={theme}>
                         <WrappedComponent {...this.props} />
                     </MuiThemeProvider>

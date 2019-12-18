@@ -17,8 +17,7 @@ import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { getChat } from '../../Actions/Chat';
-import { throttle, getPhotoSize, itemsInView, historyEquals, isAuthorizationReady } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
@@ -1036,22 +1035,20 @@ class MessagesList extends React.Component {
         const { history } = this.state;
         const list = this.listRef.current;
 
-        console.log(
-            `MessagesList.scrollToMessage before
-            chatId=${chatId} messageId=${messageId}
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`,
-            this.itemsMap
-        );
+        // console.log(
+        //     `MessagesList.scrollToMessage before
+        //     chatId=${chatId} messageId=${messageId}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`,
+        //     this.itemsMap
+        // );
 
         let scrolled = false;
         for (let i = 0; i < history.length; i++) {
             const itemComponent = this.itemsMap.get(i);
-            console.log('MessagesList.itemComponent', i, itemComponent);
             const node = ReactDOM.findDOMNode(itemComponent);
             if (node) {
-                console.log('MessagesList.node', i, node);
                 if (itemComponent.props.messageId === messageId) {
                     list.scrollTop = node.offsetTop - list.offsetHeight / 2.0;
                     scrolled = true;
@@ -1060,17 +1057,17 @@ class MessagesList extends React.Component {
             }
         }
 
-        console.log(
-            `MessagesList.scrollToMessage after
-            chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
-            list.scrollTop=${list.scrollTop}
-            list.offsetHeight=${list.offsetHeight}
-            list.scrollHeight=${list.scrollHeight}`
-        );
+        // console.log(
+        //     `MessagesList.scrollToMessage after
+        //     chatId=${chatId} messageId=${messageId} scrolled=${scrolled}
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
 
-        if (!scrolled) {
-            this.scrollToBottom();
-        }
+        // if (!scrolled) {
+        //     this.scrollToBottom();
+        // }
     };
 
     scrollToBottom = () => {
@@ -1241,10 +1238,7 @@ class MessagesList extends React.Component {
                       m = (
                           <Message
                               key={`chat_id=${x.chat_id} message_id=${x.id}`}
-                              ref={el => {
-                                  this.itemsMap.set(i, el);
-                                  console.log('MessagesList.setRef', i);
-                              }}
+                              ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}
                               sendingState={x.sending_state}
@@ -1253,8 +1247,6 @@ class MessagesList extends React.Component {
                           />
                       );
                   }
-
-                  // return m;
 
                   return (
                       <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
