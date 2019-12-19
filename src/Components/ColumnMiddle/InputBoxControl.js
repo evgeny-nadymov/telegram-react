@@ -675,10 +675,16 @@ class InputBoxControl extends Component {
     };
 
     handleCancel = () => {
-        const { chatId, editMessageId } = this.state;
+        const { chatId, editMessageId, replyToMessageId } = this.state;
         if (editMessageId) {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateEditMessage',
+                chatId,
+                messageId: 0
+            });
+        } else if (replyToMessageId) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateReply',
                 chatId,
                 messageId: 0
             });
@@ -687,6 +693,8 @@ class InputBoxControl extends Component {
 
     handleKeyDown = event => {
         const { altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey } = event;
+
+        // console.log('[k] handleKeyDown', altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey);
 
         switch (keyCode) {
             // enter
@@ -702,6 +710,7 @@ class InputBoxControl extends Component {
             // esc
             case 27: {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    console.log('[k] handleKeyDown handleCancel');
                     if (!repeat) this.handleCancel();
 
                     event.preventDefault();

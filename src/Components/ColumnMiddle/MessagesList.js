@@ -187,6 +187,8 @@ class MessagesList extends React.Component {
     }
 
     componentDidMount() {
+        // document.addEventListener('keydown', this.onKeyDown, false);
+
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
@@ -205,6 +207,8 @@ class MessagesList extends React.Component {
     }
 
     componentWillUnmount() {
+        // document.removeEventListener('keydown', this.onKeyDown, false);
+
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
@@ -221,6 +225,17 @@ class MessagesList extends React.Component {
         PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onKeyDown = event => {
+        // if (event.keyCode === 27) {
+        //     if (MessageStore.selectedItems.size > 0) {
+        //         console.log('[k] messagesList onKeyDown');
+        //         clearSelection();
+        //         event.stopPropagation();
+        //         event.preventDefault();
+        //     }
+        // }
+    };
 
     onClientUpdateTryEditMessage = async update => {
         if (this.completed) {
