@@ -58,7 +58,7 @@ class ReplyTile extends React.Component {
         const src = getSrc(photo);
         const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize);
         const isVideoNote = hasVideoNote(chatId, messageId);
-        const hasSrc = true; //Boolean(src || miniSrc);
+        const hasSrc = Boolean(src || miniSrc);
 
         return (
             <div className='reply-tile'>

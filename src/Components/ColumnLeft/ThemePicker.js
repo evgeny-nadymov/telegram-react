@@ -197,6 +197,7 @@ class ThemePicker extends React.Component {
                                 value='red'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.redRoot,
                                             checked: classes.checked
@@ -209,6 +210,7 @@ class ThemePicker extends React.Component {
                                 value='orange'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.orangeRoot,
                                             checked: classes.checked
@@ -221,6 +223,7 @@ class ThemePicker extends React.Component {
                                 value='amber'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.amberRoot,
                                             checked: classes.checked
@@ -233,6 +236,7 @@ class ThemePicker extends React.Component {
                                 value='green'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.greenRoot,
                                             checked: classes.checked
@@ -245,6 +249,7 @@ class ThemePicker extends React.Component {
                                 value='blue'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.blueRoot,
                                             checked: classes.checked
@@ -257,6 +262,7 @@ class ThemePicker extends React.Component {
                                 value='indigo'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.indigoRoot,
                                             checked: classes.checked
@@ -269,6 +275,7 @@ class ThemePicker extends React.Component {
                                 value='deepPurple'
                                 control={
                                     <Radio
+                                        color='primary'
                                         classes={{
                                             root: classes.deepPurpleRoot,
                                             checked: classes.checked
