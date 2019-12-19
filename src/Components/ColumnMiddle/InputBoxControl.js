@@ -710,7 +710,6 @@ class InputBoxControl extends Component {
             // esc
             case 27: {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    console.log('[k] handleKeyDown handleCancel');
                     if (!repeat) this.handleCancel();
 
                     event.preventDefault();
