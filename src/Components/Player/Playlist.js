@@ -75,10 +75,10 @@ class Playlist extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
-        PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
-        PlayerStore.removeListener('clientUpdateMediaPlaylistLoading', this.onClientUpdateMediaPlaylistLoading);
-        PlayerStore.removeListener('clientUpdateMediaTitleMouseOver', this.onClientUpdateMediaTitleMouseOver);
+        PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.off('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
+        PlayerStore.off('clientUpdateMediaPlaylistLoading', this.onClientUpdateMediaPlaylistLoading);
+        PlayerStore.off('clientUpdateMediaTitleMouseOver', this.onClientUpdateMediaTitleMouseOver);
     }
 
     onClientUpdateMediaTitleMouseOver = update => {

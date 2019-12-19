@@ -43,7 +43,7 @@ function withTheme(WrappedComponent) {
         }
 
         componentWillUnmount() {
-            ApplicationStore.removeListener('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
+            ApplicationStore.off('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
         }
 
         onClientUpdateThemeChanging = update => {
@@ -70,7 +70,7 @@ function withTheme(WrappedComponent) {
             const { theme } = this.state;
 
             return (
-                <StylesProvider>
+                <StylesProvider injectFirst={true}>
                     <MuiThemeProvider theme={theme}>
                         <WrappedComponent {...this.props} />
                     </MuiThemeProvider>

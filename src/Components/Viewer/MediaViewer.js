@@ -150,9 +150,9 @@ class MediaViewer extends React.Component {
 
     componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown, false);
-        MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
-        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
     }
 
     onKeyDown = event => {

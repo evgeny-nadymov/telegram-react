@@ -91,7 +91,7 @@ class DialogsHeader extends React.Component {
     }
 
     componentWillUnmount() {
-        AppStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     onUpdateAuthorizationState = update => {

@@ -88,12 +88,12 @@ class TelegramApp extends Component {
     }
 
     componentWillUnmount() {
-        TdLibController.removeListener('update', this.onUpdate);
+        TdLibController.off('update', this.onUpdate);
 
-        ApplicationStore.removeListener('clientUpdateAppInactive', this.onClientUpdateAppInactive);
-        ApplicationStore.removeListener('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.removeListener('updateFatalError', this.onUpdateFatalError);
+        ApplicationStore.off('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        ApplicationStore.off('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
+        ApplicationStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.off('updateFatalError', this.onUpdateFatalError);
     }
 
     onClientUpdateTdLibDatabaseExists = update => {

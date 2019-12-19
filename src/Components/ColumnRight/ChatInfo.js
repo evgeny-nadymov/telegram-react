@@ -70,7 +70,7 @@ class ChatInfo extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateChatId', this.onClientUpdateChatId);
+        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

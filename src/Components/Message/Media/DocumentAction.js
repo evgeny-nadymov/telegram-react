@@ -36,7 +36,7 @@ class DocumentAction extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('updateFile', this.onUpdateFile);
+        FileStore.off('updateFile', this.onUpdateFile);
     }
 
     onUpdateFile = update => {

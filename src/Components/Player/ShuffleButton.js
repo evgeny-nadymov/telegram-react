@@ -34,7 +34,7 @@ class ShuffleButton extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
+        PlayerStore.off('clientUpdateMediaShuffle', this.onClientUpdateMediaShuffle);
     }
 
     onClientUpdateMediaShuffle = update => {

@@ -21,8 +21,8 @@ class Icon extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
-        FileStore.removeListener('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
     }
 
     onClientUpdateDocumentThumbnailBlob = update => {

@@ -35,8 +35,8 @@ class Footer extends React.Component {
     }
 
     componentWillUnmount() {
-        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
-        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
+        BasicGroupStore.off('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.off('updateSupergroup', this.onUpdateSupergroup);
     }
 
     onUpdateBasicGroup = update => {

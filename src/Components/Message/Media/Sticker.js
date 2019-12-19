@@ -111,19 +111,16 @@ class Sticker extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
-        ApplicationStore.removeListener('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.removeListener(
-            'clientUpdateProfileMediaViewerContent',
-            this.onClientUpdateProfileMediaViewerContent
-        );
-        InstantViewStore.removeListener('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
-        FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
-        FileStore.removeListener('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
-        MessageStore.removeListener('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
-        StickerStore.removeListener('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
-        StickerStore.removeListener('clientUpdateStickerSet', this.onClientUpdateStickerSet);
+        ApplicationStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        ApplicationStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
+        FileStore.off('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
+        FileStore.off('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        MessageStore.off('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
+        StickerStore.off('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
+        StickerStore.off('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
     onClientUpdateInstantViewContent = update => {

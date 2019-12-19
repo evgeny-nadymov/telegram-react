@@ -88,7 +88,7 @@ class ServiceMessage extends React.Component {
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
     }
 
     onClientUpdateMessageHighlighted = update => {

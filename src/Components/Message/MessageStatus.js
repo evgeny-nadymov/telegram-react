@@ -57,10 +57,10 @@ class MessageStatus extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('updateChatReadOutbox', this.onUpdateChatReadOutbox);
+        ChatStore.off('updateChatReadOutbox', this.onUpdateChatReadOutbox);
 
-        MessageStore.removeListener('updateMessageSendFailed', this.onUpdateMessageSend);
-        MessageStore.removeListener('updateMessageSendSucceeded', this.onUpdateMessageSend);
+        MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSend);
+        MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSend);
     }
 
     onUpdateMessageSend = update => {

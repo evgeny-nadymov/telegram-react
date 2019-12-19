@@ -49,7 +49,7 @@ class MainMenuButton extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     onUpdateAuthorizationState = update => {

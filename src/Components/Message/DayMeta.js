@@ -26,7 +26,7 @@ class DayMeta extends React.Component {
     }
 
     componentWillUnmount() {
-        LocalizationStore.removeListener('clientUpdateLanguageChange', this.onClientUpdateLanguage);
+        LocalizationStore.off('clientUpdateLanguageChange', this.onClientUpdateLanguage);
     }
 
     onClientUpdateLanguage = () => {

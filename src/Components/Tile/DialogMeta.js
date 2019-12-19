@@ -42,13 +42,13 @@ class DialogMeta extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
-        ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
-        ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.off('updateChatDraftMessage', this.onUpdate);
+        ChatStore.off('updateChatLastMessage', this.onUpdate);
+        ChatStore.off('updateChatReadInbox', this.onUpdate);
+        ChatStore.off('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.off('updateMessageMentionRead', this.onUpdate);
     }
 
     onClientUpdateClearHistory = update => {

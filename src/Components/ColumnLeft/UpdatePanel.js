@@ -35,7 +35,7 @@ class UpdatePanel extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
+        ApplicationStore.off('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
     }
 
     onClientUpdateNewContentAvailable = () => {

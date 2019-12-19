@@ -33,7 +33,7 @@ class PlaybackRateButton extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
+        PlayerStore.off('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
     }
 
     onClientUpdateMediaPlaybackRate = update => {

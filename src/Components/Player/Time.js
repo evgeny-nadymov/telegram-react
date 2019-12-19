@@ -25,7 +25,7 @@ class Time extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaTime', this.onClientUpdateMediaTime);
+        PlayerStore.off('clientUpdateMediaTime', this.onClientUpdateMediaTime);
     }
 
     onClientUpdateMediaTime = update => {

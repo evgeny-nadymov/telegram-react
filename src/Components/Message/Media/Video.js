@@ -22,7 +22,7 @@ class Video extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
+        FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
     }
 
     onClientUpdateVideoThumbnailBlob = update => {

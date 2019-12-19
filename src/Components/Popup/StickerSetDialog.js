@@ -80,8 +80,8 @@ class StickerSetDialog extends React.Component {
     }
 
     componentWillUnmount() {
-        StickerStore.removeListener('clientUpdateStickerSet', this.handleClientUpdateStickerSet);
-        StickerStore.removeListener('updateInstalledStickerSets', this.handleUpdateInstalledStickerSets);
+        StickerStore.off('clientUpdateStickerSet', this.handleClientUpdateStickerSet);
+        StickerStore.off('updateInstalledStickerSets', this.handleUpdateInstalledStickerSets);
     }
 
     handleUpdateInstalledStickerSets = update => {

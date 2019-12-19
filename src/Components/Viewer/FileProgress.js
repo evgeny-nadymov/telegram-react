@@ -92,7 +92,7 @@ class FileProgress extends React.Component {
 
     componentWillUnmount() {
         this.mount = false;
-        FileStore.removeListener('updateFile', this.onUpdateFile);
+        FileStore.off('updateFile', this.onUpdateFile);
     }
 
     fileEquals(file1, file2) {

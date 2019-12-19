@@ -64,18 +64,18 @@ class DialogBadge extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatIsMarkedAsUnread', this.onUpdate);
-        ChatStore.removeListener('updateChatIsPinned', this.onUpdate);
-        ChatStore.removeListener('updateChatNotificationSettings', this.onUpdate);
-        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatReadOutbox', this.onUpdate);
-        ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
-        ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
-        NotificationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.off('updateChatDraftMessage', this.onUpdate);
+        ChatStore.off('updateChatIsMarkedAsUnread', this.onUpdate);
+        ChatStore.off('updateChatIsPinned', this.onUpdate);
+        ChatStore.off('updateChatNotificationSettings', this.onUpdate);
+        ChatStore.off('updateChatReadInbox', this.onUpdate);
+        ChatStore.off('updateChatLastMessage', this.onUpdate);
+        ChatStore.off('updateChatReadOutbox', this.onUpdate);
+        ChatStore.off('updateChatUnreadMentionCount', this.onUpdate);
+        ChatStore.off('updateMessageMentionRead', this.onUpdate);
+        NotificationStore.off('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     onClientUpdateClearHistory = update => {

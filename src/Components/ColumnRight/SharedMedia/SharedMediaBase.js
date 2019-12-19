@@ -88,9 +88,9 @@ class SharedMediaBase extends React.Component {
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('updateDeleteMessages', this.onUpdateDeleteMessages);
-        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
-        MessageStore.removeListener('updateNewMessage', this.onUpdateNewMessage);
+        MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
     }
 
     onUpdateMessageContent = update => {

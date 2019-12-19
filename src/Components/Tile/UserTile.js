@@ -51,10 +51,10 @@ class UserTile extends Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
-        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
-        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
+        FileStore.off('clientUpdateUserBlob', this.onClientUpdateUserBlob);
+        FileStore.off('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        ChatStore.off('updateChatPhoto', this.onUpdateChatPhoto);
+        ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
     }
 
     onClientUpdateUserBlob = update => {

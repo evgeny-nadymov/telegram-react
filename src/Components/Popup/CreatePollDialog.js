@@ -80,12 +80,12 @@ class CreatePollDialog extends React.Component {
     }
 
     componentWillUnmount() {
-        PollStore.removeListener('clientUpdateDeletePoll', this.handleClientUpdatePoll);
-        PollStore.removeListener('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
-        PollStore.removeListener('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
-        PollStore.removeListener('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
-        PollStore.removeListener('clientUpdatePollOption', this.handleClientUpdatePoll);
-        PollStore.removeListener('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
+        PollStore.off('clientUpdateDeletePoll', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
+        PollStore.off('clientUpdateNewPollOption', this.handleClientUpdateNewPollOption);
+        PollStore.off('clientUpdatePollOption', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdatePollQuestion', this.handleClientUpdatePollQuestion);
     }
 
     handleClientUpdateNewPoll = update => {

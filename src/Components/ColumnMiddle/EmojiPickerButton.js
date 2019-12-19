@@ -69,8 +69,8 @@ class EmojiPickerButton extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateThemeChange', this.onClientUpdateChange);
-        LocalizationStore.removeListener('clientUpdateLanguageChange', this.onClientUpdateChange);
+        ApplicationStore.off('clientUpdateThemeChange', this.onClientUpdateChange);
+        LocalizationStore.off('clientUpdateLanguageChange', this.onClientUpdateChange);
     }
 
     onClientUpdateChange = update => {

@@ -39,10 +39,10 @@ class VoiceNoteTile extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
-        PlayerStore.removeListener('clientUpdateMediaPlay', this.onClientUpdateMediaPlay);
-        PlayerStore.removeListener('clientUpdateMediaPause', this.onClientUpdateMediaPause);
-        PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+        PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.off('clientUpdateMediaPlay', this.onClientUpdateMediaPlay);
+        PlayerStore.off('clientUpdateMediaPause', this.onClientUpdateMediaPause);
+        PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
     onClientUpdateMediaEnd = update => {

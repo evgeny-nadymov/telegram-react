@@ -80,11 +80,11 @@ class AudioAction extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('updateFile', this.onUpdateFile);
+        FileStore.off('updateFile', this.onUpdateFile);
 
-        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
-        PlayerStore.removeListener('clientUpdateMediaTime', this.onClientUpdateMediaTime);
-        PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+        PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.off('clientUpdateMediaTime', this.onClientUpdateMediaTime);
+        PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
 
     onClientUpdateMediaEnd = update => {

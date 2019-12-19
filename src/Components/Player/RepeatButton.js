@@ -35,7 +35,7 @@ class RepeatButton extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
+        PlayerStore.off('clientUpdateMediaRepeat', this.onClientUpdateMediaRepeat);
     }
 
     onClientUpdateMediaRepeat = update => {

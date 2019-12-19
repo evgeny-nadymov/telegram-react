@@ -64,11 +64,11 @@ class InstantViewMediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
-        FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        FileStore.off('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
     }
 
     onClientUpdateMediaBlob = update => {

@@ -62,7 +62,7 @@ class PasswordControl extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
+        ApplicationStore.off('updateConnectionState', this.onUpdateConnectionState);
     }
 
     onUpdateConnectionState = update => {

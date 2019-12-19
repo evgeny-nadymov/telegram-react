@@ -105,19 +105,19 @@ class HeaderPlayer extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
-        PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
-        PlayerStore.removeListener('clientUpdateMediaClose', this.onClientUpdateMediaClose);
-        PlayerStore.removeListener('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
-        PlayerStore.removeListener('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
-        PlayerStore.removeListener('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
-        PlayerStore.removeListener('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
-        PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
-        PlayerStore.removeListener('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
+        FileStore.off('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
+        PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
+        PlayerStore.off('clientUpdateMediaClose', this.onClientUpdateMediaClose);
+        PlayerStore.off('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
+        PlayerStore.off('clientUpdateMediaViewerPlay', this.onClientUpdateMediaViewerPlay);
+        PlayerStore.off('clientUpdateMediaViewerPause', this.onClientUpdateMediaViewerPause);
+        PlayerStore.off('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
+        PlayerStore.off('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.off('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
 
-        ApplicationStore.removeListener('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
     onClientUpdateMediaPlaybackRate = update => {

@@ -47,8 +47,8 @@ class DialogTitle extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
     }
 
     onFastUpdatingComplete = update => {

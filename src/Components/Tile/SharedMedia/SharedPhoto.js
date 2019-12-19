@@ -64,7 +64,7 @@ class SharedPhoto extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
 
     onClientUpdatePhotoBlob = update => {

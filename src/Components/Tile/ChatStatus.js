@@ -52,7 +52,7 @@ class ChatStatus extends React.Component {
     }
 
     componentWillUnmount() {
-        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
+        UserStore.off('updateUserStatus', this.onUpdateUserStatus);
     }
 
     onUpdateUserStatus = update => {

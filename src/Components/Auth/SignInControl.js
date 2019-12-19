@@ -63,11 +63,11 @@ class SignInControl extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
-        ApplicationStore.removeListener('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
-        ApplicationStore.removeListener('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
-        ApplicationStore.removeListener('updateConnectionState', this.onUpdateConnectionState);
-        OptionStore.removeListener('updateOption', this.onUpdateOption);
+        ApplicationStore.off('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
+        ApplicationStore.off('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
+        ApplicationStore.off('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
+        ApplicationStore.off('updateConnectionState', this.onUpdateConnectionState);
+        OptionStore.off('updateOption', this.onUpdateOption);
     }
 
     onUpdateConnectionState = update => {

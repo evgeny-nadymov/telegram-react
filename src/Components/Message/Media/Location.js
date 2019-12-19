@@ -20,7 +20,7 @@ class Location extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
+        FileStore.off('clientUpdateLocationBlob', this.onClientUpdateLocationBlob);
     }
 
     onClientUpdateLocationBlob = update => {

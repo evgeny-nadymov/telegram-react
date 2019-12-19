@@ -49,7 +49,7 @@ class VolumeButton extends React.Component {
     }
 
     componentWillUnmount() {
-        PlayerStore.removeListener('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
+        PlayerStore.off('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
     }
 
     onClientUpdateMediaVolume = update => {

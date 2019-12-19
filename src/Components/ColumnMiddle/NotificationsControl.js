@@ -48,8 +48,8 @@ class NotificationsControl extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
-        NotificationStore.removeListener('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
+        ChatStore.off('updateChatNotificationSettings', this.onUpdateChatNotificationSettings);
+        NotificationStore.off('updateScopeNotificationSettings', this.onUpdateScopeNotificationSettings);
     }
 
     onUpdateChatNotificationSettings = update => {

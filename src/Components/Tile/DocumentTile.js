@@ -38,8 +38,8 @@ class DocumentTile extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
-        FileStore.removeListener('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.off('clientUpdateAudioThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     onClientUpdateDocumentThumbnailBlob = update => {

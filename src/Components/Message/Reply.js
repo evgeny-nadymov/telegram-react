@@ -31,7 +31,7 @@ class Reply extends React.Component {
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('getMessageResult', this.onGetMessageResult);
+        MessageStore.off('getMessageResult', this.onGetMessageResult);
     }
 
     onGetMessageResult = result => {

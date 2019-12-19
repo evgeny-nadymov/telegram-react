@@ -76,13 +76,13 @@ class MediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
-        FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
-        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
+        FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
+        FileStore.off('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
+        FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

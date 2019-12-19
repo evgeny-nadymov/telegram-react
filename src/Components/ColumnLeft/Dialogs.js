@@ -65,9 +65,9 @@ class Dialogs extends Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.removeListener('clientUpdateSearchChat', this.onClientUpdateSearchChat);
-        ApplicationStore.removeListener('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+        ApplicationStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        ApplicationStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
+        ApplicationStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     onClientUpdateThemeChange = update => {

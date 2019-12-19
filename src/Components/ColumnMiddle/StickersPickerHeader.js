@@ -38,7 +38,7 @@ class StickersPickerHeader extends React.Component {
     }
 
     componentWillUnmount() {
-        StickerStore.removeListener('clientUpdateStickerSetPosition', this.onClientUpdateStickerSetPosition);
+        StickerStore.off('clientUpdateStickerSetPosition', this.onClientUpdateStickerSetPosition);
     }
 
     onClientUpdateStickerSetPosition = update => {

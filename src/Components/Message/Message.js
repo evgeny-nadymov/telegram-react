@@ -168,12 +168,12 @@ class Message extends Component {
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
-        MessageStore.removeListener('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
-        MessageStore.removeListener('clientUpdateClearSelection', this.onClientUpdateClearSelection);
-        MessageStore.removeListener('updateMessageContent', this.onUpdateMessageContent);
-        MessageStore.removeListener('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.removeListener('updateMessageViews', this.onUpdateMessageViews);
+        MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
+        MessageStore.off('updateMessageViews', this.onUpdateMessageViews);
     }
 
     onClientUpdateClearSelection = update => {

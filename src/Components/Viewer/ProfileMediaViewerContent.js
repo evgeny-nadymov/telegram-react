@@ -46,8 +46,8 @@ class ProfileMediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        FileStore.removeListener('clientUpdateUserBlob', this.onClientUpdateUserBlob);
+        FileStore.off('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        FileStore.off('clientUpdateUserBlob', this.onClientUpdateUserBlob);
     }
 
     onClientUpdateChatBlob = update => {

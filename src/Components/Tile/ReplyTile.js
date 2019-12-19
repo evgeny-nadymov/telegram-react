@@ -26,13 +26,13 @@ class ReplyTile extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.removeListener('clientUpdateAnimationThumbnailBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateAudioThumbnailBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateDocumentThumbnailBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateStickerThumbnailBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateVideoThumbnailBlob', this.onClientUpdatePhotoBlob);
-        FileStore.removeListener('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateAudioThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateStickerThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdatePhotoBlob);
+        FileStore.off('clientUpdateVideoNoteThumbnailBlob', this.onClientUpdatePhotoBlob);
     }
 
     onClientUpdatePhotoBlob = update => {
@@ -58,21 +58,24 @@ class ReplyTile extends React.Component {
         const src = getSrc(photo);
         const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize);
         const isVideoNote = hasVideoNote(chatId, messageId);
+        const hasSrc = true; //Boolean(src || miniSrc);
 
         return (
             <div className='reply-tile'>
-                <img
-                    className={classNames(
-                        'reply-tile-photo',
-                        { 'reply-tile-photo-round': isVideoNote },
-                        { 'reply-tile-photo-loading': !src },
-                        { 'media-blurred': src && isBlurred },
-                        { 'media-mini-blurred': !src && miniSrc && isBlurred }
-                    )}
-                    draggable={false}
-                    src={src || miniSrc}
-                    alt=''
-                />
+                {hasSrc && (
+                    <img
+                        className={classNames(
+                            'reply-tile-photo',
+                            { 'reply-tile-photo-round': isVideoNote },
+                            { 'reply-tile-photo-loading': !src },
+                            { 'media-blurred': src && isBlurred },
+                            { 'media-mini-blurred': !src && miniSrc && isBlurred }
+                        )}
+                        draggable={false}
+                        src={src || miniSrc}
+                        alt=''
+                    />
+                )}
             </div>
         );
     }

@@ -80,12 +80,12 @@ class DialogStatus extends React.Component {
     }
 
     componentWillUnmount() {
-        UserStore.removeListener('updateUserStatus', this.onUpdateUserStatus);
-        BasicGroupStore.removeListener('updateBasicGroup', this.onUpdateBasicGroup);
-        SupergroupStore.removeListener('updateSupergroup', this.onUpdateSupergroup);
-        UserStore.removeListener('updateUserFullInfo', this.onUpdateUserFullInfo);
-        BasicGroupStore.removeListener('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
-        SupergroupStore.removeListener('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
+        UserStore.off('updateUserStatus', this.onUpdateUserStatus);
+        BasicGroupStore.off('updateBasicGroup', this.onUpdateBasicGroup);
+        SupergroupStore.off('updateSupergroup', this.onUpdateSupergroup);
+        UserStore.off('updateUserFullInfo', this.onUpdateUserFullInfo);
+        BasicGroupStore.off('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
+        SupergroupStore.off('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
     }
 
     onUpdateUserStatus = update => {

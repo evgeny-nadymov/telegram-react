@@ -52,9 +52,9 @@ class MessageGroup extends Component {
     }
 
     componentWillUnmount() {
-        //MessageStore.removeListener('updateMessageEdited', this.handleUpdateMessageEdited);
-        //MessageStore.removeListener('updateMessageViews', this.handleUpdateMessageViews);
-        //MessageStore.removeListener('updateMessageContent', this.handleUpdateMessageContent);
+        //MessageStore.off('updateMessageEdited', this.handleUpdateMessageEdited);
+        //MessageStore.off('updateMessageViews', this.handleUpdateMessageViews);
+        //MessageStore.off('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     shouldComponentUpdate(nextProps, nextState) {

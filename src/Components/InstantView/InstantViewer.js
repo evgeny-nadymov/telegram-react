@@ -117,11 +117,8 @@ class InstantViewer extends React.Component {
     componentWillUnmount() {
         this.mounted = false;
         document.removeEventListener('keydown', this.onKeyDown, false);
-        InstantViewStore.removeListener('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
-        InstantViewStore.removeListener(
-            'clientUpdateInstantViewViewerContent',
-            this.onClientUpdateInstantViewViewerContent
-        );
+        InstantViewStore.off('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
+        InstantViewStore.off('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
     }
 
     onClientUpdateInstantViewViewerContent = update => {

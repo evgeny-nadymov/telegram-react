@@ -61,10 +61,10 @@ class ChatTile extends Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        FileStore.removeListener('clientUpdateChatBlob', this.onClientUpdateChatBlob);
-        ChatStore.removeListener('updateChatPhoto', this.onUpdateChatPhoto);
-        ChatStore.removeListener('updateChatTitle', this.onUpdateChatTitle);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        FileStore.off('clientUpdateChatBlob', this.onClientUpdateChatBlob);
+        ChatStore.off('updateChatPhoto', this.onUpdateChatPhoto);
+        ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
     }
 
     onFastUpdatingComplete = update => {

@@ -26,7 +26,7 @@ class MediaStatus extends React.Component {
     }
 
     componentWillUnmount() {
-        MessageStore.removeListener('updateMessageContentOpened', this.onUpdateMessageContentOpened);
+        MessageStore.off('updateMessageContentOpened', this.onUpdateMessageContentOpened);
     }
 
     onUpdateMessageContentOpened = update => {

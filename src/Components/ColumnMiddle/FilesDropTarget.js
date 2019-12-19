@@ -25,7 +25,7 @@ class FilesDropTarget extends React.Component {
     }
 
     componentWillUnmount() {
-        ApplicationStore.removeListener('clientUpdateDragging', this.onClientUpdateDragging);
+        ApplicationStore.off('clientUpdateDragging', this.onClientUpdateDragging);
     }
 
     onClientUpdateDragging = update => {

@@ -53,12 +53,12 @@ class DialogContent extends React.Component {
     }
 
     componentWillUnmount() {
-        ChatStore.removeListener('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
-        ChatStore.removeListener('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ChatStore.removeListener('updateChatDraftMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatLastMessage', this.onUpdate);
-        ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
-        ChatStore.removeListener('updateUserChatAction', this.onUpdate);
+        ChatStore.off('clientUpdateFastUpdatingComplete', this.onFastUpdatingComplete);
+        ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
+        ChatStore.off('updateChatDraftMessage', this.onUpdate);
+        ChatStore.off('updateChatLastMessage', this.onUpdate);
+        ChatStore.off('updateChatReadInbox', this.onUpdate);
+        ChatStore.off('updateUserChatAction', this.onUpdate);
     }
 
     onClientUpdateClearHistory = update => {

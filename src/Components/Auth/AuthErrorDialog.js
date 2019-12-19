@@ -33,7 +33,7 @@ class AuthErrorDialog extends React.Component {
     }
 
     componentWillUnmount() {
-        TdLibController.removeListener('tdlib_auth_error', this.handleAuthError);
+        TdLibController.off('tdlib_auth_error', this.handleAuthError);
     }
 
     handleAuthError(error) {

@@ -47,8 +47,8 @@ class StickersHint extends React.Component {
     }
 
     componentWillUnmount() {
-        StickerStore.removeListener('clientUpdateLocalStickersHint', this.onClientUpdateLocalStickersHint);
-        StickerStore.removeListener('clientUpdateRemoteStickersHint', this.onClientUpdateRemoteStickersHint);
+        StickerStore.off('clientUpdateLocalStickersHint', this.onClientUpdateLocalStickersHint);
+        StickerStore.off('clientUpdateRemoteStickersHint', this.onClientUpdateRemoteStickersHint);
     }
 
     onClientUpdateRemoteStickersHint = update => {

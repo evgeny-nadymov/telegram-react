@@ -253,7 +253,7 @@ class PinnedMessage extends React.Component {
             <>
                 <div
                     className={classNames('pinned-message', classes.pinnedMessage, classes.borderColor)}
-                    onClick={this.handleClick}>
+                    onMouseDown={this.handleClick}>
                     <div className='pinned-message-wrapper'>
                         <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                         {photoSize && (

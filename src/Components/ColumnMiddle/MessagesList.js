@@ -84,7 +84,7 @@ class MessagesList extends React.Component {
                 prevMessageId: props.messageId,
                 clearHistory: false,
                 selectionActive: false,
-                separatorMessageId: 0,
+                separatorMessageId: props.chatId !== state.prevChatId ? 0 : state.separatorMessageId,
                 scrollDownVisible:
                     props.chatId === state.prevChatId && (state.scrollDownVisible || state.replyHistory.length > 0),
                 replyHistory: props.chatId !== state.prevChatId ? [] : state.replyHistory
@@ -138,51 +138,51 @@ class MessagesList extends React.Component {
         const { playerOpened, history, dragging, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         if (nextProps.theme !== theme) {
-            // console.log('MessagesList.shouldComponentUpdate theme');
+            // console.log('[ml] shouldComponentUpdate theme');
             return true;
         }
 
         if (nextProps.chatId !== chatId) {
-            // console.log('MessagesList.shouldComponentUpdate chatId');
+            // console.log('[ml] shouldComponentUpdate chatId');
             return true;
         }
 
         if (nextProps.messageId !== messageId) {
-            // console.log('MessagesList.shouldComponentUpdate messageId');
+            // console.log('[ml] shouldComponentUpdate messageId');
             return true;
         }
 
         if (nextState.scrollDownVisible !== scrollDownVisible) {
-            // console.log('MessagesList.shouldComponentUpdate scrollDownVisible');
+            // console.log('[ml] shouldComponentUpdate scrollDownVisible');
             return true;
         }
 
         if (nextState.playerOpened !== playerOpened) {
-            // console.log('MessagesList.shouldComponentUpdate playerOpened');
+            // console.log('[ml] shouldComponentUpdate playerOpened');
             return true;
         }
 
         if (!historyEquals(nextState.history, history)) {
-            // console.trace('MessagesList.shouldComponentUpdate history', nextState.history, history);
+            // console.trace('[ml] shouldComponentUpdate history', nextState.history, history);
             return true;
         }
 
         if (nextState.dragging !== dragging) {
-            // console.log('MessagesList.shouldComponentUpdate dragging');
+            // console.log('[ml] shouldComponentUpdate dragging');
             return true;
         }
 
         if (nextState.clearHistory !== clearHistory) {
-            // console.log('MessagesList.shouldComponentUpdate clearHistory');
+            // console.log('[ml] shouldComponentUpdate clearHistory');
             return true;
         }
 
         if (nextState.selectionActive !== selectionActive) {
-            // console.log('MessagesList.shouldComponentUpdate selectionActive');
+            // console.log('[ml] shouldComponentUpdate selectionActive');
             return true;
         }
 
-        // console.log('MessagesList.shouldComponentUpdate false');
+        // console.log('[ml] shouldComponentUpdate false');
         return false;
     }
 
@@ -561,22 +561,25 @@ class MessagesList extends React.Component {
             MessageStore.setItems(result.messages);
             result.messages.reverse();
 
-            let separatorMessageId = Number.MAX_VALUE;
-            if (chat && chat.unread_count > 1) {
-                for (let i = result.messages.length - 1; i >= 0; i--) {
-                    const { id } = result.messages[i];
-                    if (
-                        !result.messages[i].is_outgoing &&
-                        id > chat.last_read_inbox_message_id &&
-                        id < separatorMessageId
-                    ) {
-                        separatorMessageId = id;
-                    } else {
-                        break;
+            let separatorMessageId = this.state.separatorMessageId;
+            if (chatId !== previousChatId) {
+                separatorMessageId = Number.MAX_VALUE;
+                if (chat && chat.unread_count > 1) {
+                    for (let i = result.messages.length - 1; i >= 0; i--) {
+                        const { id } = result.messages[i];
+                        if (
+                            !result.messages[i].is_outgoing &&
+                            id > chat.last_read_inbox_message_id &&
+                            id < separatorMessageId
+                        ) {
+                            separatorMessageId = id;
+                        } else {
+                            break;
+                        }
                     }
                 }
+                separatorMessageId = separatorMessageId === Number.MAX_VALUE ? 0 : separatorMessageId;
             }
-            separatorMessageId = separatorMessageId === Number.MAX_VALUE ? 0 : separatorMessageId;
 
             let scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
             if (messageId) {
@@ -1149,8 +1152,7 @@ class MessagesList extends React.Component {
         MessageStore.setItems(result.messages);
         result.messages.reverse();
 
-        let separatorMessageId = 0;
-        this.replace(separatorMessageId, result.messages, () => {
+        this.replace(this.state.separatorMessageId, result.messages, () => {
             this.handleScrollBehavior(ScrollBehaviorEnum.SCROLL_TO_BOTTOM, this.snapshot);
         });
 
@@ -1192,9 +1194,9 @@ class MessagesList extends React.Component {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
-        // console.log('MessagesList.render scrollDown', this.props.chatId, this.props.messageId, scrollDownVisible, history.length);
+        // console.log('[ml] render ', this.props.chatId, this.props.messageId, separatorMessageId);
 
-        const isChannel = isChannelChat(chatId);
+        // const isChannel = isChannelChat(chatId);
 
         let prevShowDate = false;
         this.itemsMap.clear();
@@ -1228,7 +1230,7 @@ class MessagesList extends React.Component {
                   } else {
                       const showTitle =
                           prevShowDate ||
-                          isChannel ||
+                          isChannelChat(x.chat_id) ||
                           i === 0 ||
                           (prevMessage &&
                               (isServiceMessage(prevMessage) ||
