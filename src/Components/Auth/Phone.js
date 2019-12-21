@@ -191,12 +191,25 @@ class Phone extends React.Component {
         this.setState({ suggestedLanguage: value });
     };
 
+    handleKeyDown = event => {
+        console.log('[kp] keyDown', event.key);
+    };
+
+    isWhitelistKey(key) {
+        if (key >= '0' && key <= '9') return true;
+        if (key === ' ') return true;
+        if (key === '+') return true;
+
+        return false;
+    }
+
     handleKeyPress = event => {
         if (event.key === 'Enter') {
             event.preventDefault();
             this.handleDone();
-        } else {
-            //console.log('[kp] keyPress');
+        } else if (!this.isWhitelistKey(event.key)) {
+            event.preventDefault();
+            event.stopPropagation();
         }
     };
 
@@ -397,10 +410,11 @@ class Phone extends React.Component {
                     fullWidth
                     autoFocus
                     autoComplete='off'
-                    onKeyPress={this.handleKeyPress}
                     defaultValue={defaultPhone}
                     value={phone}
                     onChange={this.handlePhoneChange}
+                    onKeyPress={this.handleKeyPress}
+                    onKeyDown={this.handleKeyDown}
                 />
                 <div className='sign-in-keep'>
                     <Checkbox color='primary' checked={keep} disabled={loading} onChange={this.handleKeepChange} />
