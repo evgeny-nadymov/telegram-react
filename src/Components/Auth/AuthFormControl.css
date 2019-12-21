@@ -5,17 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.authorization-form-content{
-    background: #fff;
-    padding: 44px 65px;
-    box-shadow: 0 1px 1px rgba(97,127,152,.2), 1px 0 0 rgba(97,127,152,.1), -1px 0 0 rgba(97,127,152,.1);
-    border-radius: 8px;
-    border: 0;
-    margin: 90px auto 90px;
-    max-width: 274px;
+.authorization-form-content {
+    margin: 0 auto 0;
+    max-width: 360px;
 }
 
-.authorization-header{
+.authorization-header {
     font-size: 22px;
     font-family: 'Product Sans', 'Roboto', sans-serif;
     padding: 22px 0;
@@ -23,12 +18,12 @@
     overflow: hidden;
 }
 
-.authorization-header-content{
+.authorization-header-content {
     word-wrap: break-word;
     white-space: nowrap;
 }
 
-.authorization-actions{
+.authorization-actions {
     text-align: center;
     display: flex;
 }

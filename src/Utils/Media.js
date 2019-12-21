@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { THUMBNAIL_BLURRED_SIZE } from '../Constants';
+import { THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 
 export function getCallTitle(chatId, messageId) {
@@ -66,7 +66,7 @@ export function isValidAnimatedSticker(sticker, chatId, messageId) {
     return true;
 }
 
-export function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE) {
+export function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE_90) {
     if (!thumbnail) return false;
 
     return Math.max(thumbnail.width, thumbnail.height) < blurredSize;

@@ -42,8 +42,14 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
         resources: {
             en: {
                 local: {
+                    EnterPassword: 'Enter a Password',
+                    YourAccountProtectedWithPassword: 'Your account is protected with an additional password.',
                     DeletedMessage: 'Deleted message',
                     YourPhone: 'Your Phone',
+                    SignInToTelegram: 'Sign in to Telegram',
+                    PhoneNumber: 'Phone Number',
+                    Country: 'Country',
+                    KeepMeSignedIn: 'Keep me signed in',
                     StartText: 'Please confirm your country code and enter your phone number.',
                     Next: 'Next',
                     InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
@@ -94,8 +100,14 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
             },
             ru: {
                 local: {
+                    EnterPassword: 'Введите пароль',
+                    YourAccountProtectedWithPassword: 'Ваш аккаунт защищен дополнительным паролем.',
                     DeletedMessage: 'Удаленное сообщение',
                     YourPhone: 'Ваш телефон',
+                    SignInToTelegram: 'Вход в Telegram',
+                    PhoneNumber: 'Телефонный номер',
+                    Country: 'Страна',
+                    KeepMeSignedIn: 'Сохранить авторизацию',
                     StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
                     Next: 'Далее',
                     InvalidPhoneNumber:

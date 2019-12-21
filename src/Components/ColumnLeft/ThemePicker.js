@@ -57,9 +57,9 @@ const styles = theme => ({
         }
     },
     blueRoot: {
-        color: blue[600],
+        color: '#5B8AF1',
         '&$checked': {
-            color: blue[500]
+            color: '#5B8AF1'
         }
     },
     indigoRoot: {
@@ -116,7 +116,7 @@ class ThemePicker extends React.Component {
                 return 'amber';
             case green['500']:
                 return 'green';
-            case blue['500']:
+            case '#5B8AF1':
                 return 'blue';
             case indigo['500']:
                 return 'indigo';
@@ -138,7 +138,7 @@ class ThemePicker extends React.Component {
             case 'green':
                 return green;
             case 'blue':
-                return blue;
+                return { main: '#5B8AF1' };
             case 'indigo':
                 return indigo;
             case 'deepPurple':

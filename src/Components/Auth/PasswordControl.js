@@ -13,7 +13,8 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import InputLabel from '@material-ui/core/InputLabel';
-import Input from '@material-ui/core/Input';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Button from '@material-ui/core/Button';
@@ -27,25 +28,31 @@ import './PasswordControl.css';
 
 const styles = theme => ({
     root: {
-        display: 'flex',
-        flexWrap: 'wrap'
+        '& .MuiOutlinedInput-root': {
+            margin: '0 0',
+            width: 360,
+            [`& fieldset`]: {
+                // borderRadius: 8
+            },
+            [`& input`]: {
+                padding: [17.5, 14]
+            }
+        },
+        '& .MuiButton-root': {
+            margin: '12px 0',
+            padding: '15px 16px',
+            width: 360
+            // borderRadius: 8
+        }
     },
     margin: {
-        margin: '16px 0 8px 0'
+        margin: '12px 0'
     },
     withoutLabel: {
         marginTop: theme.spacing(3)
     },
     textField: {
-        flexBasis: 200
-    },
-    buttonLeft: {
-        marginRight: '8px',
-        marginTop: '16px'
-    },
-    buttonRight: {
-        marginLeft: '8px',
-        marginTop: '16px'
+        width: 360
     }
 });
 
@@ -131,23 +138,33 @@ class PasswordControl extends React.Component {
         const { classes, passwordHint, t } = this.props;
         const { connecting, loading, error, showPassword } = this.state;
 
-        let title = t('YourPassword');
+        let title = t('EnterPassword');
         if (connecting) {
             title = cleanProgressStatus(t('Connecting'));
         }
 
         return (
-            <div>
-                <div className='authorization-header'>
-                    <span className='authorization-header-content'>{title}</span>
+            <div className={classNames('sign-in', classes.root)}>
+                <Typography variant='body1' style={{ fontSize: 32, fontWeight: 500, margin: '0 auto 7px auto' }}>
+                    <span>{title}</span>
                     {connecting && <HeaderProgress />}
-                </div>
-                <div>Please enter your cloud password.</div>
-                <FormControl fullWidth className={classNames(classes.margin, classes.textField)}>
+                </Typography>
+                <Typography
+                    variant='body1'
+                    style={{
+                        color: '#707579',
+                        width: 235,
+                        minHeight: 72,
+                        margin: '0 auto 14px auto',
+                        textAlign: 'center'
+                    }}>
+                    {t('YourAccountProtectedWithPassword')}
+                </Typography>
+                <FormControl fullWidth className={classNames(classes.margin, classes.textField)} variant='outlined'>
                     <InputLabel htmlFor='adornment-password' error={Boolean(error)}>
-                        Your cloud password
+                        {t('LoginPassword')}
                     </InputLabel>
-                    <Input
+                    <OutlinedInput
                         fullWidth
                         autoFocus
                         id='adornment-password'
@@ -161,33 +178,30 @@ class PasswordControl extends React.Component {
                                 <IconButton
                                     aria-label='Toggle password visibility'
                                     onClick={this.handleClickShowPassword}
-                                    onMouseDown={this.handleMouseDownPassword}>
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                    onMouseDown={this.handleMouseDownPassword}
+                                    edge='end'>
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
                                 </IconButton>
                             </InputAdornment>
                         }
+                        labelWidth={70}
                     />
+                    {passwordHint && <FormHelperText id='password-hint-text'>{passwordHint}</FormHelperText>}
+                    {error && (
+                        <FormHelperText id='password-error-text' error>
+                            {error}
+                        </FormHelperText>
+                    )}
                 </FormControl>
-                {passwordHint && (
-                    <FormHelperText id='password-hint-text'>
-                        <span className='password-hint-label'>Hint: </span>
-                        {passwordHint}
-                    </FormHelperText>
-                )}
-                <FormHelperText id='password-error-text'>{error}</FormHelperText>
-                <div className='authorization-actions'>
-                    <Button fullWidth className={classes.buttonLeft} onClick={this.handleBack} disabled={loading}>
-                        {t('Back')}
-                    </Button>
-                    <Button
-                        fullWidth
-                        color='primary'
-                        className={classes.buttonRight}
-                        onClick={this.handleNext}
-                        disabled={loading}>
-                        {t('Next')}
-                    </Button>
-                </div>
+                <Button
+                    fullWidth
+                    color='primary'
+                    variant='contained'
+                    disableElevation
+                    onClick={this.handleNext}
+                    disabled={loading}>
+                    {t('Next')}
+                </Button>
             </div>
         );
     }

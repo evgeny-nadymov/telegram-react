@@ -14,28 +14,52 @@ import { getDisplayName } from './Utils/HOC';
 import Cookies from 'universal-cookie';
 import ApplicationStore from './Stores/ApplicationStore';
 
+function createTheme(type, primary) {
+    return createMuiTheme({
+        palette: {
+            type: type,
+            primary: primary,
+            secondary: { main: '#E53935' }
+        },
+        typography: {
+            useNextVariants: true
+        },
+        shape: {
+            borderRadius: 8
+        },
+        overrides: {
+            MuiOutlinedInput: {
+                input: {
+                    padding: '17.5px 14px'
+                }
+            },
+            MuiAutocomplete: {
+                option: {
+                    paddingLeft: 0,
+                    paddingTop: 0,
+                    paddingRight: 0,
+                    paddingBottom: 0
+                },
+                paper: {
+                    '& > ul': {
+                        maxHeight: 56 * 5.5
+                    }
+                }
+            }
+        }
+    });
+}
+
 function withTheme(WrappedComponent) {
     class ThemeWrapper extends React.Component {
         constructor(props) {
             super(props);
 
             const cookies = new Cookies();
-            const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: blue };
+            const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: { main: '#5B8AF1' } };
+            const theme = createTheme(type, primary);
 
-            let theme = createMuiTheme({
-                palette: {
-                    type: type,
-                    primary: primary,
-                    secondary: { main: '#FF5555' }
-                },
-                typography: {
-                    useNextVariants: true
-                }
-            });
-
-            this.state = {
-                theme: theme
-            };
+            this.state = { theme };
         }
 
         componentDidMount() {
@@ -49,21 +73,11 @@ function withTheme(WrappedComponent) {
         onClientUpdateThemeChanging = update => {
             const { type, primary } = update;
 
-            const theme = createMuiTheme({
-                palette: {
-                    type: type,
-                    primary: primary,
-                    secondary: { main: '#FF5555' },
-                    typography: {
-                        useNextVariants: true
-                    }
-                }
-            });
-
+            const theme = createTheme(type, primary);
             const cookies = new Cookies();
             cookies.set('themeOptions', { type: type, primary: primary });
 
-            this.setState({ theme: theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
+            this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
         };
 
         render() {

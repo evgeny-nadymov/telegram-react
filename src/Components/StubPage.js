@@ -53,7 +53,10 @@ class StubPage extends React.Component {
 
         return (
             <>
-                <div className={classNames(classes.page, 'page', { 'page-third-column': isChatDetailsVisible })}>
+                <div
+                    className={classNames(classes.page, classes.borderColor, 'page', {
+                        'page-third-column': isChatDetailsVisible
+                    })}>
                     <div
                         className={classNames(classes.borderColor, 'dialogs', {
                             'dialogs-third-column': isChatDetailsVisible

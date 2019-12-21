@@ -8,7 +8,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import SignInControl from './SignInControl';
+import Caption from './Caption';
+import Phone from './Phone';
 import ConfirmCodeControl from './ConfirmCodeControl';
 import PasswordControl from './PasswordControl';
 import AuthErrorDialog from './AuthErrorDialog';
@@ -20,8 +21,8 @@ const styles = theme => ({
         margin: '20px'
     },
     authorizationFormContent: {
-        background: theme.palette.background.default,
-        color: theme.palette.text.primary
+        // background: theme.palette.background.default,
+        // color: theme.palette.text.primary
     }
 });
 
@@ -38,12 +39,12 @@ class AuthFormControl extends React.Component {
             case 'authorizationStateWaitTdlib': {
                 // control = (
                 //     <>
-                //         <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
+                //         <Phone phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
                 //         <ConfirmCodeControl phone={this.phone} onCodeEnter={this.handleCodeEnter} onChangePhone={this.handleChangePhone}/>
                 //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
                 //         <SignUpControl/>
                 //     </>);
-                control = <SignInControl defaultPhone={defaultPhone} />;
+                control = <Phone defaultPhone={defaultPhone} />;
                 break;
             }
             case 'authorizationStateWaitCode': {
@@ -84,6 +85,7 @@ class AuthFormControl extends React.Component {
         return (
             <div className='sign-in-wrap'>
                 <div className={classNames(classes.authorizationFormContent, 'authorization-form-content')}>
+                    <Caption state={authorizationState} />
                     {control}
                 </div>
                 <AuthErrorDialog />

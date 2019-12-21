@@ -57,13 +57,13 @@ class Lottie extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         // console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
-        if (this.props.isStopped) {
-            this.stop();
-        } else if (this.props.segments) {
-            this.playSegments();
-        } else {
-            this.play();
-        }
+        // if (this.props.isStopped) {
+        //     this.stop();
+        // } else if (this.props.segments) {
+        //     this.playSegments();
+        // } else {
+        //     this.play();
+        // }
 
         //this.pause();
         this.setSpeed();
@@ -79,6 +79,14 @@ class Lottie extends React.Component {
         this.anim = null;
     }
 
+    getCurrentRawFrame() {
+        return this.anim.currentRawFrame;
+    }
+
+    getCurrentFrame() {
+        return this.anim.currentFrame;
+    }
+
     setSpeed() {
         this.anim.setSpeed(this.props.speed);
     }
@@ -91,8 +99,8 @@ class Lottie extends React.Component {
         this.anim.play();
     }
 
-    playSegments() {
-        this.anim.playSegments(this.props.segments);
+    playSegments(segments, forceFlag) {
+        this.anim.playSegments(segments, forceFlag);
     }
 
     stop() {

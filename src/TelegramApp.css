@@ -10,7 +10,7 @@
 }
 
 html {
-    background: #e7ebf0;
+    background: #fff;
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -21,8 +21,6 @@ body {
     padding: 0;
     height: 100%;
     width: 100%;
-    color: #000;
-    background: 0 0;
     font: 15px/20px 'Roboto', sans-serif;
     overflow: hidden;
 }
@@ -56,10 +54,12 @@ mark {
     max-width: 1010px;
     min-width: 300px;
     margin: 0 auto;
-    box-shadow: 0 1px 0 #dfe5ec;
-    border-left: 1px solid #dfe5ec;
-    border-right: 1px solid #dfe5ec;
-    border-bottom: 1px solid #d2dbe3;
+    /*box-shadow: 0 1px 0 #dfe5ec;*/
+    /*border-left: 1px solid #dfe5ec;*/
+    /*border-right: 1px solid #dfe5ec;*/
+    /*border-bottom: 1px solid #d2dbe3;*/
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
     overflow: hidden;
     border-radius: 0 0 8px 8px;
 }

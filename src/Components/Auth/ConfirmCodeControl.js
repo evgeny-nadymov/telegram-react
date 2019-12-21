@@ -9,9 +9,10 @@ import React from 'react';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import withStyles from '@material-ui/core/styles/withStyles';
-import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText/FormHelperText';
+import classNames from 'classnames';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/EditOutlined';
 import TextField from '@material-ui/core/TextField';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { cleanProgressStatus, formatPhoneNumber, isConnecting } from '../../Utils/Common';
@@ -20,13 +21,23 @@ import TdLibController from '../../Controllers/TdLibController';
 import './ConfirmCodeControl.css';
 
 const styles = {
-    buttonLeft: {
-        marginRight: '8px',
-        marginTop: '16px'
-    },
-    buttonRight: {
-        marginLeft: '8px',
-        marginTop: '16px'
+    root: {
+        '& .MuiTextField-root': {
+            margin: '12px 0',
+            width: 360,
+            [`& fieldset`]: {
+                // borderRadius: 8
+            },
+            [`& input`]: {
+                padding: [17.5, 14]
+            }
+        },
+        '& .MuiButton-root': {
+            margin: '12px 0',
+            padding: '15px 16px',
+            width: 360
+            // borderRadius: 8
+        }
     }
 };
 
@@ -61,6 +72,7 @@ class ConfirmCodeControl extends React.Component {
     };
 
     handleDone = () => {
+        const { t } = this.props;
         const code = this.code;
 
         this.setState({ loading: true });
@@ -74,7 +86,11 @@ class ConfirmCodeControl extends React.Component {
             .catch(error => {
                 let errorString = null;
                 if (error && error['@type'] === 'error' && error.message) {
-                    errorString = error.message;
+                    if (error.message === 'PHONE_CODE_INVALID') {
+                        errorString = t('InvalidCode');
+                    } else {
+                        errorString = error.message;
+                    }
                 } else {
                     errorString = JSON.stringify(error);
                 }
@@ -103,7 +119,14 @@ class ConfirmCodeControl extends React.Component {
     }
 
     handleChange = e => {
-        this.code = e.target.value;
+        const prevCode = this.code || '';
+        this.code = e.target.value || '';
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCodeChange',
+            prevCode,
+            code: this.code
+        });
 
         if (this.code && this.codeLength > 0 && this.code.length === this.codeLength) {
             this.handleNext();
@@ -144,7 +167,7 @@ class ConfirmCodeControl extends React.Component {
         return 0;
     }
 
-    getSubtitle(codeInfo) {
+    getSubtitle(codeInfo, t = k => k) {
         if (!codeInfo) return 'Subtitle';
         if (!codeInfo.type) return 'Subtitle';
 
@@ -182,39 +205,41 @@ class ConfirmCodeControl extends React.Component {
         }
 
         return (
-            <FormControl fullWidth>
-                <div className='authorization-header'>
-                    <span className='authorization-header-content'>{title}</span>
-                    {connecting && <HeaderProgress />}
+            <div className={classNames('sign-in', classes.root)}>
+                <div className='confirm-code-edit'>
+                    <Typography variant='body1' style={{ fontSize: 32, fontWeight: 500 }}>
+                        <span>{title}</span>
+                        {connecting && <HeaderProgress />}
+                    </Typography>
+                    <IconButton aria-label='edit' onClick={this.handleBack} disabled={loading}>
+                        <EditIcon fontSize='small' />
+                    </IconButton>
                 </div>
-                <div>{subtitle}</div>
+                <Typography
+                    variant='body1'
+                    style={{
+                        color: '#707579',
+                        minHeight: 72,
+                        width: 300,
+                        margin: '0 auto 14px auto',
+                        textAlign: 'center'
+                    }}>
+                    {subtitle}
+                </Typography>
                 <TextField
+                    variant='outlined'
                     color='primary'
                     disabled={loading}
                     error={Boolean(error)}
+                    helperText={error}
                     fullWidth
                     autoFocus
-                    label=''
-                    margin='normal'
+                    label={t('Code')}
                     maxLength={this.codeLength > 0 ? this.codeLength : 256}
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
                 />
-                <FormHelperText id='confirm-code-error-text'>{error}</FormHelperText>
-                <div className='authorization-actions'>
-                    <Button fullWidth className={classes.buttonLeft} onClick={this.handleBack} disabled={loading}>
-                        {t('Back')}
-                    </Button>
-                    <Button
-                        fullWidth
-                        color='primary'
-                        className={classes.buttonRight}
-                        onClick={this.handleNext}
-                        disabled={loading}>
-                        {t('Next')}
-                    </Button>
-                </div>
-            </FormControl>
+            </div>
         );
     }
 }

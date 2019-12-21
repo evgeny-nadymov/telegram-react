@@ -5,15 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.confirm-code-wrapper {
+.auth-caption {
+    height: 311px;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
-.confirm-code-edit {
-    display: flex;
-    flex-direction: row;
-    margin: 0 auto 7px auto;
-    align-items: center;
+.auth-caption-telegram-logo {
+    width: 160px;
+    height: 160px;
+    margin: 107px auto 44px;
 }

@@ -52,6 +52,10 @@ const styles = theme => ({
                 color: theme.palette.text.primary,
                 backgroundColor: 'highlight'
             }
+        },
+        body: {
+            background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#ffffff',
+            color: theme.palette.text.primary
         }
     }
 });
@@ -425,7 +429,7 @@ const enhance = compose(
     withLanguage,
     withTranslation(),
     withTheme,
-    withStyles(styles)
+    withStyles(styles, { withTheme: true })
 );
 
 export default enhance(TelegramApp);
