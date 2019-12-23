@@ -7,16 +7,78 @@
 
 import React from 'react';
 import Caption from './Caption';
+import Code from './Code';
+import Password from './Password';
 import Phone from './Phone';
-import ConfirmCodeControl from './ConfirmCodeControl';
-import PasswordControl from './PasswordControl';
 import AuthErrorDialog from './AuthErrorDialog';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import AuthStore from '../../Stores/AuthorizationStore';
 import './AuthFormControl.css';
 
 class AuthFormControl extends React.Component {
+    state = {
+        data: null
+    };
+
+    componentDidMount() {
+        this.loadData();
+    }
+
+    async loadData() {
+        const { data } = this.state;
+        if (data) return;
+
+        // const input = 'json/countries.json';
+        // try {
+        //     const response = await fetch(input);
+        //     const data = await response.json();
+        //     data.forEach(x => {
+        //         x.phone = x.phones[0];
+        //     });
+        //
+        //     AuthStore.data = data.filter(x => x.emoji);
+        //
+        //     console.log('[auth] data', AuthStore.data);
+        //     //this.setState({ data: AuthStore.data });
+        // } catch (error) {
+        //     console.error(error);
+        // }
+
+        const input2 = 'data/countries.dat';
+        try {
+            const response = await fetch(input2);
+            const text = await response.text();
+
+            const lines = text.split('\n');
+            const data2 = [];
+            lines.forEach(x => {
+                const split = x.split(';');
+                const item = {
+                    prefix: split[0],
+                    code: split[1],
+                    name: split[2],
+                    pattern: split[3],
+                    count: Number(split[4]),
+                    emoji: split[5]
+                };
+                data2.push(item);
+            });
+            data2.forEach(x => {
+                x.phone = '+' + x.prefix;
+            });
+
+            AuthStore.data = data2.filter(x => x.emoji);
+            // console.log('[auth] data2', AuthStore.data);
+
+            this.setState({ data: AuthStore.data });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     render() {
         const { authorizationState: state } = this.props;
+        const { data } = this.state;
         const { defaultPhone } = ApplicationStore;
 
         let control = null;
@@ -25,7 +87,28 @@ class AuthFormControl extends React.Component {
             case 'authorizationStateWaitEncryptionKey':
             case 'authorizationStateWaitTdlibParameters':
             case 'authorizationStateWaitTdlib': {
-                control = <Phone defaultPhone={defaultPhone} />;
+                control = <Phone defaultPhone={defaultPhone} data={data} />;
+
+                // control = (
+                //     <div style={{display: 'flex', flexDirection: 'row'}}>
+                //         <Phone
+                //             defaultPhone={defaultPhone}
+                //             data={data}
+                //         />
+                //         <Code
+                //             termsOfService={null}
+                //             codeInfo={null}
+                //             onChangePhone={null}
+                //             data={data}
+                //         />
+                //         <Password
+                //             passwordHint={null}
+                //             hasRecoveryEmailAddress={false}
+                //             recoveryEmailAddressPattern={''}
+                //             onChangePhone={null}
+                //         />
+                //     </div>
+                // );
                 break;
             }
             case 'authorizationStateWaitCode': {
@@ -33,10 +116,11 @@ class AuthFormControl extends React.Component {
                 const { terms_of_service, code_info } = state;
 
                 control = (
-                    <ConfirmCodeControl
+                    <Code
                         termsOfService={terms_of_service}
                         codeInfo={code_info}
                         onChangePhone={onChangePhone}
+                        data={data}
                     />
                 );
                 break;
@@ -46,7 +130,7 @@ class AuthFormControl extends React.Component {
                 const { password_hint, has_recovery_email_address, recovery_email_address_pattern } = state;
 
                 control = (
-                    <PasswordControl
+                    <Password
                         passwordHint={password_hint}
                         hasRecoveryEmailAddress={has_recovery_email_address}
                         recoveryEmailAddressPattern={recovery_email_address_pattern}

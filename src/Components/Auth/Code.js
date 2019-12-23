@@ -6,54 +6,31 @@
  */
 
 import React from 'react';
-import { compose } from 'recompose';
-import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/EditOutlined';
 import TextField from '@material-ui/core/TextField';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
-import { cleanProgressStatus, formatPhoneNumber, isConnecting } from '../../Utils/Common';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import { cleanProgressStatus, formatPhoneNumber, isConnecting } from './Phone';
+import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './ConfirmCodeControl.css';
+import './Code.css';
 
-const styles = {
-    root: {
-        '& .MuiTextField-root': {
-            margin: '12px 0',
-            width: 360,
-            [`& fieldset`]: {
-                // borderRadius: 8
-            },
-            [`& input`]: {
-                padding: [17.5, 14]
-            }
-        },
-        '& .MuiButton-root': {
-            margin: '12px 0',
-            padding: '15px 16px',
-            width: 360
-            // borderRadius: 8
-        }
-    }
-};
-
-class ConfirmCodeControl extends React.Component {
+class Code extends React.Component {
     state = {
-        connecting: isConnecting(ApplicationStore.connectionState),
+        connecting: isConnecting(AppStore.connectionState),
         error: '',
         loading: false
     };
 
     componentDidMount() {
-        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.off('updateConnectionState', this.onUpdateConnectionState);
     }
 
     onUpdateConnectionState = update => {
@@ -190,14 +167,14 @@ class ConfirmCodeControl extends React.Component {
     }
 
     render() {
-        const { classes, codeInfo, t } = this.props;
+        const { codeInfo, t } = this.props;
         const { connecting, loading, error } = this.state;
 
         this.phoneNumber = this.getPhoneNumber(codeInfo);
         this.codeLength = this.getCodeLength(codeInfo);
         const subtitle = this.getSubtitle(codeInfo);
 
-        let title = t('YourCode');
+        let title = 'Title';
         if (connecting) {
             title = cleanProgressStatus(t('Connecting'));
         } else if (this.phoneNumber) {
@@ -205,9 +182,9 @@ class ConfirmCodeControl extends React.Component {
         }
 
         return (
-            <div className={classNames('sign-in', classes.root)}>
-                <div className='confirm-code-edit'>
-                    <Typography variant='body1' style={{ fontSize: 32, fontWeight: 500 }}>
+            <form className='auth-root' autoComplete='off'>
+                <div className={classNames('code-title', 'auth-title')}>
+                    <Typography variant='body1' className='auth-title-typography'>
                         <span>{title}</span>
                         {connecting && <HeaderProgress />}
                     </Typography>
@@ -215,18 +192,11 @@ class ConfirmCodeControl extends React.Component {
                         <EditIcon fontSize='small' />
                     </IconButton>
                 </div>
-                <Typography
-                    variant='body1'
-                    style={{
-                        color: '#707579',
-                        minHeight: 72,
-                        width: 300,
-                        margin: '0 auto 14px auto',
-                        textAlign: 'center'
-                    }}>
+                <Typography variant='body1' className='auth-subtitle' style={{ width: 300 }}>
                     {subtitle}
                 </Typography>
                 <TextField
+                    classes={{ root: 'auth-input' }}
                     variant='outlined'
                     color='primary'
                     disabled={loading}
@@ -234,19 +204,15 @@ class ConfirmCodeControl extends React.Component {
                     helperText={error}
                     fullWidth
                     autoFocus
+                    autoComplete='off'
                     label={t('Code')}
                     maxLength={this.codeLength > 0 ? this.codeLength : 256}
                     onChange={this.handleChange}
                     onKeyPress={this.handleKeyPress}
                 />
-            </div>
+            </form>
         );
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(ConfirmCodeControl);
+export default withTranslation()(Code);

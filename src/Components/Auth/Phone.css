@@ -5,16 +5,28 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.auth-root {
+    display: flex;
+    flex-direction: column;
+    width: 360px;
+    flex-shrink: 0;
+}
+
 .auth-title {
     font-size: 32px;
     font-weight: 500;
     margin: 0 auto 7px auto;
 }
 
+.auth-title-typography {
+    font-size: 32px;
+    font-weight: 500;
+}
+
 .auth-subtitle {
     color: #707579;
-    width: 254px;
-    margin: 0 auto 38px auto;
+    min-height: 72px;
+    margin: 0 auto 14px auto;
     text-align: center;
 }
 
@@ -25,12 +37,6 @@
 
 .auth-input {
     margin: 12px 0;
-}
-
-.sign-in {
-    display: flex;
-    flex-direction: column;
-    width: 360px;
 }
 
 .sign-in-wrapper {

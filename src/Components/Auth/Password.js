@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -21,55 +18,25 @@ import Button from '@material-ui/core/Button';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
-import { cleanProgressStatus, isConnecting } from '../../Utils/Common';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import { cleanProgressStatus, isConnecting } from './Phone';
+import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './PasswordControl.css';
+import './Password.css';
 
-const styles = theme => ({
-    root: {
-        '& .MuiOutlinedInput-root': {
-            margin: '0 0',
-            width: 360,
-            [`& fieldset`]: {
-                // borderRadius: 8
-            },
-            [`& input`]: {
-                padding: [17.5, 14]
-            }
-        },
-        '& .MuiButton-root': {
-            margin: '12px 0',
-            padding: '15px 16px',
-            width: 360
-            // borderRadius: 8
-        }
-    },
-    margin: {
-        margin: '12px 0'
-    },
-    withoutLabel: {
-        marginTop: theme.spacing(3)
-    },
-    textField: {
-        width: 360
-    }
-});
-
-class PasswordControl extends React.Component {
+class Password extends React.Component {
     state = {
-        connecting: isConnecting(ApplicationStore.connectionState),
+        connecting: isConnecting(AppStore.connectionState),
         password: '',
         showPassword: false,
         error: ''
     };
 
     componentDidMount() {
-        ApplicationStore.on('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('updateConnectionState', this.onUpdateConnectionState);
+        AppStore.off('updateConnectionState', this.onUpdateConnectionState);
     }
 
     onUpdateConnectionState = update => {
@@ -135,7 +102,7 @@ class PasswordControl extends React.Component {
     };
 
     render() {
-        const { classes, passwordHint, t } = this.props;
+        const { passwordHint, t } = this.props;
         const { connecting, loading, error, showPassword } = this.state;
 
         let title = t('EnterPassword');
@@ -144,29 +111,22 @@ class PasswordControl extends React.Component {
         }
 
         return (
-            <div className={classNames('sign-in', classes.root)}>
-                <Typography variant='body1' style={{ fontSize: 32, fontWeight: 500, margin: '0 auto 7px auto' }}>
+            <form className='auth-root' autoComplete='off'>
+                <Typography variant='body1' className='auth-title'>
                     <span>{title}</span>
                     {connecting && <HeaderProgress />}
                 </Typography>
-                <Typography
-                    variant='body1'
-                    style={{
-                        color: '#707579',
-                        width: 235,
-                        minHeight: 72,
-                        margin: '0 auto 14px auto',
-                        textAlign: 'center'
-                    }}>
+                <Typography variant='body1' className='auth-subtitle' style={{ width: 235 }}>
                     {t('YourAccountProtectedWithPassword')}
                 </Typography>
-                <FormControl fullWidth className={classNames(classes.margin, classes.textField)} variant='outlined'>
+                <FormControl className='auth-input' fullWidth variant='outlined'>
                     <InputLabel htmlFor='adornment-password' error={Boolean(error)}>
                         {t('LoginPassword')}
                     </InputLabel>
                     <OutlinedInput
                         fullWidth
                         autoFocus
+                        autoComplete='off'
                         id='adornment-password'
                         type={showPassword ? 'text' : 'password'}
                         disabled={loading}
@@ -194,6 +154,7 @@ class PasswordControl extends React.Component {
                     )}
                 </FormControl>
                 <Button
+                    classes={{ root: 'auth-button' }}
                     fullWidth
                     color='primary'
                     variant='contained'
@@ -202,14 +163,9 @@ class PasswordControl extends React.Component {
                     disabled={loading}>
                     {t('Next')}
                 </Button>
-            </div>
+            </form>
         );
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(PasswordControl);
+export default withTranslation()(Password);

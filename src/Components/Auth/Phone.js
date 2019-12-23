@@ -16,7 +16,6 @@ import Link from '@material-ui/core/Link';
 import Typography from '@material-ui/core/Typography';
 import Country from './Country';
 import HeaderProgress from '../ColumnMiddle/HeaderProgress';
-import { cleanProgressStatus, isConnecting, isValidPhoneNumber } from '../../Utils/Common';
 import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import AuthStore from '../../Stores/AuthorizationStore';
@@ -24,6 +23,83 @@ import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Phone.css';
+
+export function cleanProgressStatus(status) {
+    if (!status) return status;
+
+    return status.replace('...', '').replace('…', '');
+}
+
+export function isConnecting(state) {
+    if (!state) return false;
+
+    switch (state['@type']) {
+        case 'connectionStateConnecting': {
+            return true;
+        }
+        case 'connectionStateConnectingToProxy': {
+            return true;
+        }
+        case 'connectionStateReady': {
+            return false;
+        }
+        case 'connectionStateUpdating': {
+            return false;
+        }
+        case 'connectionStateWaitingForNetwork': {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+function isValidPhoneNumber(phoneNumber) {
+    if (!phoneNumber) return false;
+
+    let isBad = !phoneNumber.match(/^[\d\-+\s]+$/);
+    if (!isBad) {
+        phoneNumber = phoneNumber.replace(/\D/g, '');
+        if (phoneNumber.length < 7) {
+            isBad = true;
+        }
+    }
+
+    return !isBad;
+}
+
+function formatByPattern(phone, pattern) {
+    phone = clearPhone(phone);
+
+    let result = '';
+    let index = 0;
+    for (let i = 0; i < pattern.length && index < phone.length; i++) {
+        if (pattern[i] >= '0' && pattern[i] <= '9') {
+            result += pattern[i];
+            if (phone[index] === pattern[i]) {
+                index++;
+            }
+        } else if (pattern[i] === ' ') {
+            result += pattern[i];
+        } else if (pattern[i] === 'X') {
+            result += phone[index++];
+        }
+    }
+
+    result += ' ' + phone.substring(index);
+
+    return '+' + result;
+}
+
+export function formatPhoneNumber(phone) {
+    const { data } = AuthStore;
+    if (!data) return phone;
+
+    const country = getCountryFromPhone(phone, data);
+    if (!country) return phone;
+
+    return formatByPattern(phone, country.pattern);
+}
 
 function phoneEquals(phone1, phone2) {
     return clearPhone(phone1) === clearPhone(phone2);
@@ -51,7 +127,7 @@ function isPhoneWithOptionCode(phone, option) {
     if (!option) return false;
 
     phone = clearPhone(phone);
-    const code = clearPhone(option.phones[0]);
+    const code = clearPhone(option.phone);
 
     return phone.startsWith(code);
 }
@@ -60,8 +136,17 @@ function isValidOption(x, value) {
     if (!x) return false;
     if (!value) return true;
 
+    if (value.length > 0 && value[0] === '(') {
+        value = value.substring(1);
+    }
+
     const names = x.name.toLowerCase().split(' ');
-    const phone = clearPhone(x.phones[0]);
+    for (let i = 0; i < names.length; i++) {
+        if (names[i].length > 0 && names[i][0] === '(') {
+            names[i] = names[i].substring(1);
+        }
+    }
+    const phone = clearPhone(x.phone);
 
     if (names.some(x => x.startsWith(value))) return true;
     if (phone.startsWith(value) || value.startsWith(phone)) return true;
@@ -77,15 +162,23 @@ function getCountryFromPhone(phone, data) {
     return index !== -1 ? data[index] : null;
 }
 
+function getCountryFromCode(code, data) {
+    if (!code) return null;
+    if (!data) return null;
+
+    const index = data.findIndex(x => x.code.toLowerCase() === code.toLowerCase());
+
+    return index !== -1 ? data[index] : null;
+}
+
 class Phone extends React.Component {
     constructor(props) {
         super(props);
 
-        const { defaultPhone } = props;
+        const { defaultPhone, data } = props;
 
-        const data = AuthStore.data;
         const phone = defaultPhone || '';
-        const country = getCountryFromPhone(phone, AuthStore.data);
+        const country = getCountryFromPhone(phone, data);
         const countryCode = null;
 
         this.state = {
@@ -95,7 +188,6 @@ class Phone extends React.Component {
             suggestedLanguage: localStorage.getItem(KEY_SUGGESTED_LANGUAGE_PACK_ID),
             keep: true,
 
-            data,
             phone,
             country,
             countryCode
@@ -111,12 +203,12 @@ class Phone extends React.Component {
         const code = await TdLibController.send({ '@type': 'getCountryCode' });
         if (!code) return;
 
-        let { country, phone, data } = this.state;
+        const { data } = this.props;
+        let { country, phone } = this.state;
         if (!country && !phone && data) {
-            const index = data.findIndex(x => x.code.toLowerCase() === code.text.toLowerCase());
-            if (index !== -1) {
-                country = data[index];
-                phone = data[index].phones[0] + ' ';
+            country = getCountryFromCode(code.text, data);
+            if (country) {
+                phone = '+' + clearPhone(country.phone) + ' ';
             }
         }
 
@@ -129,7 +221,6 @@ class Phone extends React.Component {
 
     componentDidMount() {
         this.setSuggestedLanguagePackId();
-        this.loadData();
 
         AppStore.on('clientUpdateSetPhoneCanceled', this.onClientUpdateSetPhoneCanceled);
         AppStore.on('clientUpdateSetPhoneError', this.onClientUpdateSetPhoneError);
@@ -144,22 +235,6 @@ class Phone extends React.Component {
         AppStore.off('clientUpdateSetPhoneResult', this.onClientUpdateSetPhoneResult);
         AppStore.off('updateConnectionState', this.onUpdateConnectionState);
         OptionStore.off('updateOption', this.onUpdateOption);
-    }
-
-    async loadData() {
-        const { data } = this.state;
-        if (data) return;
-
-        const input = 'json/countries.json';
-        try {
-            const response = await fetch(input);
-            const data = await response.json();
-            AuthStore.data = data.filter(x => x.emoji);
-
-            this.setState({ data: AuthStore.data });
-        } catch (error) {
-            console.error(error);
-        }
     }
 
     onUpdateConnectionState = update => {
@@ -271,8 +346,8 @@ class Phone extends React.Component {
 
         const { phone, country } = this.state;
 
-        const prevPhone = country ? phone.replace(country.phones[0], '') : phone;
-        const nextPhone = nextCountry.phones[0] + ' ' + prevPhone.trimStart();
+        const prevPhone = country ? phone.replace(country.phone, '') : phone;
+        const nextPhone = nextCountry.phone + ' ' + prevPhone.trimStart();
 
         this.setState({ country: nextCountry, phone: nextPhone }, () => {
             this.phoneInputRef.current.focus();
@@ -286,16 +361,17 @@ class Phone extends React.Component {
     handlePhoneChange = event => {
         let nextPhone = event.target.value;
 
-        let { country, data } = this.state;
+        const { data } = this.props;
+        let { country } = this.state;
         if (country) {
-            if (!nextPhone.startsWith(country.phones[0])) {
+            if (!nextPhone.startsWith(country.phone)) {
                 country = null;
             }
         }
 
         if (!country && data && nextPhone) {
             country = getCountryFromPhone(nextPhone, data);
-            if (country && phoneEquals(nextPhone, country.phones[0])) {
+            if (country && phoneEquals(nextPhone, country.phone)) {
                 nextPhone = '+' + clearPhone(nextPhone) + ' ';
             }
         }
@@ -303,9 +379,26 @@ class Phone extends React.Component {
         this.setState({ phone: nextPhone, country });
     };
 
+    handlePaste = event => {
+        const plainText = event.clipboardData.getData('text/plain');
+        if (plainText) {
+            event.preventDefault();
+            // const phoneRegExp = '/^[+]*[(]{0,1}[0-9]{1,3}[)]{0,1}[-\s\./0-9]*$/g';
+
+            let phone = '';
+            for (let i = 0; i < plainText.length; i++) {
+                if (isWhitelistKey(plainText.charAt(i))) {
+                    phone += plainText.charAt(i);
+                }
+            }
+
+            document.execCommand('insertText', false, phone);
+        }
+    };
+
     render() {
-        const { defaultPhone, i18n, t } = this.props;
-        const { connecting, loading, error, suggestedLanguage, data, keep, phone, country } = this.state;
+        const { data, i18n, t } = this.props;
+        const { connecting, loading, error, suggestedLanguage, keep, phone, country } = this.state;
 
         let errorString = '';
         if (error) {
@@ -322,12 +415,12 @@ class Phone extends React.Component {
             suggestedLanguage === i18n.language ? LocalizationStore.defaultLanguage : suggestedLanguage;
 
         return (
-            <div className='sign-in'>
+            <form className='auth-root' autoComplete='off'>
                 <Typography variant='body1' className='auth-title'>
                     <span>{title}</span>
                     {connecting && <HeaderProgress />}
                 </Typography>
-                <Typography variant='body1' className='auth-subtitle'>
+                <Typography variant='body1' className='auth-subtitle' style={{ width: 254 }}>
                     {t('StartText')}
                 </Typography>
                 <Autocomplete
@@ -336,12 +429,9 @@ class Phone extends React.Component {
                     noOptionsText={t('NoResult')}
                     options={data}
                     disabled={loading}
-                    fullWidth
                     autoHighlight
                     getOptionLabel={option => option.name}
-                    renderOption={option => (
-                        <Country name={option.name} emoji={option.emoji} phone={option.phones[0]} />
-                    )}
+                    renderOption={option => <Country name={option.name} emoji={option.emoji} phone={option.phone} />}
                     renderInput={params => (
                         <TextField
                             classes={{ root: 'auth-input' }}
@@ -349,10 +439,10 @@ class Phone extends React.Component {
                             label={t('Country')}
                             variant='outlined'
                             inputProps={{
-                                ...params.inputProps,
-                                autoComplete: 'disabled'
+                                ...params.inputProps
                             }}
                             fullWidth
+                            autoComplete='off'
                         />
                     )}
                     filterOptions={this.handleFilterOptions}
@@ -372,10 +462,10 @@ class Phone extends React.Component {
                     fullWidth
                     autoFocus
                     autoComplete='off'
-                    defaultValue={defaultPhone}
                     value={phone}
                     onChange={this.handlePhoneChange}
                     onKeyPress={this.handleKeyPress}
+                    onPaste={this.handlePaste}
                 />
                 <div className='sign-in-keep'>
                     <Checkbox color='primary' checked={keep} disabled={loading} onChange={this.handleKeepChange} />
@@ -396,7 +486,7 @@ class Phone extends React.Component {
                         {Boolean(nextLanguage) ? t('ContinueOnThisLanguage', { lng: nextLanguage }) : ' '}
                     </Link>
                 </Typography>
-            </div>
+            </form>
         );
     }
 }

@@ -11,9 +11,8 @@
     align-items: center;
 }
 
-.confirm-code-edit {
+.code-title {
     display: flex;
     flex-direction: row;
-    margin: 0 auto 7px auto;
     align-items: center;
 }

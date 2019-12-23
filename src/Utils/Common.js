@@ -53,36 +53,6 @@ function isAppleDevice() {
     return /iPad|iPhone|iPod|Mac\sOS\sX/.test(navigator.userAgent) && !window.MSStream;
 }
 
-function isConnecting(state) {
-    if (!state) return false;
-
-    switch (state['@type']) {
-        case 'connectionStateConnecting': {
-            return true;
-        }
-        case 'connectionStateConnectingToProxy': {
-            return true;
-        }
-        case 'connectionStateReady': {
-            return false;
-        }
-        case 'connectionStateUpdating': {
-            return false;
-        }
-        case 'connectionStateWaitingForNetwork': {
-            return false;
-        }
-    }
-
-    return false;
-}
-
-function cleanProgressStatus(status) {
-    if (!status) return status;
-
-    return status.replace('...', '').replace('…', '');
-}
-
 function getOSName() {
     let OSName = 'Unknown';
     if (window.navigator.userAgent.indexOf('Windows NT 10.0') !== -1) OSName = 'Windows 10';
@@ -118,20 +88,6 @@ function getBrowser() {
     }
 
     return browser_name;
-}
-
-function isValidPhoneNumber(phoneNumber) {
-    if (!phoneNumber) return false;
-
-    let isBad = !phoneNumber.match(/^[\d\-+\s]+$/);
-    if (!isBad) {
-        phoneNumber = phoneNumber.replace(/\D/g, '');
-        if (phoneNumber.length < 7) {
-            isBad = true;
-        }
-    }
-
-    return !isBad;
 }
 
 function stringToBoolean(string) {
@@ -468,11 +424,8 @@ function insertByOrder(array, element, comparator) {
 }
 
 export {
-    cleanProgressStatus,
-    isConnecting,
     getBrowser,
     getOSName,
-    isValidPhoneNumber,
     stringToBoolean,
     orderCompare,
     getSize,

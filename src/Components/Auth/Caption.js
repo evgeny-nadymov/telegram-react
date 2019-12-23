@@ -32,10 +32,10 @@ class Caption extends React.Component {
     async componentDidMount() {
         try {
             const requests = [
-                fetch('json/TwoFactorSetupMonkeyClose.json'),
-                fetch('json/TwoFactorSetupMonkeyIdle.json'),
-                fetch('json/TwoFactorSetupMonkeyPeek.json'),
-                fetch('json/TwoFactorSetupMonkeyTracking.json')
+                fetch('data/TwoFactorSetupMonkeyClose.json'),
+                fetch('data/TwoFactorSetupMonkeyIdle.json'),
+                fetch('data/TwoFactorSetupMonkeyPeek.json'),
+                fetch('data/TwoFactorSetupMonkeyTracking.json')
             ];
 
             const results = await Promise.all(requests);
