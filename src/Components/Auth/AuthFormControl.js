@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Caption from './Caption';
 import Phone from './Phone';
 import ConfirmCodeControl from './ConfirmCodeControl';
@@ -16,40 +14,23 @@ import AuthErrorDialog from './AuthErrorDialog';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './AuthFormControl.css';
 
-const styles = theme => ({
-    button: {
-        margin: '20px'
-    },
-    authorizationFormContent: {
-        // background: theme.palette.background.default,
-        // color: theme.palette.text.primary
-    }
-});
-
 class AuthFormControl extends React.Component {
     render() {
-        const { classes, authorizationState } = this.props;
+        const { authorizationState: state } = this.props;
         const { defaultPhone } = ApplicationStore;
 
         let control = null;
-        switch (authorizationState['@type']) {
+        switch (state['@type']) {
             case 'authorizationStateWaitPhoneNumber':
             case 'authorizationStateWaitEncryptionKey':
             case 'authorizationStateWaitTdlibParameters':
             case 'authorizationStateWaitTdlib': {
-                // control = (
-                //     <>
-                //         <Phone phone={this.phone} onPhoneEnter={this.handlePhoneEnter}/>
-                //         <ConfirmCodeControl phone={this.phone} onCodeEnter={this.handleCodeEnter} onChangePhone={this.handleChangePhone}/>
-                //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
-                //         <SignUpControl/>
-                //     </>);
                 control = <Phone defaultPhone={defaultPhone} />;
                 break;
             }
             case 'authorizationStateWaitCode': {
                 const { onChangePhone } = this.props;
-                const { terms_of_service, code_info } = authorizationState;
+                const { terms_of_service, code_info } = state;
 
                 control = (
                     <ConfirmCodeControl
@@ -62,11 +43,7 @@ class AuthFormControl extends React.Component {
             }
             case 'authorizationStateWaitPassword': {
                 const { onChangePhone } = this.props;
-                const {
-                    password_hint,
-                    has_recovery_email_address,
-                    recovery_email_address_pattern
-                } = authorizationState;
+                const { password_hint, has_recovery_email_address, recovery_email_address_pattern } = state;
 
                 control = (
                     <PasswordControl
@@ -84,8 +61,8 @@ class AuthFormControl extends React.Component {
 
         return (
             <div className='sign-in-wrap'>
-                <div className={classNames(classes.authorizationFormContent, 'authorization-form-content')}>
-                    <Caption state={authorizationState} />
+                <div className='authorization-form-content'>
+                    <Caption state={state} />
                     {control}
                 </div>
                 <AuthErrorDialog />
@@ -93,4 +70,4 @@ class AuthFormControl extends React.Component {
         );
     }
 }
-export default withStyles(styles)(AuthFormControl);
+export default AuthFormControl;

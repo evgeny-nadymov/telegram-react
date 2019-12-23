@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -20,14 +19,74 @@ import HeaderProgress from '../ColumnMiddle/HeaderProgress';
 import { cleanProgressStatus, isConnecting, isValidPhoneNumber } from '../../Utils/Common';
 import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
+import AuthStore from '../../Stores/AuthorizationStore';
 import OptionStore from '../../Stores/OptionStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Phone.css';
 
+function phoneEquals(phone1, phone2) {
+    return clearPhone(phone1) === clearPhone(phone2);
+}
+
+function isWhitelistKey(key) {
+    if (key >= '0' && key <= '9') return true;
+    if (key === ' ') return true;
+    if (key === '+') return true;
+
+    return false;
+}
+
+function clearPhone(phone) {
+    if (!phone) return phone;
+
+    return phone
+        .replace(/ /g, '')
+        .replace('+', '')
+        .toLowerCase();
+}
+
+function isPhoneWithOptionCode(phone, option) {
+    if (!phone) return false;
+    if (!option) return false;
+
+    phone = clearPhone(phone);
+    const code = clearPhone(option.phones[0]);
+
+    return phone.startsWith(code);
+}
+
+function isValidOption(x, value) {
+    if (!x) return false;
+    if (!value) return true;
+
+    const names = x.name.toLowerCase().split(' ');
+    const phone = clearPhone(x.phones[0]);
+
+    if (names.some(x => x.startsWith(value))) return true;
+    if (phone.startsWith(value) || value.startsWith(phone)) return true;
+
+    return false;
+}
+
+function getCountryFromPhone(phone, data) {
+    if (!data) return null;
+
+    const index = data.findIndex(x => isPhoneWithOptionCode(phone, x));
+
+    return index !== -1 ? data[index] : null;
+}
+
 class Phone extends React.Component {
     constructor(props) {
         super(props);
+
+        const { defaultPhone } = props;
+
+        const data = AuthStore.data;
+        const phone = defaultPhone || '';
+        const country = getCountryFromPhone(phone, AuthStore.data);
+        const countryCode = null;
 
         this.state = {
             connecting: isConnecting(AppStore.connectionState),
@@ -35,9 +94,11 @@ class Phone extends React.Component {
             loading: false,
             suggestedLanguage: localStorage.getItem(KEY_SUGGESTED_LANGUAGE_PACK_ID),
             keep: true,
-            phone: '',
-            country: null,
-            countryCode: null
+
+            data,
+            phone,
+            country,
+            countryCode
         };
 
         this.phoneInputRef = React.createRef();
@@ -64,43 +125,6 @@ class Phone extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         return true;
-
-        // const { t } = this.props;
-        // const { phone, country, keep, loading, data, error, connecting } = this.state;
-
-        // if (nextProps.t !== t) {
-        //     return true;
-        // }
-        //
-        // if (nextState.phone !== phone) {
-        //     return true;
-        // }
-        //
-        // if (nextState.country !== country) {
-        //     return true;
-        // }
-        //
-        // if (nextState.keep !== keep) {
-        //     return true;
-        // }
-        //
-        // if (nextState.data !== data) {
-        //     return true;
-        // }
-        //
-        // if (nextState.connecting !== connecting) {
-        //     return true;
-        // }
-        //
-        // if (nextState.loading !== loading) {
-        //     return true;
-        // }
-        //
-        // if (nextState.error !== error) {
-        //     return true;
-        // }
-        //
-        // return false;
     }
 
     componentDidMount() {
@@ -122,16 +146,21 @@ class Phone extends React.Component {
         OptionStore.off('updateOption', this.onUpdateOption);
     }
 
-    loadData = async () => {
+    async loadData() {
+        const { data } = this.state;
+        if (data) return;
+
         const input = 'json/countries.json';
         try {
             const response = await fetch(input);
             const data = await response.json();
-            this.setState({ data: data.filter(x => x.emoji) });
+            AuthStore.data = data.filter(x => x.emoji);
+
+            this.setState({ data: AuthStore.data });
         } catch (error) {
             console.error(error);
         }
-    };
+    }
 
     onUpdateConnectionState = update => {
         const { state } = update;
@@ -177,7 +206,7 @@ class Phone extends React.Component {
         }
     };
 
-    setSuggestedLanguagePackId = async () => {
+    async setSuggestedLanguagePackId() {
         const { i18n } = this.props;
         if (!i18n) return;
 
@@ -189,34 +218,20 @@ class Phone extends React.Component {
         await LocalizationStore.loadLanguage(value);
 
         this.setState({ suggestedLanguage: value });
-    };
-
-    handleKeyDown = event => {
-        console.log('[kp] keyDown', event.key);
-    };
-
-    isWhitelistKey(key) {
-        if (key >= '0' && key <= '9') return true;
-        if (key === ' ') return true;
-        if (key === '+') return true;
-
-        return false;
     }
 
     handleKeyPress = event => {
         if (event.key === 'Enter') {
             event.preventDefault();
             this.handleDone();
-        } else if (!this.isWhitelistKey(event.key)) {
+        } else if (!isWhitelistKey(event.key)) {
             event.preventDefault();
             event.stopPropagation();
         }
     };
 
     handleDone = () => {
-        const { defaultPhone } = this.props;
-
-        const phone = this.enteredPhone || defaultPhone;
+        const { phone } = this.state;
         if (!isValidPhoneNumber(phone)) {
             this.setState({ error: { code: 'InvalidPhoneNumber' } });
             return;
@@ -248,52 +263,7 @@ class Phone extends React.Component {
         let value = inputValue.toLowerCase().replace(/ /g, '');
         value = value.length > 0 && value[0] === '+' ? value.substring(1) : value;
 
-        return options.filter(x => this.isValidOption(x, value));
-    };
-
-    phoneEquals = (phone1, phone2) => {
-        return this.cleanPhone(phone1) === this.cleanPhone(phone2);
-    };
-
-    cleanPhone = phone => {
-        if (!phone) return phone;
-
-        return phone
-            .replace(/ /g, '')
-            .replace('+', '')
-            .toLowerCase();
-    };
-
-    isValidOption = (x, value) => {
-        if (!x) return false;
-        if (!value) return true;
-
-        const names = x.name.toLowerCase().split(' ');
-        const phone = x.phones[0]
-            .replace(/ /g, '')
-            .replace('+', '')
-            .toLowerCase();
-
-        if (names.some(x => x.startsWith(value))) return true;
-        if (phone.startsWith(value) || value.startsWith(phone)) return true;
-
-        return false;
-    };
-
-    isPhoneWithOptionCode = (phone, x) => {
-        if (!phone) return false;
-        if (!x) return false;
-
-        phone = phone
-            .replace(/ /g, '')
-            .replace('+', '')
-            .toLowerCase();
-        const code = x.phones[0]
-            .replace(/ /g, '')
-            .replace('+', '')
-            .toLowerCase();
-
-        return phone.startsWith(code);
+        return options.filter(x => isValidOption(x, value));
     };
 
     handleCountryChange = (event, nextCountry) => {
@@ -314,8 +284,6 @@ class Phone extends React.Component {
     };
 
     handlePhoneChange = event => {
-        this.enteredPhone = event.target.value;
-
         let nextPhone = event.target.value;
 
         let { country, data } = this.state;
@@ -326,15 +294,9 @@ class Phone extends React.Component {
         }
 
         if (!country && data && nextPhone) {
-            const index = data.findIndex(x => this.isPhoneWithOptionCode(nextPhone, x));
-            if (index !== -1) {
-                country = data[index];
-                if (nextPhone[0] !== '+') {
-                    nextPhone = '+' + nextPhone;
-                    if (this.phoneEquals(nextPhone, data[index].phones[0])) {
-                        nextPhone = nextPhone + ' ';
-                    }
-                }
+            country = getCountryFromPhone(nextPhone, data);
+            if (country && phoneEquals(nextPhone, country.phones[0])) {
+                nextPhone = '+' + clearPhone(nextPhone) + ' ';
             }
         }
 
@@ -414,7 +376,6 @@ class Phone extends React.Component {
                     value={phone}
                     onChange={this.handlePhoneChange}
                     onKeyPress={this.handleKeyPress}
-                    onKeyDown={this.handleKeyDown}
                 />
                 <div className='sign-in-keep'>
                     <Checkbox color='primary' checked={keep} disabled={loading} onChange={this.handleKeepChange} />
@@ -444,6 +405,4 @@ Phone.propTypes = {
     defaultPhone: PropTypes.string
 };
 
-const enhance = compose(withTranslation());
-
-export default enhance(Phone);
+export default withTranslation()(Phone);

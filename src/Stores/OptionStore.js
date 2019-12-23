@@ -6,8 +6,8 @@
  */
 
 import { EventEmitter } from 'events';
-import TdLibController from '../Controllers/TdLibController';
 import { KEY_SUGGESTED_LANGUAGE_PACK_ID } from '../Constants';
+import TdLibController from '../Controllers/TdLibController';
 
 class OptionStore extends EventEmitter {
     constructor() {
