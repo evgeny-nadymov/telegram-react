@@ -11,7 +11,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
 import Lottie from '../Viewer/Lottie';
-import AuthorizationStore from '../../Stores/AuthorizationStore';
+import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
 
 const styles = theme => ({
@@ -24,12 +24,15 @@ class Caption extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {};
+        this.state = {
+            data: null,
+            lastUpdate: null
+        };
 
         this.lottieRef = React.createRef();
     }
 
-    async componentDidMount() {
+    async loadData() {
         try {
             const requests = [
                 fetch('data/TwoFactorSetupMonkeyClose.json'),
@@ -42,46 +45,142 @@ class Caption extends React.Component {
 
             const [closeData, idleData, peekData, trackingData] = await Promise.all(results.map(x => x.json()));
 
-            this.setState({
-                closeData,
-                idleData,
-                peekData,
-                trackingData
-            });
+            this.setState(
+                {
+                    closeData,
+                    idleData,
+                    peekData,
+                    trackingData
+                },
+                () => {
+                    const { lastUpdate } = this.state;
+                    if (lastUpdate) {
+                        switch (lastUpdate['@type']) {
+                            case 'clientUpdateMonkeyIdle': {
+                                this.onClientUpdateMonkeyIdle(lastUpdate);
+                                break;
+                            }
+                            case 'clientUpdateMonkeyTracking': {
+                                this.onClientUpdateMonkeyTracking(lastUpdate);
+                                break;
+                            }
+                            case 'clientUpdateMonkeyClose': {
+                                this.onClientUpdateMonkeyClose(lastUpdate);
+                                break;
+                            }
+                            case 'clientUpdateMonkeyPeek': {
+                                this.onClientUpdateMonkeyPeek(lastUpdate);
+                                break;
+                            }
+                        }
+                    }
+                }
+            );
         } catch (error) {
             console.error(error);
         }
-        AuthorizationStore.on('clientUpdateCodeChange', this.onClientUpdateCodeChange);
+    }
+
+    async componentDidMount() {
+        this.loadData();
+
+        AuthStore.on('clientUpdateMonkeyIdle', this.onClientUpdateMonkeyIdle);
+        AuthStore.on('clientUpdateMonkeyTracking', this.onClientUpdateMonkeyTracking);
+        AuthStore.on('clientUpdateMonkeyClose', this.onClientUpdateMonkeyClose);
+        AuthStore.on('clientUpdateMonkeyPeek', this.onClientUpdateMonkeyPeek);
     }
 
     componentWillUnmount() {
-        AuthorizationStore.off('clientUpdateCodeChange', this.onClientUpdateCodeChange);
+        AuthStore.off('clientUpdateMonkeyIdle', this.onClientUpdateMonkeyIdle);
+        AuthStore.off('clientUpdateMonkeyTracking', this.onClientUpdateMonkeyTracking);
+        AuthStore.off('clientUpdateMonkeyClose', this.onClientUpdateMonkeyClose);
+        AuthStore.off('clientUpdateMonkeyPeek', this.onClientUpdateMonkeyPeek);
     }
 
-    onClientUpdateCodeChange = update => {
-        const lottie = this.lottieRef.current;
-        if (!lottie) return;
+    onClientUpdateMonkeyIdle = update => {
+        const { idleData } = this.state;
 
-        const { prevCode, code } = update;
+        this.setState(
+            {
+                data: idleData,
+                lastUpdate: update
+            },
+            () => {
+                const { current } = this.lottieRef;
+                if (!current) return;
 
-        // if (prevCode.length < code.length) {
-        //     lottie.pause();
-        //     const from = lottie.anim.currentFrame;
-        //     const from2 = lottie.getCurrentFrame();
-        //     const to = code.length <= 5 ? code.length * 20 : (code.length === 0 ? 0 : 100);
-        //     console.log('[an] from, to', from, from2, to, lottie.anim);
-        //     lottie.playSegments([from, to], true);
-        // } else {
-        //     lottie.pause();
-        //     const from = lottie.anim.currentRawFrame;
-        //     const to = code.length <= 5 ? code.length * 20 : (code.length === 0 ? 0 : 100);
-        //     console.log('[an] from, to', from, to, update);
-        //     lottie.playSegments([from, to], true);
-        // }
+                current.anim.playSegments([0, 180], true);
+            }
+        );
+    };
+
+    onClientUpdateMonkeyTracking = update => {
+        const { code, prevCode } = update;
+        const { trackingData } = this.state;
+
+        const from = Math.min(15 * prevCode.length, 180);
+        const to = Math.min(15 * code.length, 180);
+
+        this.setState(
+            {
+                data: trackingData,
+                lastUpdate: update
+            },
+            () => {
+                const { current } = this.lottieRef;
+                if (!current) return;
+
+                current.anim.playSegments([from, to], true);
+            }
+        );
+    };
+
+    onClientUpdateMonkeyClose = update => {
+        const { closeData } = this.state;
+
+        this.setState(
+            {
+                data: closeData,
+                lastUpdate: update
+            },
+            () => {
+                const { current } = this.lottieRef;
+                if (!current) return;
+
+                current.anim.playSegments([0, 49], true);
+            }
+        );
+    };
+
+    onClientUpdateMonkeyPeek = update => {
+        const { peek } = update;
+        const { peekData, lastUpdate } = this.state;
+
+        if (lastUpdate && lastUpdate['@type'] === 'clientUpdateMonkeyPeek' && lastUpdate.peek === peek) {
+            return;
+        }
+
+        this.setState(
+            {
+                data: peekData,
+                lastUpdate: update
+            },
+            () => {
+                const { current } = this.lottieRef;
+                if (!current) return;
+
+                if (peek) {
+                    current.anim.playSegments([0, 15], true);
+                } else {
+                    current.anim.playSegments([15, 33], true);
+                }
+            }
+        );
     };
 
     render() {
         const { classes, state } = this.props;
+        const { data } = this.state;
 
         let control = null;
         switch (state['@type']) {
@@ -94,17 +193,14 @@ class Caption extends React.Component {
             }
             case 'authorizationStateWaitCode':
             case 'authorizationStateWaitPassword': {
-                const animationData =
-                    state['@type'] === 'authorizationStateWaitCode' ? this.state.trackingData : this.state.closeData;
-
                 control = (
                     <div className='auth-caption-telegram-logo'>
                         <Lottie
                             ref={this.lottieRef}
                             options={{
-                                autoplay: true,
+                                autoplay: false,
                                 loop: false,
-                                animationData,
+                                animationData: data,
                                 renderer: 'svg',
                                 rendererSettings: {
                                     preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property

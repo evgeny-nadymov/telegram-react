@@ -23,15 +23,46 @@ import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Password.css';
 
-class Password extends React.Component {
-    state = {
-        connecting: isConnecting(AppStore.connectionState),
-        password: '',
-        showPassword: false,
-        error: ''
+function debounce(func, wait, immediate) {
+    let timeout;
+    return function() {
+        let context = this,
+            args = arguments;
+        let later = function() {
+            timeout = null;
+            if (!immediate) {
+                func.apply(context, args);
+            }
+        };
+        let callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) {
+            func.apply(context, args);
+        }
     };
+}
+
+class Password extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            connecting: isConnecting(AppStore.connectionState),
+            password: '',
+            showPassword: false,
+            error: ''
+        };
+
+        this.inputRef = React.createRef();
+        this.sendMonkeyPeek = debounce(this.sendMonkeyPeek, 200, false);
+    }
 
     componentDidMount() {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMonkeyClose'
+        });
+
         AppStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
@@ -75,7 +106,9 @@ class Password extends React.Component {
                     errorString = JSON.stringify(error);
                 }
 
-                this.setState({ error: errorString });
+                this.setState({ error: errorString }, () => {
+                    setTimeout(() => this.inputRef.current.focus(), 100);
+                });
             })
             .finally(() => {
                 this.setState({ loading: false });
@@ -88,7 +121,16 @@ class Password extends React.Component {
 
     handleClickShowPassword = () => {
         this.setState({ showPassword: !this.state.showPassword });
+
+        this.sendMonkeyPeek();
     };
+
+    sendMonkeyPeek() {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMonkeyPeek',
+            peek: this.state.showPassword
+        });
+    }
 
     handleChange = e => {
         this.password = e.target.value;
@@ -128,6 +170,7 @@ class Password extends React.Component {
                         autoFocus
                         autoComplete='off'
                         id='adornment-password'
+                        inputRef={this.inputRef}
                         type={showPassword ? 'text' : 'password'}
                         disabled={loading}
                         error={Boolean(error)}

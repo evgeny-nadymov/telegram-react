@@ -61,7 +61,19 @@ class AuthorizationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-            case 'clientUpdateCodeChange': {
+            case 'clientUpdateMonkeyIdle': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMonkeyTracking': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMonkeyClose': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMonkeyPeek': {
                 this.emit(update['@type'], update);
                 break;
             }

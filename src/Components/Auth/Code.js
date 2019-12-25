@@ -19,13 +19,23 @@ import TdLibController from '../../Controllers/TdLibController';
 import './Code.css';
 
 class Code extends React.Component {
-    state = {
-        connecting: isConnecting(AppStore.connectionState),
-        error: '',
-        loading: false
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            connecting: isConnecting(AppStore.connectionState),
+            error: '',
+            loading: false
+        };
+
+        this.inputRef = React.createRef();
+    }
 
     componentDidMount() {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMonkeyIdle'
+        });
+
         AppStore.on('updateConnectionState', this.onUpdateConnectionState);
     }
 
@@ -72,7 +82,9 @@ class Code extends React.Component {
                     errorString = JSON.stringify(error);
                 }
 
-                this.setState({ error: errorString });
+                this.setState({ error: errorString }, () => {
+                    setTimeout(() => this.inputRef.current.focus(), 100);
+                });
             })
             .finally(() => {
                 this.setState({ loading: false });
@@ -100,7 +112,7 @@ class Code extends React.Component {
         this.code = e.target.value || '';
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateCodeChange',
+            '@type': 'clientUpdateMonkeyTracking',
             prevCode,
             code: this.code
         });
@@ -197,6 +209,7 @@ class Code extends React.Component {
                 </Typography>
                 <TextField
                     classes={{ root: 'auth-input' }}
+                    inputRef={this.inputRef}
                     variant='outlined'
                     color='primary'
                     disabled={loading}

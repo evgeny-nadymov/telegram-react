@@ -28,22 +28,6 @@ class AuthFormControl extends React.Component {
         const { data } = this.state;
         if (data) return;
 
-        // const input = 'json/countries.json';
-        // try {
-        //     const response = await fetch(input);
-        //     const data = await response.json();
-        //     data.forEach(x => {
-        //         x.phone = x.phones[0];
-        //     });
-        //
-        //     AuthStore.data = data.filter(x => x.emoji);
-        //
-        //     console.log('[auth] data', AuthStore.data);
-        //     //this.setState({ data: AuthStore.data });
-        // } catch (error) {
-        //     console.error(error);
-        // }
-
         const input2 = 'data/countries.dat';
         try {
             const response = await fetch(input2);
@@ -88,27 +72,6 @@ class AuthFormControl extends React.Component {
             case 'authorizationStateWaitTdlibParameters':
             case 'authorizationStateWaitTdlib': {
                 control = <Phone defaultPhone={defaultPhone} data={data} />;
-
-                // control = (
-                //     <div style={{display: 'flex', flexDirection: 'row'}}>
-                //         <Phone
-                //             defaultPhone={defaultPhone}
-                //             data={data}
-                //         />
-                //         <Code
-                //             termsOfService={null}
-                //             codeInfo={null}
-                //             onChangePhone={null}
-                //             data={data}
-                //         />
-                //         <Password
-                //             passwordHint={null}
-                //             hasRecoveryEmailAddress={false}
-                //             recoveryEmailAddressPattern={''}
-                //             onChangePhone={null}
-                //         />
-                //     </div>
-                // );
                 break;
             }
             case 'authorizationStateWaitCode': {
