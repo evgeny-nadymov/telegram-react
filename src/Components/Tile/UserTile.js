@@ -160,7 +160,7 @@ class UserTile extends Component {
     };
 
     render() {
-        const { userId, fistName, lastName, onSelect } = this.props;
+        const { userId, fistName, lastName, onSelect, small } = this.props;
         const { loaded } = this.state;
 
         const user = UserStore.get(userId);
@@ -174,7 +174,12 @@ class UserTile extends Component {
 
         return (
             <div
-                className={classNames('user-tile', { [tileColor]: !tileLoaded }, { pointer: onSelect })}
+                className={classNames(
+                    'user-tile',
+                    { [tileColor]: !tileLoaded },
+                    { pointer: onSelect },
+                    { 'tile-small': small }
+                )}
                 onClick={this.handleSelect}>
                 {!tileLoaded && (
                     <div className='tile-photo'>
@@ -191,7 +196,8 @@ UserTile.propTypes = {
     userId: PropTypes.number.isRequired,
     firstName: PropTypes.string,
     lastName: PropTypes.string,
-    onSelect: PropTypes.func
+    onSelect: PropTypes.func,
+    small: PropTypes.bool
 };
 
 export default UserTile;

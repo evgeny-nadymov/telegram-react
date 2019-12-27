@@ -54,7 +54,7 @@ pre code {
 }
 
 .message-short .message-content {
-    margin-left: 60px;
+    margin-left: 45px;
 }
 
 .message-short .message-select-tick {
@@ -124,7 +124,7 @@ pre code {
 }
 
 .message-wrapper {
-    max-width: 556px;
+    max-width: 696px;
     padding: 6px 60px 6px 6px;
     margin: 0 auto;
     display: flex;

@@ -119,6 +119,7 @@ class DialogDetails extends Component {
                 <Footer chatId={chatId} />
                 <StickerSetDialog />
                 <ChatInfoDialog />
+                {/*<Footer />*/}
             </div>
         );
     }

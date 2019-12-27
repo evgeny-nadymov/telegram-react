@@ -182,7 +182,6 @@ class MainPage extends React.Component {
                     <DialogDetails ref={this.dialogDetailsRef} />
                     {isChatDetailsVisible && <ChatInfo />}
                 </div>
-                <Footer />
                 {instantViewContent && <InstantViewer {...instantViewContent} />}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}

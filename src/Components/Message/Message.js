@@ -435,9 +435,9 @@ class Message extends Component {
         let tile = null;
         if (showTitle) {
             tile = sender_user_id ? (
-                <UserTile userId={sender_user_id} onSelect={this.handleSelectUser} />
+                <UserTile userId={sender_user_id} onSelect={this.handleSelectUser} small />
             ) : (
-                <ChatTile chatId={chatId} onSelect={this.handleSelectChat} />
+                <ChatTile chatId={chatId} onSelect={this.handleSelectChat} small />
             );
         }
 

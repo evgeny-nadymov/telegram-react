@@ -14,6 +14,11 @@
     flex-shrink: 0;
 }
 
+.chat-tile.tile-small {
+    height: 33px;
+    width: 33px;
+}
+
 .tile_color_1 {
     background: #cc90e2;
 }
@@ -40,7 +45,6 @@
 }
 
 .tile-text {
-    line-height: 48px;
     font-size: 19px;
     /*font-family: 'Nunito', sans-serif;*/
     /*font-weight: 600;*/
@@ -51,9 +55,13 @@
     user-select: none;
 }
 
+.tile-small .tile-text {
+    font-size: 14px;
+}
+
 .tile-photo {
-    width: 48px;
-    height: 48px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     overflow: hidden;
     object-fit: cover;
@@ -63,6 +71,9 @@
     bottom: 0;
     left: 0;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .tile-saved-messages {

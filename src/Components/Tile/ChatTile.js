@@ -123,7 +123,7 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { classes, chatId, showOnline, showSavedMessages, onSelect } = this.props;
+        const { classes, chatId, showOnline, showSavedMessages, onSelect, small } = this.props;
         const { loaded } = this.state;
 
         if (isMeChat(chatId) && showSavedMessages) {
@@ -152,7 +152,12 @@ class ChatTile extends Component {
 
         return (
             <div
-                className={classNames('chat-tile', { [tileColor]: !tileLoaded }, { pointer: onSelect })}
+                className={classNames(
+                    'chat-tile',
+                    { [tileColor]: !tileLoaded },
+                    { pointer: onSelect },
+                    { 'tile-small': small }
+                )}
                 onClick={this.handleSelect}>
                 {!tileLoaded && (
                     <div className='tile-photo'>
