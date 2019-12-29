@@ -13,6 +13,8 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import emojiRegex from 'emoji-regex';
 import DoneIcon from '@material-ui/icons/Done';
 import IconButton from '@material-ui/core/IconButton';
+import Fab from '@material-ui/core/Fab';
+import Button from '@material-ui/core/Button';
 import InsertEmoticonIcon from '@material-ui/icons/InsertEmoticon';
 import SendIcon from '@material-ui/icons/Send';
 import AttachButton from './../ColumnMiddle/AttachButton';
@@ -42,7 +44,15 @@ const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPicker
 
 const styles = theme => ({
     iconButton: {
-        margin: '8px 0'
+        margin: 3
+    },
+    sendButton: {
+        margin: 0,
+        minWidth: 54,
+        height: 54,
+        borderRadius: '50%',
+        boxShadow: '0 1px 2px 0 rgba(16,35,47,.15)',
+        color: '#fff'
     },
     closeIconButton: {
         margin: 0
@@ -1160,74 +1170,79 @@ class InputBoxControl extends Component {
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
 
         return (
-            <>
+            <div className='inputbox-background'>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <InputBoxHeader
-                        chatId={chatId}
-                        messageId={replyToMessageId}
-                        editMessageId={openEditMedia ? 0 : editMessageId}
-                        onClick={this.handleHeaderClick}
-                    />
-                    <div className='inputbox-wrapper'>
-                        <div className='inputbox-left-column'>
-                            <React.Suspense
-                                fallback={
-                                    <IconButton className={classes.iconButton} aria-label='Emoticon'>
-                                        <InsertEmoticonIcon />
-                                    </IconButton>
-                                }>
-                                <EmojiPickerButton onSelect={this.handleEmojiSelect} />
-                            </React.Suspense>
-                        </div>
-                        <div className='inputbox-middle-column'>
-                            <div
-                                id='inputbox-message'
-                                ref={this.newMessageRef}
-                                placeholder={isMediaEditing ? t('Caption') : t('Message')}
-                                contentEditable
-                                suppressContentEditableWarning
-                                onKeyDown={this.handleKeyDown}
-                                onPaste={this.handlePaste}
-                                onInput={this.handleInput}
-                            />
-                        </div>
-                        <div className='inputbox-right-column'>
-                            <input
-                                ref={this.attachDocumentRef}
-                                className='inputbox-attach-button'
-                                type='file'
-                                multiple='multiple'
-                                onChange={this.handleAttachDocumentComplete}
-                            />
-                            <input
-                                ref={this.attachPhotoRef}
-                                className='inputbox-attach-button'
-                                type='file'
-                                multiple='multiple'
-                                accept='image/*'
-                                onChange={this.handleAttachPhotoComplete}
-                            />
-                            {!Boolean(editMessageId) && (
-                                <AttachButton
-                                    chatId={chatId}
-                                    onAttachPhoto={this.handleAttachPhoto}
-                                    onAttachDocument={this.handleAttachDocument}
-                                    onAttachPoll={this.handleAttachPoll}
+                    <div className='inputbox-bubble'>
+                        <InputBoxHeader
+                            chatId={chatId}
+                            messageId={replyToMessageId}
+                            editMessageId={openEditMedia ? 0 : editMessageId}
+                            onClick={this.handleHeaderClick}
+                        />
+                        <div className='inputbox-wrapper'>
+                            <div className='inputbox-left-column'>
+                                <React.Suspense
+                                    fallback={
+                                        <IconButton className={classes.iconButton} aria-label='Emoticon'>
+                                            <InsertEmoticonIcon />
+                                        </IconButton>
+                                    }>
+                                    <EmojiPickerButton onSelect={this.handleEmojiSelect} />
+                                </React.Suspense>
+                            </div>
+                            <div className='inputbox-middle-column'>
+                                <div
+                                    id='inputbox-message'
+                                    ref={this.newMessageRef}
+                                    placeholder={isMediaEditing ? t('Caption') : t('Message')}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onKeyDown={this.handleKeyDown}
+                                    onPaste={this.handlePaste}
+                                    onInput={this.handleInput}
                                 />
-                            )}
+                            </div>
+                            <div className='inputbox-right-column'>
+                                <input
+                                    ref={this.attachDocumentRef}
+                                    className='inputbox-attach-button'
+                                    type='file'
+                                    multiple='multiple'
+                                    onChange={this.handleAttachDocumentComplete}
+                                />
+                                <input
+                                    ref={this.attachPhotoRef}
+                                    className='inputbox-attach-button'
+                                    type='file'
+                                    multiple='multiple'
+                                    accept='image/*'
+                                    onChange={this.handleAttachPhotoComplete}
+                                />
+                                {!Boolean(editMessageId) && (
+                                    <AttachButton
+                                        chatId={chatId}
+                                        onAttachPhoto={this.handleAttachPhoto}
+                                        onAttachDocument={this.handleAttachDocument}
+                                        onAttachPoll={this.handleAttachPoll}
+                                    />
+                                )}
 
-                            {/*<IconButton>*/}
-                            {/*<KeyboardVoiceIcon />*/}
-                            {/*</IconButton>*/}
-                            <IconButton
-                                color='primary'
-                                className={classes.iconButton}
-                                aria-label='Send'
-                                onClick={this.handleSubmit}>
-                                {editMessageId ? <DoneIcon /> : <SendIcon />}
-                            </IconButton>
+                                {/*<IconButton>*/}
+                                {/*<KeyboardVoiceIcon />*/}
+                                {/*</IconButton>*/}
+                            </div>
                         </div>
                     </div>
+                    <Button
+                        variant='contained'
+                        disableElevation
+                        color='primary'
+                        className={classes.sendButton}
+                        aria-label='Send'
+                        size='small'
+                        onClick={this.handleSubmit}>
+                        {editMessageId ? <DoneIcon /> : <SendIcon />}
+                    </Button>
                 </div>
                 {!isPrivateChat(chatId) && <CreatePollDialog onSend={this.handleSendPoll} />}
                 <PasteFilesDialog files={files} onConfirm={this.handlePasteConfirm} onCancel={this.handlePasteCancel} />
@@ -1246,7 +1261,7 @@ class InputBoxControl extends Component {
                     onDone={this.handleDoneEditMedia}
                     onCancel={this.handleCancelEditMedia}
                 />
-            </>
+            </div>
         );
     }
 }

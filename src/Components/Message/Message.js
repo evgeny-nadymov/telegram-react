@@ -481,7 +481,10 @@ class Message extends Component {
                         )}
                     </div>
                     {tile}
-                    <div className='message-content'>
+                    <div
+                        className={classNames('message-content', {
+                            'message-bubble': message.content['@type'] !== 'messageSticker'
+                        })}>
                         <div className='message-title'>
                             {showTitle && !showForward && (
                                 <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
@@ -502,8 +505,9 @@ class Message extends Component {
                             {text}
                         </div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
+                        {/*{!showTitle && meta}*/}
                     </div>
-                    {!showTitle && meta}
+                    {/*{!showTitle && meta}*/}
                 </div>
                 <Popover
                     open={contextMenu}

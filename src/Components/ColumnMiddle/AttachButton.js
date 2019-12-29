@@ -24,7 +24,7 @@ import { ANIMATION_DURATION_300MS } from '../../Constants';
 
 const styles = {
     iconButton: {
-        margin: '8px 0'
+        margin: 3
     }
 };
 

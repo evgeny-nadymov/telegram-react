@@ -44,8 +44,15 @@
     display: flex;
 }
 
+.chat-big .dialog-inner-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 24px 0 20px;
+}
+
 .dialog-inner-wrapper {
-    width: 48px;
+    /*width: 48px;*/
     overflow: hidden;
     flex-grow: 1;
     margin-left: 12px;

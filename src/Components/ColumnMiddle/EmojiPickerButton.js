@@ -27,7 +27,7 @@ import './EmojiPickerButton.css';
 
 const styles = theme => ({
     iconButton: {
-        margin: '8px 0px'
+        margin: 3
     },
     headerButton: {
         borderRadius: 0,

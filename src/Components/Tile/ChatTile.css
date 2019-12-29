@@ -19,6 +19,11 @@
     width: 33px;
 }
 
+.chat-tile.tile-big {
+    height: 120px;
+    width: 120px;
+}
+
 .tile_color_1 {
     background: #cc90e2;
 }

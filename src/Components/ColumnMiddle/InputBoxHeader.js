@@ -25,7 +25,7 @@ const styles = theme => ({
         color: theme.palette.primary.main
     },
     closeIconButton: {
-        margin: 0
+        margin: 3
     }
 });
 
@@ -74,7 +74,10 @@ class InputBoxHeader extends React.Component {
         return (
             <div className='inputbox-header'>
                 <div className='inputbox-header-left-column'>
-                    {editMessageId > 0 ? <EditIcon className={classes.icon} /> : <ReplyIcon className={classes.icon} />}
+                    {/*{editMessageId > 0 ? <EditIcon className={classes.icon} /> : <ReplyIcon className={classes.icon} />}*/}
+                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
+                        <CloseIcon />
+                    </IconButton>
                 </div>
                 <div className='inputbox-header-middle-column'>
                     <Reply
@@ -84,11 +87,7 @@ class InputBoxHeader extends React.Component {
                         onClick={onClick}
                     />
                 </div>
-                <div className='inputbox-header-right-column'>
-                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
-                        <CloseIcon />
-                    </IconButton>
-                </div>
+                <div className='inputbox-header-right-column' />
             </div>
         );
     }

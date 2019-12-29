@@ -14,7 +14,16 @@
     flex-shrink: 0;
 }
 
+.tile-small {
+    align-self: flex-end;
+}
+
 .user-tile.tile-small {
     height: 33px;
     width: 33px;
+}
+
+.user-tile.tile-big {
+    height: 120px;
+    width: 120px;
 }

@@ -44,7 +44,7 @@ const ScrollBehaviorEnum = Object.freeze({
 
 const styles = theme => ({
     background: {
-        background: theme.palette.type === 'dark' ? theme.palette.grey[900] : 'transparent'
+        background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#e6ebee'
     }
 });
 

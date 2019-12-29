@@ -5,18 +5,56 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.inputbox-background {
+    background: #e6ebee;
+}
+
 .inputbox {
-    padding: 0 12px;
+    /*padding: 0 12px;*/
+    /*display: flex;*/
+    /*flex-direction: column;*/
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-end;
     box-sizing: border-box;
     border-top-width: 1px;
     border-top-style: solid;
+
+    padding: 10px 0 25px;
+    width: calc(100% - 22px);
+    max-width: 695px;
+    margin: 0 auto;
+}
+
+.inputbox-bubble {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 100%;
+    border-radius: 12px 12px 0 12px;
+    box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
+    margin-right: 9px;
+    background: white;
+}
+
+.inputbox-bubble::after {
+    position: absolute;
+    bottom: -3px;
+    right: -11px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    background-image: url(../assets/msg-tail-right-white.svg);
+    background-position: -2px -2px;
+    box-sizing: border-box;
 }
 
 .inputbox-wrapper {
     display: flex;
     flex-direction: row;
+    align-items: flex-end;
 }
 
 .inputbox-attach-icon {
@@ -29,7 +67,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 21px 0 22px 0;
+    padding: 16px 0 16px 0;
     white-space: pre-wrap;
     word-wrap: break-word;
     word-break: break-word;

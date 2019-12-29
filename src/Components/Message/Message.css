@@ -53,10 +53,6 @@ pre code {
     border-radius: 0;
 }
 
-.message-short .message-content {
-    margin-left: 45px;
-}
-
 .message-short .message-select-tick {
     margin-top: 0;
 }
@@ -133,9 +129,41 @@ pre code {
 
 .message-content {
     margin-left: 12px;
-    flex-grow: 1;
-    flex-shrink: 1;
-    overflow: hidden;
+    /*flex-grow: 1;*/
+    /*flex-shrink: 1;*/
+    /*overflow: hidden;*/
+    max-width: 560px;
+}
+
+.message-bubble {
+    position: relative;
+    background: white;
+    border-radius: 12px 12px 12px 0;
+    padding: 6px 10px;
+    box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
+}
+
+.message-bubble::after {
+    position: absolute;
+    left: -7px;
+    background-image: url(../../Assets/msg-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    background-position: -2px -2px;
+}
+
+.message-short .message-bubble {
+    border-radius: 12px;
+}
+
+.message-short .message-bubble::after {
+    content: none;
+}
+
+.message-short .message-content {
+    margin-left: 45px;
 }
 
 .message-title {
