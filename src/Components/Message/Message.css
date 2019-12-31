@@ -137,7 +137,7 @@ pre code {
 
 .message-bubble {
     position: relative;
-    background: white;
+    /*background: white;*/
     border-radius: 12px 12px 12px 0;
     padding: 6px 10px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
@@ -146,12 +146,12 @@ pre code {
 .message-bubble::after {
     position: absolute;
     left: -7px;
-    background-image: url(../../Assets/msg-tail-left.svg);
+    mask: url(../../Assets/bubble-tail-left.svg);
     bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    background-position: -2px -2px;
+    transform: translate(-2px, -2px);
 }
 
 .message-short .message-bubble {

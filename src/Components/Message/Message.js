@@ -57,6 +57,12 @@ const styles = theme => ({
     message: {
         backgroundColor: 'transparent'
     },
+    messageBubble: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
+        '&::after': {
+            background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
+        }
+    },
     menuListRoot: {
         minWidth: 150
     },
@@ -483,7 +489,8 @@ class Message extends Component {
                     {tile}
                     <div
                         className={classNames('message-content', {
-                            'message-bubble': message.content['@type'] !== 'messageSticker'
+                            'message-bubble': message.content['@type'] !== 'messageSticker',
+                            [classes.messageBubble]: message.content['@type'] !== 'messageSticker'
                         })}>
                         <div className='message-title'>
                             {showTitle && !showForward && (

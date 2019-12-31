@@ -46,6 +46,15 @@ const styles = theme => ({
     iconButton: {
         margin: 3
     },
+    inputboxBackground: {
+        background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#e6ebee'
+    },
+    inputboxBubble: {
+        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
+        '&::after': {
+            background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
+        }
+    },
     sendButton: {
         margin: 0,
         minWidth: 54,
@@ -1170,9 +1179,9 @@ class InputBoxControl extends Component {
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
 
         return (
-            <div className='inputbox-background'>
+            <div className={classes.inputboxBackground}>
                 <div className={classNames(classes.borderColor, 'inputbox')}>
-                    <div className='inputbox-bubble'>
+                    <div className={classNames('inputbox-bubble', classes.inputboxBubble)}>
                         <InputBoxHeader
                             chatId={chatId}
                             messageId={replyToMessageId}
