@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import ChatTile from './ChatTile';
 import DialogTitle from './DialogTitle';
 import DialogStatus from './DialogStatus';
+import { isMeChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './ChatControl.css';
 
@@ -39,6 +40,8 @@ class ChatControl extends React.Component {
     render() {
         const { chatId, onTileSelect, showStatus, showSavedMessages, big } = this.props;
 
+        const isSavedMessages = isMeChat(chatId);
+
         return (
             <div className={classNames('chat', { 'chat-big': big })} onClick={this.handleClick}>
                 <div className='chat-wrapper'>
@@ -47,7 +50,7 @@ class ChatControl extends React.Component {
                         <div className='tile-first-row'>
                             <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
                         </div>
-                        {showStatus && !showSavedMessages && (
+                        {showStatus && !isSavedMessages && (
                             <div className='tile-second-row'>
                                 <DialogStatus chatId={chatId} />
                             </div>

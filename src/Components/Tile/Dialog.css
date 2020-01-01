@@ -48,7 +48,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 24px 0 20px;
+    padding: 24px 22px 20px;
+    box-sizing: border-box;
+    margin: 0 auto;
+    max-width: 100%;
+}
+
+.chat-big .tile-first-row {
+    max-width: 100%;
 }
 
 .dialog-inner-wrapper {

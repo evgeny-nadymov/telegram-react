@@ -422,7 +422,7 @@ class ChatDetails extends React.Component {
                         <ChatControl
                             chatId={chatId}
                             big={true}
-                            showStatus={popup}
+                            showStatus={true}
                             showSavedMessages={!popup}
                             onTileSelect={photo ? this.handleOpenViewer : null}
                         />
