@@ -1205,31 +1205,62 @@ class MessagesList extends React.Component {
         }
     };
 
+    showMessageTitle(message, prevMessage, isFirst) {
+        if (!message) return false;
+
+        const { chat_id, date, sender_user_id } = message;
+
+        if (isFirst) {
+            return true;
+        }
+
+        if (isChannelChat(chat_id)) {
+            return true;
+        }
+
+        return (
+            prevMessage &&
+            (isServiceMessage(prevMessage) ||
+                sender_user_id !== prevMessage.sender_user_id ||
+                date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S)
+        );
+    }
+
+    showMessageDate(message, prevMessage, isFirst) {
+        if (isFirst) {
+            return true;
+        }
+
+        const date = new Date(message.date * 1000);
+        const prevDate = prevMessage ? new Date(prevMessage.date * 1000) : date;
+
+        if (
+            date.getFullYear() !== prevDate.getFullYear() ||
+            date.getMonth() !== prevDate.getMonth() ||
+            date.getDate() !== prevDate.getDate()
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
     render() {
         const { classes, chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
-        // console.log('[ml] render ', this.props.chatId, this.props.messageId, separatorMessageId);
+        // console.log('[ml] render ', history);
 
         // const isChannel = isChannelChat(chatId);
 
-        let prevShowDate = false;
         this.itemsMap.clear();
         this.messages = clearHistory
             ? null
             : history.map((x, i) => {
                   const prevMessage = i > 0 ? history[i - 1] : null;
-                  const date = new Date(x.date * 1000);
-                  const prevDate = prevMessage ? new Date(prevMessage.date * 1000) : date;
-                  let showDate = false;
-                  if (
-                      i === 0 ||
-                      date.getFullYear() !== prevDate.getFullYear() ||
-                      date.getMonth() !== prevDate.getMonth() ||
-                      date.getDate() !== prevDate.getDate()
-                  ) {
-                      showDate = true;
-                  }
+                  const nextMessage = i < history.length - 1 ? history[i + 1] : null;
+
+                  const showDate = this.showMessageDate(x, prevMessage, i === 0);
 
                   let m = null;
                   if (isServiceMessage(x)) {
@@ -1243,14 +1274,10 @@ class MessagesList extends React.Component {
                           />
                       );
                   } else {
-                      const showTitle =
-                          prevShowDate ||
-                          isChannelChat(x.chat_id) ||
-                          i === 0 ||
-                          (prevMessage &&
-                              (isServiceMessage(prevMessage) ||
-                                  x.sender_user_id !== prevMessage.sender_user_id ||
-                                  x.date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S));
+                      const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
+                      const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+
+                      const showTail = !nextMessage || isServiceMessage(nextMessage) || nextShowTitle;
 
                       m = (
                           <Message
@@ -1260,6 +1287,7 @@ class MessagesList extends React.Component {
                               messageId={x.id}
                               sendingState={x.sending_state}
                               showTitle={showTitle}
+                              showTail={showTail}
                               showUnreadSeparator={separatorMessageId === x.id}
                           />
                       );

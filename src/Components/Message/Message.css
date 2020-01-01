@@ -128,18 +128,20 @@ pre code {
 }
 
 .message-content {
-    margin-left: 12px;
+    margin-left: 5px;
     /*flex-grow: 1;*/
     /*flex-shrink: 1;*/
     /*overflow: hidden;*/
     max-width: 560px;
+    min-height: 33px;
+    box-sizing: border-box;
 }
 
 .message-bubble {
     position: relative;
     /*background: white;*/
-    border-radius: 12px 12px 12px 0;
-    padding: 6px 10px;
+    border-radius: 10px 10px 10px 0;
+    padding: 6px 9px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
 }
 
@@ -155,7 +157,7 @@ pre code {
 }
 
 .message-short .message-bubble {
-    border-radius: 12px;
+    border-radius: 10px;
 }
 
 .message-short .message-bubble::after {
@@ -163,7 +165,7 @@ pre code {
 }
 
 .message-short .message-content {
-    margin-left: 45px;
+    margin-left: 38px;
 }
 
 .message-title {

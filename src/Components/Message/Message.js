@@ -107,7 +107,7 @@ class Message extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTitle } = this.props;
+        const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTail, showTitle } = this.props;
         const { contextMenu, selected, highlighted, emojiMatches } = this.state;
 
         if (nextProps.theme !== theme) {
@@ -131,6 +131,11 @@ class Message extends Component {
         }
 
         if (nextProps.showUnreadSeparator !== showUnreadSeparator) {
+            // console.log('Message.shouldComponentUpdate true');
+            return true;
+        }
+
+        if (nextProps.showTail !== showTail) {
             // console.log('Message.shouldComponentUpdate true');
             return true;
         }
@@ -425,7 +430,7 @@ class Message extends Component {
 
     render() {
         // console.log('[m] render', this.props.messageId);
-        const { t, classes, chatId, messageId, showUnreadSeparator, showTitle } = this.props;
+        const { t, classes, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
         const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -439,7 +444,7 @@ class Message extends Component {
         this.unread = getUnread(message);
 
         let tile = null;
-        if (showTitle) {
+        if (showTail) {
             tile = sender_user_id ? (
                 <UserTile userId={sender_user_id} onSelect={this.handleSelectUser} small />
             ) : (
@@ -453,7 +458,7 @@ class Message extends Component {
             'message-selected': selected,
             [classes.messageSelected]: selected,
             [classes.messageHighlighted]: highlighted && !selected,
-            'message-short': !showTitle
+            'message-short': !tile
         });
 
         const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;
@@ -515,6 +520,7 @@ class Message extends Component {
                         {/*{!showTitle && meta}*/}
                     </div>
                     {/*{!showTitle && meta}*/}
+                    {/*{showTail&&<div>tail</div>}*/}
                 </div>
                 <Popover
                     open={contextMenu}
