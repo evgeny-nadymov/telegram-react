@@ -57,7 +57,7 @@ class Photo extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, showProgress, style } = this.props;
+        const { displaySize, openMedia, showProgress, title, caption, type, style } = this.props;
         const { thumbSize, photoSize, minithumbnail } = this.state;
 
         if (!photoSize) return null;
@@ -79,7 +79,15 @@ class Photo extends React.Component {
         const hasSrc = Boolean(src || thumbSrc || miniSrc);
 
         return (
-            <div className={classNames('photo', { pointer: openMedia })} style={photoStyle} onClick={openMedia}>
+            <div
+                className={classNames('photo', {
+                    'photo-big': type === 'message',
+                    'photo-title': title,
+                    'photo-caption': caption,
+                    pointer: openMedia
+                })}
+                style={photoStyle}
+                onClick={openMedia}>
                 {hasSrc && (
                     <img
                         className={classNames('photo-image', {

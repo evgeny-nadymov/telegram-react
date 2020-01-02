@@ -325,7 +325,7 @@ function getDateHint(date) {
     return dateFormat(d, 'H:MM:ss d.mm.yyyy'); //date.toDateString();
 }
 
-function getMedia(message, openMedia) {
+function getMedia(message, openMedia, hasTitle = false, hasCaption = false) {
     if (!message) return null;
 
     const { chat_id, id, content } = message;
@@ -333,7 +333,17 @@ function getMedia(message, openMedia) {
 
     switch (content['@type']) {
         case 'messageAnimation':
-            return <Animation chatId={chat_id} messageId={id} animation={content.animation} openMedia={openMedia} />;
+            return (
+                <Animation
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    animation={content.animation}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageAudio':
             return <Audio chatId={chat_id} messageId={id} audio={content.audio} openMedia={openMedia} />;
         case 'messageCall':
@@ -353,9 +363,29 @@ function getMedia(message, openMedia) {
         case 'messageGame':
             return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
         case 'messageLocation':
-            return <Location chatId={chat_id} messageId={id} location={content.location} openMedia={openMedia} />;
+            return (
+                <Location
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    location={content.location}
+                    openMedia={openMedia}
+                />
+            );
         case 'messagePhoto':
-            return <Photo chatId={chat_id} messageId={id} photo={content.photo} openMedia={openMedia} />;
+            return (
+                <Photo
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    photo={content.photo}
+                    openMedia={openMedia}
+                />
+            );
         case 'messagePoll':
             return <Poll chatId={chat_id} messageId={id} poll={content.poll} openMedia={openMedia} />;
         case 'messageSticker':
@@ -371,13 +401,53 @@ function getMedia(message, openMedia) {
         case 'messageText':
             return null;
         case 'messageVenue':
-            return <Venue chatId={chat_id} messageId={id} venue={content.venue} openMedia={openMedia} />;
+            return (
+                <Venue
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    venue={content.venue}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageVideo':
-            return <Video chatId={chat_id} messageId={id} video={content.video} openMedia={openMedia} />;
+            return (
+                <Video
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    video={content.video}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageVideoNote':
-            return <VideoNote chatId={chat_id} messageId={id} videoNote={content.video_note} openMedia={openMedia} />;
+            return (
+                <VideoNote
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    videoNote={content.video_note}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageVoiceNote':
-            return <VoiceNote chatId={chat_id} messageId={id} voiceNote={content.voice_note} openMedia={openMedia} />;
+            return (
+                <VoiceNote
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    voiceNote={content.voice_note}
+                    openMedia={openMedia}
+                />
+            );
         default:
             return '[' + content['@type'] + ']';
     }

@@ -6,12 +6,12 @@
  */
 
 .reply-tile {
-    margin-left: 12px;
-    width: 40px;
-    height: 40px;
-    min-height: 40px;
-    min-width: 40px;
-    border-radius: 6px;
+    margin-left: 4px;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    min-width: 32px;
+    border-radius: 5px;
     overflow: hidden;
 }
 
@@ -22,7 +22,7 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
-    border-radius: 6px;
+    border-radius: 4px;
 }
 
 .reply-tile-photo-round {

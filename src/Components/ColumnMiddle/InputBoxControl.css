@@ -26,6 +26,11 @@
     margin: 0 auto;
 }
 
+.inputbox-icon-button {
+    padding: 6px;
+    margin: 7px;
+}
+
 .inputbox-bubble {
     position: relative;
     display: flex;
@@ -107,7 +112,7 @@
 }
 
 .inputbox-left-column {
-    margin-right: 20px;
+    margin-right: 1px;
     width: 48px;
 }
 

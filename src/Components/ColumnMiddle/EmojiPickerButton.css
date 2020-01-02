@@ -9,6 +9,11 @@
     display: flex;
 }
 
+.emoji-picker-header-button {
+    border-radius: 0;
+    flex: 50%;
+}
+
 .emoji-picker-content {
     display: flex;
     flex-direction: row;

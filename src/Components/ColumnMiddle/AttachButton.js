@@ -7,9 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import IconButton from '@material-ui/core/IconButton';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
@@ -21,12 +19,6 @@ import PhotoIcon from '@material-ui/icons/Photo';
 import PollIcon from '@material-ui/icons/Poll';
 import { canSendDocuments, canSendPhotos, canSendPolls, isPrivateChat } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
-
-const styles = {
-    iconButton: {
-        margin: 3
-    }
-};
 
 class AttachButton extends React.Component {
     state = {
@@ -75,7 +67,7 @@ class AttachButton extends React.Component {
         return (
             <>
                 <IconButton
-                    className={classes.iconButton}
+                    className='inputbox-icon-button'
                     aria-label='Attach'
                     open={Boolean(anchorEl)}
                     onClick={this.handleMenuClick}>
@@ -130,9 +122,4 @@ AttachButton.propTypes = {
     onAttachPoll: PropTypes.func.isRequired
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(AttachButton);
+export default withTranslation()(AttachButton);

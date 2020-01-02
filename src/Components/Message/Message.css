@@ -172,6 +172,8 @@ pre code {
     display: flex;
     flex-direction: row;
     align-items: baseline;
+    font-size: 14px;
+    line-height: normal;
 }
 
 .message-text {

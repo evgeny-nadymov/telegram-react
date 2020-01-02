@@ -6,5 +6,5 @@
  */
 
 .voice-note-slider {
-    padding: 24px 12px 4px 0;
+    transform: translate(0, 14px);
 }

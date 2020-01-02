@@ -42,8 +42,6 @@
 }
 
 .message-author {
-    margin: 0 0 4px;
-    font-weight: 500;
     flex-grow: 1;
     flex-shrink: 1;
 }

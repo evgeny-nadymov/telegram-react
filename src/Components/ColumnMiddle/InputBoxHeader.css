@@ -9,11 +9,11 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    padding-top: 8px;
+    margin-bottom: -12px;
 }
 
 .inputbox-header-left-column {
-    margin-right: 20px;
+    margin-right: 2px;
 }
 
 .inputbox-header-middle-column {

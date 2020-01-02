@@ -23,7 +23,13 @@ class Venue extends React.Component {
 
         return (
             <div className='venue'>
-                <Location chatId={chatId} messageId={messageId} location={location} openMedia={openMedia} />
+                <Location
+                    type='venue'
+                    chatId={chatId}
+                    messageId={messageId}
+                    location={location}
+                    openMedia={openMedia}
+                />
                 <div className='venue-content'>
                     <a href={source} target='_blank' rel='noopener noreferrer'>
                         <div className='venue-title'>{title}</div>

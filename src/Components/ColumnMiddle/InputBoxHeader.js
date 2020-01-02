@@ -7,27 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
-import EditIcon from '@material-ui/icons/Edit';
-import ReplyIcon from '@material-ui/icons/Reply';
 import IconButton from '@material-ui/core/IconButton';
 import Reply from '../Message/Reply';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';
-
-const styles = theme => ({
-    icon: {
-        padding: 12,
-        color: theme.palette.primary.main
-    },
-    closeIconButton: {
-        margin: 3
-    }
-});
 
 class InputBoxHeader extends React.Component {
     componentDidMount() {
@@ -67,15 +53,14 @@ class InputBoxHeader extends React.Component {
     };
 
     render() {
-        const { classes, chatId, messageId, editMessageId, t, onClick } = this.props;
+        const { chatId, messageId, editMessageId, t, onClick } = this.props;
         if (!chatId) return null;
         if (!messageId && !editMessageId) return null;
 
         return (
             <div className='inputbox-header'>
                 <div className='inputbox-header-left-column'>
-                    {/*{editMessageId > 0 ? <EditIcon className={classes.icon} /> : <ReplyIcon className={classes.icon} />}*/}
-                    <IconButton className={classes.closeIconButton} aria-label='Close' onClick={this.handleClose}>
+                    <IconButton className='inputbox-icon-button' aria-label='Close' onClick={this.handleClose}>
                         <CloseIcon />
                     </IconButton>
                 </div>
@@ -100,9 +85,4 @@ InputBoxHeader.propTypes = {
     onClick: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(InputBoxHeader);
+export default withTranslation()(InputBoxHeader);

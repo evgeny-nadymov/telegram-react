@@ -22,11 +22,12 @@ import CreatePollDialog from '../Popup/CreatePollDialog';
 import EditUrlDialog from '../Popup/EditUrlDialog';
 import InputBoxHeader from './InputBoxHeader';
 import PasteFilesDialog from '../Popup/PasteFilesDialog';
-import UpdateDraftDialog from '../Popup/UpdateDraftDialog';
+import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { borderStyle } from '../Theme';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { findLastTextNode, focusInput } from '../../Utils/DOM';
+import { isEditedMedia } from '../../Utils/Media';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
@@ -37,15 +38,10 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxControl.css';
-import EditMediaDialog from '../Popup/EditMediaDialog';
-import { isEditedMedia } from '../../Utils/Media';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
 const styles = theme => ({
-    iconButton: {
-        margin: 3
-    },
     inputboxBackground: {
         background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#e6ebee'
     },
@@ -1192,7 +1188,7 @@ class InputBoxControl extends Component {
                             <div className='inputbox-left-column'>
                                 <React.Suspense
                                     fallback={
-                                        <IconButton className={classes.iconButton} aria-label='Emoticon'>
+                                        <IconButton className='inputbox-icon-button' aria-label='Emoticon'>
                                             <InsertEmoticonIcon />
                                         </IconButton>
                                     }>

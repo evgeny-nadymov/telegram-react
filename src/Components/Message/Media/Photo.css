@@ -6,9 +6,26 @@
  */
 
 .photo {
-    border-radius: 6px;
+    border-radius: 4px;
     transform: translateZ(0);
     overflow: hidden;
+}
+
+.photo-big {
+    border-radius: 10px;
+    margin: -6px -9px;
+}
+
+.photo-title {
+    margin-top: 6px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.photo-caption {
+    margin-bottom: 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .photo-image {

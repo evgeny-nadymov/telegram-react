@@ -10,6 +10,7 @@
     flex-shrink: 1;
     margin-left: 12px;
     pointer-events: none;
+    min-width: 200px;
 }
 
 .voice-note-meta {

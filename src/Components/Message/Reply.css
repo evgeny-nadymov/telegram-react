@@ -6,8 +6,7 @@
  */
 
 .reply {
-    margin-bottom: 5px;
-    margin-top: 2px;
+    margin: 2px 0 5px;
     background: transparent;
     cursor: pointer;
 }
@@ -21,7 +20,8 @@
 }
 
 .reply-border {
-    height: 40px;
+    height: 32px;
+    border-radius: 1px;
     min-width: 2px;
 }
 
@@ -30,7 +30,9 @@
 }
 
 .reply-content {
-    margin-left: 12px;
+    font-size: 14px;
+    line-height: normal;
+    margin-left: 8px;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
@@ -43,7 +45,6 @@
 }
 
 .reply-content-subtitle {
-    font-size: 14px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

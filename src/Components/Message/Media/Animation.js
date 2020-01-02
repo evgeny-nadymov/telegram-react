@@ -159,7 +159,7 @@ class Animation extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, t, style } = this.props;
+        const { displaySize, openMedia, t, title, caption, type, style } = this.props;
         const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
 
         const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
@@ -179,7 +179,15 @@ class Animation extends React.Component {
         const isGif = isGifMimeType(mime_type);
 
         return (
-            <div className={classNames('animation', { pointer: openMedia })} style={animationStyle} onClick={openMedia}>
+            <div
+                className={classNames('animation', {
+                    'animation-big': type === 'message',
+                    'animation-title': title,
+                    'animation-caption': caption,
+                    pointer: openMedia
+                })}
+                style={animationStyle}
+                onClick={openMedia}>
                 {src ? (
                     isGif ? (
                         <img className='animation-preview' src={src} alt='' />

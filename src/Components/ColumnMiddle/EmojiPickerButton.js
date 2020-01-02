@@ -26,13 +26,6 @@ import TdLibController from '../../Controllers/TdLibController';
 import './EmojiPickerButton.css';
 
 const styles = theme => ({
-    iconButton: {
-        margin: 3
-    },
-    headerButton: {
-        borderRadius: 0,
-        flex: '50%'
-    },
     pickerRoot: {
         zIndex: theme.zIndex.modal,
         width: 338,
@@ -42,7 +35,7 @@ const styles = theme => ({
         borderRadius: theme.shape.borderRadius,
         boxShadow: theme.shadows[8],
         position: 'absolute',
-        bottom: 80,
+        bottom: 54,
         display: 'none'
     },
     pickerRootOpened: {
@@ -259,7 +252,7 @@ class EmojiPickerButton extends React.Component {
                     href={theme.palette.type === 'dark' ? 'emoji-mart.dark.css' : 'emoji-mart.light.css'}
                 />
                 <IconButton
-                    className={classes.iconButton}
+                    className='inputbox-icon-button'
                     aria-label='Emoticon'
                     onMouseEnter={this.handleButtonMouseEnter}
                     onMouseLeave={this.handleButtonMouseLeave}>
@@ -272,13 +265,13 @@ class EmojiPickerButton extends React.Component {
                     <div className='emoji-picker-header'>
                         <Button
                             color={tab === 0 ? 'primary' : 'default'}
-                            className={classes.headerButton}
+                            className='emoji-picker-header-button'
                             onClick={this.handleEmojiClick}>
                             {t('Emoji')}
                         </Button>
                         <Button
                             color={tab === 1 ? 'primary' : 'default'}
-                            className={classes.headerButton}
+                            className='emoji-picker-header-button'
                             onClick={this.handleStickersClick}>
                             {t('Stickers')}
                         </Button>

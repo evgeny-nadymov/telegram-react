@@ -438,9 +438,12 @@ class Message extends Component {
 
         const { sending_state, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
+        const showForward = showMessageForward(chatId, messageId);
         const text = getText(message);
+        const hasTitle = showTitle || showForward || Boolean(reply_to_message_id);
+        const hasCaption = text !== null && text.length > 0;
         const webPage = getWebPage(message);
-        const media = getMedia(message, this.openMedia);
+        const media = getMedia(message, this.openMedia, hasTitle, hasCaption);
         this.unread = getUnread(message);
 
         let tile = null;
@@ -451,8 +454,6 @@ class Message extends Component {
                 <ChatTile chatId={chatId} onSelect={this.handleSelectChat} small />
             );
         }
-
-        const showForward = showMessageForward(chatId, messageId);
 
         const messageClassName = classNames('message', classes.message, {
             'message-selected': selected,
@@ -470,6 +471,8 @@ class Message extends Component {
         const canBeDeleted = message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users;
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
         const canBeEdited = canMessageBeEdited(chatId, messageId);
+        const withBubble =
+            message.content['@type'] !== 'messageSticker' && message.content['@type'] !== 'messageVideoNote';
 
         return (
             <div
@@ -494,8 +497,8 @@ class Message extends Component {
                     {tile}
                     <div
                         className={classNames('message-content', {
-                            'message-bubble': message.content['@type'] !== 'messageSticker',
-                            [classes.messageBubble]: message.content['@type'] !== 'messageSticker'
+                            'message-bubble': withBubble,
+                            [classes.messageBubble]: withBubble
                         })}>
                         <div className='message-title'>
                             {showTitle && !showForward && (
