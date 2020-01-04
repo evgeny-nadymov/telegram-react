@@ -12,13 +12,13 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: rgba(26, 26, 26, 0.7);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     flex-direction: column;
 }
 
 .media-viewer-default {
-    background: rgba(26, 26, 26, 0.7);
+    background: rgba(0, 0, 0, 0.9);
     color: white;
 }
 
@@ -41,14 +41,9 @@
 }
 
 .media-viewer-left-column {
-    min-width: 105px;
+    min-width: 64px;
     display: flex;
     flex-direction: column;
-}
-
-.media-viewer-button-placeholder {
-    height: 105px;
-    width: 100%;
 }
 
 .media-viewer-content-column {
@@ -61,7 +56,7 @@
 }
 
 .media-viewer-right-column {
-    min-width: 105px;
+    min-width: 64px;
     display: flex;
     flex-direction: column;
 }
@@ -69,7 +64,7 @@
 .media-viewer-footer {
     min-height: 68px;
     width: 100%;
-    background: #313131;
+    /*background: #313131;*/
     color: white;
     display: flex;
     flex-direction: row;

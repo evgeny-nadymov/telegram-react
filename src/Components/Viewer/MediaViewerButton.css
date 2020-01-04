@@ -11,7 +11,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0.5;
-    padding: 35px;
+    padding: 20px;
 }
 
 .media-viewer-button-disabled {
@@ -20,6 +20,7 @@
     align-items: center;
     justify-content: center;
     opacity: 0.15;
+    padding: 20px;
 }
 
 .media-viewer-button:hover {

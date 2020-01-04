@@ -6,16 +6,16 @@
  */
 
 .media-viewer-footer-button {
-  cursor: pointer;
-  opacity: 0.5;
+    cursor: pointer;
+    opacity: 0.5;
+    padding: 20px;
 }
 
 .media-viewer-footer-button-disabled {
-  cursor: default;
-  opacity: 0.25;
+    cursor: default;
 }
 
 .media-viewer-footer-button:hover {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.2);
 }

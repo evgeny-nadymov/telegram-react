@@ -9,11 +9,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import CloseIcon from '@material-ui/icons/Close';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import ReplyIcon from '@material-ui/icons/Reply';
-import DeleteIcon from '@material-ui/icons/Delete';
+import CloseIcon from '../../Assets/Icons/Close';
+import NavigateBeforeIcon from '../../Assets/Icons/Left';
+import ReplyIcon from '../../Assets/Icons/Share';
+import DeleteIcon from '../../Assets/Icons/Delete';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
@@ -28,18 +27,8 @@ import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
+import './MediaViewer.css';
 import './ProfileMediaViewer.css';
-
-const forwardIconStyle = {
-    padding: 20,
-    color: 'white',
-    transform: 'scaleX(-1)'
-};
-
-const deleteIconStyle = {
-    padding: 20,
-    color: 'white'
-};
 
 class ProfileMediaViewer extends React.Component {
     constructor(props) {
@@ -368,28 +357,6 @@ class ProfileMediaViewer extends React.Component {
 
         return (
             <div className={classNames('media-viewer', 'media-viewer-default')}>
-                {deleteConfirmation}
-                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
-                    <div className='media-viewer-left-column'>
-                        <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
-                            <NavigateBeforeIcon fontSize='large' />
-                        </MediaViewerButton>
-                    </div>
-
-                    <div className='media-viewer-content-column'>
-                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClick={this.handlePrevious} />
-                    </div>
-
-                    <div className='media-viewer-right-column'>
-                        <MediaViewerButton onClick={this.handleClose}>
-                            <CloseIcon fontSize='large' />
-                        </MediaViewerButton>
-                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
-                            <NavigateNextIcon fontSize='large' />
-                        </MediaViewerButton>
-                    </div>
-                </div>
                 <div className='media-viewer-footer'>
                     <ProfileMediaViewerControl chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)} />
                     <MediaViewerFooterText
@@ -398,12 +365,33 @@ class ProfileMediaViewer extends React.Component {
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
                     <MediaViewerDownloadButton title={t('Forward')} fileId={file.id} onClick={this.handleForward}>
-                        <ReplyIcon style={forwardIconStyle} />
+                        <ReplyIcon />
                     </MediaViewerDownloadButton>
                     <MediaViewerFooterButton title={t('Delete')} disabled onClick={this.handleDelete}>
-                        <DeleteIcon style={deleteIconStyle} />
+                        <DeleteIcon />
+                    </MediaViewerFooterButton>
+                    <MediaViewerFooterButton title={t('Close')} onClick={this.handleClose}>
+                        <CloseIcon />
                     </MediaViewerFooterButton>
                 </div>
+                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
+                    <div className='media-viewer-left-column'>
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                            <NavigateBeforeIcon />
+                        </MediaViewerButton>
+                    </div>
+
+                    <div className='media-viewer-content-column'>
+                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClick={this.handlePrevious} />
+                    </div>
+
+                    <div className='media-viewer-right-column'>
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                            <NavigateBeforeIcon style={{ transform: 'rotate(180deg)' }} />
+                        </MediaViewerButton>
+                    </div>
+                </div>
+                {deleteConfirmation}
             </div>
         );
     }

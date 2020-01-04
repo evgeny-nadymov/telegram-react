@@ -11,21 +11,20 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import CloseIcon from '@material-ui/icons/Close';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import CloseIcon from '../../Assets/Icons/Close';
 import Article from './Article';
 import InstantViewMediaViewer from '../Viewer/InstantViewMediaViewer';
 import IVContext from './IVContext';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
+import NavigateBeforeIcon from '../../Assets/Icons/Left';
+import { itemsInView, throttle } from '../../Utils/Common';
+import { getInnerBlocks } from '../../Utils/InstantView';
 import { openInstantView } from '../../Actions/InstantView';
 import { setInstantViewContent, setInstantViewViewerContent } from '../../Actions/Client';
 import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
-import { itemsInView, throttle } from '../../Utils/Common';
-import { getInnerBlocks } from '../../Utils/InstantView';
 
 const styles = theme => ({
     instantViewer: {
@@ -329,11 +328,12 @@ class InstantViewer extends React.Component {
                             className={classes.leftButton}
                             style={{ alignItems: 'flex-start' }}
                             onClick={this.handleBack}>
-                            {hasScroll ? (
-                                <ExpandLessIcon className='media-viewer-button-icon' fontSize='large' />
-                            ) : (
-                                <ChevronLeftIcon className='media-viewer-button-icon' fontSize='large' />
-                            )}
+                            <NavigateBeforeIcon
+                                style={{
+                                    transition: 'transform 0.25s ease-out',
+                                    transform: hasScroll ? 'rotate(90deg)' : 'rotate(0deg)'
+                                }}
+                            />
                         </MediaViewerButton>
                     </div>
                     <div className='instant-viewer-content-column'>
@@ -343,7 +343,7 @@ class InstantViewer extends React.Component {
                     </div>
                     <div className='instant-viewer-right-column'>
                         <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>
-                            <CloseIcon className='media-viewer-button-icon' fontSize='large' />
+                            <CloseIcon />
                         </MediaViewerButton>
                     </div>
                 </div>

@@ -10,12 +10,6 @@
     overflow: hidden;
 }
 
-.location-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
 .location-message {
     border-radius: 10px;
     margin: -6px -9px;
@@ -24,6 +18,12 @@
 .location-venue {
     border-radius: 10px 10px 0 0;
     margin: -6px -9px 0;
+}
+
+.location-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .location-image {

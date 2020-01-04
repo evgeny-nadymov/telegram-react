@@ -26,8 +26,9 @@ class MediaViewerFooterButton extends React.Component {
 
         return (
             <div
-                className={classNames(disabled ? 'media-viewer-footer-button-disabled' : 'media-viewer-footer-button', {
-                    [classes.checked]: checked
+                className={classNames('media-viewer-footer-button', {
+                    [classes.checked]: checked,
+                    'media-viewer-footer-button-disabled': disabled
                 })}
                 title={title}
                 onClick={this.handleClick}>

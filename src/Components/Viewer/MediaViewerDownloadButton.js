@@ -1,14 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import SaveIcon from '@material-ui/icons/GetApp';
+import SaveIcon from '../../Assets/Icons/Download';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import FileStore from '../../Stores/FileStore';
 import './MediaViewerFooterButton.css';
-
-const iconStyle = {
-    padding: 20,
-    color: 'white'
-};
 
 class MediaViewerDownloadButton extends React.Component {
     constructor(props) {
@@ -86,7 +81,7 @@ class MediaViewerDownloadButton extends React.Component {
 
         return (
             <MediaViewerFooterButton disabled={disabled} title={title} onClick={this.handleClick}>
-                {children || <SaveIcon style={iconStyle} />}
+                {children || <SaveIcon />}
             </MediaViewerFooterButton>
         );
     }

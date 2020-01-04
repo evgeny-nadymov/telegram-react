@@ -7,10 +7,11 @@
 
 .media-viewer-control {
     min-width: 204px;
+    opacity: 0.5;
 }
 
 .media-viewer-control-wrapper {
-    padding: 10px;
+    padding: 8px 20px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -20,7 +21,6 @@
     margin-left: 12px;
     flex-grow: 1;
     flex-shrink: 1;
-    color: rgba(255, 255, 255, 0.6);
 }
 
 .media-viewer-row {

@@ -6,8 +6,8 @@
  */
 
 .user-tile {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     z-index: 1;
     position: relative;
     border-radius: 50%;

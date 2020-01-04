@@ -11,10 +11,9 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withIV } from '../InstantView/IVContext';
 import { withTranslation } from 'react-i18next';
-import CloseIcon from '@material-ui/icons/Close';
-import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore';
-import ReplyIcon from '@material-ui/icons/Reply';
+import CloseIcon from '../../Assets/Icons/Close';
+import NavigateBeforeIcon from '../../Assets/Icons/Left';
+import ReplyIcon from '../../Assets/Icons/Share';
 import InstantViewMediaViewerContent from './InstantViewMediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
@@ -22,15 +21,10 @@ import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
 import { getViewerFile, saveMedia } from '../../Utils/File';
+import { getInputMediaContent } from '../../Utils/Media';
 import { setInstantViewViewerContent } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
-import { getInputMediaContent } from '../../Utils/Media';
-
-const forwardIconStyle = {
-    padding: 20,
-    transform: 'scaleX(-1)'
-};
 
 class InstantViewMediaViewer extends React.Component {
     state = {
@@ -168,26 +162,6 @@ class InstantViewMediaViewer extends React.Component {
 
         return (
             <div className={classNames('instant-view-media-viewer', 'media-viewer-default')}>
-                <div className='media-viewer-wrapper'>
-                    <div className='media-viewer-left-column'>
-                        <div className='media-viewer-button-placeholder' />
-                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
-                            <NavigateBeforeIcon fontSize='large' />
-                        </MediaViewerButton>
-                    </div>
-                    <div className='media-viewer-content-column'>
-                        <InstantViewMediaViewerContent media={media} size={size} caption={caption} url={url} />
-                    </div>
-                    <div className='media-viewer-right-column'>
-                        <MediaViewerButton onClick={this.handleClose}>
-                            <CloseIcon fontSize='large' />
-                        </MediaViewerButton>
-                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
-                            <NavigateNextIcon fontSize='large' />
-                        </MediaViewerButton>
-                    </div>
-                </div>
-
                 <div className='media-viewer-footer'>
                     <MediaViewerFooterText
                         title={title}
@@ -196,8 +170,26 @@ class InstantViewMediaViewer extends React.Component {
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
                     <MediaViewerFooterButton title={t('Forward')} onClick={this.handleForward}>
-                        <ReplyIcon style={forwardIconStyle} />
+                        <ReplyIcon />
                     </MediaViewerFooterButton>
+                    <MediaViewerFooterButton title={t('Close')} onClick={this.handleClose}>
+                        <CloseIcon />
+                    </MediaViewerFooterButton>
+                </div>
+                <div className='media-viewer-wrapper'>
+                    <div className='media-viewer-left-column'>
+                        <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
+                            <NavigateBeforeIcon />
+                        </MediaViewerButton>
+                    </div>
+                    <div className='media-viewer-content-column'>
+                        <InstantViewMediaViewerContent media={media} size={size} caption={caption} url={url} />
+                    </div>
+                    <div className='media-viewer-right-column'>
+                        <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
+                            <NavigateBeforeIcon style={{ transform: 'rotate(180deg)' }} />
+                        </MediaViewerButton>
+                    </div>
                 </div>
             </div>
         );
