@@ -8,7 +8,6 @@
 import { EventEmitter } from 'events';
 import Cookies from 'universal-cookie';
 import i18n from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
@@ -33,140 +32,138 @@ const language = cookies.get('i18next') || defaultLanguage;
 //     caches: ['localStorage', 'cookie']
 // };
 
-i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react-i18next
-    .init({
-        //detection: detection,
-        ns: [defaultNamespace, 'local'],
-        defaultNS: defaultNamespace,
-        fallbackNS: ['local', 'emoji'],
-        resources: {
-            en: {
-                local: {
-                    EnterPassword: 'Enter a Password',
-                    YourAccountProtectedWithPassword: 'Your account is protected with an additional password.',
-                    DeletedMessage: 'Deleted message',
-                    YourPhone: 'Your Phone',
-                    SignInToTelegram: 'Sign in to Telegram',
-                    PhoneNumber: 'Phone Number',
-                    Country: 'Country',
-                    KeepMeSignedIn: 'Keep me signed in',
-                    StartText: 'Please confirm your country code and enter your phone number.',
-                    Next: 'Next',
-                    InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
-                    More: 'More',
-                    SendFileConfirmation: 'Are you sure you want to send file?',
-                    SendFilesConfirmation: 'Are you sure you want to send files?',
-                    SendMessage: 'Send Message',
-                    ChatInfo: 'Chat Info',
-                    ChannelInfo: 'Channel Info',
-                    Stickers: 'STICKERS',
-                    Emoji: 'EMOJI',
-                    SelectChatToStartMessaging: 'Select a chat to start messaging',
-                    Text: 'Text',
-                    ViewChannelInfo: 'View channel info',
-                    ViewGroupInfo: 'View group info',
-                    ViewProfile: 'View profile',
-                    GoToMessage: 'Go to message',
-                    PhotosTitle: 'Photos',
-                    VideosTitle: 'Videos',
-                    VoiceTitle: 'Voice messages',
-                    UpdateDraftConfirmation: 'Are you sure you want to update draft?'
-                },
-                emoji: {
-                    Search: 'Search',
-                    NotEmojiFound: 'No Emoji Found',
-                    ChooseDefaultSkinTone: 'Choose your default skin tone',
-                    SearchResults: 'Search Results',
-                    Recent: 'Frequently Used',
-                    SmileysPeople: 'Smileys & People',
-                    AnimalsNature: 'Animals & Nature',
-                    FoodDrink: 'Food & Drink',
-                    Activity: 'Activity',
-                    TravelPlaces: 'Travel & Places',
-                    Objects: 'Objects',
-                    Symbols: 'Symbols',
-                    Flags: 'Flags',
-                    Custom: 'Custom'
-                },
-                translation: {
-                    AppName: 'Telegram',
-                    Connecting: 'Connecting...',
-                    ConnectingToProxy: 'Connecting to proxy...',
-                    Loading: 'Loading...',
-                    Updating: 'Updating...',
-                    WaitingForNetwork: 'Waiting for network...',
-                    ContinueOnThisLanguage: 'Continue in English'
-                }
+i18n.use(initReactI18next).init({
+    //detection: detection,
+    ns: [defaultNamespace, 'local'],
+    defaultNS: defaultNamespace,
+    fallbackNS: ['local', 'emoji'],
+    resources: {
+        en: {
+            local: {
+                EnterPassword: 'Enter a Password',
+                YourAccountProtectedWithPassword: 'Your account is protected with an additional password.',
+                DeletedMessage: 'Deleted message',
+                YourPhone: 'Your Phone',
+                SignInToTelegram: 'Sign in to Telegram',
+                PhoneNumber: 'Phone Number',
+                Country: 'Country',
+                KeepMeSignedIn: 'Keep me signed in',
+                StartText: 'Please confirm your country code and enter your phone number.',
+                Next: 'Next',
+                InvalidPhoneNumber: 'Invalid phone number. Please check the number and try again.',
+                More: 'More',
+                SendFileConfirmation: 'Are you sure you want to send file?',
+                SendFilesConfirmation: 'Are you sure you want to send files?',
+                SendMessage: 'Send Message',
+                ChatInfo: 'Chat Info',
+                ChannelInfo: 'Channel Info',
+                Stickers: 'STICKERS',
+                Emoji: 'EMOJI',
+                SelectChatToStartMessaging: 'Select a chat to start messaging',
+                Text: 'Text',
+                ViewChannelInfo: 'View channel info',
+                ViewGroupInfo: 'View group info',
+                ViewProfile: 'View profile',
+                GoToMessage: 'Go to message',
+                PhotosTitle: 'Photos',
+                VideosTitle: 'Videos',
+                VoiceTitle: 'Voice messages',
+                UpdateDraftConfirmation: 'Are you sure you want to update draft?'
             },
-            ru: {
-                local: {
-                    EnterPassword: 'Введите пароль',
-                    YourAccountProtectedWithPassword: 'Ваш аккаунт защищен дополнительным паролем.',
-                    DeletedMessage: 'Удаленное сообщение',
-                    YourPhone: 'Ваш телефон',
-                    SignInToTelegram: 'Вход в Telegram',
-                    PhoneNumber: 'Телефонный номер',
-                    Country: 'Страна',
-                    KeepMeSignedIn: 'Сохранить авторизацию',
-                    StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
-                    Next: 'Далее',
-                    InvalidPhoneNumber:
-                        'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
-                    More: 'Ещё',
-                    SendFileConfirmation: 'Вы действительно хотите отправить файл?',
-                    SendFilesConfirmation: 'Вы действительно хотите отправить файлы?',
-                    SendMessage: 'Отправить сообщение',
-                    ChatInfo: 'Информация о чате',
-                    ChannelInfo: 'Информация о канале',
-                    Stickers: 'СТИКЕРЫ',
-                    Emoji: 'ЕМОДЗИ',
-                    SelectChatToStartMessaging: 'Выберите, кому хотели бы написать',
-                    Text: 'Текст',
-                    ViewChannelInfo: 'Информация о канале',
-                    ViewGroupInfo: 'Информация о группе',
-                    ViewProfile: 'Показать профиль',
-                    GoToMessage: 'Перейти к сообщению',
-                    PhotosTitle: 'Фотографии',
-                    VideosTitle: 'Видеозаписи',
-                    VoiceTitle: 'Голосовые сообщения',
-                    UpdateDraftConfirmation: 'Вы действительно хотите обновить черновик сообщения?'
-                },
-                emoji: {
-                    Search: 'Поиск',
-                    NotEmojiFound: 'Емодзи не найдены',
-                    ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
-                    SearchResults: 'Результаты поиска',
-                    Recent: 'Часто используемые',
-                    SmileysPeople: 'Смайлики и люди',
-                    AnimalsNature: 'Животные и природа',
-                    FoodDrink: 'Еда и напитки',
-                    Activity: 'Активность',
-                    TravelPlaces: 'Путешествия и местности',
-                    Objects: 'Предметы',
-                    Symbols: 'Символы',
-                    Flags: 'Флаги',
-                    Custom: 'Пользовательские'
-                },
-                translation: {
-                    AppName: 'Telegram',
-                    Connecting: 'Соединение...',
-                    ConnectingToProxy: 'Подключение к прокси...',
-                    Loading: 'Загрузка...',
-                    Updating: 'Обновление...',
-                    WaitingForNetwork: 'Ожидание сети...',
-                    ContinueOnThisLanguage: 'Продолжить на русском'
-                }
+            emoji: {
+                Search: 'Search',
+                NotEmojiFound: 'No Emoji Found',
+                ChooseDefaultSkinTone: 'Choose your default skin tone',
+                SearchResults: 'Search Results',
+                Recent: 'Frequently Used',
+                SmileysPeople: 'Smileys & People',
+                AnimalsNature: 'Animals & Nature',
+                FoodDrink: 'Food & Drink',
+                Activity: 'Activity',
+                TravelPlaces: 'Travel & Places',
+                Objects: 'Objects',
+                Symbols: 'Symbols',
+                Flags: 'Flags',
+                Custom: 'Custom'
+            },
+            translation: {
+                AppName: 'Telegram',
+                Connecting: 'Connecting...',
+                ConnectingToProxy: 'Connecting to proxy...',
+                Loading: 'Loading...',
+                Updating: 'Updating...',
+                WaitingForNetwork: 'Waiting for network...',
+                ContinueOnThisLanguage: 'Continue in English'
             }
         },
-        lng: language,
-        fallbackLng: defaultLanguage,
-        interpolation: {
-            escapeValue: false
-        },
-        react: {
-            wait: false
+        ru: {
+            local: {
+                EnterPassword: 'Введите пароль',
+                YourAccountProtectedWithPassword: 'Ваш аккаунт защищен дополнительным паролем.',
+                DeletedMessage: 'Удаленное сообщение',
+                YourPhone: 'Ваш телефон',
+                SignInToTelegram: 'Вход в Telegram',
+                PhoneNumber: 'Телефонный номер',
+                Country: 'Страна',
+                KeepMeSignedIn: 'Сохранить авторизацию',
+                StartText: 'Пожалуйста, укажите код страны и свой номер телефона.',
+                Next: 'Далее',
+                InvalidPhoneNumber: 'Некорректный номер телефона. Пожалуйста, проверьте номер и попробуйте ещё раз.',
+                More: 'Ещё',
+                SendFileConfirmation: 'Вы действительно хотите отправить файл?',
+                SendFilesConfirmation: 'Вы действительно хотите отправить файлы?',
+                SendMessage: 'Отправить сообщение',
+                ChatInfo: 'Информация о чате',
+                ChannelInfo: 'Информация о канале',
+                Stickers: 'СТИКЕРЫ',
+                Emoji: 'ЕМОДЗИ',
+                SelectChatToStartMessaging: 'Выберите, кому хотели бы написать',
+                Text: 'Текст',
+                ViewChannelInfo: 'Информация о канале',
+                ViewGroupInfo: 'Информация о группе',
+                ViewProfile: 'Показать профиль',
+                GoToMessage: 'Перейти к сообщению',
+                PhotosTitle: 'Фотографии',
+                VideosTitle: 'Видеозаписи',
+                VoiceTitle: 'Голосовые сообщения',
+                UpdateDraftConfirmation: 'Вы действительно хотите обновить черновик сообщения?'
+            },
+            emoji: {
+                Search: 'Поиск',
+                NotEmojiFound: 'Емодзи не найдены',
+                ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
+                SearchResults: 'Результаты поиска',
+                Recent: 'Часто используемые',
+                SmileysPeople: 'Смайлики и люди',
+                AnimalsNature: 'Животные и природа',
+                FoodDrink: 'Еда и напитки',
+                Activity: 'Активность',
+                TravelPlaces: 'Путешествия и местности',
+                Objects: 'Предметы',
+                Symbols: 'Символы',
+                Flags: 'Флаги',
+                Custom: 'Пользовательские'
+            },
+            translation: {
+                AppName: 'Telegram',
+                Connecting: 'Соединение...',
+                ConnectingToProxy: 'Подключение к прокси...',
+                Loading: 'Загрузка...',
+                Updating: 'Обновление...',
+                WaitingForNetwork: 'Ожидание сети...',
+                ContinueOnThisLanguage: 'Продолжить на русском'
+            }
         }
-    });
+    },
+    lng: language,
+    fallbackLng: defaultLanguage,
+    interpolation: {
+        escapeValue: false
+    },
+    react: {
+        wait: false
+    }
+});
 
 const cache = new LocalStorageBackend(null, {
     enabled: true,

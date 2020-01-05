@@ -123,3 +123,12 @@
     flex-shrink: 0;
     flex-grow: 0;
 }
+
+.inputbox-send-button {
+    margin: 0;
+    min-width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
+    color: #fff;
+}
