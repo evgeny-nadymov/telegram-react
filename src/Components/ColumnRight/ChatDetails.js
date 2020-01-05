@@ -70,9 +70,6 @@ const styles = theme => ({
     nested: {
         // paddingLeft: theme.spacing(4),
     },
-    close: {
-        padding: theme.spacing(0.5)
-    },
     listItem: {
         padding: '11px 22px'
     }
@@ -258,7 +255,7 @@ class ChatDetails extends React.Component {
     handleScheduledAction = (key, message, action) => {
         if (!key) return;
 
-        const { enqueueSnackbar, classes } = this.props;
+        const { enqueueSnackbar } = this.props;
         if (!enqueueSnackbar) return;
 
         const TRANSITION_DELAY = 150;
@@ -272,7 +269,7 @@ class ChatDetails extends React.Component {
                         key='close'
                         aria-label='Close'
                         color='inherit'
-                        className={classes.close}
+                        className='notification-close-button'
                         onClick={() => ApplicationStore.removeScheduledAction(key)}>
                         <CloseIcon />
                     </IconButton>

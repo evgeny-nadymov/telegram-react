@@ -8,15 +8,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
+import AttachFileIcon from '../../Assets/Icons/Attach';
 import IconButton from '@material-ui/core/IconButton';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import InsertDriveFileIcon from '../../Assets/Icons/Document';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import PhotoIcon from '@material-ui/icons/Photo';
-import PollIcon from '@material-ui/icons/Poll';
+import PhotoIcon from '../../Assets/Icons/SharedMedia';
+import PollIcon from '@material-ui/icons/PollOutlined';
 import { canSendDocuments, canSendPhotos, canSendPolls, isPrivateChat } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 
@@ -71,7 +71,7 @@ class AttachButton extends React.Component {
                     aria-label='Attach'
                     open={Boolean(anchorEl)}
                     onClick={this.handleMenuClick}>
-                    <AttachFileIcon className='inputbox-attach-icon' />
+                    <AttachFileIcon />
                 </IconButton>
                 <Menu
                     id='attach-menu'

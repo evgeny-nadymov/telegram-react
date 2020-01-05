@@ -6,12 +6,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
-import withStyles from '@material-ui/core/styles/withStyles';
 import CloseIcon from '@material-ui/icons/Close';
 import LinkIcon from '@material-ui/icons/Link';
 import MoreIcon from '@material-ui/icons/MoreVert';
@@ -26,12 +24,6 @@ import OptionStore from '../../Stores/OptionStore';
 import StickerStore from '../../Stores/StickerStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
-
-const styles = theme => ({
-    close: {
-        padding: theme.spacing(0.5)
-    }
-});
 
 class ShareStickerSetButton extends React.Component {
     state = {
@@ -95,7 +87,7 @@ class ShareStickerSetButton extends React.Component {
                         key='close'
                         aria-label='Close'
                         color='inherit'
-                        className={classes.close}
+                        className='notification-close-button'
                         onClick={() => ApplicationStore.removeScheduledAction(key)}>
                         <CloseIcon />
                     </IconButton>
@@ -133,13 +125,13 @@ class ShareStickerSetButton extends React.Component {
     };
 
     render() {
-        const { classes, t, className } = this.props;
+        const { t, className } = this.props;
         const { anchorEl } = this.state;
 
         return (
             <>
                 <IconButton
-                    className={classes.iconButton + ' ' + className}
+                    className={className}
                     aria-label='Share'
                     open={Boolean(anchorEl)}
                     onClick={this.handleMenuClick}>
@@ -182,7 +174,6 @@ class ShareStickerSetButton extends React.Component {
 ShareStickerSetButton.propTypes = {};
 
 const enhance = compose(
-    withStyles(styles, { withTheme: true }),
     withTranslation(),
     withSnackbar
 );

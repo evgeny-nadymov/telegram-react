@@ -63,10 +63,6 @@
     align-items: flex-end;
 }
 
-.inputbox-attach-icon {
-    transform: rotateZ(45deg);
-}
-
 #inputbox-message {
     box-shadow: 0 0 0 0;
     max-height: 150px;
