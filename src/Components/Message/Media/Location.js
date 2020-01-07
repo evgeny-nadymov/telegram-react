@@ -42,7 +42,7 @@ class Location extends React.Component {
     };
 
     render() {
-        const { location, width, height, zoom, scale, type, style } = this.props;
+        const { location, width, height, zoom, scale, type, style, title, caption } = this.props;
         if (!location) return null;
 
         const locationId = getLocationId(location, width, height, zoom, scale);
@@ -62,7 +62,9 @@ class Location extends React.Component {
             <div
                 className={classNames('location', {
                     'location-message': type === 'message',
-                    'location-venue': type === 'venue'
+                    'location-venue': type === 'venue',
+                    'location-title': title,
+                    'location-caption': caption
                 })}
                 style={locationStyle}>
                 <a href={source} target='_blank' rel='noopener noreferrer' onClick={this.handleClick}>

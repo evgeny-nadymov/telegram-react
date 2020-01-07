@@ -74,7 +74,7 @@ class ChatStatus extends React.Component {
         return (
             <div className={classNames(className, classes.root)} style={{ width: size, height: size }}>
                 <div className={classes.icon} style={{ padding: borderSize }}>
-                    <div className={classes.iconIndicator} />
+                    <div className='chat-status-indicator' />
                 </div>
             </div>
         );

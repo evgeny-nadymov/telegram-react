@@ -5,19 +5,40 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.service-message {
+    display: flex;
+    flex-direction: column;
+}
+
 .service-message-wrapper {
     max-width: 500px;
-    padding: 0 15px;
+    padding: 5px 12px;
     margin: 0 auto;
 }
 
 .service-message-content {
-    margin: 16px 10px 16px 16px;
+    font-size: 15px;
+    line-height: normal;
+    border-radius: 12px;
     text-align: center;
+    color: var(--day-color);
+    background: var(--day-background);
+    padding: 0 6px 4px;
+    min-height: 24px;
+    box-sizing: border-box;
 }
 
-.service-message:before,
-.service-message:after {
-    content: ' ';
-    display: table;
+.service-message-content .message-author {
+    color: var(--day-color);
+}
+
+.service-message-content div {
+    transform: translate(0, 1px);
+}
+
+.service-message-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin: 0 auto 5px;
 }

@@ -14,7 +14,37 @@ import { getDisplayName } from './Utils/HOC';
 import Cookies from 'universal-cookie';
 import ApplicationStore from './Stores/ApplicationStore';
 
+function updateLightTheme() {
+    const { style } = document.documentElement;
+
+    style.setProperty('--badge-green', '#4DCD5E');
+    style.setProperty('--badge-gray', '#C4C9CC');
+
+    style.setProperty('--indicator-green', '#0AC630');
+
+    style.setProperty('--day-color', '#FFFFFF');
+    style.setProperty('--day-background', '#00000033');
+}
+
+function updateDarkTheme() {
+    const { style } = document.documentElement;
+
+    style.setProperty('--badge-green', '#4DCD5E');
+    style.setProperty('--badge-gray', 'rgba(255, 255, 255, 0.5)');
+
+    style.setProperty('--indicator-green', '#0AC630');
+
+    style.setProperty('--day-color', '#FFFFFF');
+    style.setProperty('--day-background', '#303030');
+}
+
 function createTheme(type, primary) {
+    if (type === 'dark') {
+        updateDarkTheme();
+    } else {
+        updateLightTheme();
+    }
+
     return createMuiTheme({
         palette: {
             type: type,

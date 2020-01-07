@@ -20,6 +20,18 @@
     margin: -6px -9px 0;
 }
 
+.location-title {
+    margin-top: 6px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.location-caption {
+    margin-bottom: 6px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
 .location-wrapper {
     position: relative;
     width: 100%;

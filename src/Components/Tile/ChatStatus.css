@@ -8,12 +8,8 @@
 .user-status {
     width: 8px;
     height: 8px;
-    background: #80d066;
+    background: var(--indicator-green);
     border-radius: 50%;
-    /*position: absolute;*/
-    /*right: 1px;*/
-    /*bottom: 1px;*/
-    /*z-index: 1;*/
     border: 2px solid;
 }
 
@@ -21,4 +17,11 @@
     width: 4px;
     height: 4px;
     padding: 2px;
+}
+
+.chat-status-indicator {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--indicator-green);
 }

@@ -486,13 +486,10 @@ class Message extends Component {
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
                     <div className='message-left-padding'>
-                        {/*<div className='message-left-padding-wrapper'>*/}
-                        {/**/}
-                        {/*</div>*/}
                         <CheckMarkIcon className={classNames('message-select-tick', classes.messageSelectTick)} />
-                        {this.unread && (
-                            <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />
-                        )}
+                        {/*{this.unread && (*/}
+                        {/*    <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />*/}
+                        {/*)}*/}
                     </div>
                     {tile}
                     <div

@@ -14,11 +14,16 @@
     margin-left: 6px;
     font-weight: 500;
     color: #fff;
+    background: var(--badge-green);
     vertical-align: baseline;
     white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.dialog-badge-muted {
+    background: var(--badge-gray);
 }
 
 .dialog-badge-text {

@@ -22,7 +22,7 @@ const chatPhotoStyle = {
     width: 64,
     height: 64,
     borderRadius: '50%',
-    margin: '-8px auto 16px auto'
+    margin: '0 auto 5px'
 };
 
 const styles = theme => ({
@@ -150,7 +150,9 @@ class ServiceMessage extends React.Component {
             <div className={messageClassName} onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='service-message-wrapper'>
-                    <div className={classNames('service-message-content', classes.serviceMessageContent)}>{text}</div>
+                    <div className={classNames('service-message-content', classes.serviceMessageContent)}>
+                        <div>{text}</div>
+                    </div>
                 </div>
                 {photo && (
                     <Photo

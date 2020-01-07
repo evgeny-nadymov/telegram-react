@@ -6,7 +6,23 @@
  */
 
 .day-meta {
-    margin: 12px 16px;
-    text-align: center;
+    margin: 5px 0;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day-meta-wrapper {
+    font-size: 15px;
+    line-height: normal;
+    height: 24px;
+    border-radius: 12px;
+    color: var(--day-color);
+    background: var(--day-background);
+    padding: 0 6px;
+}
+
+.day-meta-wrapper div {
+    transform: translate(0, 1px);
 }

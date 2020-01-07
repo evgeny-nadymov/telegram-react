@@ -102,7 +102,7 @@ pre code {
 }
 
 .message-left-padding {
-    min-width: 52px;
+    min-width: 36px;
     display: flex;
     flex-direction: row;
     align-items: flex-start;
@@ -120,8 +120,8 @@ pre code {
 }
 
 .message-wrapper {
-    max-width: 696px;
-    padding: 6px 60px 6px 6px;
+    max-width: 806px;
+    padding: 5px 42px 5px 6px;
     margin: 0 auto;
     display: flex;
     flex-direction: row;
@@ -210,8 +210,7 @@ pre code {
     box-sizing: border-box;
     border-radius: 12px;
     opacity: 0;
-    align-self: flex-start;
-    margin-top: 12px;
+    align-self: center;
 }
 
 .messages-list-selection-active .message-wrapper {

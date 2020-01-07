@@ -8,7 +8,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
-import PinIcon from 'mdi-material-ui/Pin';
+import PinIcon from '../../Assets/Icons/Pin';
 import {
     isChatMuted,
     showChatUnreadCount,
@@ -20,12 +20,6 @@ import NotificationStore from '../../Stores/NotificationStore';
 import './DialogBadge.css';
 
 const styles = theme => ({
-    dialogBadge: {
-        background: theme.palette.primary.main
-    },
-    dialogBadgeMuted: {
-        background: theme.palette.type === 'dark' ? theme.palette.text.disabled : '#d8d8d8'
-    },
     unreadIcon: {},
     pinIcon: {
         color: theme.palette.text.secondary,
@@ -140,17 +134,12 @@ class DialogBadge extends React.Component {
             <>
                 {showUnreadMessageIcon && <i className={classNames('dialog-badge-unread', classes.unreadIcon)} />}
                 {showUnreadMentionCount && (
-                    <div className={classNames('dialog-badge', classes.dialogBadge)}>
+                    <div className='dialog-badge'>
                         <div className='dialog-badge-mention'>@</div>
                     </div>
                 )}
                 {showUnreadCount && (
-                    <div
-                        className={classNames(
-                            { [classes.dialogBadgeMuted]: isMuted },
-                            'dialog-badge',
-                            classes.dialogBadge
-                        )}>
+                    <div className={classNames({ 'dialog-badge-muted': isMuted }, 'dialog-badge')}>
                         <span className='dialog-badge-text'>{unread_count > 0 ? unread_count : ''}</span>
                     </div>
                 )}

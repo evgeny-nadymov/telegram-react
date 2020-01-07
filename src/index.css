@@ -5,6 +5,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+:root {
+    --badge-green: #4dcd5e;
+    --badge-gray: #c4c9cc;
+
+    --indicator-green: #0ac630;
+
+    --day-background: #00000033;
+    --day-color: #ffffff;
+}
+
 .notification-close-button {
     padding: 4px;
 }

@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import CheckDecagramIcon from 'mdi-material-ui/CheckDecagram';
+import CheckDecagramIcon from '../../Assets/Icons/Verified';
 import { getChatTitle, isChatVerified } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogTitle.css';

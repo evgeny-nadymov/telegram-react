@@ -57,7 +57,7 @@ class Photo extends React.Component {
     };
 
     render() {
-        const { displaySize, openMedia, showProgress, title, caption, type, style } = this.props;
+        const { className, displaySize, openMedia, showProgress, title, caption, type, style } = this.props;
         const { thumbSize, photoSize, minithumbnail } = this.state;
 
         if (!photoSize) return null;
@@ -80,7 +80,7 @@ class Photo extends React.Component {
 
         return (
             <div
-                className={classNames('photo', {
+                className={classNames(className, 'photo', {
                     'photo-big': type === 'message',
                     'photo-title': title,
                     'photo-caption': caption,
