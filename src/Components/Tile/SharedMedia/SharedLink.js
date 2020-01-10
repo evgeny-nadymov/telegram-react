@@ -237,7 +237,7 @@ class SharedLink extends React.Component {
                                 break;
                         }
 
-                        title = title || this.getTitleFromUrl(url);
+                        title = title || this.getTitleFromUrl(url) || ' ';
 
                         return (
                             <SafeLink className='shared-link-url' url={url} mail={mail}>

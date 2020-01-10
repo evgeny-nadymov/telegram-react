@@ -104,7 +104,7 @@ class CacheStore extends EventEmitter {
     parseCache(cache) {
         if (!cache) return;
 
-        const { chats, users, basicGroups, supergroups, files, options } = cache;
+        const { chats, archiveChats, users, basicGroups, supergroups, files, options } = cache;
 
         (files || []).forEach(({ id, url }) => {
             FileStore.setDataUrl(id, url);
@@ -122,11 +122,14 @@ class CacheStore extends EventEmitter {
             SupergroupStore.set(x);
         });
 
-        (chats || []).forEach(x => {
+        (chats || []).concat(archiveChats || []).forEach(x => {
             ChatStore.set(x);
             if (x.photo) {
                 if (x.photo.small) FileStore.set(x.photo.small);
                 if (x.photo.big) FileStore.set(x.photo.big);
+            }
+            if (x.chat_list) {
+                ChatStore.updateChatChatList(x.id, x.chat_list);
             }
         });
 
@@ -135,13 +138,14 @@ class CacheStore extends EventEmitter {
         });
     }
 
-    getCache(chatIds) {
+    getCache(chatIds, archiveChatIds) {
         const fileMap = new Map();
         const userMap = new Map();
         const basicGroupMap = new Map();
         const supergroupMap = new Map();
         const chats = chatIds.map(x => ChatStore.get(x));
-        chats.forEach(x => {
+        const archiveChats = archiveChatIds.map(x => ChatStore.get(x));
+        chats.concat(archiveChats).forEach(x => {
             const { photo, type, last_message } = x;
             if (photo && photo.small) {
                 const { id } = photo.small;
@@ -188,6 +192,7 @@ class CacheStore extends EventEmitter {
 
         return {
             chats,
+            archiveChats,
             users: [...userMap.values()],
             basicGroups: [...basicGroupMap.values()],
             supergroups: [...supergroupMap.values()],
@@ -196,14 +201,15 @@ class CacheStore extends EventEmitter {
         };
     }
 
-    saveChats(chatIds) {
-        // console.log('[cm] saveChats', chatIds);
+    saveChats(chatIds, archiveChatIds) {
+        console.log('[cm] saveChats', chatIds, archiveChatIds);
         this.chatIds = chatIds;
+        this.archiveChatIds = archiveChatIds;
         this.saveChatsInternal();
     }
 
     async saveChatsInternal() {
-        const cache = this.getCache(this.chatIds);
+        const cache = this.getCache(this.chatIds, this.archiveChatIds);
         const files = cache.files;
         cache.files = [];
         // console.log('[cm] save cache', cache);

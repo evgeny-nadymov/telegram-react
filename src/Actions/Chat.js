@@ -19,6 +19,14 @@ export async function getChat(chatId) {
     return chat;
 }
 
+export function setChatChatList(chatId, chatList) {
+    TdLibController.send({
+        '@type': 'setChatChatList',
+        chat_id: chatId,
+        chat_list: chatList
+    });
+}
+
 export function toggleChatIsPinned(chatId, isPinned) {
     TdLibController.send({
         '@type': 'toggleChatIsPinned',

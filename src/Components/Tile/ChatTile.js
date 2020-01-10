@@ -127,12 +127,11 @@ class ChatTile extends Component {
         const { loaded } = this.state;
 
         if (isMeChat(chatId) && showSavedMessages) {
-            const className = classNames('tile-photo', 'tile_color_4', { pointer: onSelect });
             return (
                 <div
                     className={classNames('chat-tile', { 'tile-small': small }, { 'tile-big': big })}
                     onClick={this.handleSelect}>
-                    <div className={className}>
+                    <div className={classNames('tile-photo', 'tile_color_4', { pointer: onSelect })}>
                         <div className='tile-saved-messages'>
                             <BookmarkBorderIcon fontSize={big ? 'large' : 'default'} />
                         </div>

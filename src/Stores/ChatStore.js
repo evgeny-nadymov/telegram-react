@@ -28,6 +28,7 @@ class ChatStore extends EventEmitter {
         this.onlineMemberCount = new Map();
         this.counters = new Map();
         this.skippedUpdates = [];
+        this.chatList = new Map();
     };
 
     loadClientData = () => {
@@ -55,6 +56,29 @@ class ChatStore extends EventEmitter {
         const cookies = new Cookies();
         cookies.set('clientData', obj);
     };
+
+    updateChatChatList(chatId, chatList) {
+        if (!chatList) {
+            for (const key of this.chatList.keys()) {
+                this.chatList.get(key).delete(chatId);
+            }
+
+            return;
+        }
+
+        let idMap = this.chatList.get(chatList['@type']);
+        if (!idMap) {
+            idMap = new Map();
+            this.chatList.set(chatList['@type'], idMap);
+        }
+
+        idMap.set(chatId, chatId);
+        for (const key of this.chatList.keys()) {
+            if (key !== chatList['@type']) {
+                this.chatList.get(key).delete(chatId);
+            }
+        }
+    }
 
     onUpdate = update => {
         switch (update['@type']) {
@@ -86,6 +110,19 @@ class ChatStore extends EventEmitter {
                         this.skippedUpdates = [];
                     }
                 }
+                break;
+            }
+            case 'updateChatChatList': {
+                const { chat_id, chat_list } = update;
+
+                const chat = this.get(chat_id);
+                if (chat) {
+                    this.assign(chat, { chat_list });
+                }
+
+                this.updateChatChatList(chat_id, chat_list);
+
+                this.emitFastUpdate(update);
                 break;
             }
             case 'updateChatDefaultDisableNotification': {
@@ -340,7 +377,15 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
+            case 'clientUpdateCloseArchive': {
+                this.emitUpdate(update);
+                break;
+            }
             case 'clientUpdateLeaveChat': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateOpenArchive': {
                 this.emitUpdate(update);
                 break;
             }

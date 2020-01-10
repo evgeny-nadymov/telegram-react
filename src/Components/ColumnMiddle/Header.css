@@ -56,6 +56,14 @@
     flex-shrink: 1;
 }
 
+.header-left-button {
+    margin: 8px -2px 8px 12px;
+}
+
+.header-right-button {
+    margin: 8px 12px 8px 0;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }

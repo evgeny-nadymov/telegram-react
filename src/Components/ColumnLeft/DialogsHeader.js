@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import {
     Dialog,
     DialogActions,
@@ -19,6 +19,7 @@ import {
     Button,
     IconButton
 } from '@material-ui/core';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '@material-ui/icons/Close';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
@@ -28,16 +29,6 @@ import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-
-const styles = {
-    headerIconButton: {
-        margin: '8px 12px 8px 0'
-    },
-    dialogText: {
-        whiteSpace: 'pre-wrap'
-    }
-};
 
 class DialogsHeader extends React.Component {
     constructor(props) {
@@ -148,15 +139,21 @@ class DialogsHeader extends React.Component {
         }
     };
 
+    handleCloseArchive = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCloseArchive'
+        });
+    };
+
     render() {
-        const { classes, onClick, openSearch, t } = this.props;
+        const { onClick, openArchive, openSearch, t } = this.props;
         const { open } = this.state;
 
         const confirmLogoutDialog = open ? (
             <Dialog transitionDuration={0} open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
                 <DialogTitle id='form-dialog-title'>{t('Confirm')}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText className={classes.dialogText}>{t('AreYouSureLogout')}</DialogContentText>
+                    <DialogContentText style={{ whiteSpace: 'pre-wrap' }}>{t('AreYouSureLogout')}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={this.handleClose} color='primary'>
@@ -169,36 +166,51 @@ class DialogsHeader extends React.Component {
             </Dialog>
         ) : null;
 
+        let content = null;
+        if (openSearch) {
+            content = (
+                <>
+                    <div className='header-search-input grow'>
+                        <div
+                            id='header-search-inputbox'
+                            ref={this.searchInputRef}
+                            placeholder={t('Search')}
+                            contentEditable
+                            suppressContentEditableWarning
+                            onKeyDown={this.handleKeyDown}
+                            onKeyUp={this.handleKeyUp}
+                            onPaste={this.handlePaste}
+                        />
+                    </div>
+                </>
+            );
+        } else if (openArchive) {
+            content = (
+                <>
+                    <IconButton className='header-left-button' onClick={this.handleCloseArchive}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer' onClick={onClick}>
+                        <span className='header-status-content'>{t('ArchivedChats')}</span>
+                    </div>
+                </>
+            );
+        } else {
+            content = (
+                <>
+                    <MainMenuButton onLogOut={this.handleLogOut} />
+                    {confirmLogoutDialog}
+                    <div className='header-status grow cursor-pointer' onClick={onClick}>
+                        <span className='header-status-content'>{t('AppName')}</span>
+                    </div>
+                </>
+            );
+        }
+
         return (
             <div className='header-master'>
-                {!openSearch ? (
-                    <>
-                        <MainMenuButton onLogOut={this.handleLogOut} />
-                        {confirmLogoutDialog}
-                        <div className='header-status grow cursor-pointer' onClick={onClick}>
-                            <span className='header-status-content'>{t('AppName')}</span>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className='header-search-input grow'>
-                            <div
-                                id='header-search-inputbox'
-                                ref={this.searchInputRef}
-                                placeholder={t('Search')}
-                                contentEditable
-                                suppressContentEditableWarning
-                                onKeyDown={this.handleKeyDown}
-                                onKeyUp={this.handleKeyUp}
-                                onPaste={this.handlePaste}
-                            />
-                        </div>
-                    </>
-                )}
-                <IconButton
-                    className={classes.headerIconButton}
-                    aria-label={t('Search')}
-                    onMouseDown={this.handleSearch}>
+                {content}
+                <IconButton className='header-right-button' aria-label={t('Search')} onMouseDown={this.handleSearch}>
                     <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
                 </IconButton>
             </div>
@@ -208,6 +220,7 @@ class DialogsHeader extends React.Component {
 
 DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
+    openArchive: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
     onSearchTextChange: PropTypes.func.isRequired
@@ -216,7 +229,6 @@ DialogsHeader.propTypes = {
 const enhance = compose(
     withSaveRef(),
     withTranslation(),
-    withStyles(styles),
     withRestoreRef()
 );
 

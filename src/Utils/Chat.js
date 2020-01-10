@@ -13,12 +13,40 @@ import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
 import { getContent } from './Message';
 import { isServiceMessage } from './ServiceMessage';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
 import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+
+export function isChatArchived(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { chat_list } = chat;
+    if (!chat_list) return false;
+
+    return chat_list['@type'] === 'chatListArchive';
+}
+
+export function canSetChatChatList(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { is_sponsored, chat_list } = chat;
+    if (is_sponsored) return false;
+    if (!chat_list) return false;
+
+    if (chat_list['@type'] === 'chatListMain') {
+        if (isMeChat(chatId) || chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 export function draftEquals(draft1, draft2) {
     if (!draft1 && !draft2) return true;

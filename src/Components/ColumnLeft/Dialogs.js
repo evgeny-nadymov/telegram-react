@@ -16,6 +16,7 @@ import UpdatePanel from './UpdatePanel';
 import { borderStyle } from '../Theme';
 import { openChat } from '../../Actions/Client';
 import ApplicationStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import './Dialogs.css';
 
 const styles = theme => ({
@@ -32,6 +33,7 @@ class Dialogs extends Component {
         this.state = {
             isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
             openSearch: false,
+            openArchive: false,
             searchChatId: 0,
             searchText: null,
             query: null
@@ -47,6 +49,10 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.openArchive !== this.state.openArchive) {
+            return true;
+        }
+
         if (nextState.searchChatId !== this.state.searchChatId) {
             return true;
         }
@@ -59,16 +65,30 @@ class Dialogs extends Component {
     }
 
     componentDidMount() {
+        ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
+        ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
+
         ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ApplicationStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     componentWillUnmount() {
+        ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
+        ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
+
         ApplicationStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         ApplicationStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ApplicationStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
+
+    onClientUpdateOpenArchive = update => {
+        this.setState({ openArchive: true });
+    };
+
+    onClientUpdateCloseArchive = update => {
+        this.setState({ openArchive: false });
+    };
 
     onClientUpdateThemeChange = update => {
         this.forceUpdate();
@@ -145,7 +165,9 @@ class Dialogs extends Component {
 
     render() {
         const { classes } = this.props;
-        const { isChatDetailsVisible, openSearch, searchChatId, searchText } = this.state;
+        const { isChatDetailsVisible, openArchive, openSearch, searchChatId, searchText } = this.state;
+
+        this.archive = this.archive || <DialogsList type='chatListArchive' />;
 
         return (
             <div
@@ -154,13 +176,15 @@ class Dialogs extends Component {
                 })}>
                 <DialogsHeader
                     ref={this.dialogsHeaderRef}
+                    openArchive={openArchive}
                     openSearch={openSearch}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
                 />
                 <div className='dialogs-content'>
-                    <DialogsList ref={this.dialogsListRef} />
+                    <DialogsList type='chatListMain' ref={this.dialogsListRef} open={true} />
+                    {<DialogsList type='chatListArchive' open={openArchive} />}
                     {openSearch && (
                         <Search
                             chatId={searchChatId}

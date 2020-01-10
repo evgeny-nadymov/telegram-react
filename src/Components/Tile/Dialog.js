@@ -19,8 +19,13 @@ import DialogContent from './DialogContent';
 import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
-import { isChatMuted, isChatSecret, isChatUnread } from '../../Utils/Chat';
-import { toggleChatIsMarkedAsUnread, toggleChatIsPinned, toggleChatNotificationSettings } from '../../Actions/Chat';
+import { canSetChatChatList, isChatArchived, isChatMuted, isChatSecret, isChatUnread } from '../../Utils/Chat';
+import {
+    setChatChatList,
+    toggleChatIsMarkedAsUnread,
+    toggleChatIsPinned,
+    toggleChatNotificationSettings
+} from '../../Actions/Chat';
 import { openChat } from '../../Actions/Client';
 import { viewMessages } from '../../Actions/Message';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -161,10 +166,12 @@ class Dialog extends Component {
             const chat = ChatStore.get(chatId);
             const { is_pinned } = chat;
             const canTogglePin = (await this.canPinChats(chatId)) || is_pinned;
+            const canToggleArchive = canSetChatChatList(chatId);
 
             this.setState({
                 contextMenu: true,
                 canTogglePin,
+                canToggleArchive,
                 left,
                 top
             });
@@ -227,6 +234,15 @@ class Dialog extends Component {
         toggleChatIsPinned(chatId, !is_pinned);
     };
 
+    handleArchive = async event => {
+        this.handleCloseContextMenu(event);
+
+        const { chatId } = this.props;
+        if (!canSetChatChatList(chatId)) return;
+
+        setChatChatList(chatId, { '@type': isChatArchived(chatId) ? 'chatListMain' : 'chatListArchive' });
+    };
+
     getViewInfoTitle = () => {
         const { chatId, t } = this.props;
         const chat = ChatStore.get(chatId);
@@ -282,7 +298,7 @@ class Dialog extends Component {
 
     render() {
         const { classes, chatId, showSavedMessages, hidden, t } = this.props;
-        const { contextMenu, left, top, canTogglePin } = this.state;
+        const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
 
         if (hidden) return null;
 
@@ -292,6 +308,7 @@ class Dialog extends Component {
         const isSelected = currentChatId === chatId;
         const isMuted = isChatMuted(chatId);
         const isUnread = isChatUnread(chatId);
+        const isArchived = isChatArchived(chatId);
         return (
             <div
                 ref={this.dialog}
@@ -338,6 +355,11 @@ class Dialog extends Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                        {canToggleArchive && (
+                            <MenuItem onClick={this.handleArchive}>
+                                {isArchived ? t('Unarchive') : t('Archive')}
+                            </MenuItem>
+                        )}
                         {canTogglePin && (
                             <MenuItem onClick={this.handlePin}>
                                 {is_pinned ? t('UnpinFromTop') : t('PinToTop')}
