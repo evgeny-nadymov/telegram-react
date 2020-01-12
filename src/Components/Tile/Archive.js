@@ -53,14 +53,14 @@ const styles = theme => ({
 
 class Archive extends React.Component {
     componentDidMount() {
-        ChatStore.on('updateChatOrder', this.onUpdateChatChatList);
+        ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
     }
 
     componentWillUnmount() {
-        ChatStore.off('updateChatOrder', this.onUpdateChatChatList);
+        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
     }
 
-    onUpdateChatChatList = update => {
+    onUpdateChatOrder = update => {
         this.forceUpdate();
     };
 
@@ -77,10 +77,12 @@ class Archive extends React.Component {
 
         const chats = [];
         const archive = ChatStore.chatList.get('chatListArchive');
-        for (const chatId of archive.keys()) {
-            const chat = ChatStore.get(chatId);
-            if (chat) {
-                chats.push(chat);
+        if (archive) {
+            for (const chatId of archive.keys()) {
+                const chat = ChatStore.get(chatId);
+                if (chat) {
+                    chats.push(chat);
+                }
             }
         }
 

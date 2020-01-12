@@ -893,13 +893,13 @@ class InputBoxControl extends Component {
 
     async editMessageMedia(content, callback) {
         const { chatId, editMessageId } = this.state;
-        console.log('[em] editMessageMedia start', chatId, editMessageId, content);
+        // console.log('[em] editMessageMedia start', chatId, editMessageId, content);
 
         if (!chatId) return;
         if (!editMessageId) return;
         if (!content) return;
 
-        console.log('[em] editMessageMedia send', content);
+        // console.log('[em] editMessageMedia send', content);
         const result = await TdLibController.send({
             '@type': 'editMessageMedia',
             chat_id: chatId,

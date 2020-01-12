@@ -314,7 +314,7 @@ class ForwardDialog extends React.Component {
             this.targetChats.set(chatId, chatId);
         }
 
-        console.log(this.targetChats);
+        // console.log(this.targetChats);
 
         this.forceUpdate();
     };

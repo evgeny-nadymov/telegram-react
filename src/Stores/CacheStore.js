@@ -202,13 +202,13 @@ class CacheStore extends EventEmitter {
     }
 
     saveChats(chatIds, archiveChatIds) {
-        console.log('[cm] saveChats', chatIds, archiveChatIds);
         this.chatIds = chatIds;
         this.archiveChatIds = archiveChatIds;
         this.saveChatsInternal();
     }
 
     async saveChatsInternal() {
+        // console.log('[cm] saveChatsInternal', this.chatIds, this.archiveChatIds);
         const cache = this.getCache(this.chatIds, this.archiveChatIds);
         const files = cache.files;
         cache.files = [];
