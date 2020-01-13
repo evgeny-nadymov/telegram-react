@@ -167,10 +167,7 @@ class ChatStore extends EventEmitter {
 
                 const chat = this.get(chat_id);
                 if (chat) {
-                    this.assign(chat, {
-                        order: order === '0' ? chat.order : order,
-                        is_pinned
-                    });
+                    this.assign(chat, { order, is_pinned });
                 }
 
                 this.emitFastUpdate(update);
@@ -181,10 +178,7 @@ class ChatStore extends EventEmitter {
 
                 const chat = this.get(chat_id);
                 if (chat) {
-                    this.assign(chat, {
-                        order: order === '0' ? chat.order : order,
-                        is_sponsored
-                    });
+                    this.assign(chat, { order, is_sponsored });
                 }
 
                 this.emitFastUpdate(update);

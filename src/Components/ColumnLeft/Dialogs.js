@@ -15,7 +15,7 @@ import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import { borderStyle } from '../Theme';
 import { openChat } from '../../Actions/Client';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './Dialogs.css';
 
@@ -27,11 +27,12 @@ class Dialogs extends Component {
     constructor(props) {
         super(props);
 
-        this.dialogsListRef = React.createRef();
+        this.dialogListRef = React.createRef();
+        this.archiveListRef = React.createRef();
         this.dialogsHeaderRef = React.createRef();
 
         this.state = {
-            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible,
+            isChatDetailsVisible: AppStore.isChatDetailsVisible,
             openSearch: false,
             openArchive: false,
             searchChatId: 0,
@@ -41,23 +42,25 @@ class Dialogs extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextState.isChatDetailsVisible !== this.state.isChatDetailsVisible) {
+        const { isChatDetailsVisible, openSearch, openArchive, searchChatId, searchText } = this.state;
+
+        if (nextState.isChatDetailsVisible !== isChatDetailsVisible) {
             return true;
         }
 
-        if (nextState.openSearch !== this.state.openSearch) {
+        if (nextState.openSearch !== openSearch) {
             return true;
         }
 
-        if (nextState.openArchive !== this.state.openArchive) {
+        if (nextState.openArchive !== openArchive) {
             return true;
         }
 
-        if (nextState.searchChatId !== this.state.searchChatId) {
+        if (nextState.searchChatId !== searchChatId) {
             return true;
         }
 
-        if (nextState.searchText !== this.state.searchText) {
+        if (nextState.searchText !== searchText) {
             return true;
         }
 
@@ -65,21 +68,21 @@ class Dialogs extends Component {
     }
 
     componentDidMount() {
+        AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
+        AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+
         ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
-
-        ApplicationStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
-        ApplicationStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     componentWillUnmount() {
+        AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
+        AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
+        AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+
         ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
-
-        ApplicationStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
-        ApplicationStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
-        ApplicationStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     onClientUpdateOpenArchive = update => {
@@ -96,7 +99,7 @@ class Dialogs extends Component {
 
     onClientUpdateChatDetailsVisibility = update => {
         this.setState({
-            isChatDetailsVisible: ApplicationStore.isChatDetailsVisible
+            isChatDetailsVisible: AppStore.isChatDetailsVisible
         });
     };
 
@@ -124,7 +127,12 @@ class Dialogs extends Component {
     };
 
     handleHeaderClick = () => {
-        this.dialogsListRef.current.scrollToTop();
+        const { openArchive } = this.state;
+        if (openArchive) {
+            this.archiveListRef.current.scrollTop();
+        } else {
+            this.dialogListRef.current.scrollToTop();
+        }
     };
 
     handleSearch = visible => {
@@ -167,8 +175,6 @@ class Dialogs extends Component {
         const { classes } = this.props;
         const { isChatDetailsVisible, openArchive, openSearch, searchChatId, searchText } = this.state;
 
-        this.archive = this.archive || <DialogsList type='chatListArchive' />;
-
         return (
             <div
                 className={classNames(classes.borderColor, 'dialogs', {
@@ -183,8 +189,8 @@ class Dialogs extends Component {
                     onSearchTextChange={this.handleSearchTextChange}
                 />
                 <div className='dialogs-content'>
-                    <DialogsList type='chatListMain' ref={this.dialogsListRef} open={true} />
-                    {<DialogsList type='chatListArchive' open={openArchive} />}
+                    <DialogsList type='chatListMain' ref={this.dialogListRef} open={true} />
+                    <DialogsList type='chatListArchive' ref={this.archiveListRef} open={openArchive} />
                     {openSearch && (
                         <Search
                             chatId={searchChatId}

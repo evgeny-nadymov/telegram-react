@@ -356,7 +356,6 @@ class DialogsList extends React.Component {
         const { type } = this.props;
         const { chats } = this.state;
 
-        const stamp = Date.now();
         if (this.loading) {
             return;
         }
@@ -463,7 +462,8 @@ class DialogsList extends React.Component {
 }
 
 DialogsList.propTypes = {
-    type: PropTypes.oneOf(['chatListMain', 'chatListArchive']).isRequired
+    type: PropTypes.oneOf(['chatListMain', 'chatListArchive']).isRequired,
+    items: PropTypes.array
 };
 
 export default withStyles(styles, { withTheme: true })(DialogsList);
