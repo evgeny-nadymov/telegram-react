@@ -19,7 +19,14 @@ import DialogContent from './DialogContent';
 import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
-import { canSetChatChatList, isChatArchived, isChatMuted, isChatSecret, isChatUnread } from '../../Utils/Chat';
+import {
+    canSetChatChatList,
+    isArchivedChat,
+    isChatArchived,
+    isChatMuted,
+    isChatSecret,
+    isChatUnread
+} from '../../Utils/Chat';
 import {
     setChatChatList,
     toggleChatIsMarkedAsUnread,
@@ -195,27 +202,26 @@ class Dialog extends Component {
     };
 
     canPinChats = async chatId => {
-        const chat = ChatStore.get(chatId);
-        if (!chat) return false;
-
-        const pinnedSumMaxOption = OptionStore.get('pinned_chat_count_max');
+        const pinnedSumMaxOption = isChatArchived(chatId)
+            ? OptionStore.get('pinned_archived_chat_count_max').value
+            : OptionStore.get('pinned_chat_count_max').value;
         if (!pinnedSumMaxOption) return false;
 
         const isSecret = isChatSecret(chatId);
         const chats = await TdLibController.send({
             '@type': 'getChats',
+            chat_list: isChatArchived(chatId) ? { '@type': 'chatListArchive' } : { '@type': 'chatListMain' },
             offset_order: '9223372036854775807',
             offset_chat_id: 0,
-            limit: 15
+            limit: pinnedSumMaxOption + 10
         });
 
         const pinnedSum = chats.chat_ids.reduce((x, id) => {
             if (isChatSecret(id) !== isSecret) return x;
 
             const chat = ChatStore.get(id);
-            if (!chat) return x;
 
-            return x + (chat.is_pinned ? 1 : 0);
+            return x + (chat && chat.is_pinned ? 1 : 0);
         }, 0);
 
         return pinnedSum < pinnedSumMaxOption.value;

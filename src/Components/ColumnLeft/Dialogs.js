@@ -18,6 +18,7 @@ import { openChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './Dialogs.css';
+import CacheStore from '../../Stores/CacheStore';
 
 const styles = theme => ({
     ...borderStyle(theme)
@@ -129,7 +130,7 @@ class Dialogs extends Component {
     handleHeaderClick = () => {
         const { openArchive } = this.state;
         if (openArchive) {
-            this.archiveListRef.current.scrollTop();
+            this.archiveListRef.current.scrollToTop();
         } else {
             this.dialogListRef.current.scrollToTop();
         }
@@ -171,6 +172,24 @@ class Dialogs extends Component {
         });
     };
 
+    handleSaveCache = () => {
+        const archiveChatIds = [];
+        const archive = ChatStore.chatList.get('chatListArchive');
+        if (archive) {
+            for (const chatId of archive.keys()) {
+                archiveChatIds.push(chatId);
+            }
+        }
+
+        console.log('[dl] saveCache start');
+        const { current } = this.dialogListRef;
+        if (current) {
+            const chatIds = current.state.chats.slice(0, 25);
+            console.log('[dl] saveCache', chatIds, archiveChatIds);
+            CacheStore.saveChats(chatIds, archiveChatIds);
+        }
+    };
+
     render() {
         const { classes } = this.props;
         const { isChatDetailsVisible, openArchive, openSearch, searchChatId, searchText } = this.state;
@@ -189,8 +208,18 @@ class Dialogs extends Component {
                     onSearchTextChange={this.handleSearchTextChange}
                 />
                 <div className='dialogs-content'>
-                    <DialogsList type='chatListMain' ref={this.dialogListRef} open={true} />
-                    <DialogsList type='chatListArchive' ref={this.archiveListRef} open={openArchive} />
+                    <DialogsList
+                        type='chatListMain'
+                        ref={this.dialogListRef}
+                        open={true}
+                        onSaveCache={this.handleSaveCache}
+                    />
+                    <DialogsList
+                        type='chatListArchive'
+                        ref={this.archiveListRef}
+                        open={openArchive}
+                        onSaveCache={this.handleSaveCache}
+                    />
                     {openSearch && (
                         <Search
                             chatId={searchChatId}

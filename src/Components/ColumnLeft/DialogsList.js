@@ -42,6 +42,7 @@ class DialogsList extends React.Component {
 
         this.state = {
             showArchive: false,
+            archiveTitle: null,
             chats: [],
             authorizationState,
             connectionState,
@@ -53,7 +54,7 @@ class DialogsList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, open } = this.props;
-        const { showArchive, chats, firstSliceLoaded, cacheLoaded } = this.state;
+        const { showArchive, archiveTitle, chats, firstSliceLoaded, cacheLoaded } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -64,6 +65,10 @@ class DialogsList extends React.Component {
         }
 
         if (nextState.showArchive !== showArchive) {
+            return true;
+        }
+
+        if (nextState.archiveTitle !== archiveTitle) {
             return true;
         }
 
@@ -139,7 +144,7 @@ class DialogsList extends React.Component {
         const archiveList = ChatStore.chatList.get('chatListArchive');
         const showArchive = archiveList && archiveList.size > 0;
         if (type === 'chatListMain') {
-            this.setState({ showArchive }, () => {
+            this.setState({ showArchive, archiveTitle: this.getTitle() }, () => {
                 if (!prevShowArchive && showArchive) {
                     const { current } = this.listRef;
                     if (current && current.scrollTop > 0) {
@@ -204,21 +209,9 @@ class DialogsList extends React.Component {
     };
 
     saveCache = () => {
-        const { type } = this.props;
-        if (type !== 'chatListMain') return;
+        const { onSaveCache } = this.props;
 
-        setTimeout(() => {
-            const archiveChatIds = [];
-            const archive = ChatStore.chatList.get('chatListArchive');
-            if (archive) {
-                for (const chatId of archive.keys()) {
-                    archiveChatIds.push(chatId);
-                }
-            }
-
-            const chatIds = this.state.chats.slice(0, 25);
-            CacheStore.saveChats(chatIds, archiveChatIds);
-        }, 1000);
+        if (onSaveCache) onSaveCache();
     };
 
     loadCache = async () => {
@@ -233,7 +226,8 @@ class DialogsList extends React.Component {
         this.setState({
             cacheLoaded: true,
             cacheChats,
-            showArchive: archive && archive.size > 0
+            showArchive: archive && archive.size > 0,
+            archiveTitle: this.getTitle()
         });
 
         this.loadChatContents(cacheChats.map(x => x.id));
@@ -243,6 +237,29 @@ class DialogsList extends React.Component {
         });
     };
 
+    getTitle() {
+        const archive = ChatStore.chatList.get('chatListArchive');
+        const chats = [];
+        const chatsOrder = [];
+        if (archive) {
+            for (const chatId of archive.keys()) {
+                const chat = ChatStore.get(chatId);
+                if (chat) {
+                    if (chat.order !== '0') chats.push(chat);
+                    chatsOrder.push({ order: chat.order, id: chat.id, title: chat.title });
+                }
+            }
+        }
+
+        const orderedChats = chats.sort((a, b) => {
+            return orderCompare(b.order, a.order);
+        });
+
+        // console.log('[ar] getTitle', orderedChats.map(x => x.title).join(', '), chatsOrder.sort((a, b) => (orderCompare(b.order, a.order))) );
+
+        return orderedChats.map(x => x.title).join(', ');
+    }
+
     onUpdateChatOrder = update => {
         const { type } = this.props;
         const { chats } = this.state;
@@ -251,6 +268,14 @@ class DialogsList extends React.Component {
         if (loading) return;
 
         const { chat_id, order } = update;
+
+        if (type === 'chatListMain') {
+            const archive = ChatStore.chatList.get('chatListArchive');
+            if (archive && archive.has(chat_id)) {
+                this.setState({ archiveTitle: this.getTitle() });
+            }
+        }
+
         const chat = ChatStore.get(chat_id);
         if (!chat || !chat.chat_list || chat.chat_list['@type'] !== type) {
             return;
@@ -433,7 +458,7 @@ class DialogsList extends React.Component {
 
     render() {
         const { classes, type, open } = this.props;
-        const { showArchive, chats, firstSliceLoaded, cacheLoaded, cacheChats } = this.state;
+        const { showArchive, archiveTitle, chats, firstSliceLoaded, cacheLoaded, cacheChats } = this.state;
 
         // console.log('[dl] render', type, open, chats, cacheChats);
         if (!open) return null;
@@ -454,7 +479,7 @@ class DialogsList extends React.Component {
                 ref={this.listRef}
                 className={classNames('dialogs-list', classes.dialogsList)}
                 onScroll={this.handleScroll}>
-                {showArchive && <Archive />}
+                {showArchive && <Archive title={archiveTitle} />}
                 {dialogs}
             </div>
         );

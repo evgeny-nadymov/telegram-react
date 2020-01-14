@@ -52,16 +52,19 @@ const styles = theme => ({
 });
 
 class Archive extends React.Component {
-    componentDidMount() {
-        ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
-    }
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { title } = this.props;
 
-    componentWillUnmount() {
-        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
+        return title !== nextProps.title;
     }
 
     onUpdateChatOrder = update => {
-        this.forceUpdate();
+        const { chat_id } = update;
+
+        const archive = ChatStore.chatList.get('chatListArchive');
+        if (archive && archive.has(chat_id)) {
+            this.setState({ title: this.getTitle() });
+        }
     };
 
     handleSelect = event => {
@@ -73,25 +76,9 @@ class Archive extends React.Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { classes, t, title } = this.props;
 
-        const chats = [];
-        const archive = ChatStore.chatList.get('chatListArchive');
-        if (archive) {
-            for (const chatId of archive.keys()) {
-                const chat = ChatStore.get(chatId);
-                if (chat) {
-                    chats.push(chat);
-                }
-            }
-        }
-
-        const orderedChats = chats.sort((a, b) => {
-            return orderCompare(b.order, a.order);
-        });
-        // const unread_count = 100;
-
-        console.log('[ar] render', orderedChats, archive);
+        console.log('[ar] render', title);
 
         return (
             <div
@@ -114,9 +101,7 @@ class Archive extends React.Component {
                             </div>
                         </div>
                         <div className='tile-second-row'>
-                            <div className={classNames('dialog-content', classes.dialogContent)}>
-                                {orderedChats.map(x => x.title).join(', ')}
-                            </div>
+                            <div className={classNames('dialog-content', classes.dialogContent)}>{title}</div>
                             {/*{unread_count > 0 && (*/}
                             {/*    <div className={classNames('dialog-badge-muted', 'dialog-badge')}>*/}
                             {/*        <span className='dialog-badge-text'>{unread_count}</span>*/}
@@ -130,7 +115,9 @@ class Archive extends React.Component {
     }
 }
 
-Archive.propTypes = {};
+Archive.propTypes = {
+    title: PropTypes.string
+};
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
