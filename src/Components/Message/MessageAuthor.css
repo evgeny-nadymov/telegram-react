@@ -4,6 +4,20 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.message-author {
+    color: var(--message-in-author);
+}
+
+.message-bubble-out .message-author {
+    color: var(--message-out-author);
+}
+
+.message-author {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
 .user_color_1,
 .user_color_1:hover {
     color: #8365ab;
@@ -35,13 +49,4 @@
 .user_color_8,
 .user_color_8:hover {
     color: #c07844;
-}
-
-.message-author-color {
-    /*color: #3a6d99;*/
-}
-
-.message-author {
-    flex-grow: 1;
-    flex-shrink: 1;
 }

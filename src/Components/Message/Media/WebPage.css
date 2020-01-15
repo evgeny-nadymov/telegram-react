@@ -20,15 +20,25 @@
     overflow: hidden;
 }
 
-.web-page-border {
-    min-width: 2px;
-    border-radius: 1px;
-}
-
 .web-page-site-name {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--message-in-reply-title);
+}
+
+.message-bubble-out .web-page-site-name {
+    color: var(--message-out-reply-title);
+}
+
+.web-page-button {
+    width: 260px;
+    margin-top: 12px;
+    /*color: var(--message-in-reply-title);*/
+}
+
+.message-bubble-out .web-page-button {
+    /*color: var(--message-out-reply-title)*/
 }
 
 .web-page-title {

@@ -7,32 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { withTranslation } from 'react-i18next';
 import { getDate, getDateHint } from '../../Utils/Message';
 import './Meta.css';
 
-const styles = theme => ({
-    meta: {
-        color: theme.palette.text.secondary,
-        '& a': {
-            color: theme.palette.text.secondary
-        }
-    }
-});
-
 class Meta extends React.Component {
     render() {
-        const { classes, date, editDate, onDateClick, t, views } = this.props;
+        const { date, editDate, onDateClick, t, views } = this.props;
 
         const dateStr = getDate(date);
         const dateHintStr = getDateHint(date);
 
         return (
-            <div className={classNames('meta', classes.meta)}>
+            <div className='meta'>
                 <span>&ensp;</span>
                 {views > 0 && (
                     <>
@@ -60,9 +48,4 @@ Meta.propTypes = {
     onDateClick: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(Meta);
+export default withTranslation()(Meta);

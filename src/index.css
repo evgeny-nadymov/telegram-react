@@ -6,6 +6,10 @@
  */
 
 :root {
+    --color-accent-main: #5b8af1;
+    --color-accent-light: #5b8af1;
+    --color-accent-dark: #5b8af1;
+
     --badge-green: #4dcd5e;
     --badge-gray: #c4c9cc;
 
@@ -13,6 +17,22 @@
 
     --day-background: #00000033;
     --day-color: #ffffff;
+
+    --message-in-link: #5b8af1;
+    --message-in-author: #5b8af1;
+    --message-in-background: #ffffff;
+    --message-in-color: #000000;
+    --message-in-meta-color: #8d969c;
+    --message-in-reply-title: #5b8af1;
+    --message-in-reply-border: #5b8af1;
+
+    --message-out-link: #4fae4e;
+    --message-out-author: #4fae4e;
+    --message-out-background: #eeffde;
+    --message-out-color: #000000;
+    --message-out-meta-color: #4fae4e;
+    --message-out-reply-title: #4fae4e;
+    --message-out-reply-border: #4fae4e;
 }
 
 .notification-close-button {

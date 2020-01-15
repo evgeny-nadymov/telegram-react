@@ -38,9 +38,6 @@ const styles = theme => ({
     pinnedMessage: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
-    },
-    pinnedMessageContentSubtitle: {
-        color: theme.palette.text.secondary
     }
 });
 
@@ -255,7 +252,7 @@ class PinnedMessage extends React.Component {
                     className={classNames('pinned-message', classes.pinnedMessage, classes.borderColor)}
                     onMouseDown={this.handleClick}>
                     <div className='pinned-message-wrapper'>
-                        <div className={classNames('reply-border', classes.accentBackgroundLight)} />
+                        <div className='border reply-border' />
                         {photoSize && (
                             <ReplyTile
                                 chatId={chatId}
@@ -265,16 +262,8 @@ class PinnedMessage extends React.Component {
                             />
                         )}
                         <div className='pinned-message-content'>
-                            <div className={classNames('pinned-message-content-title', classes.accentColorMain)}>
-                                {t('PinnedMessage')}
-                            </div>
-                            <div
-                                className={classNames(
-                                    'pinned-message-content-subtitle',
-                                    classes.pinnedMessageContentSubtitle
-                                )}>
-                                {content}
-                            </div>
+                            <div className='pinned-message-content-title'>{t('PinnedMessage')}</div>
+                            <div className='pinned-message-content-subtitle'>{content}</div>
                         </div>
                         <div className='pinned-message-delete-button'>
                             <IconButton onClick={this.handleDelete}>

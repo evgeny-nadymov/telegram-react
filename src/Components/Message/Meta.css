@@ -9,6 +9,19 @@
     user-select: none;
     font-size: 0.85em;
     flex-shrink: 0;
+    color: var(--message-in-meta-color);
+}
+
+.message-bubble .meta a {
+    color: var(--message-in-meta-color);
+}
+
+.message-bubble-out .meta {
+    color: var(--message-out-meta-color);
+}
+
+.message-bubble-out .meta a {
+    color: var(--message-out-meta-color);
 }
 
 .meta-views {

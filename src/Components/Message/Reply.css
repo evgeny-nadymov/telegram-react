@@ -19,10 +19,18 @@
     width: 100%;
 }
 
-.reply-border {
-    height: 32px;
+.border {
     border-radius: 1px;
     min-width: 2px;
+    background: var(--color-accent-main);
+}
+
+.message-bubble-out .border {
+    background: var(--message-out-reply-border);
+}
+
+.reply-border {
+    height: 32px;
 }
 
 .reply-photo {
@@ -42,6 +50,11 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    color: var(--color-accent-main);
+}
+
+.message-bubble-out .reply-content-title {
+    color: var(--message-out-reply-title);
 }
 
 .reply-content-subtitle {

@@ -15,10 +15,14 @@ import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
 import { borderStyle } from '../Theme';
 import { openChat } from '../../Actions/Client';
+import { getArchiveTitle } from '../../Utils/Archive';
+import { loadChatsContent } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
-import ChatStore from '../../Stores/ChatStore';
-import './Dialogs.css';
 import CacheStore from '../../Stores/CacheStore';
+import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
+import TdLibController from '../../Controllers/TdLibController';
+import './Dialogs.css';
 
 const styles = theme => ({
     ...borderStyle(theme)
@@ -32,10 +36,21 @@ class Dialogs extends Component {
         this.archiveListRef = React.createRef();
         this.dialogsHeaderRef = React.createRef();
 
+        const { isChatDetailsVisible } = AppStore;
+
         this.state = {
-            isChatDetailsVisible: AppStore.isChatDetailsVisible,
+            cache: null,
+
+            showArchive: false,
+            archiveTitle: null,
+
+            mainItems: [],
+            archiveItems: [],
+
+            isChatDetailsVisible,
             openSearch: false,
             openArchive: false,
+
             searchChatId: 0,
             searchText: null,
             query: null
@@ -43,7 +58,38 @@ class Dialogs extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { isChatDetailsVisible, openSearch, openArchive, searchChatId, searchText } = this.state;
+        const {
+            cache,
+            showArchive,
+            archiveTitle,
+            mainItems,
+            archiveItems,
+            isChatDetailsVisible,
+            openSearch,
+            openArchive,
+            searchChatId,
+            searchText
+        } = this.state;
+
+        if (nextState.cache !== cache) {
+            return true;
+        }
+
+        if (nextState.showArchive !== showArchive) {
+            return true;
+        }
+
+        if (nextState.archiveTitle !== archiveTitle) {
+            return true;
+        }
+
+        if (nextState.archiveItems !== archiveItems) {
+            return true;
+        }
+
+        if (nextState.mainItems !== mainItems) {
+            return true;
+        }
 
         if (nextState.isChatDetailsVisible !== isChatDetailsVisible) {
             return true;
@@ -69,9 +115,19 @@ class Dialogs extends Component {
     }
 
     componentDidMount() {
+        this.loadCache();
+
         AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+
+        ChatStore.on('updateChatChatList', this.onUpdateChatChatList);
+
+        ChatStore.on('updateChatDraftMessage', this.onUpdateChatOrder);
+        ChatStore.on('updateChatIsPinned', this.onUpdateChatOrder);
+        ChatStore.on('updateChatIsSponsored', this.onUpdateChatOrder);
+        ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
+        ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
 
         ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
@@ -82,9 +138,101 @@ class Dialogs extends Component {
         AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
 
+        ChatStore.off('updateChatChatList', this.onUpdateChatChatList);
+
+        ChatStore.off('updateChatDraftMessage', this.onUpdateChatOrder);
+        ChatStore.off('updateChatIsPinned', this.onUpdateChatOrder);
+        ChatStore.off('updateChatIsSponsored', this.onUpdateChatOrder);
+        ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
+        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
+
         ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
     }
+
+    async loadCache() {
+        const cache = (await CacheStore.loadCache()) || {};
+
+        const { chats, archiveChats } = cache;
+
+        this.setState({
+            cache,
+
+            showArchive: archiveChats && archiveChats.length > 0,
+            archiveTitle: getArchiveTitle()
+        });
+
+        this.loadChatContents((chats || []).map(x => x.id));
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCacheLoaded'
+        });
+    }
+
+    saveCache() {
+        const { current: archiveCurrent } = this.archiveListRef;
+        const archiveChatIds =
+            archiveCurrent && archiveCurrent.state.chats ? archiveCurrent.state.chats.slice(0, 25) : [];
+
+        const { current: mainCurrent } = this.dialogListRef;
+        const mainChatIds = mainCurrent && mainCurrent.state.chats ? mainCurrent.state.chats.slice(0, 25) : [];
+
+        CacheStore.saveChats(mainChatIds, archiveChatIds);
+    }
+
+    onUpdateChatOrder = update => {
+        const { chat_id } = update;
+
+        const { current: mainCurrent } = this.dialogListRef;
+        if (mainCurrent && mainCurrent.loading) {
+            return;
+        }
+
+        const { current: archiveCurrent } = this.archiveListRef;
+        if (archiveCurrent && archiveCurrent.loading) {
+            return;
+        }
+
+        const archive = ChatStore.chatList.get('chatListArchive');
+        if (archive && archive.has(chat_id)) {
+            this.setState({ archiveTitle: getArchiveTitle() });
+        }
+    };
+
+    onUpdateChatChatList = update => {
+        const { showArchive: prevShowArchive } = this.state;
+
+        const { current: mainCurrent } = this.dialogListRef;
+        if (mainCurrent && mainCurrent.loading) {
+            return;
+        }
+
+        const { current: archiveCurrent } = this.archiveListRef;
+        if (archiveCurrent && archiveCurrent.loading) {
+            return;
+        }
+
+        const archiveList = ChatStore.chatList.get('chatListArchive');
+        const showArchive = archiveList && archiveList.size > 0;
+
+        this.setState({ showArchive, archiveTitle: getArchiveTitle() }, () => {
+            if (!prevShowArchive && showArchive) {
+                const { current } = this.dialogListRef;
+                if (current.listRef) {
+                    const { current: listCurrent } = current.listRef;
+                    if (listCurrent && listCurrent.scrollTop > 0) {
+                        current.scrollTop += 68;
+                    }
+                }
+            }
+        });
+
+        if (prevShowArchive && !showArchive) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateCloseArchive'
+            });
+        }
+    };
 
     onClientUpdateOpenArchive = update => {
         this.setState({ openArchive: true });
@@ -99,9 +247,9 @@ class Dialogs extends Component {
     };
 
     onClientUpdateChatDetailsVisibility = update => {
-        this.setState({
-            isChatDetailsVisible: AppStore.isChatDetailsVisible
-        });
+        const { isChatDetailsVisible } = AppStore;
+
+        this.setState({ isChatDetailsVisible });
     };
 
     onClientUpdateSearchChat = update => {
@@ -130,7 +278,9 @@ class Dialogs extends Component {
     handleHeaderClick = () => {
         const { openArchive } = this.state;
         if (openArchive) {
-            this.archiveListRef.current.scrollToTop();
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateCloseArchive'
+            });
         } else {
             this.dialogListRef.current.scrollToTop();
         }
@@ -173,26 +323,31 @@ class Dialogs extends Component {
     };
 
     handleSaveCache = () => {
-        const archiveChatIds = [];
-        const archive = ChatStore.chatList.get('chatListArchive');
-        if (archive) {
-            for (const chatId of archive.keys()) {
-                archiveChatIds.push(chatId);
-            }
-        }
-
-        console.log('[dl] saveCache start');
-        const { current } = this.dialogListRef;
-        if (current) {
-            const chatIds = current.state.chats.slice(0, 25);
-            console.log('[dl] saveCache', chatIds, archiveChatIds);
-            CacheStore.saveChats(chatIds, archiveChatIds);
-        }
+        this.saveCache();
     };
+
+    loadChatContents(chatIds) {
+        const store = FileStore.getStore();
+        loadChatsContent(store, chatIds);
+    }
 
     render() {
         const { classes } = this.props;
-        const { isChatDetailsVisible, openArchive, openSearch, searchChatId, searchText } = this.state;
+        const {
+            cache,
+            showArchive,
+            archiveTitle,
+            mainItems,
+            archiveItems,
+            isChatDetailsVisible,
+            openArchive,
+            openSearch,
+            searchChatId,
+            searchText
+        } = this.state;
+
+        const mainCacheItems = cache ? cache.chats || [] : null;
+        const archiveCacheItems = cache ? cache.archiveChats || [] : null;
 
         return (
             <div
@@ -211,12 +366,18 @@ class Dialogs extends Component {
                     <DialogsList
                         type='chatListMain'
                         ref={this.dialogListRef}
+                        cacheItems={mainCacheItems}
+                        items={mainItems}
+                        showArchive={showArchive}
+                        archiveTitle={archiveTitle}
                         open={true}
                         onSaveCache={this.handleSaveCache}
                     />
                     <DialogsList
                         type='chatListArchive'
                         ref={this.archiveListRef}
+                        cacheItems={archiveCacheItems}
+                        items={archiveItems}
                         open={openArchive}
                         onSaveCache={this.handleSaveCache}
                     />

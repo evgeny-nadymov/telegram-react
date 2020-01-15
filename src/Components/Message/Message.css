@@ -139,13 +139,14 @@ pre code {
 
 .message-bubble {
     position: relative;
-    /*background: white;*/
     border-radius: 10px 10px 10px 0;
     padding: 6px 9px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
+    background: var(--message-in-background);
 }
 
 .message-bubble::after {
+    background: var(--message-in-background);
     position: absolute;
     left: -7px;
     mask: url(../../Assets/bubble-tail-left.svg);
@@ -154,6 +155,22 @@ pre code {
     height: 20px;
     content: '';
     transform: translate(-2px, -2px);
+}
+
+.message-bubble a {
+    color: var(--message-in-link);
+}
+
+.message-bubble-out a {
+    color: var(--message-out-link);
+}
+
+.message-bubble-out {
+    background: var(--message-out-background);
+}
+
+.message-bubble-out::after {
+    background: var(--message-out-background);
 }
 
 .message-short .message-bubble {

@@ -53,9 +53,17 @@ const styles = theme => ({
 
 class Archive extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { title } = this.props;
+        const { title, theme } = this.props;
 
-        return title !== nextProps.title;
+        if (nextProps.theme !== theme) {
+            return true;
+        }
+
+        if (nextProps.title !== title) {
+            return true;
+        }
+
+        return false;
     }
 
     onUpdateChatOrder = update => {
@@ -77,8 +85,6 @@ class Archive extends React.Component {
 
     render() {
         const { classes, t, title } = this.props;
-
-        console.log('[ar] render', title);
 
         return (
             <div

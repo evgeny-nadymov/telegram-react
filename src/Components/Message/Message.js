@@ -57,12 +57,6 @@ const styles = theme => ({
     message: {
         backgroundColor: 'transparent'
     },
-    messageBubble: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        '&::after': {
-            background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-        }
-    },
     menuListRoot: {
         minWidth: 150
     },
@@ -436,7 +430,16 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
+        const {
+            is_outgoing,
+            sending_state,
+            views,
+            date,
+            edit_date,
+            reply_to_message_id,
+            forward_info,
+            sender_user_id
+        } = message;
 
         const showForward = showMessageForward(chatId, messageId);
         const text = getText(message);
@@ -495,7 +498,7 @@ class Message extends Component {
                     <div
                         className={classNames('message-content', {
                             'message-bubble': withBubble,
-                            [classes.messageBubble]: withBubble
+                            'message-bubble-out': withBubble && is_outgoing
                         })}>
                         <div className='message-title'>
                             {showTitle && !showForward && (

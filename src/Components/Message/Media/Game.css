@@ -26,10 +26,14 @@
 }
 
 .game-title {
+    color: var(--color-accent-main);
+}
+
+.message-bubble-out .game-title {
+    color: var(--message-out-reply-title);
 }
 
 .game-text {
-    font-weight: bold;
 }
 
 .game-description {

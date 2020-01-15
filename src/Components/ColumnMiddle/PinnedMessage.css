@@ -41,6 +41,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    color: var(--message-in-reply-title);
 }
 
 .pinned-message-content-subtitle {

@@ -82,7 +82,7 @@ class CacheStore extends EventEmitter {
         TdLibController.off('clientUpdate', this.onClientUpdate);
     };
 
-    async getChats() {
+    async loadCache() {
         // console.log('[cm] getChats start');
         const promises = [];
         promises.push(CacheManager.load('cache').catch(error => null));
@@ -96,9 +96,8 @@ class CacheStore extends EventEmitter {
         if (!this.cache) return null;
 
         this.parseCache(this.cache);
-        const { chats } = this.cache;
 
-        return chats || [];
+        return this.cache;
     }
 
     parseCache(cache) {

@@ -203,8 +203,8 @@ class Dialog extends Component {
 
     canPinChats = async chatId => {
         const pinnedSumMaxOption = isChatArchived(chatId)
-            ? OptionStore.get('pinned_archived_chat_count_max').value
-            : OptionStore.get('pinned_chat_count_max').value;
+            ? OptionStore.get('pinned_archived_chat_count_max')
+            : OptionStore.get('pinned_chat_count_max');
         if (!pinnedSumMaxOption) return false;
 
         const isSecret = isChatSecret(chatId);
@@ -213,7 +213,7 @@ class Dialog extends Component {
             chat_list: isChatArchived(chatId) ? { '@type': 'chatListArchive' } : { '@type': 'chatListMain' },
             offset_order: '9223372036854775807',
             offset_chat_id: 0,
-            limit: pinnedSumMaxOption + 10
+            limit: pinnedSumMaxOption.value + 10
         });
 
         const pinnedSum = chats.chat_ids.reduce((x, id) => {
