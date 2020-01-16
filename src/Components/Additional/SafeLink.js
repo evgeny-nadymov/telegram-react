@@ -15,7 +15,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
+import MessageStore from '../../Stores/MessageStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './SafeLink.css';
+import { openChat } from '../../Actions/Client';
 
 class SafeLink extends React.Component {
     constructor(props) {
@@ -72,10 +75,45 @@ class SafeLink extends React.Component {
         }
     };
 
-    handleSafeClick = event => {
+    isTelegramLink(url) {
+        if (!url) return false;
+
+        const lowerCaseUrl = url
+            .toLowerCase()
+            .replace('https://', '')
+            .replace('http://', '');
+
+        return lowerCaseUrl.startsWith('t.me') || lowerCaseUrl.startsWith('tg://');
+    }
+
+    handleSafeClick = async event => {
         event.stopPropagation();
 
-        const { onClick } = this.props;
+        const { onClick, url: href } = this.props;
+
+        if (this.isTelegramLink(href)) {
+            event.preventDefault();
+            try {
+                const messageLinkInfo = await TdLibController.send({
+                    '@type': 'getMessageLinkInfo',
+                    url: href
+                });
+
+                MessageStore.setItems([messageLinkInfo.message]);
+
+                const { chat_id, message } = messageLinkInfo;
+                if (chat_id) {
+                    openChat(chat_id, message ? message.id : null);
+                    return;
+                }
+            } catch (error) {
+                console.log('[safeLink] messageLinkInfo error', error);
+            }
+
+            if (onClick) {
+                onClick(event);
+            }
+        }
 
         if (onClick) {
             event.preventDefault();

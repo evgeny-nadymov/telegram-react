@@ -1208,7 +1208,7 @@ class MessagesList extends React.Component {
     showMessageTitle(message, prevMessage, isFirst) {
         if (!message) return false;
 
-        const { chat_id, date, sender_user_id } = message;
+        const { chat_id, date, sender_user_id, content } = message;
 
         if (isFirst) {
             return true;
@@ -1219,6 +1219,7 @@ class MessagesList extends React.Component {
         }
 
         return (
+            content['@type'] !== 'messageSticker' &&
             prevMessage &&
             (isServiceMessage(prevMessage) ||
                 sender_user_id !== prevMessage.sender_user_id ||

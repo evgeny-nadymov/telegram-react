@@ -9,8 +9,11 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
+import withTheme from '@material-ui/core/styles/withTheme';
 import CheckMarkIcon from '@material-ui/icons/Check';
+import Popover from '@material-ui/core/Popover';
+import MenuList from '@material-ui/core/MenuList';
+import MenuItem from '@material-ui/core/MenuItem';
 import Reply from './Reply';
 import Forward from './Forward';
 import Meta from './Meta';
@@ -43,41 +46,13 @@ import {
     clearSelection,
     deleteMessages
 } from '../../Actions/Client';
+import { pinMessage, unpinMessage } from '../../Actions/Message';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { getFitSize, getSize } from '../../Utils/Common';
+import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
-import Popover from '@material-ui/core/Popover';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
-import ChatStore from '../../Stores/ChatStore';
-import { pinMessage, unpinMessage } from '../../Actions/Message';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-
-const styles = theme => ({
-    message: {
-        backgroundColor: 'transparent'
-    },
-    menuListRoot: {
-        minWidth: 150
-    },
-    messageAuthorColor: {
-        color: theme.palette.primary.main
-    },
-    messageSelected: {
-        backgroundColor: theme.palette.primary.main + '22'
-    },
-    messageSelectTick: {
-        background: theme.palette.primary.main,
-        color: 'white'
-    },
-    '@keyframes highlighted': {
-        from: { backgroundColor: theme.palette.primary.main + '22' },
-        to: { backgroundColor: 'transparent' }
-    },
-    messageHighlighted: {
-        animation: '$highlighted 4s ease-out'
-    }
-});
 
 class Message extends Component {
     constructor(props) {
@@ -422,6 +397,59 @@ class Message extends Component {
         deleteMessages(chatId, [messageId]);
     };
 
+    getMessageStyle(chatId, messageId) {
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return null;
+
+        const { content } = message;
+        if (!content) return null;
+
+        switch (content['@type']) {
+            case 'messageAnimation': {
+                const { animation } = content;
+                if (!animation) return null;
+
+                const { width, height, thumbnail } = animation;
+
+                const size = { width, height } || thumbnail;
+                if (!size) return null;
+
+                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+                if (!fitSize) return null;
+
+                return { width: fitSize.width };
+            }
+            case 'messagePhoto': {
+                const { photo } = content;
+                if (!photo) return null;
+
+                const size = getSize(photo.sizes, PHOTO_SIZE);
+                if (!size) return null;
+
+                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+                if (!fitSize) return null;
+
+                return { width: fitSize.width };
+            }
+            case 'messageVideo': {
+                const { video } = content;
+                if (!video) return null;
+
+                const { thumbnail, width, height } = video;
+
+                const size = { width, height } || thumbnail;
+                if (!size) return null;
+
+                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
+                if (!fitSize) return null;
+
+                return { width: fitSize.width };
+            }
+        }
+
+        return null;
+    }
+
     render() {
         // console.log('[m] render', this.props.messageId);
         const { t, classes, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
@@ -458,14 +486,8 @@ class Message extends Component {
             );
         }
 
-        const messageClassName = classNames('message', classes.message, {
-            'message-selected': selected,
-            [classes.messageSelected]: selected,
-            [classes.messageHighlighted]: highlighted && !selected,
-            'message-short': !tile
-        });
-
         const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;
+        const style = this.getMessageStyle(chatId, messageId);
 
         const canBeReplied = canSendMessages(chatId);
         const canBePinned = canPinMessages(chatId);
@@ -479,7 +501,12 @@ class Message extends Component {
 
         return (
             <div
-                className={messageClassName}
+                className={classNames('message', {
+                    'message-out': is_outgoing,
+                    'message-selected': selected,
+                    'message-highlighted': highlighted && !selected,
+                    'message-short': !tile
+                })}
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}
                 onMouseDown={this.handleMouseDown}
@@ -487,43 +514,47 @@ class Message extends Component {
                 onAnimationEnd={this.handleAnimationEnd}
                 onContextMenu={this.handleContextMenu}>
                 {showUnreadSeparator && <UnreadSeparator />}
-                <div className='message-wrapper'>
-                    <div className='message-left-padding'>
-                        <CheckMarkIcon className={classNames('message-select-tick', classes.messageSelectTick)} />
-                        {/*{this.unread && (*/}
-                        {/*    <MessageStatus chatId={chatId} messageId={messageId} sendingState={sending_state} />*/}
-                        {/*)}*/}
+                <div className='message-body'>
+                    <div className='message-padding'>
+                        <CheckMarkIcon className='message-select-tick' />
                     </div>
-                    {tile}
-                    <div
-                        className={classNames('message-content', {
-                            'message-bubble': withBubble,
-                            'message-bubble-out': withBubble && is_outgoing
-                        })}>
-                        <div className='message-title'>
-                            {showTitle && !showForward && (
-                                <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
-                            )}
-                            {showForward && <Forward forwardInfo={forward_info} />}
-                            {showTitle && meta}
-                        </div>
-                        {Boolean(reply_to_message_id) && (
-                            <Reply chatId={chatId} messageId={reply_to_message_id} onClick={this.handleReplyClick} />
-                        )}
-                        {media}
+                    <div className='message-wrapper'>
+                        {tile}
                         <div
-                            className={classNames('message-text', {
-                                'message-text-1emoji': emojiMatches === 1,
-                                'message-text-2emoji': emojiMatches === 2,
-                                'message-text-3emoji': emojiMatches === 3
-                            })}>
-                            {text}
+                            className={classNames('message-content', {
+                                'message-bubble': withBubble,
+                                'message-bubble-out': withBubble && is_outgoing
+                            })}
+                            style={style}>
+                            <div className='message-title'>
+                                {showTitle && !showForward && (
+                                    <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
+                                )}
+                                {showForward && <Forward forwardInfo={forward_info} />}
+                                {showTitle && meta}
+                            </div>
+                            {Boolean(reply_to_message_id) && (
+                                <Reply
+                                    chatId={chatId}
+                                    messageId={reply_to_message_id}
+                                    onClick={this.handleReplyClick}
+                                />
+                            )}
+                            {media}
+                            <div
+                                className={classNames('message-text', {
+                                    'message-text-1emoji': emojiMatches === 1,
+                                    'message-text-2emoji': emojiMatches === 2,
+                                    'message-text-3emoji': emojiMatches === 3
+                                })}>
+                                {text}
+                            </div>
+                            {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
+                            {/*{!showTitle && meta}*/}
                         </div>
-                        {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                         {/*{!showTitle && meta}*/}
                     </div>
-                    {/*{!showTitle && meta}*/}
-                    {/*{showTail&&<div>tail</div>}*/}
+                    <div className='message-padding' />
                 </div>
                 <Popover
                     open={contextMenu}
@@ -539,7 +570,7 @@ class Message extends Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: 'message-menu' }} onClick={e => e.stopPropagation()}>
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
                         {canBePinned && (
                             <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>
@@ -557,7 +588,7 @@ class Message extends Component {
 
 const enhance = compose(
     withSaveRef(),
-    withStyles(styles, { withTheme: true }),
+    withTheme,
     withTranslation(),
     withRestoreRef()
 );

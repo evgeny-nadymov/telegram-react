@@ -104,6 +104,8 @@ class Search extends React.Component {
         const sessionId = this.sessionId;
         let store = null;
 
+        console.log('[se] searchText=' + text);
+
         const { chatId } = this.props;
         const { savedMessages } = this.state;
 
@@ -234,12 +236,34 @@ class Search extends React.Component {
 
         MessageStore.setItems(messages.messages);
 
+        let linkMessage = null;
+        if (!chatId) {
+            try {
+                const messageLinkInfo = await TdLibController.send({
+                    '@type': 'getMessageLinkInfo',
+                    url: text
+                });
+                console.log('[se] searchText=' + text + ' messageLinkInfo', messageLinkInfo);
+
+                MessageStore.setItems([messageLinkInfo.message]);
+
+                linkMessage = messageLinkInfo;
+            } catch (error) {
+                console.log('[se] searchText=' + text + ' messageLinkInfo error', error);
+            }
+        }
+
+        console.log('[se] searchText=' + text + ' result', messages, linkMessage);
+
         if (sessionId !== this.sessionId) {
             return;
         }
 
+        console.log('[se] searchText=' + text + ' result session', messages, linkMessage);
+
         this.setState({
-            messages
+            messages,
+            linkMessage
         });
 
         const chats = new Map();
@@ -248,6 +272,15 @@ class Search extends React.Component {
             chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
             if (messages.messages[i].sender_user_id) {
                 users.set(messages.messages[i].sender_user_id, messages.messages[i].sender_user_id);
+            }
+        }
+
+        if (linkMessage) {
+            const { chat_id, sender_user_id } = linkMessage;
+
+            chats.set(chat_id, chat_id);
+            if (sender_user_id) {
+                users.set(sender_user_id, sender_user_id);
             }
         }
 
@@ -264,7 +297,8 @@ class Search extends React.Component {
                 recentlyFound: null,
                 local: null,
                 global: null,
-                messages: null
+                messages: null,
+                linkMessage: null
             });
 
             return;
@@ -304,7 +338,8 @@ class Search extends React.Component {
             savedMessages,
             local: null,
             global: null,
-            messages: null
+            messages: null,
+            linkMessage: null
         });
 
         const store = FileStore.getStore();
@@ -456,7 +491,9 @@ class Search extends React.Component {
 
     render() {
         const { classes, chatId } = this.props;
-        const { top, recentlyFound, local, global, messages } = this.state;
+        const { top, recentlyFound, local, global, messages, linkMessage } = this.state;
+
+        console.log('[se] render', messages, linkMessage);
 
         const chat = ChatStore.get(chatId);
 
@@ -488,28 +525,76 @@ class Search extends React.Component {
               ))
             : [];
 
+        const globalChatsMap = new Map();
         const globalChats = global
-            ? global.map(x => (
-                  <FoundPublicChat key={x} chatId={x} onClick={() => this.handleSelectMessage(x, null, true, true)} />
-              ))
+            ? global.map(x => {
+                  globalChatsMap.set(x, x);
+
+                  return (
+                      <FoundPublicChat
+                          key={x}
+                          chatId={x}
+                          onClick={() => this.handleSelectMessage(x, null, true, true)}
+                      />
+                  );
+              })
             : [];
 
+        const globalLinkChat =
+            linkMessage && linkMessage.chat_id && !linkMessage.message && !globalChatsMap.has(linkMessage.chat_id) ? (
+                <FoundPublicChat
+                    key={linkMessage.chat_id}
+                    chatId={linkMessage.chat_id}
+                    onClick={() => this.handleSelectMessage(linkMessage.chat_id, null, true, true)}
+                />
+            ) : null;
+
+        const globalMessagesMap = new Map();
         const globalMessages =
             messages && messages.messages
-                ? messages.messages.map(x => (
-                      <FoundMessage
-                          key={`${x.chat_id}_${x.id}`}
-                          chatId={x.chat_id}
-                          messageId={x.id}
-                          chatSearch={Boolean(chatId)}
-                          onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}
-                      />
-                  ))
+                ? messages.messages.map(x => {
+                      const key = `${x.chat_id}_${x.id}`;
+                      globalMessagesMap.set(key, key);
+
+                      return (
+                          <FoundMessage
+                              key={key}
+                              chatId={x.chat_id}
+                              messageId={x.id}
+                              chatSearch={Boolean(chatId)}
+                              onClick={() => this.handleSelectMessage(x.chat_id, x.id, false, true)}
+                          />
+                      );
+                  })
                 : [];
 
+        const globalLinkMessage =
+            linkMessage &&
+            linkMessage.message &&
+            !globalMessagesMap.has(`${linkMessage.message.chat_id}_${linkMessage.message.id}`) ? (
+                <FoundMessage
+                    key={`${linkMessage.message.chat_id}_${linkMessage.message.id}`}
+                    chatId={linkMessage.message.chat_id}
+                    messageId={linkMessage.message.id}
+                    chatSearch={false}
+                    onClick={() =>
+                        this.handleSelectMessage(linkMessage.message.chat_id, linkMessage.message.id, false, true)
+                    }
+                />
+            ) : null;
+
+        let count = messages ? messages.total_count : 0;
+        if (
+            linkMessage &&
+            linkMessage.message &&
+            !globalMessagesMap.has(`${linkMessage.message.chat_id}_${linkMessage.message.id}`)
+        ) {
+            count++;
+        }
+
         let messagesCaption = 'No messages found';
-        if (messages && messages.total_count) {
-            messagesCaption = messages.total_count === 1 ? 'Found 1 message' : `Found ${messages.total_count} messages`;
+        if (count) {
+            messagesCaption = count === 1 ? 'Found 1 message' : `Found ${count} messages`;
         }
 
         return (
@@ -555,12 +640,14 @@ class Search extends React.Component {
                 {globalChats.length > 0 && (
                     <div className='search-global-chats'>
                         <SearchCaption caption='Global search' />
+                        {globalLinkChat}
                         {globalChats}
                     </div>
                 )}
-                {messages && (
+                {(messages || (linkMessage && linkMessage.message)) && (
                     <div className='search-global-chats'>
                         <SearchCaption caption={messagesCaption} />
+                        {globalLinkMessage}
                         {globalMessages}
                     </div>
                 )}

@@ -40,7 +40,7 @@ class Video extends React.Component {
         const { displaySize, openMedia, title, caption, type, style } = this.props;
         const { minithumbnail, thumbnail, video, width, height, duration } = this.props.video;
 
-        const fitPhotoSize = getFitSize(thumbnail || { width: width, height: height }, displaySize);
+        const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize);
         if (!fitPhotoSize) return null;
 
         const videoStyle = {

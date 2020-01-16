@@ -20,6 +20,7 @@ function updateLightTheme(theme) {
     const { style } = document.documentElement;
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
+    style.setProperty('--color-accent-main22', theme.palette.primary.main + '22');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
 
@@ -54,6 +55,7 @@ function updateDarkTheme(theme) {
     const { style } = document.documentElement;
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
+    style.setProperty('--color-accent-main22', theme.palette.primary.main + '22');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
 

@@ -251,6 +251,8 @@ class MessageStore extends EventEmitter {
     }
 
     set(message) {
+        if (!message) return;
+
         let chat = this.items.get(message.chat_id);
         if (!chat) {
             chat = new Map();

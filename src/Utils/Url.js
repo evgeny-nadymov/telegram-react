@@ -12,6 +12,8 @@ export function getHref(url, mail) {
 
     if (mail) return url.startsWith('mailto:') ? url : 'mailto:' + url;
 
+    // if (url.startsWith('tg://')) return url;
+
     return url.startsWith('http') ? url : 'http://' + url;
 }
 
