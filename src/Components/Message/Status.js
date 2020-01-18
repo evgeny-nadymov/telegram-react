@@ -6,43 +6,31 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
+import PropTypes from 'prop-types';
+import ErrorIcon from '../../Assets/Icons/Error';
+import PendingIcon from '../../Assets/Icons/Pending';
+import SentIcon from '../../Assets/Icons/Sent';
+import SucceededIcon from '../../Assets/Icons/Succeeded';
+import { isMessageUnread } from '../../Utils/Message';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
-import './MessageStatus.css';
-import PropTypes from 'prop-types';
+import './Status.css';
 
-const styles = theme => ({
-    messageStatusFailed: {
-        background: theme.palette.error.light
-    },
-    messageStatusPending: {
-        background: theme.palette.primary.light
-    },
-    messageStatusSucceeded: {
-        background: theme.palette.primary.light
-    }
-});
-
-class MessageStatus extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            prevChatId: props.chatId,
-            prevMessageId: props.messageId,
-            sendingState: props.sendingState,
-            unread: true
-        };
-    }
+class Status extends React.Component {
+    state = {};
 
     static getDerivedStateFromProps(props, state) {
-        if (props.chatId !== state.prevChatId || props.messageId !== state.prevMessageId) {
+        const { chatId, messageId } = props;
+
+        const message = MessageStore.get(chatId, messageId);
+        const sendingState = message ? message.sending_state : null;
+
+        if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
             return {
-                prevChatId: props.chatId,
-                prevMessageId: props.messageId,
-                sendingState: props.sendingState
+                prevChatId: chatId,
+                prevMessageId: messageId,
+                sendingState,
+                unread: isMessageUnread(chatId, messageId)
             };
         }
 
@@ -90,25 +78,34 @@ class MessageStatus extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { sendingState, unread } = this.state;
-
-        let stateClassName = classNames('message-status-succeeded', classes.messageStatusSucceeded);
-        if (sendingState) {
-            stateClassName =
-                sendingState['@type'] === 'messageSendingStateFailed'
-                    ? classNames('message-status-failed', classes.messageStatusFailed)
-                    : classNames('message-status-pending', classes.messageStatusPending);
+        if (!unread) {
+            return <SucceededIcon className='status' viewBox='0 0 17 10' style={{ width: 16, height: 9 }} />;
         }
 
-        return unread && <i className={classNames('message-status-icon', stateClassName)} />;
+        if (sendingState) {
+            return sendingState['@type'] === 'messageSendingStateFailed' ? (
+                <ErrorIcon
+                    className='status'
+                    viewBox='0 0 14 14'
+                    style={{ width: 16, height: 12, transform: 'translate(0, 1px)' }}
+                />
+            ) : (
+                <PendingIcon
+                    className='status'
+                    viewBox='0 0 14 14'
+                    style={{ width: 16, height: 12, transform: 'translate(0, 1px)', stroke: 'currentColor' }}
+                />
+            );
+        }
+
+        return <SentIcon className='status' viewBox='0 0 12 10' style={{ width: 16, height: 9 }} />;
     }
 }
 
-MessageStatus.propTypes = {
+Status.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
-    sendingState: PropTypes.object
+    messageId: PropTypes.number.isRequired
 };
 
-export default withStyles(styles, { withTheme: true })(MessageStatus);
+export default Status;

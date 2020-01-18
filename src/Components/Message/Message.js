@@ -17,8 +17,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Reply from './Reply';
 import Forward from './Forward';
 import Meta from './Meta';
-import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
+import Status from './Status';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
@@ -452,7 +452,7 @@ class Message extends Component {
 
     render() {
         // console.log('[m] render', this.props.messageId);
-        const { t, classes, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
+        const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
         const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -486,7 +486,16 @@ class Message extends Component {
             );
         }
 
-        const meta = <Meta date={date} editDate={edit_date} views={views} onDateClick={this.handleDateClick} />;
+        const meta = (
+            <Meta
+                chatId={chatId}
+                messageId={messageId}
+                date={date}
+                editDate={edit_date}
+                views={views}
+                onDateClick={this.handleDateClick}
+            />
+        );
         const style = this.getMessageStyle(chatId, messageId);
 
         const canBeReplied = canSendMessages(chatId);

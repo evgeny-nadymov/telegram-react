@@ -28,7 +28,8 @@
     box-sizing: border-box;
 }
 
-.service-message-content .message-author {
+.service-message-content .message-author,
+.service-message-content .message-author:hover {
     color: var(--day-color);
 }
 

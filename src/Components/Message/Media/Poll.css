@@ -19,6 +19,8 @@
 .poll-question-title {
     font-weight: bold;
     white-space: pre-wrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .poll-total-count {

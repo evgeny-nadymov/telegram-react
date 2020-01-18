@@ -15,16 +15,16 @@
 
 .message-author {
     color: var(--message-in-author);
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 38px;
 }
 
 .message-bubble-out .message-author,
 .message-bubble-out .message-author:hover {
     color: var(--message-out-author);
-}
-
-.message-author {
-    flex-grow: 1;
-    flex-shrink: 1;
 }
 
 a.user_color_1,

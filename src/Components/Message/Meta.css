@@ -7,25 +7,28 @@
 
 .meta {
     user-select: none;
-    font-size: 0.85em;
+    font-size: 12px;
+    line-height: 14px;
     flex-shrink: 0;
     color: var(--message-in-meta-color);
+    display: flex;
+    align-items: baseline;
 }
 
-.message-bubble .meta a {
+.message .meta a {
     color: var(--message-in-meta-color);
 }
 
-.message-bubble-out .meta {
+.message-out .meta {
     color: var(--message-out-meta-color);
 }
 
-.message-bubble-out .meta a {
+.message-out .meta a {
     color: var(--message-out-meta-color);
 }
 
 .meta-views {
-    font-weight: 500;
+    /*font-weight: 500;*/
 }
 
 .meta-views-icon {

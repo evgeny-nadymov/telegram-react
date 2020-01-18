@@ -28,7 +28,8 @@ import {
     getChatDisableMentionNotifications,
     getChatDisablePinnedMessageNotifications,
     getChatTitle,
-    isChatMuted
+    isChatMuted,
+    isMeChat
 } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getPhotoSize } from './Common';
@@ -45,6 +46,24 @@ import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import Call from '../Components/Message/Media/Call';
+
+export function isMessageUnread(chatId, messageId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { last_read_inbox_message_id, last_read_outbox_message_id } = chat;
+
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { id, is_outgoing } = message;
+    const isMe = isMeChat(chatId);
+    if (is_outgoing && isMe) {
+        return false;
+    }
+
+    return is_outgoing ? id > last_read_outbox_message_id : id > last_read_inbox_message_id;
+}
 
 function getAuthor(message) {
     if (!message) return null;
