@@ -49,12 +49,16 @@ import Call from '../Components/Message/Media/Call';
 
 export function isMessageUnread(chatId, messageId) {
     const chat = ChatStore.get(chatId);
-    if (!chat) return false;
+    if (!chat) {
+        return false;
+    }
 
     const { last_read_inbox_message_id, last_read_outbox_message_id } = chat;
 
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
+    if (!message) {
+        return false;
+    }
 
     const { id, is_outgoing } = message;
     const isMe = isMeChat(chatId);

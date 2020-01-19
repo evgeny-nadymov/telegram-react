@@ -19,6 +19,13 @@
     --day-background: #00000033;
     --day-color: #ffffff;
 
+    --panel-background: #ffffff;
+
+    --dialog-title-color: #000000;
+    --dialog-color: #707579;
+    --dialog-meta-color: #5f6369;
+    --dialog-status-color: #4fae4e;
+
     --message-in-link: #5b8af1;
     --message-in-author: #5b8af1;
     --message-in-background: #ffffff;

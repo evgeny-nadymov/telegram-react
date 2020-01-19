@@ -11,6 +11,7 @@ import CacheManager from '../Workers/CacheManager';
 import BasicGroupStore from './BasicGroupStore';
 import ChatStore from './ChatStore';
 import FileStore from './FileStore';
+import MessageStore from './MessageStore';
 import OptionStore from './OptionStore';
 import SupergroupStore from './SupergroupStore';
 import UserStore from './UserStore';
@@ -129,6 +130,9 @@ class CacheStore extends EventEmitter {
             }
             if (x.chat_list) {
                 ChatStore.updateChatChatList(x.id, x.chat_list);
+            }
+            if (x.last_message) {
+                MessageStore.set(x.last_message);
             }
         });
 

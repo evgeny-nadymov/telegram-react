@@ -6,6 +6,7 @@
  */
 
 .dialogs-list {
+    background: var(--panel-background);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overflow-x: hidden;

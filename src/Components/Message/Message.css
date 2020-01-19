@@ -115,6 +115,10 @@ pre code {
     justify-content: center;
 }
 
+.message-tile-padding {
+    min-width: 33px;
+}
+
 .message-wrapper {
     max-width: 784px;
     padding: 5px 6px 5px 6px;
@@ -245,6 +249,6 @@ pre code {
     pointer-events: none;
 }
 
-.message-menu {
+.menu-list {
     min-width: 150px;
 }

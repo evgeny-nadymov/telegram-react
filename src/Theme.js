@@ -32,6 +32,13 @@ function updateLightTheme(theme) {
     style.setProperty('--day-color', '#FFFFFF');
     style.setProperty('--day-background', '#00000033');
 
+    style.setProperty('--panel-background', '#ffffff');
+
+    style.setProperty('--dialog-title-color', '#000000');
+    style.setProperty('--dialog-color', '#707579');
+    style.setProperty('--dialog-meta-color', '#5F6369');
+    style.setProperty('--dialog-status-color', '#4FAE4E');
+
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);
     style.setProperty('--message-in-background', '#FFFFFF');
@@ -66,6 +73,13 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--day-color', '#FFFFFF');
     style.setProperty('--day-background', '#303030');
+
+    style.setProperty('--panel-background', '#303030');
+
+    style.setProperty('--dialog-title-color', '#ffffff');
+    style.setProperty('--dialog-color', theme.palette.text.secondary);
+    style.setProperty('--dialog-meta-color', theme.palette.text.secondary);
+    style.setProperty('--dialog-status-color', '#4FAE4E');
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);
@@ -114,6 +128,11 @@ function createTheme(type, primary) {
                     '& > ul': {
                         maxHeight: 56 * 5.5
                     }
+                }
+            },
+            MuiMenuList: {
+                root: {
+                    minWidth: 150
                 }
             }
         }

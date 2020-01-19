@@ -7,32 +7,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { isUserOnline } from '../../Utils/User';
 import { getChatUserId } from '../../Utils/Chat';
 import UserStore from './../../Stores/UserStore';
 import './ChatStatus.css';
-
-const styles = theme => ({
-    root: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        borderRadius: '50%',
-        overflow: 'hidden'
-    },
-    icon: {
-        background: 'transparent',
-        width: '100%',
-        height: '100%',
-        boxSizing: 'border-box'
-    },
-    iconIndicator: {
-        width: '100%',
-        height: '100%',
-        borderRadius: '50%',
-        background: '#80d066'
-    }
-});
 
 class ChatStatus extends React.Component {
     constructor(props) {
@@ -42,7 +20,7 @@ class ChatStatus extends React.Component {
         const user = UserStore.get(userId);
 
         this.state = {
-            userId: userId,
+            userId,
             online: isUserOnline(user)
         };
     }
@@ -67,13 +45,13 @@ class ChatStatus extends React.Component {
     };
 
     render() {
-        const { classes, size, borderSize, className } = this.props;
+        const { size, borderSize } = this.props;
         const { online } = this.state;
         if (!online) return null;
 
         return (
-            <div className={classNames(className, classes.root)} style={{ width: size, height: size }}>
-                <div className={classes.icon} style={{ padding: borderSize }}>
+            <div className='chat-status' style={{ width: size, height: size }}>
+                <div className='chat-status-icon' style={{ padding: borderSize }}>
                     <div className='chat-status-indicator' />
                 </div>
             </div>
@@ -88,8 +66,8 @@ ChatStatus.propTypes = {
 };
 
 ChatStatus.defaultProps = {
-    size: 12,
+    size: 14,
     borderSize: 2
 };
 
-export default withStyles(styles)(ChatStatus);
+export default ChatStatus;

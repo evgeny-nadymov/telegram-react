@@ -6,25 +6,16 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
+import Status from '../Message/Status';
 import { getLastMessageDate } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogMeta.css';
 
-const styles = theme => ({
-    dialogMetaDate: {
-        color: theme.palette.text.secondary
-    }
-});
-
 class DialogMeta extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
-            return true;
-        }
+        const { chatId } = this.props;
 
-        if (nextProps.theme !== this.props.theme) {
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
@@ -75,13 +66,29 @@ class DialogMeta extends React.Component {
     render() {
         if (this.clearHistory) return null;
 
-        const { chatId, classes } = this.props;
+        const { chatId } = this.props;
 
         const chat = ChatStore.get(chatId);
-        const date = getLastMessageDate(chat);
+        if (!chat) return null;
 
-        return <>{date && <div className={classNames('dialog-meta', classes.dialogMetaDate)}>{date}</div>}</>;
+        const { last_message } = chat;
+        if (!last_message) return null;
+
+        const date = getLastMessageDate(chat);
+        if (!date) return null;
+
+        return (
+            <div className='dialog-meta'>
+                {last_message.is_outgoing && (
+                    <>
+                        <Status chatId={chatId} messageId={last_message.id} />
+                        <span> </span>
+                    </>
+                )}
+                {date}
+            </div>
+        );
     }
 }
 
-export default withStyles(styles, { withTheme: true })(DialogMeta);
+export default DialogMeta;

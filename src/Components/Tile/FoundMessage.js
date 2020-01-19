@@ -28,15 +28,9 @@ const styles = theme => ({
     foundMessageSubtitle: {
         color: theme.palette.text.secondary
     },
-    verifiedIcon: {
-        color: theme.palette.primary.main
-    },
     foundMessageActive: {
         color: '#fff',
-        backgroundColor: theme.palette.primary.main,
-        '& $verifiedIcon': {
-            color: '#fff'
-        }
+        backgroundColor: theme.palette.primary.main
     }
 });
 
@@ -112,7 +106,7 @@ class FoundMessage extends React.Component {
                             {chatSearch && senderFullName ? (
                                 <div className='dialog-title'>{senderFullName}</div>
                             ) : (
-                                <DialogTitle chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
+                                <DialogTitle chatId={chatId} />
                             )}
                             <div className={classNames('dialog-meta', classes.foundMessageSubtitle)}>{date}</div>
                         </div>

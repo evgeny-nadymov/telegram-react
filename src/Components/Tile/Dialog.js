@@ -8,8 +8,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
@@ -19,14 +17,7 @@ import DialogContent from './DialogContent';
 import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
-import {
-    canSetChatChatList,
-    isArchivedChat,
-    isChatArchived,
-    isChatMuted,
-    isChatSecret,
-    isChatUnread
-} from '../../Utils/Chat';
+import { canSetChatChatList, isChatArchived, isChatMuted, isChatSecret, isChatUnread } from '../../Utils/Chat';
 import {
     setChatChatList,
     toggleChatIsMarkedAsUnread,
@@ -41,61 +32,6 @@ import OptionStore from '../../Stores/OptionStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialog.css';
 
-const styles = theme => ({
-    menuListRoot: {
-        minWidth: 150
-    },
-    statusRoot: {
-        position: 'absolute',
-        right: 1,
-        bottom: 1,
-        zIndex: 1
-    },
-    statusIcon: {},
-    iconIndicator: {
-        background: '#80d066'
-    },
-    verifiedIcon: {
-        color: theme.palette.primary.main
-    },
-    unreadIcon: {
-        background: theme.palette.primary.light
-    },
-    dialogActive: {
-        color: '#fff', //theme.palette.primary.contrastText,
-        backgroundColor: theme.palette.primary.main,
-        borderRadius: 8,
-        cursor: 'pointer',
-        margin: '0 12px',
-        '& $verifiedIcon': {
-            color: '#fff'
-        },
-        '& $unreadIcon': {
-            background: '#ffffff77'
-        },
-        '& $statusRoot': {
-            background: theme.palette.primary.main
-        },
-        '& $iconIndicator': {
-            background: '#ffffff'
-        }
-    },
-    dialog: {
-        borderRadius: 8,
-        cursor: 'pointer',
-        margin: '0 12px',
-        '&:hover': {
-            backgroundColor: theme.palette.primary.main + '22',
-            '& $statusRoot': {
-                background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-            },
-            '& $statusIcon': {
-                background: theme.palette.primary.main + '22'
-            }
-        }
-    }
-});
-
 class Dialog extends Component {
     constructor(props) {
         super(props);
@@ -104,7 +40,7 @@ class Dialog extends Component {
 
         const chat = ChatStore.get(this.props.chatId);
         this.state = {
-            chat: chat,
+            chat,
             contextMenu: false,
             left: 0,
             top: 0
@@ -112,23 +48,22 @@ class Dialog extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, t, hidden } = this.props;
+        const { contextMenu } = this.state;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
-        if (nextProps.t !== this.props.t) {
+        if (nextProps.t !== t) {
             return true;
         }
 
-        if (nextProps.theme !== this.props.theme) {
+        if (nextProps.hidden !== hidden) {
             return true;
         }
 
-        if (nextProps.hidden !== this.props.hidden) {
-            return true;
-        }
-
-        if (nextState.contextMenu !== this.state.contextMenu) {
+        if (nextState.contextMenu !== contextMenu) {
             return true;
         }
 
@@ -303,7 +238,7 @@ class Dialog extends Component {
     };
 
     render() {
-        const { classes, chatId, showSavedMessages, hidden, t } = this.props;
+        const { chatId, showSavedMessages, hidden, t } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
 
         if (hidden) return null;
@@ -318,31 +253,19 @@ class Dialog extends Component {
         return (
             <div
                 ref={this.dialog}
-                className={classNames(
-                    isSelected ? classes.dialogActive : classes.dialog,
-                    isSelected ? 'dialog-active' : 'dialog'
-                )}
+                className={classNames(isSelected ? 'dialog-active' : 'dialog', { 'accent-background': isSelected })}
                 onMouseDown={this.handleSelect}
                 onContextMenu={this.handleContextMenu}>
                 <div className='dialog-wrapper'>
-                    <ChatTile
-                        chatId={chatId}
-                        showSavedMessages={showSavedMessages}
-                        showOnline
-                        classes={{
-                            statusRoot: classes.statusRoot,
-                            statusIcon: classes.statusIcon,
-                            iconIndicator: classes.iconIndicator
-                        }}
-                    />
+                    <ChatTile chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
-                            <DialogTitle chatId={chatId} classes={{ verifiedIcon: classes.verifiedIcon }} />
+                            <DialogTitle chatId={chatId} />
                             <DialogMeta chatId={chatId} />
                         </div>
                         <div className='tile-second-row'>
                             <DialogContent chatId={chatId} />
-                            <DialogBadge chatId={chatId} classes={{ unreadIcon: classes.unreadIcon }} />
+                            <DialogBadge chatId={chatId} />
                         </div>
                     </div>
                 </div>
@@ -360,7 +283,7 @@ class Dialog extends Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
                         {canToggleArchive && (
                             <MenuItem onClick={this.handleArchive}>
                                 {isArchived ? t('Unarchive') : t('Archive')}
@@ -392,9 +315,4 @@ Dialog.defaultProps = {
     showSavedMessages: true
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(Dialog);
+export default withTranslation()(Dialog);

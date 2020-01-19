@@ -10,10 +10,10 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 500;
     flex-grow: 1;
     display: flex;
     align-items: center;
+    color: var(--dialog-title-color);
 }
 
 .chat-big .dialog-title {
@@ -30,4 +30,5 @@
 
 .dialog-title-icon {
     height: 16px;
+    color: var(--color-accent-main);
 }

@@ -7,8 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Archive from '../Tile/Archive';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
@@ -22,12 +20,6 @@ import FileStore from '../../Stores/FileStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
-
-const styles = theme => ({
-    dialogsList: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    }
-});
 
 class DialogsList extends React.Component {
     constructor(props) {
@@ -353,7 +345,7 @@ class DialogsList extends React.Component {
     }
 
     render() {
-        const { classes, type, open, cacheItems, showArchive, archiveTitle } = this.props;
+        const { type, open, cacheItems, showArchive, archiveTitle } = this.props;
         const { chats } = this.state;
 
         // console.log('[dl] render', type, open, chats, cacheChats);
@@ -371,10 +363,7 @@ class DialogsList extends React.Component {
         }
 
         return (
-            <div
-                ref={this.listRef}
-                className={classNames('dialogs-list', classes.dialogsList)}
-                onScroll={this.handleScroll}>
+            <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
                 {showArchive && <Archive title={archiveTitle} />}
                 {dialogs}
             </div>
@@ -390,4 +379,4 @@ DialogsList.propTypes = {
     items: PropTypes.array
 };
 
-export default withStyles(styles, { withTheme: true })(DialogsList);
+export default DialogsList;

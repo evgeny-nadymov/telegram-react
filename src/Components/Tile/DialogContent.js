@@ -6,10 +6,7 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import {
     getChatTypingString,
     getChatDraft,
@@ -20,23 +17,15 @@ import {
 import ChatStore from '../../Stores/ChatStore';
 import './DialogContent.css';
 
-const styles = theme => ({
-    dialogContent: {
-        color: theme.palette.text.secondary
-    }
-});
-
 class DialogContent extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
-        if (nextProps.chatId !== this.props.chatId) {
+        const { chatId, t } = this.props;
+
+        if (nextProps.chatId !== chatId) {
             return true;
         }
 
-        if (nextProps.t !== this.props.t) {
-            return true;
-        }
-
-        if (nextProps.theme !== this.props.theme) {
+        if (nextProps.t !== t) {
             return true;
         }
 
@@ -83,13 +72,12 @@ class DialogContent extends React.Component {
     };
 
     render() {
-        const { chatId, t, classes } = this.props;
+        const { chatId, t } = this.props;
 
-        if (this.clearHistory)
-            return <div className={classNames('dialog-content', classes.dialogContent)}>{'\u00A0'}</div>;
+        if (this.clearHistory) return <div className='dialog-content'>{'\u00A0'}</div>;
 
         const chat = ChatStore.get(chatId);
-        if (!chat) return <div className={classNames('dialog-content', classes.dialogContent)}>{'\u00A0'}</div>;
+        if (!chat) return <div className='dialog-content'>{'\u00A0'}</div>;
 
         let contentControl = null;
         const typingString = getChatTypingString(chatId);
@@ -122,13 +110,8 @@ class DialogContent extends React.Component {
             );
         }
 
-        return <div className={classNames('dialog-content', classes.dialogContent)}>{contentControl}</div>;
+        return <div className='dialog-content'>{contentControl}</div>;
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(DialogContent);
+export default withTranslation()(DialogContent);

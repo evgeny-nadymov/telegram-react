@@ -10,9 +10,17 @@
 /*}*/
 
 .dialog {
-    /*border-radius: 8px;*/
-    /*cursor: pointer;*/
-    /*margin: 0 12px;*/
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 0 9px;
+}
+
+.dialog:hover {
+    background: var(--color-accent-main22);
+}
+
+.dialog:hover .chat-status-icon {
+    background: var(--color-accent-main22);
 }
 
 .dialog-tile {
@@ -21,17 +29,27 @@
 }
 
 .dialog-active {
-    /*background-color: #3B9EDB;*/
-    /*color: #fff;*/
-    /*border-radius: 8px;*/
-    /*cursor: pointer;*/
-    /*margin: 0 12px;*/
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 0 9px;
+    background: var(--color-accent-main);
+    color: #fff;
+}
+
+.accent-background .chat-status {
+    background: var(--color-accent-main);
+}
+
+.accent-background .chat-status-indicator {
+    background: #fff;
 }
 
 .accent-background .dialog-title,
+.accent-background .dialog-title-icon,
 .accent-background .dialog-content,
 .accent-background .dialog-content-accent,
-.accent-background .dialog-meta {
+.accent-background .dialog-meta,
+.accent-background .status {
     color: #fff;
 }
 
@@ -62,12 +80,12 @@
     /*width: 48px;*/
     overflow: hidden;
     flex-grow: 1;
-    margin-left: 12px;
+    margin-left: 9px;
     z-index: 1;
 }
 
 .dialog-wrapper {
-    padding: 10px 12px 10px 10px;
+    padding: 9px 12px 9px 9px;
     display: flex;
     align-items: center;
     user-select: none;

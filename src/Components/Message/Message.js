@@ -561,6 +561,7 @@ class Message extends Component {
                             {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                             {/*{!showTitle && meta}*/}
                         </div>
+                        <div className='message-tile-padding' />
                         {/*{!showTitle && meta}*/}
                     </div>
                     <div className='message-padding' />
@@ -579,7 +580,7 @@ class Message extends Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: 'message-menu' }} onClick={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
                         {canBePinned && (
                             <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>

@@ -8,8 +8,8 @@
 .chat-tile {
     z-index: 1;
     position: relative;
-    height: 48px;
-    width: 48px;
+    height: 54px;
+    width: 54px;
     border-radius: 50%;
     flex-shrink: 0;
 }
