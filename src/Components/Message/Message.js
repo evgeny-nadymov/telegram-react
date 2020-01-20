@@ -18,7 +18,6 @@ import Reply from './Reply';
 import Forward from './Forward';
 import Meta from './Meta';
 import MessageAuthor from './MessageAuthor';
-import Status from './Status';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
@@ -27,7 +26,6 @@ import {
     getEmojiMatches,
     getText,
     getMedia,
-    getUnread,
     getWebPage,
     openMedia,
     showMessageForward,
@@ -458,16 +456,7 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const {
-            is_outgoing,
-            sending_state,
-            views,
-            date,
-            edit_date,
-            reply_to_message_id,
-            forward_info,
-            sender_user_id
-        } = message;
+        const { is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
         const showForward = showMessageForward(chatId, messageId);
         const text = getText(message);
@@ -475,7 +464,6 @@ class Message extends Component {
         const hasCaption = text !== null && text.length > 0;
         const webPage = getWebPage(message);
         const media = getMedia(message, this.openMedia, hasTitle, hasCaption);
-        this.unread = getUnread(message);
 
         let tile = null;
         if (showTail) {
@@ -511,10 +499,10 @@ class Message extends Component {
         return (
             <div
                 className={classNames('message', {
+                    'message-short': !tile,
                     'message-out': is_outgoing,
                     'message-selected': selected,
-                    'message-highlighted': highlighted && !selected,
-                    'message-short': !tile
+                    'message-highlighted': highlighted && !selected
                 })}
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}
@@ -535,13 +523,15 @@ class Message extends Component {
                                 'message-bubble-out': withBubble && is_outgoing
                             })}
                             style={style}>
-                            <div className='message-title'>
-                                {showTitle && !showForward && (
-                                    <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
-                                )}
-                                {showForward && <Forward forwardInfo={forward_info} />}
-                                {showTitle && meta}
-                            </div>
+                            {withBubble && (
+                                <div className='message-title'>
+                                    {showTitle && !showForward && (
+                                        <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
+                                    )}
+                                    {showForward && <Forward forwardInfo={forward_info} />}
+                                    {showTitle && meta}
+                                </div>
+                            )}
                             {Boolean(reply_to_message_id) && (
                                 <Reply
                                     chatId={chatId}
@@ -559,10 +549,8 @@ class Message extends Component {
                                 {text}
                             </div>
                             {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
-                            {/*{!showTitle && meta}*/}
                         </div>
                         <div className='message-tile-padding' />
-                        {/*{!showTitle && meta}*/}
                     </div>
                     <div className='message-padding' />
                 </div>

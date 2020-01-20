@@ -144,6 +144,11 @@ pre code {
     box-sizing: border-box;
 }
 
+.message-content:not(.message-bubble) {
+    display: flex;
+    align-items: flex-end;
+}
+
 .message-bubble {
     position: relative;
     border-radius: 10px 10px 10px 0;

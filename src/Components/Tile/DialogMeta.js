@@ -77,11 +77,13 @@ class DialogMeta extends React.Component {
         const date = getLastMessageDate(chat);
         if (!date) return null;
 
+        const { id, is_outgoing } = last_message;
+
         return (
             <div className='dialog-meta'>
-                {last_message.is_outgoing && (
+                {is_outgoing && (
                     <>
-                        <Status chatId={chatId} messageId={last_message.id} />
+                        <Status chatId={chatId} messageId={id} />
                         <span> </span>
                     </>
                 )}
