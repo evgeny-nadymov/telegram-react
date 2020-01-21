@@ -8,8 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox/';
@@ -24,7 +22,6 @@ import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
 import Photo from '../../Message/Media/Photo';
 import SafeLink from '../../Additional/SafeLink';
-import { accentStyles } from '../../Theme';
 import { openMedia, substring } from '../../../Utils/Message';
 import { getChatShortTitle, isPrivateChat } from '../../../Utils/Chat';
 import { forwardMessages, openChat } from '../../../Actions/Client';
@@ -32,10 +29,6 @@ import punycode from '../../../Utils/Punycode';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedLink.css';
-
-const styles = theme => ({
-    ...accentStyles(theme)
-});
 
 class SharedLink extends React.Component {
     constructor(props) {
@@ -187,7 +180,7 @@ class SharedLink extends React.Component {
     }
 
     render() {
-        const { chatId, classes, messageId, webPage, showOpenMessage, t } = this.props;
+        const { chatId, messageId, webPage, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -286,7 +279,7 @@ class SharedLink extends React.Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                    <MenuList onClick={e => e.stopPropagation()}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
@@ -339,9 +332,4 @@ SharedLink.propTypes = {
     openMedia: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedLink);
+export default withTranslation()(SharedLink);

@@ -19,7 +19,7 @@
     box-sizing: border-box;
     border-top-width: 1px;
     border-top-style: solid;
-
+    border-color: var(--border);
     padding: 10px 0 25px;
     width: calc(100% - 22px);
     max-width: 695px;

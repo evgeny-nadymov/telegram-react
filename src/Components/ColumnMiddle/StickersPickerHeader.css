@@ -9,6 +9,7 @@
     min-height: 44px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
+    border-color: var(--border);
     overflow: hidden;
 }
 
@@ -43,5 +44,5 @@
     position: absolute;
     bottom: 16px;
     transition: transform 500ms ease-out;
-    /*display: none;*/
+    background: var(--color-accent-dark);
 }

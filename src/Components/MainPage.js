@@ -20,7 +20,6 @@ import Footer from './Footer';
 import InstantViewer from './InstantView/InstantViewer';
 import MediaViewer from './Viewer/MediaViewer';
 import ProfileMediaViewer from './Viewer/ProfileMediaViewer';
-import { borderStyle } from './Theme';
 import { highlightMessage } from '../Actions/Client';
 import ApplicationStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
@@ -33,8 +32,7 @@ const styles = theme => ({
     page: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class MainPage extends React.Component {
@@ -175,7 +173,7 @@ class MainPage extends React.Component {
         return (
             <>
                 <div
-                    className={classNames(classes.page, classes.borderColor, 'page', {
+                    className={classNames(classes.page, 'page', {
                         'page-third-column': isChatDetailsVisible
                     })}>
                     <Dialogs />

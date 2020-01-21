@@ -22,7 +22,6 @@ import ShuffleButton from '../Player/ShuffleButton';
 import PlaybackRateButton from './PlaybackRateButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
-import { borderStyle } from '../Theme';
 import { getSrc } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
@@ -37,8 +36,7 @@ import './HeaderPlayer.css';
 const styles = theme => ({
     iconButton: {
         padding: 4
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class HeaderPlayer extends React.Component {
@@ -648,7 +646,7 @@ class HeaderPlayer extends React.Component {
                     onEnded={this.handleVideoEnded}
                 />
                 {message && (
-                    <div className={classNames(classes.borderColor, 'header-player')}>
+                    <div className='header-player'>
                         <IconButton
                             disabled={!hasPrev}
                             className={classes.iconButton}

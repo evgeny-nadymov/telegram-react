@@ -23,7 +23,6 @@ import InputBoxHeader from './InputBoxHeader';
 import PasteFilesDialog from '../Popup/PasteFilesDialog';
 import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { borderStyle } from '../Theme';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { findLastTextNode, focusInput } from '../../Utils/DOM';
 import { isEditedMedia } from '../../Utils/Media';
@@ -49,8 +48,7 @@ const styles = theme => ({
         '&::after': {
             background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
         }
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class InputBoxControl extends Component {
@@ -1164,7 +1162,7 @@ class InputBoxControl extends Component {
 
         return (
             <div className={classes.inputboxBackground}>
-                <div className={classNames(classes.borderColor, 'inputbox')}>
+                <div className='inputbox'>
                     <div className={classNames('inputbox-bubble', classes.inputboxBubble)}>
                         <InputBoxHeader
                             chatId={chatId}

@@ -14,7 +14,6 @@ import { withTranslation } from 'react-i18next';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import PollRadio from './PollRadio';
 import PollPercentage from './PollPercentage';
-import { borderStyle } from '../../Theme';
 import './PollOption.css';
 
 const styles = theme => ({
@@ -28,8 +27,7 @@ const styles = theme => ({
     },
     progressBar: {
         transition: 'transform .2s linear'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class PollOption extends React.Component {
@@ -94,7 +92,7 @@ class PollOption extends React.Component {
                         <div className='poll-option-text'>{text}</div>
                     </div>
                 </div>
-                <div className={classNames('poll-option-bottom-border', { [classes.borderColor]: canBeSelected })} />
+                <div className='poll-option-bottom-border' />
                 <LinearProgress
                     classes={{ root: classes.progressRoot, bar: classes.progressBar }}
                     color='primary'

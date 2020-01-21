@@ -14,7 +14,6 @@ import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import IconButton from '@material-ui/core/IconButton';
 import Slider from '@material-ui/core/Slider';
-import { borderStyle } from '../Theme';
 import { PLAYER_VOLUME_NORMAL } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -30,8 +29,7 @@ const styles = theme => ({
         width: 28,
         padding: '13px 0',
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class VolumeButton extends React.Component {
@@ -187,13 +185,7 @@ class VolumeButton extends React.Component {
                     }}
                     onMouseEnter={e => this.handleMouseEnter(e, false)}
                     onMouseLeave={this.handlePopupMouseLeave}>
-                    <div
-                        className={classNames(classes.borderColor, classes.root)}
-                        style={{
-                            marginTop: 8,
-                            borderWidth: 1,
-                            borderStyle: 'solid'
-                        }}>
+                    <div className={classNames('volume-button-panel', classes.root)}>
                         <Slider
                             min={0}
                             max={1}

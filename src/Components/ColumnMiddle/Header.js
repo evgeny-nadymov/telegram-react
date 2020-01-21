@@ -23,7 +23,6 @@ import { compose } from 'recompose';
 import MainMenuButton from './MainMenuButton';
 import HeaderCommand from './HeaderCommand';
 import HeaderProgress from './HeaderProgress';
-import { borderStyle } from '../Theme';
 import {
     getChatShortTitle,
     getChatSubtitle,
@@ -62,8 +61,7 @@ const styles = theme => ({
     },
     headerStatusAccentTitle: {
         color: theme.palette.primary.dark + '!important'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class Header extends Component {
@@ -432,7 +430,7 @@ class Header extends Component {
         }
 
         control = control || (
-            <div className={classNames(classes.borderColor, 'header-details')}>
+            <div className='header-details'>
                 <div
                     className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
                     onClick={this.openChatDetails}>

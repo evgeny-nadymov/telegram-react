@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import ChatDetails from './ChatDetails';
 import GroupsInCommon from './GroupsInCommon';
 import SharedAudios from './SharedMedia/SharedAudios';
@@ -18,7 +17,6 @@ import SharedMedia from './SharedMedia';
 import SharedPhotos from './SharedMedia/SharedPhotos';
 import SharedVideos from './SharedMedia/SharedVideos';
 import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
-import { borderStyle } from '../Theme';
 import { getChatCounters } from '../../Actions/Chat';
 import { getPhotoFromChat, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { loadProfileMediaViewerContent } from '../../Utils/File';
@@ -27,12 +25,6 @@ import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatInfo.css';
-
-// const styles = (theme) => ({
-//     borderColor: {
-//         borderColor: theme.palette.divider
-//     }
-// });
 
 class ChatInfo extends React.Component {
     constructor(props) {
@@ -372,7 +364,7 @@ class ChatInfo extends React.Component {
         return popup ? (
             <>{content}</>
         ) : (
-            <div className={classNames(classes.borderColor, { 'right-column': !popup }, className)}>{content}</div>
+            <div className={classNames('chat-info', { 'right-column': !popup }, className)}>{content}</div>
         );
     }
 }
@@ -389,4 +381,4 @@ ChatInfo.defaultProps = {
     popup: false
 };
 
-export default withStyles(borderStyle)(ChatInfo);
+export default ChatInfo;

@@ -23,7 +23,6 @@ import ForwardTargetChat from '../Tile/ForwardTargetChat';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
-import { borderStyle } from '../Theme';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -44,8 +43,7 @@ const styles = theme => ({
     },
     searchList: {
         background: theme.palette.background.paper
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class ForwardDialog extends React.Component {
@@ -501,7 +499,7 @@ class ForwardDialog extends React.Component {
                     onKeyUp={this.handleSearchKeyUp}
                     onPaste={this.handleSearchPaste}
                 />
-                <div className={classNames(classes.borderColor, 'forward-dialog-content')}>
+                <div className='forward-dialog-content'>
                     <div className='forward-dialog-list'>{chats}</div>
                     {searchText && (
                         <div className={classNames(classes.searchList, 'forward-dialog-search-list')}>{foundChats}</div>

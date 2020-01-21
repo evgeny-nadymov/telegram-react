@@ -4,3 +4,10 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.volume-button-panel {
+    margin-top: 8px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: var(--border);
+}

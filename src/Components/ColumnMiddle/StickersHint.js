@@ -11,7 +11,6 @@ import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerPreview from './StickerPreview';
-import { borderStyle } from '../Theme';
 import { loadStickerContent, loadStickersContent } from '../../Utils/File';
 import { STICKER_HINT_DISPLAY_SIZE, STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
@@ -22,8 +21,7 @@ import './StickersHint.css';
 const styles = theme => ({
     root: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class StickersHint extends React.Component {
@@ -281,7 +279,7 @@ class StickersHint extends React.Component {
         ));
 
         return (
-            <div ref={this.hintsRef} className={classNames('stickers-hint', classes.borderColor, classes.root)}>
+            <div ref={this.hintsRef} className={classNames('stickers-hint', classes.root)}>
                 {controls}
                 {Boolean(sticker) && showPreview && <StickerPreview sticker={sticker} />}
             </div>

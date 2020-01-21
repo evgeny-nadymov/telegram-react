@@ -33,6 +33,7 @@ function updateLightTheme(theme) {
     style.setProperty('--day-background', '#00000033');
 
     style.setProperty('--panel-background', '#ffffff');
+    style.setProperty('--border', '#DADCE0');
 
     style.setProperty('--dialog-title-color', '#000000');
     style.setProperty('--dialog-color', '#707579');
@@ -75,6 +76,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--day-background', '#303030');
 
     style.setProperty('--panel-background', '#303030');
+    style.setProperty('--border', theme.palette.divider);
 
     style.setProperty('--dialog-title-color', '#ffffff');
     style.setProperty('--dialog-color', theme.palette.text.secondary);

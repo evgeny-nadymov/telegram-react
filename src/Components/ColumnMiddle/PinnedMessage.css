@@ -18,6 +18,7 @@
     box-sizing: border-box;
     border-bottom-width: 1px;
     border-bottom-style: solid;
+    border-color: var(--border);
 }
 
 .pinned-message-wrapper {

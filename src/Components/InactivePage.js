@@ -10,14 +10,12 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
 import AppInactiveControl from './Additional/AppInactiveControl';
 import Footer from './Footer';
-import { borderStyle } from './Theme';
 
 const styles = theme => ({
     page: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class InactivePage extends React.Component {
@@ -27,7 +25,7 @@ class InactivePage extends React.Component {
         return (
             <>
                 <div className='header-wrapper' />
-                <div className={classNames(classes.page, classes.borderColor, 'page')}>
+                <div className={classNames(classes.page, 'page')}>
                     <AppInactiveControl />
                 </div>
                 <Footer />

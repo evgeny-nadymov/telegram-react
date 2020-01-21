@@ -20,21 +20,18 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
 import ReplyTile from '../Tile/ReplyTile';
-import { accentStyles, borderStyle } from '../Theme';
 import { canPinMessages } from '../../Utils/Chat';
 import { getContent, getReplyMinithumbnail, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
 import { loadMessageContents } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
-import AppStore from '../../Stores/ApplicationStore';
 
 const styles = theme => ({
-    ...accentStyles(theme),
-    ...borderStyle(theme),
     pinnedMessage: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
         color: theme.palette.text.primary
@@ -248,9 +245,7 @@ class PinnedMessage extends React.Component {
 
         return (
             <>
-                <div
-                    className={classNames('pinned-message', classes.pinnedMessage, classes.borderColor)}
-                    onMouseDown={this.handleClick}>
+                <div className={classNames('pinned-message', classes.pinnedMessage)} onMouseDown={this.handleClick}>
                     <div className='pinned-message-wrapper'>
                         <div className='border reply-border' />
                         {photoSize && (

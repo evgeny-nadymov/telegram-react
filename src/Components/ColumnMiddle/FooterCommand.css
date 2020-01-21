@@ -11,8 +11,14 @@
     box-sizing: border-box;
     border-top-width: 1px;
     border-top-style: solid;
+    border-color: var(--border);
 }
 
 .footer-command-actions {
     margin: 0 auto;
+}
+
+.footer-command-button {
+    margin: 14px;
+    min-width: 100px;
 }

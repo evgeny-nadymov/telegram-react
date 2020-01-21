@@ -17,7 +17,6 @@ import Typography from '@material-ui/core/es/Typography/Typography';
 import { focusNode } from '../../Utils/Component';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
-import { borderStyle } from '../Theme';
 import { POLL_OPTION_HINT_LENGTH, POLL_OPTION_LENGTH, POLL_OPTION_MAX_LENGTH } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollOption.css';
@@ -32,8 +31,7 @@ const styles = theme => ({
         bottom: 6,
         minWidth: 28,
         userSelect: 'none'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class CreatePollOption extends React.Component {
@@ -224,7 +222,7 @@ class CreatePollOption extends React.Component {
                         <CloseIcon fontSize='small' />
                     </IconButton>
                 </div>
-                <div className={classNames('create-poll-option-bottom-border', { [classes.borderColor]: true })} />
+                <div className='create-poll-option-bottom-border' />
                 {remainLength <= POLL_OPTION_LENGTH - POLL_OPTION_HINT_LENGTH && (
                     <Typography
                         align='center'

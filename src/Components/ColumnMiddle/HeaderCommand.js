@@ -7,12 +7,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
-import { borderStyle } from '../Theme';
 import { clearSelection, deleteMessages, forwardMessages } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './HeaderCommand.css';
@@ -23,8 +21,7 @@ const styles = theme => ({
     },
     buttonRight: {
         margin: '14px 14px 14px 0'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class HeaderCommand extends React.Component {
@@ -84,7 +81,7 @@ class HeaderCommand extends React.Component {
         }
 
         return (
-            <div className={classNames(classes.borderColor, 'header-command')}>
+            <div className='header-command'>
                 {canBeForwarded && (
                     <Button color='primary' className={classes.buttonLeft} onClick={this.handleForward}>
                         {count <= 1 ? t('Forward') : `${t('Forward')} ${count}`}

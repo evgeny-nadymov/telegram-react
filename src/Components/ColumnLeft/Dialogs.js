@@ -6,14 +6,11 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Search from './Search/Search';
 import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
 import UpdatePanel from './UpdatePanel';
-import { borderStyle } from '../Theme';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
 import { loadChatsContent } from '../../Utils/File';
@@ -23,10 +20,6 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-
-const styles = theme => ({
-    ...borderStyle(theme)
-});
 
 class Dialogs extends Component {
     constructor(props) {
@@ -332,7 +325,6 @@ class Dialogs extends Component {
     }
 
     render() {
-        const { classes } = this.props;
         const {
             cache,
             showArchive,
@@ -351,7 +343,7 @@ class Dialogs extends Component {
 
         return (
             <div
-                className={classNames(classes.borderColor, 'dialogs', {
+                className={classNames('dialogs', {
                     'dialogs-third-column': isChatDetailsVisible
                 })}>
                 <DialogsHeader
@@ -396,4 +388,4 @@ class Dialogs extends Component {
     }
 }
 
-export default withStyles(styles)(Dialogs);
+export default Dialogs;

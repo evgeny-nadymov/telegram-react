@@ -7,7 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
@@ -17,17 +16,15 @@ import DialogActions from '@material-ui/core/DialogActions';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
 import EditUrlDialog from './EditUrlDialog';
-import { borderStyle } from '../Theme';
 import { focusInput } from '../../Utils/DOM';
 import { getEntities, getMedia, getNodes } from '../../Utils/Message';
+import { readImageSize } from '../../Utils/Common';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EditMediaDialog.css';
-import { readImageSize } from '../../Utils/Common';
 
 const styles = theme => ({
-    ...borderStyle(theme),
     editButton: {
         position: 'absolute',
         top: 30,
@@ -493,7 +490,7 @@ class EditMediaDialog extends React.Component {
                 open={true}
                 onClose={this.handleCancel}
                 aria-labelledby='edit-media-dialog-title'>
-                <div className={classNames(classes.borderColor, 'edit-media-dialog-content')}>
+                <div className='edit-media-dialog-content'>
                     <div style={{ margin: 24 }}>{media}</div>
                     <IconButton
                         disableRipple={true}

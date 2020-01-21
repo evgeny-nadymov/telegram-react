@@ -14,7 +14,6 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
-import { borderStyle } from './Theme';
 import DialogPlaceholder from './Tile/DialogPlaceholder';
 import Footer from './Footer';
 import HeaderProgress from './ColumnMiddle/HeaderProgress';
@@ -40,8 +39,7 @@ const styles = theme => ({
         background: theme.palette.type === 'dark' ? theme.palette.grey[900] : 'transparent',
         flex: '1 1 auto',
         position: 'relative'
-    },
-    ...borderStyle(theme)
+    }
 });
 
 class StubPage extends React.Component {
@@ -54,11 +52,11 @@ class StubPage extends React.Component {
         return (
             <>
                 <div
-                    className={classNames(classes.page, classes.borderColor, 'page', {
+                    className={classNames(classes.page, 'page', {
                         'page-third-column': isChatDetailsVisible
                     })}>
                     <div
-                        className={classNames(classes.borderColor, 'dialogs', {
+                        className={classNames('dialogs', {
                             'dialogs-third-column': isChatDetailsVisible
                         })}>
                         <div className='header-master'>
@@ -78,7 +76,7 @@ class StubPage extends React.Component {
                         className={classNames('dialog-details', {
                             'dialog-details-third-column': isChatDetailsVisible
                         })}>
-                        <div className={classNames(classes.borderColor, 'header-details')}>
+                        <div className='header-details'>
                             <div className={classNames('header-status', 'grow', 'cursor-default')}>
                                 <span className='header-status-content'>{title}</span>
                                 {Boolean(title) && <HeaderProgress />}

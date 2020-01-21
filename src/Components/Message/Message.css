@@ -144,9 +144,15 @@ pre code {
     box-sizing: border-box;
 }
 
-.message-content:not(.message-bubble) {
+.message.message-out .message-content:not(.message-bubble) {
     display: flex;
     align-items: flex-end;
+}
+
+.message:not(.message-out) .message-content:not(.message-bubble) {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: row-reverse;
 }
 
 .message-bubble {

@@ -39,6 +39,7 @@
     border-top-style: solid;
     border-bottom-width: 1px;
     border-bottom-style: solid;
+    border-color: var(--border);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }

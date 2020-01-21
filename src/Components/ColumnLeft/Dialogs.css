@@ -12,6 +12,7 @@
     box-sizing: border-box;
     border-right-width: 1px;
     border-right-style: solid;
+    border-color: var(--border);
     height: 100%;
     display: flex;
     flex-direction: column;
