@@ -36,6 +36,12 @@
     color: #fff;
 }
 
+.dialog-bottom-separator {
+    background: var(--border);
+    height: 1px;
+    margin: 6px -9px;
+}
+
 .accent-background .chat-status {
     background: var(--color-accent-main);
 }

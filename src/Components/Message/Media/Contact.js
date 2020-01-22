@@ -6,32 +6,25 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import withStyles from '@material-ui/core/styles/withStyles';
+import classNames from 'classnames';
 import UserTile from '../../Tile/UserTile';
 import { formatPhoneNumber } from '../../../Utils/Common';
 import { getUserFullName } from '../../../Utils/User';
 import UserStore from '../../../Stores/UserStore';
 import './Contact.css';
 
-const styles = theme => ({
-    contactPhone: {
-        color: theme.palette.text.secondary
-    }
-});
-
 class Contact extends React.Component {
     render() {
-        const { classes, contact, openMedia } = this.props;
+        const { contact, title, openMedia } = this.props;
         if (!contact) return null;
 
-        const { user_id, first_name, last_name, phone_number } = contact;
+        const { user_id: id, first_name, last_name, phone_number } = contact;
 
-        const user = UserStore.get(user_id) || {
+        const user = UserStore.get(id) || {
             '@type': 'user',
             type: { '@type': 'userTypeRegular' },
-            id: user_id,
+            id,
             first_name,
             last_name
         };
@@ -40,15 +33,15 @@ class Contact extends React.Component {
         const number = formatPhoneNumber(phone_number);
 
         return (
-            <div className='contact'>
+            <div className={classNames('contact', { 'contact-title': title })}>
                 <div className='contact-tile'>
-                    <UserTile userId={user_id} firstName={first_name} lastName={last_name} />
+                    <UserTile userId={id} firstName={first_name} lastName={last_name} />
                 </div>
                 <div className='contact-content'>
                     <div className='contact-name'>
-                        {user_id > 0 ? <a onClick={openMedia}>{fullName}</a> : <span>{fullName}</span>}
+                        {id > 0 ? <a onClick={openMedia}>{fullName}</a> : <span>{fullName}</span>}
                     </div>
-                    <div className={classNames('contact-phone', classes.contactPhone)}>{number}</div>
+                    <div className='contact-phone'>{number}</div>
                 </div>
             </div>
         );
@@ -62,4 +55,4 @@ Contact.propTypes = {
     openMedia: PropTypes.func
 };
 
-export default withStyles(styles, { withTheme: true })(Contact);
+export default Contact;

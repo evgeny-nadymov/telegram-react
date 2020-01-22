@@ -20,20 +20,20 @@
 }
 
 .forward-target-chat-tile-wrapper {
-    height: 48px;
+    /*height:  54px;*/
     transition: transform 0.2s cubic-bezier(0.5, 2, 0.6, 0.6);
 }
 
 .forward-target-chat-selected .forward-target-chat-tile-wrapper {
-    transform: scaleX(0.834) scaleY(0.834);
+    transform: scaleX(0.852) scaleY(0.852);
 }
 
 .forward-target-chat-selection {
     border-width: 2px;
     border-style: solid;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     position: absolute;
     left: 0;
     top: 0;

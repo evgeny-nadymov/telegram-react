@@ -15,7 +15,7 @@
 }
 
 .dialog-content-accent {
-    /*color: #000;*/
+    color: var(--dialog-accent-color);
 }
 
 .dialog-active .dialog-content,

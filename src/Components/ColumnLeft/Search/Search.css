@@ -25,6 +25,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     padding: 10px 22px;
+    overflow: hidden;
 }
 
 .search-top-chats {

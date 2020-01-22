@@ -48,7 +48,7 @@ class Dialog extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, t, hidden } = this.props;
+        const { chatId, t, hidden, isLastPinned } = this.props;
         const { contextMenu } = this.state;
 
         if (nextProps.chatId !== chatId) {
@@ -60,6 +60,10 @@ class Dialog extends Component {
         }
 
         if (nextProps.hidden !== hidden) {
+            return true;
+        }
+
+        if (nextProps.isLastPinned !== isLastPinned) {
             return true;
         }
 
@@ -238,7 +242,7 @@ class Dialog extends Component {
     };
 
     render() {
-        const { chatId, showSavedMessages, hidden, t } = this.props;
+        const { chatId, showSavedMessages, hidden, t, isLastPinned } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
 
         if (hidden) return null;
@@ -251,55 +255,60 @@ class Dialog extends Component {
         const isUnread = isChatUnread(chatId);
         const isArchived = isChatArchived(chatId);
         return (
-            <div
-                ref={this.dialog}
-                className={classNames(isSelected ? 'dialog-active' : 'dialog', { 'accent-background': isSelected })}
-                onMouseDown={this.handleSelect}
-                onContextMenu={this.handleContextMenu}>
-                <div className='dialog-wrapper'>
-                    <ChatTile chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            <DialogTitle chatId={chatId} />
-                            <DialogMeta chatId={chatId} />
-                        </div>
-                        <div className='tile-second-row'>
-                            <DialogContent chatId={chatId} />
-                            <DialogBadge chatId={chatId} />
+            <>
+                <div
+                    ref={this.dialog}
+                    className={classNames(isSelected ? 'dialog-active' : 'dialog', { 'accent-background': isSelected })}
+                    onMouseDown={this.handleSelect}
+                    onContextMenu={this.handleContextMenu}>
+                    <div className='dialog-wrapper'>
+                        <ChatTile chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
+                        <div className='dialog-inner-wrapper'>
+                            <div className='tile-first-row'>
+                                <DialogTitle chatId={chatId} />
+                                <DialogMeta chatId={chatId} />
+                            </div>
+                            <div className='tile-second-row'>
+                                <DialogContent chatId={chatId} />
+                                <DialogBadge chatId={chatId} />
+                            </div>
                         </div>
                     </div>
+                    <Popover
+                        open={contextMenu}
+                        onClose={this.handleCloseContextMenu}
+                        anchorReference='anchorPosition'
+                        anchorPosition={{ top, left }}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right'
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'left'
+                        }}
+                        onMouseDown={e => e.stopPropagation()}>
+                        <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
+                            {canToggleArchive && (
+                                <MenuItem onClick={this.handleArchive}>
+                                    {isArchived ? t('Unarchive') : t('Archive')}
+                                </MenuItem>
+                            )}
+                            {canTogglePin && (
+                                <MenuItem onClick={this.handlePin}>
+                                    {is_pinned ? t('UnpinFromTop') : t('PinToTop')}
+                                </MenuItem>
+                            )}
+                            <MenuItem onClick={this.handleViewInfo}>{this.getViewInfoTitle()}</MenuItem>
+                            <MenuItem onClick={this.handleMute}>{isMuted ? t('Unmute') : t('Mute')}</MenuItem>
+                            <MenuItem onClick={this.handleRead}>
+                                {isUnread ? t('MarkAsRead') : t('MarkAsUnread')}
+                            </MenuItem>
+                        </MenuList>
+                    </Popover>
                 </div>
-                <Popover
-                    open={contextMenu}
-                    onClose={this.handleCloseContextMenu}
-                    anchorReference='anchorPosition'
-                    anchorPosition={{ top, left }}
-                    anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right'
-                    }}
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'left'
-                    }}
-                    onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
-                        {canToggleArchive && (
-                            <MenuItem onClick={this.handleArchive}>
-                                {isArchived ? t('Unarchive') : t('Archive')}
-                            </MenuItem>
-                        )}
-                        {canTogglePin && (
-                            <MenuItem onClick={this.handlePin}>
-                                {is_pinned ? t('UnpinFromTop') : t('PinToTop')}
-                            </MenuItem>
-                        )}
-                        <MenuItem onClick={this.handleViewInfo}>{this.getViewInfoTitle()}</MenuItem>
-                        <MenuItem onClick={this.handleMute}>{isMuted ? t('Unmute') : t('Mute')}</MenuItem>
-                        <MenuItem onClick={this.handleRead}>{isUnread ? t('MarkAsRead') : t('MarkAsUnread')}</MenuItem>
-                    </MenuList>
-                </Popover>
-            </div>
+                {/*{isLastPinned && <div className='dialog-bottom-separator'/>}*/}
+            </>
         );
     }
 }
@@ -307,7 +316,8 @@ class Dialog extends Component {
 Dialog.propTypes = {
     chatId: PropTypes.number.isRequired,
     hidden: PropTypes.bool,
-    showSavedMessages: PropTypes.bool
+    showSavedMessages: PropTypes.bool,
+    isLastPinned: PropTypes.bool
 };
 
 Dialog.defaultProps = {

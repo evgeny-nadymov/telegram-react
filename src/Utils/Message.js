@@ -380,7 +380,15 @@ function getMedia(message, openMedia, hasTitle = false, hasCaption = false) {
                 />
             );
         case 'messageContact':
-            return <Contact chatId={chat_id} messageId={id} contact={content.contact} openMedia={openMedia} />;
+            return (
+                <Contact
+                    title={hasTitle}
+                    chatId={chat_id}
+                    messageId={id}
+                    contact={content.contact}
+                    openMedia={openMedia}
+                />
+            );
         case 'messageDocument':
             return <Document chatId={chat_id} messageId={id} document={content.document} openMedia={openMedia} />;
         case 'messageGame':
@@ -1111,7 +1119,7 @@ function openContact(contact, message, fileCancel) {
         message_id: id
     });
 
-    openUser(contact.userId);
+    openUser(contact.user_id, true);
 }
 
 function openDocument(document, message, fileCancel) {

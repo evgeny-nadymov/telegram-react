@@ -36,6 +36,7 @@ function updateLightTheme(theme) {
     style.setProperty('--border', '#DADCE0');
 
     style.setProperty('--dialog-title-color', '#000000');
+    style.setProperty('--dialog-accent-color', '#000000');
     style.setProperty('--dialog-color', '#707579');
     style.setProperty('--dialog-meta-color', '#5F6369');
     style.setProperty('--dialog-status-color', '#4FAE4E');
@@ -44,6 +45,7 @@ function updateLightTheme(theme) {
     style.setProperty('--message-in-author', theme.palette.primary.main);
     style.setProperty('--message-in-background', '#FFFFFF');
     style.setProperty('--message-in-color', '#000000');
+    style.setProperty('--message-in-secondary-color', '#707579');
     style.setProperty('--message-in-meta-color', '#8D969C');
     style.setProperty('--message-in-reply-title', theme.palette.primary.main);
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
@@ -52,6 +54,7 @@ function updateLightTheme(theme) {
     style.setProperty('--message-out-author', '#4FAE4E');
     style.setProperty('--message-out-background', '#EEFFDE');
     style.setProperty('--message-out-color', '#000000');
+    style.setProperty('--message-out-secondary-color', '#4FAE4E');
     style.setProperty('--message-out-meta-color', '#4FAE4E');
     style.setProperty('--message-out-reply-title', '#4FAE4E');
     style.setProperty('--message-out-reply-border', '#4FAE4E');
@@ -79,6 +82,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--border', theme.palette.divider);
 
     style.setProperty('--dialog-title-color', '#ffffff');
+    style.setProperty('--dialog-accent-color', '#ffffff');
     style.setProperty('--dialog-color', theme.palette.text.secondary);
     style.setProperty('--dialog-meta-color', theme.palette.text.secondary);
     style.setProperty('--dialog-status-color', '#4FAE4E');
@@ -87,6 +91,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-in-author', theme.palette.primary.main);
     style.setProperty('--message-in-background', '#303030'); // background.default
     style.setProperty('--message-in-color', '#FFFFFF');
+    style.setProperty('--message-in-secondary-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-in-meta-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-in-reply-title', theme.palette.primary.main);
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
@@ -95,6 +100,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-out-author', theme.palette.primary.main);
     style.setProperty('--message-out-background', '#303030'); // background.default
     style.setProperty('--message-out-color', '#FFFFFF');
+    style.setProperty('--message-out-secondary-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-out-meta-color', 'rgba(255, 255, 255, 0.7)'); // text.secondary
     style.setProperty('--message-out-reply-title', theme.palette.primary.main);
     style.setProperty('--message-out-reply-border', theme.palette.primary.main);

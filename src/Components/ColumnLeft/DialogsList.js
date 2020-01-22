@@ -353,9 +353,32 @@ class DialogsList extends React.Component {
 
         let dialogs = null;
         if (chats) {
-            dialogs = chats.map(x => <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} />);
+            let lastPinnedId = 0;
+            chats.forEach(x => {
+                const chat = ChatStore.get(x);
+                if (chat && chat.is_pinned) {
+                    lastPinnedId = x;
+                }
+            });
+            dialogs = chats.map(x => (
+                <Dialog key={x} chatId={x} isLastPinned={x === lastPinnedId} hidden={this.hiddenChats.has(x)} />
+            ));
         } else if (cacheItems) {
-            dialogs = cacheItems.map(x => <Dialog key={x.id} chatId={x.id} hidden={this.hiddenChats.has(x.id)} />);
+            let lastPinnedId = 0;
+            cacheItems.forEach(x => {
+                const chat = ChatStore.get(x);
+                if (chat && chat.is_pinned) {
+                    lastPinnedId = x;
+                }
+            });
+            dialogs = cacheItems.map(x => (
+                <Dialog
+                    key={x.id}
+                    chatId={x.id}
+                    isLastPinned={x === lastPinnedId}
+                    hidden={this.hiddenChats.has(x.id)}
+                />
+            ));
         } else {
             if (type === 'chatListMain') {
                 dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);

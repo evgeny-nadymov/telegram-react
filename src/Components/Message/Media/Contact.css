@@ -9,21 +9,29 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 48px;
+}
+
+.contact-title {
+    margin-top: 6px;
 }
 
 .contact-tile {
-    height: 48px;
-    margin-right: 12px;
+    margin-right: 9px;
 }
 
 .contact-name {
-    font-weight: 500;
     white-space: nowrap;
 }
 
 .contact-phone {
+    margin-top: 2px;
     font-size: 14px;
+    line-height: normal;
+    color: var(--message-in-secondary-color);
+}
+
+.message-out .contact-phone {
+    color: var(--message-out-secondary-color);
 }
 
 .contact-content {
