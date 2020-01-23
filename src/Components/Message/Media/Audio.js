@@ -7,16 +7,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import PauseIcon from '@material-ui/icons/Pause';
 import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
-import FileProgress from '../../Viewer/FileProgress';
 import { getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './Audio.css';
-import InsertDriveFileIcon from './Document';
 
 class Audio extends React.Component {
     constructor(props) {
@@ -122,16 +121,16 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, audio, openMedia } = this.props;
+        const { chatId, messageId, audio, openMedia, title, meta } = this.props;
         const { playing } = this.state;
         if (!audio) return null;
 
         const { album_cover_thumbnail, duration, audio: file } = audio;
 
-        const title = getAudioTitle(audio);
+        const audioTitle = getAudioTitle(audio);
 
         return (
-            <div className='document'>
+            <div className={classNames('document', { 'media-title': title })}>
                 <DocumentTile
                     thumbnail={album_cover_thumbnail}
                     file={file}
@@ -141,11 +140,11 @@ class Audio extends React.Component {
                 />
                 <div className='document-content'>
                     <div className='document-title'>
-                        <a className='document-name' onClick={openMedia} title={title}>
-                            {title}
+                        <a className='document-name' onClick={openMedia} title={audioTitle}>
+                            {audioTitle}
                         </a>
                     </div>
-                    <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
+                    <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} meta={meta} />
                 </div>
             </div>
         );

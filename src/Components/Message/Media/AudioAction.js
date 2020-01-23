@@ -152,7 +152,7 @@ class AudioAction extends React.Component {
     };
 
     render() {
-        const { classes, title } = this.props;
+        const { classes, title, meta } = this.props;
         const { active, file, timeString } = this.state;
         if (!file) return null;
 
@@ -175,6 +175,7 @@ class AudioAction extends React.Component {
                 {!active && <span>{title}</span>}
                 {!isDownloadingCompleted && <span>{`${sizeString}, `}</span>}
                 <span>{timeString}</span>
+                {meta}
             </div>
         );
     }

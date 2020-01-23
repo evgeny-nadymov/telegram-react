@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DocumentTile from '../../Tile/DocumentTile';
@@ -16,7 +17,7 @@ import './Document.css';
 
 class Document extends React.Component {
     render() {
-        const { document, openMedia, width, height } = this.props;
+        const { document, openMedia, width, height, meta, title } = this.props;
         if (!document) return null;
 
         const { minithumbnail, thumbnail, file_name } = document;
@@ -25,7 +26,7 @@ class Document extends React.Component {
         const style = width && height ? { width, height } : null;
 
         return (
-            <div className='document' style={style}>
+            <div className={classNames('document', { 'media-title': title })} style={style}>
                 <DocumentTile
                     minithumbnail={minithumbnail}
                     thumbnail={thumbnail}
@@ -45,7 +46,7 @@ class Document extends React.Component {
                             {file_name}
                         </a>
                     </div>
-                    <DocumentAction file={file} />
+                    <DocumentAction file={file} meta={meta} />
                 </div>
             </div>
         );

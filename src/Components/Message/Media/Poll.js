@@ -124,7 +124,7 @@ class Poll extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, poll, t } = this.props;
+        const { chatId, messageId, poll, t, meta } = this.props;
         const { left, top, contextMenu, dialog } = this.state;
         const { question, options, total_voter_count, is_closed } = poll;
 
@@ -155,7 +155,10 @@ class Poll extends React.Component {
                         />
                     ))}
                 </div>
-                <div className='poll-total-count subtitle'>{this.getTotalVoterCountString(total_voter_count, t)}</div>
+                <div className='poll-total-count subtitle'>
+                    {this.getTotalVoterCountString(total_voter_count, t)}
+                    {meta}
+                </div>
                 <Popover
                     open={contextMenu && (canUnvote || canStopPoll)}
                     onClose={this.handleCloseContextMenu}

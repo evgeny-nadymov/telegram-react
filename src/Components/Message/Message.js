@@ -30,7 +30,8 @@ import {
     openMedia,
     showMessageForward,
     canMessageBeEdited,
-    isMessagePinned
+    isMessagePinned,
+    isMetaBubble
 } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import {
@@ -57,20 +58,12 @@ class Message extends Component {
         super(props);
 
         const { chatId, messageId } = this.props;
-        if (process.env.NODE_ENV !== 'production') {
-            this.state = {
-                message: MessageStore.get(chatId, messageId),
-                emojiMatches: getEmojiMatches(chatId, messageId),
-                selected: false,
-                highlighted: false
-            };
-        } else {
-            this.state = {
-                emojiMatches: getEmojiMatches(chatId, messageId),
-                selected: false,
-                highlighted: false
-            };
-        }
+        this.state = {
+            message: MessageStore.get(chatId, messageId),
+            emojiMatches: getEmojiMatches(chatId, messageId),
+            selected: false,
+            highlighted: false
+        };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -458,32 +451,32 @@ class Message extends Component {
 
         const { is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
-        const showForward = showMessageForward(chatId, messageId);
-        const text = getText(message);
-        const hasTitle = showTitle || showForward || Boolean(reply_to_message_id);
-        const hasCaption = text !== null && text.length > 0;
-        const webPage = getWebPage(message);
-        const media = getMedia(message, this.openMedia, hasTitle, hasCaption);
-
-        let tile = null;
-        if (showTail) {
-            tile = sender_user_id ? (
-                <UserTile userId={sender_user_id} onSelect={this.handleSelectUser} small />
-            ) : (
-                <ChatTile chatId={chatId} onSelect={this.handleSelectChat} small />
-            );
-        }
-
-        const meta = (
+        const inlineMeta = (
             <Meta
+                className='meta-hidden'
                 chatId={chatId}
                 messageId={messageId}
                 date={date}
                 editDate={edit_date}
                 views={views}
-                onDateClick={this.handleDateClick}
             />
         );
+        const text = getText(message, inlineMeta);
+        const hasCaption = text !== null && text.length > 0;
+        const showForward = showMessageForward(chatId, messageId);
+        const hasTitle = showTitle || showForward || Boolean(reply_to_message_id);
+        const webPage = getWebPage(message);
+        const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta);
+
+        let tile = null;
+        if (showTail) {
+            tile = sender_user_id ? (
+                <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />
+            ) : (
+                <ChatTile small chatId={chatId} onSelect={this.handleSelectChat} />
+            );
+        }
+
         const style = this.getMessageStyle(chatId, messageId);
 
         const canBeReplied = canSendMessages(chatId);
@@ -523,13 +516,12 @@ class Message extends Component {
                                 'message-bubble-out': withBubble && is_outgoing
                             })}
                             style={style}>
-                            {withBubble && (
+                            {withBubble && (showTitle || showForward) && (
                                 <div className='message-title'>
                                     {showTitle && !showForward && (
                                         <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
                                     )}
                                     {showForward && <Forward forwardInfo={forward_info} />}
-                                    {showTitle && meta}
                                 </div>
                             )}
                             {Boolean(reply_to_message_id) && (
@@ -548,7 +540,27 @@ class Message extends Component {
                                 })}>
                                 {text}
                             </div>
-                            {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
+                            {webPage && (
+                                <WebPage
+                                    chatId={chatId}
+                                    messageId={messageId}
+                                    openMedia={this.openMedia}
+                                    meta={inlineMeta}
+                                />
+                            )}
+                            {withBubble && (
+                                <Meta
+                                    className={classNames('meta-text', {
+                                        'meta-bubble': isMetaBubble(chatId, messageId)
+                                    })}
+                                    chatId={chatId}
+                                    messageId={messageId}
+                                    date={date}
+                                    editDate={edit_date}
+                                    views={views}
+                                    onDateClick={this.handleDateClick}
+                                />
+                            )}
                         </div>
                         <div className='message-tile-padding' />
                     </div>

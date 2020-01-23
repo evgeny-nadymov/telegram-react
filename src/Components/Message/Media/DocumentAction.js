@@ -83,7 +83,7 @@ class DocumentAction extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
+        const { classes, meta } = this.props;
         const { file } = this.state;
         if (!file) return null;
 
@@ -103,6 +103,7 @@ class DocumentAction extends React.Component {
         return (
             <div className={classNames('document-action', classes.documentAction)}>
                 <span>{sizeString}</span>
+                {meta}
             </div>
         );
     }

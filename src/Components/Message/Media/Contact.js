@@ -16,7 +16,7 @@ import './Contact.css';
 
 class Contact extends React.Component {
     render() {
-        const { contact, title, openMedia } = this.props;
+        const { contact, title, openMedia, meta } = this.props;
         if (!contact) return null;
 
         const { user_id: id, first_name, last_name, phone_number } = contact;
@@ -33,7 +33,7 @@ class Contact extends React.Component {
         const number = formatPhoneNumber(phone_number);
 
         return (
-            <div className={classNames('contact', { 'contact-title': title })}>
+            <div className={classNames('contact', { 'media-title': title })}>
                 <div className='contact-tile'>
                     <UserTile userId={id} firstName={first_name} lastName={last_name} />
                 </div>
@@ -41,7 +41,10 @@ class Contact extends React.Component {
                     <div className='contact-name'>
                         {id > 0 ? <a onClick={openMedia}>{fullName}</a> : <span>{fullName}</span>}
                     </div>
-                    <div className='contact-phone'>{number}</div>
+                    <div className='contact-phone'>
+                        {number}
+                        {meta}
+                    </div>
                 </div>
             </div>
         );

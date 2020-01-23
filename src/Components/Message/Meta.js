@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import Status from './Status';
@@ -16,7 +17,7 @@ import './Meta.css';
 
 class Meta extends React.Component {
     render() {
-        const { chatId, messageId, date, editDate, onDateClick, t, views } = this.props;
+        const { className, chatId, messageId, date, editDate, onDateClick, t, views, style } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         const { is_outgoing } = message;
@@ -25,11 +26,11 @@ class Meta extends React.Component {
         const dateHintStr = getDateHint(date);
 
         return (
-            <div className='meta'>
+            <div className={classNames('meta', className)} style={style}>
                 <span>&ensp;</span>
                 {views > 0 && (
                     <>
-                        <VisibilityIcon fontSize='inherit' className='meta-views-icon' />
+                        <VisibilityIcon className='meta-views-icon' />
                         <span className='meta-views'>
                             &nbsp;
                             {views}

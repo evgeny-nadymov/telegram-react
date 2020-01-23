@@ -7,29 +7,31 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import DocumentTile from '../../Tile/DocumentTile';
+import classNames from 'classnames';
+import IconButton from '@material-ui/core/IconButton';
 import CallIcon from '@material-ui/icons/Call';
 import { getCallTitle } from '../../../Utils/Media';
-import './Call.css';
-import DoneIcon from '@material-ui/core/SvgIcon/SvgIcon';
-import IconButton from '@material-ui/core/IconButton';
 import { getDurationString } from '../../../Utils/Common';
+import './Call.css';
 
 class Call extends React.Component {
     render() {
-        const { chatId, messageId, duration, openMedia } = this.props;
+        const { chatId, messageId, duration, openMedia, title, meta } = this.props;
 
-        const title = getCallTitle(chatId, messageId);
+        const callTitle = getCallTitle(chatId, messageId);
         const durationString = getDurationString(Math.floor(duration || 0));
 
         return (
-            <div className='document'>
+            <div className={classNames('document', { 'media-title': title })}>
                 <IconButton color='primary' aria-label='Call'>
                     <CallIcon fontSize='large' />
                 </IconButton>
                 <div className='document-content'>
-                    <div className='document-title'>{title}</div>
-                    <div className='document-action'>{durationString}</div>
+                    <div className='document-title'>{callTitle}</div>
+                    <div className='document-action'>
+                        {durationString}
+                        {meta}
+                    </div>
                 </div>
             </div>
         );

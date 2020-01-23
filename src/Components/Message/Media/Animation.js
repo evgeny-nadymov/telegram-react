@@ -183,6 +183,7 @@ class Animation extends React.Component {
                 className={classNames('animation', {
                     'animation-big': type === 'message',
                     'animation-title': title,
+                    'media-title': title,
                     'animation-caption': caption,
                     pointer: openMedia
                 })}

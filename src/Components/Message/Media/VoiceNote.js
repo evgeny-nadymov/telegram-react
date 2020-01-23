@@ -23,19 +23,20 @@ const styles = theme => ({
 
 class VoiceNote extends React.Component {
     render() {
-        const { chatId, messageId, voiceNote, openMedia, classes } = this.props;
+        const { chatId, messageId, voiceNote, openMedia, classes, title, meta } = this.props;
         if (!voiceNote) return null;
 
         const { duration, voice: file } = voiceNote;
 
         return (
-            <div className='document'>
+            <div className={classNames('document', { 'media-title': title })}>
                 <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                 <div className='voice-note-content'>
                     <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />
                     <div className={classNames(classes.voiceNoteMeta, 'voice-note-meta')}>
                         <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
                         <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
+                        {meta}
                     </div>
                 </div>
             </div>

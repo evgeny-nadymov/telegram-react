@@ -17,6 +17,7 @@
     border-radius: 6px;
     padding: 2px 6px;
     max-width: 200px;
+    margin: 0 9px;
 }
 
 .message-content:not(.message-bubble) .reply-border {

@@ -165,8 +165,8 @@ class WebPage extends React.Component {
         openInstantView(url);
     };
 
-    getWebPage = () => {
-        const { classes, chatId, messageId, t } = this.props;
+    getWebPage() {
+        const { chatId, messageId, t } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -209,14 +209,19 @@ class WebPage extends React.Component {
                 {webPageInstantView}
             </>
         );
-    };
+    }
 
     render() {
+        const { meta } = this.props;
+
         return (
-            <div className='web-page'>
-                <div className='border' />
-                <div className='web-page-wrapper'>{this.getWebPage()}</div>
-            </div>
+            <>
+                <div className='web-page'>
+                    <div className='border' />
+                    <div className='web-page-wrapper'>{this.getWebPage()}</div>
+                </div>
+                {meta}
+            </>
         );
     }
 }

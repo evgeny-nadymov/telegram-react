@@ -12,7 +12,31 @@
     flex-shrink: 0;
     color: var(--message-in-meta-color);
     display: flex;
-    align-items: baseline;
+    align-items: center;
+}
+
+.meta-text {
+    position: absolute;
+    right: 4px;
+    bottom: 3px;
+}
+
+.meta-bubble {
+    height: 18px;
+    align-items: center;
+    border-radius: 9px;
+    padding: 0 5px 0 0;
+    background: var(--day-background);
+}
+
+.message .meta.meta-bubble,
+.message .meta.meta-bubble a {
+    color: var(--day-color);
+}
+
+.meta-hidden {
+    display: inline;
+    opacity: 0;
 }
 
 .message .meta a {
@@ -28,9 +52,9 @@
 }
 
 .meta-views {
-    /*font-weight: 500;*/
 }
 
 .meta-views-icon {
-    transform: translateY(2px);
+    font-size: 14px;
+    /*transform: translateY(2px);*/
 }
