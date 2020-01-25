@@ -42,20 +42,20 @@
     margin: 6px -9px;
 }
 
-.accent-background .chat-status {
+.item-selected .chat-status {
     background: var(--color-accent-main);
 }
 
-.accent-background .chat-status-indicator {
+.item-selected .chat-status-indicator {
     background: #fff;
 }
 
-.accent-background .dialog-title,
-.accent-background .dialog-title-icon,
-.accent-background .dialog-content,
-.accent-background .dialog-content-accent,
-.accent-background .dialog-meta,
-.accent-background .status {
+.item-selected .dialog-title,
+.item-selected .dialog-title-icon,
+.item-selected .dialog-content,
+.item-selected .dialog-content-accent,
+.item-selected .dialog-meta,
+.item-selected .status {
     color: #fff;
 }
 

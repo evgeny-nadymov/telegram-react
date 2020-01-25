@@ -18,8 +18,8 @@
     line-height: normal;
     height: 24px;
     border-radius: 12px;
-    color: var(--day-color);
-    background: var(--day-background);
+    color: var(--message-service-color);
+    background: var(--message-service-background);
     padding: 0 6px;
 }
 

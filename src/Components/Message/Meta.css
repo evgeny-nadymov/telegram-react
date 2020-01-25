@@ -26,12 +26,12 @@
     align-items: center;
     border-radius: 9px;
     padding: 0 5px 0 0;
-    background: var(--day-background);
+    background: var(--message-service-background);
 }
 
 .message .meta.meta-bubble,
 .message .meta.meta-bubble a {
-    color: var(--day-color);
+    color: var(--message-service-color);
 }
 
 .meta-hidden {

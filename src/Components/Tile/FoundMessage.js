@@ -98,7 +98,7 @@ class FoundMessage extends React.Component {
                     className={classNames(
                         'found-message',
                         { [classes.foundMessageActive]: selected },
-                        { 'accent-background': selected }
+                        { 'item-selected': selected }
                     )}>
                     {tile}
                     <div className='dialog-inner-wrapper'>

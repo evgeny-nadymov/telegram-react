@@ -67,9 +67,13 @@ mark {
 .accent-color {
 }
 
-.accent-background {
+.item-selected {
 }
 
 .pointer {
     cursor: pointer;
+}
+
+.notification-close-button {
+    padding: 4px;
 }

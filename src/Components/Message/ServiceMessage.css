@@ -21,8 +21,8 @@
     line-height: normal;
     border-radius: 12px;
     text-align: center;
-    color: var(--day-color);
-    background: var(--day-background);
+    color: var(--message-service-color);
+    background: var(--message-service-background);
     padding: 0 6px 4px;
     min-height: 24px;
     box-sizing: border-box;
@@ -30,7 +30,7 @@
 
 .service-message-content .message-author,
 .service-message-content .message-author:hover {
-    color: var(--day-color);
+    color: var(--message-service-color);
 }
 
 .service-message-content div {

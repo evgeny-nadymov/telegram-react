@@ -24,13 +24,13 @@ function updateLightTheme(theme) {
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
 
-    style.setProperty('--badge-green', '#4DCD5E');
-    style.setProperty('--badge-gray', '#C4C9CC');
+    style.setProperty('--badge-unmuted', '#4DCD5E');
+    style.setProperty('--badge-muted', '#C4C9CC');
 
-    style.setProperty('--indicator-green', '#0AC630');
+    style.setProperty('--online-indicator', '#0AC630');
 
-    style.setProperty('--day-color', '#FFFFFF');
-    style.setProperty('--day-background', '#00000033');
+    style.setProperty('--message-service-color', '#FFFFFF');
+    style.setProperty('--message-service-background', '#00000033');
 
     style.setProperty('--panel-background', '#ffffff');
     style.setProperty('--border', '#DADCE0');
@@ -39,7 +39,7 @@ function updateLightTheme(theme) {
     style.setProperty('--dialog-accent-color', '#000000');
     style.setProperty('--dialog-color', '#707579');
     style.setProperty('--dialog-meta-color', '#5F6369');
-    style.setProperty('--dialog-status-color', '#4FAE4E');
+    style.setProperty('--dialog-meta-read-color', '#4FAE4E');
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);
@@ -70,13 +70,13 @@ function updateDarkTheme(theme) {
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
 
-    style.setProperty('--badge-green', '#4DCD5E');
-    style.setProperty('--badge-gray', 'rgba(255, 255, 255, 0.5)');
+    style.setProperty('--badge-unmuted', '#4DCD5E');
+    style.setProperty('--badge-muted', 'rgba(255, 255, 255, 0.5)');
 
-    style.setProperty('--indicator-green', '#0AC630');
+    style.setProperty('--online-indicator', '#0AC630');
 
-    style.setProperty('--day-color', '#FFFFFF');
-    style.setProperty('--day-background', '#303030');
+    style.setProperty('--message-service-color', '#FFFFFF');
+    style.setProperty('--message-service-background', '#303030');
 
     style.setProperty('--panel-background', '#303030');
     style.setProperty('--border', theme.palette.divider);
@@ -85,7 +85,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--dialog-accent-color', '#ffffff');
     style.setProperty('--dialog-color', theme.palette.text.secondary);
     style.setProperty('--dialog-meta-color', theme.palette.text.secondary);
-    style.setProperty('--dialog-status-color', '#4FAE4E');
+    style.setProperty('--dialog-meta-read-color', '#4FAE4E');
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);

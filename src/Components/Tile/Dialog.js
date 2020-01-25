@@ -258,7 +258,7 @@ class Dialog extends Component {
             <>
                 <div
                     ref={this.dialog}
-                    className={classNames(isSelected ? 'dialog-active' : 'dialog', { 'accent-background': isSelected })}
+                    className={classNames(isSelected ? 'dialog-active' : 'dialog', { 'item-selected': isSelected })}
                     onMouseDown={this.handleSelect}
                     onContextMenu={this.handleContextMenu}>
                     <div className='dialog-wrapper'>

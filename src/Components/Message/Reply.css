@@ -12,8 +12,8 @@
 }
 
 .message-content:not(.message-bubble) .reply {
-    background: var(--day-background);
-    color: var(--day-color);
+    background: var(--message-service-background);
+    color: var(--message-service-color);
     border-radius: 6px;
     padding: 2px 6px;
     max-width: 200px;
@@ -21,11 +21,11 @@
 }
 
 .message-content:not(.message-bubble) .reply-border {
-    background: var(--day-color);
+    background: var(--message-service-color);
 }
 
 .message-content:not(.message-bubble) .reply-content-title {
-    color: var(--day-color);
+    color: var(--message-service-color);
 }
 
 .reply-wrapper {

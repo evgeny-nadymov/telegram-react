@@ -6,5 +6,5 @@
  */
 
 .archive-tile-background {
-    background: var(--badge-gray);
+    background: var(--badge-muted);
 }

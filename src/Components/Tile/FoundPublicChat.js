@@ -90,7 +90,7 @@ class FoundPublicChat extends React.Component {
                 <div
                     className={classNames('found-public-chat', {
                         [classes.foundPublicChatActive]: chatId === selectedChatId,
-                        'accent-background': chatId === selectedChatId
+                        'item-selected': chatId === selectedChatId
                     })}>
                     <ChatTile chatId={chatId} />
                     <div className='dialog-inner-wrapper'>

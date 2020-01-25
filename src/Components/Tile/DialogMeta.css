@@ -13,5 +13,5 @@
 }
 
 .dialog-meta .status {
-    color: var(--dialog-status-color);
+    color: var(--dialog-meta-read-color);
 }

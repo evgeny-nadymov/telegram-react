@@ -17,7 +17,7 @@
     margin-left: 6px;
     font-weight: 500;
     color: #fff;
-    background: var(--badge-green);
+    background: var(--badge-unmuted);
     vertical-align: baseline;
     white-space: nowrap;
     flex-shrink: 0;
@@ -27,7 +27,7 @@
 }
 
 .dialog-badge-muted {
-    background: var(--badge-gray);
+    background: var(--badge-muted);
 }
 
 .dialog-badge-text {
@@ -45,15 +45,15 @@
     margin-top: -3px;
     margin-left: 6px;
     color: #fff;
-    background: var(--badge-gray);
+    background: var(--badge-muted);
     vertical-align: baseline;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.accent-background .dialog-badge,
-.accent-background .dialog-badge-pinned {
+.item-selected .dialog-badge,
+.item-selected .dialog-badge-pinned {
     background: #ffffff77;
 }
 

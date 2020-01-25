@@ -67,16 +67,16 @@ class InputBoxControl extends Component {
             editMessageId: 0
         };
 
-        document.addEventListener(
-            'selectionchange',
-            () => {
-                // console.log('[ed] selectionchange', document.activeElement);
-                if (document.activeElement === this.newMessageRef.current) {
-                    this.saveSelection();
-                }
-            },
-            true
-        );
+        // document.addEventListener(
+        //     'selectionchange',
+        //     () => {
+        //         // console.log('[ed] selectionchange', document.activeElement);
+        //         if (document.activeElement === this.newMessageRef.current) {
+        //             this.saveSelection();
+        //         }
+        //     },
+        //     true
+        // );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -145,7 +145,16 @@ class InputBoxControl extends Component {
         this.setChatDraftMessage(draftMessage);
     }
 
+    selectionChangeListener = () => {
+        // console.log('[ed] selectionchange', document.activeElement);
+        if (document.activeElement === this.newMessageRef.current) {
+            this.saveSelection();
+        }
+    };
+
     componentDidMount() {
+        document.addEventListener('selectionchange', this.selectionChangeListener, true);
+
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
@@ -167,6 +176,8 @@ class InputBoxControl extends Component {
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
+
+        document.removeEventListener('selectionchange', this.selectionChangeListener, true);
     }
 
     onUpdateDeleteMessages = update => {

@@ -53,7 +53,7 @@ class EditMediaDialog extends React.Component {
     }
 
     componentWillUnmount() {
-        document.removeEventListener('selectionchange', this.handleSelectionChange);
+        document.removeEventListener('selectionchange', this.handleSelectionChange, true);
     }
 
     handleSelectionChange = () => {
