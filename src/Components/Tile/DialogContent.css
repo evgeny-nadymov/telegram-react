@@ -11,11 +11,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     flex-grow: 1;
-    color: var(--dialog-color);
+    color: var(--dialog-subtle-color);
 }
 
 .dialog-content-accent {
-    color: var(--dialog-accent-color);
+    color: var(--dialog-color);
 }
 
 .dialog-active .dialog-content,

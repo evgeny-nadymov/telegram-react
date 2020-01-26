@@ -8,8 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import CloseIcon from '@material-ui/icons/Close';
@@ -30,13 +28,6 @@ import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
-
-const styles = theme => ({
-    pinnedMessage: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
-    }
-});
 
 class PinnedMessage extends React.Component {
     constructor(props) {
@@ -245,27 +236,25 @@ class PinnedMessage extends React.Component {
 
         return (
             <>
-                <div className={classNames('pinned-message', classes.pinnedMessage)} onMouseDown={this.handleClick}>
-                    <div className='pinned-message-wrapper'>
-                        <div className='border reply-border' />
-                        {photoSize && (
-                            <ReplyTile
-                                chatId={chatId}
-                                messageId={messageId}
-                                photoSize={photoSize}
-                                minithumbnail={minithumbnail}
-                            />
-                        )}
-                        <div className='pinned-message-content'>
-                            <div className='pinned-message-content-title'>{t('PinnedMessage')}</div>
-                            <div className='pinned-message-content-subtitle'>{content}</div>
-                        </div>
-                        <div className='pinned-message-delete-button'>
-                            <IconButton onClick={this.handleDelete}>
-                                <CloseIcon />
-                            </IconButton>
-                        </div>
+                <div className='pinned-message' onMouseDown={this.handleClick}>
+                    <div className='border reply-border' />
+                    {photoSize && (
+                        <ReplyTile
+                            chatId={chatId}
+                            messageId={messageId}
+                            photoSize={photoSize}
+                            minithumbnail={minithumbnail}
+                        />
+                    )}
+                    <div className='pinned-message-content'>
+                        <div className='pinned-message-title'>{t('PinnedMessage')}</div>
+                        <div className='pinned-message-subtitle'>{content}</div>
                     </div>
+                    {/*<div className='pinned-message-delete-button'>*/}
+                    {/*    <IconButton onClick={this.handleDelete}>*/}
+                    {/*        <CloseIcon />*/}
+                    {/*    </IconButton>*/}
+                    {/*</div>*/}
                 </div>
                 {confirm && (
                     <Dialog
@@ -296,9 +285,4 @@ PinnedMessage.propTypes = {
     chatId: PropTypes.number.isRequired
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(PinnedMessage);
+export default withTranslation()(PinnedMessage);

@@ -1316,7 +1316,6 @@ class MessagesList extends React.Component {
                 </div>
                 <Placeholder />
                 {scrollDownVisible && <ScrollDownButton onClick={this.handleScrollDownClick} />}
-                <PinnedMessage chatId={chatId} />
                 <FilesDropTarget />
                 <StickersHint />
             </div>

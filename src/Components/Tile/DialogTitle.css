@@ -13,7 +13,7 @@
     flex-grow: 1;
     display: flex;
     align-items: center;
-    color: var(--dialog-title-color);
+    color: var(--dialog-color);
 }
 
 .chat-big .dialog-title {

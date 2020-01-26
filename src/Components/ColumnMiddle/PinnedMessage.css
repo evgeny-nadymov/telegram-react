@@ -6,47 +6,38 @@
  */
 
 .pinned-message {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    box-sizing: border-box;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-color: var(--border);
-}
-
-.pinned-message-wrapper {
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin: 3px 12px;
     width: 100%;
     overflow: hidden;
+    box-sizing: border-box;
+    background: var(--panel-background);
+    max-width: 191px;
+    margin-right: 19px;
 }
 
 .pinned-message-content {
-    margin-left: 12px;
+    margin-left: 8px;
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
     pointer-events: none;
 }
 
-.pinned-message-content-title {
+.pinned-message-title {
+    font-size: 14px;
+    line-height: normal;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     color: var(--message-in-reply-title);
 }
 
-.pinned-message-content-subtitle {
+.pinned-message-subtitle {
     font-size: 14px;
+    line-height: normal;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

@@ -7,22 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import { clearSelection, deleteMessages, forwardMessages } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './HeaderCommand.css';
-
-const styles = theme => ({
-    buttonLeft: {
-        margin: '14px 0 14px 14px'
-    },
-    buttonRight: {
-        margin: '14px 14px 14px 0'
-    }
-});
 
 class HeaderCommand extends React.Component {
     handleCancel = () => {
@@ -52,7 +41,7 @@ class HeaderCommand extends React.Component {
     };
 
     render() {
-        const { classes, t, count } = this.props;
+        const { t, count } = this.props;
 
         let canBeDeleted = true;
         for (let { chatId, messageId } of MessageStore.selectedItems.values()) {
@@ -83,17 +72,17 @@ class HeaderCommand extends React.Component {
         return (
             <div className='header-command'>
                 {canBeForwarded && (
-                    <Button color='primary' className={classes.buttonLeft} onClick={this.handleForward}>
+                    <Button color='primary' className='header-command-button' onClick={this.handleForward}>
                         {count <= 1 ? t('Forward') : `${t('Forward')} ${count}`}
                     </Button>
                 )}
                 {canBeDeleted && (
-                    <Button color='primary' className={classes.buttonLeft} onClick={this.handleDelete}>
+                    <Button color='primary' className='header-command-button' onClick={this.handleDelete}>
                         {count <= 1 ? t('Delete') : `${t('Delete')} ${count}`}
                     </Button>
                 )}
                 <div className='header-command-space' />
-                <Button color='primary' className={classes.buttonRight} onClick={this.handleCancel}>
+                <Button color='primary' className='header-command-button' onClick={this.handleCancel}>
                     {t('Cancel')}
                 </Button>
             </div>
@@ -105,9 +94,4 @@ HeaderCommand.propTypes = {
     count: PropTypes.number
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(HeaderCommand);
+export default withTranslation()(HeaderCommand);

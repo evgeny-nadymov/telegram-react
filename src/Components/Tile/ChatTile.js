@@ -110,13 +110,22 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { chatId, showOnline, showSavedMessages, onSelect, small, big } = this.props;
+        const { chatId, showOnline, showSavedMessages, onSelect, small, big, size } = this.props;
         const { loaded } = this.state;
+
+        let style = null;
+        if (size) {
+            style = {
+                width: size,
+                height: size
+            };
+        }
 
         if (isMeChat(chatId) && showSavedMessages) {
             return (
                 <div
                     className={classNames('chat-tile', { 'tile-small': small }, { 'tile-big': big })}
+                    style={style}
                     onClick={this.handleSelect}>
                     <div className={classNames('tile-photo', 'tile_color_4', { pointer: onSelect })}>
                         <div className='tile-saved-messages'>
@@ -147,6 +156,7 @@ class ChatTile extends Component {
                     { 'tile-small': small },
                     { 'tile-big': big }
                 )}
+                style={style}
                 onClick={this.handleSelect}>
                 {!tileLoaded && (
                     <div className='tile-photo'>
@@ -164,7 +174,8 @@ ChatTile.propTypes = {
     chatId: PropTypes.number.isRequired,
     onSelect: PropTypes.func,
     showSavedMessages: PropTypes.bool,
-    showOnline: PropTypes.bool
+    showOnline: PropTypes.bool,
+    size: PropTypes.number
 };
 
 ChatTile.defaultProps = {
