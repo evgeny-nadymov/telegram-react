@@ -6,6 +6,9 @@
  */
 
 import React from 'react';
+import { withTranslation } from 'react-i18next';
+import { withSnackbar } from 'notistack';
+import { compose } from 'recompose';
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
@@ -16,34 +19,16 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import withStyles from '@material-ui/core/styles/withStyles';
-import { withSnackbar } from 'notistack';
-import { compose } from 'recompose';
 import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
-import { canClearHistory, canDeleteChat, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { unpinMessage } from '../../Actions/Message';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
-
-const styles = theme => ({
-    menuIconButton: {
-        margin: '8px 12px 8px 0'
-    }
-});
-
-const menuAnchorOrigin = {
-    vertical: 'bottom',
-    horizontal: 'right'
-};
-
-const menuTransformOrigin = {
-    vertical: 'top',
-    horizontal: 'right'
-};
 
 class LeaveChatDialog extends React.Component {
     getDeleteDialogText = chatId => {
@@ -204,6 +189,7 @@ class MainMenuButton extends React.Component {
     };
 
     handleScheduledAction = (chatId, clientUpdateType, message, request) => {
+        const { t } = this.props;
         if (!clientUpdateType) return;
 
         const key = `${clientUpdateType} chatId=${chatId}`;
@@ -218,7 +204,7 @@ class MainMenuButton extends React.Component {
             TdLibController.clientUpdate({ '@type': clientUpdateType, chatId: chatId, inProgress: false });
         };
 
-        const { enqueueSnackbar, classes } = this.props;
+        const { enqueueSnackbar } = this.props;
         if (!enqueueSnackbar) return;
 
         const TRANSITION_DELAY = 150;
@@ -235,33 +221,33 @@ class MainMenuButton extends React.Component {
                         color='primary'
                         size='small'
                         onClick={() => ApplicationStore.removeScheduledAction(key)}>
-                        UNDO
+                        {t('Undo')}
                     </Button>
                 ]
             });
         }
     };
 
-    getLeaveChatTitle = chatId => {
+    getLeaveChatTitle = (chatId, t) => {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
         if (!chat.type) return null;
 
         switch (chat.type['@type']) {
             case 'chatTypeBasicGroup': {
-                return 'Delete and exit';
+                return t('DeleteChat');
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
                 if (supergroup) {
-                    return supergroup.is_channel ? 'Leave channel' : 'Leave group';
+                    return supergroup.is_channel ? t('LeaveChannel') : t('LeaveMegaGroup');
                 }
 
                 return null;
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return 'Delete conversation';
+                return t('DeleteChatUser');
             }
         }
 
@@ -269,13 +255,15 @@ class MainMenuButton extends React.Component {
     };
 
     getLeaveChatNotification = chatId => {
+        const { t } = this.props;
+
         const chat = ChatStore.get(chatId);
-        if (!chat) return 'Chat deleted';
-        if (!chat.type) return 'Chat deleted';
+        if (!chat) return t('ChatDeletedUndo');
+        if (!chat.type) return t('ChatDeletedUndo');
 
         switch (chat.type['@type']) {
             case 'chatTypeBasicGroup': {
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
@@ -283,32 +271,43 @@ class MainMenuButton extends React.Component {
                     return supergroup.is_channel ? 'Left channel' : 'Left group';
                 }
 
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
         }
 
-        return 'Chat deleted';
+        return t('ChatDeletedUndo');
+    };
+
+    handleUnpin = () => {
+        this.handleMenuClose();
+
+        const chatId = ApplicationStore.getChatId();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateUnpin',
+            chatId
+        });
     };
 
     render() {
-        const { classes } = this.props;
+        const { t } = this.props;
         const { anchorEl, openDelete, openClearHistory } = this.state;
 
         const chatId = ApplicationStore.getChatId();
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
-        const leaveChatTitle = this.getLeaveChatTitle(chatId);
+        const leaveChatTitle = this.getLeaveChatTitle(chatId, t);
+        const unpinMessage = canUnpinMessage(chatId);
 
         return (
             <>
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
                     aria-haspopup='true'
-                    className={classes.menuIconButton}
+                    className='main-menu-button'
                     aria-label='Menu'
                     onClick={this.handleButtonClick}>
                     <MoreVertIcon />
@@ -321,11 +320,18 @@ class MainMenuButton extends React.Component {
                     getContentAnchorEl={null}
                     disableAutoFocusItem
                     disableRestoreFocus={true}
-                    anchorOrigin={menuAnchorOrigin}
-                    transformOrigin={menuTransformOrigin}>
-                    <MenuItem onClick={this.handleChatInfo}>Chat info</MenuItem>
-                    {clearHistory && <MenuItem onClick={this.handleClearHistory}>Clear history</MenuItem>}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right'
+                    }}>
+                    <MenuItem onClick={this.handleChatInfo}>{t('ChatInfo')}</MenuItem>
+                    {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
                     {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
+                    {unpinMessage && <MenuItem onClick={this.handleUnpin}>{t('Unpin')}</MenuItem>}
                 </Menu>
                 <LeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
                 <ClearHistoryDialog chatId={chatId} open={openClearHistory} onClose={this.handleClearHistoryContinue} />
@@ -335,8 +341,8 @@ class MainMenuButton extends React.Component {
 }
 
 const enhance = compose(
-    withStyles(styles),
-    withSnackbar
+    withSnackbar,
+    withTranslation()
 );
 
 export default enhance(MainMenuButton);

@@ -1012,7 +1012,7 @@ class MessagesList extends React.Component {
         const list = this.listRef.current;
 
         const chat = ChatStore.get(chatId);
-        const pinnedMessageMargin = chat && chat.pinned_message_id ? 55 : 0;
+        const pinnedMessageMargin = 0; //chat && chat.pinned_message_id ? 55 : 0;
 
         // console.log(
         //     `MessagesList.scrollToUnread before

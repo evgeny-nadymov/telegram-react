@@ -7,9 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import emojiRegex from 'emoji-regex';
 import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
@@ -39,18 +37,6 @@ import './InputBoxControl.css';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
-const styles = theme => ({
-    inputboxBackground: {
-        background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#e6ebee'
-    },
-    inputboxBubble: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        '&::after': {
-            background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-        }
-    }
-});
-
 class InputBoxControl extends Component {
     constructor(props) {
         super(props);
@@ -66,17 +52,6 @@ class InputBoxControl extends Component {
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
             editMessageId: 0
         };
-
-        // document.addEventListener(
-        //     'selectionchange',
-        //     () => {
-        //         // console.log('[ed] selectionchange', document.activeElement);
-        //         if (document.activeElement === this.newMessageRef.current) {
-        //             this.saveSelection();
-        //         }
-        //     },
-        //     true
-        // );
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -1156,7 +1131,7 @@ class InputBoxControl extends Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { t } = this.props;
         const {
             chatId,
             editMessageId,
@@ -1172,9 +1147,9 @@ class InputBoxControl extends Component {
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
 
         return (
-            <div className={classes.inputboxBackground}>
+            <div className='inputbox-background'>
                 <div className='inputbox'>
-                    <div className={classNames('inputbox-bubble', classes.inputboxBubble)}>
+                    <div className='inputbox-bubble'>
                         <InputBoxHeader
                             chatId={chatId}
                             messageId={replyToMessageId}
@@ -1268,9 +1243,4 @@ class InputBoxControl extends Component {
     }
 }
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(InputBoxControl);
+export default withTranslation()(InputBoxControl);

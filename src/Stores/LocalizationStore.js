@@ -40,6 +40,8 @@ i18n.use(initReactI18next).init({
     resources: {
         en: {
             local: {
+                LeftChannel: 'Left channel',
+                LeftGroup: 'Left group',
                 EnterPassword: 'Enter a Password',
                 YourAccountProtectedWithPassword: 'Your account is protected with an additional password.',
                 DeletedMessage: 'Deleted message',
@@ -98,6 +100,8 @@ i18n.use(initReactI18next).init({
         },
         ru: {
             local: {
+                LeftChannel: 'Канал покинут',
+                LeftGroup: 'Группа покинута',
                 EnterPassword: 'Введите пароль',
                 YourAccountProtectedWithPassword: 'Ваш аккаунт защищен дополнительным паролем.',
                 DeletedMessage: 'Удаленное сообщение',

@@ -21,6 +21,15 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function canUnpinMessage(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { pinned_message_id } = chat;
+
+    return pinned_message_id > 0;
+}
+
 export function isChatArchived(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;

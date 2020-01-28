@@ -6,7 +6,7 @@
  */
 
 .inputbox-background {
-    /*background: #e6ebee;*/
+    background: var(--chat-background);
 }
 
 .inputbox {
@@ -41,7 +41,7 @@
     border-radius: 12px 12px 0 12px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     margin-right: 9px;
-    /*background: white;*/
+    background: var(--message-in-background);
 }
 
 .inputbox-bubble::after {
@@ -54,7 +54,7 @@
     mask: url(../../Assets/bubble-tail-right.svg);
     transform: translate(-2px, -2px);
     box-sizing: border-box;
-    /*background: red;*/
+    background: var(--message-in-background);
 }
 
 .inputbox-wrapper {
