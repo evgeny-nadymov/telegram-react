@@ -12,6 +12,7 @@
     position: relative;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    background: var(--chat-background);
 }
 
 .messages-list-wrapper {

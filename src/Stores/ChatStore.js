@@ -112,6 +112,17 @@ class ChatStore extends EventEmitter {
                 }
                 break;
             }
+            case 'updateChatActionBar': {
+                const { chat_id, action_bar } = update;
+
+                const chat = this.get(chat_id);
+                if (chat) {
+                    this.assign(chat, { action_bar });
+                }
+
+                this.emitFastUpdate(update);
+                break;
+            }
             case 'updateChatChatList': {
                 const { chat_id, chat_list } = update;
 

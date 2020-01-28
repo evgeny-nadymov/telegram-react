@@ -115,7 +115,7 @@ class DialogDetails extends Component {
             <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
-                <MessagesList innerRef={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
+                <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
                 <Footer chatId={chatId} />
                 <StickerSetDialog />
                 <ChatInfoDialog />

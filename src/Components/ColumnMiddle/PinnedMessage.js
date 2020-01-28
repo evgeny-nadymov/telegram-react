@@ -259,11 +259,6 @@ class PinnedMessage extends React.Component {
                         <div className='pinned-message-title'>{t('PinnedMessage')}</div>
                         <div className='pinned-message-subtitle'>{content}</div>
                     </div>
-                    {/*<div className='pinned-message-delete-button'>*/}
-                    {/*    <IconButton onClick={this.handleDelete}>*/}
-                    {/*        <CloseIcon />*/}
-                    {/*    </IconButton>*/}
-                    {/*</div>*/}
                 </div>
                 {confirm && (
                     <Dialog

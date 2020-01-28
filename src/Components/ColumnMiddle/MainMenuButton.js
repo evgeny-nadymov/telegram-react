@@ -240,7 +240,7 @@ class MainMenuButton extends React.Component {
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
                 if (supergroup) {
-                    return supergroup.is_channel ? t('LeaveChannel') : t('LeaveMegaGroup');
+                    return supergroup.is_channel ? t('LeaveChannel') : t('LeaveMegaMenu');
                 }
 
                 return null;

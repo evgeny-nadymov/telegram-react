@@ -8,11 +8,10 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
+import ActionBar from './ActionBar';
 import DayMeta from '../Message/DayMeta';
 import FilesDropTarget from './FilesDropTarget';
 import Message from '../Message/Message';
-import PinnedMessage from './PinnedMessage';
 import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import ServiceMessage from '../Message/ServiceMessage';
@@ -40,12 +39,6 @@ const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_MESSAGE: 'SCROLL_TO_MESSAGE',
     KEEP_SCROLL_POSITION: 'KEEP_SCROLL_POSITION',
     NONE: 'NONE'
-});
-
-const styles = theme => ({
-    background: {
-        background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#e6ebee'
-    }
 });
 
 class MessagesList extends React.Component {
@@ -1247,7 +1240,7 @@ class MessagesList extends React.Component {
     }
 
     render() {
-        const { classes, chatId } = this.props;
+        const { chatId } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         // console.log('[ml] render ', history);
@@ -1304,7 +1297,7 @@ class MessagesList extends React.Component {
 
         return (
             <div
-                className={classNames(classes.background, 'messages-list', {
+                className={classNames('messages-list', {
                     'messages-list-selection-active': selectionActive
                 })}
                 onDragEnter={this.handleListDragEnter}>
@@ -1314,6 +1307,7 @@ class MessagesList extends React.Component {
                         {this.messages}
                     </div>
                 </div>
+                <ActionBar chatId={chatId} />
                 <Placeholder />
                 {scrollDownVisible && <ScrollDownButton onClick={this.handleScrollDownClick} />}
                 <FilesDropTarget />
@@ -1323,4 +1317,4 @@ class MessagesList extends React.Component {
     }
 }
 
-export default withStyles(styles, { withTheme: true })(MessagesList);
+export default MessagesList;
