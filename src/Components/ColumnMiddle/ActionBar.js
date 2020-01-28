@@ -52,7 +52,7 @@ class ActionBar extends React.Component {
         if (!chat) return null;
 
         TdLibController.send({
-            '@type': 'reportSpam',
+            '@type': 'reportChat',
             chat_id: chatId,
             reason: {
                 '@type': 'chatReportReasonSpam'
@@ -67,7 +67,7 @@ class ActionBar extends React.Component {
         if (!chat) return null;
 
         TdLibController.send({
-            '@type': 'reportSpam',
+            '@type': 'reportChat',
             chat_id: chatId,
             reason: {
                 '@type': 'chatReportReasonUnrelatedLocation'

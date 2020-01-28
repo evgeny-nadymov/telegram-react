@@ -52,6 +52,8 @@ class InputBoxControl extends Component {
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
             editMessageId: 0
         };
+
+        document.execCommand('defaultParagraphSeparator', false, 'br');
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -435,7 +437,7 @@ class InputBoxControl extends Component {
         const element = this.newMessageRef.current;
         if (!element) return;
 
-        const { innerHTML } = element;
+        let { innerHTML } = element;
 
         element.innerText = null;
         this.handleInput();
@@ -447,6 +449,10 @@ class InputBoxControl extends Component {
 
         if (!innerHTML) return;
         if (!innerHTML.trim()) return;
+
+        innerHTML = innerHTML.replace(/<div><br><\/div>/gi, '<br>');
+        innerHTML = innerHTML.replace(/<div>/gi, '<br>');
+        innerHTML = innerHTML.replace(/<\/div>/gi, '');
 
         const { text, entities } = getEntities(innerHTML);
 

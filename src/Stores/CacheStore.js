@@ -123,6 +123,8 @@ class CacheStore extends EventEmitter {
         });
 
         (chats || []).concat(archiveChats || []).forEach(x => {
+            delete x.OutputTypingManager;
+
             ChatStore.set(x);
             if (x.photo) {
                 if (x.photo.small) FileStore.set(x.photo.small);
