@@ -196,6 +196,11 @@ function getFormattedText(formattedText) {
         const entity = entities[i];
         const { offset, length, type } = entity;
 
+        // skip nested entities
+        if (index > offset) {
+            continue;
+        }
+
         let textBefore = substring(text, index, offset);
         const textBeforeLength = textBefore.length;
         if (textBefore) {
