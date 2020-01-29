@@ -121,7 +121,7 @@ pre code {
 
 .message-wrapper {
     max-width: 784px;
-    padding: 5px 6px 5px 6px;
+    padding: 5px 6px;
     margin: 0 auto;
     display: flex;
     flex-direction: row;
@@ -131,6 +131,18 @@ pre code {
 
 .message-out .message-wrapper {
     flex-direction: row-reverse;
+}
+
+.message-top .message-wrapper {
+    padding: 5px 6px 2px;
+}
+
+.message-middle .message-wrapper {
+    padding: 3px 6px 2px;
+}
+
+.message-bottom .message-wrapper {
+    padding: 3px 6px 5px;
 }
 
 .message-content {
@@ -157,10 +169,38 @@ pre code {
 }
 
 .message-bubble {
-    border-radius: 10px 10px 10px 0;
+    border-radius: 12px 12px 12px 0;
     padding: 6px 9px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     background: var(--message-in-background);
+}
+
+.message-short .message-bubble {
+    border-radius: 12px;
+}
+
+.message-top .message-bubble:not(.message-bubble-out) {
+    border-radius: 12px 12px 12px 6px;
+}
+
+.message-middle .message-bubble:not(.message-bubble-out) {
+    border-radius: 6px 12px 12px 6px;
+}
+
+.message-bottom .message-bubble:not(.message-bubble-out) {
+    border-radius: 6px 12px 12px 0;
+}
+
+.message-top .message-bubble.message-bubble-out {
+    border-radius: 12px 12px 6px 12px;
+}
+
+.message-middle .message-bubble.message-bubble-out {
+    border-radius: 12px 6px 6px 12px;
+}
+
+.message-bottom .message-bubble.message-bubble-out {
+    border-radius: 12px 6px 0 12px;
 }
 
 :not(.message-bubble-out).message-bubble::after {
@@ -189,15 +229,11 @@ pre code {
 
 .message-bubble-out {
     background: var(--message-out-background);
-    border-radius: 10px 10px 0 10px;
+    border-radius: 12px 12px 0 12px;
 }
 
 .message-bubble-out::after {
     background: var(--message-out-background);
-}
-
-.message-short .message-bubble {
-    border-radius: 10px;
 }
 
 .message-short .message-bubble::after {

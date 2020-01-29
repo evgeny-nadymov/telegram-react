@@ -442,7 +442,6 @@ class Message extends Component {
     }
 
     render() {
-        // console.log('[m] render', this.props.messageId);
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
         const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
 
@@ -495,7 +494,10 @@ class Message extends Component {
                     'message-short': !tile,
                     'message-out': is_outgoing,
                     'message-selected': selected,
-                    'message-highlighted': highlighted && !selected
+                    'message-highlighted': highlighted && !selected,
+                    'message-top': showTitle && !showTail,
+                    'message-bottom': !showTitle && showTail,
+                    'message-middle': !showTitle && !showTail
                 })}
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}
@@ -508,7 +510,7 @@ class Message extends Component {
                     <div className='message-padding'>
                         <CheckMarkIcon className='message-select-tick' />
                     </div>
-                    <div className='message-wrapper'>
+                    <div className={classNames('message-wrapper', {})}>
                         {tile}
                         <div
                             className={classNames('message-content', {
