@@ -497,7 +497,8 @@ class Message extends Component {
                     'message-highlighted': highlighted && !selected,
                     'message-top': showTitle && !showTail,
                     'message-bottom': !showTitle && showTail,
-                    'message-middle': !showTitle && !showTail
+                    'message-middle': !showTitle && !showTail,
+                    'message-bubble-hidden': !withBubble
                 })}
                 onMouseOver={this.handleMouseOver}
                 onMouseOut={this.handleMouseOut}

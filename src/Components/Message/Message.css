@@ -173,6 +173,7 @@ pre code {
     padding: 6px 9px;
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     background: var(--message-in-background);
+    overflow: hidden;
 }
 
 .message-short .message-bubble {
@@ -203,28 +204,30 @@ pre code {
     border-radius: 12px 6px 0 12px;
 }
 
-:not(.message-bubble-out).message-bubble::after {
+.message:not(.message-out):not(.message-bubble-hidden) .user-tile::before,
+.message:not(.message-out):not(.message-bubble-hidden) .chat-tile::before {
     background: var(--message-in-background);
     position: absolute;
-    left: -7px;
+    right: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
     bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-2px, -2px);
+    transform: translate(7px, -2px);
 }
 
-.message-bubble-out.message-bubble::after {
+.message.message-out:not(.message-bubble-hidden) .user-tile::before,
+.message.message-out:not(.message-bubble-hidden) .chat-tile::before {
     background: var(--message-out-background);
     position: absolute;
-    right: -10px;
+    left: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
     bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-1px, -2px) scaleX(-1);
+    transform: translate(-7px, -2px) scaleX(-1);
 }
 
 .message-bubble-out {

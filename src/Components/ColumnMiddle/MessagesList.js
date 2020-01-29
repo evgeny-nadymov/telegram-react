@@ -1212,7 +1212,6 @@ class MessagesList extends React.Component {
         }
 
         return (
-            content['@type'] !== 'messageSticker' &&
             prevMessage &&
             (isServiceMessage(prevMessage) ||
                 sender_user_id !== prevMessage.sender_user_id ||

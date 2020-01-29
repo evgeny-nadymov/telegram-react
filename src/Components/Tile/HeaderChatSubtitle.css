@@ -9,6 +9,9 @@
     font-size: 14px;
     line-height: normal;
     color: var(--header-subtle-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .header-chat-subtitle-accent {

@@ -8,7 +8,7 @@
 .poll-percentage {
     width: 38px;
     position: fixed;
-    transform: translateX(-12px);
+    transform: translateX(-6px);
     text-align: right;
     transition: opacity 0.2s linear;
 }
