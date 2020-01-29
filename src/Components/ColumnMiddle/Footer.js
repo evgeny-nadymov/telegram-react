@@ -17,10 +17,6 @@ import TdLibController from '../../Controllers/TdLibController';
 import './Footer.css';
 
 class Footer extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
     shouldComponentUpdate(nextProps, nextState) {
         if (nextProps.chatId !== this.props.chatId) {
             return true;
@@ -86,42 +82,44 @@ class Footer extends React.Component {
         const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
-        if (!chat.type) return null;
 
-        switch (chat.type['@type']) {
+        const { type } = chat;
+        if (!type) return null;
+
+        switch (type['@type']) {
             case 'chatTypeBasicGroup': {
-                const basicGroup = BasicGroupStore.get(chat.type.basic_group_id);
-                if (basicGroup && basicGroup.status) {
-                    switch (basicGroup.status['@type']) {
-                        case 'chatMemberStatusAdministrator': {
-                            return <InputBoxControl />;
-                        }
-                        case 'chatMemberStatusBanned': {
-                            return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
-                        }
-                        case 'chatMemberStatusCreator': {
-                            return basicGroup.status.is_member ? <InputBoxControl /> : null;
-                        }
-                        case 'chatMemberStatusLeft': {
-                            return null;
-                        }
-                        case 'chatMemberStatusMember': {
-                            return <InputBoxControl />;
-                        }
-                        case 'chatMemberStatusRestricted': {
-                            if (basicGroup.status.is_member) {
-                                if (!basicGroup.status.can_send_messages) {
-                                    return null;
-                                }
+                const basicGroup = BasicGroupStore.get(type.basic_group_id);
+                if (!basicGroup) return null;
 
-                                return <InputBoxControl />;
-                            } else {
-                                return <FooterCommand command='join' onCommand={this.handleJoin} />;
-                            }
+                const { status } = basicGroup;
+                if (!status) return null;
+
+                const { is_member, permissions } = status;
+
+                switch (status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        return <InputBoxControl />;
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return is_member ? <InputBoxControl /> : null;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return null;
+                    }
+                    case 'chatMemberStatusMember': {
+                        return <InputBoxControl />;
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        if (is_member) {
+                            return permissions && permissions.can_send_messages ? <InputBoxControl /> : null;
+                        } else {
+                            return <FooterCommand command='join' onCommand={this.handleJoin} />;
                         }
                     }
                 }
-
                 break;
             }
             case 'chatTypePrivate': {
@@ -131,38 +129,39 @@ class Footer extends React.Component {
                 return <InputBoxControl />;
             }
             case 'chatTypeSupergroup': {
-                const supergroup = SupergroupStore.get(chat.type.supergroup_id);
-                if (supergroup && supergroup.status) {
-                    switch (supergroup.status['@type']) {
-                        case 'chatMemberStatusAdministrator': {
+                const supergroup = SupergroupStore.get(type.supergroup_id);
+                if (!supergroup) return null;
+
+                const { is_channel, status } = supergroup;
+                if (!status) return null;
+
+                const { is_member, permissions } = status;
+
+                switch (status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        return <InputBoxControl />;
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return is_member ? <InputBoxControl /> : null;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return <FooterCommand command='join' onCommand={this.handleJoin} />;
+                    }
+                    case 'chatMemberStatusMember': {
+                        if (is_channel) {
+                            return <NotificationsCommandControl chatId={chatId} />;
+                        } else {
                             return <InputBoxControl />;
                         }
-                        case 'chatMemberStatusBanned': {
-                            return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
-                        }
-                        case 'chatMemberStatusCreator': {
-                            return supergroup.status.is_member ? <InputBoxControl /> : null;
-                        }
-                        case 'chatMemberStatusLeft': {
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        if (is_member) {
+                            return permissions && permissions.can_send_messages ? <InputBoxControl /> : null;
+                        } else {
                             return <FooterCommand command='join' onCommand={this.handleJoin} />;
-                        }
-                        case 'chatMemberStatusMember': {
-                            if (supergroup.is_channel) {
-                                return <NotificationsCommandControl chatId={chatId} />;
-                            } else {
-                                return <InputBoxControl />;
-                            }
-                        }
-                        case 'chatMemberStatusRestricted': {
-                            if (supergroup.status.is_member) {
-                                if (!supergroup.status.can_send_messages) {
-                                    return null;
-                                }
-
-                                return <InputBoxControl />;
-                            } else {
-                                return <FooterCommand command='join' onCommand={this.handleJoin} />;
-                            }
                         }
                     }
                 }

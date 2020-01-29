@@ -1205,33 +1205,35 @@ function canSendMessages(chatId) {
     const { type } = chat;
     if (!type) return false;
 
-    switch (chat.type['@type']) {
+    switch (type['@type']) {
         case 'chatTypeBasicGroup': {
             const basicGroup = BasicGroupStore.get(type.basic_group_id);
-            if (basicGroup && basicGroup.status) {
-                switch (basicGroup.status['@type']) {
-                    case 'chatMemberStatusAdministrator': {
-                        return true;
-                    }
-                    case 'chatMemberStatusBanned': {
-                        return false;
-                    }
-                    case 'chatMemberStatusCreator': {
-                        return true;
-                    }
-                    case 'chatMemberStatusLeft': {
-                        return false;
-                    }
-                    case 'chatMemberStatusMember': {
-                        return true;
-                    }
-                    case 'chatMemberStatusRestricted': {
-                        if (basicGroup.status.can_send_messages) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
+            if (!basicGroup) return false;
+
+            const { status } = basicGroup;
+            if (!status) return false;
+
+            const { permissions } = status;
+            if (!permissions) return false;
+
+            switch (status['@type']) {
+                case 'chatMemberStatusAdministrator': {
+                    return true;
+                }
+                case 'chatMemberStatusBanned': {
+                    return false;
+                }
+                case 'chatMemberStatusCreator': {
+                    return true;
+                }
+                case 'chatMemberStatusLeft': {
+                    return false;
+                }
+                case 'chatMemberStatusMember': {
+                    return true;
+                }
+                case 'chatMemberStatusRestricted': {
+                    return permissions.can_send_messages;
                 }
             }
 
@@ -1245,34 +1247,32 @@ function canSendMessages(chatId) {
         }
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(type.supergroup_id);
-            if (supergroup && supergroup.status) {
-                switch (supergroup.status['@type']) {
-                    case 'chatMemberStatusAdministrator': {
-                        return true;
-                    }
-                    case 'chatMemberStatusBanned': {
-                        return false;
-                    }
-                    case 'chatMemberStatusCreator': {
-                        return true;
-                    }
-                    case 'chatMemberStatusLeft': {
-                        return false;
-                    }
-                    case 'chatMemberStatusMember': {
-                        if (supergroup.is_channel) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    }
-                    case 'chatMemberStatusRestricted': {
-                        if (supergroup.status.can_send_messages) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
+            if (!supergroup) return false;
+
+            const { status } = supergroup;
+            if (!status) return false;
+
+            const { permissions } = status;
+            if (!permissions) return false;
+
+            switch (status['@type']) {
+                case 'chatMemberStatusAdministrator': {
+                    return true;
+                }
+                case 'chatMemberStatusBanned': {
+                    return false;
+                }
+                case 'chatMemberStatusCreator': {
+                    return true;
+                }
+                case 'chatMemberStatusLeft': {
+                    return false;
+                }
+                case 'chatMemberStatusMember': {
+                    return true;
+                }
+                case 'chatMemberStatusRestricted': {
+                    return permissions.can_send_messages;
                 }
             }
         }
