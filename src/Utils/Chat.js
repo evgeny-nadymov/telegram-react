@@ -1214,7 +1214,6 @@ function canSendMessages(chatId) {
             if (!status) return false;
 
             const { permissions } = status;
-            if (!permissions) return false;
 
             switch (status['@type']) {
                 case 'chatMemberStatusAdministrator': {
@@ -1233,7 +1232,7 @@ function canSendMessages(chatId) {
                     return true;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return permissions.can_send_messages;
+                    return permissions && permissions.can_send_messages;
                 }
             }
 
@@ -1253,7 +1252,6 @@ function canSendMessages(chatId) {
             if (!status) return false;
 
             const { permissions } = status;
-            if (!permissions) return false;
 
             switch (status['@type']) {
                 case 'chatMemberStatusAdministrator': {
@@ -1272,7 +1270,7 @@ function canSendMessages(chatId) {
                     return true;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return permissions.can_send_messages;
+                    return permissions && permissions.can_send_messages;
                 }
             }
         }

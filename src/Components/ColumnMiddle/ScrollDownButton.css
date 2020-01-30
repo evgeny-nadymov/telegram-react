@@ -6,8 +6,8 @@
  */
 
 .scroll-down-button {
-    border-width: 1px;
-    border-style: solid;
+    border: 1px solid var(--border);
+    background: var(--panel-background);
     position: absolute;
     right: 24px;
     bottom: 12px;

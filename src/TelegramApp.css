@@ -57,6 +57,8 @@ mark {
     border-style: solid;
     border-width: 0 1px 0 1px;
     border-color: var(--border);
+    background: var(--background);
+    color: var(--color);
     overflow: hidden;
 }
 

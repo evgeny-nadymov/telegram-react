@@ -25,10 +25,6 @@ import '../TelegramApp.css';
 import Dialog from './ColumnLeft/DialogsList';
 
 const styles = theme => ({
-    page: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
-    },
     menuIconButton: {
         margin: '8px -2px 8px 12px'
     },
@@ -52,7 +48,7 @@ class StubPage extends React.Component {
         return (
             <>
                 <div
-                    className={classNames(classes.page, 'page', {
+                    className={classNames('page', {
                         'page-third-column': isChatDetailsVisible
                     })}>
                     <div

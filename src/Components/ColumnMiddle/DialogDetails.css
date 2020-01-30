@@ -15,7 +15,10 @@
     display: flex;
     flex-direction: column;
     background-color: var(--chat-background);
-    background-image: url('/bg.jpg');
+}
+
+.light .dialog-details {
+    background-image: url('../../Assets/bg.jpg');
     background-size: cover;
 }
 

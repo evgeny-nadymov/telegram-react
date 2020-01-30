@@ -6,6 +6,14 @@
  */
 
 .unread-separator {
-    text-align: center;
-    padding: 4px 10px;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--message-service-color);
+    background: var(--message-service-background);
+    min-height: 24px;
+    font-size: 15px;
+    line-height: normal;
+    padding: 0 12px;
 }

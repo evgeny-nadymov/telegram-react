@@ -6,21 +6,13 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
+import { withTranslation } from 'react-i18next';
 import './UnreadSeparator.css';
 
-const styles = theme => ({
-    unreadSeparator: {
-        background: theme.palette.type === 'dark' ? theme.palette.grey[800] : '#f0f4f7',
-        color: theme.palette.type === 'dark' ? theme.palette.text.primary : '#8096a8'
-    }
-});
-
 function UnreadSeparator(props) {
-    const { classes } = props;
+    const { t } = props;
 
-    return <div className={classNames('unread-separator', classes.unreadSeparator)}>Unread messages</div>;
+    return <div className='unread-separator'>{t('UnreadMessages')}</div>;
 }
 
-export default withStyles(styles)(UnreadSeparator);
+export default withTranslation()(UnreadSeparator);

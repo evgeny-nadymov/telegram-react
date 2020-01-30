@@ -28,3 +28,21 @@
     width: 150px;
     margin-bottom: 12px;
 }
+
+.placeholder-meta {
+    margin: 5px 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--message-service-color);
+    background: var(--message-service-background);
+    min-height: 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    line-height: normal;
+    padding: 0 12px;
+}
+
+.placeholder-meta-wrapper {
+}

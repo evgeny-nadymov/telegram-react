@@ -20,6 +20,8 @@ class Meta extends React.Component {
         const { className, chatId, messageId, date, editDate, onDateClick, t, views, style } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
+        if (!message) return null;
+
         const { is_outgoing } = message;
 
         const dateStr = getDate(date);

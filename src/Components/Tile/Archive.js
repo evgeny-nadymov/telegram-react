@@ -7,49 +7,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import ArchiveIcon from '@material-ui/icons/Archive';
-import ChatTile from './ChatTile';
-import DialogTitle from './DialogTitle';
-import DialogMeta from './DialogMeta';
-import DialogContent from './DialogContent';
-import DialogBadge from './DialogBadge';
-import { isPrivateChat } from '../../Utils/Chat';
-import ChatStatus from './ChatStatus';
-import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Archive.css';
-import { orderCompare } from '../../Utils/Common';
-import AppStore from '../../Stores/ApplicationStore';
-
-const styles = theme => ({
-    menuListRoot: {
-        minWidth: 150
-    },
-    statusRoot: {
-        position: 'absolute',
-        right: 1,
-        bottom: 1,
-        zIndex: 1
-    },
-    unreadIcon: {
-        background: theme.palette.primary.light
-    },
-    dialog: {
-        borderRadius: 8,
-        cursor: 'pointer',
-        margin: '0 12px',
-        '&:hover': {
-            backgroundColor: theme.palette.primary.main + '22'
-        }
-    },
-    dialogContent: {
-        color: theme.palette.text.secondary
-    }
-});
 
 class Archive extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -66,15 +27,6 @@ class Archive extends React.Component {
         return false;
     }
 
-    onUpdateChatOrder = update => {
-        const { chat_id } = update;
-
-        const archive = ChatStore.chatList.get('chatListArchive');
-        if (archive && archive.has(chat_id)) {
-            this.setState({ title: this.getTitle() });
-        }
-    };
-
     handleSelect = event => {
         if (event.button === 0) {
             TdLibController.clientUpdate({
@@ -84,12 +36,12 @@ class Archive extends React.Component {
     };
 
     render() {
-        const { classes, t, title } = this.props;
+        const { t, title } = this.props;
 
         return (
             <div
                 ref={this.dialog}
-                className={classNames(classes.dialog, 'dialog')}
+                className='dialog'
                 onMouseDown={this.handleSelect}
                 onContextMenu={this.handleContextMenu}>
                 <div className='dialog-wrapper'>
@@ -107,7 +59,7 @@ class Archive extends React.Component {
                             </div>
                         </div>
                         <div className='tile-second-row'>
-                            <div className={classNames('dialog-content', classes.dialogContent)}>{title}</div>
+                            <div className='dialog-content'>{title}</div>
                             {/*{unread_count > 0 && (*/}
                             {/*    <div className={classNames('dialog-badge-muted', 'dialog-badge')}>*/}
                             {/*        <span className='dialog-badge-text'>{unread_count}</span>*/}
@@ -125,9 +77,4 @@ Archive.propTypes = {
     title: PropTypes.string
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(Archive);
+export default withTranslation()(Archive);

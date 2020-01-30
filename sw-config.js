@@ -9,7 +9,7 @@ module.exports = {
         [   './build/**/**.html',
             './build/static/js/*.js',
             './build/static/css/*.css',
-            './build/static/media/**',
+            './build/static/media/*.*',
             './build/*.wasm',
             './build/*.worker.js',
             './build/tdweb.js',

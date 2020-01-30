@@ -1216,16 +1216,15 @@ class InputBoxControl extends Component {
                             </div>
                         </div>
                     </div>
-                    <Button
-                        variant='contained'
-                        disableElevation
-                        color='primary'
-                        className='inputbox-send-button'
-                        aria-label='Send'
-                        size='small'
-                        onClick={this.handleSubmit}>
-                        {editMessageId ? <DoneIcon /> : <SendIcon />}
-                    </Button>
+                    <div className='inputbox-send-button-background'>
+                        <IconButton
+                            className='inputbox-send-button'
+                            aria-label='Send'
+                            size='small'
+                            onClick={this.handleSubmit}>
+                            {editMessageId ? <DoneIcon /> : <SendIcon />}
+                        </IconButton>
+                    </div>
                 </div>
                 {!isPrivateChat(chatId) && <CreatePollDialog onSend={this.handleSendPoll} />}
                 <PasteFilesDialog files={files} onConfirm={this.handlePasteConfirm} onCancel={this.handlePasteCancel} />

@@ -184,7 +184,7 @@ class TelegramApp extends Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, theme } = this.props;
         const { inactive, nativeMobile, tdlibDatabaseExists, fatalError } = this.state;
         let { authorizationState, prevAuthorizationState } = this.state;
         const state = authorizationState;
@@ -266,7 +266,12 @@ class TelegramApp extends Component {
         // );
 
         return (
-            <div id='app' onDragOver={this.handleDragOver} onDrop={this.handleDrop} onKeyDown={this.handleKeyDown}>
+            <div
+                id='app'
+                className={theme.palette.type === 'dark' ? 'dark' : 'light'}
+                onDragOver={this.handleDragOver}
+                onDrop={this.handleDrop}
+                onKeyDown={this.handleKeyDown}>
                 {page}
                 <Dialog
                     transitionDuration={0}

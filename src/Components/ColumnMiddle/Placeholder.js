@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import { ReactComponent as BubblesLogo } from '../../Assets/Bubbles.svg';
+// import { ReactComponent as BubblesLogo } from '../../Assets/Bubbles.svg';
 import AppStore from '../../Stores/ApplicationStore';
 import './Placeholder.css';
 
@@ -78,8 +78,8 @@ class Placeholder extends React.Component {
         return (
             <div className='placeholder'>
                 <div className='placeholder-wrapper'>
-                    <BubblesLogo className='placeholder-logo' />
-                    {t('SelectChatToStartMessaging')}
+                    {/*<BubblesLogo className='placeholder-logo' />*/}
+                    <div className='placeholder-meta'>{t('SelectChatToStartMessaging')}</div>
                 </div>
             </div>
         );

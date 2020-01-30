@@ -8,15 +8,12 @@
 import React from 'react';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import withLanguage from '../Language';
-import withTheme from '../Theme';
 import withSnackbarNotifications from '../Notifications';
 import ForwardDialog from './Popup/ForwardDialog';
 import ChatInfo from './ColumnRight/ChatInfo';
 import Dialogs from './ColumnLeft/Dialogs';
 import DialogDetails from './ColumnMiddle/DialogDetails';
-import Footer from './Footer';
 import InstantViewer from './InstantView/InstantViewer';
 import MediaViewer from './Viewer/MediaViewer';
 import ProfileMediaViewer from './Viewer/ProfileMediaViewer';
@@ -27,13 +24,6 @@ import InstantViewStore from '../Stores/InstantViewStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
-
-const styles = theme => ({
-    page: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
-    }
-});
 
 class MainPage extends React.Component {
     constructor(props) {
@@ -161,7 +151,6 @@ class MainPage extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const {
             instantViewContent,
             isChatDetailsVisible,
@@ -173,7 +162,7 @@ class MainPage extends React.Component {
         return (
             <>
                 <div
-                    className={classNames(classes.page, 'page', {
+                    className={classNames('page', {
                         'page-third-column': isChatDetailsVisible
                     })}>
                     <Dialogs />
@@ -193,8 +182,6 @@ MainPage.propTypes = {};
 
 const enhance = compose(
     withLanguage,
-    withTheme,
-    withStyles(styles),
     withSnackbarNotifications
 );
 
