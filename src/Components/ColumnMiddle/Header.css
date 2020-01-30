@@ -20,6 +20,7 @@
     box-sizing: border-box;
     border-bottom-width: 1px;
     border-bottom-style: solid;
+    background: var(--panel-background);
     border-color: var(--border);
 }
 

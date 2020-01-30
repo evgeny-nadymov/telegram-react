@@ -36,7 +36,7 @@ class ApplicationStore extends EventEmitter {
         this.isChatDetailsVisible = false;
         this.mediaViewerContent = null;
         this.profileMediaViewerContent = null;
-        this.dragging = false;
+        this.dragParams = null;
         this.actionScheduler = new ActionScheduler(this.handleScheduledAction, this.handleCancelScheduledAction);
     };
 
@@ -201,6 +201,13 @@ class ApplicationStore extends EventEmitter {
             case 'clientUpdateDialogsReady': {
                 this.dialogsReady = true;
                 this.emit('clientUpdateDialogsReady', update);
+                break;
+            }
+            case 'clientUpdateDragging': {
+                const { dragging, files } = update;
+
+                this.dragParams = dragging ? { dragging, files } : null;
+                this.emit('clientUpdateDragging', update);
                 break;
             }
             case 'clientUpdateEditMessage': {
@@ -371,15 +378,6 @@ class ApplicationStore extends EventEmitter {
     getAuthorizationState() {
         return this.authorizationState;
     }
-
-    getDragging = () => {
-        return this.dragging;
-    };
-
-    setDragging = value => {
-        this.dragging = value;
-        this.emit('clientUpdateDragging', value);
-    };
 
     assign(source1, source2) {
         Object.assign(source1, source2);

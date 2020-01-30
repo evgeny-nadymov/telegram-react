@@ -11,6 +11,7 @@
     box-sizing: border-box;
     border-top-width: 1px;
     border-top-style: solid;
+    background: var(--panel-background);
     border-color: var(--border);
 }
 

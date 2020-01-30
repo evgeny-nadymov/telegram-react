@@ -7,7 +7,7 @@
 
 import React from 'react';
 import FileStore from '../../Stores/FileStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './FilesDropTarget.css';
 
@@ -15,21 +15,23 @@ class FilesDropTarget extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            dragging: ApplicationStore.getDragging()
-        };
+        const { dragParams } = AppStore;
+
+        this.state = { dragParams };
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateDragging', this.onClientUpdateDragging);
+        AppStore.on('clientUpdateDragging', this.onClientUpdateDragging);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateDragging', this.onClientUpdateDragging);
+        AppStore.off('clientUpdateDragging', this.onClientUpdateDragging);
     }
 
     onClientUpdateDragging = update => {
-        this.setState({ dragging: ApplicationStore.getDragging() });
+        const { dragParams } = AppStore;
+
+        this.setState({ dragParams });
     };
 
     handleDragEnter = event => {
@@ -40,7 +42,10 @@ class FilesDropTarget extends React.Component {
     handleDrop = event => {
         event.preventDefault();
         event.stopPropagation();
-        ApplicationStore.setDragging(false);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDragging',
+            dragging: false
+        });
 
         this.handleAttachDocumentComplete(event.dataTransfer.files);
     };
@@ -48,7 +53,10 @@ class FilesDropTarget extends React.Component {
     handleDragLeave = event => {
         event.preventDefault();
         event.stopPropagation();
-        ApplicationStore.setDragging(false);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDragging',
+            dragging: false
+        });
     };
 
     handleAttachDocumentComplete = files => {
@@ -66,13 +74,13 @@ class FilesDropTarget extends React.Component {
     };
 
     onSendInternal = async (content, callback) => {
-        const currentChatId = ApplicationStore.getChatId();
+        const currentChatId = AppStore.getChatId();
 
         if (!currentChatId) return;
         if (!content) return;
 
         try {
-            ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
+            AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
 
             let result = await TdLibController.send({
                 '@type': 'sendMessage',
@@ -96,11 +104,11 @@ class FilesDropTarget extends React.Component {
     };
 
     render() {
-        const { dragging } = this.state;
+        const { dragParams } = this.state;
 
         return (
             <>
-                {dragging && (
+                {dragParams && (
                     <div
                         className='files-drop-target'
                         onDragEnter={this.handleDragEnter}
@@ -118,7 +126,5 @@ class FilesDropTarget extends React.Component {
         );
     }
 }
-
-FilesDropTarget.propTypes = {};
 
 export default FilesDropTarget;

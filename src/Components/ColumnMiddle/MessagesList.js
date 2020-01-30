@@ -1179,7 +1179,11 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (!canSendFiles(chatId)) return;
 
-        AppStore.setDragging(true);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateDragging',
+            dragging: true,
+            files: event.dataTransfer.files
+        });
     };
 
     handleScrollDownClick = event => {
