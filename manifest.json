@@ -1,19 +1,61 @@
 {
-  "short_name": "Telegram",
   "name": "Telegram",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "32x32",
-      "type": "image/png"
-    }
-  ],
-  "start_url": "./index.html",
+  "description": "Telegram Web App.\nMore info & source code here: https://github.com/evgeny-nadymov/telegram-react",
+  "short_name": "Telegram",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff",
+  "gcm_sender_id": "795646555577",
+  "start_url": "./index.html",
+  "scope": "/",
+  "background_color": "#fff",
+  "icons": [
+    {
+      "src": "img/icons/icon16.png",
+      "type": "image/png",
+      "sizes": "16x16"
+    },
+    {
+      "src": "img/icons/icon32.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    },
+    {
+      "src": "img/icons/icon60.png",
+      "type": "image/png",
+      "sizes": "60x60"
+    },
+    {
+      "src": "img/icons/icon64.png",
+      "type": "image/png",
+      "sizes": "64x64"
+    },
+    {
+      "src": "img/icons/icon90.png",
+      "type": "image/png",
+      "sizes": "90x90"
+    },
+    {
+      "src": "img/icons/icon128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "img/icons/icon192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "img/icons/icon512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "img/icons/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "513x513"
+    }
+  ],
   "permissions": [
     "notifications"
-  ],
-  "gcm_sender_id": "795646555577"
+  ]
 }
