@@ -15,6 +15,12 @@
 
 .voice-note-meta {
     font-size: 14px;
+    line-height: normal;
     user-select: none;
     display: flex;
+    color: var(--message-in-subtle-color);
+}
+
+.message-out .voice-note-meta {
+    color: var(--message-out-subtle-color);
 }
