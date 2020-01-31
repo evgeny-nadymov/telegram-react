@@ -13,7 +13,7 @@
     background: transparent;
     position: relative;
     box-sizing: border-box;
-    padding: 12px 0;
+    margin: 6px 0;
 }
 
 .poll-option-wrapper {
@@ -27,7 +27,7 @@
 }
 
 .poll-option-text {
-    margin-left: 38px;
+    margin-left: 41px;
 }
 
 .poll-option-bottom-border {
@@ -36,5 +36,20 @@
     right: 0;
     bottom: 0;
     border-bottom: 1px solid var(--border);
-    margin-left: 38px;
+    margin-left: 41px;
+}
+
+.poll-option-progress-root {
+    background: transparent;
+    margin: 2px 0 0 41px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 2px;
+}
+
+.poll-option-progress-bar {
+    transition: transform 0.2s linear;
+    border-radius: 2px;
 }

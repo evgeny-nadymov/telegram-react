@@ -11,9 +11,8 @@
     align-items: center;
     /*overflow: hidden;*/
     box-sizing: border-box;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-color: var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--panel-background);
     padding: 0 12px;
 
     /*position: absolute;*/

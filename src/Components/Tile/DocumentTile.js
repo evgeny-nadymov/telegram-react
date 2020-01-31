@@ -8,20 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import FileProgress from '../../Components/Viewer/FileProgress';
 import { getSrc } from '../../Utils/File';
 import FileStore from '../../Stores/FileStore';
 import './DocumentTile.css';
-
-const styles = theme => ({
-    background: {
-        background: theme.palette.primary.main,
-        borderRadius: '50%',
-        width: 48,
-        height: 48
-    }
-});
 
 class DocumentTile extends React.Component {
     constructor(props) {
@@ -63,7 +53,7 @@ class DocumentTile extends React.Component {
     };
 
     render() {
-        const { classes, minithumbnail, thumbnail, file, icon, completeIcon, openMedia } = this.props;
+        const { minithumbnail, thumbnail, file, icon, completeIcon, openMedia } = this.props;
         const { loaded } = this.state;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
@@ -73,9 +63,9 @@ class DocumentTile extends React.Component {
 
         return (
             <div
-                className={classNames('document-tile', { 'document-tile-background': !src }, { pointer: openMedia })}
+                className={classNames('document-tile', { 'document-tile-image': !src }, { pointer: openMedia })}
                 onClick={openMedia}>
-                {!tileLoaded && <div className={classes.background} />}
+                {!tileLoaded && <div className='document-tile-background' />}
                 {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
                 {file && (
                     <FileProgress
@@ -103,4 +93,4 @@ DocumentTile.propTypes = {
     completeIcon: PropTypes.node
 };
 
-export default withStyles(styles, { withTheme: true })(DocumentTile);
+export default DocumentTile;

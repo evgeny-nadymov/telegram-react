@@ -32,15 +32,56 @@ class Poll extends React.Component {
 
     getTotalVoterCountString = (count, t = key => key) => {
         if (!count) return t('NoVotes');
-        if (count === 1) return '1 vote';
+        if (count === 1) return '1 answer';
 
-        return count + ' votes';
+        return count + ' answers';
+    };
+
+    handleSubmit = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const { chatId, messageId, poll } = this.props;
+        if (!poll) return;
+
+        const { type } = poll;
+        if (!type) return;
+
+        if (this.viewResults(poll)) {
+            return;
+        }
+
+        if (!type.allow_multiple_answers) {
+            return;
+        }
+
+        const optionIds = [];
+        poll.options.forEach((x, index) => {
+            if (x.isMultiChoosen) {
+                optionIds.push(index);
+            }
+        });
+
+        if (!optionIds.length) {
+            return;
+        }
+
+        setPollAnswer(chatId, messageId, optionIds);
     };
 
     handleVote = index => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, poll } = this.props;
+        if (!poll) return;
 
-        setPollAnswer(chatId, messageId, [index]);
+        const { type } = poll;
+        if (!type) return;
+
+        if (type['@type'] === 'pollTypeRegular' && type.allow_multiple_answers) {
+            poll.options[index].isMultiChoosen = !poll.options[index].isMultiChoosen;
+            this.forceUpdate();
+        } else {
+            setPollAnswer(chatId, messageId, [index]);
+        }
     };
 
     handleUnvote = event => {
@@ -123,10 +164,52 @@ class Poll extends React.Component {
         this.setState({ contextMenu: false });
     };
 
+    viewResults(poll) {
+        if (!poll) return false;
+
+        const { options, is_closed, is_anonymous } = poll;
+        if (is_anonymous) {
+            return false;
+        }
+
+        return is_closed || options.some(x => x.is_chosen);
+    }
+
+    getOptionType(index, poll) {
+        const types = ['regular', 'correct', 'incorrect'];
+        const defaultTypeId = 0;
+        const correctTypeId = 1;
+        const incorrectTypeId = 2;
+        if (!poll) return types[defaultTypeId];
+
+        const { type } = poll;
+        if (!type) return types[defaultTypeId];
+        if (type['@type'] !== 'pollTypeQuiz') return types[defaultTypeId];
+
+        const { correct_option_id } = type;
+        if (correct_option_id === -1) return types[defaultTypeId];
+
+        return correct_option_id === index ? types[correctTypeId] : types[incorrectTypeId];
+    }
+
     render() {
         const { chatId, messageId, poll, t, meta } = this.props;
         const { left, top, contextMenu, dialog } = this.state;
-        const { question, options, total_voter_count, is_closed } = poll;
+        const { question, options, total_voter_count, type, is_closed, is_anonymous } = poll;
+
+        let subtitle = t('FinalResults');
+        if (!is_closed) {
+            switch (type['@type']) {
+                case 'pollTypeRegular': {
+                    subtitle = is_anonymous ? t('AnonymousPoll') : t('PublicPoll');
+                    break;
+                }
+                case 'pollTypeQuiz': {
+                    subtitle = is_anonymous ? t('AnonymousQuizPoll') : t('QuizPoll');
+                    break;
+                }
+            }
+        }
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -135,17 +218,21 @@ class Poll extends React.Component {
         const canStopPoll = message && message.can_be_edited;
         const canBeSelected = !is_closed && options.every(x => !x.is_chosen);
         const maxVoterCount = Math.max(...options.map(x => x.voter_count));
+        const showViewResults = this.viewResults(poll);
+        const showButton = type.allow_multiple_answers || showViewResults;
+        const buttonEnabled = showViewResults || options.some(x => x.isMultiChoosen);
 
         return (
             <div className='poll' onContextMenu={this.handleContextMenu}>
                 <div className='poll-question'>
                     <span className='poll-question-title'>{question}</span>
-                    <span className='subtitle'>{is_closed ? t('FinalResults') : t('AnonymousPoll')}</span>
+                    <span className='poll-question-subtitle'>{subtitle}</span>
                 </div>
                 <div className='poll-options'>
                     {options.map((x, index) => (
                         <PollOption
                             key={index}
+                            type={this.getOptionType(index, poll)}
                             option={x}
                             canBeSelected={canBeSelected}
                             closed={is_closed}
@@ -155,10 +242,17 @@ class Poll extends React.Component {
                         />
                     ))}
                 </div>
-                <div className='poll-total-count subtitle'>
-                    {this.getTotalVoterCountString(total_voter_count, t)}
-                    {meta}
-                </div>
+                {showButton && (
+                    <Button fullWidth color='primary' disabled={!buttonEnabled} onClick={this.handleSubmit}>
+                        {showViewResults ? t('PollViewResults') : t('PollSubmitVotes')}
+                    </Button>
+                )}
+                {!showButton && (
+                    <div className='poll-total-count'>
+                        {this.getTotalVoterCountString(total_voter_count, t)}
+                        {meta}
+                    </div>
+                )}
                 <Popover
                     open={contextMenu && (canUnvote || canStopPoll)}
                     onClose={this.handleCloseContextMenu}

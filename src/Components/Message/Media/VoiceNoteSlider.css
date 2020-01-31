@@ -8,3 +8,23 @@
 .voice-note-slider {
     transform: translate(0, 14px);
 }
+
+.voice-note-slider-component {
+    color: var(--color-accent-main);
+}
+
+.voice-note-slider-track {
+    transition: width 0ms linear 0ms, height 0ms linear 0ms, transform 0ms linear 0ms;
+}
+
+.voice-note-slider-thumb {
+    transition: transform 0ms linear 0ms, box-shadow 0ms linear 0ms;
+}
+
+.voice-note-slider-thumb-wrapper {
+    transition: transform 0ms linear 0ms;
+}
+
+.message-bubble-out .voice-note-slider-component {
+    color: var(--message-out-meta-color);
+}

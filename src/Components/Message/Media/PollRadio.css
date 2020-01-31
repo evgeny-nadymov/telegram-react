@@ -14,7 +14,22 @@
     position: fixed;
 }
 
+.poll-radio-root {
+    padding: 6px;
+}
+
+.poll-radio-icon {
+    color: transparent;
+}
+
 .poll-radio-hidden {
     pointer-events: none;
     opacity: 0;
+}
+
+.poll-radio-progress-root {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    pointer-events: none;
 }

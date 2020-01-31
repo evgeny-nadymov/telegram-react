@@ -20,7 +20,7 @@ import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendFiles, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
+import { canSendMediaMessages, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { highlightMessage, openChat } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -1177,7 +1177,7 @@ class MessagesList extends React.Component {
         event.stopPropagation();
 
         const { chatId } = this.props;
-        if (!canSendFiles(chatId)) return;
+        if (!canSendMediaMessages(chatId)) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateDragging',

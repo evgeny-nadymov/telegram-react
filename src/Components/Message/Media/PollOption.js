@@ -8,27 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import PollRadio from './PollRadio';
 import PollPercentage from './PollPercentage';
 import './PollOption.css';
-
-const styles = theme => ({
-    progressRoot: {
-        backgroundColor: 'transparent',
-        margin: '2px 0 0 38px',
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0
-    },
-    progressBar: {
-        transition: 'transform .2s linear'
-    }
-});
 
 class PollOption extends React.Component {
     getTitleString = (count, t = key => key) => {
@@ -59,10 +43,10 @@ class PollOption extends React.Component {
     };
 
     render() {
-        const { classes, option, onChange, canBeSelected, closed, maxVoterCount, t } = this.props;
+        const { option, onChange, canBeSelected, closed, maxVoterCount, t } = this.props;
         if (!option) return null;
 
-        const { text, voter_count, vote_percentage, is_chosen, is_being_chosen } = option;
+        const { text, voter_count, vote_percentage, is_chosen, isMultiChoosen, is_being_chosen } = option;
 
         let value = 1.5;
         if (voter_count) {
@@ -85,16 +69,15 @@ class PollOption extends React.Component {
                         />
                         <PollRadio
                             hidden={!canBeSelected}
-                            chosen={is_chosen}
+                            chosen={is_chosen || isMultiChoosen}
                             beingChosen={is_being_chosen}
                             onChange={onChange}
                         />
                         <div className='poll-option-text'>{text}</div>
                     </div>
                 </div>
-                <div className='poll-option-bottom-border' />
                 <LinearProgress
-                    classes={{ root: classes.progressRoot, bar: classes.progressBar }}
+                    classes={{ root: 'poll-option-progress-root', bar: 'poll-option-progress-bar' }}
                     color='primary'
                     variant='determinate'
                     value={canBeSelected ? 0 : Math.max(1.5, value)}
@@ -105,6 +88,7 @@ class PollOption extends React.Component {
 }
 
 PollOption.propTypes = {
+    type: PropTypes.oneOf(['regular', 'correct', 'incorrect']).isRequired,
     option: PropTypes.object.isRequired,
     onVote: PropTypes.func.isRequired,
     onUnvote: PropTypes.func.isRequired,
@@ -113,9 +97,4 @@ PollOption.propTypes = {
     maxVoterCount: PropTypes.number
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(PollOption);
+export default withTranslation()(PollOption);

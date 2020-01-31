@@ -17,7 +17,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import PhotoIcon from '../../Assets/Icons/SharedMedia';
 import PollIcon from '@material-ui/icons/PollOutlined';
-import { canSendDocuments, canSendPhotos, canSendPolls, isPrivateChat } from '../../Utils/Chat';
+import { canSendMediaMessages, canSendPolls, isPrivateChat } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 
 class AttachButton extends React.Component {
@@ -89,13 +89,13 @@ class AttachButton extends React.Component {
                         horizontal: 'right'
                     }}
                     onClose={this.handleMenuClose}>
-                    <MenuItem onClick={this.handleAttachPhoto} disabled={!canSendPhotos(chatId)}>
+                    <MenuItem onClick={this.handleAttachPhoto} disabled={!canSendMediaMessages(chatId)}>
                         <ListItemIcon>
                             <PhotoIcon />
                         </ListItemIcon>
                         <ListItemText primary={t('AttachPhoto')} />
                     </MenuItem>
-                    <MenuItem onClick={this.handleAttachDocument} disabled={!canSendDocuments(chatId)}>
+                    <MenuItem onClick={this.handleAttachDocument} disabled={!canSendMediaMessages(chatId)}>
                         <ListItemIcon>
                             <InsertDriveFileIcon />
                         </ListItemIcon>

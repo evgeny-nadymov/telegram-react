@@ -13,8 +13,19 @@
     flex-shrink: 0;
 }
 
-.document-tile-background {
+.document-tile-image {
     background: rgba(218, 228, 234, 0.5);
+}
+
+.document-tile-background {
+    background: var(--color-accent-main);
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+}
+
+.message-bubble-out .document-tile-background {
+    background: var(--message-in-subtle-color);
 }
 
 .document-tile-cancel {
