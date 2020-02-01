@@ -935,8 +935,11 @@ function canSendMediaMessages(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { type } = chat;
+    const { type, permissions: globalPermissions } = chat;
     if (!type) return false;
+    if (!globalPermissions) return false;
+
+    const { can_send_media_messages } = globalPermissions;
 
     switch (type['@type']) {
         case 'chatTypeBasicGroup': {
@@ -971,11 +974,9 @@ function canSendMediaMessages(chatId) {
 
             break;
         }
-        case 'chatTypePrivate': {
-            return true;
-        }
+        case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return true;
+            return can_send_media_messages;
         }
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(chat.type.supergroup_id);
@@ -994,16 +995,16 @@ function canSendMediaMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return is_member;
+                    return can_send_media_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
                 }
                 case 'chatMemberStatusMember': {
-                    return !supergroup.is_channel;
+                    return can_send_media_messages && !supergroup.is_channel;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return is_member && permissions && permissions.can_send_media_messages;
+                    return can_send_media_messages && is_member && permissions && permissions.can_send_media_messages;
                 }
             }
         }
@@ -1102,8 +1103,11 @@ function canSendPolls(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { type } = chat;
+    const { type, permissions: globalPermissions } = chat;
     if (!type) return false;
+    if (!globalPermissions) return false;
+
+    const { can_send_polls } = globalPermissions;
 
     switch (type['@type']) {
         case 'chatTypeBasicGroup': {
@@ -1138,11 +1142,9 @@ function canSendPolls(chatId) {
 
             break;
         }
-        case 'chatTypePrivate': {
-            return true;
-        }
+        case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return true;
+            return can_send_polls;
         }
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(type.supergroup_id);
@@ -1161,16 +1163,16 @@ function canSendPolls(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return is_member;
+                    return can_send_polls && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
                 }
                 case 'chatMemberStatusMember': {
-                    return !supergroup.is_channel;
+                    return can_send_polls && !supergroup.is_channel;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return is_member && permissions && permissions.can_send_polls;
+                    return can_send_polls && is_member && permissions && permissions.can_send_polls;
                 }
             }
         }
@@ -1183,8 +1185,11 @@ function canSendMessages(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { type } = chat;
+    const { type, permissions: globalPermissions } = chat;
     if (!type) return false;
+    if (!globalPermissions) return false;
+
+    const { can_send_messages } = globalPermissions;
 
     switch (type['@type']) {
         case 'chatTypeBasicGroup': {
@@ -1219,11 +1224,9 @@ function canSendMessages(chatId) {
 
             break;
         }
-        case 'chatTypePrivate': {
-            return true;
-        }
+        case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return true;
+            return can_send_messages;
         }
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(type.supergroup_id);
@@ -1242,16 +1245,16 @@ function canSendMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return is_member;
+                    return can_send_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
                 }
                 case 'chatMemberStatusMember': {
-                    return !supergroup.is_channel;
+                    return can_send_messages && !supergroup.is_channel;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return is_member && permissions && permissions.can_send_messages;
+                    return can_send_messages && is_member && permissions && permissions.can_send_messages;
                 }
             }
         }
@@ -1300,8 +1303,11 @@ function canPinMessages(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { type } = chat;
+    const { type, permissions: globalPermissions } = chat;
     if (!type) return false;
+    if (!globalPermissions) return false;
+
+    const { can_pin_messages } = globalPermissions;
 
     switch (type['@type']) {
         case 'chatTypeBasicGroup': {
@@ -1336,11 +1342,9 @@ function canPinMessages(chatId) {
 
             break;
         }
-        case 'chatTypePrivate': {
-            return isMeChat(chatId);
-        }
+        case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return false;
+            return can_pin_messages;
         }
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(type.supergroup_id);
@@ -1353,13 +1357,13 @@ function canPinMessages(chatId) {
 
             switch (status['@type']) {
                 case 'chatMemberStatusAdministrator': {
-                    return status.can_pin_messages;
+                    return can_pin_messages || status.can_pin_messages;
                 }
                 case 'chatMemberStatusBanned': {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return is_member;
+                    return can_pin_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
@@ -1368,7 +1372,7 @@ function canPinMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusRestricted': {
-                    return is_member && permissions && permissions.can_pin_messages;
+                    return can_pin_messages && is_member && permissions && permissions.can_pin_messages;
                 }
             }
         }

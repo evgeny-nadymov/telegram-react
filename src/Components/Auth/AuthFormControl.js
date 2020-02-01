@@ -107,7 +107,7 @@ class AuthFormControl extends React.Component {
         }
 
         return (
-            <div className='sign-in-wrap'>
+            <div className='authorization-form'>
                 <div className='authorization-form-content'>
                     <Caption state={state} />
                     {control}
