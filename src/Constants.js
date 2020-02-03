@@ -79,5 +79,5 @@ export const VERBOSITY_MAX = 20;
 export const VERBOSITY_MIN = 0;
 export const USERNAME_LENGTH_MIN = 5;
 export const REPLACE_PREFIX = '/telegram-react';
-export const WASM_FILE_NAME = '07e52262c6a35ccf202dc2355db24a57.wasm';
+export const WASM_FILE_NAME = '93851361833a55534e17170c3e15da85.wasm';
 export const WASM_FILE_HASH = WASM_FILE_NAME.replace('.wasm', '');
