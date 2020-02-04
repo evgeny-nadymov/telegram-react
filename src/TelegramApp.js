@@ -19,7 +19,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import packageJson from '../package.json';
-import AuthFormControl from './Components/Auth/AuthFormControl';
+import AuthForm from './Components/Auth/AuthForm';
 import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
 import StubPage from './Components/StubPage';
@@ -232,18 +232,13 @@ class TelegramApp extends Component {
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
                 case 'authorizationStateWaitTdlib':
-                    page = (
-                        <AuthFormControl
-                            authorizationState={authorizationState}
-                            onChangePhone={this.handleChangePhone}
-                        />
-                    );
+                    page = <AuthForm authorizationState={authorizationState} onChangePhone={this.handleChangePhone} />;
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {
                     // if (!tdlibDatabaseExists) {
                     //     page = (
-                    //         <AuthFormControl
+                    //         <AuthForm
                     //             authorizationState={authorizationState}
                     //             onChangePhone={this.handleChangePhone}
                     //         />

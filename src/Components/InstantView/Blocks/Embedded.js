@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactIframeResizer from 'react-iframe-resizer-super';
+import ReactIframeResizer from '../../Additional/IframeResizer';
 import Caption from './Caption';
 
 class Embedded extends React.Component {

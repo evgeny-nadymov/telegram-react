@@ -6,20 +6,10 @@
  */
 
 import React from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
+import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
-import ApplicationStore from '../../Stores/ApplicationStore';
-
-const styles = {
-    root: {
-        margin: 0,
-        padding: '24px',
-        width: '100%',
-        borderRadius: 0,
-        color: 'white',
-        maxHeight: '65px'
-    }
-};
+import AppStore from '../../Stores/ApplicationStore';
+import './UpdatePanel.css';
 
 class UpdatePanel extends React.Component {
     constructor(props) {
@@ -31,11 +21,11 @@ class UpdatePanel extends React.Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
+        AppStore.on('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
+        AppStore.off('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
     }
 
     onClientUpdateNewContentAvailable = () => {
@@ -53,16 +43,18 @@ class UpdatePanel extends React.Component {
 
     render() {
         const { newContentAvailable } = this.state;
-        const { classes } = this.props;
+        const { t } = this.props;
 
-        const content = newContentAvailable ? (
-            <Button variant='contained' color='primary' className={classes.root} onClick={this.handleUpdate}>
-                Update
+        if (!newContentAvailable) {
+            return null;
+        }
+
+        return (
+            <Button className='update-button' variant='contained' color='primary' onClick={this.handleUpdate}>
+                {t('Update')}
             </Button>
-        ) : null;
-
-        return <>{content}</>;
+        );
     }
 }
 
-export default withStyles(styles)(UpdatePanel);
+export default withTranslation()(UpdatePanel);

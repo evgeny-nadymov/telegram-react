@@ -7,22 +7,12 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { getChatSubtitleWithoutTyping, isAccentChatSubtitleWithoutTyping } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import './DialogStatus.css';
-
-const styles = theme => ({
-    statusSubtitle: {
-        color: theme.palette.text.secondary
-    },
-    statusAccentSubtitle: {
-        color: theme.palette.primary.dark + '!important'
-    }
-});
 
 class DialogStatus extends React.Component {
     constructor(props) {
@@ -140,10 +130,13 @@ class DialogStatus extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
+        const { type } = chat;
+        if (!type) return;
+
         if (
-            chat.type &&
-            (chat.type['@type'] === 'chatTypePrivate' || chat.type['@type'] === 'chatTypeSecret') &&
-            chat.type.user_id === update.user_id
+            type &&
+            (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret') &&
+            type.user_id === update.user_id
         ) {
             this.updateSubtitle(chat);
         }
@@ -154,11 +147,10 @@ class DialogStatus extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        if (
-            chat.type &&
-            chat.type['@type'] === 'chatTypeBasicGroup' &&
-            chat.type.basic_group_id === update.basic_group_id
-        ) {
+        const { type } = chat;
+        if (!type) return;
+
+        if (type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === update.basic_group_id) {
             this.updateSubtitle(chat);
         }
     };
@@ -168,11 +160,10 @@ class DialogStatus extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        if (
-            chat.type &&
-            chat.type['@type'] === 'chatTypeSupergroup' &&
-            chat.type.supergroup_id === update.supergroup_id
-        ) {
+        const { type } = chat;
+        if (!type) return;
+
+        if (type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === update.supergroup_id) {
             this.updateSubtitle(chat);
         }
     };
@@ -182,11 +173,10 @@ class DialogStatus extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        if (
-            chat.type &&
-            chat.type['@type'] === 'chatTypeBasicGroup' &&
-            chat.type.basic_group_id === update.basic_group.id
-        ) {
+        const { type } = chat;
+        if (!type) return;
+
+        if (type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === update.basic_group.id) {
             this.updateSubtitle(chat);
         }
     };
@@ -196,29 +186,19 @@ class DialogStatus extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        if (
-            chat.type &&
-            chat.type['@type'] === 'chatTypeSupergroup' &&
-            chat.type.supergroup_id === update.supergroup.id
-        ) {
+        const { type } = chat;
+        if (!type) return;
+
+        if (type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === update.supergroup.id) {
             this.updateSubtitle(chat);
         }
     };
 
     render() {
-        const { classes } = this.props;
         const { subtitle, isAccent } = this.state;
 
-        return (
-            <div
-                className={classNames(
-                    'dialog-status',
-                    isAccent ? classes.statusAccentSubtitle : classes.statusSubtitle
-                )}>
-                {subtitle}
-            </div>
-        );
+        return <div className={classNames('dialog-status', { 'dialog-status-accent': isAccent })}>{subtitle}</div>;
     }
 }
 
-export default withStyles(styles, { withTheme: true })(DialogStatus);
+export default DialogStatus;

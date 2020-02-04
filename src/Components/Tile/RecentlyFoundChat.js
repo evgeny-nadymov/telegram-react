@@ -8,24 +8,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListItem from '@material-ui/core/ListItem';
-import withStyles from '@material-ui/core/styles/withStyles';
 import ChatTile from './ChatTile';
 import DialogTitle from './DialogTitle';
 import './RecentlyFoundChat.css';
 
-const styles = {
-    listItem: {
-        padding: 0
-    }
-};
-
 class RecentlyFoundChat extends React.PureComponent {
     render() {
-        const { chatId, onClick, classes } = this.props;
+        const { chatId, onClick } = this.props;
 
         return (
-            <ListItem button className={classes.listItem} onClick={onClick}>
-                <div className='recently-found-chat'>
+            <ListItem button className='recently-found-chat' onClick={onClick}>
+                <div className='recently-found-chat-content'>
                     <div className='chat-wrapper'>
                         <ChatTile chatId={chatId} />
                         <div className='dialog-inner-wrapper'>
@@ -45,4 +38,4 @@ RecentlyFoundChat.propTypes = {
     onSelect: PropTypes.func
 };
 
-export default withStyles(styles)(RecentlyFoundChat);
+export default RecentlyFoundChat;

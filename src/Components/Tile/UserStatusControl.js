@@ -7,19 +7,9 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { getUserStatus, isUserOnline } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import './UserStatusControl.css';
-
-const styles = theme => ({
-    userStatusSubtitle: {
-        color: theme.palette.text.secondary
-    },
-    userStatusAccentSubtitle: {
-        color: theme.palette.primary.dark + '!important'
-    }
-});
 
 class UserStatusControl extends React.Component {
     constructor(props) {
@@ -51,12 +41,8 @@ class UserStatusControl extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { userId, theme } = this.props;
+        const { userId } = this.props;
         const { status, isAccent } = this.state;
-
-        if (nextProps.theme !== theme) {
-            return true;
-        }
 
         if (nextProps.userId !== userId) {
             return true;
@@ -91,19 +77,10 @@ class UserStatusControl extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { status, isAccent } = this.state;
 
-        return (
-            <div
-                className={classNames('dialog-content', classes.userStatusSubtitle, {
-                    'accent-color': isAccent,
-                    [classes.userStatusAccentSubtitle]: isAccent
-                })}>
-                {status}
-            </div>
-        );
+        return <div className={classNames('dialog-content', { 'user-status-accent': isAccent })}>{status}</div>;
     }
 }
 
-export default withStyles(styles, { withTheme: true })(UserStatusControl);
+export default UserStatusControl;

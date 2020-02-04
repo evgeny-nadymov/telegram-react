@@ -21,6 +21,10 @@
     /*top: 65px;*/
 }
 
+.header-player-button {
+    padding: 4px;
+}
+
 .header-player-video {
     visibility: hidden;
     position: absolute;

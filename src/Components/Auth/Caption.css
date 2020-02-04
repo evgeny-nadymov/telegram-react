@@ -16,4 +16,5 @@
     width: 160px;
     height: 160px;
     margin: 107px auto 44px;
+    fill: var(--color-accent-main);
 }

@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.user-status-accent {
-    color: var(--color-accent-dark);
+.update-button {
+    margin: 0;
+    padding: 24px;
+    width: 100%;
+    border-radius: 0;
+    color: white;
+    max-height: 65px;
 }

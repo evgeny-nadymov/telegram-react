@@ -6,19 +6,10 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import withStyles from '@material-ui/core/styles/withStyles';
-import classNames from 'classnames';
 import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
 import Lottie from '../Viewer/Lottie';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
-
-const styles = theme => ({
-    logo: {
-        fill: theme.palette.primary.main
-    }
-});
 
 class Caption extends React.Component {
     constructor(props) {
@@ -179,7 +170,7 @@ class Caption extends React.Component {
     };
 
     render() {
-        const { classes, state } = this.props;
+        const { state } = this.props;
         const { data } = this.state;
 
         let control = null;
@@ -188,7 +179,7 @@ class Caption extends React.Component {
             case 'authorizationStateWaitEncryptionKey':
             case 'authorizationStateWaitTdlibParameters':
             case 'authorizationStateWaitTdlib': {
-                control = <Logo className={classNames('auth-caption-telegram-logo', classes.logo)} />;
+                control = <Logo className='auth-caption-telegram-logo' />;
                 break;
             }
             case 'authorizationStateWaitCode':
@@ -223,6 +214,4 @@ class Caption extends React.Component {
     }
 }
 
-Caption.propTypes = {};
-
-export default withStyles(styles)(Caption);
+export default Caption;

@@ -11,11 +11,11 @@ import Code from './Code';
 import Password from './Password';
 import Phone from './Phone';
 import AuthErrorDialog from './AuthErrorDialog';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import AuthStore from '../../Stores/AuthorizationStore';
-import './AuthFormControl.css';
+import './AuthForm.css';
 
-class AuthFormControl extends React.Component {
+class AuthForm extends React.Component {
     state = {
         data: null
     };
@@ -63,7 +63,7 @@ class AuthFormControl extends React.Component {
     render() {
         const { authorizationState: state } = this.props;
         const { data } = this.state;
-        const { defaultPhone } = ApplicationStore;
+        const { defaultPhone } = AppStore;
 
         let control = null;
         switch (state['@type']) {
@@ -117,4 +117,4 @@ class AuthFormControl extends React.Component {
         );
     }
 }
-export default AuthFormControl;
+export default AuthForm;

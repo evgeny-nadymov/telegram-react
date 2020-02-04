@@ -17,8 +17,8 @@ import ThemePicker from './ThemePicker';
 import LanguagePicker from './LanguagePicker';
 import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import { WASM_FILE_HASH, WASM_FILE_NAME } from '../../Constants';
+import ApplicationStore from '../../Stores/ApplicationStore';
 
 const styles = {
     menuIconButton: {
