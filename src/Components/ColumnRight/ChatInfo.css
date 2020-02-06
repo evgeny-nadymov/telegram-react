@@ -6,7 +6,8 @@
  */
 
 .chat-info {
-    border-color: var(--border);
+    border-left: 1px solid var(--border);
+    background: var(--panel-background);
 }
 
 .right-column {
@@ -15,8 +16,6 @@
     width: calc(25% - 0px);
     margin: 0;
     box-sizing: border-box;
-    border-left-width: 1px;
-    border-left-style: solid;
     height: 100%;
     display: flex;
     flex-direction: column;

@@ -61,6 +61,7 @@ import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatDetails.css';
+import TouchRipple from '@material-ui/core/ButtonBase/TouchRipple';
 
 class ChatDetails extends React.Component {
     constructor(props) {
@@ -462,7 +463,7 @@ class ChatDetails extends React.Component {
                             <Divider />
                             <List>
                                 {!isMe && <NotificationsListItem chatId={chatId} />}
-                                {isGroup && <MoreListItem chatId={chatId} />}
+                                {/*{isGroup && <MoreListItem chatId={chatId} />}*/}
                                 {popup && !isGroup && (
                                     <ListItem button className='list-item' onClick={this.handleOpenChat}>
                                         <ListItemText

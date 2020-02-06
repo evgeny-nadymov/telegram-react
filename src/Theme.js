@@ -107,7 +107,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--panel-background', '#303030');
     style.setProperty('--border', theme.palette.divider);
     style.setProperty('--chat-background', theme.palette.grey[900]);
-    style.setProperty('--background', theme.palette.background.default);
+    style.setProperty('--background', theme.palette.grey[900]);
     style.setProperty('--background-paper', theme.palette.background.paper);
     style.setProperty('--color', '#ffffff');
 
@@ -139,11 +139,39 @@ function updateDarkTheme(theme) {
 }
 
 function createTheme(type, primary) {
+    let MuiTouchRipple = {};
+    let action = {};
+    if (type === 'light') {
+        MuiTouchRipple = {
+            child: {
+                color: type === 'dark' ? 'currentColor' : 'rgba(112, 117, 121, 0.08)'
+            },
+            rippleVisible: {
+                opacity: type === 'dark' ? 0.15 : 1
+            },
+            '@keyframes enter': {
+                '0%': {
+                    transform: 'scale(0)',
+                    opacity: 0.1
+                },
+                '100%': {
+                    transform: 'scale(1)',
+                    opacity: type === 'dark' ? 0.15 : 1
+                }
+            }
+        };
+        action = {
+            hover: 'rgba(112, 117, 121, 0.08)',
+            hoverOpacity: 0.08
+        };
+    }
+
     const theme = createMuiTheme({
         palette: {
             type: type,
             primary: primary,
-            secondary: { main: '#E53935' }
+            secondary: { main: '#E53935' },
+            action
         },
         typography: {
             useNextVariants: true
@@ -174,7 +202,13 @@ function createTheme(type, primary) {
                 root: {
                     minWidth: 150
                 }
-            }
+            },
+            MuiList: {
+                root: {
+                    minWidth: 150
+                }
+            },
+            MuiTouchRipple
         }
     });
 

@@ -150,7 +150,7 @@ class SharedDocument extends React.Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
+                    <MenuList onClick={e => e.stopPropagation()}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (

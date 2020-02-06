@@ -583,7 +583,7 @@ class Message extends Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
+                    <MenuList onClick={e => e.stopPropagation()}>
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
                         {canBePinned && (
                             <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>

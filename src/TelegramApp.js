@@ -9,8 +9,8 @@ import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
 import { compose } from 'recompose';
 import withLanguage from './Language';
-import withStyles from '@material-ui/core/styles/withStyles';
-import withTheme from './Theme';
+import withTelegramTheme from './Theme';
+import withTheme from '@material-ui/core/styles/withTheme';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -28,37 +28,13 @@ import { isMobile } from './Utils/Common';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
-import ApplicationStore from './Stores/ApplicationStore';
+import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore from './Stores/AuthorizationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
 import MainPage from './Components/MainPage';
 // const MainPage = React.lazy(() => import('./Components/MainPage'));
-
-const styles = theme => ({
-    '@global': {
-        a: {
-            color: theme.palette.primary.main
-        },
-        code: {
-            color: theme.palette.primary.dark
-        },
-        pre: {
-            borderColor: theme.palette.divider,
-            color: theme.palette.primary.dark,
-            // background: theme.palette.primary.main + '11'
-            '&::selection': {
-                color: theme.palette.text.primary,
-                backgroundColor: 'highlight'
-            }
-        },
-        body: {
-            background: theme.palette.type === 'dark' ? theme.palette.grey[900] : '#ffffff',
-            color: theme.palette.text.primary
-        }
-    }
-});
 
 class TelegramApp extends Component {
     constructor(props) {
@@ -85,19 +61,19 @@ class TelegramApp extends Component {
     componentDidMount() {
         TdLibController.addListener('update', this.onUpdate);
 
-        ApplicationStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
-        ApplicationStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.on('updateFatalError', this.onUpdateFatalError);
+        AppStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        AppStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.on('updateFatalError', this.onUpdateFatalError);
     }
 
     componentWillUnmount() {
         TdLibController.off('update', this.onUpdate);
 
-        ApplicationStore.off('clientUpdateAppInactive', this.onClientUpdateAppInactive);
-        ApplicationStore.off('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
-        ApplicationStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
-        ApplicationStore.off('updateFatalError', this.onUpdateFatalError);
+        AppStore.off('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        AppStore.off('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.off('updateFatalError', this.onUpdateFatalError);
     }
 
     onClientUpdateTdLibDatabaseExists = update => {
@@ -330,7 +306,7 @@ document.addEventListener('keydown', async event => {
     keyMap.set(event.key, event.key);
     //console.log('keydown key=' + event.key, event.altKey, event.ctrlKey, event, keyMap);
 
-    const { authorizationState } = ApplicationStore;
+    const { authorizationState } = AppStore;
     if (!authorizationState) return;
     if (authorizationState['@type'] !== 'authorizationStateReady') return;
     if (keyMap.size > 3) return;
@@ -428,8 +404,8 @@ window.onpopstate = function() {
 const enhance = compose(
     withLanguage,
     withTranslation(),
-    withTheme,
-    withStyles(styles, { withTheme: true })
+    withTelegramTheme,
+    withTheme
 );
 
 export default enhance(TelegramApp);

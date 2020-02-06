@@ -23,6 +23,26 @@ body {
     width: 100%;
     font: 16px/21px 'Roboto', sans-serif;
     overflow: hidden;
+    background: var(--background);
+    color: var(--color);
+}
+
+a {
+    color: var(--color-accent-main);
+}
+
+code {
+    color: var(--color-accent-dark);
+}
+
+pre {
+    border-color: var(--border);
+    color: var(--color-accent-dark);
+}
+
+pre::selection {
+    color: var(--color);
+    background-color: highlight;
 }
 
 b,

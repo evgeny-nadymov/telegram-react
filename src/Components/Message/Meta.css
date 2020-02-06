@@ -21,7 +21,7 @@
     bottom: 3px;
 }
 
-.message:not(.message-out) .meta-text {
+.message:not(.message-out) .meta-text:not(.meta-bubble) {
     right: 7px;
 }
 

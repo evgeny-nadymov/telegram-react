@@ -124,7 +124,13 @@ class PollStore extends EventEmitter {
         return {
             '@type': 'inputMessagePoll',
             question,
-            options: options.filter(x => Boolean(x.text)).map(x => x.text)
+            options: options.filter(x => Boolean(x.text)).map(x => x.text),
+            is_anonymous: true,
+            type: {
+                '@type': 'pollTypeRegular',
+                allow_multiple_answers: false
+            },
+            is_closed: false
         };
     }
 }

@@ -7,7 +7,7 @@
 
 .stickers-hint {
     border-top: 1px solid var(--border);
-    background: var(--background);
+    background: var(--panel-background);
     position: absolute;
     left: 0;
     right: 0;

@@ -298,7 +298,3 @@ pre code {
 .messages-list-selection-active .message-wrapper {
     pointer-events: none;
 }
-
-.menu-list {
-    min-width: 150px;
-}

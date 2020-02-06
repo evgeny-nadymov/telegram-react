@@ -288,7 +288,7 @@ class Dialog extends Component {
                             horizontal: 'left'
                         }}
                         onMouseDown={e => e.stopPropagation()}>
-                        <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
+                        <MenuList onClick={e => e.stopPropagation()}>
                             {canToggleArchive && (
                                 <MenuItem onClick={this.handleArchive}>
                                     {isArchived ? t('Unarchive') : t('Archive')}
