@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import copy from 'copy-to-clipboard';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
@@ -62,18 +61,6 @@ import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatDetails.css';
-
-const styles = theme => ({
-    closeIconButton: {
-        margin: '8px -2px 8px 12px'
-    },
-    nested: {
-        // paddingLeft: theme.spacing(4),
-    },
-    listItem: {
-        padding: '11px 22px'
-    }
-});
 
 class ChatDetails extends React.Component {
     constructor(props) {
@@ -340,7 +327,6 @@ class ChatDetails extends React.Component {
             backButton,
             className,
             chatId,
-            classes,
             onClose,
             onOpenGroupInCommon,
             onOpenSharedAudios,
@@ -399,7 +385,7 @@ class ChatDetails extends React.Component {
             return getUserStatusOrder(y) - getUserStatusOrder(x);
         });
         const items = sortedUsers.map(user => (
-            <ListItem button className={classes.listItem} key={user.id}>
+            <ListItem button className='list-item' key={user.id}>
                 <UserControl userId={user.id} onSelect={this.handleOpenUser} />
             </ListItem>
         ));
@@ -428,7 +414,7 @@ class ChatDetails extends React.Component {
                         <>
                             <List>
                                 {username && (
-                                    <ListItem button className={classes.listItem} onClick={this.handleUsernameHint}>
+                                    <ListItem button className='list-item' onClick={this.handleUsernameHint}>
                                         <ListItemIcon>
                                             <AlternateEmailIcon />
                                         </ListItemIcon>
@@ -443,7 +429,7 @@ class ChatDetails extends React.Component {
                                 )}
                                 {phoneNumber && (
                                     <>
-                                        <ListItem button className={classes.listItem} onClick={this.handlePhoneHint}>
+                                        <ListItem button className='list-item' onClick={this.handlePhoneHint}>
                                             <ListItemIcon>
                                                 <CallIcon />
                                             </ListItemIcon>
@@ -458,7 +444,7 @@ class ChatDetails extends React.Component {
                                     </>
                                 )}
                                 {bio && (
-                                    <ListItem className={classes.listItem}>
+                                    <ListItem className='list-item'>
                                         <ListItemIcon>
                                             <ErrorOutlineIcon className='chat-details-info-icon' />
                                         </ListItemIcon>
@@ -478,7 +464,7 @@ class ChatDetails extends React.Component {
                                 {!isMe && <NotificationsListItem chatId={chatId} />}
                                 {isGroup && <MoreListItem chatId={chatId} />}
                                 {popup && !isGroup && (
-                                    <ListItem button className={classes.listItem} onClick={this.handleOpenChat}>
+                                    <ListItem button className='list-item' onClick={this.handleOpenChat}>
                                         <ListItemText
                                             inset
                                             primary={
@@ -503,7 +489,7 @@ class ChatDetails extends React.Component {
                             <Divider />
                             <List>
                                 {photoCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedPhotos}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedPhotos}>
                                         <ListItemIcon>
                                             <PhotoIcon />
                                         </ListItemIcon>
@@ -517,7 +503,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {videoCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedVideos}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedVideos}>
                                         <ListItemIcon>
                                             <VideocamIcon />
                                         </ListItemIcon>
@@ -531,7 +517,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {documentCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedDocuments}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedDocuments}>
                                         <ListItemIcon>
                                             <InsertDriveFileIcon />
                                         </ListItemIcon>
@@ -545,7 +531,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {audioCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedAudios}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedAudios}>
                                         <ListItemIcon>
                                             <HeadsetIcon />
                                         </ListItemIcon>
@@ -559,7 +545,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {urlCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedLinks}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedLinks}>
                                         <ListItemIcon>
                                             <InsertLinkIcon />
                                         </ListItemIcon>
@@ -573,7 +559,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {voiceAndVideoNoteCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenSharedVoiceNotes}>
+                                    <ListItem button className='list-item' onClick={onOpenSharedVoiceNotes}>
                                         <ListItemIcon>
                                             <MicIcon />
                                         </ListItemIcon>
@@ -589,7 +575,7 @@ class ChatDetails extends React.Component {
                                     </ListItem>
                                 )}
                                 {groupInCommonCount > 0 && (
-                                    <ListItem button className={classes.listItem} onClick={onOpenGroupInCommon}>
+                                    <ListItem button className='list-item' onClick={onOpenGroupInCommon}>
                                         <ListItemIcon>
                                             <GroupIcon />
                                         </ListItemIcon>
@@ -637,7 +623,6 @@ ChatDetails.propTypes = {
 const enhance = compose(
     withSaveRef(),
     withTranslation(),
-    withStyles(styles, { withTheme: true }),
     withSnackbar,
     withRestoreRef()
 );

@@ -6,17 +6,10 @@
  */
 
 import React from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
-
-const styles = {
-    iconButton: {
-        padding: 4
-    }
-};
 
 class ShuffleButton extends React.Component {
     constructor(props) {
@@ -53,12 +46,11 @@ class ShuffleButton extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { shuffle } = this.state;
 
         return (
             <IconButton
-                className={classes.iconButton}
+                className='header-player-button'
                 color={!shuffle ? 'default' : 'primary'}
                 onClick={this.handleShuffle}>
                 <ShuffleIcon fontSize='small' />
@@ -67,4 +59,4 @@ class ShuffleButton extends React.Component {
     }
 }
 
-export default withStyles(styles)(ShuffleButton);
+export default ShuffleButton;

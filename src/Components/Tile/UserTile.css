@@ -6,8 +6,8 @@
  */
 
 .user-tile {
-    width: 54px;
-    height: 54px;
+    width: var(--tile-size);
+    height: var(--tile-size);
     z-index: 1;
     position: relative;
     border-radius: 50%;
@@ -19,11 +19,11 @@
 }
 
 .user-tile.tile-small {
-    height: 33px;
-    width: 33px;
+    height: var(--tile-size-small);
+    width: var(--tile-size-small);
 }
 
 .user-tile.tile-big {
-    height: 120px;
-    width: 120px;
+    height: var(--tile-size-big);
+    width: var(--tile-size-big);
 }

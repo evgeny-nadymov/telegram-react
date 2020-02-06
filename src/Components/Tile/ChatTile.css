@@ -8,20 +8,20 @@
 .chat-tile {
     z-index: 1;
     position: relative;
-    height: 54px;
-    width: 54px;
+    height: var(--tile-size);
+    width: var(--tile-size);
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .chat-tile.tile-small {
-    height: 33px;
-    width: 33px;
+    height: var(--tile-size-small);
+    width: var(--tile-size-small);
 }
 
 .chat-tile.tile-big {
-    height: 120px;
-    width: 120px;
+    height: var(--tile-size-big);
+    width: var(--tile-size-big);
 }
 
 .tile_color_1 {

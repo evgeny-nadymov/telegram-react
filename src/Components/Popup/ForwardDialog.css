@@ -5,6 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.forward-dialog {
+    color: var(--color);
+}
+
 .forward-dialog-list {
     max-width: 336px;
     display: flex;
@@ -15,6 +19,7 @@
 }
 
 .forward-dialog-search-list {
+    background: var(--background-paper);
     max-width: 336px;
     position: absolute;
     left: 0;

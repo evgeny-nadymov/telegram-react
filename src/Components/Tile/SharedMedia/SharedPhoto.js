@@ -203,7 +203,7 @@ class SharedPhoto extends React.Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }}>
+                    <MenuList classes={{ root: 'menu-list' }}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (

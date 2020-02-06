@@ -6,18 +6,11 @@
  */
 
 import React from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import RepeatIcon from '@material-ui/icons/Repeat';
 import RepeatOneIcon from '@material-ui/icons/RepeatOne';
 import PlayerStore, { RepeatEnum } from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
-
-const styles = {
-    iconButton: {
-        padding: 4
-    }
-};
 
 class RepeatButton extends React.Component {
     constructor(props) {
@@ -87,12 +80,11 @@ class RepeatButton extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { repeat } = this.state;
 
         return (
             <IconButton
-                className={classes.iconButton}
+                className='header-player-button'
                 color={repeat === RepeatEnum.NONE ? 'default' : 'primary'}
                 onClick={this.handleRepeat}>
                 {this.getIcon(repeat)}
@@ -101,4 +93,4 @@ class RepeatButton extends React.Component {
     }
 }
 
-export default withStyles(styles)(RepeatButton);
+export default RepeatButton;

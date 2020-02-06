@@ -6,23 +6,12 @@
  */
 
 import React from 'react';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import './ChatDetailsHeader.css';
 import { isChannelChat, isPrivateChat } from '../../Utils/Chat';
-
-const styles = {
-    leftIconButton: {
-        margin: '8px -2px 8px 12px'
-    },
-    rightIconButton: {
-        margin: '8px 12px 8px -2px'
-    }
-};
+import './ChatDetailsHeader.css';
 
 class ChatDetailsHeader extends React.Component {
     constructor(props) {
@@ -30,7 +19,7 @@ class ChatDetailsHeader extends React.Component {
     }
 
     render() {
-        const { classes, chatId, t, backButton, onClick, onClose } = this.props;
+        const { chatId, t, backButton, onClick, onClose } = this.props;
 
         let info = t('ChatInfo');
         if (isPrivateChat(chatId)) {
@@ -42,7 +31,7 @@ class ChatDetailsHeader extends React.Component {
         return (
             <div className='header-master'>
                 {backButton && (
-                    <IconButton className={classes.leftIconButton} onClick={onClose}>
+                    <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
                     </IconButton>
                 )}
@@ -50,7 +39,7 @@ class ChatDetailsHeader extends React.Component {
                     <span className='header-status-content'>{info}</span>
                 </div>
                 {!backButton && (
-                    <IconButton className={classes.rightIconButton} onClick={onClose}>
+                    <IconButton className='header-right-button' onClick={onClose}>
                         <CloseIcon />
                     </IconButton>
                 )}
@@ -59,9 +48,4 @@ class ChatDetailsHeader extends React.Component {
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(ChatDetailsHeader);
+export default withTranslation()(ChatDetailsHeader);

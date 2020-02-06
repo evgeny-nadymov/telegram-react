@@ -6,9 +6,8 @@
  */
 
 .stickers-hint {
-    border-top-width: 1px;
-    border-top-style: solid;
-    border-color: var(--border);
+    border-top: 1px solid var(--border);
+    background: var(--background);
     position: absolute;
     left: 0;
     right: 0;

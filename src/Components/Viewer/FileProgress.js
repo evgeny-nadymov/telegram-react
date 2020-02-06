@@ -13,8 +13,6 @@ import { ANIMATION_DURATION_300MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import './FileProgress.css';
 
-const circleStyle = { circle: 'file-progress-circle' };
-
 class FileProgress extends React.Component {
     constructor(props) {
         super(props);
@@ -257,7 +255,7 @@ class FileProgress extends React.Component {
             if (completeIcon) {
                 return (
                     <div className='file-progress' style={style}>
-                        <div className='file-progress-icon'>{completeIcon}</div>
+                        {completeIcon}
                     </div>
                 );
             }
@@ -269,20 +267,15 @@ class FileProgress extends React.Component {
             // console.log('FileProgress.render inProgressIcon');
             return (
                 <div className='file-progress' style={style}>
-                    <div className='file-progress-indicator'>
-                        <CircularProgress
-                            classes={circleStyle}
-                            variant='static'
-                            value={progress}
-                            size={42}
-                            thickness={2}
-                        />
-                    </div>
-                    {cancelButton && (
-                        <div className='file-progress-icon'>
-                            <CloseIcon />
-                        </div>
-                    )}
+                    <CircularProgress
+                        className='file-progress-indicator'
+                        classes={{ circle: 'file-progress-circle' }}
+                        variant='static'
+                        value={progress}
+                        size={42}
+                        thickness={2}
+                    />
+                    {cancelButton && <CloseIcon />}
                 </div>
             );
         }
@@ -291,7 +284,7 @@ class FileProgress extends React.Component {
             // console.log('FileProgress.render icon');
             return (
                 <div className='file-progress' style={style}>
-                    <div className='file-progress-icon'>{icon}</div>
+                    {icon}
                 </div>
             );
         }

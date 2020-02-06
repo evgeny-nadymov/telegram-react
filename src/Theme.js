@@ -19,10 +19,17 @@ function updateLightTheme(theme) {
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
 
+    style.setProperty('--tile-size', '54px');
+    style.setProperty('--tile-size-small', '33px');
+    style.setProperty('--tile-size-big', '120px');
+
+    style.setProperty('--z-index-modal', theme.zIndex.modal);
+
     style.setProperty('--color-accent-main', theme.palette.primary.main);
     style.setProperty('--color-accent-main22', theme.palette.primary.main + '22');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
+    style.setProperty('--color-grey700', theme.palette.grey[700]);
 
     style.setProperty('--header-color', '#000000');
     style.setProperty('--header-subtle-color', '#707579');
@@ -39,12 +46,16 @@ function updateLightTheme(theme) {
     style.setProperty('--border', '#DADCE0');
     style.setProperty('--chat-background', '#e6ebee');
     style.setProperty('--background', '#ffffff');
+    style.setProperty('--background-paper', theme.palette.background.paper);
     style.setProperty('--color', '#000000');
 
     style.setProperty('--dialog-color', '#000000');
     style.setProperty('--dialog-subtle-color', '#707579');
     style.setProperty('--dialog-meta-color', '#5F6369');
     style.setProperty('--dialog-meta-read-color', '#4FAE4E');
+
+    style.setProperty('--media-in-tile-background', theme.palette.primary.main);
+    style.setProperty('--media-out-tile-background', '#4FAE4E');
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);
@@ -70,10 +81,17 @@ function updateDarkTheme(theme) {
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
 
+    style.setProperty('--tile-size', '54px');
+    style.setProperty('--tile-size-small', '33px');
+    style.setProperty('--tile-size-big', '120px');
+
+    style.setProperty('--z-index-modal', theme.zIndex.modal);
+
     style.setProperty('--color-accent-main', theme.palette.primary.main);
     style.setProperty('--color-accent-main22', theme.palette.primary.main + '22');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
+    style.setProperty('--color-grey700', theme.palette.grey[700]);
 
     style.setProperty('--header-color', '#ffffff');
     style.setProperty('--header-subtle-color', theme.palette.text.secondary);
@@ -90,12 +108,16 @@ function updateDarkTheme(theme) {
     style.setProperty('--border', theme.palette.divider);
     style.setProperty('--chat-background', theme.palette.grey[900]);
     style.setProperty('--background', theme.palette.background.default);
+    style.setProperty('--background-paper', theme.palette.background.paper);
     style.setProperty('--color', '#ffffff');
 
     style.setProperty('--dialog-color', '#ffffff');
     style.setProperty('--dialog-subtle-color', theme.palette.text.secondary);
     style.setProperty('--dialog-meta-color', theme.palette.text.secondary);
     style.setProperty('--dialog-meta-read-color', '#4FAE4E');
+
+    style.setProperty('--media-in-tile-background', theme.palette.primary.main);
+    style.setProperty('--media-out-tile-background', theme.palette.primary.main);
 
     style.setProperty('--message-in-link', theme.palette.primary.main);
     style.setProperty('--message-in-author', theme.palette.primary.main);

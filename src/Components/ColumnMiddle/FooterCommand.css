@@ -6,9 +6,9 @@
  */
 
 .footer-command-wrapper {
-    margin-top: 14px;
+    margin-top: 8px;
     text-align: center;
-    height: 65px;
+    height: 75px;
     box-sizing: border-box;
     border-top: 1px solid var(--border);
     background: var(--panel-background);

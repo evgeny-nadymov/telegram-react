@@ -7,10 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox/';
 import Dialog from '@material-ui/core/Dialog';
@@ -31,12 +28,6 @@ import MessageStore from '../../../Stores/MessageStore';
 import './SharedVoiceNote.css';
 import { forwardMessages, openChat } from '../../../Actions/Client';
 import TdLibController from '../../../Controllers/TdLibController';
-
-const styles = theme => ({
-    voiceNoteMeta: {
-        color: theme.palette.text.secondary
-    }
-});
 
 class SharedVoiceNote extends React.Component {
     constructor(props) {
@@ -136,7 +127,7 @@ class SharedVoiceNote extends React.Component {
     };
 
     render() {
-        const { chatId, classes, i18n, messageId, voiceNote, openMedia, showOpenMessage, t } = this.props;
+        const { chatId, i18n, messageId, voiceNote, openMedia, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         if (!voiceNote) return null;
@@ -164,7 +155,7 @@ class SharedVoiceNote extends React.Component {
                 <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                 <div className='voice-note-content'>
                     <MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} />
-                    <div className={classNames(classes.voiceNoteMeta, 'voice-note-meta')}>
+                    <div className='voice-note-meta'>
                         <AudioAction
                             chatId={chatId}
                             messageId={messageId}
@@ -189,7 +180,7 @@ class SharedVoiceNote extends React.Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
@@ -242,9 +233,4 @@ SharedVoiceNote.propTypes = {
     openMedia: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedVoiceNote);
+export default withTranslation()(SharedVoiceNote);

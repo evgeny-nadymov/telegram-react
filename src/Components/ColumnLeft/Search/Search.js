@@ -7,10 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import withStyles from '@material-ui/core/styles/withStyles';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import ChatControl from '../../Tile/ChatControl';
@@ -30,18 +27,6 @@ import MessageStore from '../../../Stores/MessageStore';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Search.css';
-
-const styles = theme => ({
-    closeSearchIconButton: {
-        margin: '8px 12px 8px 0'
-    },
-    listItem: {
-        padding: 0
-    },
-    search: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    }
-});
 
 class Search extends React.Component {
     constructor(props) {
@@ -598,7 +583,7 @@ class Search extends React.Component {
         }
 
         return (
-            <div ref={this.listRef} className={classNames(classes.search, 'search')} onScroll={this.handleScroll}>
+            <div ref={this.listRef} className='search' onScroll={this.handleScroll}>
                 {chat && (
                     <div className='search-chat'>
                         <SearchCaption caption='Search messages in' />
@@ -607,7 +592,7 @@ class Search extends React.Component {
                                 <ChatControl chatId={chatId} showStatus={false} />
                             </div>
                             <IconButton
-                                className={classes.closeSearchIconButton}
+                                className='header-right-button'
                                 aria-label='Search'
                                 onMouseDown={this.handleClose}>
                                 <CloseIcon />
@@ -663,9 +648,4 @@ Search.propTypes = {
     onClose: PropTypes.func.isRequired
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(Search);
+export default withTranslation()(Search);

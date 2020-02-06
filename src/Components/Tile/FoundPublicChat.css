@@ -4,10 +4,16 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-.found-public-chat{
-    width: 100%;
-    height: 100%;
-    padding: 10px 22px;
-    display: flex;
-    flex-direction: row;
+.found-public-chat {
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.found-public-chat .dialog-wrapper {
+    padding: 9px 21px 9px 18px;
+}
+
+.found-public-chat.item-selected .dialog-wrapper {
+    background: var(--color-accent-main);
+    color: #fff;
 }

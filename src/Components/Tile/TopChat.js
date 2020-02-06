@@ -7,23 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import withStyles from '@material-ui/core/styles/withStyles';
 import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './TopChat.css';
 
-const styles = {
-    userStatusRoot: {
-        position: 'absolute',
-        right: 1,
-        bottom: 1,
-        zIndex: 1
-    }
-};
-
 class TopChat extends React.PureComponent {
     render() {
-        const { classes, chatId, onSelect, showSavedMessages } = this.props;
+        const { chatId, onSelect, showSavedMessages } = this.props;
 
         const shortTitle = getChatShortTitle(chatId, showSavedMessages);
 
@@ -46,4 +36,4 @@ TopChat.defaultProps = {
     showSavedMessages: true
 };
 
-export default withStyles(styles)(TopChat);
+export default TopChat;

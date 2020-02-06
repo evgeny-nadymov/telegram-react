@@ -9,22 +9,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import withStyles from '@material-ui/core/styles/withStyles';
 import './GroupsInCommonHeader.css';
-
-const styles = {
-    backIconButton: {
-        margin: '8px -2px 8px 12px'
-    }
-};
 
 class GroupsInCommonHeader extends React.Component {
     render() {
-        const { classes, onClose } = this.props;
+        const { onClose } = this.props;
 
         return (
             <div className='header-master'>
-                <IconButton className={classes.backIconButton} onClick={onClose}>
+                <IconButton className='header-left-button' onClick={onClose}>
                     <ArrowBackIcon />
                 </IconButton>
                 <div className='header-status grow cursor-pointer'>
@@ -39,4 +32,4 @@ GroupsInCommonHeader.propTypes = {
     onClose: PropTypes.func.isRequired
 };
 
-export default withStyles(styles)(GroupsInCommonHeader);
+export default GroupsInCommonHeader;

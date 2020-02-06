@@ -8,8 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -32,12 +30,6 @@ import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedVideo.css';
-
-const styles = theme => ({
-    sharedPhotoContent: {
-        // backgroundColor: theme.palette.type === 'dark' ? theme.palette.background.paper : theme.palette.background.default
-    }
-});
 
 class SharedVideo extends React.Component {
     constructor(props) {
@@ -156,7 +148,7 @@ class SharedVideo extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, classes, openMedia, style, showOpenMessage, t } = this.props;
+        const { chatId, messageId, openMedia, style, showOpenMessage, t } = this.props;
         const { minithumbnail, thumbnail, video, width, height, duration } = this.props.video;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
@@ -197,7 +189,7 @@ class SharedVideo extends React.Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}
                     onClick={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }}>
+                    <MenuList classes={{ root: 'menu-list' }}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
@@ -260,9 +252,4 @@ SharedVideo.defaultProps = {
     thumbnailSize: PHOTO_THUMBNAIL_SIZE
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedVideo);
+export default withTranslation()(SharedVideo);

@@ -6,28 +6,17 @@
  */
 
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import withStyles from '@material-ui/core/styles/withStyles';
-import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
 import ThemePicker from './ThemePicker';
 import LanguagePicker from './LanguagePicker';
 import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
 import { WASM_FILE_HASH, WASM_FILE_NAME } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
-
-const styles = {
-    menuIconButton: {
-        margin: '8px -2px 8px 12px'
-    },
-    searchIconButton: {
-        margin: '8px 12px 8px 0'
-    }
-};
 
 const menuAnchorOrigin = {
     vertical: 'bottom',
@@ -99,7 +88,7 @@ class MainMenuButton extends React.Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { t } = this.props;
         const { anchorEl, authorizationState } = this.state;
 
         const mainMenuControl = isAuthorizationReady(authorizationState) ? (
@@ -126,7 +115,7 @@ class MainMenuButton extends React.Component {
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
                     aria-haspopup='true'
-                    className={classes.menuIconButton}
+                    className='header-left-button'
                     aria-label='Menu'
                     onClick={this.handleMenuOpen}>
                     <MenuIcon />
@@ -139,9 +128,4 @@ class MainMenuButton extends React.Component {
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(MainMenuButton);
+export default withTranslation()(MainMenuButton);

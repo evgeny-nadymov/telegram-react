@@ -6,15 +6,23 @@
  */
 
 :root {
+    --z-index-modal: 1300;
+
+    --tile-size: 54px;
+    --tile-size-small: 33px;
+    --tile-size-big: 120px;
+
     --color-accent-main: #5b8af1;
     --color-accent-main22: #5b8af122;
     --color-accent-light: #5b8af1;
     --color-accent-dark: #5b8af1;
+    --color-grey700: rgba(97, 97, 97, 0.9);
 
     --border: #dadce0;
     --panel-background: #ffffff;
     --chat-background: #e6ebee;
     --background: #ffffff;
+    --background-paper: #ffffff;
     --color: #000000;
 
     --header-color: #000000;
@@ -29,6 +37,9 @@
     --dialog-subtle-color: #707579;
     --dialog-meta-color: #5f6369;
     --dialog-meta-read-color: #4fae4e;
+
+    --media-in-tile-background: #5b8af1;
+    --media-out-tile-background: #5b8af1;
 
     --message-service-background: #00000033;
     --message-service-color: #ffffff;

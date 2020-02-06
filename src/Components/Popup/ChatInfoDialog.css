@@ -4,3 +4,20 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.chat-info-dialog-content {
+    width: 336px;
+}
+
+.chat-info-dialog-root {
+    align-items: start;
+}
+
+.chat-info-dialog-container {
+    color: var(--color);
+    z-index: var(--z-index-modal);
+}
+
+.chat-info-dialog-paper {
+    width: 336px;
+}

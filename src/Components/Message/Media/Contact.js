@@ -16,7 +16,7 @@ import './Contact.css';
 
 class Contact extends React.Component {
     render() {
-        const { contact, title, openMedia, meta } = this.props;
+        const { contact, title, openMedia, meta, caption } = this.props;
         if (!contact) return null;
 
         const { user_id: id, first_name, last_name, phone_number } = contact;
@@ -43,7 +43,7 @@ class Contact extends React.Component {
                     </div>
                     <div className='contact-phone'>
                         {number}
-                        {meta}
+                        {!caption && meta}
                     </div>
                 </div>
             </div>

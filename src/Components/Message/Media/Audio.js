@@ -121,7 +121,7 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, audio, openMedia, title, meta } = this.props;
+        const { chatId, messageId, audio, openMedia, title, meta, caption } = this.props;
         const { playing } = this.state;
         if (!audio) return null;
 
@@ -144,7 +144,13 @@ class Audio extends React.Component {
                             {audioTitle}
                         </a>
                     </div>
-                    <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} meta={meta} />
+                    <AudioAction
+                        chatId={chatId}
+                        messageId={messageId}
+                        duration={duration}
+                        file={file}
+                        meta={caption ? null : meta}
+                    />
                 </div>
             </div>
         );

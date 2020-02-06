@@ -8,9 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
 import ListItem from '@material-ui/core/ListItem';
 import ChatTile from './ChatTile';
 import UserTile from './UserTile';
@@ -18,29 +16,16 @@ import DialogTitle from './DialogTitle';
 import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import './FoundMessage.css';
-
-const styles = theme => ({
-    listItem: {
-        padding: 0
-    },
-    foundMessageSubtitle: {
-        color: theme.palette.text.secondary
-    },
-    foundMessageActive: {
-        color: '#fff',
-        backgroundColor: theme.palette.primary.main
-    }
-});
 
 class FoundMessage extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            nextChatId: ApplicationStore.getChatId(),
-            nextMessageId: ApplicationStore.getMessageId()
+            nextChatId: AppStore.getChatId(),
+            nextMessageId: AppStore.getMessageId()
         };
     }
 
@@ -63,11 +48,11 @@ class FoundMessage extends React.Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     onClientUpdateChatId = update => {
@@ -77,7 +62,7 @@ class FoundMessage extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, chatSearch, onClick, classes, t } = this.props;
+        const { chatId, messageId, chatSearch, onClick, t } = this.props;
         const selectedChatId = this.state.nextChatId;
         const selectedMessageId = this.state.nextMessageId;
         const message = MessageStore.get(chatId, messageId);
@@ -93,13 +78,8 @@ class FoundMessage extends React.Component {
         const tile = sender_user_id && chatSearch ? <UserTile userId={sender_user_id} /> : <ChatTile chatId={chatId} />;
 
         return (
-            <ListItem button className={classes.listItem} onClick={onClick}>
-                <div
-                    className={classNames(
-                        'found-message',
-                        { [classes.foundMessageActive]: selected },
-                        { 'item-selected': selected }
-                    )}>
+            <ListItem button className={classNames('found-message', { 'item-selected': selected })} onClick={onClick}>
+                <div className='dialog-wrapper'>
                     {tile}
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
@@ -108,10 +88,10 @@ class FoundMessage extends React.Component {
                             ) : (
                                 <DialogTitle chatId={chatId} />
                             )}
-                            <div className={classNames('dialog-meta', classes.foundMessageSubtitle)}>{date}</div>
+                            <div className='dialog-meta'>{date}</div>
                         </div>
                         <div className='tile-second-row'>
-                            <div className={classNames('dialog-content', classes.foundMessageSubtitle)}>
+                            <div className='dialog-content'>
                                 {
                                     <>
                                         {!chatSearch && senderName && (
@@ -136,9 +116,4 @@ FoundMessage.propTypes = {
     onClick: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(FoundMessage);
+export default withTranslation()(FoundMessage);

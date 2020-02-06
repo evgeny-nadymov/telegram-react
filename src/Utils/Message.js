@@ -416,6 +416,7 @@ function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inli
             return (
                 <Audio
                     title={hasTitle}
+                    caption={hasCaption}
                     chatId={chat_id}
                     messageId={id}
                     audio={content.audio}
@@ -427,6 +428,7 @@ function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inli
             return (
                 <Call
                     title={hasTitle}
+                    caption={hasCaption}
                     chatId={chat_id}
                     messageId={id}
                     duraton={content.duration}
@@ -439,6 +441,7 @@ function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inli
             return (
                 <Contact
                     title={hasTitle}
+                    caption={hasCaption}
                     chatId={chat_id}
                     messageId={id}
                     contact={content.contact}
@@ -450,6 +453,7 @@ function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inli
             return (
                 <Document
                     title={hasTitle}
+                    caption={hasCaption}
                     chatId={chat_id}
                     messageId={id}
                     document={content.document}

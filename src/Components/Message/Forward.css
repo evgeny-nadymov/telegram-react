@@ -9,4 +9,78 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: pre;
+    color: var(--color-accent-main);
+}
+
+.forward-arrow {
+    position: absolute;
+    font-size: 6px;
+    width: 3em;
+    height: 3em;
+}
+
+.forward-arrow-popper {
+}
+
+.forward-arrow-popper[x-placement*='bottom'] .forward-arrow {
+    top: 0;
+    left: 0;
+    margin-top: -0.95em;
+    width: 3em;
+    height: 1em;
+}
+
+.forward-arrow-popper[x-placement*='bottom'] .forward-arrow::before {
+    border-width: 0 1em 1em 1em;
+    border-color: transparent transparent var(--color-grey700) transparent;
+}
+
+.forward-arrow-popper[x-placement*='top'] .forward-arrow {
+    bottom: 0;
+    left: 0;
+    margin-bottom: -0.95em;
+    width: 3em;
+    height: 1em;
+}
+
+.forward-arrow-popper[x-placement*='top'] .forward-arrow::before {
+    border-width: 1em 1em 0 1em;
+    border-color: var(--color-grey700) transparent transparent transparent;
+}
+
+.forward-arrow-popper[x-placement*='right'] .forward-arrow {
+    left: 0;
+    margin-left: -0.95em;
+    width: 3em;
+    height: 1em;
+}
+
+.forward-arrow-popper[x-placement*='right'] .forward-arrow::before {
+    border-width: 1em 1em 1em 0;
+    border-color: transparent var(--color-grey700) transparent transparent;
+}
+
+.forward-arrow-popper[x-placement*='left'] .forward-arrow {
+    right: 0;
+    margin-right: -0.95em;
+    width: 3em;
+    height: 1em;
+}
+
+.forward-arrow-popper[x-placement*='left'] .forward-arrow::before {
+    border-width: 1em 0 1em 1em;
+    border-color: transparent transparent transparent var(--color-grey700);
+}
+
+.forward-arrow::before {
+    content: '';
+    margin: auto;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+}
+
+.forward-tooltip {
+    margin: 0;
 }

@@ -29,8 +29,7 @@
 }
 
 .forward-target-chat-selection {
-    border-width: 2px;
-    border-style: solid;
+    border: 2px solid var(--color-accent-main);
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -51,6 +50,16 @@
     /*box-shadow: inset 0 0 0 0 transparent;*/
     transition: box-shadow 0.5s;
     z-index: 2;
+}
+
+.forward-target-chat-mark-selected {
+    box-shadow: inset 0 0 0 10px var(--color-accent-main);
+    border: 2px solid var(--backgorund-paper);
+}
+
+.forward-target-chat-mark-unselected {
+    box-shadow: inset 0 0 0 0 var(--color-accent-main);
+    border: 2px solid transparent;
 }
 
 .forward-target-chat-mark-icon {

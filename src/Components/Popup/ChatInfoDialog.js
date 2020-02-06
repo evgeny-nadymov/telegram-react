@@ -6,29 +6,11 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
 import ChatInfo from '../ColumnRight/ChatInfo';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatInfoDialog.css';
-
-const styles = theme => ({
-    chatInfoRoot: {
-        width: 336
-    },
-    containerRoot: {
-        alignItems: 'start'
-    },
-    dialogRoot: {
-        color: theme.palette.text.primary,
-        zIndex: theme.zIndex.modal
-    },
-    paperRoot: {
-        width: 336
-    }
-});
 
 class ChatInfoDialog extends React.Component {
     state = {
@@ -71,7 +53,6 @@ class ChatInfoDialog extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { chatId } = this.state;
         if (!chatId) return null;
 
@@ -80,8 +61,12 @@ class ChatInfoDialog extends React.Component {
                 open
                 transitionDuration={0}
                 onClose={this.handleClose}
-                classes={{ root: classes.dialogRoot, container: classes.containerRoot, paper: classes.paperRoot }}>
-                <ChatInfo className={classes.chatInfoRoot} chatId={chatId} popup />
+                classes={{
+                    root: 'chat-info-dialog-root',
+                    container: 'chat-info-dialog-container',
+                    paper: 'chat-info-dialog-paper'
+                }}>
+                <ChatInfo className='chat-info-dialog-content' chatId={chatId} popup />
             </Dialog>
         );
     }
@@ -89,4 +74,4 @@ class ChatInfoDialog extends React.Component {
 
 ChatInfoDialog.propTypes = {};
 
-export default withStyles(styles)(ChatInfoDialog);
+export default ChatInfoDialog;

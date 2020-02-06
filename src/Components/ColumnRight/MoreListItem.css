@@ -5,14 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.recently-found-chat {
-    padding: 0;
-    box-sizing: border-box;
-}
-
-.recently-found-chat-content {
-    width: 100%;
-    height: 100%;
-    padding: 10px 22px;
-    box-sizing: border-box;
+.list-item {
+    padding: 11px 22px;
 }

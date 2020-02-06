@@ -7,34 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ListItem from '@material-ui/core/ListItem';
-import withStyles from '@material-ui/core/styles/withStyles';
 import classNames from 'classnames';
+import ListItem from '@material-ui/core/ListItem';
 import ChatTile from './ChatTile';
 import DialogTitle from './DialogTitle';
 import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import './FoundPublicChat.css';
-
-const styles = theme => ({
-    listItem: {
-        padding: 0
-    },
-    foundPublicChatActive: {
-        color: '#fff',
-        backgroundColor: theme.palette.primary.main
-    },
-    foundPublicChatSubtitle: {
-        color: theme.palette.text.secondary
-    }
-});
 
 class FoundPublicChat extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            nextChatId: ApplicationStore.getChatId(),
+            nextChatId: AppStore.getChatId(),
             previousChatId: null
         };
     }
@@ -58,11 +44,11 @@ class FoundPublicChat extends React.Component {
     }
 
     componentDidMount() {
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
     }
 
     onClientUpdateChatId = update => {
@@ -75,7 +61,7 @@ class FoundPublicChat extends React.Component {
     };
 
     render() {
-        const { chatId, onClick, classes } = this.props;
+        const { chatId, onClick } = this.props;
         const selectedChatId = this.state.nextChatId;
 
         const username = getChatUsername(chatId);
@@ -86,19 +72,20 @@ class FoundPublicChat extends React.Component {
         }
 
         return (
-            <ListItem button classes={{ root: classes.listItem }} onClick={onClick}>
-                <div
-                    className={classNames('found-public-chat', {
-                        [classes.foundPublicChatActive]: chatId === selectedChatId,
-                        'item-selected': chatId === selectedChatId
-                    })}>
+            <ListItem
+                button
+                classes={classNames('found-public-chat', {
+                    'item-selected': chatId === selectedChatId
+                })}
+                onClick={onClick}>
+                <div className='dialog-wrapper'>
                     <ChatTile chatId={chatId} />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <DialogTitle chatId={chatId} />
                         </div>
                         <div className='tile-second-row'>
-                            <div className={classNames('dialog-content', classes.foundPublicChatSubtitle)}>
+                            <div className='dialog-content'>
                                 @{username}
                                 {subscribersString}
                             </div>
@@ -115,4 +102,4 @@ FoundPublicChat.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withStyles(styles, { withTheme: true })(FoundPublicChat);
+export default FoundPublicChat;

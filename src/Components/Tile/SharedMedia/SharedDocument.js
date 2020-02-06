@@ -7,8 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -27,12 +25,6 @@ import { forwardMessages, openChat } from '../../../Actions/Client';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedDocument.css';
-
-const styles = {
-    menuListRoot: {
-        minWidth: 150
-    }
-};
 
 class SharedDocument extends React.Component {
     constructor(props) {
@@ -132,7 +124,7 @@ class SharedDocument extends React.Component {
     };
 
     render() {
-        const { chatId, classes, messageId, showOpenMessage, t } = this.props;
+        const { chatId, messageId, showOpenMessage, t } = this.props;
         const { contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -158,7 +150,7 @@ class SharedDocument extends React.Component {
                         horizontal: 'left'
                     }}
                     onMouseDown={e => e.stopPropagation()}>
-                    <MenuList classes={{ root: classes.menuListRoot }} onClick={e => e.stopPropagation()}>
+                    <MenuList classes={{ root: 'menu-list' }} onClick={e => e.stopPropagation()}>
                         {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
                         {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
@@ -209,9 +201,4 @@ SharedDocument.propTypes = {
     showOpenMessage: PropTypes.number.isRequired
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedDocument);
+export default withTranslation()(SharedDocument);

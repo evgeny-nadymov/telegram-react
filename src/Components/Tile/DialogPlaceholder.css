@@ -23,6 +23,7 @@
     height: 48px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: var(--dialog-subtle-color);
 }
 
 .dialog-placeholder-inner-wrapper {
@@ -33,12 +34,14 @@
 .dialog-placeholder-title {
     height: 17px;
     border-radius: 4px;
+    background: var(--dialog-subtle-color);
 }
 
 .dialog-placeholder-content {
     margin-top: 3px;
     height: 15px;
     border-radius: 4px;
+    background: var(--dialog-subtle-color);
 }
 
 @keyframes dialog-placeholder-animation {

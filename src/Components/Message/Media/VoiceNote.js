@@ -16,7 +16,7 @@ import './VoiceNote.css';
 
 class VoiceNote extends React.Component {
     render() {
-        const { chatId, messageId, voiceNote, openMedia, title, meta } = this.props;
+        const { chatId, messageId, voiceNote, openMedia, title, meta, caption } = this.props;
         if (!voiceNote) return null;
 
         const { duration, voice: file } = voiceNote;
@@ -29,7 +29,7 @@ class VoiceNote extends React.Component {
                     <div className='voice-note-meta'>
                         <AudioAction chatId={chatId} messageId={messageId} duration={duration} file={file} />
                         <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
-                        {meta}
+                        {!caption && meta}
                     </div>
                 </div>
             </div>

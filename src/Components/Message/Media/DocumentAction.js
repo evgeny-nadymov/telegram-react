@@ -7,17 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { getDownloadedSize, getUploadedSize, getFileSize } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import './DocumentAction.css';
-
-const styles = theme => ({
-    documentAction: {
-        color: theme.palette.text.secondary
-    }
-});
 
 class DocumentAction extends React.Component {
     constructor(props) {
@@ -83,7 +75,7 @@ class DocumentAction extends React.Component {
     }
 
     render() {
-        const { classes, meta } = this.props;
+        const { meta } = this.props;
         const { file } = this.state;
         if (!file) return null;
 
@@ -101,7 +93,7 @@ class DocumentAction extends React.Component {
         const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
 
         return (
-            <div className={classNames('document-action', classes.documentAction)}>
+            <div className='document-action'>
                 <span>{sizeString}</span>
                 {meta}
             </div>
@@ -113,4 +105,4 @@ DocumentAction.propTypes = {
     file: PropTypes.object.isRequired
 };
 
-export default withStyles(styles, { withTheme: true })(DocumentAction);
+export default DocumentAction;

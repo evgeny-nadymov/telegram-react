@@ -7,31 +7,15 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import './SearchCaption.css';
 
-const styles = theme => ({
-    searchCaption: {
-        background: theme.palette.type === 'dark' ? theme.palette.grey[800] + '!important' : '#f0f4f7',
-        color: theme.palette.type === 'dark' ? theme.palette.text.primary + '!important' : '#8096a8'
-    },
-    searchCaptionCommand: {
-        color: theme.palette.type === 'dark' ? theme.palette.text.primary + '!important' : '#8096a8'
-    }
-});
-
 function SearchCaption(props) {
-    const { caption, command, onClick, classes } = props;
+    const { caption, command, onClick } = props;
 
     return (
-        <div className={classNames('search-caption', classes.searchCaption)}>
+        <div className='search-caption'>
             <div className='search-caption-title'>{caption}</div>
-            {Boolean(command) && (
-                <a className={classes.searchCaptionCommand} onClick={onClick}>
-                    {command}
-                </a>
-            )}
+            {Boolean(command) && <a onClick={onClick}>{command}</a>}
         </div>
     );
 }
@@ -42,4 +26,4 @@ SearchCaption.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withStyles(styles, { withTheme: true })(SearchCaption);
+export default SearchCaption;

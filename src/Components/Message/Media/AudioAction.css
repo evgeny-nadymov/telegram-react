@@ -7,5 +7,11 @@
 
 .audio-action {
     font-size: 14px;
+    line-height: normal;
+    color: var(--message-in-subtle-color);
     user-select: none;
+}
+
+.message-out .audio-action {
+    color: var(--message-out-subtle-color);
 }

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -17,18 +16,12 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import Collapse from '@material-ui/core/Collapse';
 import Typography from '@material-ui/core/Typography';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { isUserBlocked } from '../../Utils/User';
 import { isChannelChat, isChatMember, isGroupChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import ApplicationStore from '../../Stores/ApplicationStore';
-
-const styles = {
-    listItem: {
-        padding: '11px 22px'
-    }
-};
+import './MoreListItem.css';
 
 class MoreListItem extends React.Component {
     constructor(props) {
@@ -83,7 +76,7 @@ class MoreListItem extends React.Component {
     };
 
     render() {
-        const { t, chatId, classes } = this.props;
+        const { t, chatId } = this.props;
         const { openMore } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -99,7 +92,7 @@ class MoreListItem extends React.Component {
 
         return (
             <>
-                <ListItem button className={classes.listItem} onClick={this.handleMoreClick}>
+                <ListItem button className='list-item' onClick={this.handleMoreClick}>
                     <ListItemIcon>
                         <MoreHorizIcon />
                     </ListItemIcon>
@@ -116,7 +109,7 @@ class MoreListItem extends React.Component {
                     <List component='div' disablePadding>
                         {!isGroup && (
                             <>
-                                <ListItem button className={classes.listItem} onClick={this.handleSendMessage}>
+                                <ListItem button className='list-item' onClick={this.handleSendMessage}>
                                     <ListItemText
                                         inset
                                         primary={
@@ -126,7 +119,7 @@ class MoreListItem extends React.Component {
                                         }
                                     />
                                 </ListItem>
-                                <ListItem button className={classes.listItem} onClick={this.handleBlock}>
+                                <ListItem button className='list-item' onClick={this.handleBlock}>
                                     <ListItemText
                                         inset
                                         primary={
@@ -139,7 +132,7 @@ class MoreListItem extends React.Component {
                             </>
                         )}
                         {isGroup && isMember && (
-                            <ListItem button className={classes.listItem}>
+                            <ListItem button className='list-item'>
                                 <ListItemText
                                     inset
                                     primary={
@@ -151,7 +144,7 @@ class MoreListItem extends React.Component {
                             </ListItem>
                         )}
                         {isGroup && !isMember && (
-                            <ListItem button className={classes.listItem}>
+                            <ListItem button className='list-item'>
                                 <ListItemText
                                     inset
                                     primary={
@@ -169,9 +162,4 @@ class MoreListItem extends React.Component {
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(MoreListItem);
+export default withTranslation()(MoreListItem);

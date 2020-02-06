@@ -12,7 +12,7 @@ import './Venue.css';
 
 class Venue extends React.Component {
     render() {
-        const { chatId, messageId, venue, openMedia, meta } = this.props;
+        const { chatId, messageId, venue, openMedia, meta, caption } = this.props;
         if (!venue) return null;
 
         const { title, address, location } = venue;
@@ -36,7 +36,7 @@ class Venue extends React.Component {
                     </a>
                     <div className='venue-subtitle'>
                         {address}
-                        {meta}
+                        {!caption && meta}
                     </div>
                 </div>
             </div>

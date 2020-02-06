@@ -11,6 +11,10 @@
     padding: 20px;
 }
 
+.media-viewer-footer-button-checked {
+    color: var(--color-accent-main);
+}
+
 .media-viewer-footer-button-disabled {
     cursor: default;
 }

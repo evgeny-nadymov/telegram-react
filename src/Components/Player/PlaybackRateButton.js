@@ -6,17 +6,11 @@
  */
 
 import React from 'react';
-import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
 
-const styles = {
-    iconButton: {
-        padding: 4
-    }
-};
 class PlaybackRateButton extends React.Component {
     constructor(props) {
         super(props);
@@ -55,12 +49,11 @@ class PlaybackRateButton extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
         const { playbackRate } = this.state;
 
         return (
             <IconButton
-                className={classes.iconButton}
+                className='header-player-button'
                 color={playbackRate > PLAYER_PLAYBACKRATE_NORMAL ? 'primary' : 'default'}
                 onClick={this.handlePlaybackRate}>
                 <div className='header-player-playback-icon'>2X</div>
@@ -69,4 +62,4 @@ class PlaybackRateButton extends React.Component {
     }
 }
 
-export default withStyles(styles)(PlaybackRateButton);
+export default PlaybackRateButton;

@@ -7,8 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import CloseIcon from '@material-ui/icons/Close';
@@ -17,15 +15,6 @@ import SearchIcon from '@material-ui/icons/Search';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import { ANIMATION_DURATION_200MS } from '../../../Constants';
 import './SharedMediaHeader.css';
-
-const styles = {
-    headerBackButton: {
-        margin: '8px -2px 8px 12px'
-    },
-    headerSearchButton: {
-        margin: '8px 12px 8px -2px'
-    }
-};
 
 class SharedMediaHeader extends React.Component {
     constructor(props) {
@@ -105,14 +94,14 @@ class SharedMediaHeader extends React.Component {
     };
 
     render() {
-        const { classes, t, title, onClick, onClose, onSearch } = this.props;
+        const { t, title, onClick, onClose, onSearch } = this.props;
         const { openSearch } = this.state;
 
         return (
             <div className='header-master'>
                 {!openSearch ? (
                     <>
-                        <IconButton className={classes.headerBackButton} onClick={onClose}>
+                        <IconButton className='header-left-button' onClick={onClose}>
                             <ArrowBackIcon />
                         </IconButton>
                         <div className='header-status grow cursor-pointer' onClick={onClick}>
@@ -136,7 +125,7 @@ class SharedMediaHeader extends React.Component {
                     </>
                 )}
                 {Boolean(onSearch) && (
-                    <IconButton className={classes.headerSearchButton} onMouseDown={this.handleSearch}>
+                    <IconButton className='header-right-button' onMouseDown={this.handleSearch}>
                         <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
                     </IconButton>
                 )}
@@ -153,9 +142,4 @@ SharedMediaHeader.propTypes = {
     onSearch: PropTypes.func
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedMediaHeader);
+export default withTranslation()(SharedMediaHeader);

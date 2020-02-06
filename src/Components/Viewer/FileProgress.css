@@ -5,13 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 .file-progress {
+    color: white;
     position: absolute;
-    width: 48px;
-    height: 48px;
+    width: var(--tile-size);
+    height: var(--tile-size);
     left: 50%;
     top: 50%;
-    margin: -24px 0 0 -24px;
+    margin: calc(var(--tile-size) / -2) 0 0 calc(var(--tile-size) / -2);
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .file-progress-background {
@@ -25,9 +29,6 @@
 
 .file-progress-indicator {
     position: absolute;
-    width: 42px;
-    height: 42px;
-    margin: 3px;
     animation: spin 4s linear infinite;
 }
 

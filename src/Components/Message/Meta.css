@@ -21,6 +21,10 @@
     bottom: 3px;
 }
 
+.message:not(.message-out) .meta-text {
+    right: 7px;
+}
+
 .meta-bubble {
     height: 18px;
     align-items: center;

@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerPreview from './StickerPreview';
 import { loadStickerContent, loadStickersContent } from '../../Utils/File';
@@ -17,12 +14,6 @@ import FileStore from '../../Stores/FileStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickersHint.css';
-
-const styles = theme => ({
-    root: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF'
-    }
-});
 
 class StickersHint extends React.Component {
     constructor(props) {
@@ -250,7 +241,6 @@ class StickersHint extends React.Component {
     }
 
     render() {
-        const { classes } = this.props;
         const { hint, items, sticker, showPreview } = this.state;
         if (!hint) return null;
         if (!items) return null;
@@ -279,7 +269,7 @@ class StickersHint extends React.Component {
         ));
 
         return (
-            <div ref={this.hintsRef} className={classNames('stickers-hint', classes.root)}>
+            <div ref={this.hintsRef} className='stickers-hint'>
                 {controls}
                 {Boolean(sticker) && showPreview && <StickerPreview sticker={sticker} />}
             </div>
@@ -287,4 +277,4 @@ class StickersHint extends React.Component {
     }
 }
 
-export default withStyles(styles)(StickersHint);
+export default StickersHint;

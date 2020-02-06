@@ -46,9 +46,6 @@ const styles = theme => ({
     button: {
         margin: '14px'
     },
-    menuIconButton: {
-        margin: '8px -2px 8px 12px'
-    },
     searchIconButton: {
         margin: '8px 12px 8px 0'
     },
