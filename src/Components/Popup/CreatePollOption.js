@@ -20,6 +20,8 @@ import { utils } from '../../Utils/Key';
 import { POLL_OPTION_HINT_LENGTH, POLL_OPTION_LENGTH, POLL_OPTION_MAX_LENGTH } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollOption.css';
+import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
+import Radio from '@material-ui/core/Radio';
 
 const styles = theme => ({
     iconButton: {
@@ -199,24 +201,45 @@ class CreatePollOption extends React.Component {
         document.execCommand('insertText', false, pasteText);
     };
 
+    handleChange = () => {
+        const { option } = this.props;
+        if (!option) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollChooseOption',
+            id: option.id
+        });
+    };
+
     render() {
-        const { classes, t } = this.props;
+        const { classes, t, option } = this.props;
         const { remainLength } = this.state;
+
+        const { is_chosen } = option;
 
         return (
             <div className='create-poll-option'>
-                <div
-                    ref={this.optionTextRef}
-                    id='create-poll-option-text'
-                    contentEditable
-                    suppressContentEditableWarning
-                    placeholder={t('Option')}
-                    data-length={POLL_OPTION_LENGTH}
-                    data-max-length={POLL_OPTION_MAX_LENGTH}
-                    onInput={this.handleInput}
-                    onKeyDown={this.handleKeyDown}
-                    onPaste={this.handlePaste}
-                />
+                <div className='create-poll-option-wrapper'>
+                    <Radio
+                        key={Date.now()}
+                        classes={{ root: 'create-poll-radio-root' }}
+                        color='primary'
+                        checked={is_chosen}
+                        onChange={this.handleChange}
+                    />
+                    <div
+                        ref={this.optionTextRef}
+                        className='create-poll-option-text'
+                        contentEditable
+                        suppressContentEditableWarning
+                        placeholder={t('Option')}
+                        data-length={POLL_OPTION_LENGTH}
+                        data-max-length={POLL_OPTION_MAX_LENGTH}
+                        onInput={this.handleInput}
+                        onKeyDown={this.handleKeyDown}
+                        onPaste={this.handlePaste}
+                    />
+                </div>
                 <div className='create-poll-option-delete-button'>
                     <IconButton className={classes.iconButton} onClick={this.handleDelete}>
                         <CloseIcon fontSize='small' />

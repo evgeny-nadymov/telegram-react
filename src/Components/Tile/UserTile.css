@@ -27,3 +27,16 @@
     height: var(--tile-size-big);
     width: var(--tile-size-big);
 }
+
+.user-tile.tile-poll {
+    height: var(--tile-size-extra-small);
+    width: var(--tile-size-extra-small);
+    font-size: 8px;
+    line-height: normal;
+    border: 2px solid var(--message-in-background);
+    margin: -2px 0 -2px -4px;
+}
+
+.message-bubble-out .user-tile.tile-poll {
+    border-color: var(--message-out-background);
+}

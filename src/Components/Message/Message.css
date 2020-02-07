@@ -129,6 +129,31 @@ pre code {
     flex-shrink: 1;
 }
 
+.message-bubble-shook {
+    animation: shake-animation 500ms;
+}
+
+@keyframes shake-animation {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    20% {
+        transform: rotate(3deg) scale(0.98);
+    }
+    40% {
+        transform: rotate(-3deg) scale(0.96);
+    }
+    60% {
+        transform: rotate(3deg) scale(0.96);
+    }
+    80% {
+        transform: rotate(-3deg) scale(0.98);
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
 .message-out .message-wrapper {
     flex-direction: row-reverse;
 }
@@ -217,7 +242,7 @@ pre code {
     transform: translate(7px, -2px);
 }
 
-.message.message-out:not(.message-bubble-hidden) .user-tile::before,
+.message.message-out:not(.message-bubble-hidden) .user-tile:not(.tile-poll)::before,
 .message.message-out:not(.message-bubble-hidden) .chat-tile::before {
     background: var(--message-out-background);
     position: absolute;

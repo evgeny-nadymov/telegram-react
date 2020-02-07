@@ -46,12 +46,67 @@ class PollStore extends EventEmitter {
         switch (update['@type']) {
             case 'clientUpdateNewPoll': {
                 this.set({
+                    type: {
+                        '@type': 'pollTypeRegular',
+                        allow_multiple_answers: false
+                    },
                     id: Date.now(),
                     question: '',
-                    options: []
+                    options: [],
+                    is_anonymous: true
                 });
 
                 this.emit('clientUpdateNewPoll', update);
+                break;
+            }
+            case 'clientUpdatePollChangeAnonymous': {
+                const { poll } = this;
+                const isAnonymous = poll && poll.is_anonymous;
+
+                this.assign(this.poll, { is_anonymous: !isAnonymous });
+
+                this.emit('clientUpdatePollChangeAnonymous', update);
+                break;
+            }
+            case 'clientUpdatePollChangeAllowMultipleAnswers': {
+                const { poll } = this;
+                const { type } = poll;
+                if (type['@type'] === 'pollTypeRegular') {
+                    const allowMultipleAnswers = poll && poll.type.allow_multiple_answers;
+
+                    const newType = { ...type, allow_multiple_answers: !allowMultipleAnswers };
+
+                    this.assign(this.poll, { type: newType });
+                }
+
+                this.emit('clientUpdatePollChangeAllowMultipleAnswers', update);
+                break;
+            }
+            case 'clientUpdatePollChangeType': {
+                const { poll } = this;
+                const { type } = poll;
+                if (type['@type'] === 'pollTypeRegular') {
+                    const newType = { '@type': 'pollTypeQuiz', correct_option_id: -1 };
+
+                    this.assign(this.poll, { type: newType });
+                } else {
+                    const newType = { '@type': 'pollTypeRegular', allow_multiple_answers: false };
+
+                    this.assign(this.poll, { type: newType });
+                }
+
+                this.emit('clientUpdatePollChangeType', update);
+                break;
+            }
+            case 'clientUpdatePollChooseOption': {
+                const { id } = update;
+                const { options } = this.poll;
+
+                this.assign(this.poll, {
+                    options: options.map(x => (x.id === id ? { ...x, is_chosen: true } : { ...x, is_chosen: false }))
+                });
+
+                this.emit('clientUpdatePollChooseOption', update);
                 break;
             }
             case 'clientUpdatePollQuestion': {
@@ -119,17 +174,22 @@ class PollStore extends EventEmitter {
     getInputMessagePoll() {
         if (!this.poll) return null;
         if (!isValidPoll(this.poll)) return null;
-        const { question, options } = this.poll;
+        const { question, options, type, is_anonymous } = this.poll;
+
+        if (type['@type'] === 'pollTypeQuiz') {
+            type.correct_option_id = options.findIndex(x => x.is_chosen);
+
+            if (type.correct_option_id === -1) {
+                return null;
+            }
+        }
 
         return {
             '@type': 'inputMessagePoll',
             question,
             options: options.filter(x => Boolean(x.text)).map(x => x.text),
-            is_anonymous: true,
-            type: {
-                '@type': 'pollTypeRegular',
-                allow_multiple_answers: false
-            },
+            is_anonymous,
+            type,
             is_closed: false
         };
     }

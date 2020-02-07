@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import LinearProgress from '@material-ui/core/LinearProgress';
+import CheckIcon from '../../../Assets/Icons/Check';
+import CloseIcon from '../../../Assets/Icons/Close';
 import PollRadio from './PollRadio';
 import PollPercentage from './PollPercentage';
 import './PollOption.css';
@@ -43,7 +45,7 @@ class PollOption extends React.Component {
     };
 
     render() {
-        const { option, onChange, canBeSelected, closed, maxVoterCount, t } = this.props;
+        const { option, onChange, canBeSelected, closed, maxVoterCount, t, type, isCorrect } = this.props;
         if (!option) return null;
 
         const { text, voter_count, vote_percentage, is_chosen, isMultiChoosen, is_being_chosen } = option;
@@ -73,11 +75,32 @@ class PollOption extends React.Component {
                             beingChosen={is_being_chosen}
                             onChange={onChange}
                         />
+                        {(is_chosen || isCorrect) && (
+                            <div
+                                className={classNames(
+                                    'poll-option-mark',
+                                    { 'poll-option-mark-correct': type === 'correct' },
+                                    { 'poll-option-mark-incorrect': type === 'incorrect' }
+                                )}>
+                                {type === 'incorrect' ? (
+                                    <CloseIcon className='poll-option-mark-icon' />
+                                ) : (
+                                    <CheckIcon className='poll-option-mark-icon' />
+                                )}
+                            </div>
+                        )}
                         <div className='poll-option-text'>{text}</div>
                     </div>
                 </div>
                 <LinearProgress
-                    classes={{ root: 'poll-option-progress-root', bar: 'poll-option-progress-bar' }}
+                    classes={{
+                        root: 'poll-option-progress-root',
+                        bar: classNames(
+                            'poll-option-progress-bar',
+                            { 'poll-option-progress-bar-correct': type === 'correct' },
+                            { 'poll-option-progress-bar-incorrect': type === 'incorrect' }
+                        )
+                    }}
                     color='primary'
                     variant='determinate'
                     value={canBeSelected ? 0 : Math.max(1.5, value)}

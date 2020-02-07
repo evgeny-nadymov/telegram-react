@@ -17,18 +17,48 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import FireworksComponent from './FireworksControl';
 import PollOption from './PollOption';
 import { cancelPollAnswer, setPollAnswer, stopPoll } from '../../../Actions/Poll';
 import MessageStore from './../../../Stores/MessageStore';
+import TdLibController from './../../../Controllers/TdLibController';
 import './Poll.css';
+import UserTile from '../../Tile/UserTile';
 
 class Poll extends React.Component {
-    state = {
-        dialog: false,
-        contextMenu: false,
-        left: 0,
-        top: 0
-    };
+    constructor(props) {
+        super(props);
+
+        this.fireworksRef = React.createRef();
+        this.state = {
+            dialog: false,
+            contextMenu: false,
+            left: 0,
+            top: 0
+        };
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { chatId, messageId, poll } = this.props;
+
+        if (poll && poll.type['@type'] === 'pollTypeQuiz') {
+            const { poll: prevPoll } = prevProps;
+            if (prevPoll.type.correct_option_id === -1 && poll.type.correct_option_id !== -1) {
+                const fireworks = this.fireworksRef.current;
+                if (!fireworks) return;
+
+                if (poll.options[poll.type.correct_option_id].is_chosen) {
+                    fireworks.start();
+                } else {
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateMessageShake',
+                        chatId,
+                        messageId
+                    });
+                }
+            }
+        }
+    }
 
     getTotalVoterCountString = (count, t = key => key) => {
         if (!count) return t('NoVotes');
@@ -182,6 +212,10 @@ class Poll extends React.Component {
         const incorrectTypeId = 2;
         if (!poll) return types[defaultTypeId];
 
+        const option = poll.options[index];
+        if (!option) return types[defaultTypeId];
+        if (!option.is_chosen) return types[defaultTypeId];
+
         const { type } = poll;
         if (!type) return types[defaultTypeId];
         if (type['@type'] !== 'pollTypeQuiz') return types[defaultTypeId];
@@ -192,10 +226,36 @@ class Poll extends React.Component {
         return correct_option_id === index ? types[correctTypeId] : types[incorrectTypeId];
     }
 
+    getOptionIsCorrect(index, poll) {
+        if (!poll) return false;
+
+        const option = poll.options[index];
+        if (!option) return false;
+
+        const { type } = poll;
+        if (!type) return false;
+        if (type['@type'] !== 'pollTypeQuiz') return false;
+
+        const { correct_option_id } = type;
+        if (correct_option_id === -1) return false;
+
+        return correct_option_id === index;
+    }
+
+    handleQuestionClick = event => {
+        // return;
+        event.stopPropagation();
+
+        const fireworks = this.fireworksRef.current;
+        if (!fireworks) return;
+
+        fireworks.start();
+    };
+
     render() {
         const { chatId, messageId, poll, t, meta } = this.props;
-        const { left, top, contextMenu, dialog } = this.state;
-        const { question, options, total_voter_count, type, is_closed, is_anonymous } = poll;
+        const { left, top, contextMenu, dialog, shake } = this.state;
+        const { question, options, total_voter_count, type, is_closed, is_anonymous, recent_voter_user_ids } = poll;
 
         let subtitle = t('FinalResults');
         if (!is_closed) {
@@ -221,18 +281,27 @@ class Poll extends React.Component {
         const showViewResults = this.viewResults(poll);
         const showButton = type.allow_multiple_answers || showViewResults;
         const buttonEnabled = showViewResults || options.some(x => x.isMultiChoosen);
+        let recentVoters = [];
+        if (recent_voter_user_ids) {
+            recentVoters = recent_voter_user_ids.map(id => <UserTile poll userId={id} />);
+        }
 
         return (
             <div className='poll' onContextMenu={this.handleContextMenu}>
-                <div className='poll-question'>
-                    <span className='poll-question-title'>{question}</span>
-                    <span className='poll-question-subtitle'>{subtitle}</span>
+                <FireworksComponent ref={this.fireworksRef} />
+                <div className='poll-question' onClick={this.handleQuestionClick}>
+                    <div className='poll-question-title'>{question}</div>
+                    <div className='poll-question-subtitle'>
+                        <span style={{ marginRight: 6 }}>{subtitle}</span>
+                        {recentVoters}
+                    </div>
                 </div>
                 <div className='poll-options'>
                     {options.map((x, index) => (
                         <PollOption
                             key={index}
                             type={this.getOptionType(index, poll)}
+                            isCorrect={this.getOptionIsCorrect(index, poll)}
                             option={x}
                             canBeSelected={canBeSelected}
                             closed={is_closed}

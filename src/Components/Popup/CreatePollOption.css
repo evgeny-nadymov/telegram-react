@@ -8,10 +8,30 @@
 .create-poll-option {
     display: flex;
     flex-direction: row;
+    align-items: center;
     width: 100%;
     padding: 0 0 0 24px;
     box-sizing: border-box;
     position: relative;
+}
+
+.create-quiz-dialog .create-poll-option-wrapper {
+    margin-right: 0;
+    transform: translateX(0);
+}
+
+.create-quiz-dialog .create-poll-option-bottom-border {
+    transform: translateX(46px);
+}
+
+.create-poll-option-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transform: translateX(-46px);
+    box-sizing: border-box;
+    margin-right: -46px;
+    transition: transform 250ms, margin-right 250ms;
 }
 
 .create-poll-option-delete-button {
@@ -29,12 +49,14 @@
     bottom: 0;
     border-bottom: 1px solid var(--border);
     margin-left: 24px;
+    transform: translateX(0);
+    transition: transform 250ms;
 }
 
-#create-poll-option-text {
+.create-poll-option-text {
     flex-grow: 1;
     flex-shrink: 1;
-    margin: 0 0 0 -24px;
+    margin: 0 0 0 -14px;
     box-shadow: 0 0 0 0;
     max-height: 150px;
     max-width: 324px;
@@ -48,7 +70,12 @@
     word-break: break-word;
 }
 
-#create-poll-option-text::before {
+.create-poll-radio-root {
+    padding: 6px;
+    transform: translate(-6px, 0);
+}
+
+.create-poll-option-text::before {
     /*content: attr(placeholder);*/
     color: #8e9396;
     pointer-events: none;
@@ -59,18 +86,18 @@
     transition: opacity 0.15s ease-out, transform 0.15s ease-out;
 }
 
-#create-poll-option-text:empty::before {
+.create-poll-option-text:empty::before {
     content: attr(placeholder);
     transform: translateX(0px);
     opacity: 0.75;
 }
 
-#create-poll-option-text:empty:active::before,
-#create-poll-option-text:empty:focus::before {
+.create-poll-option-text:empty:active::before,
+.create-poll-option-text:empty:focus::before {
     opacity: 0.75;
 }
 
-#create-poll-option-text:focus {
+.create-poll-option-text:focus {
     border: 0;
     outline: none;
     box-shadow: 0 0 0 0;

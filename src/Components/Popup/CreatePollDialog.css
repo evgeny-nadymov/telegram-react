@@ -5,8 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.create-poll-dialog {
+    color: var(--color);
+}
+
+.create-quiz-dialog {
+}
+
 .create-poll-dialog-question-title {
     display: flex;
+}
+
+.create-poll-add-option {
+    padding: 11px 24px;
+    color: var(--dialog-subtle-color);
+    height: 48px;
+    transition: padding 250ms;
+}
+
+.create-quiz-dialog .create-poll-add-option {
+    padding-left: 72px;
 }
 
 #create-poll-dialog-question {

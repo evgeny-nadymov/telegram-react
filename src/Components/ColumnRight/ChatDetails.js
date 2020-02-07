@@ -61,13 +61,10 @@ import FileStore from '../../Stores/FileStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatDetails.css';
-import TouchRipple from '@material-ui/core/ButtonBase/TouchRipple';
 
 class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
-
-        // console.log('ChatDetails.ctor', this.props.counters);
 
         this.chatDetailsListRef = React.createRef();
 

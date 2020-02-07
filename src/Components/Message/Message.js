@@ -62,13 +62,14 @@ class Message extends Component {
             message: MessageStore.get(chatId, messageId),
             emojiMatches: getEmojiMatches(chatId, messageId),
             selected: false,
-            highlighted: false
+            highlighted: false,
+            shook: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { contextMenu, selected, highlighted, emojiMatches } = this.state;
+        const { contextMenu, selected, highlighted, shook, emojiMatches } = this.state;
 
         if (nextProps.theme !== theme) {
             // console.log('Message.shouldComponentUpdate true');
@@ -120,6 +121,11 @@ class Message extends Component {
             return true;
         }
 
+        if (nextState.shook !== shook) {
+            // console.log('Message.shouldComponentUpdate true');
+            return true;
+        }
+
         if (nextState.emojiMatches !== emojiMatches) {
             // console.log('Message.shouldComponentUpdate true');
             return true;
@@ -132,6 +138,7 @@ class Message extends Component {
     componentDidMount() {
         MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
@@ -141,6 +148,7 @@ class Message extends Component {
     componentWillUnmount() {
         MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
@@ -151,6 +159,23 @@ class Message extends Component {
         if (!this.state.selected) return;
 
         this.setState({ selected: false });
+    };
+
+    onClientUpdateMessageShake = update => {
+        const { chatId, messageId } = this.props;
+        const { shook } = this.state;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            if (shook) {
+                this.setState({ shook: false }, () => {
+                    setTimeout(() => {
+                        this.setState({ shook: true });
+                    }, 0);
+                });
+            } else {
+                this.setState({ shook: true });
+            }
+        }
     };
 
     onClientUpdateMessageHighlighted = update => {
@@ -443,7 +468,7 @@ class Message extends Component {
 
     render() {
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { emojiMatches, selected, highlighted, contextMenu, left, top } = this.state;
+        const { emojiMatches, selected, highlighted, shook, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -511,12 +536,13 @@ class Message extends Component {
                     <div className='message-padding'>
                         <CheckMarkIcon className='message-select-tick' />
                     </div>
-                    <div className={classNames('message-wrapper', {})}>
+                    <div className='message-wrapper'>
                         {tile}
                         <div
                             className={classNames('message-content', {
                                 'message-bubble': withBubble,
-                                'message-bubble-out': withBubble && is_outgoing
+                                'message-bubble-out': withBubble && is_outgoing,
+                                'message-bubble-shook': shook
                             })}
                             style={style}>
                             {withBubble && (showTitle || showForward) && (

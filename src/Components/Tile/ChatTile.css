@@ -51,8 +51,7 @@
 
 .tile-text {
     font-size: 19px;
-    /*font-family: 'Nunito', sans-serif;*/
-    /*font-weight: 600;*/
+    line-height: normal;
     display: block;
     color: #fff;
     text-align: center;
@@ -62,10 +61,17 @@
 
 .tile-small .tile-text {
     font-size: 14px;
+    line-height: normal;
 }
 
 .tile-big .tile-text {
     font-size: 42px;
+    line-height: normal;
+}
+
+.tile-poll .tile-text {
+    font-size: 8px;
+    line-height: normal;
 }
 
 .tile-photo {

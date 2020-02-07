@@ -19,7 +19,10 @@ function updateLightTheme(theme) {
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
 
+    style.setProperty('--error', '#E53935');
+
     style.setProperty('--tile-size', '54px');
+    style.setProperty('--tile-size-extra-small', '16px');
     style.setProperty('--tile-size-small', '33px');
     style.setProperty('--tile-size-big', '120px');
 
@@ -81,7 +84,10 @@ function updateDarkTheme(theme) {
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
 
+    style.setProperty('--error', '#E53935');
+
     style.setProperty('--tile-size', '54px');
+    style.setProperty('--tile-size-extra-small', '16px');
     style.setProperty('--tile-size-small', '33px');
     style.setProperty('--tile-size-big', '120px');
 

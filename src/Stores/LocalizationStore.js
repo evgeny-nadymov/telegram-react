@@ -40,6 +40,7 @@ i18n.use(initReactI18next).init({
     resources: {
         en: {
             local: {
+                PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Left channel',
                 LeftGroup: 'Left group',
                 EnterPassword: 'Enter a Password',
@@ -100,6 +101,7 @@ i18n.use(initReactI18next).init({
         },
         ru: {
             local: {
+                PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Канал покинут',
                 LeftGroup: 'Группа покинута',
                 EnterPassword: 'Введите пароль',

@@ -52,4 +52,43 @@
 .poll-option-progress-bar {
     transition: transform 0.2s linear;
     border-radius: 2px;
+    background-color: var(--message-in-link);
+}
+
+.poll-option-mark {
+    position: absolute;
+    left: 21px;
+    bottom: -3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--message-in-link);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.poll-option-mark-icon {
+    font-size: 10px;
+    line-height: normal;
+    color: white;
+}
+
+.message-bubble-out .poll-option-progress-bar,
+.message-bubble-out .poll-option-mark {
+    background-color: var(--message-out-link);
+}
+
+.poll-option-mark-correct,
+.message-bubble-out .poll-option-mark-correct,
+.poll-option-progress-bar-correct,
+.message-bubble-out .poll-option-progress-correct {
+    background-color: var(--message-out-link);
+}
+
+.poll-option-mark-incorrect,
+.message-bubble-out .poll-option-mark-incorrect,
+.poll-option-progress-bar-incorrect,
+.message-bubble-out .poll-option-progress-bar-incorrect {
+    background-color: var(--error);
 }

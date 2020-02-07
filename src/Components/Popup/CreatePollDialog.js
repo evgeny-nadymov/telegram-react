@@ -7,15 +7,19 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { compose } from 'recompose';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -26,6 +30,7 @@ import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
 import { hasPollData, isValidPoll } from '../../Utils/Poll';
 import {
+    NOTIFICATION_AUTO_HIDE_DURATION_MS,
     POLL_OPTIONS_MAX_COUNT,
     POLL_QUESTION_HINT_LENGTH,
     POLL_QUESTION_LENGTH,
@@ -34,11 +39,12 @@ import {
 import PollStore from '../../Stores/PollStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollDialog.css';
+import AppStore from '../../Stores/ApplicationStore';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
+import { withSnackbar } from 'notistack';
 
 const styles = theme => ({
-    dialogRoot: {
-        color: theme.palette.text.primary
-    },
     contentRoot: {
         width: 300
     },
@@ -71,6 +77,10 @@ class CreatePollDialog extends React.Component {
     }
 
     componentDidMount() {
+        PollStore.on('clientUpdatePollChooseOption', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdatePollChangeAnonymous', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdatePollChangeAllowMultipleAnswers', this.handleClientUpdatePoll);
+        PollStore.on('clientUpdatePollChangeType', this.handleClientUpdatePoll);
         PollStore.on('clientUpdateDeletePoll', this.handleClientUpdatePoll);
         PollStore.on('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
         PollStore.on('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
@@ -80,6 +90,10 @@ class CreatePollDialog extends React.Component {
     }
 
     componentWillUnmount() {
+        PollStore.off('clientUpdatePollChooseOption', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdatePollChangeAnonymous', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdatePollChangeAllowMultipleAnswers', this.handleClientUpdatePoll);
+        PollStore.off('clientUpdatePollChangeType', this.handleClientUpdatePoll);
         PollStore.off('clientUpdateDeletePoll', this.handleClientUpdatePoll);
         PollStore.off('clientUpdateDeletePollOption', this.handleClientUpdatePoll);
         PollStore.off('clientUpdateNewPoll', this.handleClientUpdateNewPoll);
@@ -399,12 +413,76 @@ class CreatePollDialog extends React.Component {
         });
     };
 
+    handleChangeAnonymous = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollChangeAnonymous'
+        });
+    };
+
+    handleChangeAllowMultipleAnswers = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollChangeAllowMultipleAnswers'
+        });
+    };
+
+    handleChangeType = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePollChangeType'
+        });
+    };
+
+    handleScheduledAction = (key, message, action) => {
+        if (!key) return;
+
+        const { enqueueSnackbar } = this.props;
+        if (!enqueueSnackbar) return;
+
+        const TRANSITION_DELAY = 150;
+        if (AppStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS + 2 * TRANSITION_DELAY, action)) {
+            enqueueSnackbar(message, {
+                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+                action: [
+                    <IconButton
+                        key='close'
+                        aria-label='Close'
+                        color='inherit'
+                        className='notification-close-button'
+                        onClick={() => AppStore.removeScheduledAction(key)}>
+                        <CloseIcon />
+                    </IconButton>
+                ]
+            });
+        }
+    };
+
+    handleAllowMultipleAnswersClick = event => {
+        const { t } = this.props;
+        const { poll } = this.state;
+        if (!poll) return;
+
+        const quizPoll = poll.type['@type'] === 'pollTypeQuiz';
+        if (quizPoll) {
+            event.stopPropagation();
+
+            const key = 'disallow_multiple_answers';
+            const message = t('PollQuizOneRightAnswer');
+            const action = null;
+
+            this.handleScheduledAction(key, message, action);
+        }
+    };
+
     render() {
         const { classes, t } = this.props;
         const { remainLength, confirm, poll } = this.state;
         if (!poll) return null;
 
+        const { is_anonymous } = poll;
+
         const options = poll ? poll.options : [];
+        const allowMultipleAnswers = poll.type.allow_multiple_answers;
+        const allowMultipleAnswersDisabled = poll.type['@type'] !== 'pollTypeRegular';
+        const quizPoll = poll.type['@type'] === 'pollTypeQuiz';
 
         this.optionsRefMap.clear();
         const items = options.map((x, i) => (
@@ -424,7 +502,7 @@ class CreatePollDialog extends React.Component {
         return (
             <>
                 <Dialog
-                    className={classes.dialogRoot}
+                    className={classNames('create-poll-dialog', { 'create-quiz-dialog': quizPoll })}
                     open
                     transitionDuration={0}
                     onClose={this.handleClose}
@@ -462,7 +540,7 @@ class CreatePollDialog extends React.Component {
                             {canAddOption && (
                                 <ListItem
                                     selected={false}
-                                    className={classes.listItem}
+                                    className='create-poll-add-option'
                                     button
                                     onClick={this.handleAddOption}>
                                     <ListItemText disableTypography primary={t('AddAnOption')} />
@@ -470,6 +548,42 @@ class CreatePollDialog extends React.Component {
                             )}
                         </List>
                         <Typography>{hint}</Typography>
+                        <Divider className={classes.dividerRoot} />
+                        <Typography color='primary' variant='subtitle1'>
+                            {t('Settings')}
+                        </Typography>
+                        <FormGroup>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        color='primary'
+                                        checked={is_anonymous}
+                                        onChange={this.handleChangeAnonymous}
+                                    />
+                                }
+                                label={t('PollAnonymous')}
+                            />
+                            <div onClick={this.handleAllowMultipleAnswersClick} style={{ background: 'transparent' }}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            color='primary'
+                                            disabled={allowMultipleAnswersDisabled}
+                                            checked={allowMultipleAnswers}
+                                            onChange={this.handleChangeAllowMultipleAnswers}
+                                        />
+                                    }
+                                    label={t('PollMultiple')}
+                                />
+                            </div>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox color='primary' checked={quizPoll} onChange={this.handleChangeType} />
+                                }
+                                label={t('PollQuiz')}
+                            />
+                        </FormGroup>
+                        <Typography>{t('QuizInfo')}</Typography>
                     </DialogContent>
                     <DialogActions>
                         <Button color='primary' onClick={this.handleClose}>
@@ -477,7 +591,7 @@ class CreatePollDialog extends React.Component {
                         </Button>
                         {isValidPoll(poll) && (
                             <Button color='primary' onClick={this.handleSend}>
-                                {t('Send')}
+                                {t('Create')}
                             </Button>
                         )}
                     </DialogActions>
@@ -512,6 +626,7 @@ const enhance = compose(
     withSaveRef(),
     withStyles(styles),
     withTranslation(),
+    withSnackbar,
     withRestoreRef()
 );
 

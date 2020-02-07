@@ -17,6 +17,7 @@
 }
 
 .poll-question-title {
+    margin-top: 2px;
     font-weight: bold;
     white-space: pre-wrap;
     overflow: hidden;
@@ -24,16 +25,24 @@
 }
 
 .poll-question-subtitle {
+    margin-top: 2px;
     font-size: 14px;
     line-height: normal;
     color: var(--message-in-subtle-color);
     white-space: pre-wrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.message-bubble-out .poll-question-subtitle {
+    color: var(--message-out-subtle-color);
 }
 
 .poll-options {
-    padding: 9px 0 10px;
+    padding: 9px 3px 10px;
 }
 
 .poll-total-count {
@@ -46,5 +55,9 @@
     height: 36px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    /*justify-content: center;*/
+}
+
+.message-bubble-out .poll-total-count {
+    color: var(--message-out-subtle-color);
 }

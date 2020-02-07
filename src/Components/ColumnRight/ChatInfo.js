@@ -30,8 +30,6 @@ class ChatInfo extends React.Component {
     constructor(props) {
         super(props);
 
-        // console.log('ChatDetails.ChatInfo.ctor');
-
         this.detailsRef = React.createRef();
 
         const { popup } = props;

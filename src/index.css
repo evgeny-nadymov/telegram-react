@@ -8,7 +8,10 @@
 :root {
     --z-index-modal: 1300;
 
+    --error: #e53935;
+
     --tile-size: 54px;
+    --tile-size-extra-small: 16px;
     --tile-size-small: 33px;
     --tile-size-big: 120px;
 
