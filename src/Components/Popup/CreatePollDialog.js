@@ -9,10 +9,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
+import { withSnackbar } from 'notistack';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
+import CloseIcon from '@material-ui/icons/Close';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -20,13 +22,13 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
+import IconButton from '@material-ui/core/IconButton';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import CreatePollOption from './CreatePollOption';
 import { focusNode } from '../../Utils/Component';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { utils } from '../../Utils/Key';
 import { hasPollData, isValidPoll } from '../../Utils/Poll';
 import {
@@ -36,31 +38,10 @@ import {
     POLL_QUESTION_LENGTH,
     POLL_QUESTION_MAX_LENGTH
 } from '../../Constants';
+import AppStore from '../../Stores/ApplicationStore';
 import PollStore from '../../Stores/PollStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollDialog.css';
-import AppStore from '../../Stores/ApplicationStore';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-import { withSnackbar } from 'notistack';
-
-const styles = theme => ({
-    contentRoot: {
-        width: 300
-    },
-    dividerRoot: {
-        margin: '8px -24px'
-    },
-    listRoot: {
-        margin: '0 -24px'
-    },
-    listItem: {
-        padding: '11px 24px',
-        color: '#8e9396',
-        height: 48
-    },
-    typographyRoot: {}
-});
 
 class CreatePollDialog extends React.Component {
     constructor(props) {
@@ -473,7 +454,7 @@ class CreatePollDialog extends React.Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { t } = this.props;
         const { remainLength, confirm, poll } = this.state;
         if (!poll) return null;
 
@@ -508,7 +489,7 @@ class CreatePollDialog extends React.Component {
                     onClose={this.handleClose}
                     aria-labelledby='dialog-title'>
                     <DialogTitle id='dialog-title'>{t('NewPoll')}</DialogTitle>
-                    <DialogContent classes={{ root: classes.contentRoot }}>
+                    <DialogContent classes={{ root: 'create-poll-dialog-root' }}>
                         <div className='create-poll-dialog-question-title'>
                             <Typography color='primary' variant='subtitle1' style={{ flexGrow: 1 }}>
                                 {t('Question')}
@@ -531,11 +512,11 @@ class CreatePollDialog extends React.Component {
                             onKeyDown={this.handleKeyDown}
                             onInput={this.handleInput}
                         />
-                        <Divider className={classes.dividerRoot} />
+                        <Divider className='divider' />
                         <Typography color='primary' variant='subtitle1'>
                             {t('PollOptions')}
                         </Typography>
-                        <List classes={{ root: classes.listRoot }}>
+                        <List classes={{ root: 'create-poll-dialog-list' }}>
                             {items}
                             {canAddOption && (
                                 <ListItem
@@ -548,7 +529,7 @@ class CreatePollDialog extends React.Component {
                             )}
                         </List>
                         <Typography>{hint}</Typography>
-                        <Divider className={classes.dividerRoot} />
+                        <Divider className='divider' />
                         <Typography color='primary' variant='subtitle1'>
                             {t('Settings')}
                         </Typography>
@@ -597,13 +578,15 @@ class CreatePollDialog extends React.Component {
                     </DialogActions>
                 </Dialog>
                 <Dialog
-                    className={classes.dialogRoot}
+                    className='create-poll-dialog-root'
                     open={confirm}
                     transitionDuration={0}
                     onClose={this.handleConfirmationClose}
                     aria-labelledby='dialog-title'>
                     <DialogTitle id='dialog-title'>{t('CancelPollAlertTitle')}</DialogTitle>
-                    <DialogContent classes={{ root: classes.contentRoot }}>{t('CancelPollAlertText')}</DialogContent>
+                    <DialogContent classes={{ root: 'create-poll-dialog-root' }}>
+                        {t('CancelPollAlertText')}
+                    </DialogContent>
                     <DialogActions>
                         <Button color='primary' onClick={this.handleConfirmationClose}>
                             {t('Cancel')}
@@ -624,7 +607,6 @@ CreatePollDialog.propTypes = {
 
 const enhance = compose(
     withSaveRef(),
-    withStyles(styles),
     withTranslation(),
     withSnackbar,
     withRestoreRef()

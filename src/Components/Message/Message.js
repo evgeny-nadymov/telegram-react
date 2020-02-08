@@ -536,13 +536,12 @@ class Message extends Component {
                     <div className='message-padding'>
                         <CheckMarkIcon className='message-select-tick' />
                     </div>
-                    <div className='message-wrapper'>
+                    <div className={classNames('message-wrapper', { 'message-wrapper-shook': shook })}>
                         {tile}
                         <div
                             className={classNames('message-content', {
                                 'message-bubble': withBubble,
-                                'message-bubble-out': withBubble && is_outgoing,
-                                'message-bubble-shook': shook
+                                'message-bubble-out': withBubble && is_outgoing
                             })}
                             style={style}>
                             {withBubble && (showTitle || showForward) && (

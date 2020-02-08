@@ -243,13 +243,20 @@ class Poll extends React.Component {
     }
 
     handleQuestionClick = event => {
+        const { chatId, messageId } = this.props;
         // return;
         event.stopPropagation();
 
-        const fireworks = this.fireworksRef.current;
-        if (!fireworks) return;
+        // const fireworks = this.fireworksRef.current;
+        // if (!fireworks) return;
+        //
+        // fireworks.start();
 
-        fireworks.start();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMessageShake',
+            chatId,
+            messageId
+        });
     };
 
     render() {

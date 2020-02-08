@@ -7,12 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
+import Radio from '@material-ui/core/Radio';
 import Typography from '@material-ui/core/es/Typography/Typography';
 import { focusNode } from '../../Utils/Component';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
@@ -20,21 +19,6 @@ import { utils } from '../../Utils/Key';
 import { POLL_OPTION_HINT_LENGTH, POLL_OPTION_LENGTH, POLL_OPTION_MAX_LENGTH } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollOption.css';
-import RadioButtonCheckedIcon from '@material-ui/icons/RadioButtonChecked';
-import Radio from '@material-ui/core/Radio';
-
-const styles = theme => ({
-    iconButton: {
-        padding: 4
-    },
-    counterRoot: {
-        position: 'absolute',
-        right: 24,
-        bottom: 6,
-        minWidth: 28,
-        userSelect: 'none'
-    }
-});
 
 class CreatePollOption extends React.Component {
     constructor(props) {
@@ -212,7 +196,7 @@ class CreatePollOption extends React.Component {
     };
 
     render() {
-        const { classes, t, option } = this.props;
+        const { t, option } = this.props;
         const { remainLength } = this.state;
 
         const { is_chosen } = option;
@@ -241,7 +225,7 @@ class CreatePollOption extends React.Component {
                     />
                 </div>
                 <div className='create-poll-option-delete-button'>
-                    <IconButton className={classes.iconButton} onClick={this.handleDelete}>
+                    <IconButton className='create-poll-option-button' onClick={this.handleDelete}>
                         <CloseIcon fontSize='small' />
                     </IconButton>
                 </div>
@@ -249,7 +233,7 @@ class CreatePollOption extends React.Component {
                 {remainLength <= POLL_OPTION_LENGTH - POLL_OPTION_HINT_LENGTH && (
                     <Typography
                         align='center'
-                        className={classes.counterRoot}
+                        className='create-poll-option-subtitle'
                         color={remainLength >= 0 ? 'textSecondary' : 'error'}
                         variant='subtitle1'>
                         {remainLength}
@@ -269,7 +253,6 @@ CreatePollOption.propTypes = {
 
 const enhance = compose(
     withSaveRef(),
-    withStyles(styles),
     withTranslation(),
     withRestoreRef()
 );

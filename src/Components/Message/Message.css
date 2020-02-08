@@ -129,7 +129,15 @@ pre code {
     flex-shrink: 1;
 }
 
-.message-bubble-shook {
+.message:not(.message-out) .message-wrapper {
+    transform-origin: 25% 50%;
+}
+
+.message.message-out .message-wrapper {
+    transform-origin: 75% 50%;
+}
+
+.message-wrapper-shook {
     animation: shake-animation 500ms;
 }
 

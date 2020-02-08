@@ -15,6 +15,18 @@
     position: relative;
 }
 
+.create-poll-option-button {
+    padding: 4px;
+}
+
+.create-poll-option-subtitle {
+    position: absolute;
+    right: 24px;
+    bottom: 6px;
+    min-width: 28px;
+    user-select: none;
+}
+
 .create-quiz-dialog .create-poll-option-wrapper {
     margin-right: 0;
     transform: translateX(0);
