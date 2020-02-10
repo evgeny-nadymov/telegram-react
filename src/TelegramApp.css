@@ -24,7 +24,7 @@ body {
     font: 16px/21px 'Roboto', sans-serif;
     overflow: hidden;
     background: var(--background);
-    color: var(--color);
+    color: var(--text-primary);
 }
 
 a {
@@ -41,7 +41,7 @@ pre {
 }
 
 pre::selection {
-    color: var(--color);
+    color: var(--text-primary);
     background-color: highlight;
 }
 
@@ -78,7 +78,7 @@ mark {
     border-width: 0 1px 0 1px;
     border-color: var(--border);
     background: var(--background);
-    color: var(--color);
+    color: var(--text-primary);
     overflow: hidden;
 }
 

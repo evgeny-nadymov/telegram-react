@@ -64,11 +64,11 @@
 }
 
 .document-title a {
-    color: var(--color);
+    color: var(--text-primary);
 }
 
 .document-title a:hover {
-    color: var(--color);
+    color: var(--text-primary);
 }
 
 @keyframes spin {

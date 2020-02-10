@@ -8,8 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -26,37 +24,6 @@ import FileStore from '../../Stores/FileStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './StickerSetDialog.css';
-
-const styles = theme => ({
-    contentRoot: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        maxHeight: 480,
-        padding: '0 12px 24px',
-        background: 'transparent'
-    },
-    paperRoot: {
-        width: 344
-    },
-    dialogTitleRoot: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center'
-    },
-    dialogRoot: {
-        color: theme.palette.text.primary
-    },
-    shareButtonRoot: {
-        margin: '-24px -12px -24px 0'
-    },
-    typographyRoot: {
-        flexGrow: 1,
-        flexShrink: 1
-    },
-    disablePointerEvents: {
-        pointerEvents: 'none'
-    }
-});
 
 class StickerSetDialog extends React.Component {
     constructor(props) {
@@ -270,7 +237,7 @@ class StickerSetDialog extends React.Component {
     };
 
     render() {
-        const { t, classes } = this.props;
+        const { t } = this.props;
         const { stickerSet, sticker } = this.state;
         if (!stickerSet) return null;
 
@@ -300,30 +267,28 @@ class StickerSetDialog extends React.Component {
 
         return (
             <Dialog
-                className={classes.dialogRoot}
+                className='sticker-set-dialog'
                 open
                 transitionDuration={0}
                 onClose={this.handleClose}
                 aria-labelledby='sticker-set-dialog-title-text'
-                classes={{ paper: classes.paperRoot }}>
+                classes={{ paper: 'sticker-set-dialog-paper' }}>
                 <DialogTitle
                     id='sticker-set-dialog-title-text'
-                    className={classNames(classes.dialogTitleRoot, {
-                        [classes.disablePointerEvents]: Boolean(sticker)
-                    })}
+                    className={classNames({ 'sticker-set-dialog-disabled': Boolean(sticker) })}
                     disableTypography>
-                    <Typography variant='h6' className={classes.typographyRoot} noWrap>
+                    <Typography variant='h6' className='sticker-set-dialog-title-typography' noWrap>
                         {title}
                     </Typography>
-                    <ShareStickerSetButton className={classes.shareButtonRoot} />
+                    <ShareStickerSetButton className='sticker-set-dialog-share-button' />
                 </DialogTitle>
                 <DialogContent
-                    classes={{ root: classes.contentRoot }}
+                    classes={{ root: 'sticker-set-dialog-content-root' }}
                     onMouseOver={this.handleMouseOver}
                     onMouseOut={this.handleMouseOut}>
                     {items}
                 </DialogContent>
-                <DialogActions className={classNames({ [classes.disablePointerEvents]: Boolean(sticker) })}>
+                <DialogActions className={classNames({ 'sticker-set-dialog-disabled': Boolean(sticker) })}>
                     <Button color='primary' onClick={this.handleClose}>
                         {t('Cancel')}
                     </Button>
@@ -339,9 +304,4 @@ class StickerSetDialog extends React.Component {
 
 StickerSetDialog.propTypes = {};
 
-const enhance = compose(
-    withStyles(styles),
-    withTranslation()
-);
-
-export default enhance(StickerSetDialog);
+export default withTranslation()(StickerSetDialog);

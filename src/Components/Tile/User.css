@@ -5,11 +5,17 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.shared-media {
-    margin: 0;
-    box-sizing: border-box;
-    height: 100%;
+/*.user:hover{*/
+/*background: #f2f6fa;*/
+/*}*/
+
+.user {
     width: 100%;
+    height: 100%;
+}
+
+.user-wrapper {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    user-select: none;
 }

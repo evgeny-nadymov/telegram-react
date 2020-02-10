@@ -15,10 +15,20 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: flex;
+    background: var(--panel-background);
+    color: var(--text-primary);
 }
 
 .instant-viewer-left-column {
     min-width: 105px;
+}
+
+.instant-viewer-left-button {
+    color: var(--dialog-subtle-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
 }
 
 .instant-viewer-content-column {
@@ -32,4 +42,11 @@
     min-width: 105px;
     display: flex;
     flex-direction: column;
+}
+
+.instant-viewer-right-button {
+    color: var(--dialog-subtle-color);
+    position: fixed;
+    top: 0;
+    right: 0;
 }

@@ -7,8 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import SharedMediaBase from './SharedMediaBase';
 import './SharedDocuments.css';
@@ -42,9 +40,4 @@ SharedDocuments.defaultProps = {
     minHeight: 0
 };
 
-const enhance = compose(
-    withStyles(SharedMediaBase.getStyles),
-    withTranslation()
-);
-
-export default enhance(SharedDocuments);
+export default withTranslation()(SharedDocuments);

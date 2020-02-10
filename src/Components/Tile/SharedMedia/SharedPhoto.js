@@ -7,9 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -32,13 +29,6 @@ import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedPhoto.css';
-
-const styles = theme => ({
-    sharedPhotoContent: {
-        backgroundColor:
-            theme.palette.type === 'dark' ? theme.palette.background.paper : theme.palette.background.default
-    }
-});
 
 class SharedPhoto extends React.Component {
     constructor(props) {
@@ -163,7 +153,7 @@ class SharedPhoto extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, classes, openMedia, style, showOpenMessage, t } = this.props;
+        const { chatId, messageId, openMedia, style, showOpenMessage, t } = this.props;
         const { minithumbnail, thumbSize, photoSize, contextMenu, left, top, openDeleteDialog, revoke } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -181,9 +171,7 @@ class SharedPhoto extends React.Component {
 
         return (
             <div className='shared-photo' style={style} onClick={openMedia} onContextMenu={this.handleContextMenu}>
-                <div
-                    className={classNames('shared-photo-content', classes.sharedPhotoContent)}
-                    style={{ backgroundImage: `url(${thumbSrc || miniSrc})` }}>
+                <div className='shared-photo-content' style={{ backgroundImage: `url(${thumbSrc || miniSrc})` }}>
                     {src !== thumbSrc && (
                         <div className='shared-photo-main-content' style={{ backgroundImage: `url(${src})` }} />
                     )}
@@ -266,9 +254,4 @@ SharedPhoto.defaultProps = {
     thumbnailSize: PHOTO_THUMBNAIL_SIZE
 };
 
-const enhance = compose(
-    withStyles(styles, { withTheme: true }),
-    withTranslation()
-);
-
-export default enhance(SharedPhoto);
+export default withTranslation()(SharedPhoto);

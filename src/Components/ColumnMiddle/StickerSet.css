@@ -12,6 +12,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    background: var(--panel-background);
+    color: var(--text-primary);
 }
 
 .sticker-set-title-wrapper {
@@ -37,4 +39,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 3px;
+    box-sizing: border-box;
+    border-radius: 6px;
+}
+
+.sticker-set-item:hover {
+    background: var(--shared-media-background);
+}
+
+.sticker-set-icon-root {
+    font-size: 16px;
+    line-height: normal;
+    padding: 4px;
+    margin: 4px 8px 4px 4px;
 }

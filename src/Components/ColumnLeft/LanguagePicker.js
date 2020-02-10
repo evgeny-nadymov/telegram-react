@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -20,15 +19,6 @@ import FormControl from '@material-ui/core/FormControl';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import TdLibController from '../../Controllers/TdLibController';
 import LocalizationStore from '../../Stores/LocalizationStore';
-
-const styles = theme => ({
-    formControl: {
-        margin: theme.spacing(3)
-    },
-    group: {
-        margin: `${theme.spacing(1)}px 0`
-    }
-});
 
 class LanguagePicker extends React.Component {
     constructor(props) {
@@ -58,7 +48,7 @@ class LanguagePicker extends React.Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { t } = this.props;
         const { open, language } = this.state;
         const info = LocalizationStore.info || { language_packs: [] };
 
@@ -100,7 +90,6 @@ LanguagePicker.propTypes = {};
 const enhance = compose(
     withSaveRef(),
     withTranslation(),
-    withStyles(styles, { withTheme: true }),
     withRestoreRef()
 );
 

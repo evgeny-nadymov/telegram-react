@@ -19,6 +19,10 @@ function updateLightTheme(theme) {
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
 
+    style.setProperty('--text-primary', '#000000');
+    style.setProperty('--text-secondary', '#707579');
+    style.setProperty('--text-disabled', 'rgba(0, 0, 0, 0.38)');
+
     style.setProperty('--error', '#E53935');
 
     style.setProperty('--tile-size', '54px');
@@ -50,7 +54,7 @@ function updateLightTheme(theme) {
     style.setProperty('--chat-background', '#e6ebee');
     style.setProperty('--background', '#ffffff');
     style.setProperty('--background-paper', theme.palette.background.paper);
-    style.setProperty('--color', '#000000');
+    style.setProperty('--shared-media-background', theme.palette.background.default);
 
     style.setProperty('--dialog-color', '#000000');
     style.setProperty('--dialog-subtle-color', '#707579');
@@ -68,6 +72,8 @@ function updateLightTheme(theme) {
     style.setProperty('--message-in-meta-color', '#8D969C');
     style.setProperty('--message-in-reply-title', theme.palette.primary.main);
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
+    style.setProperty('--message-in-control', theme.palette.primary.main);
+    style.setProperty('--message-in-control-hover', theme.palette.primary.main + '22');
 
     style.setProperty('--message-out-link', '#4FAE4E');
     style.setProperty('--message-out-author', '#4FAE4E');
@@ -77,12 +83,18 @@ function updateLightTheme(theme) {
     style.setProperty('--message-out-meta-color', '#4FAE4E');
     style.setProperty('--message-out-reply-title', '#4FAE4E');
     style.setProperty('--message-out-reply-border', '#4FAE4E');
+    style.setProperty('--message-out-control', '#4FAE4E');
+    style.setProperty('--message-out-control-hover', '#4FAE4E22');
 }
 
 function updateDarkTheme(theme) {
     // const root = document.querySelector(':root');
     // const style = getComputedStyle(root);
     const { style } = document.documentElement;
+
+    style.setProperty('--text-primary', theme.palette.text.primary);
+    style.setProperty('--text-secondary', theme.palette.text.secondary);
+    style.setProperty('--text-disabled', theme.palette.text.disabled);
 
     style.setProperty('--error', '#E53935');
 
@@ -115,7 +127,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--chat-background', theme.palette.grey[900]);
     style.setProperty('--background', theme.palette.grey[900]);
     style.setProperty('--background-paper', theme.palette.background.paper);
-    style.setProperty('--color', '#ffffff');
+    style.setProperty('--shared-media-background', theme.palette.background.paper);
 
     style.setProperty('--dialog-color', '#ffffff');
     style.setProperty('--dialog-subtle-color', theme.palette.text.secondary);
@@ -133,6 +145,8 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-in-meta-color', 'rgba(255, 255, 255, 0.7)');
     style.setProperty('--message-in-reply-title', theme.palette.primary.main);
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
+    style.setProperty('--message-in-control', theme.palette.primary.main);
+    style.setProperty('--message-in-control-hover', theme.palette.primary.main + '22');
 
     style.setProperty('--message-out-link', theme.palette.primary.main);
     style.setProperty('--message-out-author', theme.palette.primary.main);
@@ -142,6 +156,8 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-out-meta-color', 'rgba(255, 255, 255, 0.7)'); // text.secondary
     style.setProperty('--message-out-reply-title', theme.palette.primary.main);
     style.setProperty('--message-out-reply-border', theme.palette.primary.main);
+    style.setProperty('--message-out-control', theme.palette.primary.main);
+    style.setProperty('--message-out-control-hover', theme.palette.primary.main + '22');
 }
 
 function createTheme(type, primary) {
@@ -150,19 +166,19 @@ function createTheme(type, primary) {
     if (type === 'light') {
         MuiTouchRipple = {
             child: {
-                color: type === 'dark' ? 'currentColor' : 'rgba(112, 117, 121, 0.08)'
+                color: type === 'dark' ? 'currentColor' : 'rgba(112, 117, 121)'
             },
             rippleVisible: {
-                opacity: type === 'dark' ? 0.15 : 1
+                opacity: 0.08 //type === 'dark' ? 0.15 : 1
             },
             '@keyframes enter': {
                 '0%': {
                     transform: 'scale(0)',
-                    opacity: 0.1
+                    opacity: 0.03
                 },
                 '100%': {
                     transform: 'scale(1)',
-                    opacity: type === 'dark' ? 0.15 : 1
+                    opacity: 0.08 //type === 'dark' ? 0.15 : 1
                 }
             }
         };

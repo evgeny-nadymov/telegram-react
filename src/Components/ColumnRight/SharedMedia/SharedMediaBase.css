@@ -15,9 +15,18 @@
     padding: 0 14px;
 }
 
+.shared-photos-list {
+    padding: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
 .shared-media-search-list {
     position: absolute;
-    top: 65px;
+    top: 60px;
     right: 0;
     bottom: 0;
     left: 0;
@@ -27,4 +36,15 @@
     transform: translateZ(0);
     will-change: transform;
     padding: 0 14px;
+    background: var(--panel-background);
+}
+
+.shared-photos-search-list {
+    background: var(--panel-background);
+    padding: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
 }

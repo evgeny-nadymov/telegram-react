@@ -27,6 +27,8 @@ class MainMenuButton extends React.Component {
     constructor(props) {
         super(props);
 
+        this.themePickerRef = React.createRef();
+
         this.state = {
             authorizationState: ApplicationStore.getAuthorizationState(),
             anchorEl: null
@@ -73,7 +75,7 @@ class MainMenuButton extends React.Component {
     handleAppearance = event => {
         this.handleMenuClose();
 
-        this.themePicker.open();
+        this.themePickerRef.current.open();
     };
 
     handleLanguage = event => {
@@ -121,7 +123,7 @@ class MainMenuButton extends React.Component {
                     <MenuIcon />
                 </IconButton>
                 {mainMenuControl}
-                <ThemePicker innerRef={ref => (this.themePicker = ref)} />
+                <ThemePicker ref={this.themePickerRef} />
                 <LanguagePicker ref={ref => (this.languagePicker = ref)} />
             </>
         );

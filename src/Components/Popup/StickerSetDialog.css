@@ -5,15 +5,47 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.sticker-set-dialog {
+    color: var(--text-primary);
+}
+
+.sticker-set-dialog-paper {
+    width: 344px;
+}
+
 .sticker-set-dialog-title {
     display: flex;
     align-items: center;
     padding-right: 12px;
 }
 
+.sticker-set-dialog-title-typography {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
 #sticker-set-dialog-title-text {
     flex-grow: 1;
     flex-shrink: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.sticker-set-dialog-content-root {
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 480px;
+    padding: 0 12px 24px;
+    background: transparent;
+}
+
+.sticker-set-dialog-disabled {
+    pointer-events: none;
+}
+
+.sticker-set-dialog-share-button {
+    margin: -24px -12px -24px 0;
 }
 
 .sticker-set-dialog-item {

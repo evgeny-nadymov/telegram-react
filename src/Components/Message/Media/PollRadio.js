@@ -20,14 +20,23 @@ class PollRadio extends React.Component {
         return (
             <div className={classNames('poll-radio', { 'poll-radio-hidden': hidden })}>
                 <Radio
-                    classes={{ root: 'poll-radio-root' }}
                     color='primary'
+                    classes={{
+                        root: 'poll-radio-root',
+                        colorPrimary: 'message-control',
+                        disabled: 'message-control-disabled'
+                    }}
+                    TouchRippleProps={{ classes: { child: 'touch-ripple-current-color' } }}
                     checked={chosen || beingChosen}
                     onChange={onChange}
                     checkedIcon={<RadioButtonCheckedIcon classes={{ root: beingChosen ? 'poll-radio-icon' : null }} />}
                 />
                 {beingChosen && (
-                    <CircularProgress size={20} thickness={4.4} classes={{ root: 'poll-radio-progress-root' }} />
+                    <CircularProgress
+                        size={20}
+                        thickness={4.4}
+                        classes={{ root: 'poll-radio-progress-root', colorPrimary: 'message-control' }}
+                    />
                 )}
             </div>
         );

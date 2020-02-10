@@ -995,7 +995,7 @@ function canSendMediaMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return can_send_media_messages && is_member;
+                    return is_member; //can_send_media_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
@@ -1163,7 +1163,7 @@ function canSendPolls(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return can_send_polls && is_member;
+                    return is_member; //can_send_polls && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
@@ -1245,7 +1245,7 @@ function canSendMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return can_send_messages && is_member;
+                    return is_member; //can_send_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;
@@ -1363,7 +1363,7 @@ function canPinMessages(chatId) {
                     return false;
                 }
                 case 'chatMemberStatusCreator': {
-                    return can_pin_messages && is_member;
+                    return is_member; //can_pin_messages && is_member;
                 }
                 case 'chatMemberStatusLeft': {
                     return false;

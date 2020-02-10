@@ -10,9 +10,8 @@
     width: calc(25% - 0px);
     margin: 0;
     box-sizing: border-box;
-    border-right-width: 1px;
-    border-right-style: solid;
-    border-color: var(--border);
+    border-right: 1px solid var(--border);
+    background: var(--panel-background);
     height: 100%;
     display: flex;
     flex-direction: column;

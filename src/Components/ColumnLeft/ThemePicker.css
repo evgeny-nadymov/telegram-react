@@ -1,0 +1,49 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.theme-picker-form {
+    margin: 24px;
+}
+
+.theme-picker-group {
+    margin: 8px 0;
+}
+
+.theme-picker-red,
+.theme-picker-red:checked {
+    color: #f44336;
+}
+
+.theme-picker-orange,
+.theme-picker-orange:checked {
+    color: #fb8c00;
+}
+
+.theme-picker-amber,
+.theme-picker-amber:checked {
+    color: #ffb300;
+}
+
+.theme-picker-green,
+.theme-picker-green:checked {
+    color: #43a047;
+}
+
+.theme-picker-blue,
+.theme-picker-blue:checked {
+    color: #5b8af1;
+}
+
+.theme-picker-indigo,
+.theme-picker-indigo:checked {
+    color: #3949ab;
+}
+
+.theme-picker-deep-purple,
+.theme-picker-deep-purple:checked {
+    color: #5e35b1;
+}

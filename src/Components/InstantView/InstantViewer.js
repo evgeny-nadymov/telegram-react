@@ -7,9 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '../../Assets/Icons/Close';
 import Article from './Article';
@@ -25,26 +22,6 @@ import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
-
-const styles = theme => ({
-    instantViewer: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.text.primary
-    },
-    leftButton: {
-        color: theme.palette.text.secondary,
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0
-    },
-    closeButton: {
-        color: theme.palette.text.secondary,
-        position: 'fixed',
-        top: 0,
-        right: 0
-    }
-});
 
 class InstantViewer extends React.Component {
     constructor(props) {
@@ -319,13 +296,10 @@ class InstantViewer extends React.Component {
 
         return (
             <IVContext.Provider value={instantView}>
-                <div
-                    ref={this.instantViewerRef}
-                    className={classNames('instant-viewer', classes.instantViewer)}
-                    onScroll={this.handleScroll}>
+                <div ref={this.instantViewerRef} className='instant-viewer' onScroll={this.handleScroll}>
                     <div className='instant-viewer-left-column' onClick={this.handleBack}>
                         <MediaViewerButton
-                            className={classes.leftButton}
+                            className='instant-viewer-left-button'
                             style={{ alignItems: 'flex-start' }}
                             onClick={this.handleBack}>
                             <NavigateBeforeIcon
@@ -342,7 +316,7 @@ class InstantViewer extends React.Component {
                         </div>
                     </div>
                     <div className='instant-viewer-right-column'>
-                        <MediaViewerButton className={classes.closeButton} onClick={this.handleClose}>
+                        <MediaViewerButton className='instant-viewer-right-button' onClick={this.handleClose}>
                             <CloseIcon />
                         </MediaViewerButton>
                     </div>
@@ -357,9 +331,4 @@ InstantViewer.propTypes = {
     instantView: PropTypes.object.isRequired
 };
 
-const enhance = compose(
-    withStyles(styles),
-    withTranslation()
-);
-
-export default enhance(InstantViewer);
+export default withTranslation()(InstantViewer);

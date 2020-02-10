@@ -11,7 +11,6 @@
     align-items: center;
     overflow: hidden;
     flex-shrink: 0;
-    background: var(--panel-background);
 }
 
 .header-details {
@@ -73,6 +72,10 @@
 
 .header-right-button {
     margin: 8px 12px 8px 0;
+}
+
+.header-right-second-button {
+    margin: 8px 0 8px 12px;
 }
 
 .cursor-pointer {

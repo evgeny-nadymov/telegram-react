@@ -6,6 +6,10 @@
  */
 
 :root {
+    --text-primary: #000000;
+    --text-secondary: #707579;
+    --text-disabled: rgba(0, 0, 0, 0.38);
+
     --z-index-modal: 1300;
 
     --error: #e53935;
@@ -26,7 +30,7 @@
     --chat-background: #e6ebee;
     --background: #ffffff;
     --background-paper: #ffffff;
-    --color: #000000;
+    --shared-media-background: #fafafa;
 
     --header-color: #000000;
     --header-subtle-color: #707579;
@@ -55,6 +59,8 @@
     --message-in-meta-color: #8d969c;
     --message-in-reply-title: #5b8af1;
     --message-in-reply-border: #5b8af1;
+    --message-in-control: #5b8af1;
+    --message-in-control-hover: #5b8af122;
 
     --message-out-link: #4fae4e;
     --message-out-author: #4fae4e;
@@ -64,4 +70,6 @@
     --message-out-meta-color: #4fae4e;
     --message-out-reply-title: #4fae4e;
     --message-out-reply-border: #4fae4e;
+    --message-out-control: #4fae4e;
+    --message-out-control-hover: #4fae4e22;
 }

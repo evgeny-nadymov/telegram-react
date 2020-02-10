@@ -7,9 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
-import { compose } from 'recompose';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
@@ -33,35 +31,11 @@ import {
     isPrivateChat
 } from '../../Utils/Chat';
 import { clearSelection, searchChat } from '../../Actions/Client';
-import ChatStore from '../../Stores/ChatStore';
-import UserStore from '../../Stores/UserStore';
-import BasicGroupStore from '../../Stores/BasicGroupStore';
-import SupergroupStore from '../../Stores/SupergroupStore';
-import MessageStore from '../../Stores/MessageStore';
 import AppStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
+import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Header.css';
-
-const styles = theme => ({
-    button: {
-        margin: '14px'
-    },
-    searchIconButton: {
-        margin: '8px 12px 8px 0'
-    },
-    messageSearchIconButton: {
-        margin: '8px 0 8px 12px'
-    },
-    moreIconButton: {
-        margin: '8px 12px 8px 0'
-    },
-    headerStatusTitle: {
-        color: theme.palette.text.secondary
-    },
-    headerStatusAccentTitle: {
-        color: theme.palette.primary.dark + '!important'
-    }
-});
 
 class Header extends Component {
     constructor(props) {
@@ -91,23 +65,23 @@ class Header extends Component {
     }
 
     componentDidMount() {
-        AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
-        AppStore.on('updateConnectionState', this.onUpdateConnectionState);
-        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.on('updateConnectionState', this.onUpdateConnectionState);
 
-        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
+        MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
     }
 
     componentWillUnmount() {
-        AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
-        AppStore.off('updateConnectionState', this.onUpdateConnectionState);
-        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.off('updateConnectionState', this.onUpdateConnectionState);
 
-        MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
+        MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
     }
 
     onClientUpdateDeleteMessages = update => {
@@ -198,7 +172,7 @@ class Header extends Component {
     };
 
     render() {
-        const { classes, t } = this.props;
+        const { t } = this.props;
         const {
             authorizationState,
             connectionState,
@@ -310,7 +284,7 @@ class Header extends Component {
                 {chat && (
                     <>
                         <IconButton
-                            className={classes.messageSearchIconButton}
+                            className='header-right-second-button'
                             aria-label='Search'
                             onClick={this.handleSearchChat}>
                             <SearchIcon />
@@ -361,9 +335,4 @@ class Header extends Component {
     }
 }
 
-const enhance = compose(
-    withTranslation(),
-    withStyles(styles, { withTheme: true })
-);
-
-export default enhance(Header);
+export default withTranslation()(Header);

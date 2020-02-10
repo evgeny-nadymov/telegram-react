@@ -7,35 +7,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
-import withStyles from '@material-ui/core/styles/withStyles';
 import { withTranslation } from 'react-i18next';
 import SharedMediaBase from './SharedMediaBase';
 import SharedPhoto from '../../Tile/SharedMedia/SharedPhoto';
 import { openMedia } from '../../../Utils/Message';
 import './SharedPhotos.css';
 
-const styles = theme => ({
-    sharedMediaList: {
-        padding: '6px !important',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        alignContent: 'flex-start'
-    },
-    sharedMediaSearchList: {
-        background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        padding: '6px !important',
-        display: 'flex',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        alignContent: 'flex-start'
-    }
-});
-
 class SharedPhotos extends SharedMediaBase {
+    getListClassName() {
+        return 'shared-photos-list';
+    }
+
+    getSearchListClassName() {
+        return 'shared-photos-search-list';
+    }
+
     isValidContent(content) {
         return content && content['@type'] === 'messagePhoto';
     }
@@ -80,9 +66,4 @@ SharedPhotos.defaultProps = {
     minHeight: 0
 };
 
-const enhance = compose(
-    withStyles(styles),
-    withTranslation()
-);
-
-export default enhance(SharedPhotos);
+export default withTranslation()(SharedPhotos);

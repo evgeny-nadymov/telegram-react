@@ -14,7 +14,7 @@
 }
 
 .chat-info-dialog-container {
-    color: var(--color);
+    color: var(--text-primary);
     z-index: var(--z-index-modal);
 }
 

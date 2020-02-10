@@ -10,7 +10,7 @@
 }
 
 .create-poll-dialog {
-    color: var(--color);
+    color: var(--text-primary);
 }
 
 .create-poll-dialog-root {

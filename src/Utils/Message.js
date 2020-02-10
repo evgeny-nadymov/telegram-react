@@ -2446,6 +2446,36 @@ export function isMessagePinned(chatId, messageId) {
     return chat.pinned_message_id === messageId;
 }
 
+export function canMessageBeUnvoted(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return;
+    if (content['@type'] !== 'messagePoll') return;
+
+    const { poll } = content;
+    if (!poll) return false;
+
+    const { type, is_closed, options } = poll;
+    if (!type) return false;
+    if (type['@type'] !== 'pollTypeRegular') return false;
+    if (is_closed) return false;
+
+    return options.some(x => x.is_chosen || x.is_being_chosen);
+}
+
+export function canMessageBeClosed(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content, can_be_edited } = message;
+    if (!content) return;
+    if (content['@type'] !== 'messagePoll') return;
+
+    return can_be_edited;
+}
+
 export {
     getAuthor,
     getTitle,

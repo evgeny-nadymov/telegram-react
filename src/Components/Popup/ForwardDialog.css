@@ -6,7 +6,7 @@
  */
 
 .forward-dialog {
-    color: var(--color);
+    color: var(--text-primary);
 }
 
 .forward-dialog-list {

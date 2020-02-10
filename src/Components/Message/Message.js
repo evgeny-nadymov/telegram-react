@@ -31,7 +31,9 @@ import {
     showMessageForward,
     canMessageBeEdited,
     isMessagePinned,
-    isMetaBubble
+    isMetaBubble,
+    canMessageBeUnvoted,
+    canMessageBeClosed
 } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import {
@@ -52,6 +54,13 @@ import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
+import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
 
 class Message extends Component {
     constructor(props) {
@@ -69,7 +78,7 @@ class Message extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { contextMenu, selected, highlighted, shook, emojiMatches } = this.state;
+        const { contextMenu, selected, highlighted, shook, emojiMatches, confirmStopPoll } = this.state;
 
         if (nextProps.theme !== theme) {
             // console.log('Message.shouldComponentUpdate true');
@@ -102,6 +111,11 @@ class Message extends Component {
         }
 
         if (nextProps.showTitle !== showTitle) {
+            // console.log('Message.shouldComponentUpdate true');
+            return true;
+        }
+
+        if (nextState.confirmStopPoll !== confirmStopPoll) {
             // console.log('Message.shouldComponentUpdate true');
             return true;
         }
@@ -466,9 +480,55 @@ class Message extends Component {
         return null;
     }
 
+    handleUnvote = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const { chatId, messageId } = this.props;
+        const { contextMenu } = this.state;
+
+        if (contextMenu) {
+            this.handleCloseContextMenu();
+        }
+
+        cancelPollAnswer(chatId, messageId);
+    };
+
+    handleConfirmStopPoll = event => {
+        const { dialog } = this.state;
+        if (dialog) return;
+
+        this.setState({
+            confirmStopPoll: true,
+            contextMenu: false
+        });
+    };
+
+    handleStopPoll = event => {
+        event.stopPropagation();
+
+        const { chatId, messageId } = this.props;
+        const { confirmStopPoll } = this.state;
+
+        if (confirmStopPoll) {
+            this.setState({ confirmStopPoll: false });
+        }
+
+        stopPoll(chatId, messageId);
+    };
+
+    handleCloseConfirm = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        this.setState({ confirmStopPoll: false });
+    };
+
     render() {
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { emojiMatches, selected, highlighted, shook, contextMenu, left, top } = this.state;
+        const { emojiMatches, selected, highlighted, shook, contextMenu, left, top, confirmStopPoll } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -503,6 +563,8 @@ class Message extends Component {
 
         const style = this.getMessageStyle(chatId, messageId);
 
+        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId);
+        const canBeClosed = canMessageBeClosed(chatId, messageId);
         const canBeReplied = canSendMessages(chatId);
         const canBePinned = canPinMessages(chatId);
         const isPinned = isMessagePinned(chatId, messageId);
@@ -617,8 +679,28 @@ class Message extends Component {
                         {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
                         {canBeEdited && <MenuItem onClick={this.handleEdit}>{t('Edit')}</MenuItem>}
                         {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
+                        {canBeUnvoted && <MenuItem onClick={this.handleUnvote}>{t('Unvote')}</MenuItem>}
+                        {canBeClosed && <MenuItem onClick={this.handleConfirmStopPoll}>{t('StopPoll')}</MenuItem>}
                     </MenuList>
                 </Popover>
+                <Dialog
+                    transitionDuration={0}
+                    open={confirmStopPoll}
+                    onClose={this.handleCloseConfirm}
+                    aria-labelledby='form-dialog-title'>
+                    <DialogTitle id='form-dialog-title'>{t('StopPollAlertTitle')}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{t('StopPollAlertText')}</DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCloseConfirm} color='primary'>
+                            {t('Cancel')}
+                        </Button>
+                        <Button onClick={this.handleStopPoll} color='primary'>
+                            {t('Stop')}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }

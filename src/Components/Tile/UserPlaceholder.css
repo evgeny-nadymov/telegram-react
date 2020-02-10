@@ -4,18 +4,3 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
-/*.user:hover{*/
-    /*background: #f2f6fa;*/
-/*}*/
-
-.user{
-    width: 100%;
-    height: 100%;
-}
-
-.user-wrapper{
-    display: flex;
-    align-items: center;
-    user-select: none;
-}

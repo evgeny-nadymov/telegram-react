@@ -7,35 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
-import withStyles from '@material-ui/core/styles/withStyles';
 import IconButton from '@material-ui/core/IconButton';
 import ClearIcon from '@material-ui/icons/Clear';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import './StickerSet.css';
-
-const styles = theme => ({
-    title: {
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary
-    },
-    stickerSetItem: {
-        width: STICKER_SMALL_DISPLAY_SIZE,
-        height: STICKER_SMALL_DISPLAY_SIZE,
-        padding: 3,
-        boxSizing: 'border-box',
-        '&:hover': {
-            background: theme.palette.type === 'dark' ? '#303030' : '#f4f4f4',
-            borderRadius: 6
-        }
-    },
-    iconRoot: {
-        fontSize: 16,
-        padding: 4,
-        margin: '4px 8px 4px 4px'
-    }
-});
 
 class StickerSet extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -53,19 +29,23 @@ class StickerSet extends React.Component {
     }
 
     render() {
-        const { classes, info, onSelect, onMouseDown, onMouseEnter, onDeleteClick } = this.props;
+        const { info, onSelect, onMouseDown, onMouseEnter, onDeleteClick } = this.props;
         if (!info) return null;
 
         const { title, stickers } = info;
 
         const items = stickers.map((x, i) => (
             <div
-                className={classNames('sticker-set-item', classes.stickerSetItem)}
+                className='sticker-set-item'
                 key={x.sticker.id}
                 data-sticker-id={x.sticker.id}
                 onClick={() => onSelect(x)}
                 onMouseEnter={onMouseEnter}
-                onMouseDown={onMouseDown}>
+                onMouseDown={onMouseDown}
+                style={{
+                    width: STICKER_SMALL_DISPLAY_SIZE,
+                    height: STICKER_SMALL_DISPLAY_SIZE
+                }}>
                 <Sticker
                     key={x.sticker.id}
                     sticker={x}
@@ -80,14 +60,14 @@ class StickerSet extends React.Component {
 
         return (
             <div className='sticker-set'>
-                <div className={classNames('sticker-set-title', classes.title)}>
+                <div className='sticker-set-title'>
                     <div className='sticker-set-title-wrapper'>
                         <span>{title}</span>
                     </div>
                     {onDeleteClick && (
                         <IconButton
                             aria-label='delete'
-                            classes={{ root: classes.iconRoot }}
+                            classes={{ root: 'sticker-set-icon-root' }}
                             size='small'
                             onClick={onDeleteClick}>
                             <ClearIcon fontSize='inherit' />
@@ -107,4 +87,4 @@ StickerSet.propTypes = {
     onDeleteClick: PropTypes.func
 };
 
-export default withStyles(styles, { withTheme: true })(StickerSet);
+export default StickerSet;

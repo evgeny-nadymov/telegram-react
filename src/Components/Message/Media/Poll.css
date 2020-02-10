@@ -58,6 +58,13 @@
     /*justify-content: center;*/
 }
 
+.poll-button {
+    border-radius: 0;
+    margin: 0 -9px -6px;
+    width: calc(100% + 18px);
+    padding: 6px 8px 12px 8px;
+}
+
 .message-bubble-out .poll-total-count {
     color: var(--message-out-subtle-color);
 }

@@ -11,9 +11,9 @@ import UserTile from './UserTile';
 import UserStatusControl from './UserStatusControl';
 import { getUserFullName } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
-import './UserControl.css';
+import './User.css';
 
-class UserControl extends React.Component {
+class User extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return nextProps.userId !== this.props.userId;
     }
@@ -49,9 +49,9 @@ class UserControl extends React.Component {
     }
 }
 
-UserControl.propTypes = {
+User.propTypes = {
     userId: PropTypes.number.isRequired,
     onSelect: PropTypes.func
 };
 
-export default UserControl;
+export default User;

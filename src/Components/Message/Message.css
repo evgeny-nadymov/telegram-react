@@ -331,3 +331,31 @@ pre code {
 .messages-list-selection-active .message-wrapper {
     pointer-events: none;
 }
+
+.touch-ripple-current-color {
+    color: currentColor;
+}
+
+.message-control {
+    color: var(--message-in-control);
+}
+
+.message-control:hover {
+    background-color: var(--message-in-control-hover);
+}
+
+.message-control-disabled {
+    color: var(--text-disabled);
+}
+
+.message-out .message-control {
+    color: var(--message-out-control);
+}
+
+.message-out .message-control:hover {
+    background-color: var(--message-out-control-hover);
+}
+
+.message-out .message-control-disabled {
+    color: var(--text-disabled);
+}

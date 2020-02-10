@@ -5,6 +5,21 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.edit-media-dialog-edit-button {
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    padding: 6px;
+    font-size: 18px;
+    line-height: normal;
+    color: white;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.edit-media-dialog-edit-button:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
 .edit-media-dialog-content {
     flex: 1 1 auto;
     display: flex;
