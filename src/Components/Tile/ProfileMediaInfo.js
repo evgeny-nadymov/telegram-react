@@ -9,9 +9,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ChatTile from './ChatTile';
 import MessageAuthor from '../Message/MessageAuthor';
-import './MediaViewerControl.css';
+import './MediaInfo.css';
 
-class ProfileMediaViewerControl extends React.Component {
+class ProfileMediaInfo extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -20,15 +20,15 @@ class ProfileMediaViewerControl extends React.Component {
         const { chatId, date } = this.props;
 
         return (
-            <div className='media-viewer-control'>
-                <div className='media-viewer-control-wrapper'>
+            <div className='media-info'>
+                <div className='media-info-wrapper'>
                     <ChatTile chatId={chatId} showSavedMessages={false} />
-                    <div className='media-viewer-control-content'>
-                        <div className='media-viewer-row'>
+                    <div className='media-info-content'>
+                        <div className='media-info-row'>
                             <MessageAuthor chatId={chatId} />
                         </div>
                         {date && (
-                            <div className='media-viewer-row meta'>
+                            <div className='media-info-row meta'>
                                 <span>{date}</span>
                             </div>
                         )}
@@ -39,9 +39,9 @@ class ProfileMediaViewerControl extends React.Component {
     }
 }
 
-ProfileMediaViewerControl.propTypes = {
+ProfileMediaInfo.propTypes = {
     chatId: PropTypes.number.isRequired,
     date: PropTypes.string
 };
 
-export default ProfileMediaViewerControl;
+export default ProfileMediaInfo;

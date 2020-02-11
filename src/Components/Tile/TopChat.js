@@ -7,15 +7,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './TopChat.css';
 
 class TopChat extends React.PureComponent {
     render() {
-        const { chatId, onSelect, showSavedMessages } = this.props;
+        const { chatId, onSelect, showSavedMessages, t } = this.props;
 
-        const shortTitle = getChatShortTitle(chatId, showSavedMessages);
+        const shortTitle = getChatShortTitle(chatId, showSavedMessages, t);
 
         return (
             <div className='top-chat'>
@@ -36,4 +37,4 @@ TopChat.defaultProps = {
     showSavedMessages: true
 };
 
-export default TopChat;
+export default withTranslation()(TopChat);

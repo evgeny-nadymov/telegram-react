@@ -15,9 +15,9 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
-import NotificationsControl from '../ColumnMiddle/NotificationsControl';
+import Notifications from '../ColumnMiddle/Notifications';
 
-class NotificationsListItem extends NotificationsControl {
+class NotificationsListItem extends Notifications {
     render() {
         const { t } = this.props;
         const { isMuted } = this.state;

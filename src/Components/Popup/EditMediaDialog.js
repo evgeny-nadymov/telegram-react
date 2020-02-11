@@ -79,6 +79,7 @@ class EditMediaDialog extends React.Component {
     }
 
     setFormattedText(formattedText) {
+        const { t } = this.props;
         const element = this.captionRef.current;
 
         if (!formattedText) {
@@ -88,7 +89,7 @@ class EditMediaDialog extends React.Component {
 
         const { text, entities } = formattedText;
         try {
-            const nodes = getNodes(text, entities);
+            const nodes = getNodes(text, entities, t);
             element.innerHTML = null;
             nodes.forEach(x => {
                 element.appendChild(x);

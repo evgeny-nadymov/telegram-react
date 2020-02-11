@@ -599,7 +599,7 @@ class HeaderPlayer extends React.Component {
     };
 
     render() {
-        const { classes } = this.props;
+        const { t } = this.props;
         const { playing, message, playlist, src } = this.state;
 
         let audio = false;
@@ -610,7 +610,7 @@ class HeaderPlayer extends React.Component {
 
         const date = message ? message.date : null;
 
-        const title = getMediaTitle(message);
+        const title = getMediaTitle(message, t);
         const dateHintStr = getDateHint(date);
         const dateStr = getDate(date);
         const showDate = !audio;

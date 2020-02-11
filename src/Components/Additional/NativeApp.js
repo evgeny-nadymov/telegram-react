@@ -8,9 +8,9 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import { isIOS, isWindowsPhone } from '../../Utils/Common';
-import './NativeAppControl.css';
+import './NativeApp.css';
 
-class NativeAppControl extends React.Component {
+class NativeApp extends React.Component {
     static handleInstall = () => {
         if (isIOS()) {
             window.location.href = 'https://telegram.org/dl/ios';
@@ -32,7 +32,7 @@ class NativeAppControl extends React.Component {
         return (
             <div className='app-inactive'>
                 <div className='app-inactive-wrapper'>
-                    <img src={src} alt='' className='app-inactive-image' onClick={NativeAppControl.handleInstall} />
+                    <img src={src} alt='' className='app-inactive-image' onClick={NativeApp.handleInstall} />
                     <h3 className='app-inactive-title'>Work is in progress!</h3>
                     <div className='app-inactive-description'>
                         This client has not been optimized for mobile devices yet.
@@ -40,7 +40,7 @@ class NativeAppControl extends React.Component {
                         Please consider using our native mobile app.
                     </div>
                     <div className='app-inactive-actions'>
-                        <Button color='primary' onClick={NativeAppControl.handleInstall}>
+                        <Button color='primary' onClick={NativeApp.handleInstall}>
                             Install app
                         </Button>
                     </div>
@@ -50,4 +50,4 @@ class NativeAppControl extends React.Component {
     }
 }
 
-export default NativeAppControl;
+export default NativeApp;

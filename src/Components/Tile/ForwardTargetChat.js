@@ -8,15 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './ForwardTargetChat.css';
 
 class ForwardTargetChat extends React.Component {
     render() {
-        const { chatId, selected, onSelect } = this.props;
+        const { chatId, selected, onSelect, t } = this.props;
 
-        const shortTitle = getChatShortTitle(chatId, true);
+        const shortTitle = getChatShortTitle(chatId, true, t);
 
         return (
             <div
@@ -47,4 +48,4 @@ ForwardTargetChat.propTypes = {
     onSelect: PropTypes.func.isRequired
 };
 
-export default ForwardTargetChat;
+export default withTranslation()(ForwardTargetChat);

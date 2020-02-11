@@ -21,7 +21,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import NavigateBeforeIcon from '../../Assets/Icons/Left';
 import ReplyIcon from '../../Assets/Icons/Share';
-import MediaViewerControl from '../Tile/MediaViewerControl';
+import MediaInfo from '../Tile/MediaInfo';
 import MediaViewerContent from './MediaViewerContent';
 import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
@@ -825,7 +825,7 @@ class MediaViewer extends React.Component {
         return (
             <div className={classNames('media-viewer', background)}>
                 <div className='media-viewer-footer'>
-                    <MediaViewerControl chatId={chatId} messageId={currentMessageId} />
+                    <MediaInfo chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
                         title={title}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}

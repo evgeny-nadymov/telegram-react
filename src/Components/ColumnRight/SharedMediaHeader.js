@@ -8,9 +8,9 @@
 import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import './SharedMediaHeaderControl.css';
+import './SharedMediaHeader.css';
 
-class SharedMediaHeaderControl extends React.Component {
+class SharedMediaHeader extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -31,4 +31,4 @@ class SharedMediaHeaderControl extends React.Component {
     }
 }
 
-export default SharedMediaHeaderControl;
+export default SharedMediaHeader;

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import Button from '@material-ui/core/Button/Button';
-import './AppInactiveControl.css';
+import './AppInactive.css';
 
-class AppInactiveControl extends React.Component {
+class AppInactive extends React.Component {
     static handleReload() {
         window.location.reload();
     }
@@ -22,7 +22,7 @@ class AppInactiveControl extends React.Component {
                         className='app-inactive-image'
                         src='Manytabs_2x.png'
                         alt=''
-                        onClick={AppInactiveControl.handleReload}
+                        onClick={AppInactive.handleReload}
                     />
                     <h3 className='app-inactive-title'>Such error, many tabs</h3>
                     <div className='app-inactive-description'>
@@ -31,7 +31,7 @@ class AppInactiveControl extends React.Component {
                         Please reload this page to continue using this tab or close it.
                     </div>
                     <div className='app-inactive-actions'>
-                        <Button color='primary' onClick={AppInactiveControl.handleReload}>
+                        <Button color='primary' onClick={AppInactive.handleReload}>
                             Reload app
                         </Button>
                     </div>
@@ -41,4 +41,4 @@ class AppInactiveControl extends React.Component {
     }
 }
 
-export default AppInactiveControl;
+export default AppInactive;

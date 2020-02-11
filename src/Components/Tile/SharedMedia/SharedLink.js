@@ -305,7 +305,9 @@ class SharedLink extends React.Component {
                                     <Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />
                                 }
                                 label={
-                                    isPrivateChat(chatId) ? `Delete for ${getChatShortTitle(chatId)}` : 'Delete for all'
+                                    isPrivateChat(chatId)
+                                        ? `Delete for ${getChatShortTitle(chatId, false, t)}`
+                                        : 'Delete for all'
                                 }
                             />
                         )}

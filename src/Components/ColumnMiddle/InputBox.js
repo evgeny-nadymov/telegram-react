@@ -33,11 +33,11 @@ import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './InputBoxControl.css';
+import './InputBox.css';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
-class InputBoxControl extends Component {
+class InputBox extends Component {
     constructor(props) {
         super(props);
 
@@ -361,6 +361,7 @@ class InputBoxControl extends Component {
     }
 
     setFormattedText(formattedText) {
+        const { t } = this.props;
         const element = this.newMessageRef.current;
 
         if (!formattedText) {
@@ -370,7 +371,7 @@ class InputBoxControl extends Component {
 
         const { text, entities } = formattedText;
         try {
-            const nodes = getNodes(text, entities);
+            const nodes = getNodes(text, entities, t);
             element.innerHTML = null;
             nodes.forEach(x => {
                 element.appendChild(x);
@@ -1248,4 +1249,4 @@ class InputBoxControl extends Component {
     }
 }
 
-export default withTranslation()(InputBoxControl);
+export default withTranslation()(InputBox);

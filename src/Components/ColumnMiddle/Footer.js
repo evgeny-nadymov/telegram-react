@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import InputBoxControl from './InputBoxControl';
+import InputBox from './InputBox';
 import FooterCommand from './FooterCommand';
-import NotificationsCommandControl from './NotificationsCommandControl';
+import NotificationsCommand from './NotificationsCommand';
 import { hasBasicGroupId, hasSupergroupId } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
@@ -105,23 +105,23 @@ class Footer extends React.Component {
 
                 switch (status['@type']) {
                     case 'chatMemberStatusAdministrator': {
-                        return <InputBoxControl />;
+                        return <InputBox />;
                     }
                     case 'chatMemberStatusBanned': {
                         return <FooterCommand command={t('DeleteChat')} onCommand={this.handleDeleteAndExit} />;
                     }
                     case 'chatMemberStatusCreator': {
-                        return is_member ? <InputBoxControl /> : null;
+                        return is_member ? <InputBox /> : null;
                     }
                     case 'chatMemberStatusLeft': {
                         return null;
                     }
                     case 'chatMemberStatusMember': {
-                        return <InputBoxControl />;
+                        return <InputBox />;
                     }
                     case 'chatMemberStatusRestricted': {
                         if (is_member) {
-                            return permissions && permissions.can_send_messages ? <InputBoxControl /> : null;
+                            return permissions && permissions.can_send_messages ? <InputBox /> : null;
                         } else {
                             return <FooterCommand command={t('JoinGroup')} onCommand={this.handleJoin} />;
                         }
@@ -130,10 +130,10 @@ class Footer extends React.Component {
                 break;
             }
             case 'chatTypePrivate': {
-                return <InputBoxControl />;
+                return <InputBox />;
             }
             case 'chatTypeSecret': {
-                return <InputBoxControl />;
+                return <InputBox />;
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(type.supergroup_id);
@@ -146,13 +146,13 @@ class Footer extends React.Component {
 
                 switch (status['@type']) {
                     case 'chatMemberStatusAdministrator': {
-                        return <InputBoxControl />;
+                        return <InputBox />;
                     }
                     case 'chatMemberStatusBanned': {
                         return <FooterCommand command={t('DeleteChat')} onCommand={this.handleDeleteAndExit} />;
                     }
                     case 'chatMemberStatusCreator': {
-                        return is_member ? <InputBoxControl /> : null;
+                        return is_member ? <InputBox /> : null;
                     }
                     case 'chatMemberStatusLeft': {
                         return (
@@ -164,14 +164,14 @@ class Footer extends React.Component {
                     }
                     case 'chatMemberStatusMember': {
                         if (is_channel) {
-                            return <NotificationsCommandControl chatId={chatId} />;
+                            return <NotificationsCommand chatId={chatId} />;
                         } else {
-                            return <InputBoxControl />;
+                            return <InputBox />;
                         }
                     }
                     case 'chatMemberStatusRestricted': {
                         if (is_member) {
-                            return permissions && permissions.can_send_messages ? <InputBoxControl /> : null;
+                            return permissions && permissions.can_send_messages ? <InputBox /> : null;
                         } else {
                             return (
                                 <FooterCommand

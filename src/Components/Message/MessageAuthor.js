@@ -45,7 +45,7 @@ class MessageAuthor extends React.Component {
                 : `user_color_${(Math.abs(userId) % 8) + 1}`;
             const className = classNames([tileColor], 'message-author');
 
-            const fullName = getUserFullName(user);
+            const fullName = getUserFullName(userId, null, t);
 
             return openUser ? (
                 <a className={className} onClick={this.handleSelect}>

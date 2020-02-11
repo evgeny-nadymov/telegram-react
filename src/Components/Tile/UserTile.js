@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import { getUserLetters } from '../../Utils/User';
 import { getSrc, loadChatContent } from '../../Utils/File';
 import UserStore from '../../Stores/UserStore';
@@ -160,13 +161,13 @@ class UserTile extends Component {
     };
 
     render() {
-        const { className, userId, fistName, lastName, onSelect, small, poll } = this.props;
+        const { className, userId, fistName, lastName, onSelect, small, poll, t } = this.props;
         const { loaded } = this.state;
 
         const user = UserStore.get(userId);
         if (!user && !(fistName || lastName)) return null;
 
-        const letters = getUserLetters(userId, fistName, lastName);
+        const letters = getUserLetters(userId, fistName, lastName, t);
         const src = getSrc(user && user.profile_photo ? user.profile_photo.small : null);
         const tileLoaded = src && loaded;
 
@@ -202,4 +203,4 @@ UserTile.propTypes = {
     small: PropTypes.bool
 };
 
-export default UserTile;
+export default withTranslation()(UserTile);

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import Footer from './Footer';
-import NativeAppControl from './Additional/NativeAppControl';
+import NativeApp from './Additional/NativeApp';
 
 class NativeAppPage extends React.Component {
     render() {
@@ -20,7 +20,7 @@ class NativeAppPage extends React.Component {
                         background: '#FFFFFF',
                         color: '#000000'
                     }}>
-                    <NativeAppControl />
+                    <NativeApp />
                 </div>
                 <Footer />
             </>

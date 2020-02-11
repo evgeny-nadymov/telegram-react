@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
-import SharedMediaHeaderControl from './SharedMediaHeaderControl';
+import SharedMediaHeader from './SharedMediaHeader';
 import './SharedMedia.css';
-import PropTypes from 'prop-types';
-import GroupsInCommon from './GroupsInCommon';
 
 class SharedMedia extends React.Component {
     state = {
@@ -28,7 +27,7 @@ class SharedMedia extends React.Component {
 
         const content = (
             <>
-                <SharedMediaHeaderControl close={onClose} />
+                <SharedMediaHeader close={onClose} />
                 <Tabs
                     value={value}
                     onChange={this.handleChange}

@@ -7,8 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Photo from './Photo';
+import { withTranslation } from 'react-i18next';
 import Animation from './Animation';
+import Photo from './Photo';
 import { getFormattedText } from '../../../Utils/Message';
 import { getFitSize, getSize } from '../../../Utils/Common';
 import { getSrc } from '../../../Utils/File';
@@ -50,11 +51,11 @@ class Game extends React.Component {
     };
 
     render() {
-        const { game } = this.props;
+        const { game, t } = this.props;
         if (!game) return null;
 
         const { title, text, description } = game;
-        const formattedText = getFormattedText(text);
+        const formattedText = getFormattedText(text, t);
 
         return (
             <div className='game'>
@@ -85,4 +86,4 @@ Game.defaultProps = {
     displaySize: PHOTO_DISPLAY_SIZE
 };
 
-export default Game;
+export default withTranslation()(Game);

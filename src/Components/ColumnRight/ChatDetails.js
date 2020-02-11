@@ -30,8 +30,8 @@ import MicIcon from '@material-ui/icons/Mic';
 import PhotoIcon from '@material-ui/icons/Photo';
 import Typography from '@material-ui/core/Typography';
 import VideocamIcon from '@material-ui/icons/Videocam';
-import UserControl from '../Tile/UserControl';
-import ChatControl from '../Tile/ChatControl';
+import User from '../Tile/User';
+import Chat from '../Tile/Chat';
 import ChatDetailsHeader from './ChatDetailsHeader';
 import NotificationsListItem from './NotificationsListItem';
 import MoreListItem from './MoreListItem';
@@ -384,7 +384,7 @@ class ChatDetails extends React.Component {
         });
         const items = sortedUsers.map(user => (
             <ListItem button className='list-item' key={user.id}>
-                <UserControl userId={user.id} onSelect={this.handleOpenUser} />
+                <User userId={user.id} onSelect={this.handleOpenUser} />
             </ListItem>
         ));
 
@@ -400,7 +400,7 @@ class ChatDetails extends React.Component {
                 />
                 <div ref={this.chatDetailsListRef} className='chat-details-list'>
                     <div className='chat-details-info'>
-                        <ChatControl
+                        <Chat
                             chatId={chatId}
                             big={true}
                             showStatus={true}

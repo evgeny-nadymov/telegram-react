@@ -545,7 +545,7 @@ class Message extends Component {
                 views={views}
             />
         );
-        const text = getText(message, inlineMeta);
+        const text = getText(message, inlineMeta, t);
         const hasCaption = text !== null && text.length > 0;
         const showForward = showMessageForward(chatId, messageId);
         const hasTitle = showTitle || showForward || Boolean(reply_to_message_id);

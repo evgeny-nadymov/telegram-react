@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
-import { compose } from 'recompose';
 import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Menu from '@material-ui/core/Menu';
@@ -22,7 +22,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
 import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
-import { unpinMessage } from '../../Actions/Message';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -31,7 +30,7 @@ import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
 
 class LeaveChatDialog extends React.Component {
-    getDeleteDialogText = chatId => {
+    getDeleteDialogText = (chatId, t) => {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
         if (!chat.type) return null;
@@ -52,7 +51,7 @@ class LeaveChatDialog extends React.Component {
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return `Are you sure you want to delete chat with ${getChatShortTitle(chatId)}?`;
+                return `Are you sure you want to delete chat with ${getChatShortTitle(chatId, false, t)}?`;
             }
         }
 
@@ -60,7 +59,7 @@ class LeaveChatDialog extends React.Component {
     };
 
     render() {
-        const { onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, t, ...other } = this.props;
 
         return (
             <Dialog
@@ -68,12 +67,12 @@ class LeaveChatDialog extends React.Component {
                 onClose={() => onClose(false)}
                 aria-labelledby='delete-dialog-title'
                 {...other}>
-                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
+                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId, false, t)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>
                         <ChatTile chatId={chatId} />
                         <DialogContentText id='delete-dialog-description'>
-                            {this.getDeleteDialogText(chatId)}
+                            {this.getDeleteDialogText(chatId, t)}
                         </DialogContentText>
                     </div>
                 </DialogContent>
@@ -90,9 +89,11 @@ class LeaveChatDialog extends React.Component {
     }
 }
 
+const EnhancedLeaveChatDialog = withTranslation()(LeaveChatDialog);
+
 class ClearHistoryDialog extends React.Component {
     render() {
-        const { onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, t, ...other } = this.props;
 
         return (
             <Dialog
@@ -100,7 +101,7 @@ class ClearHistoryDialog extends React.Component {
                 onClose={() => onClose(false)}
                 aria-labelledby='delete-dialog-title'
                 {...other}>
-                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
+                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId, false, t)}</DialogTitle>
                 <DialogContent>
                     <div className='delete-dialog-content'>
                         <ChatTile chatId={chatId} />
@@ -121,6 +122,8 @@ class ClearHistoryDialog extends React.Component {
         );
     }
 }
+
+const EnhancedClearHistoryDialog = withTranslation()(ClearHistoryDialog);
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -333,8 +336,12 @@ class MainMenuButton extends React.Component {
                     {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
                     {unpinMessage && <MenuItem onClick={this.handleUnpin}>{t('Unpin')}</MenuItem>}
                 </Menu>
-                <LeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
-                <ClearHistoryDialog chatId={chatId} open={openClearHistory} onClose={this.handleClearHistoryContinue} />
+                <EnhancedLeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
+                <EnhancedClearHistoryDialog
+                    chatId={chatId}
+                    open={openClearHistory}
+                    onClose={this.handleClearHistoryContinue}
+                />
             </>
         );
     }

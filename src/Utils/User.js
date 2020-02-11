@@ -101,40 +101,45 @@ function isUserOnline(user) {
     return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-function getUserFullName(user) {
+function getUserFullName(userId, user, t = k => k) {
+    user = UserStore.get(userId) || user;
     if (!user) return null;
-    if (!user.type) return null;
 
-    switch (user.type['@type']) {
+    const { type, first_name, last_name } = user;
+    if (!type) return null;
+
+    switch (type['@type']) {
         case 'userTypeBot':
         case 'userTypeRegular': {
-            if (user.first_name && user.last_name) return `${user.first_name} ${user.last_name}`;
-            if (user.first_name) return user.first_name;
-            if (user.last_name) return user.last_name;
+            if (first_name && last_name) return `${first_name} ${last_name}`;
+            if (first_name) return first_name;
+            if (last_name) return last_name;
         }
         case 'userTypeDeleted':
         case 'userTypeUnknown': {
-            return 'Deleted account';
+            return t('HiddenName');
         }
     }
 
     return null;
 }
 
-function getUserShortName(userId) {
+function getUserShortName(userId, t = k => k) {
     const user = UserStore.get(userId);
     if (!user) return null;
-    if (!user.type) return null;
 
-    switch (user.type['@type']) {
+    const { type, first_name, last_name } = user;
+    if (!type) return null;
+
+    switch (type['@type']) {
         case 'userTypeBot':
         case 'userTypeRegular': {
-            if (user.first_name) return user.first_name;
-            if (user.last_name) return user.last_name;
+            if (first_name) return first_name;
+            if (last_name) return last_name;
         }
         case 'userTypeDeleted':
         case 'userTypeUnknown': {
-            return 'Deleted account';
+            return t('HiddenName');
         }
     }
 
@@ -150,11 +155,11 @@ function isUserBlocked(userId) {
     return false;
 }
 
-function getUserLetters(userId, firstName, lastName) {
+function getUserLetters(userId, firstName, lastName, t) {
     const user = UserStore.get(userId);
     if (!user && !(firstName || lastName)) return null;
 
-    const title = getUserFullName(user) || `${firstName} ${lastName}`.trim();
+    const title = getUserFullName(userId, null, t) || `${firstName} ${lastName}`.trim();
     const letters = getLetters(title);
     if (letters && letters.length > 0) {
         return letters;

@@ -8,9 +8,9 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import FooterCommand from './FooterCommand';
-import NotificationsControl from './NotificationsControl';
+import Notifications from './Notifications';
 
-class NotificationsCommandControl extends NotificationsControl {
+class NotificationsCommand extends Notifications {
     render() {
         const { t } = this.props;
         const { isMuted } = this.state;
@@ -20,4 +20,4 @@ class NotificationsCommandControl extends NotificationsControl {
     }
 }
 
-export default withTranslation()(NotificationsCommandControl);
+export default withTranslation()(NotificationsCommand);

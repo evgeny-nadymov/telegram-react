@@ -18,7 +18,7 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
-import ProfileMediaViewerControl from '../Tile/ProfileMediaViewerControl';
+import ProfileMediaInfo from '../Tile/ProfileMediaInfo';
 import { setProfileMediaViewerContent } from '../../Actions/Client';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
@@ -358,7 +358,7 @@ class ProfileMediaViewer extends React.Component {
         return (
             <div className={classNames('media-viewer', 'media-viewer-default')}>
                 <div className='media-viewer-footer'>
-                    <ProfileMediaViewerControl chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)} />
+                    <ProfileMediaInfo chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)} />
                     <MediaViewerFooterText
                         title={t('AttachPhoto')}
                         subtitle={totalCount && index >= 0 ? `${index + 1} of ${totalCount}` : null}

@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
 import ChatStatus from './ChatStatus';
 import { getChatLetters, isMeChat, isPrivateChat } from '../../Utils/Chat';
@@ -110,7 +111,7 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { chatId, showOnline, showSavedMessages, onSelect, small, big, size } = this.props;
+        const { chatId, showOnline, showSavedMessages, onSelect, small, big, size, t } = this.props;
         const { loaded } = this.state;
 
         let style = null;
@@ -141,7 +142,7 @@ class ChatTile extends Component {
 
         const { photo } = chat;
 
-        const letters = getChatLetters(chat);
+        const letters = getChatLetters(chat, t);
         const src = getSrc(photo ? photo.small : null);
         const tileLoaded = src && loaded;
 
@@ -183,4 +184,4 @@ ChatTile.defaultProps = {
     showOnline: false
 };
 
-export default ChatTile;
+export default withTranslation()(ChatTile);

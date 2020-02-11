@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import { getAnimationData, getMediaFile, getMediaPreviewFile } from '../../Utils/File';
@@ -34,7 +35,7 @@ class MediaViewerContent extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        const { chatId, messageId, size } = props;
+        const { chatId, messageId, size, t } = props;
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
             let [width, height, file] = getMediaFile(chatId, messageId, size);
@@ -44,7 +45,7 @@ class MediaViewerContent extends React.Component {
             thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
             const message = MessageStore.get(chatId, messageId);
-            const text = getText(message);
+            const text = getText(message, null, t);
 
             return {
                 prevChatId: chatId,
@@ -141,18 +142,18 @@ class MediaViewerContent extends React.Component {
     };
 
     onUpdateMessageContent = update => {
-        const { chatId, messageId, size } = this.props;
+        const { chatId, messageId, size, t } = this.props;
         const { chat_id, message_id } = update;
 
         if (chatId === chat_id && messageId === message_id) {
             const [width, height, file] = getMediaFile(chatId, messageId, size);
             const message = MessageStore.get(chatId, messageId);
-            const text = getText(message);
+            const text = getText(message, null, t);
             this.setState({
-                width: width,
-                height: height,
-                file: file,
-                text: text
+                width,
+                height,
+                file,
+                text
             });
         }
     };
@@ -349,4 +350,4 @@ MediaViewerContent.propTypes = {
     size: PropTypes.number.isRequired
 };
 
-export default MediaViewerContent;
+export default withTranslation()(MediaViewerContent);

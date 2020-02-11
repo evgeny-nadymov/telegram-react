@@ -57,7 +57,7 @@ class Reply extends React.Component {
 
         const message = MessageStore.get(chatId, messageId);
 
-        title = title || getTitle(message);
+        title = title || getTitle(message, t);
         let content = !message ? t('Loading') : getContent(message, t);
         const photoSize = getReplyPhotoSize(chatId, messageId);
         const minithumbnail = getReplyMinithumbnail(chatId, messageId);

@@ -13,9 +13,9 @@ import DialogTitle from './DialogTitle';
 import DialogStatus from './DialogStatus';
 import { isMeChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
-import './ChatControl.css';
+import './Chat.css';
 
-class ChatControl extends React.Component {
+class Chat extends React.Component {
     constructor(props) {
         super(props);
         if (process.env.NODE_ENV !== 'production') {
@@ -62,7 +62,7 @@ class ChatControl extends React.Component {
     }
 }
 
-ChatControl.propTypes = {
+Chat.propTypes = {
     chatId: PropTypes.number.isRequired,
     showSavedMessages: PropTypes.bool,
     showStatus: PropTypes.bool,
@@ -70,9 +70,9 @@ ChatControl.propTypes = {
     onTileSelect: PropTypes.func
 };
 
-ChatControl.defaultProps = {
+Chat.defaultProps = {
     showSavedMessages: true,
     showStatus: true
 };
 
-export default ChatControl;
+export default Chat;

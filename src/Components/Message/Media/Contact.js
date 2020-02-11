@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import UserTile from '../../Tile/UserTile';
 import { formatPhoneNumber } from '../../../Utils/Common';
 import { getUserFullName } from '../../../Utils/User';
@@ -16,7 +17,7 @@ import './Contact.css';
 
 class Contact extends React.Component {
     render() {
-        const { contact, title, openMedia, meta, caption } = this.props;
+        const { contact, title, openMedia, meta, caption, t } = this.props;
         if (!contact) return null;
 
         const { user_id: id, first_name, last_name, phone_number } = contact;
@@ -29,7 +30,7 @@ class Contact extends React.Component {
             last_name
         };
 
-        const fullName = getUserFullName(user);
+        const fullName = getUserFullName(id, user, t);
         const number = formatPhoneNumber(phone_number);
 
         return (
@@ -58,4 +59,4 @@ Contact.propTypes = {
     openMedia: PropTypes.func
 };
 
-export default Contact;
+export default withTranslation()(Contact);

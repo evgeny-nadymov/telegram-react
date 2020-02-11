@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '@material-ui/icons/Close';
 import IconButton from '@material-ui/core/IconButton';
-import ChatControl from '../../Tile/ChatControl';
+import Chat from '../../Tile/Chat';
 import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
 import FoundPublicChat from '../../Tile/FoundPublicChat';
@@ -589,7 +589,7 @@ class Search extends React.Component {
                         <SearchCaption caption='Search messages in' />
                         <div className='search-chat-wrapper'>
                             <div className='search-chat-control'>
-                                <ChatControl chatId={chatId} showStatus={false} />
+                                <Chat chatId={chatId} showStatus={false} />
                             </div>
                             <IconButton
                                 className='header-right-button'

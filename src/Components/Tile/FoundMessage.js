@@ -70,8 +70,8 @@ class FoundMessage extends React.Component {
         const { sender_user_id } = message;
 
         const date = getMessageDate(message);
-        const senderName = getMessageSenderName(message);
-        const senderFullName = getMessageSenderFullName(message);
+        const senderName = getMessageSenderName(message, t);
+        const senderFullName = getMessageSenderFullName(message, t);
         const content = getContent(message, t) || '\u00A0';
         const selected = chatId === selectedChatId && messageId === selectedMessageId;
 

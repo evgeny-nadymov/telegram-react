@@ -12,9 +12,9 @@ import UserTile from './UserTile';
 import ChatTile from './ChatTile';
 import MessageAuthor from '../Message/MessageAuthor';
 import MessageStore from '../../Stores/MessageStore';
-import './MediaViewerControl.css';
+import './MediaInfo.css';
 
-class MediaViewerControl extends React.Component {
+class MediaInfo extends React.Component {
     constructor(props) {
         super(props);
     }
@@ -33,14 +33,14 @@ class MediaViewerControl extends React.Component {
         const tileControl = userId ? <UserTile userId={userId} /> : <ChatTile chatId={chatId} />;
 
         return (
-            <div className='media-viewer-control'>
-                <div className='media-viewer-control-wrapper'>
+            <div className='media-info'>
+                <div className='media-info-wrapper'>
                     {tileControl}
-                    <div className='media-viewer-control-content'>
-                        <div className='media-viewer-row'>
+                    <div className='media-info-content'>
+                        <div className='media-info-row'>
                             <MessageAuthor chatId={chatId} userId={userId} />
                         </div>
-                        <div className='media-viewer-row meta'>
+                        <div className='media-info-row meta'>
                             <span>{dateHint}</span>
                         </div>
                     </div>
@@ -50,9 +50,9 @@ class MediaViewerControl extends React.Component {
     }
 }
 
-MediaViewerControl.propTypes = {
+MediaInfo.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired
 };
 
-export default MediaViewerControl;
+export default MediaInfo;

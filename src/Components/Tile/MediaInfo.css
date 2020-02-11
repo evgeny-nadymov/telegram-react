@@ -5,27 +5,24 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.media-viewer-control {
+.media-info {
     min-width: 204px;
     opacity: 0.5;
 }
 
-.media-viewer-control-wrapper {
+.media-info-wrapper {
     padding: 8px 20px;
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.media-viewer-control-content {
+.media-info-content {
     margin-left: 12px;
     flex-grow: 1;
     flex-shrink: 1;
 }
 
-.media-viewer-row {
+.media-info-row {
     overflow: hidden;
-}
-
-.media-viewer-meta {
 }

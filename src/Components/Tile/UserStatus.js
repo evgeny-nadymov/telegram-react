@@ -9,9 +9,9 @@ import React from 'react';
 import classNames from 'classnames';
 import { getUserStatus, isUserOnline } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
-import './UserStatusControl.css';
+import './UserStatus.css';
 
-class UserStatusControl extends React.Component {
+class UserStatus extends React.Component {
     constructor(props) {
         super(props);
 
@@ -83,4 +83,4 @@ class UserStatusControl extends React.Component {
     }
 }
 
-export default UserStatusControl;
+export default UserStatus;

@@ -13,7 +13,7 @@ import { NOTIFICATION_DEBOUNCE_DELAY_MS } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import NotificationStore from '../../Stores/NotificationStore';
 
-class NotificationsControl extends React.Component {
+class Notifications extends React.Component {
     constructor(props) {
         super(props);
 
@@ -95,4 +95,4 @@ class NotificationsControl extends React.Component {
     };
 }
 
-export default NotificationsControl;
+export default Notifications;

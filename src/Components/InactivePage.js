@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import AppInactiveControl from './Additional/AppInactiveControl';
+import AppInactive from './Additional/AppInactive';
 import Footer from './Footer';
 
 class InactivePage extends React.Component {
@@ -15,7 +15,7 @@ class InactivePage extends React.Component {
             <>
                 <div className='header-wrapper' />
                 <div className='page'>
-                    <AppInactiveControl />
+                    <AppInactive />
                 </div>
                 <Footer />
             </>
