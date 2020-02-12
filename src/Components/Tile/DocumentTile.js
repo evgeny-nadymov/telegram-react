@@ -65,8 +65,6 @@ class DocumentTile extends React.Component {
             <div
                 className={classNames('document-tile', { 'document-tile-image': !src }, { pointer: openMedia })}
                 onClick={openMedia}>
-                {!tileLoaded && <div className='document-tile-background' />}
-                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
                 {file && (
                     <FileProgress
                         file={file}
@@ -76,9 +74,11 @@ class DocumentTile extends React.Component {
                         cancelButton
                         zIndex={1}
                         icon={icon}
-                        completeIcon={completeIcon}
+                        completeIcon={typeof completeIcon === 'function' ? completeIcon(src) : completeIcon}
                     />
                 )}
+                {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
+                {!tileLoaded && <div className='document-tile-background' />}
             </div>
         );
     }
@@ -90,7 +90,7 @@ DocumentTile.propTypes = {
     file: PropTypes.object,
     openMedia: PropTypes.func,
     icon: PropTypes.node,
-    completeIcon: PropTypes.node
+    completeIcon: PropTypes.oneOf([PropTypes.node, PropTypes.func])
 };
 
 export default DocumentTile;

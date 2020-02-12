@@ -68,7 +68,7 @@ class ThemePicker extends React.Component {
                 return 'amber';
             case green['500']:
                 return 'green';
-            case '#5B8AF1':
+            case '#50A2E9':
                 return 'blue';
             case indigo['500']:
                 return 'indigo';
@@ -90,7 +90,7 @@ class ThemePicker extends React.Component {
             case 'green':
                 return green;
             case 'blue':
-                return { main: '#5B8AF1' };
+                return { main: '#50A2E9' };
             case 'indigo':
                 return indigo;
             case 'deepPurple':

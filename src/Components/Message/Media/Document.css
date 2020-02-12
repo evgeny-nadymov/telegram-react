@@ -6,6 +6,7 @@
  */
 
 .document {
+    margin: 2px -1px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -72,7 +73,10 @@
 }
 
 @keyframes spin {
+    0% {
+        transform: rotate(-90deg);
+    }
     100% {
-        transform: rotate(360deg);
+        transform: rotate(270deg);
     }
 }

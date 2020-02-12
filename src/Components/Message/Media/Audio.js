@@ -130,7 +130,7 @@ class Audio extends React.Component {
         const audioTitle = getAudioTitle(audio);
 
         return (
-            <div className={classNames('document', { 'media-title': title })}>
+            <div className={classNames('audio', 'document', { 'media-title': title })}>
                 <DocumentTile
                     thumbnail={album_cover_thumbnail}
                     file={file}

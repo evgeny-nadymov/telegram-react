@@ -249,7 +249,7 @@ function withTheme(WrappedComponent) {
             super(props);
 
             const cookies = new Cookies();
-            const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: { main: '#5B8AF1' } };
+            const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: { main: '#50A2E9' } };
             const theme = createTheme(type, primary);
 
             this.state = { theme };

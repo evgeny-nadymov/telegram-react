@@ -19,10 +19,10 @@
     --tile-size-small: 33px;
     --tile-size-big: 120px;
 
-    --color-accent-main: #5b8af1;
-    --color-accent-main22: #5b8af122;
-    --color-accent-light: #5b8af1;
-    --color-accent-dark: #5b8af1;
+    --color-accent-main: #50a2e9;
+    --color-accent-main22: #50a2e922;
+    --color-accent-light: #50a2e9;
+    --color-accent-dark: #50a2e9;
     --color-grey700: rgba(97, 97, 97, 0.9);
 
     --border: #dadce0;
@@ -45,22 +45,22 @@
     --dialog-meta-color: #5f6369;
     --dialog-meta-read-color: #4fae4e;
 
-    --media-in-tile-background: #5b8af1;
-    --media-out-tile-background: #5b8af1;
+    --media-in-tile-background: #50a2e9;
+    --media-out-tile-background: #50a2e9;
 
     --message-service-background: #00000033;
     --message-service-color: #ffffff;
 
-    --message-in-link: #5b8af1;
-    --message-in-author: #5b8af1;
+    --message-in-link: #50a2e9;
+    --message-in-author: #50a2e9;
     --message-in-background: #ffffff;
     --message-in-color: #000000;
     --message-in-subtle-color: #707579;
     --message-in-meta-color: #8d969c;
-    --message-in-reply-title: #5b8af1;
-    --message-in-reply-border: #5b8af1;
-    --message-in-control: #5b8af1;
-    --message-in-control-hover: #5b8af122;
+    --message-in-reply-title: #50a2e9;
+    --message-in-reply-border: #50a2e9;
+    --message-in-control: #50a2e9;
+    --message-in-control-hover: #50a2e922;
 
     --message-out-link: #4fae4e;
     --message-out-author: #4fae4e;

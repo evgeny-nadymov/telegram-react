@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CloseIcon from '@material-ui/icons/Close';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
@@ -254,7 +255,7 @@ class FileProgress extends React.Component {
             // console.log('FileProgress.render completeIcon');
             if (completeIcon) {
                 return (
-                    <div className='file-progress' style={style}>
+                    <div className={classNames('file-progress', 'file-progress-complete')} style={style}>
                         {completeIcon}
                     </div>
                 );

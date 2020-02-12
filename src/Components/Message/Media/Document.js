@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import DocumentNewIcon from '../../../Assets/Icons/DocumentNew';
 import DocumentTile from '../../Tile/DocumentTile';
 import DocumentAction from './DocumentAction';
 import { getExtension } from '../../../Utils/File';
@@ -24,6 +24,13 @@ class Document extends React.Component {
         const file = document.document;
 
         const style = width && height ? { width, height } : null;
+        const completeIconFunc = thumb =>
+            thumb ? null : (
+                <div className='document-tile-complete-icon'>
+                    <DocumentNewIcon className='document-tile-icon-fill' viewBox='0 0 54 54' />
+                    <div className='document-tile-file-ext'>{getExtension(file_name)}</div>
+                </div>
+            );
 
         return (
             <div className={classNames('document', { 'media-title': title })} style={style}>
@@ -33,7 +40,7 @@ class Document extends React.Component {
                     file={file}
                     openMedia={openMedia}
                     icon={<ArrowDownwardIcon />}
-                    completeIcon={<InsertDriveFileIcon />}
+                    completeIcon={completeIconFunc}
                 />
                 <div className='document-content'>
                     <div className='document-title'>

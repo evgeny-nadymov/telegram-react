@@ -22,7 +22,7 @@ class VoiceNote extends React.Component {
         const { duration, voice: file } = voiceNote;
 
         return (
-            <div className={classNames('document', { 'media-title': title })}>
+            <div className={classNames('voice-note', 'document', { 'media-title': title })}>
                 <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                 <div className='voice-note-content'>
                     <VoiceNoteSlider chatId={chatId} messageId={messageId} duration={duration} file={file} />

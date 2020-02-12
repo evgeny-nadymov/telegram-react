@@ -11,10 +11,28 @@
     height: var(--tile-size);
     border-radius: 50%;
     flex-shrink: 0;
+    flex-direction: row-reverse;
+}
+
+.document-tile-complete-icon {
+    position: relative;
+}
+
+.document-tile-file-ext {
+    position: absolute;
+    bottom: 7px;
+    left: 6px;
+    right: 6px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .document-tile-image {
-    background: rgba(218, 228, 234, 0.5);
+    /*background: rgba(218, 228, 234, 0.5);*/
 }
 
 .document-tile-background {
@@ -22,10 +40,41 @@
     border-radius: 50%;
     width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.document-tile-icon-background {
+    background: var(--media-in-tile-background);
+    border-radius: 6px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.document-tile-icon-fill {
+    fill: var(--media-in-tile-background);
+    border-radius: 6px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .message-bubble-out .document-tile-background {
     background: var(--media-out-tile-background);
+}
+
+.message-bubble-out .document-tile-icon-background {
+    background: var(--media-out-tile-background);
+}
+
+.message-bubble-out .document-tile-icon-fill {
+    fill: var(--media-out-tile-background);
 }
 
 .document-tile-cancel {
@@ -42,4 +91,15 @@
 
 .document-tile-cancel-line {
     stroke-linecap: round;
+}
+
+.document:not(.audio):not(.voice-note) .document-tile,
+.document:not(.audio):not(.voice-note) .document-tile-background,
+.document:not(.audio):not(.voice-note) .tile-photo,
+.document:not(.audio):not(.voice-note) .file-progress {
+    border-radius: 6px;
+}
+
+.document:not(.audio):not(.voice-note) .file-progress-complete + .document-tile-background {
+    background: transparent;
 }
