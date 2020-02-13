@@ -74,6 +74,8 @@ function updateLightTheme(theme) {
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
     style.setProperty('--message-in-control', theme.palette.primary.main);
     style.setProperty('--message-in-control-hover', theme.palette.primary.main + '22');
+    style.setProperty('--message-in-control-border', theme.palette.primary.main + '77');
+    style.setProperty('--message-in-control-border-hover', theme.palette.primary.main);
 
     style.setProperty('--message-out-link', '#4FAE4E');
     style.setProperty('--message-out-author', '#4FAE4E');
@@ -84,7 +86,9 @@ function updateLightTheme(theme) {
     style.setProperty('--message-out-reply-title', '#4FAE4E');
     style.setProperty('--message-out-reply-border', '#4FAE4E');
     style.setProperty('--message-out-control', '#4FAE4E');
-    style.setProperty('--message-out-control-hover', '#4FAE4E22');
+    style.setProperty('--message-out-control-hover', '#4FAE4E' + '22');
+    style.setProperty('--message-out-control-border', '#4FAE4E' + '77');
+    style.setProperty('--message-out-control-border-hover', '#4FAE4E');
 }
 
 function updateDarkTheme(theme) {
@@ -147,6 +151,8 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-in-reply-border', theme.palette.primary.main);
     style.setProperty('--message-in-control', theme.palette.primary.main);
     style.setProperty('--message-in-control-hover', theme.palette.primary.main + '22');
+    style.setProperty('--message-in-control-border', theme.palette.primary.main + '77');
+    style.setProperty('--message-in-control-border-hover', theme.palette.primary.main);
 
     style.setProperty('--message-out-link', theme.palette.primary.main);
     style.setProperty('--message-out-author', theme.palette.primary.main);
@@ -158,6 +164,8 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-out-reply-border', theme.palette.primary.main);
     style.setProperty('--message-out-control', theme.palette.primary.main);
     style.setProperty('--message-out-control-hover', theme.palette.primary.main + '22');
+    style.setProperty('--message-out-control-border', theme.palette.primary.main + '77');
+    style.setProperty('--message-out-control-border-hover', theme.palette.primary.main);
 }
 
 function createTheme(type, primary) {

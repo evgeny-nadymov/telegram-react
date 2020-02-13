@@ -6,10 +6,15 @@
  */
 
 .audio-action {
+    margin-top: 2px;
     font-size: 14px;
     line-height: normal;
     color: var(--message-in-subtle-color);
     user-select: none;
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .message-out .audio-action {

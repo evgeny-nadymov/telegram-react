@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause';
+import PlayArrowIcon from '../../Assets/Icons/PlayArrow';
+import PauseIcon from '../../Assets/Icons/Pause';
 import SkipNextIcon from '@material-ui/icons/SkipNext';
 import SkipPreviousIcon from '@material-ui/icons/SkipPrevious';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import VolumeButton from '../Player/VolumeButton';
 import RepeatButton from '../Player/RepeatButton';

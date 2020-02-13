@@ -10,7 +10,7 @@ import copy from 'copy-to-clipboard';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import LinkIcon from '@material-ui/icons/Link';
 import MoreIcon from '@material-ui/icons/MoreVert';
 import IconButton from '@material-ui/core/IconButton';

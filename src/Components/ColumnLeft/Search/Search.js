@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Chat from '../../Tile/Chat';
 import TopChat from '../../Tile/TopChat';

@@ -338,10 +338,12 @@ pre code {
 
 .message-control {
     color: var(--message-in-control);
+    border-color: var(--message-in-control-border);
 }
 
 .message-control:hover {
     background-color: var(--message-in-control-hover);
+    border-color: var(--message-in-control-border-hover);
 }
 
 .message-control-disabled {
@@ -350,10 +352,12 @@ pre code {
 
 .message-out .message-control {
     color: var(--message-out-control);
+    border-color: var(--message-out-control-border);
 }
 
 .message-out .message-control:hover {
     background-color: var(--message-out-control-hover);
+    border-color: var(--message-out-control-border-hover);
 }
 
 .message-out .message-control-disabled {

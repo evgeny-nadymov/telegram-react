@@ -191,6 +191,10 @@ class WebPage extends React.Component {
             <Button
                 variant='outlined'
                 color='primary'
+                classes={{
+                    outlinedPrimary: 'message-control',
+                    disabled: 'message-control-disabled'
+                }}
                 fullWidth
                 onClick={this.handleInstantViewClick}
                 className='web-page-button'>

@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Radio from '@material-ui/core/Radio';
 import Typography from '@material-ui/core/es/Typography/Typography';

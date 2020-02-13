@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SearchIcon from '@material-ui/icons/Search';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import MainMenuButton from './MainMenuButton';
 import { isAuthorizationReady } from '../../Utils/Common';

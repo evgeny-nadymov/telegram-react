@@ -7,10 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Document from '../../Message/Media/Document';
-import RichText from './RichText';
-import ArrowDownwardIcon from '@material-ui/core/SvgIcon/SvgIcon';
-import DocumentTile from '../../Tile/DocumentTile';
 import { getSrc } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause';
+import DownloadIcon from '../../Assets/Icons/Download';
+import PlayArrowIcon from '../../Assets/Icons/PlayArrow';
+import PauseIcon from '../../Assets/Icons/Pause';
 import DocumentTile from './DocumentTile';
 import PlayerStore from '../../Stores/PlayerStore';
 import './VoiceNoteTile.css';
@@ -104,7 +104,7 @@ class VoiceNoteTile extends React.Component {
                 thumbnail={null}
                 file={file}
                 openMedia={openMedia}
-                icon={<ArrowDownwardIcon />}
+                icon={<DownloadIcon />}
                 completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
             />
         );

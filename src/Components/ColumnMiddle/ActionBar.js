@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import { getChatUserId } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';

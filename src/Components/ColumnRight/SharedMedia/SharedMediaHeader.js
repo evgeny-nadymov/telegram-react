@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';

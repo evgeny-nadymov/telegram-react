@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import DownloadIcon from '../../../Assets/Icons/Download';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import FileProgress from '../../Viewer/FileProgress';
 import MediaStatus from './MediaStatus';
@@ -382,7 +382,7 @@ class VideoNote extends React.Component {
                         </div>
                     </>
                 )}
-                <FileProgress file={video} download upload cancelButton icon={<ArrowDownwardIcon />} />
+                <FileProgress file={video} download upload cancelButton icon={<DownloadIcon />} />
             </div>
         );
     }

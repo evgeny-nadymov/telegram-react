@@ -61,6 +61,8 @@
     --message-in-reply-border: #50a2e9;
     --message-in-control: #50a2e9;
     --message-in-control-hover: #50a2e922;
+    --message-in-control-border: #50a2e977;
+    --message-in-control-border-hover: #50a2e9;
 
     --message-out-link: #4fae4e;
     --message-out-author: #4fae4e;
@@ -72,4 +74,6 @@
     --message-out-reply-border: #4fae4e;
     --message-out-control: #4fae4e;
     --message-out-control-hover: #4fae4e22;
+    --message-out-control-border: #4fae4e77;
+    --message-out-control-border-hover: #4fae4e;
 }

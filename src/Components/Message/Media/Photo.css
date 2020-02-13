@@ -41,8 +41,8 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     margin-left: -21px;
     margin-top: -21px;
     animation: spin 4s linear infinite;

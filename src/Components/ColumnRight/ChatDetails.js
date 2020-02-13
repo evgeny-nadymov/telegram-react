@@ -15,7 +15,7 @@ import { withTranslation } from 'react-i18next';
 import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
 import GroupIcon from '@material-ui/icons/Group';
 import CallIcon from '@material-ui/icons/Call';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import Divider from '@material-ui/core/Divider';
 import ErrorOutlineIcon from '@material-ui/icons/ErrorOutline';
 import HeadsetIcon from '@material-ui/icons/Headset';

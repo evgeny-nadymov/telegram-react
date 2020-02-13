@@ -8,8 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
-import DocumentNewIcon from '../../../Assets/Icons/DocumentNew';
+import DownloadIcon from '../../../Assets/Icons/Download';
+import DocumentIcon from '../../../Assets/Icons/Document';
 import DocumentTile from '../../Tile/DocumentTile';
 import DocumentAction from './DocumentAction';
 import { getExtension } from '../../../Utils/File';
@@ -27,7 +27,7 @@ class Document extends React.Component {
         const completeIconFunc = thumb =>
             thumb ? null : (
                 <div className='document-tile-complete-icon'>
-                    <DocumentNewIcon className='document-tile-icon-fill' viewBox='0 0 54 54' />
+                    <DocumentIcon className='document-tile-icon-fill' viewBox='0 0 54 54' />
                     <div className='document-tile-file-ext'>{getExtension(file_name)}</div>
                 </div>
             );
@@ -39,7 +39,7 @@ class Document extends React.Component {
                     thumbnail={thumbnail}
                     file={file}
                     openMedia={openMedia}
-                    icon={<ArrowDownwardIcon />}
+                    icon={<DownloadIcon />}
                     completeIcon={completeIconFunc}
                 />
                 <div className='document-content'>

@@ -9,7 +9,7 @@
     margin: 2px -1px;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     min-width: 270px;
     max-width: 370px;
 }
@@ -18,8 +18,8 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     margin: 3px;
     animation: spin 4s linear infinite;
 }
@@ -45,7 +45,7 @@
     flex-shrink: 1;
     margin-left: 9px;
     overflow: hidden;
-    max-height: 48px;
+    /*max-height: 48px;*/
 }
 
 .document-title {
@@ -55,6 +55,7 @@
     text-overflow: ellipsis;
     font-size: 16px;
     line-height: normal;
+    margin-top: 7px;
 }
 
 .document-name {

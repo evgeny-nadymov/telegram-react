@@ -84,6 +84,25 @@ export function getAudioTitle(audio) {
         : file_name;
 }
 
+export function getAudioShortTitle(audio) {
+    if (!audio) return null;
+
+    const { file_name, title, performer } = audio;
+    const trimmedTitle = title ? title.trim() : '';
+    const trimmedPerformer = performer ? performer.trim() : '';
+
+    return trimmedTitle || trimmedPerformer ? `${trimmedPerformer || 'Unknown Artist'}` : file_name;
+}
+
+export function getAudioSubtitle(audio) {
+    if (!audio) return null;
+
+    const { title } = audio;
+    const trimmedTitle = title ? title.trim() : '';
+
+    return trimmedTitle || 'Unknown Track';
+}
+
 export function getStickers(sets) {
     return sets.reduce((stickers, set) => stickers.concat(set.stickers), []);
 }

@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import CloseIcon from '@material-ui/icons/Close';
+import CloseIcon from '../../Assets/Icons/Close';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import './FileProgress.css';
@@ -273,7 +273,7 @@ class FileProgress extends React.Component {
                         classes={{ circle: 'file-progress-circle' }}
                         variant='static'
                         value={progress}
-                        size={42}
+                        size={48}
                         thickness={2}
                     />
                     {cancelButton && <CloseIcon />}
