@@ -9,9 +9,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
-import BookmarkBorderIcon from '@material-ui/icons/BookmarkBorder';
+import BookmarkBorderIcon from '../../Assets/Icons/Saved';
+import DeletedAccountIcon from '../../Assets/Icons/DeletedAccount';
 import ChatStatus from './ChatStatus';
-import { getChatLetters, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { getChatLetters, isMeChat, isPrivateChat, isDeletedPrivateChat } from '../../Utils/Chat';
 import { getSrc, loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -120,6 +121,21 @@ class ChatTile extends Component {
                 width: size,
                 height: size
             };
+        }
+
+        if (isDeletedPrivateChat(chatId)) {
+            return (
+                <div
+                    className={classNames('chat-tile', { 'tile-small': small }, { 'tile-big': big })}
+                    style={style}
+                    onClick={this.handleSelect}>
+                    <div className={classNames('tile-photo', 'tile_color_0', { pointer: onSelect })}>
+                        <div className='tile-saved-messages'>
+                            <DeletedAccountIcon fontSize={big ? 'large' : 'default'} />
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
         if (isMeChat(chatId) && showSavedMessages) {

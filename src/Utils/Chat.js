@@ -770,6 +770,28 @@ function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     return chat.title || t('HiddenName');
 }
 
+export function isDeletedPrivateChat(chatId) {
+    const fallbackValue = false;
+
+    const chat = ChatStore.get(chatId);
+    if (!chat) return fallbackValue;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+        case 'chatTypeSecret':
+        case 'chatTypePrivate': {
+            const user = UserStore.get(chat.type.user_id);
+
+            return user && user.type['@type'] === 'userTypeDeleted';
+        }
+    }
+
+    return fallbackValue;
+}
+
 function isMeChat(chatId) {
     const fallbackValue = false;
 

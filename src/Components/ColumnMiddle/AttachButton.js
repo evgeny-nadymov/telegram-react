@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import AttachFileIcon from '../../Assets/Icons/Attach';
 import IconButton from '@material-ui/core/IconButton';
-import InsertDriveFileIcon from '../../Assets/Icons/Document';
+import InsertDriveFileIcon from '../../Assets/Icons/Document2';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';

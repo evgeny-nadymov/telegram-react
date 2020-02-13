@@ -24,6 +24,10 @@
     width: var(--tile-size-big);
 }
 
+.tile_color_0 {
+    background: var(--color-grey);
+}
+
 .tile_color_1 {
     background: #cc90e2;
 }

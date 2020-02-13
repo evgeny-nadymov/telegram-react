@@ -300,7 +300,7 @@ class Dialog extends Component {
                                 </MenuItem>
                             )}
                             <MenuItem onClick={this.handleViewInfo}>{this.getViewInfoTitle()}</MenuItem>
-                            <MenuItem onClick={this.handleMute}>{isMuted ? t('Unmute') : t('Mute')}</MenuItem>
+                            <MenuItem onClick={this.handleMute}>{isMuted ? t('ChatsUnmute') : t('ChatsMute')}</MenuItem>
                             <MenuItem onClick={this.handleRead}>
                                 {isUnread ? t('MarkAsRead') : t('MarkAsUnread')}
                             </MenuItem>

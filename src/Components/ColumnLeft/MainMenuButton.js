@@ -13,15 +13,15 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ThemePicker from './ThemePicker';
 import LanguagePicker from './LanguagePicker';
-import { update } from '../../registerServiceWorker';
 import { isAuthorizationReady } from '../../Utils/Common';
-import { WASM_FILE_HASH, WASM_FILE_NAME } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
-
-const menuAnchorOrigin = {
-    vertical: 'bottom',
-    horizontal: 'left'
-};
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import PhotoIcon from '../../Assets/Icons/SharedMedia';
+import LanguageIcon from '../../Assets/Icons/Language';
+import SettingsIcon from '../../Assets/Icons/Settings';
+import HelpIcon from '../../Assets/Icons/Help';
+import LogOutIcon from '../../Assets/Icons/LogOut';
+import ListItemText from '@material-ui/core/ListItemText';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -67,8 +67,6 @@ class MainMenuButton extends React.Component {
     handleCheckUpdates = async () => {
         this.handleMenuClose();
 
-        const result = await fetch(`${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`);
-        console.log('wasm result', result);
         //await update();
     };
 
@@ -84,9 +82,12 @@ class MainMenuButton extends React.Component {
         this.languagePicker.open();
     };
 
-    setRef = ref => {
-        console.log(this);
-        this.languagePicker = ref;
+    handleSettings = event => {
+        this.handleMenuClose();
+    };
+
+    handleHelp = event => {
+        this.handleMenuClose();
     };
 
     render() {
@@ -103,11 +104,41 @@ class MainMenuButton extends React.Component {
                     getContentAnchorEl={null}
                     disableAutoFocusItem
                     disableRestoreFocus={true}
-                    anchorOrigin={menuAnchorOrigin}>
-                    <MenuItem onClick={this.handleCheckUpdates}>{t('UpdateTelegram')}</MenuItem>
-                    <MenuItem onClick={this.handleAppearance}>{t('Appearance')}</MenuItem>
-                    <MenuItem onClick={this.handleLanguage}>{t('Language')}</MenuItem>
-                    <MenuItem onClick={this.handleLogOut}>{t('LogOut')}</MenuItem>
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left'
+                    }}>
+                    {/*<MenuItem onClick={this.handleCheckUpdates}>{t('UpdateTelegram')}</MenuItem>*/}
+                    <MenuItem onClick={this.handleAppearance}>
+                        <ListItemIcon>
+                            <PhotoIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Appearance')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleLanguage}>
+                        <ListItemIcon>
+                            <LanguageIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Language')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleSettings}>
+                        <ListItemIcon>
+                            <SettingsIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Settings')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleHelp}>
+                        <ListItemIcon>
+                            <HelpIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('SettingsHelp')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleLogOut}>
+                        <ListItemIcon>
+                            <LogOutIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('LogOut')} />
+                    </MenuItem>
                 </Menu>
             </>
         ) : null;
