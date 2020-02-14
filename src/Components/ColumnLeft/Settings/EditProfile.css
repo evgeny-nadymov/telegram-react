@@ -1,0 +1,22 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.edit-profile-name {
+    padding: 12px 24px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.edit-profile-input {
+    margin: 12px 0;
+}
+
+.edit-profile-hint {
+    margin-top: 4px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: normal;
+}

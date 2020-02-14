@@ -287,7 +287,7 @@ class ChatDetails extends React.Component {
         if (!chat) return;
         if (!chat.photo) return;
 
-        setProfileMediaViewerContent({ chatId: chatId });
+        setProfileMediaViewerContent({ chatId });
 
         if (popup) {
             TdLibController.clientUpdate({

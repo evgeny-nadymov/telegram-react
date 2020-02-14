@@ -9,7 +9,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Chat from '../../Tile/Chat';
-import ChatStore from '../../../Stores/ChatStore';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,6 +20,12 @@ import UnmuteIcon from '../../../Assets/Icons/Unmute';
 import LanguagePicker from '../LanguagePicker';
 import ThemePicker from '../ThemePicker';
 import PhotoIcon from '../../../Assets/Icons/SharedMedia';
+import { loadChatsContent } from '../../../Utils/File';
+import { setProfileMediaViewerContent } from '../../../Actions/Client';
+import ChatStore from '../../../Stores/ChatStore';
+import FileStore from '../../../Stores/FileStore';
+import TdLibController from '../../../Controllers/TdLibController';
+import './Settings.css';
 
 class Settings extends React.Component {
     constructor(props) {
@@ -28,6 +33,18 @@ class Settings extends React.Component {
 
         this.languagePickerRef = React.createRef();
         this.themePickerRef = React.createRef();
+    }
+
+    componentDidMount() {
+        this.loadContent();
+    }
+
+    loadContent() {
+        const { chatId } = this.props;
+
+        const store = FileStore.getStore();
+
+        loadChatsContent(store, [chatId]);
     }
 
     handleAppearance = () => {
@@ -38,6 +55,27 @@ class Settings extends React.Component {
         this.languagePickerRef.current.open();
     };
 
+    handleOpenViewer = () => {
+        const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+        if (!chat.photo) return;
+
+        setProfileMediaViewerContent({ chatId });
+    };
+
+    handleEditProfile = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenEditProfile'
+        });
+    };
+
+    handleNotifications = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenNotifications'
+        });
+    };
+
     render() {
         const { chatId, t } = this.props;
         const chat = ChatStore.get(chatId);
@@ -46,7 +84,7 @@ class Settings extends React.Component {
         const { photo } = chat;
 
         return (
-            <div ref={this.listRef} className='search' onScroll={this.handleScroll}>
+            <div ref={this.listRef} className='search'>
                 <div className='chat-details-info'>
                     <Chat
                         chatId={chatId}
@@ -56,7 +94,7 @@ class Settings extends React.Component {
                         onTileSelect={photo ? this.handleOpenViewer : null}
                     />
                 </div>
-                <ListItem className='list-item' button onClick={this.handleHelp}>
+                <ListItem className='list-item' button onClick={this.handleEditProfile}>
                     <ListItemIcon>
                         <EditIcon />
                     </ListItemIcon>
@@ -68,7 +106,7 @@ class Settings extends React.Component {
                     </ListItemIcon>
                     <ListItemText primary={t('GeneralSettings')} />
                 </ListItem>
-                <ListItem className='list-item' button onClick={this.handleHelp}>
+                <ListItem className='list-item' button onClick={this.handleNotifications}>
                     <ListItemIcon>
                         <UnmuteIcon />
                     </ListItemIcon>

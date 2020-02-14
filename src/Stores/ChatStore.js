@@ -386,6 +386,14 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
+            case 'clientUpdateCloseEditProfile': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateCloseNotifications': {
+                this.emitUpdate(update);
+                break;
+            }
             case 'clientUpdateCloseSettings': {
                 this.emitUpdate(update);
                 break;
@@ -399,6 +407,14 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateOpenChat': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateOpenEditProfile': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateOpenNotifications': {
                 this.emitUpdate(update);
                 break;
             }

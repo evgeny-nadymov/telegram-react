@@ -143,8 +143,20 @@ class DialogsHeader extends React.Component {
         });
     };
 
+    handleCloseEditProfile = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCloseEditProfile'
+        });
+    };
+
+    handleCloseNotifications = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCloseNotifications'
+        });
+    };
+
     render() {
-        const { onClick, openArchive, openSearch, openSettings, t } = this.props;
+        const { onClick, openArchive, openSearch, openSettings, openEditProfile, openNotifications, t } = this.props;
 
         let content = null;
         let showRightButton = true;
@@ -173,6 +185,30 @@ class DialogsHeader extends React.Component {
                     </IconButton>
                     <div className='header-status grow cursor-pointer' onClick={onClick}>
                         <span className='header-status-content'>{t('ArchivedChats')}</span>
+                    </div>
+                </>
+            );
+        } else if (openEditProfile) {
+            showRightButton = false;
+            content = (
+                <>
+                    <IconButton className='header-left-button' onClick={this.handleCloseEditProfile}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer' onClick={onClick}>
+                        <span className='header-status-content'>{t('EditProfile')}</span>
+                    </div>
+                </>
+            );
+        } else if (openNotifications) {
+            showRightButton = false;
+            content = (
+                <>
+                    <IconButton className='header-left-button' onClick={this.handleCloseNotifications}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer' onClick={onClick}>
+                        <span className='header-status-content'>{t('Notifications')}</span>
                     </div>
                 </>
             );

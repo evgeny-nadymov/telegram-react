@@ -1,0 +1,20 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.notifications-section {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.notifications-section-last {
+    border-color: transparent;
+}
+
+.notifications-section-caption {
+    margin: 17px 24px 18px;
+    color: var(--text-secondary);
+}

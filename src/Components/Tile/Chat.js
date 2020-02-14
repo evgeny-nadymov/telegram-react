@@ -37,7 +37,7 @@ class Chat extends React.Component {
     };
 
     render() {
-        const { chatId, onTileSelect, showStatus, showSavedMessages, big } = this.props;
+        const { chatId, onTileSelect, showStatus, showSavedMessages, big, showTitle } = this.props;
 
         const isSavedMessages = isMeChat(chatId);
 
@@ -45,16 +45,18 @@ class Chat extends React.Component {
             <div className={classNames('chat', { 'chat-big': big })} onClick={this.handleClick}>
                 <div className='chat-wrapper'>
                     <ChatTile big={big} chatId={chatId} onSelect={onTileSelect} showSavedMessages={showSavedMessages} />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
-                        </div>
-                        {showStatus && (!isSavedMessages || !showSavedMessages) && (
-                            <div className='tile-second-row'>
-                                <DialogStatus chatId={chatId} />
+                    {showTitle && (
+                        <div className='dialog-inner-wrapper'>
+                            <div className='tile-first-row'>
+                                <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
                             </div>
-                        )}
-                    </div>
+                            {showStatus && (!isSavedMessages || !showSavedMessages) && (
+                                <div className='tile-second-row'>
+                                    <DialogStatus chatId={chatId} />
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -65,13 +67,15 @@ Chat.propTypes = {
     chatId: PropTypes.number.isRequired,
     showSavedMessages: PropTypes.bool,
     showStatus: PropTypes.bool,
+    showTitle: PropTypes.bool,
     onSelect: PropTypes.func,
     onTileSelect: PropTypes.func
 };
 
 Chat.defaultProps = {
     showSavedMessages: true,
-    showStatus: true
+    showStatus: true,
+    showTitle: true
 };
 
 export default Chat;

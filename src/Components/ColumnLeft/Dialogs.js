@@ -10,6 +10,8 @@ import classNames from 'classnames';
 import Search from './Search/Search';
 import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
+import EditProfile from './Settings/EditProfile';
+import Notifications from './Settings/Notifications';
 import Settings from './Settings/Settings';
 import UpdatePanel from './UpdatePanel';
 import { openChat } from '../../Actions/Client';
@@ -61,6 +63,8 @@ class Dialogs extends Component {
             isChatDetailsVisible,
             openSearch,
             openSettings,
+            openEditProfile,
+            openNotifications,
             openArchive,
             searchChatId,
             searchText
@@ -87,6 +91,14 @@ class Dialogs extends Component {
         }
 
         if (nextState.isChatDetailsVisible !== isChatDetailsVisible) {
+            return true;
+        }
+
+        if (nextState.openEditProfile !== openEditProfile) {
+            return true;
+        }
+
+        if (nextState.openNotifications !== openNotifications) {
             return true;
         }
 
@@ -132,6 +144,10 @@ class Dialogs extends Component {
         ChatStore.on('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
         ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
+        ChatStore.on('clientUpdateOpenEditProfile', this.onClientUpdateOpenEditProfile);
+        ChatStore.on('clientUpdateCloseEditProfile', this.onClientUpdateCloseEditProfile);
+        ChatStore.on('clientUpdateOpenNotifications', this.onClientUpdateOpenNotifications);
+        ChatStore.on('clientUpdateCloseNotifications', this.onClientUpdateCloseNotifications);
     }
 
     componentWillUnmount() {
@@ -151,6 +167,10 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
         ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
+        ChatStore.off('clientUpdateOpenEditProfile', this.onClientUpdateOpenEditProfile);
+        ChatStore.off('clientUpdateCloseEditProfile', this.onClientUpdateCloseEditProfile);
+        ChatStore.off('clientUpdateOpenNotifications', this.onClientUpdateOpenNotifications);
+        ChatStore.off('clientUpdateCloseNotifications', this.onClientUpdateCloseNotifications);
     }
 
     async loadCache() {
@@ -235,6 +255,22 @@ class Dialogs extends Component {
                 '@type': 'clientUpdateCloseArchive'
             });
         }
+    };
+
+    onClientUpdateOpenEditProfile = update => {
+        this.setState({ openEditProfile: true });
+    };
+
+    onClientUpdateCloseEditProfile = update => {
+        this.setState({ openEditProfile: false });
+    };
+
+    onClientUpdateOpenNotifications = update => {
+        this.setState({ openNotifications: true });
+    };
+
+    onClientUpdateCloseNotifications = update => {
+        this.setState({ openNotifications: false });
     };
 
     onClientUpdateOpenSettings = update => {
@@ -351,6 +387,8 @@ class Dialogs extends Component {
             archiveItems,
             isChatDetailsVisible,
             openSettings,
+            openEditProfile,
+            openNotifications,
             meChatId,
             openArchive,
             openSearch,
@@ -371,6 +409,8 @@ class Dialogs extends Component {
                     openSettings={openSettings}
                     openArchive={openArchive}
                     openSearch={openSearch}
+                    openEditProfile={openEditProfile}
+                    openNotifications={openNotifications}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
@@ -403,6 +443,8 @@ class Dialogs extends Component {
                         />
                     )}
                     {openSettings && <Settings chatId={meChatId} />}
+                    {openEditProfile && <EditProfile chatId={meChatId} />}
+                    {openNotifications && <Notifications chatId={meChatId} />}
                 </div>
                 <UpdatePanel />
             </div>
