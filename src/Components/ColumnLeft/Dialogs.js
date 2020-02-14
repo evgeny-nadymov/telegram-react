@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import Search from './Search/Search';
 import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
+import Settings from './Settings/Settings';
 import UpdatePanel from './UpdatePanel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
@@ -59,6 +60,7 @@ class Dialogs extends Component {
             archiveItems,
             isChatDetailsVisible,
             openSearch,
+            openSettings,
             openArchive,
             searchChatId,
             searchText
@@ -92,6 +94,10 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.openSettings !== openSettings) {
+            return true;
+        }
+
         if (nextState.openArchive !== openArchive) {
             return true;
         }
@@ -122,6 +128,8 @@ class Dialogs extends Component {
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
 
+        ChatStore.on('clientUpdateOpenSettings', this.onClientUpdateOpenSettings);
+        ChatStore.on('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
         ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
     }
@@ -139,6 +147,8 @@ class Dialogs extends Component {
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
 
+        ChatStore.off('clientUpdateOpenSettings', this.onClientUpdateOpenSettings);
+        ChatStore.off('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
         ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
         ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
     }
@@ -225,6 +235,14 @@ class Dialogs extends Component {
                 '@type': 'clientUpdateCloseArchive'
             });
         }
+    };
+
+    onClientUpdateOpenSettings = update => {
+        this.setState({ openSettings: true, meChatId: update.chatId });
+    };
+
+    onClientUpdateCloseSettings = update => {
+        this.setState({ openSettings: false });
     };
 
     onClientUpdateOpenArchive = update => {
@@ -332,6 +350,8 @@ class Dialogs extends Component {
             mainItems,
             archiveItems,
             isChatDetailsVisible,
+            openSettings,
+            meChatId,
             openArchive,
             openSearch,
             searchChatId,
@@ -348,6 +368,7 @@ class Dialogs extends Component {
                 })}>
                 <DialogsHeader
                     ref={this.dialogsHeaderRef}
+                    openSettings={openSettings}
                     openArchive={openArchive}
                     openSearch={openSearch}
                     onClick={this.handleHeaderClick}
@@ -381,6 +402,7 @@ class Dialogs extends Component {
                             onClose={this.handleClose}
                         />
                     )}
+                    {openSettings && <Settings chatId={meChatId} />}
                 </div>
                 <UpdatePanel />
             </div>

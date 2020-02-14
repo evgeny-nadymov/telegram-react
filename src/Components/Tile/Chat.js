@@ -18,12 +18,11 @@ import './Chat.css';
 class Chat extends React.Component {
     constructor(props) {
         super(props);
-        if (process.env.NODE_ENV !== 'production') {
-            const { chatId } = this.props;
-            this.state = {
-                chat: ChatStore.get(chatId)
-            };
-        }
+
+        const { chatId } = this.props;
+        this.state = {
+            chat: ChatStore.get(chatId)
+        };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -50,7 +49,7 @@ class Chat extends React.Component {
                         <div className='tile-first-row'>
                             <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
                         </div>
-                        {showStatus && !isSavedMessages && (
+                        {showStatus && (!isSavedMessages || !showSavedMessages) && (
                             <div className='tile-second-row'>
                                 <DialogStatus chatId={chatId} />
                             </div>

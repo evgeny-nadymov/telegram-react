@@ -12,7 +12,7 @@ import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import CloseIcon from '../../Assets/Icons/Close';
 import LinkIcon from '@material-ui/icons/Link';
-import MoreIcon from '@material-ui/icons/MoreVert';
+import MoreIcon from '../../Assets/Icons/More';
 import IconButton from '@material-ui/core/IconButton';
 import ShareIcon from '@material-ui/icons/Share';
 import ListItemIcon from '@material-ui/core/ListItemIcon';

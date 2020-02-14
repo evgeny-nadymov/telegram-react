@@ -11,6 +11,7 @@ import { withTranslation } from 'react-i18next';
 import ArchiveIcon from '@material-ui/icons/Archive';
 import TdLibController from '../../Controllers/TdLibController';
 import './Archive.css';
+import { openArchive } from '../../Actions/Client';
 
 class Archive extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -29,9 +30,7 @@ class Archive extends React.Component {
 
     handleSelect = event => {
         if (event.button === 0) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateOpenArchive'
-            });
+            openArchive();
         }
     };
 

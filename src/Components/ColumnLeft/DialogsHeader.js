@@ -29,6 +29,7 @@ import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
+import SettingsMenuButton from './Settings/SettingsMenuButton';
 
 class DialogsHeader extends React.Component {
     constructor(props) {
@@ -93,15 +94,6 @@ class DialogsHeader extends React.Component {
         this.setState({ open: true });
     };
 
-    handleDone = () => {
-        this.handleClose();
-        TdLibController.logOut();
-    };
-
-    handleClose = () => {
-        this.setState({ open: false });
-    };
-
     handleSearch = () => {
         const { onSearch, openSearch } = this.props;
         const { authorizationState } = this.state;
@@ -145,28 +137,17 @@ class DialogsHeader extends React.Component {
         });
     };
 
-    render() {
-        const { onClick, openArchive, openSearch, t } = this.props;
-        const { open } = this.state;
+    handleCloseSettings = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateCloseSettings'
+        });
+    };
 
-        const confirmLogoutDialog = open ? (
-            <Dialog transitionDuration={0} open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
-                <DialogTitle id='form-dialog-title'>{t('Confirm')}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText style={{ whiteSpace: 'pre-wrap' }}>{t('AreYouSureLogout')}</DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleClose} color='primary'>
-                        {t('Cancel')}
-                    </Button>
-                    <Button onClick={this.handleDone} color='primary'>
-                        {t('Ok')}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        ) : null;
+    render() {
+        const { onClick, openArchive, openSearch, openSettings, t } = this.props;
 
         let content = null;
+        let showRightButton = true;
         if (openSearch) {
             content = (
                 <>
@@ -195,11 +176,23 @@ class DialogsHeader extends React.Component {
                     </div>
                 </>
             );
+        } else if (openSettings) {
+            showRightButton = false;
+            content = (
+                <>
+                    <IconButton className='header-left-button' onClick={this.handleCloseSettings}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer' onClick={onClick}>
+                        <span className='header-status-content'>{t('Settings')}</span>
+                    </div>
+                    <SettingsMenuButton />
+                </>
+            );
         } else {
             content = (
                 <>
-                    <MainMenuButton onLogOut={this.handleLogOut} />
-                    {confirmLogoutDialog}
+                    <MainMenuButton />
                     <div className='header-status grow cursor-pointer' onClick={onClick}>
                         <span className='header-status-content'>{t('AppName')}</span>
                     </div>
@@ -210,9 +203,14 @@ class DialogsHeader extends React.Component {
         return (
             <div className='header-master'>
                 {content}
-                <IconButton className='header-right-button' aria-label={t('Search')} onMouseDown={this.handleSearch}>
-                    <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
-                </IconButton>
+                {showRightButton && (
+                    <IconButton
+                        className='header-right-button'
+                        aria-label={t('Search')}
+                        onMouseDown={this.handleSearch}>
+                        <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
+                    </IconButton>
+                )}
             </div>
         );
     }
@@ -221,6 +219,7 @@ class DialogsHeader extends React.Component {
 DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
     openArchive: PropTypes.bool.isRequired,
+    openSettings: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
     onSearchTextChange: PropTypes.func.isRequired

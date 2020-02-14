@@ -7,6 +7,12 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function openArchive() {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateOpenArchive'
+    });
+}
+
 export function editMessage(chatId, messageId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateEditMessage',

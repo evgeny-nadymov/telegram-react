@@ -9,38 +9,38 @@ import React from 'react';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import ThemePicker from './ThemePicker';
-import LanguagePicker from './LanguagePicker';
-import { isAuthorizationReady } from '../../Utils/Common';
-import ApplicationStore from '../../Stores/ApplicationStore';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import PhotoIcon from '../../Assets/Icons/SharedMedia';
-import LanguageIcon from '../../Assets/Icons/Language';
-import SettingsIcon from '../../Assets/Icons/Settings';
+import ArchiveIcon from '../../Assets/Icons/Archive';
+import GroupIcon from '../../Assets/Icons/Group';
 import HelpIcon from '../../Assets/Icons/Help';
-import LogOutIcon from '../../Assets/Icons/LogOut';
-import ListItemText from '@material-ui/core/ListItemText';
+import SavedIcon from '../../Assets/Icons/Saved';
+import SettingsIcon from '../../Assets/Icons/Settings';
+import UserIcon from '../../Assets/Icons/User';
+import { isAuthorizationReady } from '../../Utils/Common';
+import { openArchive, openChat } from '../../Actions/Client';
+import AppStore from '../../Stores/ApplicationStore';
+import UserStore from '../../Stores/UserStore';
+import TdLibController from '../../Controllers/TdLibController';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
         super(props);
 
-        this.themePickerRef = React.createRef();
-
         this.state = {
-            authorizationState: ApplicationStore.getAuthorizationState(),
+            authorizationState: AppStore.getAuthorizationState(),
             anchorEl: null
         };
     }
 
     componentDidMount() {
-        ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
+        AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
     onUpdateAuthorizationState = update => {
@@ -58,32 +58,53 @@ class MainMenuButton extends React.Component {
         this.setState({ anchorEl: null });
     };
 
-    handleLogOut = () => {
-        this.handleMenuClose();
-
-        this.props.onLogOut();
-    };
-
     handleCheckUpdates = async () => {
         this.handleMenuClose();
 
         //await update();
     };
 
-    handleAppearance = event => {
+    handleNewGroup = event => {
         this.handleMenuClose();
-
-        this.themePickerRef.current.open();
     };
 
-    handleLanguage = event => {
+    handleContacts = event => {
         this.handleMenuClose();
-
-        this.languagePicker.open();
     };
 
-    handleSettings = event => {
+    handleArchived = event => {
         this.handleMenuClose();
+
+        openArchive();
+    };
+
+    handleSaved = async event => {
+        this.handleMenuClose();
+
+        const chat = await TdLibController.send({
+            '@type': 'createPrivateChat',
+            user_id: UserStore.getMyId(),
+            force: true
+        });
+        if (!chat) return;
+
+        openChat(chat.id);
+    };
+
+    handleSettings = async event => {
+        this.handleMenuClose();
+
+        const chat = await TdLibController.send({
+            '@type': 'createPrivateChat',
+            user_id: UserStore.getMyId(),
+            force: true
+        });
+        if (!chat) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenSettings',
+            chatId: chat.id
+        });
     };
 
     handleHelp = event => {
@@ -108,18 +129,29 @@ class MainMenuButton extends React.Component {
                         vertical: 'bottom',
                         horizontal: 'left'
                     }}>
-                    {/*<MenuItem onClick={this.handleCheckUpdates}>{t('UpdateTelegram')}</MenuItem>*/}
-                    <MenuItem onClick={this.handleAppearance}>
+                    <MenuItem onClick={this.handleNewGroup}>
                         <ListItemIcon>
-                            <PhotoIcon />
+                            <GroupIcon />
                         </ListItemIcon>
-                        <ListItemText primary={t('Appearance')} />
+                        <ListItemText primary={t('NewGroup')} />
                     </MenuItem>
-                    <MenuItem onClick={this.handleLanguage}>
+                    <MenuItem onClick={this.handleContacts}>
                         <ListItemIcon>
-                            <LanguageIcon />
+                            <UserIcon />
                         </ListItemIcon>
-                        <ListItemText primary={t('Language')} />
+                        <ListItemText primary={t('Contacts')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleArchived}>
+                        <ListItemIcon>
+                            <ArchiveIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Archived')} />
+                    </MenuItem>
+                    <MenuItem onClick={this.handleSaved}>
+                        <ListItemIcon>
+                            <SavedIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Saved')} />
                     </MenuItem>
                     <MenuItem onClick={this.handleSettings}>
                         <ListItemIcon>
@@ -132,12 +164,6 @@ class MainMenuButton extends React.Component {
                             <HelpIcon />
                         </ListItemIcon>
                         <ListItemText primary={t('SettingsHelp')} />
-                    </MenuItem>
-                    <MenuItem onClick={this.handleLogOut}>
-                        <ListItemIcon>
-                            <LogOutIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={t('LogOut')} />
                     </MenuItem>
                 </Menu>
             </>
@@ -154,8 +180,6 @@ class MainMenuButton extends React.Component {
                     <MenuIcon />
                 </IconButton>
                 {mainMenuControl}
-                <ThemePicker ref={this.themePickerRef} />
-                <LanguagePicker ref={ref => (this.languagePicker = ref)} />
             </>
         );
     }

@@ -10,7 +10,7 @@ import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
+import MoreVertIcon from '../../Assets/Icons/More';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
