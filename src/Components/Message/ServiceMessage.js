@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { compose } from 'recompose';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import UnreadSeparator from './UnreadSeparator';

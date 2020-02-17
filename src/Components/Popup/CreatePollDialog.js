@@ -8,9 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
 import { withSnackbar } from 'notistack';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
+import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';

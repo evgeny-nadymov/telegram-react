@@ -8,7 +8,7 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import StickerSet from './StickerSet';

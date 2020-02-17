@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import withTheme from '@material-ui/core/styles/withTheme';
 import CheckMarkIcon from '@material-ui/icons/Check';

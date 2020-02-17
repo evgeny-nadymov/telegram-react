@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withIV } from '../InstantView/IVContext';
 import { withTranslation } from 'react-i18next';
 import CloseIcon from '../../Assets/Icons/Close';

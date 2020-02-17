@@ -7,7 +7,7 @@
 
 import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
-import { compose } from 'recompose';
+import { compose } from './Utils/HOC';
 import withLanguage from './Language';
 import withTelegramTheme from './Theme';
 import withTheme from '@material-ui/core/styles/withTheme';

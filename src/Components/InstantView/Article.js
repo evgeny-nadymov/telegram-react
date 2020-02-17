@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withSaveRef } from '../../Utils/HOC';
 import { withIV } from './IVContext';
 import { getPageBlock } from '../../Utils/InstantView';

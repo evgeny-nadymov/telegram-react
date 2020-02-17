@@ -7,7 +7,7 @@
 
 import React from 'react';
 import copy from 'copy-to-clipboard';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import CloseIcon from '../../Assets/Icons/Close';

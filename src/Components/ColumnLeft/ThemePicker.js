@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import withTheme from '@material-ui/core/styles/withTheme';
 import { withTranslation } from 'react-i18next';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { compose } from 'recompose';
+import { compose } from '../Utils/HOC';
 import withLanguage from '../Language';
 import withSnackbarNotifications from '../Notifications';
 import ForwardDialog from './Popup/ForwardDialog';

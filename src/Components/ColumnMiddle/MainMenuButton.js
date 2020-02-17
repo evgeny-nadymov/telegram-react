@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { compose } from 'recompose';
+import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';

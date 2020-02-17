@@ -7,18 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'recompose';
 import { withTranslation } from 'react-i18next';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import {
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    Button,
-    IconButton
-} from '@material-ui/core';
+import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
+import { IconButton } from '@material-ui/core';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SearchIcon from '@material-ui/icons/Search';
 import CloseIcon from '../../Assets/Icons/Close';
