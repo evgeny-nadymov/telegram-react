@@ -6,7 +6,6 @@
  */
 
 import { EventEmitter } from 'events';
-import Cookies from 'universal-cookie';
 import i18n from 'i18next';
 import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
@@ -14,8 +13,7 @@ import TdLibController from '../Controllers/TdLibController';
 
 const defaultLanguage = 'en';
 const defaultNamespace = 'translation';
-const cookies = new Cookies();
-const language = cookies.get('i18next') || defaultLanguage;
+const language = localStorage.getItem('i18next') || defaultLanguage;
 
 // const detection = {
 //     // order and from where user language should be detected
@@ -269,8 +267,7 @@ class LocalizationStore extends EventEmitter {
                     language_pack_id: language,
                     keys: []
                 }).then(async result => {
-                    const cookies = new Cookies();
-                    cookies.set('i18next', language);
+                    localStorage.setItem('i18next', language);
 
                     const resources = this.processStrings(language, result);
 

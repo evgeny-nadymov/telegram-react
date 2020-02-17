@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import Cookies from 'universal-cookie';
 import { compose } from './Utils/HOC';
 import withLanguage from './Language';
 import withTelegramTheme from './Theme';
@@ -94,13 +93,9 @@ class TelegramApp extends Component {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
-                const cookieEnabled = navigator.cookieEnabled;
-                if (cookieEnabled) {
-                    const cookies = new Cookies();
-                    const register = cookies.get('register');
-                    if (!register) {
-                        registerServiceWorker();
-                    }
+                const register = localStorage.getItem('register');
+                if (!register) {
+                    registerServiceWorker();
                 }
             }
         }

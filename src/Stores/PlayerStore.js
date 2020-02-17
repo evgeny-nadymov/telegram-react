@@ -6,7 +6,6 @@
  */
 
 import { EventEmitter } from 'events';
-import Cookies from 'universal-cookie';
 import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
 import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
@@ -25,14 +24,7 @@ class PlayerStore extends EventEmitter {
     constructor() {
         super();
 
-        const cookies = new Cookies();
-        let playbackRate = cookies.get('playbackRate');
-        let volume = cookies.get('volume');
-        playbackRate =
-            playbackRate && Number(playbackRate) >= 1 && Number(playbackRate) <= 2
-                ? Number(playbackRate)
-                : PLAYER_PLAYBACKRATE_NORMAL;
-        volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
+        const { playbackRate, volume } = this.loadPlayerSettings();
 
         this.playbackRate = playbackRate;
         this.volume = volume;
@@ -90,6 +82,26 @@ class PlayerStore extends EventEmitter {
         });
     };
 
+    loadPlayerSettings() {
+        const player = localStorage.getItem('player') || {};
+
+        let { playbackRate, volume } = player;
+
+        playbackRate =
+            playbackRate && Number(playbackRate) >= 1 && Number(playbackRate) <= 2
+                ? Number(playbackRate)
+                : PLAYER_PLAYBACKRATE_NORMAL;
+        volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
+
+        return { playbackRate, volume };
+    }
+
+    savePlayerSettings() {
+        const { volume, playbackRate } = this;
+
+        localStorage.setItem('player', JSON.stringify({ volume, playbackRate }));
+    }
+
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateMediaClose': {
@@ -121,8 +133,7 @@ class PlayerStore extends EventEmitter {
 
                 this.volume = volume;
 
-                const cookies = new Cookies();
-                cookies.set('volume', volume);
+                this.savePlayerSettings();
 
                 this.emit(update['@type'], update);
                 break;
@@ -148,8 +159,7 @@ class PlayerStore extends EventEmitter {
 
                 this.playbackRate = playbackRate;
 
-                const cookies = new Cookies();
-                cookies.set('playbackRate', playbackRate);
+                this.savePlayerSettings();
 
                 this.emit(update['@type'], update);
                 break;

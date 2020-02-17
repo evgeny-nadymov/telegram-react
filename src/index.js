@@ -11,7 +11,6 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 // import TelegramApp from './Components/Auth/TestPage';
 import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
-import Cookies from 'universal-cookie';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import './index.css';
 
@@ -23,14 +22,8 @@ ReactDOM.render(
 );
 
 if (OPTIMIZATIONS_FIRST_START) {
-    const cookieEnabled = navigator.cookieEnabled;
-    if (cookieEnabled) {
-        const cookies = new Cookies();
-        const register = cookies.get('register');
-        if (register) {
-            registerServiceWorker();
-        }
-    } else {
+    const register = localStorage.getItem('register');
+    if (register) {
         registerServiceWorker();
     }
 } else {

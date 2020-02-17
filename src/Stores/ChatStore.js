@@ -6,7 +6,6 @@
  */
 
 import { EventEmitter } from 'events';
-import Cookies from 'universal-cookie';
 import InputTypingManager from '../Utils/InputTypingManager';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -32,13 +31,17 @@ class ChatStore extends EventEmitter {
     };
 
     loadClientData = () => {
-        const cookies = new Cookies();
         const clientData = new Map();
         try {
-            const data = cookies.get('clientData');
-            Object.keys(data).forEach(key => {
-                clientData.set(Number(key), data[key]);
-            });
+            let data = localStorage.get('clientData');
+            if (data) {
+                data = JSON.parse(data);
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        clientData.set(Number(key), data[key]);
+                    });
+                }
+            }
         } catch {}
 
         this.clientData = clientData;
@@ -53,8 +56,7 @@ class ChatStore extends EventEmitter {
             return obj;
         }, {});
 
-        const cookies = new Cookies();
-        cookies.set('clientData', obj);
+        localStorage.setItem('clientData', JSON.stringify(obj));
     };
 
     updateChatChatList(chatId, chatList) {

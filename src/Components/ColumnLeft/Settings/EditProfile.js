@@ -34,7 +34,7 @@ class EditProfile extends React.Component {
                         variant='outlined'
                         fullWidth
                         label='Name'
-                        defaultValue='Evgeny'
+                        defaultValue=''
                     />
                     <TextField
                         className='edit-profile-input'
@@ -42,7 +42,7 @@ class EditProfile extends React.Component {
                         variant='outlined'
                         fullWidth
                         label='Last Name'
-                        defaultValue='Nadymov'
+                        defaultValue=''
                     />
                     <TextField
                         className='edit-profile-input'

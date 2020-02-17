@@ -6,7 +6,6 @@
  */
 
 import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
-import Cookies from 'universal-cookie';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ApplicationStore from './Stores/ApplicationStore';
 import NotificationStore from './Stores/NotificationStore';
@@ -36,8 +35,7 @@ export default async function register() {
     console.log('[SW] Register');
 
     if (OPTIMIZATIONS_FIRST_START) {
-        const cookies = new Cookies();
-        cookies.set('register', true);
+        localStorage.setItem('register', 'true');
     }
 
     if ('serviceWorker' in navigator) {
