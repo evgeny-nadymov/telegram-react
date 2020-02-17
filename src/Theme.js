@@ -11,7 +11,6 @@ import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import { StylesProvider } from '@material-ui/core/styles';
 import { getDisplayName } from './Utils/HOC';
-import Cookies from 'universal-cookie';
 import ApplicationStore from './Stores/ApplicationStore';
 
 function updateLightTheme(theme) {
@@ -258,8 +257,14 @@ function withTheme(WrappedComponent) {
         constructor(props) {
             super(props);
 
-            const cookies = new Cookies();
-            const { type, primary } = cookies.get('themeOptions') || { type: 'light', primary: { main: '#50A2E9' } };
+            let { type, primary } = { type: 'light', primary: { main: '#50A2E9' } };
+            try {
+                const themeOptions = JSON.parse(localStorage.getItem('themeOptions'));
+                if (themeOptions) {
+                    type = themeOptions.type;
+                    primary = themeOptions.primary;
+                }
+            } catch {}
             const theme = createTheme(type, primary);
 
             this.state = { theme };
@@ -277,8 +282,7 @@ function withTheme(WrappedComponent) {
             const { type, primary } = update;
 
             const theme = createTheme(type, primary);
-            const cookies = new Cookies();
-            cookies.set('themeOptions', { type: type, primary: primary });
+            localStorage.setItem('themeOptions', JSON.stringify({ type, primary }));
 
             this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
         };
