@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from './EventEmitter';
 import ActionScheduler from '../Utils/ActionScheduler';
 import { closeChat } from '../Actions/Client';
 import { subscribeNotifications } from '../registerServiceWorker';
@@ -19,7 +19,6 @@ class ApplicationStore extends EventEmitter {
 
         this.addTdLibListener();
         this.addStatistics();
-        this.setMaxListeners(Infinity);
     }
 
     reset = () => {
@@ -331,8 +330,8 @@ class ApplicationStore extends EventEmitter {
     };
 
     addTdLibListener = () => {
-        TdLibController.addListener('update', this.onUpdate);
-        TdLibController.addListener('clientUpdate', this.onClientUpdate);
+        TdLibController.on('update', this.onUpdate);
+        TdLibController.on('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {
@@ -341,7 +340,7 @@ class ApplicationStore extends EventEmitter {
     };
 
     addStatistics = () => {
-        TdLibController.addListener('update', this.onUpdateStatistics);
+        TdLibController.on('update', this.onUpdateStatistics);
     };
 
     setChatId = (chatId, messageId = null) => {

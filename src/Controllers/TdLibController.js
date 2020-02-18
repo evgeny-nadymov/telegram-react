@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from '../Stores/EventEmitter';
 import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import {
@@ -47,8 +47,6 @@ class TdLibController extends EventEmitter {
         };
 
         this.disableLog = true;
-
-        this.setMaxListeners(Infinity);
     }
 
     init = location => {

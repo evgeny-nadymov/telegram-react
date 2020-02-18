@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from './EventEmitter';
 import { KEY_AUTH_STATE } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -17,7 +17,6 @@ class AuthorizationStore extends EventEmitter {
         this.load();
 
         this.addTdLibListener();
-        this.setMaxListeners(Infinity);
     }
 
     load() {
@@ -83,8 +82,8 @@ class AuthorizationStore extends EventEmitter {
     };
 
     addTdLibListener = () => {
-        TdLibController.addListener('update', this.onUpdate);
-        TdLibController.addListener('clientUpdate', this.onClientUpdate);
+        TdLibController.on('update', this.onUpdate);
+        TdLibController.on('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {

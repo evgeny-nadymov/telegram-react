@@ -60,7 +60,7 @@ class TelegramApp extends Component {
 
     componentDidMount() {
         setTimeout(() => loadData(), 1500);
-        TdLibController.addListener('update', this.onUpdate);
+        TdLibController.on('update', this.onUpdate);
 
         AppStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
         AppStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);

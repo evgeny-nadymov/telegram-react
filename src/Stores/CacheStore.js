@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { EventEmitter } from 'events';
+import EventEmitter from './EventEmitter';
 import { debounce } from '../Utils/Common';
 import CacheManager from '../Workers/CacheManager';
 import BasicGroupStore from './BasicGroupStore';
@@ -24,7 +24,6 @@ class CacheStore extends EventEmitter {
         this.reset();
 
         this.addTdLibListener();
-        this.setMaxListeners(Infinity);
 
         this.saveChatsInternal = debounce(this.saveChatsInternal, 2000);
     }
@@ -74,8 +73,8 @@ class CacheStore extends EventEmitter {
     };
 
     addTdLibListener = () => {
-        TdLibController.addListener('update', this.onUpdate);
-        TdLibController.addListener('clientUpdate', this.onClientUpdate);
+        TdLibController.on('update', this.onUpdate);
+        TdLibController.on('clientUpdate', this.onClientUpdate);
     };
 
     removeTdLibListener = () => {
