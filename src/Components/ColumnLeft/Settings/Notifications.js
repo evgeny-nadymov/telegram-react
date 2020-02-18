@@ -6,76 +6,130 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Checkbox from '@material-ui/core/Checkbox';
 import ListItemText from '@material-ui/core/ListItemText';
+import NotificationStore from '../../../Stores/NotificationStore';
+import OptionStore from '../../../Stores/OptionStore';
+import TdLibController from '../../../Controllers/TdLibController';
 import './Notifications.css';
 
 class Notifications extends React.Component {
-    state = {
-        privateEnabled: true,
-        privatePreview: true,
-        groupEnabled: true,
-        groupPreview: true,
-        channelEnabled: true,
-        channelPreview: true,
-        contactJoined: true
-    };
+    constructor(props) {
+        super(props);
 
-    getEnabled(value) {
-        return value ? 'Enabled' : 'Disabled';
+        const contactJoinedOption = OptionStore.get('disable_contact_registered_notifications');
+
+        this.state = {
+            privateChatsSettings: NotificationStore.settings.get('notificationSettingsScopePrivateChats'),
+            groupChatsSettings: NotificationStore.settings.get('notificationSettingsScopeGroupChats'),
+            channelChatsSettings: NotificationStore.settings.get('notificationSettingsScopeChannelChats'),
+            contactJoined: !contactJoinedOption || !contactJoinedOption.value
+        };
     }
 
-    handlePrivate = () => {
-        this.setState({ privateEnabled: !this.state.privateEnabled });
+    componentWillUnmount() {
+        const { privateChatsSettings, groupChatsSettings, channelChatsSettings, contactJoined } = this.state;
+        this.setScopeNotificationSettings('notificationSettingsScopePrivateChats', privateChatsSettings);
+        this.setScopeNotificationSettings('notificationSettingsScopeGroupChats', groupChatsSettings);
+        this.setScopeNotificationSettings('notificationSettingsScopeChannelChats', channelChatsSettings);
+        this.setContactJoinedOption(contactJoined);
+    }
+
+    setContactJoinedOption() {
+        const { contactJoined } = this.state;
+
+        const contactJoinedOption = OptionStore.get('disable_contact_registered_notifications');
+        const oldContactJoined = !contactJoinedOption || !contactJoinedOption.value;
+        if (oldContactJoined === contactJoined) return;
+
+        TdLibController.send({
+            '@type': 'setOption',
+            name: 'disable_contact_registered_notifications',
+            value: {
+                '@type': 'optionValueBoolean',
+                value: !contactJoined
+            }
+        });
+    }
+
+    setScopeNotificationSettings(scope, settings) {
+        if (!scope) return;
+        if (!settings) return;
+        const oldSettings = NotificationStore.settings.get(scope);
+        if (!oldSettings) return;
+
+        const { mute_for, show_preview } = settings;
+        const { mute_for: oldMuteFor, show_preview: oldShowPreview } = oldSettings;
+        if (mute_for === oldMuteFor && show_preview === oldShowPreview) return;
+
+        TdLibController.send({
+            '@type': 'setScopeNotificationSettings',
+            scope: { '@type': scope },
+            notification_settings: settings
+        });
+    }
+
+    handleMuteFor = property => {
+        const settings = this.state[property];
+        if (!settings) return;
+
+        const { mute_for } = settings;
+        const newSettings = { ...settings, mute_for: mute_for === 0 ? 365 * 24 * 60 * 60 : 0 };
+
+        this.setState({ [property]: newSettings });
     };
 
-    handlePrivatePreview = () => {
-        this.setState({ privatePreview: !this.state.privatePreview });
-    };
+    handleShowPreview = property => {
+        const settings = this.state[property];
+        if (!settings) return;
 
-    handleGroup = () => {
-        this.setState({ groupEnabled: !this.state.groupEnabled });
-    };
+        const { show_preview } = settings;
+        const newSettings = { ...settings, show_preview: !show_preview };
 
-    handleGroupPreview = () => {
-        this.setState({ groupPreview: !this.state.groupPreview });
-    };
-
-    handleChannel = () => {
-        this.setState({ channelEnabled: !this.state.channelEnabled });
-    };
-
-    handleChannelPreview = () => {
-        this.setState({ channelPreview: !this.state.channelPreview });
+        this.setState({ [property]: newSettings });
     };
 
     handleContactJoined = () => {
         this.setState({ contactJoined: !this.state.contactJoined });
     };
 
+    isEnabled(settings) {
+        if (!settings) return false;
+
+        const { mute_for } = settings;
+
+        return mute_for === 0;
+    }
+
+    showPreview(settings) {
+        if (!settings) return false;
+
+        const { show_preview } = settings;
+
+        return show_preview;
+    }
+
+    isEnabledString(value) {
+        const { t } = this.props;
+        return value ? t('NotificationsOn') : t('NotificationsOff');
+    }
+
     render() {
-        const {
-            privateEnabled,
-            privatePreview,
-            groupEnabled,
-            groupPreview,
-            channelEnabled,
-            channelPreview,
-            contactJoined
-        } = this.state;
+        const { t } = this.props;
+        const { privateChatsSettings, groupChatsSettings, channelChatsSettings, contactJoined } = this.state;
 
         return (
             <div className='search'>
                 <div className='notifications-section'>
-                    <div className='notifications-section-caption'>Private Chats</div>
-                    <ListItem role={undefined} button onClick={this.handlePrivate}>
+                    <div className='notifications-section-caption'>{t('NotificationsPrivateChats')}</div>
+                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('privateChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={privateEnabled}
+                                checked={this.isEnabled(privateChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
@@ -83,15 +137,19 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-1'
-                            primary={'Notifications for private chats'}
-                            secondary={this.getEnabled(privateEnabled)}
+                            primary={t('NotificationsForPrivateChats')}
+                            secondary={
+                                this.isEnabled(privateChatsSettings)
+                                    ? t('NotificationsEnabled')
+                                    : t('NotificationsDisabled')
+                            }
                         />
                     </ListItem>
-                    <ListItem role={undefined} button onClick={this.handlePrivatePreview}>
+                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('privateChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={privatePreview}
+                                checked={this.showPreview(privateChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
@@ -99,18 +157,20 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-2'
-                            primary={'Message preview'}
-                            secondary={this.getEnabled(privatePreview)}
+                            primary={t('MessagePreview')}
+                            secondary={
+                                this.showPreview(privateChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                            }
                         />
                     </ListItem>
                 </div>
                 <div className='notifications-section'>
-                    <div className='notifications-section-caption'>Groups</div>
-                    <ListItem role={undefined} button onClick={this.handleGroup}>
+                    <div className='notifications-section-caption'>{t('NotificationsGroups')}</div>
+                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('groupChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={groupEnabled}
+                                checked={this.isEnabled(groupChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
@@ -118,15 +178,19 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-1'
-                            primary={'Notifications for groups'}
-                            secondary={this.getEnabled(groupEnabled)}
+                            primary={t('NotificationsForGroups')}
+                            secondary={
+                                this.isEnabled(groupChatsSettings)
+                                    ? t('NotificationsEnabled')
+                                    : t('NotificationsDisabled')
+                            }
                         />
                     </ListItem>
-                    <ListItem role={undefined} button onClick={this.handleGroupPreview}>
+                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('groupChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={groupPreview}
+                                checked={this.showPreview(groupChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
@@ -134,18 +198,20 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-2'
-                            primary={'Message preview'}
-                            secondary={this.getEnabled(groupPreview)}
+                            primary={t('MessagePreview')}
+                            secondary={
+                                this.showPreview(groupChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                            }
                         />
                     </ListItem>
                 </div>
                 <div className='notifications-section'>
-                    <div className='notifications-section-caption'>Channels</div>
-                    <ListItem role={undefined} button onClick={this.handleChannel}>
+                    <div className='notifications-section-caption'>{t('NotificationsChannels')}</div>
+                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('channelChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={channelEnabled}
+                                checked={this.isEnabled(channelChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
@@ -153,15 +219,19 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-1'
-                            primary={'Notifications for private channels'}
-                            secondary={this.getEnabled(channelEnabled)}
+                            primary={t('NotificationsForChannels')}
+                            secondary={
+                                this.isEnabled(channelChatsSettings)
+                                    ? t('NotificationsEnabled')
+                                    : t('NotificationsDisabled')
+                            }
                         />
                     </ListItem>
-                    <ListItem role={undefined} button onClick={this.handleChannelPreview}>
+                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('channelChatsSettings')}>
                         <ListItemIcon>
                             <Checkbox
                                 color='primary'
-                                checked={channelPreview}
+                                checked={this.showPreview(channelChatsSettings)}
                                 tabIndex={-1}
                                 disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
@@ -169,13 +239,15 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-2'
-                            primary={'Message preview'}
-                            secondary={this.getEnabled(channelPreview)}
+                            primary={t('MessagePreview')}
+                            secondary={
+                                this.showPreview(channelChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                            }
                         />
                     </ListItem>
                 </div>
                 <div className='notifications-section notifications-section-last'>
-                    <div className='notifications-section-caption'>Other</div>
+                    <div className='notifications-section-caption'>{t('NotificationsOther')}</div>
                     <ListItem role={undefined} button onClick={this.handleContactJoined}>
                         <ListItemIcon>
                             <Checkbox
@@ -188,8 +260,8 @@ class Notifications extends React.Component {
                         </ListItemIcon>
                         <ListItemText
                             id='label-1'
-                            primary={'Contacts joined Telegram'}
-                            secondary={this.getEnabled(contactJoined)}
+                            primary={t('ContactJoined')}
+                            secondary={contactJoined ? t('ContactJoinedEnabled') : t('ContactJoinedDisabled')}
                         />
                     </ListItem>
                 </div>
@@ -198,6 +270,4 @@ class Notifications extends React.Component {
     }
 }
 
-Notifications.propTypes = {};
-
-export default Notifications;
+export default withTranslation()(Notifications);

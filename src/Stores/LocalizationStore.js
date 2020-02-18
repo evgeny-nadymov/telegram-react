@@ -38,6 +38,12 @@ i18n.use(initReactI18next).init({
     resources: {
         en: {
             settings: {
+                ContactJoinedEnabled: 'Enabled',
+                ContactJoinedDisabled: 'Disabled',
+                NotificationsEnabled: 'Enabled',
+                NotificationsDisabled: 'Disabled',
+                PreviewEnabled: 'Enabled',
+                PreviewDisabled: 'Disabled',
                 BioAbout: 'Any details such as age, occupation or city.\nExample: 23 y.o. designer from San Francisco.',
                 Archived: 'Archived',
                 Saved: 'Saved',
@@ -106,6 +112,12 @@ i18n.use(initReactI18next).init({
         },
         ru: {
             settings: {
+                ContactJoinedEnabled: 'Включено',
+                ContactJoinedDisabled: 'Выключено',
+                NotificationsEnabled: 'Включены',
+                NotificationsDisabled: 'Выключены',
+                PreviewEnabled: 'Включено',
+                PreviewDisabled: 'Выключено',
                 BioAbout:
                     'Любые подробности, например: возраст, род занятий или город.\nПример: 23 года, дизайнер из Санкт-Петербурга.',
                 Archived: 'Архив',
