@@ -24,6 +24,7 @@ import { loadChatsContent } from '../../../Utils/File';
 import { setProfileMediaViewerContent } from '../../../Actions/Client';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
+import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Settings.css';
 
@@ -39,12 +40,19 @@ class Settings extends React.Component {
         this.loadContent();
     }
 
-    loadContent() {
+    async loadContent() {
         const { chatId } = this.props;
 
         const store = FileStore.getStore();
 
         loadChatsContent(store, [chatId]);
+
+        const result = await TdLibController.send({
+            '@type': 'getUserFullInfo',
+            user_id: UserStore.getMyId()
+        });
+
+        UserStore.setFullInfo(UserStore.getMyId(), result);
     }
 
     handleAppearance = () => {

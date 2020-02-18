@@ -38,6 +38,7 @@ i18n.use(initReactI18next).init({
     resources: {
         en: {
             settings: {
+                BioAbout: 'Any details such as age, occupation or city.\nExample: 23 y.o. designer from San Francisco.',
                 Archived: 'Archived',
                 Saved: 'Saved',
                 EditProfile: 'Edit Profile',
@@ -105,6 +106,8 @@ i18n.use(initReactI18next).init({
         },
         ru: {
             settings: {
+                BioAbout:
+                    'Любые подробности, например: возраст, род занятий или город.\nПример: 23 года, дизайнер из Санкт-Петербурга.',
                 Archived: 'Архив',
                 Saved: 'Избранное',
                 EditProfile: 'Редактровать профиль',

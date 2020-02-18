@@ -122,7 +122,6 @@ class EmojiPickerButton extends React.Component {
         const { sticker } = this.state;
         if (this.paperEnter || this.buttonEnter || sticker) return;
 
-        return;
         this.updatePicker(false);
     };
 
