@@ -7,7 +7,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import copy from 'copy-to-clipboard';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
@@ -18,6 +17,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import CloseIcon from '../../Assets/Icons/Close';
 import ForwardTargetChat from '../Tile/ForwardTargetChat';
+import { copy } from '../../Utils/Text';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';

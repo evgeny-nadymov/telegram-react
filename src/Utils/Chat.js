@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import dateFormat from 'dateformat';
+import dateFormat from '../Utils/Date';
 import { getUserFullName, getUserShortName, getUserStatus, isUserOnline } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
@@ -20,8 +20,6 @@ import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import InputBox from '../Components/ColumnMiddle/InputBox';
-import FooterCommand from '../Components/ColumnMiddle/FooterCommand';
 
 export function canUnpinMessage(chatId) {
     const chat = ChatStore.get(chatId);

@@ -28,9 +28,8 @@ class AuthForm extends React.Component {
         const { data } = this.state;
         if (data) return;
 
-        const input2 = 'data/countries.dat';
         try {
-            const response = await fetch(input2);
+            const response = await fetch('data/countries.dat');
             const text = await response.text();
 
             const lines = text.split('\n');
@@ -52,7 +51,6 @@ class AuthForm extends React.Component {
             });
 
             AuthStore.data = data2.filter(x => x.emoji);
-            // console.log('[auth] data2', AuthStore.data);
 
             this.setState({ data: AuthStore.data });
         } catch (error) {

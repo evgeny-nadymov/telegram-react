@@ -14,6 +14,8 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
 import { Picker as EmojiPicker } from 'emoji-mart';
+// import { NimblePicker as EmojiPicker } from 'emoji-mart';
+// import data from 'emoji-mart/data/messenger.json'
 import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
 import { isAppleDevice } from '../../Utils/Common';
@@ -120,6 +122,7 @@ class EmojiPickerButton extends React.Component {
         const { sticker } = this.state;
         if (this.paperEnter || this.buttonEnter || sticker) return;
 
+        return;
         this.updatePicker(false);
     };
 
@@ -206,6 +209,7 @@ class EmojiPickerButton extends React.Component {
             this.picker = (
                 <EmojiPicker
                     ref={this.emojiPickerRef}
+                    // data={data}
                     set='apple'
                     showPreview={false}
                     showSkinTones={false}

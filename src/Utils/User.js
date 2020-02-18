@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import dateFormat from 'dateformat';
+import dateFormat from '../Utils/Date';
 import { getLetters, getSize } from './Common';
 import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import UserStore from '../Stores/UserStore';

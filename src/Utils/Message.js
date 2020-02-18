@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import dateFormat from 'dateformat';
 import emojiRegex from 'emoji-regex';
 import Audio from '../Components/Message/Media/Audio';
 import Animation from '../Components/Message/Media/Animation';
@@ -23,6 +22,7 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
+import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import {
     getChatDisableMentionNotifications,

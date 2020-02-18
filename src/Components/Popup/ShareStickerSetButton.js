@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import copy from 'copy-to-clipboard';
+import { copy } from '../../Utils/Text';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';

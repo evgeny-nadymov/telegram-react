@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { formatNumber } from 'libphonenumber-js';
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
 export function isMobile() {
@@ -324,12 +323,6 @@ function readImageSize(file, callback) {
     reader.readAsDataURL(file);
 }
 
-function formatPhoneNumber(number) {
-    const unformattedNumber = number && number.startsWith('+') ? number : '+' + number;
-    const formattedNumber = formatNumber(unformattedNumber, 'International');
-    return formattedNumber || unformattedNumber;
-}
-
 /**
  * use this to make a Base64 encoded string URL friendly,
  * i.e. '+' and '/' are replaced with '-' and '_' also any trailing '='
@@ -437,7 +430,6 @@ export {
     debounce,
     getLetters,
     readImageSize,
-    formatPhoneNumber,
     arrayBufferToBase64,
     isAuthorizationReady,
     between,

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import dateFormat from 'dateformat';
 import SafeLink from '../../Additional/SafeLink';
+import dateFormat from '../../../Utils/Date';
 import TdLibController from '../../../Controllers/TdLibController';
 
 class RelatedArticle extends React.Component {

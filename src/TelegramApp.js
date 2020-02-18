@@ -23,6 +23,7 @@ import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
 import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
+import { loadData } from './Utils/Phone';
 import { isMobile } from './Utils/Common';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
@@ -58,6 +59,7 @@ class TelegramApp extends Component {
     }
 
     componentDidMount() {
+        setTimeout(() => loadData(), 1500);
         TdLibController.addListener('update', this.onUpdate);
 
         AppStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);

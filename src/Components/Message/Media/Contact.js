@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import UserTile from '../../Tile/UserTile';
-import { formatPhoneNumber } from '../../../Utils/Common';
+import { formatPhoneNumber } from '../../../Utils/Phone';
 import { getUserFullName } from '../../../Utils/User';
 import UserStore from '../../../Stores/UserStore';
 import './Contact.css';

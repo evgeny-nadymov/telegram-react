@@ -7,8 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import dateFormat from 'dateformat';
 import RichText from '../RichText/RichText';
+import dateFormat from '../../../Utils/Date';
 import { isEmptyText } from '../../../Utils/InstantView';
 
 function AuthorDate(props) {

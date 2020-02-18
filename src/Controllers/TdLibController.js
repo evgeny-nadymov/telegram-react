@@ -47,7 +47,6 @@ class TdLibController extends EventEmitter {
         };
 
         this.disableLog = true;
-        this.localStorage = true;
 
         this.setMaxListeners(Infinity);
     }
@@ -157,9 +156,6 @@ class TdLibController extends EventEmitter {
         }
         if (params.has('clientlog')) {
             this.disableLog = !stringToBoolean(params.get('clientlog'));
-        }
-        if (params.has('localstorage')) {
-            this.localStorage = stringToBoolean(params.get('localstorage'));
         }
     };
 
