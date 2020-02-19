@@ -7,33 +7,17 @@
 
 import EventEmitter from './EventEmitter';
 import i18n from 'i18next';
-import LocalStorageBackend from 'i18next-localstorage-backend';
+import LocalizationCache from '../Localization/Cache';
 import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
 
-const defaultLanguage = 'en';
-const defaultNamespace = 'translation';
-const language = localStorage.getItem('i18next') || defaultLanguage;
-
-// const detection = {
-//     // order and from where user language should be detected
-//     order: ['querystring', 'cookie', 'localStorage', 'navigator', 'htmlTag', 'path', 'subdomain'],
-//
-//     // keys or params to lookup language from
-//     lookupQuerystring: 'lng',
-//     lookupCookie: 'i18next',
-//     lookupLocalStorage: 'i18nextLng',
-//     lookupFromPathIndex: 0,
-//     lookupFromSubdomainIndex: 0,
-//
-//     // cache user language on
-//     caches: ['localStorage', 'cookie']
-// };
+const fallbackLng = 'en';
+const defaultNS = 'translation';
+const lng = localStorage.getItem('i18next') || fallbackLng;
 
 i18n.use(initReactI18next).init({
-    //detection: detection,
-    ns: [defaultNamespace, 'local'],
-    defaultNS: defaultNamespace,
+    ns: [defaultNS, 'local'],
+    defaultNS,
     fallbackNS: ['local', 'emoji', 'settings', 'translation'],
     resources: {
         en: {
@@ -186,8 +170,8 @@ i18n.use(initReactI18next).init({
             }
         }
     },
-    lng: language,
-    fallbackLng: defaultLanguage,
+    lng,
+    fallbackLng,
     interpolation: {
         escapeValue: false
     },
@@ -196,26 +180,23 @@ i18n.use(initReactI18next).init({
     }
 });
 
-const cache = new LocalStorageBackend(null, {
+const cache = new LocalizationCache(null, {
     enabled: true,
     prefix: 'i18next_res_',
     expirationTime: Infinity
 });
 
-const translationDefaultLng = cache.read(defaultLanguage, defaultNamespace, (err, data) => {
-    return data;
-});
-const translationCurrentLng = cache.read(language, defaultNamespace, (err, data) => {
-    return data;
-});
-i18n.addResourceBundle(defaultLanguage, defaultNamespace, translationDefaultLng);
-i18n.addResourceBundle(language, defaultNamespace, translationCurrentLng);
+const defaultResources = cache.read(fallbackLng, defaultNS, (err, data) => data);
+const currentResources = cache.read(lng, defaultNS, (err, data) => data);
+
+i18n.addResourceBundle(fallbackLng, defaultNS, defaultResources);
+i18n.addResourceBundle(lng, defaultNS, currentResources);
 
 class LocalizationStore extends EventEmitter {
     constructor() {
         super();
 
-        this.defaultLanguage = defaultLanguage;
+        this.fallbackLng = fallbackLng;
         this.i18n = i18n;
         this.cache = cache;
 
@@ -232,7 +213,7 @@ class LocalizationStore extends EventEmitter {
         TdLibController.off('clientUpdate', this.onClientUpdate);
     };
 
-    onUpdate = update => {
+    onUpdate = async update => {
         switch (update['@type']) {
             case 'updateAuthorizationState': {
                 switch (update.authorization_state['@type']) {
@@ -242,21 +223,21 @@ class LocalizationStore extends EventEmitter {
                             name: 'localization_target',
                             value: { '@type': 'optionValueString', value: 'android' }
                         });
+
                         TdLibController.send({
                             '@type': 'setOption',
                             name: 'language_pack_id',
-                            value: { '@type': 'optionValueString', value: language }
+                            value: { '@type': 'optionValueString', value: lng }
                         });
-                        TdLibController.send({
+
+                        this.info = await TdLibController.send({
                             '@type': 'getLocalizationTargetInfo',
                             only_local: false
-                        }).then(result => {
-                            this.info = result;
+                        });
 
-                            TdLibController.clientUpdate({
-                                '@type': 'clientUpdateLanguageChange',
-                                language: language
-                            });
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateLanguageChange',
+                            language: lng
                         });
                         break;
                 }
@@ -276,29 +257,19 @@ class LocalizationStore extends EventEmitter {
             case 'clientUpdateLanguageChange': {
                 const { language } = update;
 
+                await this.loadLanguage(language);
+
+                localStorage.setItem('i18next', language);
+
+                await i18n.changeLanguage(language);
+
                 TdLibController.send({
-                    '@type': 'getLanguagePackStrings',
-                    language_pack_id: language,
-                    keys: []
-                }).then(async result => {
-                    localStorage.setItem('i18next', language);
-
-                    const resources = this.processStrings(language, result);
-
-                    this.cache.save(language, defaultNamespace, resources);
-
-                    i18n.addResourceBundle(language, defaultNamespace, resources);
-
-                    await i18n.changeLanguage(language);
-
-                    TdLibController.send({
-                        '@type': 'setOption',
-                        name: 'language_pack_id',
-                        value: { '@type': 'optionValueString', value: language }
-                    });
-
-                    this.emit('clientUpdateLanguageChange', update);
+                    '@type': 'setOption',
+                    name: 'language_pack_id',
+                    value: { '@type': 'optionValueString', value: language }
                 });
+
+                this.emit('clientUpdateLanguageChange', update);
                 break;
             }
         }
@@ -338,10 +309,8 @@ class LocalizationStore extends EventEmitter {
         });
 
         const resources = this.processStrings(language, result);
-
-        this.cache.save(language, defaultNamespace, resources);
-
-        i18n.addResourceBundle(language, defaultNamespace, resources);
+        this.cache.save(language, defaultNS, resources);
+        i18n.addResourceBundle(language, defaultNS, resources);
     };
 }
 
