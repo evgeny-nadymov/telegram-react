@@ -7,9 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
+import Button from '@material-ui/core/Button';
 import PollOptionResult from './PollOptionResult';
 import { loadUsersContent } from '../../Utils/File';
-import { POLL_RESULTS_FIRST_SLICE_LENGTH, POLL_RESULTS_LEAVE_LENGTH } from '../../Constants';
+import { POLL_RESULTS_FIRST_SLICE_LENGTH, POLL_RESULTS_LEAVE_LENGTH, POLL_RESULTS_SLICE_LENGTH } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PollOptionResults.css';
@@ -32,19 +34,23 @@ class PollOptionResults extends React.Component {
         };
     }
 
-    async updateVoters() {
+    async updateVoters(offset, count, loadMore) {
         const { chatId, messageId, optionId, option } = this.props;
-        const { offset, voters, count } = this.state;
+        const { voters } = this.state;
+        console.log('[poll] getPollVoters start', loadMore, offset, count - offset);
         if (count <= 0) return;
 
+        const limit = count - offset;
         const result = await TdLibController.send({
             '@type': 'getPollVoters',
             chat_id: chatId,
             message_id: messageId,
             option_id: optionId,
-            offset: offset,
-            limit: count
+            offset,
+            limit
         });
+
+        console.log('[poll] getPollVoters', loadMore, offset, limit, result);
 
         if (this.props.option !== option) {
             return;
@@ -53,23 +59,64 @@ class PollOptionResults extends React.Component {
         const store = FileStore.getStore();
         loadUsersContent(store, result.user_ids);
 
-        this.setState({
-            voters: [...voters, ...result.user_ids]
-        });
+        this.setState(
+            {
+                voters: [...voters, ...result.user_ids]
+            },
+            async () => {
+                if (result.user_ids.length < limit && loadMore) {
+                    const offset2 = offset + result.user_ids.length;
+
+                    this.updateVoters(offset2, count, false);
+                }
+            }
+        );
     }
 
     componentDidMount() {
-        this.updateVoters();
+        const { offset, count } = this.state;
+
+        this.updateVoters(offset, count, true);
     }
 
-    async componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.count !== this.props.count) {
-            this.updateVoters();
-        }
-    }
+    handleShowMore = () => {
+        const { option } = this.props;
+        const { count } = this.state;
+
+        const newOffset = count;
+        const newCount = Math.min(option.voter_count, count + POLL_RESULTS_SLICE_LENGTH);
+
+        this.setState(
+            {
+                offset: newOffset,
+                count: newCount
+            },
+            () => {
+                this.updateVoters(newOffset, newCount, true);
+            }
+        );
+    };
+
+    handleCollapse = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const { option } = this.props;
+
+        const count =
+            option && option.voter_count <= POLL_RESULTS_FIRST_SLICE_LENGTH
+                ? option.voter_count
+                : POLL_RESULTS_FIRST_SLICE_LENGTH - POLL_RESULTS_LEAVE_LENGTH;
+
+        this.setState({
+            voters: this.state.voters.slice(0, count),
+            offset: 0,
+            count
+        });
+    };
 
     render() {
-        const { option, isQuiz } = this.props;
+        const { option, isQuiz, t } = this.props;
         const { voters, count } = this.state;
 
         const { text, voter_count, vote_percentage } = option;
@@ -84,20 +131,50 @@ class PollOptionResults extends React.Component {
         }
 
         const voterCount = isQuiz
-            ? count === 1
-                ? `${count} answers`
-                : `${count} answer`
-            : count === 1
-            ? `${count} votes`
-            : `${count} vote`;
+            ? voter_count !== 1
+                ? `${voter_count} answers`
+                : `${voter_count} answer`
+            : voter_count !== 1
+            ? `${voter_count} votes`
+            : `${voter_count} vote`;
+
+        let showMoreButton = null;
+        const showMoreCount = voter_count - count;
+        if (showMoreCount > 0) {
+            const showMore = isQuiz
+                ? showMoreCount !== 1
+                    ? `${showMoreCount} answers`
+                    : `${showMoreCount} answer`
+                : showMoreCount !== 1
+                ? `${showMoreCount} votes`
+                : `${showMoreCount} vote`;
+
+            showMoreButton = (
+                <Button
+                    classes={{ root: 'poll-option-results-button' }}
+                    color='primary'
+                    fullWidth
+                    onClick={this.handleShowMore}>
+                    {t('ShowVotesOT').replace('%1$d', showMore)}
+                </Button>
+            );
+        }
+        const showCollapse =
+            count > POLL_RESULTS_FIRST_SLICE_LENGTH - POLL_RESULTS_LEAVE_LENGTH &&
+            voter_count > POLL_RESULTS_FIRST_SLICE_LENGTH;
 
         return (
             <>
                 <div className='poll-option-results-caption'>
                     <div className='poll-option-results-answer'>{`${text} — ${vote_percentage}%`}</div>
-                    <div className='poll-option-results-count'>{voterCount}</div>
+                    {showCollapse ? (
+                        <a onClick={this.handleCollapse}>{t('PollCollapse')}</a>
+                    ) : (
+                        <div className='poll-option-results-count'>{voterCount}</div>
+                    )}
                 </div>
                 {results}
+                {showMoreButton}
             </>
         );
     }
@@ -111,4 +188,4 @@ PollOptionResults.propTypes = {
     isQuiz: PropTypes.bool.isRequired
 };
 
-export default PollOptionResults;
+export default withTranslation()(PollOptionResults);

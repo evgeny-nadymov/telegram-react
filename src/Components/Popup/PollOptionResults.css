@@ -25,3 +25,8 @@
     flex-grow: 0;
     flex-shrink: 0;
 }
+
+.poll-option-results-button {
+    border-radius: 0;
+    padding: 12px 8px;
+}

@@ -51,7 +51,7 @@ class PollResultsDialog extends React.Component {
         const { chatId, messageId, poll, t } = this.props;
         if (!poll) return;
 
-        const { options, type } = poll;
+        const { options, type, question } = poll;
         const isQuiz = type && type['@type'] === 'pollTypeQuiz';
 
         return (
@@ -69,6 +69,7 @@ class PollResultsDialog extends React.Component {
                 aria-labelledby='poll-results-title'>
                 <DialogTitle id='poll-results-title'>{isQuiz ? t('QuizAnswers') : t('PollResults')}</DialogTitle>
                 <DialogContent classes={{ root: 'poll-results-content' }}>
+                    <div className='poll-results-question'>{question}</div>
                     {options.map((x, i) => (
                         <PollOptionResults
                             key={i}

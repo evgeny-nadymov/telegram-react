@@ -8,3 +8,9 @@
 .poll-results-content {
     padding: 0;
 }
+
+.poll-results-question {
+    margin: 0 24px;
+    font-size: 20px;
+    line-height: normal;
+}

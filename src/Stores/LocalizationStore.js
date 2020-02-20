@@ -289,7 +289,24 @@ class LocalizationStore extends EventEmitter {
                     break;
                 }
                 case 'languagePackStringValuePluralized': {
-                    //result[strings[i].key] = value.value;
+                    if (value.zero_value) {
+                        result[strings[i].key + 'Z'] = value.zero_value;
+                    }
+                    if (value.one_value) {
+                        result[strings[i].key + 'O'] = value.one_value;
+                    }
+                    if (value.two_value) {
+                        result[strings[i].key + 'T'] = value.two_value;
+                    }
+                    if (value.few_value) {
+                        result[strings[i].key + 'F'] = value.few_value;
+                    }
+                    if (value.many_value) {
+                        result[strings[i].key + 'M'] = value.many_value;
+                    }
+                    if (value.other_value) {
+                        result[strings[i].key + 'OT'] = value.other_value;
+                    }
                     break;
                 }
                 case 'languagePackStringValueDeleted': {
