@@ -43,6 +43,10 @@ class PollStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateClosePollResults': {
+                this.emit('clientUpdateClosePollResults', update);
+                break;
+            }
             case 'clientUpdateNewPoll': {
                 this.set({
                     type: {

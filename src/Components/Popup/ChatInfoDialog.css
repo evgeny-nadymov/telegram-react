@@ -20,4 +20,5 @@
 
 .chat-info-dialog-paper {
     width: 336px;
+    align-self: flex-start;
 }

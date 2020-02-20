@@ -25,7 +25,7 @@ class Storage {
 function getDefaults() {
     return {
         prefix: 'i18next_res_',
-        expirationTime: 7 * 24 * 60 * 60 * 1000,
+        expirationTime: Infinity,
         versions: {},
         store: window.localStorage
     };

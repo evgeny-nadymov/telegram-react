@@ -1,0 +1,27 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+.poll-option-results-caption {
+    position: sticky;
+    top: 0;
+    padding: 17px 24px 18px;
+    color: var(--text-secondary);
+    background: var(--background-paper);
+    display: flex;
+    flex-direction: row;
+    z-index: 2;
+}
+
+.poll-option-results-answer {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.poll-option-results-count {
+    margin-left: 9px;
+    flex-grow: 0;
+    flex-shrink: 0;
+}

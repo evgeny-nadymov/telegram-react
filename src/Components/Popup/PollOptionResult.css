@@ -4,11 +4,3 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
-.user-placeholder {
-    opacity: 0.2;
-    will-change: opacity;
-    animation: dialog-placeholder-animation 2s ease-in-out infinite;
-    width: 100%;
-    height: 100%;
-}

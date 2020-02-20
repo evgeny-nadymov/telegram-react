@@ -19,6 +19,7 @@ import { setPollAnswer } from '../../../Actions/Poll';
 import MessageStore from './../../../Stores/MessageStore';
 import TdLibController from './../../../Controllers/TdLibController';
 import './Poll.css';
+import PollResultsDialog from '../../Popup/PollResultsDialog';
 
 class Poll extends React.Component {
     constructor(props) {
@@ -152,21 +153,26 @@ class Poll extends React.Component {
         return correct_option_id === index;
     }
 
-    handleOpenResults = () => {
+    handleOpenResults = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const { poll } = this.props;
+
         this.setState({
-            viewResults: true
+            viewResultsPoll: poll
         });
     };
 
     handleCloseResults = () => {
         this.setState({
-            viewResults: false
+            viewResultsPoll: null
         });
     };
 
     render() {
         const { chatId, messageId, poll, t, meta } = this.props;
-        const { viewResults } = this.state;
+        const { viewResultsPoll } = this.state;
         const { question, options, total_voter_count, type, is_closed, is_anonymous, recent_voter_user_ids } = poll;
 
         let subtitle = t('FinalResults');
@@ -218,7 +224,6 @@ class Poll extends React.Component {
                             closed={is_closed}
                             maxVoterCount={maxVoterCount}
                             onVote={() => this.handleVote(index)}
-                            onUnvote={this.handleUnvote}
                         />
                     ))}
                 </div>
@@ -242,17 +247,13 @@ class Poll extends React.Component {
                         {meta}
                     </div>
                 )}
-                {viewResults && (
-                    <Dialog
-                        transitionDuration={0}
-                        open={viewResults}
+                {Boolean(viewResultsPoll) && (
+                    <PollResultsDialog
+                        chatId={chatId}
+                        messageId={messageId}
+                        poll={viewResultsPoll}
                         onClose={this.handleCloseResults}
-                        aria-labelledby='poll-results-title'>
-                        <DialogTitle id='poll-results-title'>
-                            {isQuiz ? t('QuizResults') : t('PollResults')}
-                        </DialogTitle>
-                        <DialogContent>{}</DialogContent>
-                    </Dialog>
+                    />
                 )}
             </div>
         );

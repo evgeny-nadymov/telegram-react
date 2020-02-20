@@ -7,11 +7,33 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import './UserPlaceholder.css';
 
 class UserPlaceholder extends React.Component {
-    render() {}
+    render() {
+        const { index } = this.props;
+
+        const titleWidth = `${20 + Math.sin(index) * 10}%`;
+        const contentWidth = `${30 + Math.cos(index) * 10}%`;
+
+        return (
+            <div className='user-placeholder'>
+                <div className='user-wrapper'>
+                    <div className='dialog-placeholder-tile' />
+                    <div className='dialog-placeholder-inner-wrapper'>
+                        <div className='tile-first-row'>
+                            <div className='dialog-placeholder-title' style={{ width: titleWidth }} />
+                            <div className='dialog-placeholder-title' style={{ width: contentWidth, marginLeft: 8 }} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
 
-UserPlaceholder.propTypes = {};
+UserPlaceholder.propTypes = {
+    index: PropTypes.number.isRequired
+};
 
 export default UserPlaceholder;

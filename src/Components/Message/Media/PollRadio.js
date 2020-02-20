@@ -44,8 +44,8 @@ class PollRadio extends React.Component {
 }
 
 PollRadio.propTypes = {
-    chosen: PropTypes.bool.isRequired,
-    beingChosen: PropTypes.bool.isRequired,
+    chosen: PropTypes.bool,
+    beingChosen: PropTypes.bool,
     hidden: PropTypes.bool
 };
 

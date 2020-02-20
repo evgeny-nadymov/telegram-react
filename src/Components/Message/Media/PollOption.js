@@ -36,14 +36,6 @@ class PollOption extends React.Component {
         onVote();
     };
 
-    handleCancel = event => {
-        const { onUnvote } = this.props;
-
-        event.stopPropagation();
-
-        onUnvote();
-    };
-
     render() {
         const { option, onChange, canBeSelected, closed, maxVoterCount, t, type, isCorrect } = this.props;
         if (!option) return null;
@@ -63,12 +55,7 @@ class PollOption extends React.Component {
                         canBeSelected ? 'poll-option-unselected' : 'poll-option-selected'
                     )}>
                     <div className='poll-option-text-wrapper' title={this.getTitleString(voter_count, t)}>
-                        <PollPercentage
-                            value={vote_percentage}
-                            chosen={is_chosen}
-                            closed={closed}
-                            onClick={this.handleCancel}
-                        />
+                        <PollPercentage value={vote_percentage} chosen={is_chosen} closed={closed} />
                         <PollRadio
                             hidden={!canBeSelected}
                             chosen={is_chosen || isMultiChoosen}
@@ -114,7 +101,6 @@ PollOption.propTypes = {
     type: PropTypes.oneOf(['regular', 'correct', 'incorrect']).isRequired,
     option: PropTypes.object.isRequired,
     onVote: PropTypes.func.isRequired,
-    onUnvote: PropTypes.func.isRequired,
     canBeSelected: PropTypes.bool,
     closed: PropTypes.bool,
     maxVoterCount: PropTypes.number

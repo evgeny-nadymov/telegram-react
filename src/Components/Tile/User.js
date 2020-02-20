@@ -26,7 +26,7 @@ class User extends React.Component {
     };
 
     render() {
-        const { userId, t } = this.props;
+        const { userId, t, showStatus } = this.props;
 
         const fullName = getUserFullName(userId, null, t);
 
@@ -38,9 +38,11 @@ class User extends React.Component {
                         <div className='tile-first-row'>
                             <div className='dialog-title'>{fullName}</div>
                         </div>
-                        <div className='tile-second-row'>
-                            <UserStatus userId={userId} />
-                        </div>
+                        {showStatus && (
+                            <div className='tile-second-row'>
+                                <UserStatus userId={userId} />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -50,7 +52,12 @@ class User extends React.Component {
 
 User.propTypes = {
     userId: PropTypes.number.isRequired,
-    onSelect: PropTypes.func
+    onSelect: PropTypes.func,
+    showStatus: PropTypes.bool
+};
+
+User.defaultProps = {
+    showStatus: true
 };
 
 export default withTranslation()(User);
