@@ -19,3 +19,23 @@
     align-items: center;
     user-select: none;
 }
+
+.user-inner-wrapper {
+    overflow: hidden;
+    flex-grow: 1;
+    margin-left: 12px;
+    z-index: 1;
+}
+
+.user-placeholder-tile {
+    width: var(--user-tile-size);
+    height: var(--user-tile-size);
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--dialog-subtle-color);
+}
+
+.user-list-item {
+    padding: 12px;
+    border-radius: 10px;
+}

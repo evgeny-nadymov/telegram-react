@@ -79,7 +79,11 @@ class UserStatus extends React.Component {
     render() {
         const { status, isAccent } = this.state;
 
-        return <div className={classNames('dialog-content', { 'user-status-accent': isAccent })}>{status}</div>;
+        return (
+            <div className={classNames('user-content', 'dialog-content', { 'user-status-accent': isAccent })}>
+                {status}
+            </div>
+        );
     }
 }
 

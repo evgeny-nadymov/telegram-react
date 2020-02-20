@@ -34,7 +34,7 @@ class User extends React.Component {
             <div className='user' onClick={this.handleClick}>
                 <div className='user-wrapper'>
                     <UserTile userId={userId} />
-                    <div className='dialog-inner-wrapper'>
+                    <div className='user-inner-wrapper'>
                         <div className='tile-first-row'>
                             <div className='dialog-title'>{fullName}</div>
                         </div>

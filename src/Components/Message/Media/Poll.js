@@ -194,9 +194,10 @@ class Poll extends React.Component {
 
         const isQuiz = type && type['@type'] === 'pollTypeQuiz';
         const canBeSelected = !is_closed && options.every(x => !x.is_chosen);
+        const isSelected = !is_closed && options.some(x => x.is_chosen);
         const maxVoterCount = Math.max(...options.map(x => x.voter_count));
         const showViewResults = this.viewResults(poll);
-        const showButton = type.allow_multiple_answers || showViewResults;
+        const showButton = (type.allow_multiple_answers && !isSelected) || showViewResults;
         const buttonEnabled = showViewResults || options.some(x => x.isMultiChoosen);
         let recentVoters = [];
         if (recent_voter_user_ids) {

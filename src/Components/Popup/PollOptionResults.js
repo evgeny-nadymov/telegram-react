@@ -37,7 +37,7 @@ class PollOptionResults extends React.Component {
     async updateVoters(offset, count, loadMore) {
         const { chatId, messageId, optionId, option } = this.props;
         const { voters } = this.state;
-        console.log('[poll] getPollVoters start', loadMore, offset, count - offset);
+        // console.log('[poll] getPollVoters start', loadMore, offset, count - offset);
         if (count <= 0) return;
 
         const limit = count - offset;
@@ -50,7 +50,7 @@ class PollOptionResults extends React.Component {
             limit
         });
 
-        console.log('[poll] getPollVoters', loadMore, offset, limit, result);
+        // console.log('[poll] getPollVoters', loadMore, offset, limit, result);
 
         if (this.props.option !== option) {
             return;

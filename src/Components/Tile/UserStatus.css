@@ -5,6 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.user-content {
+    font-size: 14px;
+    line-height: normal;
+}
+
 .user-status-accent {
     color: var(--color-accent-dark);
 }

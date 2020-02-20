@@ -31,10 +31,14 @@ class PollOptionResult extends React.Component {
     render() {
         const { index, userId } = this.props;
 
-        const content = userId ? <User userId={userId} showStatus={false} /> : <UserPlaceholder index={index} />;
+        const content = userId ? (
+            <User userId={userId} showStatus={false} />
+        ) : (
+            <UserPlaceholder index={index} showStatus={false} />
+        );
 
         return (
-            <ListItem button className='list-item' onClick={this.onClick}>
+            <ListItem button className='user-list-item' onClick={this.onClick}>
                 {content}
             </ListItem>
         );
