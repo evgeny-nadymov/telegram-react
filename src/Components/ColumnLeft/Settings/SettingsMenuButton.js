@@ -19,7 +19,8 @@ import TdLibController from '../../../Controllers/TdLibController';
 
 class SettingsMenuButton extends React.Component {
     state = {
-        anchorEl: null
+        anchorEl: null,
+        open: false
     };
 
     handleMenuOpen = event => {

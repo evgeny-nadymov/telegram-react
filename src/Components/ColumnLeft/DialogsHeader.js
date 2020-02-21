@@ -147,7 +147,17 @@ class DialogsHeader extends React.Component {
     };
 
     render() {
-        const { onClick, openArchive, openSearch, openSettings, openEditProfile, openNotifications, t } = this.props;
+        const {
+            onClick,
+            openArchive,
+            openSearch,
+            openSettings,
+            openLanguage,
+            openEditProfile,
+            openNotifications,
+            openContacts,
+            t
+        } = this.props;
 
         let content = null;
         let showRightButton = true;
@@ -191,18 +201,9 @@ class DialogsHeader extends React.Component {
                     </div>
                 </>
             );
-        } else if (openNotifications) {
+        } else if (openLanguage || openNotifications) {
             showRightButton = false;
-            content = (
-                <>
-                    <IconButton className='header-left-button' onClick={this.handleCloseNotifications}>
-                        <ArrowBackIcon />
-                    </IconButton>
-                    <div className='header-status grow cursor-pointer' onClick={onClick}>
-                        <span className='header-status-content'>{t('Notifications')}</span>
-                    </div>
-                </>
-            );
+            content = null;
         } else if (openSettings) {
             showRightButton = false;
             content = (
@@ -216,6 +217,9 @@ class DialogsHeader extends React.Component {
                     <SettingsMenuButton />
                 </>
             );
+        } else if (openContacts) {
+            showRightButton = false;
+            content = null;
         } else {
             content = (
                 <>
@@ -247,6 +251,8 @@ DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
     openArchive: PropTypes.bool.isRequired,
     openSettings: PropTypes.bool.isRequired,
+    openLanguage: PropTypes.bool.isRequired,
+    openContacts: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
     onSearchTextChange: PropTypes.func.isRequired

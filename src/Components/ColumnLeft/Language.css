@@ -5,25 +5,28 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.settings {
+.sidebar-page {
     position: absolute;
     top: 0;
     right: 0;
     bottom: 0;
     left: 0;
+    background: var(--panel-background);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sidebar-page-content {
+    flex-grow: 1;
+    flex-shrink: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
-    background: var(--panel-background);
     padding: 0 8px 8px;
 }
 
-.settings-list-item {
-    padding: 12px;
-    border-radius: 10px;
-}
-
-.settings-list-item2 {
+.language-list-item {
     padding: 8px 12px;
     border-radius: 10px;
 }

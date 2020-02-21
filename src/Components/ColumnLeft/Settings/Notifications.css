@@ -7,14 +7,30 @@
 
 .notifications-section {
     padding: 8px 0;
-    border-bottom: 1px solid var(--border);
 }
 
-.notifications-section-last {
-    border-color: transparent;
-}
-
-.notifications-section-caption {
-    margin: 17px 24px 18px;
+.notifications-section-header {
+    margin: 17px 16px 18px;
     color: var(--text-secondary);
+}
+
+.settings-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 72px;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+}
+
+.settings-item-control {
+    align-self: flex-start;
+    margin: 4px 20px 4px 4px;
+}
+
+.notifications-section-border {
+    margin: 0 -8px;
+    width: calc(100% + 16px);
+    border-bottom: 1px solid var(--border);
 }

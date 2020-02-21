@@ -23,6 +23,8 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
+import Contacts from './Contacts';
+import Language from './Language';
 
 class Dialogs extends Component {
     constructor(props) {
@@ -46,6 +48,9 @@ class Dialogs extends Component {
             isChatDetailsVisible,
             openSearch: false,
             openArchive: false,
+            openSettings: false,
+            openLanguage: false,
+            openContacts: false,
 
             searchChatId: 0,
             searchText: null,
@@ -65,6 +70,8 @@ class Dialogs extends Component {
             openSettings,
             openEditProfile,
             openNotifications,
+            openLanguage,
+            openContacts,
             openArchive,
             searchChatId,
             searchText
@@ -110,6 +117,14 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.openContacts !== openContacts) {
+            return true;
+        }
+
+        if (nextState.openLanguage !== openLanguage) {
+            return true;
+        }
+
         if (nextState.openArchive !== openArchive) {
             return true;
         }
@@ -146,8 +161,10 @@ class Dialogs extends Component {
         ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
         ChatStore.on('clientUpdateOpenEditProfile', this.onClientUpdateOpenEditProfile);
         ChatStore.on('clientUpdateCloseEditProfile', this.onClientUpdateCloseEditProfile);
-        ChatStore.on('clientUpdateOpenNotifications', this.onClientUpdateOpenNotifications);
-        ChatStore.on('clientUpdateCloseNotifications', this.onClientUpdateCloseNotifications);
+        ChatStore.on('clientUpdateNotificationsPage', this.onClientUpdateNotificationsPage);
+        ChatStore.on('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
+        ChatStore.on('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.on('clientUpdateLanguagePage', this.onClientUpdateLanguagePage);
     }
 
     componentWillUnmount() {
@@ -169,8 +186,10 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
         ChatStore.off('clientUpdateOpenEditProfile', this.onClientUpdateOpenEditProfile);
         ChatStore.off('clientUpdateCloseEditProfile', this.onClientUpdateCloseEditProfile);
-        ChatStore.off('clientUpdateOpenNotifications', this.onClientUpdateOpenNotifications);
-        ChatStore.off('clientUpdateCloseNotifications', this.onClientUpdateCloseNotifications);
+        ChatStore.off('clientUpdateNotificationsPage', this.onClientUpdateNotificationsPage);
+        ChatStore.off('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
+        ChatStore.off('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.off('clientUpdateLanguagePage', this.onClientUpdateLanguagePage);
     }
 
     async loadCache() {
@@ -265,12 +284,28 @@ class Dialogs extends Component {
         this.setState({ openEditProfile: false });
     };
 
-    onClientUpdateOpenNotifications = update => {
-        this.setState({ openNotifications: true });
+    onClientUpdateNotificationsPage = update => {
+        const { opened } = update;
+
+        this.setState({ openNotifications: opened });
     };
 
-    onClientUpdateCloseNotifications = update => {
-        this.setState({ openNotifications: false });
+    onClientUpdateOpenContacts = async update => {
+        const contacts = await TdLibController.send({
+            '@type': 'getContacts'
+        });
+
+        this.setState({ openContacts: true, contacts });
+    };
+
+    onClientUpdateLanguagePage = update => {
+        const { opened } = update;
+
+        this.setState({ openLanguage: opened });
+    };
+
+    onClientUpdateCloseContacts = update => {
+        this.setState({ openContacts: false });
     };
 
     onClientUpdateOpenSettings = update => {
@@ -389,6 +424,9 @@ class Dialogs extends Component {
             openSettings,
             openEditProfile,
             openNotifications,
+            openLanguage,
+            openContacts,
+            contacts,
             meChatId,
             openArchive,
             openSearch,
@@ -411,6 +449,8 @@ class Dialogs extends Component {
                     openSearch={openSearch}
                     openEditProfile={openEditProfile}
                     openNotifications={openNotifications}
+                    openContacts={openContacts}
+                    openLanguage={openLanguage}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
@@ -445,6 +485,8 @@ class Dialogs extends Component {
                     {openSettings && <Settings chatId={meChatId} />}
                     {openEditProfile && <EditProfile chatId={meChatId} />}
                     {openNotifications && <Notifications chatId={meChatId} />}
+                    {openLanguage && <Language />}
+                    {openContacts && <Contacts items={contacts} />}
                 </div>
                 <UpdatePanel />
             </div>

@@ -29,6 +29,7 @@ class User extends React.Component {
         const { userId, t, showStatus } = this.props;
 
         const fullName = getUserFullName(userId, null, t);
+        console.log('[r] User.render');
 
         return (
             <div className='user' onClick={this.handleClick}>

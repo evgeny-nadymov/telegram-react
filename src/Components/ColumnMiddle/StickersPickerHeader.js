@@ -103,7 +103,7 @@ class StickersPickerHeader extends React.Component {
     };
 
     render() {
-        const { classes, stickers } = this.props;
+        const { stickers } = this.props;
 
         const items = stickers.map(x => (
             <Sticker

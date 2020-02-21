@@ -17,7 +17,6 @@ import EditIcon from '../../../Assets/Icons/Edit';
 import LanguageIcon from '../../../Assets/Icons/Language';
 import SettingsIcon from '../../../Assets/Icons/Settings';
 import UnmuteIcon from '../../../Assets/Icons/Unmute';
-import LanguagePicker from '../LanguagePicker';
 import ThemePicker from '../ThemePicker';
 import PhotoIcon from '../../../Assets/Icons/SharedMedia';
 import { loadChatsContent } from '../../../Utils/File';
@@ -32,7 +31,6 @@ class Settings extends React.Component {
     constructor(props) {
         super(props);
 
-        this.languagePickerRef = React.createRef();
         this.themePickerRef = React.createRef();
     }
 
@@ -60,7 +58,10 @@ class Settings extends React.Component {
     };
 
     handleLanguage = () => {
-        this.languagePickerRef.current.open();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateLanguagePage',
+            opened: true
+        });
     };
 
     handleOpenViewer = () => {
@@ -80,7 +81,8 @@ class Settings extends React.Component {
 
     handleNotifications = () => {
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateOpenNotifications'
+            '@type': 'clientUpdateNotificationsPage',
+            opened: true
         });
     };
 
@@ -92,7 +94,7 @@ class Settings extends React.Component {
         const { photo } = chat;
 
         return (
-            <div ref={this.listRef} className='search'>
+            <div ref={this.listRef} className='settings'>
                 <div className='chat-details-info'>
                     <Chat
                         chatId={chatId}
@@ -102,43 +104,42 @@ class Settings extends React.Component {
                         onTileSelect={photo ? this.handleOpenViewer : null}
                     />
                 </div>
-                <ListItem className='list-item' button onClick={this.handleEditProfile}>
+                <ListItem className='settings-list-item' button onClick={this.handleEditProfile}>
                     <ListItemIcon>
                         <EditIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('EditProfile')} />
                 </ListItem>
-                <ListItem className='list-item' button onClick={this.handleHelp}>
+                <ListItem className='settings-list-item' button onClick={this.handleHelp}>
                     <ListItemIcon>
                         <SettingsIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('GeneralSettings')} />
                 </ListItem>
-                <ListItem className='list-item' button onClick={this.handleNotifications}>
+                <ListItem className='settings-list-item' button onClick={this.handleNotifications}>
                     <ListItemIcon>
                         <UnmuteIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('Notifications')} />
                 </ListItem>
-                <ListItem className='list-item' button onClick={this.handleHelp}>
+                <ListItem className='settings-list-item' button onClick={this.handleHelp}>
                     <ListItemIcon>
                         <DataIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('PrivacySettings')} />
                 </ListItem>
-                <ListItem autoFocus={false} className='list-item' button onClick={this.handleLanguage}>
+                <ListItem autoFocus={false} className='settings-list-item' button onClick={this.handleLanguage}>
                     <ListItemIcon>
                         <LanguageIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('Language')} />
                 </ListItem>
-                <ListItem autoFocus={false} className='list-item' button onClick={this.handleAppearance}>
+                <ListItem autoFocus={false} className='settings-list-item' button onClick={this.handleAppearance}>
                     <ListItemIcon>
                         <PhotoIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('Appearance')} />
                 </ListItem>
-                <LanguagePicker ref={this.languagePickerRef} />
                 <ThemePicker ref={this.themePickerRef} />
             </div>
         );

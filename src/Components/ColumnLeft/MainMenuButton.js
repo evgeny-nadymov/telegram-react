@@ -70,6 +70,10 @@ class MainMenuButton extends React.Component {
 
     handleContacts = event => {
         this.handleMenuClose();
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenContacts'
+        });
     };
 
     handleArchived = event => {

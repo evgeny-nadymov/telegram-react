@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import Checkbox from '@material-ui/core/Checkbox';
+import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Checkbox from '@material-ui/core/Checkbox';
 import ListItemText from '@material-ui/core/ListItemText';
 import NotificationStore from '../../../Stores/NotificationStore';
 import OptionStore from '../../../Stores/OptionStore';
@@ -112,158 +114,156 @@ class Notifications extends React.Component {
         return show_preview;
     }
 
-    isEnabledString(value) {
-        const { t } = this.props;
-        return value ? t('NotificationsOn') : t('NotificationsOff');
-    }
+    handleClose = () => {
+        TdLibController.clientUpdate({ '@type': 'clientUpdateNotificationsPage', opened: false });
+    };
 
     render() {
         const { t } = this.props;
         const { privateChatsSettings, groupChatsSettings, channelChatsSettings, contactJoined } = this.state;
 
         return (
-            <div className='search'>
-                <div className='notifications-section'>
-                    <div className='notifications-section-caption'>{t('NotificationsPrivateChats')}</div>
-                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('privateChatsSettings')}>
-                        <ListItemIcon>
+            <div className='sidebar-page'>
+                <div className='header-master'>
+                    <IconButton className='header-left-button' onClick={this.handleClose}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer'>
+                        <span className='header-status-content'>{t('Notifications')}</span>
+                    </div>
+                </div>
+                <div className='sidebar-page-content'>
+                    <div className='notifications-section'>
+                        <div className='notifications-section-header'>{t('NotificationsPrivateChats')}</div>
+                        <div className='settings-item' onClick={() => this.handleMuteFor('privateChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.isEnabled(privateChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-1'
-                            primary={t('NotificationsForPrivateChats')}
-                            secondary={
-                                this.isEnabled(privateChatsSettings)
-                                    ? t('NotificationsEnabled')
-                                    : t('NotificationsDisabled')
-                            }
-                        />
-                    </ListItem>
-                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('privateChatsSettings')}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-1'
+                                primary={t('NotificationsForPrivateChats')}
+                                secondary={
+                                    this.isEnabled(privateChatsSettings)
+                                        ? t('NotificationsEnabled')
+                                        : t('NotificationsDisabled')
+                                }
+                            />
+                        </div>
+                        <div className='settings-item' onClick={() => this.handleShowPreview('privateChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.showPreview(privateChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-2'
-                            primary={t('MessagePreview')}
-                            secondary={
-                                this.showPreview(privateChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
-                            }
-                        />
-                    </ListItem>
-                </div>
-                <div className='notifications-section'>
-                    <div className='notifications-section-caption'>{t('NotificationsGroups')}</div>
-                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('groupChatsSettings')}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-2'
+                                primary={t('MessagePreview')}
+                                secondary={
+                                    this.showPreview(privateChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                                }
+                            />
+                        </div>
+                    </div>
+                    <div className='notifications-section-border' />
+                    <div className='notifications-section'>
+                        <div className='notifications-section-header'>{t('NotificationsGroups')}</div>
+                        <div className='settings-item' onClick={() => this.handleMuteFor('groupChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.isEnabled(groupChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-1'
-                            primary={t('NotificationsForGroups')}
-                            secondary={
-                                this.isEnabled(groupChatsSettings)
-                                    ? t('NotificationsEnabled')
-                                    : t('NotificationsDisabled')
-                            }
-                        />
-                    </ListItem>
-                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('groupChatsSettings')}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-1'
+                                primary={t('NotificationsForGroups')}
+                                secondary={
+                                    this.isEnabled(groupChatsSettings)
+                                        ? t('NotificationsEnabled')
+                                        : t('NotificationsDisabled')
+                                }
+                            />
+                        </div>
+                        <div className='settings-item' onClick={() => this.handleShowPreview('groupChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.showPreview(groupChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-2'
-                            primary={t('MessagePreview')}
-                            secondary={
-                                this.showPreview(groupChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
-                            }
-                        />
-                    </ListItem>
-                </div>
-                <div className='notifications-section'>
-                    <div className='notifications-section-caption'>{t('NotificationsChannels')}</div>
-                    <ListItem role={undefined} button onClick={() => this.handleMuteFor('channelChatsSettings')}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-2'
+                                primary={t('MessagePreview')}
+                                secondary={
+                                    this.showPreview(groupChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                                }
+                            />
+                        </div>
+                    </div>
+                    <div className='notifications-section-border' />
+                    <div className='notifications-section'>
+                        <div className='notifications-section-header'>{t('NotificationsChannels')}</div>
+                        <div className='settings-item' onClick={() => this.handleMuteFor('channelChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.isEnabled(channelChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-1'
-                            primary={t('NotificationsForChannels')}
-                            secondary={
-                                this.isEnabled(channelChatsSettings)
-                                    ? t('NotificationsEnabled')
-                                    : t('NotificationsDisabled')
-                            }
-                        />
-                    </ListItem>
-                    <ListItem role={undefined} button onClick={() => this.handleShowPreview('channelChatsSettings')}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-1'
+                                primary={t('NotificationsForChannels')}
+                                secondary={
+                                    this.isEnabled(channelChatsSettings)
+                                        ? t('NotificationsEnabled')
+                                        : t('NotificationsDisabled')
+                                }
+                            />
+                        </div>
+                        <div className='settings-item' onClick={() => this.handleShowPreview('channelChatsSettings')}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={this.showPreview(channelChatsSettings)}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-2' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-2'
-                            primary={t('MessagePreview')}
-                            secondary={
-                                this.showPreview(channelChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
-                            }
-                        />
-                    </ListItem>
-                </div>
-                <div className='notifications-section notifications-section-last'>
-                    <div className='notifications-section-caption'>{t('NotificationsOther')}</div>
-                    <ListItem role={undefined} button onClick={this.handleContactJoined}>
-                        <ListItemIcon>
+                            <ListItemText
+                                id='label-2'
+                                primary={t('MessagePreview')}
+                                secondary={
+                                    this.showPreview(channelChatsSettings) ? t('PreviewEnabled') : t('PreviewDisabled')
+                                }
+                            />
+                        </div>
+                    </div>
+                    <div className='notifications-section-border' />
+                    <div className='notifications-section'>
+                        <div className='notifications-section-header'>{t('NotificationsOther')}</div>
+                        <div className='settings-item' onClick={this.handleContactJoined}>
                             <Checkbox
                                 color='primary'
+                                className='settings-item-control'
                                 checked={contactJoined}
                                 tabIndex={-1}
-                                disableRipple
                                 inputProps={{ 'aria-labelledby': 'label-1' }}
                             />
-                        </ListItemIcon>
-                        <ListItemText
-                            id='label-1'
-                            primary={t('ContactJoined')}
-                            secondary={contactJoined ? t('ContactJoinedEnabled') : t('ContactJoinedDisabled')}
-                        />
-                    </ListItem>
+                            <ListItemText
+                                id='label-1'
+                                primary={t('ContactJoined')}
+                                secondary={contactJoined ? t('ContactJoinedEnabled') : t('ContactJoinedDisabled')}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         );
