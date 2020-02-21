@@ -24,6 +24,20 @@
 }
 
 .settings-list-item2 {
-    padding: 8px 12px;
+    padding: 12px;
     border-radius: 10px;
+}
+
+.settings-list-item-icon {
+    margin: 4px 0 4px 4px;
+    align-self: flex-start;
+}
+
+.settings-list-item-text {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.settings-list-item-text2 {
+    margin: 2px 4px;
 }

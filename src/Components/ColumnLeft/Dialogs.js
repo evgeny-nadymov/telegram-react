@@ -13,6 +13,10 @@ import DialogsList from './DialogsList';
 import EditProfile from './Settings/EditProfile';
 import Notifications from './Settings/Notifications';
 import Settings from './Settings/Settings';
+import Contacts from './Contacts';
+import Language from './Language';
+import PrivacySecurity from './Settings/PrivacySecurity';
+import ActiveSessions from './Settings/ActiveSessions';
 import UpdatePanel from './UpdatePanel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
@@ -23,8 +27,6 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-import Contacts from './Contacts';
-import Language from './Language';
 
 class Dialogs extends Component {
     constructor(props) {
@@ -49,6 +51,10 @@ class Dialogs extends Component {
             openSearch: false,
             openArchive: false,
             openSettings: false,
+            openEditProfile: false,
+            openNotifications: false,
+            openPrivacySecurity: false,
+            openActiveSessions: false,
             openLanguage: false,
             openContacts: false,
 
@@ -70,6 +76,8 @@ class Dialogs extends Component {
             openSettings,
             openEditProfile,
             openNotifications,
+            openPrivacySecurity,
+            openActiveSessions,
             openLanguage,
             openContacts,
             openArchive,
@@ -101,6 +109,10 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.openSettings !== openSettings) {
+            return true;
+        }
+
         if (nextState.openEditProfile !== openEditProfile) {
             return true;
         }
@@ -109,11 +121,15 @@ class Dialogs extends Component {
             return true;
         }
 
-        if (nextState.openSearch !== openSearch) {
+        if (nextState.openPrivacySecurity !== openPrivacySecurity) {
             return true;
         }
 
-        if (nextState.openSettings !== openSettings) {
+        if (nextState.openActiveSessions !== openActiveSessions) {
+            return true;
+        }
+
+        if (nextState.openLanguage !== openLanguage) {
             return true;
         }
 
@@ -121,7 +137,7 @@ class Dialogs extends Component {
             return true;
         }
 
-        if (nextState.openLanguage !== openLanguage) {
+        if (nextState.openSearch !== openSearch) {
             return true;
         }
 
@@ -164,6 +180,8 @@ class Dialogs extends Component {
         ChatStore.on('clientUpdateNotificationsPage', this.onClientUpdateNotificationsPage);
         ChatStore.on('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
         ChatStore.on('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.on('clientUpdatePrivacySecurityPage', this.onClientUpdatePrivacySecurityPage);
+        ChatStore.on('clientUpdateActiveSessionsPage', this.onClientUpdateActiveSessionsPage);
         ChatStore.on('clientUpdateLanguagePage', this.onClientUpdateLanguagePage);
     }
 
@@ -189,6 +207,8 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateNotificationsPage', this.onClientUpdateNotificationsPage);
         ChatStore.off('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
         ChatStore.off('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.off('clientUpdatePrivacySecurityPage', this.onClientUpdatePrivacySecurityPage);
+        ChatStore.off('clientUpdateActiveSessionsPage', this.onClientUpdateActiveSessionsPage);
         ChatStore.off('clientUpdateLanguagePage', this.onClientUpdateLanguagePage);
     }
 
@@ -296,6 +316,18 @@ class Dialogs extends Component {
         });
 
         this.setState({ openContacts: true, contacts });
+    };
+
+    onClientUpdatePrivacySecurityPage = update => {
+        const { opened } = update;
+
+        this.setState({ openPrivacySecurity: opened });
+    };
+
+    onClientUpdateActiveSessionsPage = update => {
+        const { opened, sessions } = update;
+
+        this.setState({ openActiveSessions: opened, sessions });
     };
 
     onClientUpdateLanguagePage = update => {
@@ -424,6 +456,9 @@ class Dialogs extends Component {
             openSettings,
             openEditProfile,
             openNotifications,
+            openPrivacySecurity,
+            openActiveSessions,
+            sessions,
             openLanguage,
             openContacts,
             contacts,
@@ -449,8 +484,10 @@ class Dialogs extends Component {
                     openSearch={openSearch}
                     openEditProfile={openEditProfile}
                     openNotifications={openNotifications}
-                    openContacts={openContacts}
+                    openPrivacySecurity={openPrivacySecurity}
+                    openActiveSessions={openActiveSessions}
                     openLanguage={openLanguage}
+                    openContacts={openContacts}
                     onClick={this.handleHeaderClick}
                     onSearch={this.handleSearch}
                     onSearchTextChange={this.handleSearchTextChange}
@@ -485,6 +522,8 @@ class Dialogs extends Component {
                     {openSettings && <Settings chatId={meChatId} />}
                     {openEditProfile && <EditProfile chatId={meChatId} />}
                     {openNotifications && <Notifications chatId={meChatId} />}
+                    {openPrivacySecurity && <PrivacySecurity />}
+                    {openActiveSessions && <ActiveSessions sessions={sessions} />}
                     {openLanguage && <Language />}
                     {openContacts && <Contacts items={contacts} />}
                 </div>

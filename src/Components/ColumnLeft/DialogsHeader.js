@@ -155,6 +155,8 @@ class DialogsHeader extends React.Component {
             openLanguage,
             openEditProfile,
             openNotifications,
+            openPrivacySecurity,
+            openActiveSessions,
             openContacts,
             t
         } = this.props;
@@ -201,7 +203,7 @@ class DialogsHeader extends React.Component {
                     </div>
                 </>
             );
-        } else if (openLanguage || openNotifications) {
+        } else if (openLanguage || openNotifications || openPrivacySecurity || openActiveSessions) {
             showRightButton = false;
             content = null;
         } else if (openSettings) {
@@ -251,6 +253,10 @@ DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
     openArchive: PropTypes.bool.isRequired,
     openSettings: PropTypes.bool.isRequired,
+    openEditProfile: PropTypes.bool.isRequired,
+    openNotifications: PropTypes.bool.isRequired,
+    openPrivacySecurity: PropTypes.bool.isRequired,
+    openActiveSessions: PropTypes.bool.isRequired,
     openLanguage: PropTypes.bool.isRequired,
     openContacts: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,

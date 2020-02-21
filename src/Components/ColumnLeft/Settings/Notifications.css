@@ -5,11 +5,11 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.notifications-section {
+.settings-section {
     padding: 8px 0;
 }
 
-.notifications-section-header {
+.settings-section-header {
     margin: 17px 16px 18px;
     color: var(--text-secondary);
 }
@@ -29,7 +29,7 @@
     margin: 4px 20px 4px 4px;
 }
 
-.notifications-section-border {
+.settings-border {
     margin: 0 -8px;
     width: calc(100% + 16px);
     border-bottom: 1px solid var(--border);

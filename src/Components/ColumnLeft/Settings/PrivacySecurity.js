@@ -7,16 +7,77 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import IconButton from '@material-ui/core/IconButton';
+import { withTranslation } from 'react-i18next';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import IconButton from '@material-ui/core/IconButton';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import DeviceIcon from '../../../Assets/Icons/Device';
+import RemoveMemberIcon from '../../../Assets/Icons/RemoveMember';
 import TdLibController from '../../../Controllers/TdLibController';
+import './PrivacySecurity.css';
 
 class PrivacySecurity extends React.Component {
+    state = {
+        sessions: null,
+        users: null
+    };
+
+    componentDidMount() {
+        this.loadContent();
+    }
+
+    async loadContent() {
+        TdLibController.send({
+            '@type': 'getActiveSessions'
+        }).then(sessions => this.setState({ sessions }));
+
+        TdLibController.send({
+            '@type': 'getBlockedUsers',
+            offset: 0,
+            limit: 100
+        }).then(users => this.setState({ users }));
+    }
+
     handleClose = () => {
         TdLibController.clientUpdate({ '@type': 'clientUpdatePrivacySecurityPage', opened: false });
     };
 
+    handleBlockedUsers = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateBlockedUsersPage',
+            opened: true,
+            users: this.state.users
+        });
+    };
+
+    handleActiveSessions = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateActiveSessionsPage',
+            opened: true,
+            sessions: this.state.sessions
+        });
+    };
+
     render() {
+        const { t } = this.props;
+        const { users, sessions } = this.state;
+
+        const sessionsCount =
+            sessions && sessions.sessions.length > 0
+                ? sessions.sessions.length === 1
+                    ? '1 session'
+                    : `${sessions.sessions.length} sessions`
+                : '1 session';
+
+        const usersCount =
+            users && users.total_count > 0
+                ? users.total_count === 1
+                    ? '1 user'
+                    : `${users.total_count} users`
+                : 'no users';
+
         return (
             <div className='sidebar-page'>
                 <div className='header-master'>
@@ -24,10 +85,82 @@ class PrivacySecurity extends React.Component {
                         <ArrowBackIcon />
                     </IconButton>
                     <div className='header-status grow cursor-pointer'>
-                        <span className='header-status-content'>{t('Language')}</span>
+                        <span className='header-status-content'>{t('PrivacySettings')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content' />
+                <div className='sidebar-page-content'>
+                    <div className='settings-section'>
+                        <ListItem
+                            className='settings-list-item2'
+                            role={undefined}
+                            button
+                            onClick={this.handleBlockedUsers}>
+                            <ListItemIcon className='settings-list-item-icon'>
+                                <RemoveMemberIcon />
+                            </ListItemIcon>
+                            <ListItemText
+                                id='label-2'
+                                className='settings-list-item-text'
+                                primary={t('BlockedUsers')}
+                                secondary={usersCount}
+                            />
+                        </ListItem>
+                        <ListItem
+                            className='settings-list-item2'
+                            role={undefined}
+                            button
+                            onClick={this.handleActiveSessions}>
+                            <ListItemIcon className='settings-list-item-icon'>
+                                <DeviceIcon />
+                            </ListItemIcon>
+                            <ListItemText
+                                id='label-2'
+                                className='settings-list-item-text'
+                                primary={t('SessionsTitle')}
+                                secondary={sessionsCount}
+                            />
+                        </ListItem>
+                    </div>
+                    <div className='settings-border' />
+                    <div className='settings-section'>
+                        <div className='settings-section-header'>{t('PrivacyTitle')}</div>
+                        <ListItem className='settings-list-item2' role={undefined} button>
+                            <ListItemText
+                                className='settings-list-item-text2'
+                                primary={t('PrivacyPhoneTitle')}
+                                secondary={t('LastSeenContacts')}
+                            />
+                        </ListItem>
+                        <ListItem className='settings-list-item2' role={undefined} button>
+                            <ListItemText
+                                className='settings-list-item-text2'
+                                primary={t('LastSeenTitle')}
+                                secondary={t('LastSeenEverybody')}
+                            />
+                        </ListItem>
+                        <ListItem className='settings-list-item2' role={undefined} button>
+                            <ListItemText
+                                className='settings-list-item-text2'
+                                primary={t('PrivacyProfilePhotoTitle')}
+                                secondary={t('LastSeenEverybody')}
+                            />
+                        </ListItem>
+                        <ListItem className='settings-list-item2' role={undefined} button>
+                            <ListItemText
+                                className='settings-list-item-text2'
+                                primary={t('PrivacyForwardsTitle')}
+                                secondary={t('LastSeenEverybody')}
+                            />
+                        </ListItem>
+                        <ListItem className='settings-list-item2' role={undefined} button>
+                            <ListItemText
+                                className='settings-list-item-text2'
+                                primary={t('WhoCanAddMe')}
+                                secondary={t('LastSeenEverybody')}
+                            />
+                        </ListItem>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -35,4 +168,4 @@ class PrivacySecurity extends React.Component {
 
 PrivacySecurity.propTypes = {};
 
-export default PrivacySecurity;
+export default withTranslation()(PrivacySecurity);

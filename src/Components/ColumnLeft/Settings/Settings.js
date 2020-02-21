@@ -57,13 +57,6 @@ class Settings extends React.Component {
         this.themePickerRef.current.open();
     };
 
-    handleLanguage = () => {
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateLanguagePage',
-            opened: true
-        });
-    };
-
     handleOpenViewer = () => {
         const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
@@ -82,6 +75,20 @@ class Settings extends React.Component {
     handleNotifications = () => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateNotificationsPage',
+            opened: true
+        });
+    };
+
+    handlePrivacySecurity = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePrivacySecurityPage',
+            opened: true
+        });
+    };
+
+    handleLanguage = () => {
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateLanguagePage',
             opened: true
         });
     };
@@ -122,7 +129,7 @@ class Settings extends React.Component {
                     </ListItemIcon>
                     <ListItemText primary={t('Notifications')} />
                 </ListItem>
-                <ListItem className='settings-list-item' button onClick={this.handleHelp}>
+                <ListItem className='settings-list-item' button onClick={this.handlePrivacySecurity}>
                     <ListItemIcon>
                         <DataIcon />
                     </ListItemIcon>
