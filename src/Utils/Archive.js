@@ -11,7 +11,6 @@ export function getArchiveTitle() {
     const archive = ChatStore.chatList.get('chatListArchive');
     const chats = [];
     const chatsOrder = [];
-    console.log('[ar] getArchiveTitle', archive);
     if (archive) {
         for (const chatId of archive.keys()) {
             const chat = ChatStore.get(chatId);
@@ -23,7 +22,6 @@ export function getArchiveTitle() {
     }
 
     const orderedChats = chats.sort((a, b) => orderCompare(b.order, a.order));
-    console.log('[update] getArchiveTitle', orderedChats.map(x => x.title).join(', '), chatsOrder);
 
     return orderedChats.map(x => x.title).join(', ');
 }

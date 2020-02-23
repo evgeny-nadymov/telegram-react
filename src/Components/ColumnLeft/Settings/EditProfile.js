@@ -21,22 +21,41 @@ class EditProfile extends React.Component {
         this.firstNameRef = React.createRef();
         this.lastNameRef = React.createRef();
         this.bioRef = React.createRef();
+        this.usernameRef = React.createRef();
 
         const user = UserStore.get(UserStore.getMyId());
         const userFullInfo = UserStore.getFullInfo(UserStore.getMyId());
 
-        console.log('[edit]', user, userFullInfo);
-
         this.state = {
             firstName: user ? user.first_name : '',
             lastName: user ? user.last_name : '',
-            bio: userFullInfo ? userFullInfo.bio : ''
+            bio: userFullInfo ? userFullInfo.bio : '',
+            username: user ? user.username : '',
+            usernameCheck: null
         };
     }
 
     componentWillUnmount() {
         this.setName();
         this.setBio();
+        this.setUsername();
+    }
+
+    setUsername() {
+        const { username, usernameCheck } = this.state;
+        let newUsername = this.usernameRef.current.value;
+        if (newUsername.startsWith('@') && newUsername.length > 1) {
+            newUsername = newUsername.substr(1);
+        }
+
+        if (username === newUsername) return;
+        if (!usernameCheck) return;
+        if (usernameCheck['@type'] !== 'checkChatUsernameResultOk') return;
+
+        TdLibController.send({
+            '@type': 'setUsername',
+            username: newUsername
+        });
     }
 
     setName() {
@@ -68,9 +87,70 @@ class EditProfile extends React.Component {
         });
     }
 
+    handleUsernameChange = async () => {
+        const { chatId } = this.props;
+        const { username } = this.state;
+        let newUsername = this.usernameRef.current.value;
+        if (newUsername.startsWith('@') && newUsername.length > 1) {
+            newUsername = newUsername.substr(1);
+        }
+        if (username === newUsername || newUsername === '') {
+            this.setState({
+                usernameCheck: null
+            });
+
+            // console.log('[un] checkChatUsername', 'null');
+        } else {
+            // console.log('[un] checkChatUsername start', chatId, newUsername);
+            const result = await TdLibController.send({
+                '@type': 'checkChatUsername',
+                chat_id: chatId,
+                username: newUsername
+            });
+
+            // console.log('[un] checkChatUsername end', chatId, newUsername, result);
+
+            let newUsername2 = this.usernameRef.current.value;
+            if (newUsername2.startsWith('@') && newUsername2.length > 1) {
+                newUsername2 = newUsername2.substr(1);
+            }
+            if (newUsername2 === newUsername) {
+                this.setState({
+                    usernameCheck: result
+                });
+            }
+        }
+    };
+
     render() {
         const { chatId, t } = this.props;
-        const { firstName, lastName, bio } = this.state;
+        const { firstName, lastName, bio, username, usernameCheck } = this.state;
+
+        let hasError = false;
+        let usernameLabel = t('Username');
+        if (usernameCheck) {
+            switch (usernameCheck['@type']) {
+                case 'checkChatUsernameResultOk': {
+                    hasError = false;
+                    usernameLabel = 'Username is available';
+                    break;
+                }
+                case 'checkChatUsernameResultPublicChatsTooMuch':
+                case 'checkChatUsernameResultPublicGroupsUnavailable':
+                case 'checkChatUsernameResultUsernameInvalid': {
+                    hasError = true;
+                    usernameLabel = 'Invalid username';
+                    break;
+                }
+                case 'checkChatUsernameResultUsernameOccupied': {
+                    hasError = true;
+                    usernameLabel = 'Username is already taken';
+                    break;
+                }
+            }
+        }
+
+        // console.log('[un] render', hasError, usernameLabel);
 
         return (
             <div className='search'>
@@ -110,6 +190,24 @@ class EditProfile extends React.Component {
                         defaultValue={bio}
                     />
                     <div className='edit-profile-hint'>{t('BioAbout')}</div>
+                </div>
+                <div className='settings-border' />
+                <div className='edit-profile-username'>
+                    <TextField
+                        inputRef={this.usernameRef}
+                        error={hasError}
+                        className='edit-profile-input'
+                        variant='outlined'
+                        fullWidth
+                        label={usernameLabel}
+                        defaultValue={username}
+                        onChange={this.handleUsernameChange}
+                    />
+                    <div className='edit-profile-hint'>
+                        You can choose a username on Telegram. If you do, other people will be able to find you by this
+                        username and contact you without knowing your phone number. You can use a-z, 0-9 and
+                        underscores. Minimum length is 5 characters.
+                    </div>
                 </div>
             </div>
         );

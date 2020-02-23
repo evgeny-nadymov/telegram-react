@@ -59,7 +59,7 @@ import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
 
 export function openInstantViewMedia(media, caption, block, instantView, fileCancel) {
-    console.log('[IV] openIVMedia', media);
+    // console.log('[IV] openIVMedia', media);
 
     if (!media) return;
 

@@ -13,6 +13,7 @@ import PollOptionResult from './PollOptionResult';
 import { loadUsersContent } from '../../Utils/File';
 import { POLL_RESULTS_FIRST_SLICE_LENGTH, POLL_RESULTS_LEAVE_LENGTH, POLL_RESULTS_SLICE_LENGTH } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
+import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PollOptionResults.css';
 
@@ -37,10 +38,10 @@ class PollOptionResults extends React.Component {
     async updateVoters(offset, count, loadMore) {
         const { chatId, messageId, optionId, option } = this.props;
         const { voters } = this.state;
-        // console.log('[poll] getPollVoters start', loadMore, offset, count - offset);
         if (count <= 0) return;
 
         const limit = count - offset;
+        // console.log(`[poll] getPollVoters start option_id=${optionId} offset=${offset} limit=${limit}`);
         const result = await TdLibController.send({
             '@type': 'getPollVoters',
             chat_id: chatId,
@@ -49,8 +50,7 @@ class PollOptionResults extends React.Component {
             offset,
             limit
         });
-
-        // console.log('[poll] getPollVoters', loadMore, offset, limit, result);
+        // console.log(`[poll] getPollVoters end option_id=${optionId} offset=${offset} limit=${limit}`, result, result.user_ids.map(x => UserStore.get(x)));
 
         if (this.props.option !== option) {
             return;

@@ -39,3 +39,13 @@
     padding: 12px;
     border-radius: 10px;
 }
+
+.user-title {
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+    align-items: center;
+    color: var(--dialog-color);
+}

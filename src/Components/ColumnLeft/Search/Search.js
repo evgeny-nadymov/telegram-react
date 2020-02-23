@@ -89,7 +89,7 @@ class Search extends React.Component {
         const sessionId = this.sessionId;
         let store = null;
 
-        console.log('[se] searchText=' + text);
+        // console.log('[se] searchText=' + text);
 
         const { chatId } = this.props;
         const { savedMessages } = this.state;
@@ -228,7 +228,7 @@ class Search extends React.Component {
                     '@type': 'getMessageLinkInfo',
                     url: text
                 });
-                console.log('[se] searchText=' + text + ' messageLinkInfo', messageLinkInfo);
+                // console.log('[se] searchText=' + text + ' messageLinkInfo', messageLinkInfo);
 
                 MessageStore.setItems([messageLinkInfo.message]);
 
@@ -238,13 +238,13 @@ class Search extends React.Component {
             }
         }
 
-        console.log('[se] searchText=' + text + ' result', messages, linkMessage);
+        // console.log('[se] searchText=' + text + ' result', messages, linkMessage);
 
         if (sessionId !== this.sessionId) {
             return;
         }
 
-        console.log('[se] searchText=' + text + ' result session', messages, linkMessage);
+        // console.log('[se] searchText=' + text + ' result session', messages, linkMessage);
 
         this.setState({
             messages,
@@ -478,7 +478,7 @@ class Search extends React.Component {
         const { classes, chatId } = this.props;
         const { top, recentlyFound, local, global, messages, linkMessage } = this.state;
 
-        console.log('[se] render', messages, linkMessage);
+        // console.log('[se] render', messages, linkMessage);
 
         const chat = ChatStore.get(chatId);
 

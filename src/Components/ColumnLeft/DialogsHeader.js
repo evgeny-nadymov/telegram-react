@@ -165,20 +165,18 @@ class DialogsHeader extends React.Component {
         let showRightButton = true;
         if (openSearch) {
             content = (
-                <>
-                    <div className='header-search-input grow'>
-                        <div
-                            id='header-search-inputbox'
-                            ref={this.searchInputRef}
-                            placeholder={t('Search')}
-                            contentEditable
-                            suppressContentEditableWarning
-                            onKeyDown={this.handleKeyDown}
-                            onKeyUp={this.handleKeyUp}
-                            onPaste={this.handlePaste}
-                        />
-                    </div>
-                </>
+                <div className='header-search-input grow'>
+                    <div
+                        id='header-search-inputbox'
+                        ref={this.searchInputRef}
+                        placeholder={t('Search')}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onKeyDown={this.handleKeyDown}
+                        onKeyUp={this.handleKeyUp}
+                        onPaste={this.handlePaste}
+                    />
+                </div>
             );
         } else if (openArchive) {
             content = (

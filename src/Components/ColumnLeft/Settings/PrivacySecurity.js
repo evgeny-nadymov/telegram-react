@@ -45,18 +45,24 @@ class PrivacySecurity extends React.Component {
     };
 
     handleBlockedUsers = () => {
+        const { users } = this.state;
+        if (!users) return;
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateBlockedUsersPage',
             opened: true,
-            users: this.state.users
+            users
         });
     };
 
     handleActiveSessions = () => {
+        const { sessions } = this.state;
+        if (!sessions) return;
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateActiveSessionsPage',
             opened: true,
-            sessions: this.state.sessions
+            sessions
         });
     };
 

@@ -7,7 +7,10 @@
 
 .edit-profile-name {
     padding: 12px 24px 18px;
-    border-bottom: 1px solid var(--border);
+}
+
+.edit-profile-username {
+    padding: 12px 24px 18px;
 }
 
 .edit-profile-input {

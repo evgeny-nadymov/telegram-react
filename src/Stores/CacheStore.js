@@ -31,6 +31,7 @@ class CacheStore extends EventEmitter {
     reset = () => {
         this.chatIds = [];
         this.cache = null;
+        this.contacts = null;
     };
 
     onUpdate = update => {
@@ -51,6 +52,7 @@ class CacheStore extends EventEmitter {
                     case 'authorizationStateWaitRegistration': {
                         CacheManager.remove('cache');
                         CacheManager.remove('files');
+                        CacheManager.remove('contacts');
                         break;
                     }
                 }
@@ -242,13 +244,13 @@ class CacheStore extends EventEmitter {
     }
 
     clear() {
-        if (!this.cache) return;
+        if (this.cache) {
+            const { files } = this.cache;
 
-        const { files } = this.cache;
-
-        files.forEach(({ id, url }) => {
-            FileStore.deleteDataUrl(id);
-        });
+            files.forEach(({ id, url }) => {
+                FileStore.deleteDataUrl(id);
+            });
+        }
     }
 }
 

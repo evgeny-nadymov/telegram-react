@@ -67,15 +67,15 @@
 }
 
 .header-left-button {
-    margin: 8px -2px 8px 12px;
+    margin: 6px -2px 6px 12px;
 }
 
 .header-right-button {
-    margin: 8px 12px 8px 0;
+    margin: 6px 12px 6px 0;
 }
 
 .header-right-second-button {
-    margin: 8px 0 8px 12px;
+    margin: 6px 0 6px 12px;
 }
 
 .cursor-pointer {
@@ -109,7 +109,7 @@
 
 #header-search-inputbox {
     box-shadow: 0 0 0 0;
-    padding: 22px 0 22px 0;
+    padding: 19px 0 20px 0;
     white-space: pre-wrap;
 }
 

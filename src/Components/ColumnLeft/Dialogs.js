@@ -25,8 +25,10 @@ import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
+import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
+import { getUserFullName } from '../../Utils/User';
 
 class Dialogs extends Component {
     constructor(props) {
@@ -311,11 +313,7 @@ class Dialogs extends Component {
     };
 
     onClientUpdateOpenContacts = async update => {
-        const contacts = await TdLibController.send({
-            '@type': 'getContacts'
-        });
-
-        this.setState({ openContacts: true, contacts });
+        this.setState({ openContacts: true });
     };
 
     onClientUpdatePrivacySecurityPage = update => {
@@ -461,7 +459,6 @@ class Dialogs extends Component {
             sessions,
             openLanguage,
             openContacts,
-            contacts,
             meChatId,
             openArchive,
             openSearch,
@@ -525,7 +522,7 @@ class Dialogs extends Component {
                     {openPrivacySecurity && <PrivacySecurity />}
                     {openActiveSessions && <ActiveSessions sessions={sessions} />}
                     {openLanguage && <Language />}
-                    {openContacts && <Contacts items={contacts} />}
+                    {openContacts && <Contacts />}
                 </div>
                 <UpdatePanel />
             </div>

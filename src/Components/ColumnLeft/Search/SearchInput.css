@@ -1,0 +1,62 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.search-input {
+    /*padding: 0 0 0 24px;*/
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+[contenteditable='true']#search-inputbox {
+    white-space: nowrap;
+    overflow: hidden;
+}
+[contenteditable='true']#search-inputbox br {
+    display: none;
+}
+[contenteditable='true']#search-inputbox * {
+    display: inline;
+    white-space: nowrap;
+}
+
+#search-inputbox {
+    white-space: pre-wrap;
+    background: var(--color-hover);
+    border: 2px solid var(--color-hover);
+    border-radius: 22px;
+    margin: 8px 12px 8px 14px;
+    padding: 8px 12px 11px 12px;
+}
+
+#search-inputbox::before {
+    /*content: attr(placeholder);*/
+    color: var(--text-secondary);
+    pointer-events: none;
+    transform: translateX(20px);
+    will-change: transform;
+    opacity: 0;
+    /*position: absolute;*/
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+#search-inputbox:empty::before {
+    content: attr(placeholder);
+    transform: translateX(0px);
+    opacity: 0.75;
+}
+
+#search-inputbox:empty:active::before,
+#search-inputbox:empty:focus::before {
+    opacity: 0.75;
+}
+
+#search-inputbox:focus {
+    border-color: var(--color-accent-main);
+    background: transparent;
+    outline: none;
+}
