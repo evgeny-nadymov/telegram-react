@@ -90,7 +90,7 @@ DocumentTile.propTypes = {
     file: PropTypes.object,
     openMedia: PropTypes.func,
     icon: PropTypes.node,
-    completeIcon: PropTypes.oneOf([PropTypes.node, PropTypes.func])
+    completeIcon: PropTypes.oneOfType([PropTypes.node, PropTypes.func])
 };
 
 export default DocumentTile;

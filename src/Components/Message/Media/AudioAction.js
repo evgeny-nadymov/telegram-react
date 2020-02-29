@@ -97,10 +97,11 @@ class AudioAction extends React.Component {
         const { active, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
+            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
             this.setState({
                 currentTime: update.currentTime,
-                duration: update.duration || duration,
-                timeString: this.getTimeString(update.currentTime, update.duration || duration, active, file)
+                duration: playerDuration,
+                timeString: this.getTimeString(update.currentTime, playerDuration, active, file)
             });
         }
     };

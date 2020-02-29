@@ -97,10 +97,13 @@ class VoiceNoteSlider extends React.Component {
         const { active } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
+            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+            const value = this.getValue(update.currentTime, playerDuration, active);
+
             this.setState({
                 currentTime: update.currentTime,
-                duration: update.duration || duration,
-                value: this.getValue(update.currentTime, update.duration || duration, active)
+                duration: playerDuration,
+                value
             });
         }
     };
@@ -110,10 +113,13 @@ class VoiceNoteSlider extends React.Component {
         const { active, currentTime } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
+            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+            const value = this.getValue(active ? currentTime : 0, playerDuration, true);
+
             this.setState({
                 active: true,
                 currentTime: active ? currentTime : 0,
-                value: this.getValue(active ? currentTime : 0, duration, true)
+                value
             });
         } else if (active) {
             this.reset();
@@ -133,7 +139,7 @@ class VoiceNoteSlider extends React.Component {
                     className='voice-note-slider-component'
                     classes={{
                         track: 'voice-note-slider-track',
-                        thumbWrapper: 'voice-note-slider-thumb-wrapper',
+                        // thumbWrapper: 'voice-note-slider-thumb-wrapper',
                         thumb: 'voice-note-slider-thumb'
                     }}
                     min={0}
