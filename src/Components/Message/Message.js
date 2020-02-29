@@ -35,7 +35,7 @@ import {
     canMessageBeUnvoted,
     canMessageBeClosed
 } from '../../Utils/Message';
-import { canPinMessages, canSendMessages } from '../../Utils/Chat';
+import { canPinMessages, canSendMessages, isPrivateChat } from '../../Utils/Chat';
 import {
     openUser,
     openChat,
@@ -548,7 +548,9 @@ class Message extends Component {
         const text = getText(message, inlineMeta, t);
         const hasCaption = text !== null && text.length > 0;
         const showForward = showMessageForward(chatId, messageId);
-        const hasTitle = showTitle || showForward || Boolean(reply_to_message_id);
+        const showReply = Boolean(reply_to_message_id);
+        const suppressTitle = isPrivateChat(chatId);
+        const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
         const webPage = getWebPage(message);
         const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta);
 
@@ -606,7 +608,7 @@ class Message extends Component {
                                 'message-bubble-out': withBubble && is_outgoing
                             })}
                             style={style}>
-                            {withBubble && (showTitle || showForward) && (
+                            {withBubble && !suppressTitle && (showTitle || showForward) && (
                                 <div className='message-title'>
                                     {showTitle && !showForward && (
                                         <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />
@@ -614,7 +616,7 @@ class Message extends Component {
                                     {showForward && <Forward forwardInfo={forward_info} />}
                                 </div>
                             )}
-                            {Boolean(reply_to_message_id) && (
+                            {showReply && (
                                 <Reply
                                     chatId={chatId}
                                     messageId={reply_to_message_id}

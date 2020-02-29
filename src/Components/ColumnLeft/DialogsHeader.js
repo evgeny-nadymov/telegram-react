@@ -10,17 +10,17 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { IconButton } from '@material-ui/core';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import SearchIcon from '@material-ui/icons/Search';
-import CloseIcon from '../../Assets/Icons/Close';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import ArrowBackIcon from '../../Assets/Icons/Back';
+import CloseIcon from '../../Assets/Icons/Close';
+import SearchIcon from '../../Assets/Icons/Search';
 import MainMenuButton from './MainMenuButton';
+import SettingsMenuButton from './Settings/SettingsMenuButton';
 import { isAuthorizationReady } from '../../Utils/Common';
 import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
-import SettingsMenuButton from './Settings/SettingsMenuButton';
 
 class DialogsHeader extends React.Component {
     constructor(props) {

@@ -254,6 +254,11 @@ class InputBox extends Component {
         const { sticker, thumbnail, width, height } = item;
         if (!sticker) return;
 
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        element.innerText = null;
+
         this.restoreSelection();
 
         const content = {

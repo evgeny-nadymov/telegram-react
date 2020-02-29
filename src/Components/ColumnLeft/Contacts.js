@@ -7,9 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
+import ArrowBackIcon from '../../Assets/Icons/Back';
 import User from '../Tile/User';
 import SearchInput from './Search/SearchInput';
 import VirtualizedList from '../Additional/VirtualizedList';

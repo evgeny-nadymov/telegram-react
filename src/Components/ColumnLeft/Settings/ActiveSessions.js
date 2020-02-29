@@ -10,15 +10,15 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import Session from '../../Tile/Session';
-import TdLibController from '../../../Controllers/TdLibController';
-import './ActiveSessions.css';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import StopIcon from '../../../Assets/Icons/Stop';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItem from '@material-ui/core/ListItem';
+import IconButton from '@material-ui/core/IconButton';
+import ArrowBackIcon from '../../../Assets/Icons/Back';
+import Session from '../../Tile/Session';
+import StopIcon from '../../../Assets/Icons/Stop';
+import TdLibController from '../../../Controllers/TdLibController';
+import './ActiveSessions.css';
 
 class ActiveSessions extends React.Component {
     state = {

@@ -8,11 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ArrowBackIcon from '../../../Assets/Icons/Back';
 import DeviceIcon from '../../../Assets/Icons/Device';
 import RemoveMemberIcon from '../../../Assets/Icons/RemoveMember';
 import TdLibController from '../../../Controllers/TdLibController';

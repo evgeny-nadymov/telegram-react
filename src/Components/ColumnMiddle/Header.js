@@ -17,7 +17,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from '../../Assets/Icons/Search';
 import MainMenuButton from './MainMenuButton';
 import HeaderChat from '../Tile/HeaderChat';
 import HeaderCommand from './HeaderCommand';

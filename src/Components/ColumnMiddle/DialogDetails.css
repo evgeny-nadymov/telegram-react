@@ -20,6 +20,7 @@
 .light .dialog-details {
     background-image: url('../../Assets/bg.jpg');
     background-size: cover;
+    background-position: center;
 }
 
 .dialog-details-third-column {

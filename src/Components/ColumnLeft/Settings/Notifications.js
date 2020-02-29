@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ArrowBackIcon from '../../../Assets/Icons/Back';
 import NotificationStore from '../../../Stores/NotificationStore';
 import OptionStore from '../../../Stores/OptionStore';
 import TdLibController from '../../../Controllers/TdLibController';

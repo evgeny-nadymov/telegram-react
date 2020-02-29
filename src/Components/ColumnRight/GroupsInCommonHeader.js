@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowBackIcon from '../../Assets/Icons/Back';
 import './GroupsInCommonHeader.css';
 
 class GroupsInCommonHeader extends React.Component {
