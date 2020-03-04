@@ -54,10 +54,10 @@ function getSizeString(size) {
 }
 
 function getFileSize(file) {
-    if (!file) return null;
+    if (!file) return '';
 
     let size = file.size;
-    if (!size) return null;
+    if (!size) return '';
 
     return getSizeString(size);
 }

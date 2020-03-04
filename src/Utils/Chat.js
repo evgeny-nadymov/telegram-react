@@ -20,6 +20,7 @@ import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import { formatPhoneNumber } from './Phone';
 
 export function canUnpinMessage(chatId) {
     const chat = ChatStore.get(chatId);
@@ -585,7 +586,7 @@ function getChatPhoneNumber(chatId) {
         case 'chatTypeSecret': {
             const user = UserStore.get(chat.type.user_id);
             if (user) {
-                return user.phone_number;
+                return formatPhoneNumber(user.phone_number);
             }
 
             break;

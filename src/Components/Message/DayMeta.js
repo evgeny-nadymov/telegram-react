@@ -27,12 +27,22 @@ class DayMeta extends React.Component {
     render() {
         const { date, i18n } = this.props;
 
+        const showYear = new Date(date * 1000) < new Date().setMonth(new Date().getMonth() - 3);
+        const options = showYear
+            ? {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+              }
+            : {
+                  day: 'numeric',
+                  month: 'long'
+              };
+
         return (
             <div className='day-meta'>
                 <div className='day-meta-wrapper'>
-                    <div>
-                        {new Date(date * 1000).toLocaleDateString([i18n.language], { day: 'numeric', month: 'long' })}
-                    </div>
+                    <div>{new Date(date * 1000).toLocaleDateString([i18n.language], options)}</div>
                 </div>
             </div>
         );

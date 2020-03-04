@@ -54,7 +54,7 @@
 
 .forward-target-chat-mark-selected {
     box-shadow: inset 0 0 0 10px var(--color-accent-main);
-    border: 2px solid var(--backgorund-paper);
+    border: 2px solid var(--background-paper);
 }
 
 .forward-target-chat-mark-unselected {
