@@ -22,6 +22,7 @@ import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
+import { scrollTop } from '../../Utils/DOM';
 
 class InstantViewer extends React.Component {
     constructor(props) {
@@ -172,13 +173,7 @@ class InstantViewer extends React.Component {
 
         switch (behavior) {
             case 'smooth': {
-                element.scrollTop = Math.min(element.scrollTop, 100);
-                setTimeout(() => {
-                    element.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                }, 50);
+                scrollTop(element);
                 break;
             }
             default: {

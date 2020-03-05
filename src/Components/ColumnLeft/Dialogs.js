@@ -25,10 +25,8 @@ import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
-import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-import { getUserFullName } from '../../Utils/User';
 
 class Dialogs extends Component {
     constructor(props) {

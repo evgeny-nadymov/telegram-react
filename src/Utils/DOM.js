@@ -36,3 +36,15 @@ export function focusInput(element) {
 
     element.focus();
 }
+
+export function scrollTop(element, behavior = 'smooth') {
+    if (!element) return;
+
+    element.scrollTop = Math.min(element.scrollTop, 100);
+    setTimeout(() => {
+        element.scrollTo({
+            top: 0,
+            behavior
+        });
+    }, 50);
+}

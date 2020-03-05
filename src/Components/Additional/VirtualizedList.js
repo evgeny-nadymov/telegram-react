@@ -35,23 +35,29 @@ export class VirtualizedList extends React.Component {
         };
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.source !== this.props.source) {
+            this.setViewportHeight();
+        }
+    }
+
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         return true;
 
-        const { renderIds } = this.state;
-        const { renderIds: nextRenderIds } = nextState;
-
-        if (renderIds.size === nextRenderIds.size) {
-            renderIds.forEach((value, key) => {
-                if (!nextRenderIds.has(key)) {
-                    return true;
-                }
-            });
-
-            return false;
-        }
-
-        return true;
+        // const { renderIds } = this.state;
+        // const { renderIds: nextRenderIds } = nextState;
+        //
+        // if (renderIds.size === nextRenderIds.size) {
+        //     renderIds.forEach((value, key) => {
+        //         if (!nextRenderIds.has(key)) {
+        //             return true;
+        //         }
+        //     });
+        //
+        //     return false;
+        // }
+        //
+        // return true;
     }
 
     componentDidMount() {
@@ -71,10 +77,9 @@ export class VirtualizedList extends React.Component {
         if (!current) return;
 
         const viewportHeight = parseFloat(window.getComputedStyle(current, null).getPropertyValue('height'));
-
         const renderIds = this.getRenderIds(source, viewportHeight, scrollTop);
 
-        console.log('setViewportHeight', viewportHeight, renderIds);
+        // console.log('[vl] setViewportHeight');
         this.setState({ viewportHeight, ...renderIds });
     };
 
@@ -123,6 +128,10 @@ export class VirtualizedList extends React.Component {
         }
     };
 
+    getListRef() {
+        return this.listRef;
+    }
+
     isVisibleItem = (index, viewportHeight, scrollTop) => {
         const { overScanCount, rowHeight } = this.props;
 
@@ -137,15 +146,13 @@ export class VirtualizedList extends React.Component {
 
     render() {
         const { className, source, renderItem, rowHeight } = this.props;
-        const { viewportHeight, scrollTop, renderIds, renderIdsList } = this.state;
+        const { renderIds } = this.state;
 
         const items = (source || []).map((item, index) => {
             return renderIds.has(index) && renderItem({ index, style: style.item(index, rowHeight) });
         });
 
-        // const items = (renderIdsList || []).map((item, index) => {
-        //     return renderItem({ index: item, style: style.item(item, rowHeight) });
-        // });
+        // console.log('[vl] render', source, renderIds);
 
         return (
             <div ref={this.listRef} className={className}>

@@ -26,13 +26,16 @@ class UserListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { userId, style } = this.props;
         if (nextProps.userId !== userId) {
+            // console.log('[vl] UserListItem.shouldUpdate true userId');
             return true;
         }
 
         if (nextProps.style.top !== style.top) {
+            // console.log('[vl] UserListItem.shouldUpdate true style');
             return true;
         }
 
+        // console.log('[vl] UserListItem.shouldUpdate false');
         return false;
     }
 

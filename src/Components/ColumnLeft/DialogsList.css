@@ -19,3 +19,7 @@
     bottom: 0;
     left: 0;
 }
+
+.dialogs-list-item {
+    margin: 2px 0;
+}

@@ -10,9 +10,10 @@ import PropTypes from 'prop-types';
 import Archive from '../Tile/Archive';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
+import VirtualizedList from '../Additional/VirtualizedList';
 import { loadChatsContent } from '../../Utils/File';
 import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
-import { CHAT_SLICE_LIMIT, SCROLL_PRECISION } from '../../Constants';
+import { CHAT_SLICE_LIMIT, SCROLL_CHATS_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -20,6 +21,40 @@ import FileStore from '../../Stores/FileStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
+import { scrollTop } from '../../Utils/DOM';
+
+class DialogListItem extends React.Component {
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, style, hidden } = this.props;
+        if (nextProps.chatId !== chatId) {
+            // console.log('[vl] UserListItem.shouldUpdate true userId');
+            return true;
+        }
+
+        if (nextProps.hidden !== hidden) {
+            // console.log('[vl] UserListItem.shouldUpdate true userId');
+            return true;
+        }
+
+        if (nextProps.style.top !== style.top) {
+            // console.log('[vl] UserListItem.shouldUpdate true style');
+            return true;
+        }
+
+        // console.log('[vl] UserListItem.shouldUpdate false');
+        return false;
+    }
+
+    render() {
+        const { chatId, hidden, style } = this.props;
+
+        return (
+            <div className='dialog-list-item' style={style}>
+                <Dialog chatId={chatId} hidden={hidden} />
+            </div>
+        );
+    }
+}
 
 class DialogsList extends React.Component {
     constructor(props) {
@@ -33,6 +68,7 @@ class DialogsList extends React.Component {
 
         this.state = {
             authorizationState,
+            offset: 0,
             chats: null,
             fistSliceLoaded: false
         };
@@ -40,7 +76,7 @@ class DialogsList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, open, showArchive, archiveTitle, items, cacheItems } = this.props;
-        const { chats } = this.state;
+        const { chats, offset } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -66,6 +102,10 @@ class DialogsList extends React.Component {
             return true;
         }
 
+        if (nextState.offset !== offset) {
+            return true;
+        }
+
         if (nextState.chats !== chats) {
             return true;
         }
@@ -86,7 +126,10 @@ class DialogsList extends React.Component {
 
         const { scrollTop } = snapshot;
 
-        list.scrollTop = scrollTop;
+        // if (prevState.offset > this.state.offset) {
+        //     list.scrollTop += ( - this.state.offset + prevState.offset) * 72;
+        // }
+        // list.scrollTop = scrollTop;
     }
 
     componentDidMount() {
@@ -254,16 +297,35 @@ class DialogsList extends React.Component {
     }
 
     handleScroll = () => {
-        const list = this.listRef.current;
+        // console.log('[vl] onScroll');
+        const list = this.listRef.current.getListRef().current;
+        if (!list) return;
 
-        if (list && list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
+        // console.log(`[vl] onScroll [scrollTop, offsetHeight, scrollHeight] = [${list.scrollTop}, ${list.offsetHeight}, ${list.scrollHeight}]`, list.scrollTop + list.offsetHeight, (list.scrollHeight - SCROLL_CHATS_PRECISION));
+        if (list.scrollTop <= SCROLL_CHATS_PRECISION) {
+            this.onLoadPrev();
+        } else if (list.scrollTop + list.offsetHeight >= list.scrollHeight - list.offsetHeight) {
+            // console.log(`[vl] onScroll onLoadNext`);
             this.onLoadNext();
         }
     };
 
-    onLoadNext = async (replace = false) => {
+    onLoadPrev() {
+        this.setState({
+            offset: Math.max(this.state.offset - CHAT_SLICE_LIMIT, 0)
+        });
+    }
+
+    async onLoadNext(replace = false) {
         const { type } = this.props;
-        const { chats } = this.state;
+        const { offset, chats } = this.state;
+
+        if (chats && offset + 2 * CHAT_SLICE_LIMIT < chats.length) {
+            this.setState({
+                offset: offset + CHAT_SLICE_LIMIT
+            });
+            return;
+        }
 
         if (this.loading) {
             return;
@@ -317,7 +379,7 @@ class DialogsList extends React.Component {
                 this.loadChatContents(result.chat_ids);
             });
         }
-    };
+    }
 
     loadChatContents(chatIds) {
         const store = FileStore.getStore();
@@ -332,25 +394,36 @@ class DialogsList extends React.Component {
 
         const { chats } = this.state;
 
-        this.setState({ chats: (chats || []).concat(chatIds) }, callback);
+        const newChats = (chats || []).concat(chatIds);
+        this.setState({ chats: newChats, offset: newChats.length - 2 * CHAT_SLICE_LIMIT }, callback);
     }
 
     replaceChats(chats, callback) {
-        this.setState({ chats }, callback);
+        this.setState({ chats, offset: 0 }, callback);
     }
 
     scrollToTop() {
-        const list = this.listRef.current;
-        list.scrollTop = 0;
+        const list = this.listRef.current.getListRef().current;
+
+        scrollTop(list);
     }
+
+    renderItem = ({ index, style }, source) => {
+        const x = source[index];
+
+        return <DialogListItem key={x} chatId={x} hidden={this.hiddenChats.has(x)} style={style} />;
+
+        // return <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} style={style} />
+    };
 
     render() {
         const { type, open, cacheItems, showArchive, archiveTitle } = this.props;
-        const { chats } = this.state;
+        const { chats, offset } = this.state;
 
         // console.log('[dl] render', type, open, chats, cacheChats);
         if (!open) return null;
 
+        this.source = [];
         let dialogs = null;
         if (chats) {
             let lastPinnedId = 0;
@@ -360,9 +433,10 @@ class DialogsList extends React.Component {
                     lastPinnedId = x;
                 }
             });
-            dialogs = chats.map(x => (
-                <Dialog key={x} chatId={x} isLastPinned={x === lastPinnedId} hidden={this.hiddenChats.has(x)} />
-            ));
+            this.source = chats;
+            // dialogs = chats.slice(offset, offset + 2 * CHAT_SLICE_LIMIT).map(x => (
+            //     <Dialog key={x} chatId={x} isLastPinned={x === lastPinnedId} hidden={this.hiddenChats.has(x)} />
+            // ));
         } else if (cacheItems) {
             let lastPinnedId = 0;
             cacheItems.forEach(x => {
@@ -371,14 +445,15 @@ class DialogsList extends React.Component {
                     lastPinnedId = x;
                 }
             });
-            dialogs = cacheItems.map(x => (
-                <Dialog
-                    key={x.id}
-                    chatId={x.id}
-                    isLastPinned={x === lastPinnedId}
-                    hidden={this.hiddenChats.has(x.id)}
-                />
-            ));
+            this.source = cacheItems.map(x => x.id);
+            // dialogs = cacheItems.map(x => (
+            //     <Dialog
+            //         key={x.id}
+            //         chatId={x.id}
+            //         isLastPinned={x === lastPinnedId}
+            //         hidden={this.hiddenChats.has(x.id)}
+            //     />
+            // ));
         } else {
             if (type === 'chatListMain') {
                 dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
@@ -386,10 +461,19 @@ class DialogsList extends React.Component {
         }
 
         return (
-            <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
-                {showArchive && <Archive title={archiveTitle} />}
-                {dialogs}
-            </div>
+            <VirtualizedList
+                ref={this.listRef}
+                className='dialogs-list'
+                source={this.source}
+                rowHeight={76}
+                overScanCount={20}
+                renderItem={x => this.renderItem(x, this.source)}
+                onScroll={this.handleScroll}
+            />
+            // <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
+            //     {showArchive && offset === 0 && <Archive title={archiveTitle} />}
+            //     {dialogs}
+            // </div>
         );
     }
 }
