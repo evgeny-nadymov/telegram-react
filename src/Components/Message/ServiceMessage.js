@@ -9,6 +9,7 @@ import React from 'react';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
+import DayMeta from './DayMeta';
 import UnreadSeparator from './UnreadSeparator';
 import Photo from './Media/Photo';
 import { openMedia } from '../../Utils/Message';
@@ -106,13 +107,13 @@ class ServiceMessage extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, showUnreadSeparator } = this.props;
+        const { chatId, messageId, showUnreadSeparator, showDate } = this.props;
         const { highlighted } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
-        const { content } = message;
+        const { content, date } = message;
         if (!content) return null;
 
         const { photo } = content;
@@ -120,24 +121,27 @@ class ServiceMessage extends React.Component {
         const text = getServiceMessageContent(message, true);
 
         return (
-            <div
-                className={classNames('service-message', { 'message-highlighted': highlighted })}
-                onAnimationEnd={this.handleAnimationEnd}>
-                {showUnreadSeparator && <UnreadSeparator />}
-                <div className='service-message-wrapper'>
-                    <div className='service-message-content'>
-                        <div>{text}</div>
+            <div>
+                {showDate && <DayMeta date={date} />}
+                <div
+                    className={classNames('service-message', { 'message-highlighted': highlighted })}
+                    onAnimationEnd={this.handleAnimationEnd}>
+                    {showUnreadSeparator && <UnreadSeparator />}
+                    <div className='service-message-wrapper'>
+                        <div className='service-message-content'>
+                            <div>{text}</div>
+                        </div>
                     </div>
+                    {photo && (
+                        <Photo
+                            chatId={chatId}
+                            messageId={messageId}
+                            photo={photo}
+                            style={chatPhotoStyle}
+                            openMedia={this.openMedia}
+                        />
+                    )}
                 </div>
-                {photo && (
-                    <Photo
-                        chatId={chatId}
-                        messageId={messageId}
-                        photo={photo}
-                        style={chatPhotoStyle}
-                        openMedia={this.openMedia}
-                    />
-                )}
             </div>
         );
     }

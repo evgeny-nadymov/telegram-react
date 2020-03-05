@@ -63,6 +63,7 @@ class MessagesList extends React.Component {
 
         this.listRef = React.createRef();
         this.itemsRef = React.createRef();
+        this.scrollDownButtonRef = React.createRef();
 
         this.defferedActions = [];
         this.itemsMap = new Map();
@@ -483,7 +484,7 @@ class MessagesList extends React.Component {
         for (let i = 0; i < items.length; i++) {
             const messageWrapper = this.messages[items[i]];
             if (messageWrapper) {
-                const message = messageWrapper.props.children[1];
+                const message = messageWrapper;
                 const { chatId, messageId } = message.props;
                 const key = `${chatId}_${messageId}`;
                 messages.set(key, key);
@@ -1286,16 +1287,12 @@ class MessagesList extends React.Component {
                               showTitle={showTitle}
                               showTail={showTail}
                               showUnreadSeparator={separatorMessageId === x.id}
+                              showDate={showDate}
                           />
                       );
                   }
 
-                  return (
-                      <div key={`chat_id=${x.chat_id} message_id=${x.id}`}>
-                          {showDate && <DayMeta date={x.date} />}
-                          {m}
-                      </div>
-                  );
+                  return m;
               });
 
         return (
@@ -1312,7 +1309,9 @@ class MessagesList extends React.Component {
                 </div>
                 <ActionBar chatId={chatId} />
                 <Placeholder />
-                {scrollDownVisible && <ScrollDownButton onClick={this.handleScrollDownClick} />}
+                {scrollDownVisible && (
+                    <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} />
+                )}
                 <FilesDropTarget />
                 <StickersHint />
             </div>

@@ -55,20 +55,28 @@ export class VirtualizedList extends React.Component {
     }
 
     componentDidMount() {
-        const { source } = this.props;
-        const { scrollTop } = this.state;
+        window.addEventListener('resize', this.setViewportHeight, true);
 
         const { current } = this.listRef;
         if (!current) return;
-
         current.addEventListener('scroll', this.setScrollPosition, true);
+
+        this.setViewportHeight();
+    }
+
+    setViewportHeight = () => {
+        const { source } = this.props;
+        const { scrollTop } = this.state;
+        const { current } = this.listRef;
+        if (!current) return;
 
         const viewportHeight = parseFloat(window.getComputedStyle(current, null).getPropertyValue('height'));
 
         const renderIds = this.getRenderIds(source, viewportHeight, scrollTop);
 
+        console.log('setViewportHeight', viewportHeight, renderIds);
         this.setState({ viewportHeight, ...renderIds });
-    }
+    };
 
     getRenderIds(source, viewportHeight, scrollTop) {
         const renderIds = new Map();
@@ -84,9 +92,10 @@ export class VirtualizedList extends React.Component {
     }
 
     componentWillUnmount() {
+        window.removeEventListener('resize', this.setViewportHeight);
+
         const { current } = this.listRef;
         if (!current) return;
-
         current.removeEventListener('scroll', this.setScrollPosition);
     }
 

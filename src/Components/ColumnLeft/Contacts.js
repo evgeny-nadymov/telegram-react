@@ -29,7 +29,7 @@ class UserListItem extends React.Component {
             return true;
         }
 
-        if (nextProps.style !== style) {
+        if (nextProps.style.top !== style.top) {
             return true;
         }
 
