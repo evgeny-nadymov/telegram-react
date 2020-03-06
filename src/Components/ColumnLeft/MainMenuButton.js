@@ -8,12 +8,14 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import ArrowBackIcon from '../../Assets/Icons/Back';
 import ArchiveIcon from '../../Assets/Icons/Archive';
+import MenuIcon from '../../Assets/Icons/Menu';
 import GroupIcon from '../../Assets/Icons/Group';
 import HelpIcon from '../../Assets/Icons/Help';
 import SavedIcon from '../../Assets/Icons/Saved';
@@ -116,11 +118,11 @@ class MainMenuButton extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, showClose, onClose } = this.props;
         const { anchorEl, authorizationState } = this.state;
 
-        const mainMenuControl = isAuthorizationReady(authorizationState) ? (
-            <>
+        const mainMenuControl =
+            !showClose && isAuthorizationReady(authorizationState) ? (
                 <Menu
                     id='main-menu'
                     anchorEl={anchorEl}
@@ -170,8 +172,7 @@ class MainMenuButton extends React.Component {
                         <ListItemText primary={t('SettingsHelp')} />
                     </MenuItem>
                 </Menu>
-            </>
-        ) : null;
+            ) : null;
 
         return (
             <>
@@ -180,8 +181,8 @@ class MainMenuButton extends React.Component {
                     aria-haspopup='true'
                     className='header-left-button'
                     aria-label='Menu'
-                    onClick={this.handleMenuOpen}>
-                    <MenuIcon />
+                    onClick={showClose ? onClose : this.handleMenuOpen}>
+                    <SpeedDialIcon open={showClose} openIcon={<ArrowBackIcon />} icon={<MenuIcon />} />
                 </IconButton>
                 {mainMenuControl}
             </>

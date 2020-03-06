@@ -103,7 +103,7 @@ class Contacts extends React.Component {
     componentDidMount() {
         const { current } = this.searchInputRef;
         if (current) {
-            current.focus();
+            setTimeout(() => current.focus(), 50);
         }
 
         this.loadContent();
@@ -177,7 +177,11 @@ class Contacts extends React.Component {
                     <IconButton className='header-left-button' onClick={this.handleClose}>
                         <ArrowBackIcon />
                     </IconButton>
-                    <SearchInput inputRef={this.searchInputRef} onChange={this.handleSearch} />
+                    <SearchInput
+                        inputRef={this.searchInputRef}
+                        onChange={this.handleSearch}
+                        onClose={this.handleClose}
+                    />
                 </div>
                 <div className='contacts-content'>
                     {items && (

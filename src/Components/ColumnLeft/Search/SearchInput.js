@@ -14,6 +14,13 @@ class SearchInput extends React.Component {
     handleKeyDown = event => {
         if (event.keyCode === 13) {
             event.preventDefault();
+        } else if (event.keyCode === 27) {
+            const { onClose } = this.props;
+
+            if (onClose) {
+                event.target.blur();
+                onClose();
+            }
         }
     };
 
@@ -72,7 +79,8 @@ class SearchInput extends React.Component {
 SearchInput.propTypes = {
     inputRef: PropTypes.object,
     onChange: PropTypes.func,
-    onFocus: PropTypes.func
+    onFocus: PropTypes.func,
+    onClose: PropTypes.func
 };
 
 export default withTranslation()(SearchInput);

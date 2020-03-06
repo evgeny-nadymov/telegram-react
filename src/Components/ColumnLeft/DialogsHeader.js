@@ -9,11 +9,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
-import { IconButton } from '@material-ui/core';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
-import ArrowBackIcon from '../../Assets/Icons/Back';
-import CloseIcon from '../../Assets/Icons/Close';
-import SearchIcon from '../../Assets/Icons/Search';
 import MainMenuButton from './MainMenuButton';
 import SearchInput from './Search/SearchInput';
 import { isAuthorizationReady } from '../../Utils/Common';
@@ -123,64 +118,45 @@ class DialogsHeader extends React.Component {
         this.handleSearch();
     };
 
+    handleClose = () => {
+        const { openArchive, openSearch } = this.props;
+
+        if (openArchive) {
+            this.handleCloseArchive();
+        } else if (openSearch) {
+            this.handleCloseSearch();
+        }
+    };
+
     render() {
         const { onClick, openArchive, openSearch, t } = this.props;
 
         let content = null;
-        let showRightButton = true;
+        let showClose = false;
         if (openSearch) {
-            showRightButton = false;
+            showClose = true;
             content = (
-                <>
-                    {/*<div*/}
-                    {/*    id='header-search-inputbox'*/}
-                    {/*    ref={this.searchInputRef}*/}
-                    {/*    placeholder={t('Search')}*/}
-                    {/*    contentEditable*/}
-                    {/*    suppressContentEditableWarning*/}
-                    {/*    onKeyDown={this.handleKeyDown}*/}
-                    {/*    onKeyUp={this.handleKeyUp}*/}
-                    {/*    onPaste={this.handlePaste}*/}
-                    {/*/>*/}
-                    <IconButton className='header-left-button' onClick={this.handleCloseSearch}>
-                        <ArrowBackIcon />
-                    </IconButton>
-                    <SearchInput inputRef={this.searchInputRef} onChange={this.handleSearchTextChange} />
-                </>
+                <SearchInput
+                    inputRef={this.searchInputRef}
+                    onChange={this.handleSearchTextChange}
+                    onClose={this.handleCloseSearch}
+                />
             );
         } else if (openArchive) {
-            showRightButton = false;
+            showClose = true;
             content = (
-                <>
-                    <IconButton className='header-left-button' onClick={this.handleCloseArchive}>
-                        <ArrowBackIcon />
-                    </IconButton>
-                    <div className='header-status grow cursor-pointer' onClick={onClick}>
-                        <span className='header-status-content'>{t('ArchivedChats')}</span>
-                    </div>
-                </>
+                <div className='header-status grow cursor-pointer' onClick={onClick}>
+                    <span className='header-status-content'>{t('ArchivedChats')}</span>
+                </div>
             );
         } else {
-            showRightButton = false;
-            content = (
-                <>
-                    <MainMenuButton />
-                    <SearchInput inputRef={this.searchInputRef} onFocus={this.handleFocus} />
-                </>
-            );
+            content = <SearchInput inputRef={this.searchInputRef} onFocus={this.handleFocus} />;
         }
 
         return (
             <div className='header-master'>
+                <MainMenuButton showClose={showClose} onClose={this.handleClose} />
                 {content}
-                {showRightButton && (
-                    <IconButton
-                        className='header-right-button'
-                        aria-label={t('Search')}
-                        onMouseDown={this.handleSearch}>
-                        <SpeedDialIcon open={openSearch} icon={<SearchIcon />} openIcon={<CloseIcon />} />
-                    </IconButton>
-                )}
             </div>
         );
     }
