@@ -15,9 +15,21 @@ class SearchInput extends React.Component {
         if (event.keyCode === 13) {
             event.preventDefault();
         } else if (event.keyCode === 27) {
-            const { onClose } = this.props;
+            const { onChange, onClose } = this.props;
+
+            const element = event.target;
+            if (!element) return;
+
+            if (element.innerText) {
+                event.stopPropagation();
+
+                element.innerText = null;
+                onChange(element.innerText);
+                return;
+            }
 
             if (onClose) {
+                event.stopPropagation();
                 event.target.blur();
                 onClose();
             }

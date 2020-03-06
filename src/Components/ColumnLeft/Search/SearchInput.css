@@ -26,8 +26,8 @@
 
 #search-inputbox {
     white-space: pre-wrap;
-    background: var(--color-hover);
-    border: 2px solid var(--color-hover);
+    background: var(--color-search-input);
+    border: 2px solid var(--color-search-input);
     border-radius: 22px;
     margin: 8px 12px 8px 14px;
     padding: 8px 12px 11px 12px;

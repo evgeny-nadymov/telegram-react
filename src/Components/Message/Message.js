@@ -642,7 +642,7 @@ class Message extends Component {
                                     'message-bubble-out': withBubble && is_outgoing
                                 })}
                                 style={style}>
-                                {withBubble && !suppressTitle && (showTitle || showForward) && (
+                                {withBubble && ((showTitle && !suppressTitle) || showForward) && (
                                     <div className='message-title'>
                                         {showTitle && !showForward && (
                                             <MessageAuthor chatId={chatId} openChat userId={sender_user_id} openUser />

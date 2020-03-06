@@ -55,6 +55,8 @@ class PrivacySecurity extends React.Component {
     };
 
     openActiveSessions = () => {
+        if (!this.state.sessions) return;
+
         this.setState({
             openActiveSessions: true
         });
