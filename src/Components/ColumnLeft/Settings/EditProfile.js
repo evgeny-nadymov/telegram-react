@@ -8,8 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Chat from '../../Tile/Chat';
+import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import TextField from '@material-ui/core/TextField';
+import { IconButton } from '@material-ui/core';
+import ArrowBackIcon from '../../../Assets/Icons/Back';
+import Chat from '../../Tile/Chat';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditProfile.css';
@@ -123,7 +126,7 @@ class EditProfile extends React.Component {
     };
 
     render() {
-        const { chatId, t } = this.props;
+        let { chatId, t, onClose } = this.props;
         const { firstName, lastName, bio, username, usernameCheck } = this.state;
 
         let hasError = false;
@@ -153,60 +156,70 @@ class EditProfile extends React.Component {
         // console.log('[un] render', hasError, usernameLabel);
 
         return (
-            <div className='search'>
-                <div className='chat-details-info'>
-                    <Chat
-                        chatId={chatId}
-                        showTitle={false}
-                        big={true}
-                        showStatus={true}
-                        showSavedMessages={false}
-                        onTileSelect={null}
-                    />
+            <div className='settings-page'>
+                <div className='header-master'>
+                    <IconButton className='header-left-button' onClick={onClose}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <div className='header-status grow cursor-pointer'>
+                        <span className='header-status-content'>{t('EditProfile')}</span>
+                    </div>
                 </div>
-                <div className='edit-profile-name'>
-                    <TextField
-                        inputRef={this.firstNameRef}
-                        className='edit-profile-input'
-                        variant='outlined'
-                        fullWidth
-                        label={t('FirstName')}
-                        defaultValue={firstName}
-                    />
-                    <TextField
-                        inputRef={this.lastNameRef}
-                        className='edit-profile-input'
-                        variant='outlined'
-                        fullWidth
-                        label={t('LastName')}
-                        defaultValue={lastName}
-                    />
-                    <TextField
-                        inputRef={this.bioRef}
-                        className='edit-profile-input'
-                        variant='outlined'
-                        fullWidth
-                        label={t('Bio')}
-                        defaultValue={bio}
-                    />
-                    <div className='edit-profile-hint'>{t('BioAbout')}</div>
-                </div>
-                <div className='settings-border' />
-                <div className='edit-profile-username'>
-                    <TextField
-                        inputRef={this.usernameRef}
-                        error={hasError}
-                        className='edit-profile-input'
-                        variant='outlined'
-                        fullWidth
-                        label={usernameLabel}
-                        defaultValue={username}
-                        onChange={this.handleUsernameChange}
-                    />
-                    <div className='edit-profile-hint'>
-                        You can choose a username on Telegram. If you do, other people will be able to find you by this
-                        username and contact you without knowing your phone number. You can use a-z, 0-9 and
-                        underscores. Minimum length is 5 characters.
+                <div className='settings-page-content'>
+                    <div className='chat-details-info'>
+                        <Chat
+                            chatId={chatId}
+                            showTitle={false}
+                            big={true}
+                            showStatus={true}
+                            showSavedMessages={false}
+                            onTileSelect={null}
+                        />
+                    </div>
+                    <div className='edit-profile-name'>
+                        <TextField
+                            inputRef={this.firstNameRef}
+                            className='edit-profile-input'
+                            variant='outlined'
+                            fullWidth
+                            label={t('FirstName')}
+                            defaultValue={firstName}
+                        />
+                        <TextField
+                            inputRef={this.lastNameRef}
+                            className='edit-profile-input'
+                            variant='outlined'
+                            fullWidth
+                            label={t('LastName')}
+                            defaultValue={lastName}
+                        />
+                        <TextField
+                            inputRef={this.bioRef}
+                            className='edit-profile-input'
+                            variant='outlined'
+                            fullWidth
+                            label={t('Bio')}
+                            defaultValue={bio}
+                        />
+                        <div className='edit-profile-hint'>{t('BioAbout')}</div>
+                    </div>
+                    <div className='settings-border' />
+                    <div className='edit-profile-username'>
+                        <TextField
+                            inputRef={this.usernameRef}
+                            error={hasError}
+                            className='edit-profile-input'
+                            variant='outlined'
+                            fullWidth
+                            label={usernameLabel}
+                            defaultValue={username}
+                            onChange={this.handleUsernameChange}
+                        />
+                        <div className='edit-profile-hint'>
+                            You can choose a username on Telegram. If you do, other people will be able to find you by
+                            this username and contact you without knowing your phone number. You can use a-z, 0-9 and
+                            underscores. Minimum length is 5 characters.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -218,4 +231,10 @@ EditProfile.propTypes = {
     chatId: PropTypes.number.isRequired
 };
 
-export default withTranslation()(EditProfile);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(EditProfile);

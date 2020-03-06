@@ -379,10 +379,6 @@ class ChatStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
-            case 'clientUpdateActiveSessionsPage': {
-                this.emitUpdate(update);
-                break;
-            }
             case 'clientUpdateClearHistory': {
                 this.emitUpdate(update);
                 break;
@@ -395,23 +391,11 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateCloseEditProfile': {
-                this.emitUpdate(update);
-                break;
-            }
             case 'clientUpdateCloseSettings': {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateLanguagePage': {
-                this.emitUpdate(update);
-                break;
-            }
             case 'clientUpdateLeaveChat': {
-                this.emitUpdate(update);
-                break;
-            }
-            case 'clientUpdateNotificationsPage': {
                 this.emitUpdate(update);
                 break;
             }
@@ -427,15 +411,7 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateOpenEditProfile': {
-                this.emitUpdate(update);
-                break;
-            }
             case 'clientUpdateOpenSettings': {
-                this.emitUpdate(update);
-                break;
-            }
-            case 'clientUpdatePrivacySecurityPage': {
                 this.emitUpdate(update);
                 break;
             }

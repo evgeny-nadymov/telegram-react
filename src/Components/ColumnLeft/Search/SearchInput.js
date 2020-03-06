@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import SearchIcon from '../../../Assets/Icons/Search';
 import './SearchInput.css';
 
 class SearchInput extends React.Component {
@@ -48,7 +47,7 @@ class SearchInput extends React.Component {
     };
 
     render() {
-        const { inputRef, t } = this.props;
+        const { inputRef, t, onFocus } = this.props;
 
         return (
             <div className='search-input'>
@@ -63,6 +62,7 @@ class SearchInput extends React.Component {
                     onKeyUp={this.handleKeyUp}
                     onPaste={this.handlePaste}
                     onInput={this.handleInput}
+                    onFocus={onFocus}
                 />
             </div>
         );
@@ -71,7 +71,8 @@ class SearchInput extends React.Component {
 
 SearchInput.propTypes = {
     inputRef: PropTypes.object,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    onFocus: PropTypes.func
 };
 
 export default withTranslation()(SearchInput);

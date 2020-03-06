@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import IconButton from '@material-ui/core/IconButton';
 import ListItemText from '@material-ui/core/ListItemText';
 import Radio from '@material-ui/core/Radio';
@@ -34,12 +35,8 @@ class Language extends React.Component {
         TdLibController.clientUpdate({ '@type': 'clientUpdateLanguageChange', language });
     };
 
-    handleClose = () => {
-        TdLibController.clientUpdate({ '@type': 'clientUpdateLanguagePage', opened: false });
-    };
-
     render() {
-        const { t } = this.props;
+        const { t, onClose } = this.props;
         const { language } = this.state;
         const info = LocalizationStore.info || { language_packs: [] };
 
@@ -57,21 +54,29 @@ class Language extends React.Component {
         ));
 
         return (
-            <div className='sidebar-page'>
+            <div className='settings-page'>
                 <div className='header-master'>
-                    <IconButton className='header-left-button' onClick={this.handleClose}>
+                    <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
                     </IconButton>
                     <div className='header-status grow cursor-pointer'>
                         <span className='header-status-content'>{t('Language')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content'>{languages}</div>
+                <div className='settings-page-content'>{languages}</div>
             </div>
         );
     }
 }
 
-Language.propTypes = {};
+Language.propTypes = {
+    onClose: PropTypes.func
+};
 
-export default withTranslation()(Language);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(Language);

@@ -43,9 +43,11 @@ class Search extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { text } = this.props;
+        const { chatId, text } = this.props;
 
         if (prevProps.text !== text) {
+            this.searchOrLoadContent(text);
+        } else if (prevProps.chatId !== chatId) {
             this.searchOrLoadContent(text);
         }
     }

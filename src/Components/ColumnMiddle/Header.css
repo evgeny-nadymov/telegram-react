@@ -11,6 +11,7 @@
     align-items: center;
     overflow: hidden;
     flex-shrink: 0;
+    padding: 0 8px;
 }
 
 .header-details {
@@ -23,6 +24,7 @@
     border-bottom-style: solid;
     background: var(--panel-background);
     border-color: var(--border);
+    padding: 0 8px;
 }
 
 .header-title {
@@ -67,11 +69,11 @@
 }
 
 .header-left-button {
-    margin: 6px -2px 6px 12px;
+    margin: 6px -2px 6px 6px;
 }
 
 .header-right-button {
-    margin: 6px 12px 6px 0;
+    margin: 6px 6px 6px 0;
 }
 
 .header-right-second-button {

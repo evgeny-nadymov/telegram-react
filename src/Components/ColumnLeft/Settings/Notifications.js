@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
+import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -112,25 +113,21 @@ class Notifications extends React.Component {
         return show_preview;
     }
 
-    handleClose = () => {
-        TdLibController.clientUpdate({ '@type': 'clientUpdateNotificationsPage', opened: false });
-    };
-
     render() {
-        const { t } = this.props;
+        const { t, onClose } = this.props;
         const { privateChatsSettings, groupChatsSettings, channelChatsSettings, contactJoined } = this.state;
 
         return (
-            <div className='sidebar-page'>
+            <div className='settings-page'>
                 <div className='header-master'>
-                    <IconButton className='header-left-button' onClick={this.handleClose}>
+                    <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
                     </IconButton>
                     <div className='header-status grow cursor-pointer'>
                         <span className='header-status-content'>{t('Notifications')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content'>
+                <div className='settings-page-content'>
                     <div className='settings-section'>
                         <div className='settings-section-header'>{t('NotificationsPrivateChats')}</div>
                         <div className='settings-item' onClick={() => this.handleMuteFor('privateChatsSettings')}>
@@ -268,4 +265,10 @@ class Notifications extends React.Component {
     }
 }
 
-export default withTranslation()(Notifications);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(Notifications);

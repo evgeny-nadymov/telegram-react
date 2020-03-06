@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import Button from '@material-ui/core/Button';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -25,10 +26,6 @@ class ActiveSessions extends React.Component {
         open: false,
         openAll: false,
         session: null
-    };
-
-    handleClose = () => {
-        TdLibController.clientUpdate({ '@type': 'clientUpdateActiveSessionsPage', opened: false });
     };
 
     handleTerminate = session => {
@@ -92,7 +89,7 @@ class ActiveSessions extends React.Component {
     };
 
     render() {
-        const { t, sessions } = this.props;
+        const { t, sessions, onClose } = this.props;
         const { open, openAll } = this.state;
 
         const current = sessions.sessions.find(x => x.is_current);
@@ -100,16 +97,16 @@ class ActiveSessions extends React.Component {
 
         return (
             <>
-                <div className='sidebar-page'>
+                <div className='settings-page'>
                     <div className='header-master'>
-                        <IconButton className='header-left-button' onClick={this.handleClose}>
+                        <IconButton className='header-left-button' onClick={onClose}>
                             <ArrowBackIcon />
                         </IconButton>
                         <div className='header-status grow cursor-pointer'>
                             <span className='header-status-content'>{t('SessionsTitle')}</span>
                         </div>
                     </div>
-                    <div className='sidebar-page-content'>
+                    <div className='settings-page-content'>
                         {Boolean(current) && (
                             <div className='settings-section'>
                                 <div className='settings-section-header'>{t('CurrentSession')}</div>
@@ -190,7 +187,14 @@ class ActiveSessions extends React.Component {
 }
 
 ActiveSessions.propTypes = {
-    sessions: PropTypes.object.isRequired
+    sessions: PropTypes.object.isRequired,
+    onClose: PropTypes.func
 };
 
-export default withTranslation()(ActiveSessions);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(ActiveSessions);
