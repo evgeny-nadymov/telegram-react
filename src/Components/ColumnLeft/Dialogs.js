@@ -7,16 +7,13 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import Archive from './Archive';
 import Search from './Search/Search';
 import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
-import EditProfile from './Settings/EditProfile';
-import Notifications from './Settings/Notifications';
+import SidebarPage from './SidebarPage';
 import Settings from './Settings/Settings';
 import Contacts from './Contacts';
-import Language from './Language';
-import PrivacySecurity from './Settings/PrivacySecurity';
-import ActiveSessions from './Settings/ActiveSessions';
 import UpdatePanel from './UpdatePanel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
@@ -27,7 +24,6 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-import { Slide } from '@material-ui/core';
 
 class Dialogs extends Component {
     constructor(props) {
@@ -51,6 +47,8 @@ class Dialogs extends Component {
             isChatDetailsVisible,
             openSearch: false,
             openArchive: false,
+            openContacts: false,
+            openSettings: false,
 
             searchChatId: 0,
             searchText: null,
@@ -398,7 +396,6 @@ class Dialogs extends Component {
                     <div className='sidebar-page'>
                         <DialogsHeader
                             ref={this.dialogsHeaderRef}
-                            openArchive={openArchive}
                             openSearch={openSearch}
                             onClick={this.handleHeaderClick}
                             onSearch={this.handleSearch}
@@ -415,14 +412,6 @@ class Dialogs extends Component {
                                 open={true}
                                 onSaveCache={this.handleSaveCache}
                             />
-                            <DialogsList
-                                type='chatListArchive'
-                                ref={this.archiveListRef}
-                                cacheItems={archiveCacheItems}
-                                items={archiveItems}
-                                open={openArchive}
-                                onSaveCache={this.handleSaveCache}
-                            />
                             {openSearch && (
                                 <Search
                                     chatId={searchChatId}
@@ -435,13 +424,21 @@ class Dialogs extends Component {
                         <UpdatePanel />
                     </div>
 
-                    <Slide direction='right' in={openContacts} mountOnEnter unmountOnExit>
-                        <Contacts />
-                    </Slide>
+                    <SidebarPage open={openArchive}>
+                        <Archive
+                            innerListRef={this.archiveListRef}
+                            items={archiveItems}
+                            cacheItems={archiveCacheItems}
+                        />
+                    </SidebarPage>
 
-                    <Slide direction='right' in={openSettings} mountOnEnter unmountOnExit>
+                    <SidebarPage open={openContacts}>
+                        <Contacts />
+                    </SidebarPage>
+
+                    <SidebarPage open={openSettings}>
                         <Settings chatId={meChatId} />
-                    </Slide>
+                    </SidebarPage>
                 </div>
             </>
         );

@@ -9,13 +9,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
-import { Slide } from '@material-ui/core';
 import Main from './Main';
 import EditProfile from './EditProfile';
 import General from './General';
+import Language from '../Language';
 import Notifications from './Notifications';
 import PrivacySecurity from './PrivacySecurity';
-import Language from '../Language';
+import SidebarPage from '../SidebarPage';
 import { loadChatsContent } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import UserStore from '../../../Stores/UserStore';
@@ -30,12 +30,13 @@ class Settings extends React.Component {
             openEditProfile: false,
             openGeneral: false,
             openNotifications: false,
-            openPrivacy: false,
+            openPrivacySecurity: false,
             openLanguage: false
         };
     }
 
     componentDidMount() {
+        console.log('[perf] Settings.componentDidMount');
         this.loadContent();
     }
 
@@ -125,34 +126,32 @@ class Settings extends React.Component {
         const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage } = this.state;
 
         return (
-            <div className='settings'>
-                <div className='settings-content'>
-                    <Main
-                        chatId={chatId}
-                        onClose={this.handleCloseSettings}
-                        onEditProfile={this.openEditProfile}
-                        onGeneral={this.openGeneral}
-                        onNotifications={this.openNotifications}
-                        onPrivacySecurity={this.openPrivacySecurity}
-                        onLanguage={this.openLanguage}
-                    />
-                    <Slide direction='right' in={openEditProfile} mountOnEnter unmountOnExit>
-                        <EditProfile chatId={chatId} onClose={this.closeEditProfile} />
-                    </Slide>
-                    <Slide direction='right' in={openGeneral} mountOnEnter unmountOnExit>
-                        <General chatId={chatId} onClose={this.closeGeneral} />
-                    </Slide>
-                    <Slide direction='right' in={openNotifications} mountOnEnter unmountOnExit>
-                        <Notifications chatId={chatId} onClose={this.closeNotifications} />
-                    </Slide>
-                    <Slide direction='right' in={openPrivacySecurity} mountOnEnter unmountOnExit>
-                        <PrivacySecurity onClose={this.closePrivacySecurity} />
-                    </Slide>
-                    <Slide direction='right' in={openLanguage} mountOnEnter unmountOnExit>
-                        <Language onClose={this.closeLanguage} />
-                    </Slide>
-                </div>
-            </div>
+            <>
+                <Main
+                    chatId={chatId}
+                    onClose={this.handleCloseSettings}
+                    onEditProfile={this.openEditProfile}
+                    onGeneral={this.openGeneral}
+                    onNotifications={this.openNotifications}
+                    onPrivacySecurity={this.openPrivacySecurity}
+                    onLanguage={this.openLanguage}
+                />
+                <SidebarPage open={openEditProfile}>
+                    <EditProfile chatId={chatId} onClose={this.closeEditProfile} />
+                </SidebarPage>
+                <SidebarPage open={openGeneral}>
+                    <General chatId={chatId} onClose={this.closeGeneral} />
+                </SidebarPage>
+                <SidebarPage open={openNotifications}>
+                    <Notifications chatId={chatId} onClose={this.closeNotifications} />
+                </SidebarPage>
+                <SidebarPage open={openPrivacySecurity}>
+                    <PrivacySecurity onClose={this.closePrivacySecurity} />
+                </SidebarPage>
+                <SidebarPage open={openLanguage}>
+                    <Language onClose={this.closeLanguage} />
+                </SidebarPage>
+            </>
         );
     }
 }

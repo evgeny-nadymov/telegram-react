@@ -16,6 +16,8 @@ import NotificationStore from '../../../Stores/NotificationStore';
 import OptionStore from '../../../Stores/OptionStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Notifications.css';
+import SidebarPage from '../SidebarPage';
+import PropTypes from 'prop-types';
 
 class Notifications extends React.Component {
     constructor(props) {
@@ -118,7 +120,7 @@ class Notifications extends React.Component {
         const { privateChatsSettings, groupChatsSettings, channelChatsSettings, contactJoined } = this.state;
 
         return (
-            <div className='settings-page'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
@@ -127,7 +129,7 @@ class Notifications extends React.Component {
                         <span className='header-status-content'>{t('Notifications')}</span>
                     </div>
                 </div>
-                <div className='settings-page-content'>
+                <div className='sidebar-page-content'>
                     <div className='settings-section'>
                         <div className='settings-section-header'>{t('NotificationsPrivateChats')}</div>
                         <div className='settings-item' onClick={() => this.handleMuteFor('privateChatsSettings')}>
@@ -260,10 +262,14 @@ class Notifications extends React.Component {
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 }
+
+Notifications.propTypes = {
+    onClose: PropTypes.func
+};
 
 const enhance = compose(
     withSaveRef(),

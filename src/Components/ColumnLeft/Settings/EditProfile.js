@@ -13,6 +13,7 @@ import TextField from '@material-ui/core/TextField';
 import { IconButton } from '@material-ui/core';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import Chat from '../../Tile/Chat';
+import SidebarPage from '../SidebarPage';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditProfile.css';
@@ -156,7 +157,7 @@ class EditProfile extends React.Component {
         // console.log('[un] render', hasError, usernameLabel);
 
         return (
-            <div className='settings-page'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
@@ -165,7 +166,7 @@ class EditProfile extends React.Component {
                         <span className='header-status-content'>{t('EditProfile')}</span>
                     </div>
                 </div>
-                <div className='settings-page-content'>
+                <div className='sidebar-page-content'>
                     <div className='chat-details-info'>
                         <Chat
                             chatId={chatId}
@@ -222,7 +223,7 @@ class EditProfile extends React.Component {
                         </div>
                     </div>
                 </div>
-            </div>
+            </>
         );
     }
 }

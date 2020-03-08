@@ -19,24 +19,6 @@
     position: relative;
 }
 
-.settings-page {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: var(--panel-background);
-    display: flex;
-    flex-direction: column;
-}
-
-.settings-page-content {
-    padding: 0 8px 8px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    transform: translateZ(0);
-}
-
 .settings-list-item {
     padding: 12px;
     border-radius: 10px;

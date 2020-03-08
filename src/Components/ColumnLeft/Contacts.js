@@ -172,7 +172,7 @@ class Contacts extends React.Component {
         const { items, searchItems } = this.state;
 
         return (
-            <div className='contacts'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={this.handleClose}>
                         <ArrowBackIcon />
@@ -207,7 +207,7 @@ class Contacts extends React.Component {
                         />
                     )}
                 </div>
-            </div>
+            </>
         );
     }
 }

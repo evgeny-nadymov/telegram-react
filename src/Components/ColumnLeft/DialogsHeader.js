@@ -7,14 +7,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withTranslation } from 'react-i18next';
-import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import MainMenuButton from './MainMenuButton';
 import SearchInput from './Search/SearchInput';
 import { isAuthorizationReady } from '../../Utils/Common';
 import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
-import TdLibController from '../../Controllers/TdLibController';
 import '../ColumnMiddle/Header.css';
 
 class DialogsHeader extends React.Component {
@@ -84,9 +81,6 @@ class DialogsHeader extends React.Component {
         if (!isAuthorizationReady(authorizationState)) return;
 
         onSearch(!openSearch);
-
-        if (!openSearch) {
-        }
     };
 
     handleSearchTextChange = () => {
@@ -104,12 +98,6 @@ class DialogsHeader extends React.Component {
         onSearchTextChange(innerText);
     };
 
-    handleCloseArchive = () => {
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateCloseArchive'
-        });
-    };
-
     handleCloseSearch = () => {
         this.handleSearch();
     };
@@ -118,18 +106,8 @@ class DialogsHeader extends React.Component {
         this.handleSearch();
     };
 
-    handleClose = () => {
-        const { openArchive, openSearch } = this.props;
-
-        if (openArchive) {
-            this.handleCloseArchive();
-        } else if (openSearch) {
-            this.handleCloseSearch();
-        }
-    };
-
     render() {
-        const { onClick, openArchive, openSearch, t } = this.props;
+        const { openSearch } = this.props;
 
         let content = null;
         let showClose = false;
@@ -142,20 +120,13 @@ class DialogsHeader extends React.Component {
                     onClose={this.handleCloseSearch}
                 />
             );
-        } else if (openArchive) {
-            showClose = true;
-            content = (
-                <div className='header-status grow cursor-pointer' onClick={onClick}>
-                    <span className='header-status-content'>{t('ArchivedChats')}</span>
-                </div>
-            );
         } else {
             content = <SearchInput inputRef={this.searchInputRef} onFocus={this.handleFocus} />;
         }
 
         return (
             <div className='header-master'>
-                <MainMenuButton showClose={showClose} onClose={this.handleClose} />
+                <MainMenuButton showClose={showClose} onClose={this.handleCloseSearch} />
                 {content}
             </div>
         );
@@ -164,16 +135,9 @@ class DialogsHeader extends React.Component {
 
 DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
-    openArchive: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
     onSearchTextChange: PropTypes.func.isRequired
 };
 
-const enhance = compose(
-    withSaveRef(),
-    withTranslation(),
-    withRestoreRef()
-);
-
-export default enhance(DialogsHeader);
+export default DialogsHeader;

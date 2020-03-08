@@ -63,7 +63,7 @@ class Main extends React.Component {
         const { photo } = chat;
 
         return (
-            <div className='settings-page'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
@@ -73,7 +73,7 @@ class Main extends React.Component {
                     </div>
                     <SettingsMenuButton />
                 </div>
-                <div className='settings-page-content'>
+                <div className='sidebar-page-content'>
                     <div className='chat-details-info'>
                         <Chat
                             chatId={chatId}
@@ -121,7 +121,7 @@ class Main extends React.Component {
                     </ListItem>
                     <ThemePicker ref={this.themePickerRef} />
                 </div>
-            </div>
+            </>
         );
     }
 }

@@ -18,7 +18,7 @@ class General extends React.Component {
         const { t, onClose } = this.props;
 
         return (
-            <div className='settings-page'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
@@ -27,8 +27,8 @@ class General extends React.Component {
                         <span className='header-status-content'>{t('GeneralSettings')}</span>
                     </div>
                 </div>
-                <div className='settings-page-content' />
-            </div>
+                <div className='sidebar-page-content' />
+            </>
         );
     }
 }

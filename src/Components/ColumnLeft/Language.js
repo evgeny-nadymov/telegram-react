@@ -54,7 +54,7 @@ class Language extends React.Component {
         ));
 
         return (
-            <div className='settings-page'>
+            <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
@@ -63,8 +63,8 @@ class Language extends React.Component {
                         <span className='header-status-content'>{t('Language')}</span>
                     </div>
                 </div>
-                <div className='settings-page-content'>{languages}</div>
-            </div>
+                <div className='sidebar-page-content'>{languages}</div>
+            </>
         );
     }
 }
