@@ -273,7 +273,7 @@ class Dialog extends Component {
                 onContextMenu={this.handleContextMenu}
                 style={style}>
                 <div className='dialog-wrapper'>
-                    <ChatTile chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
+                    <ChatTile chatId={chatId} dialog showSavedMessages={showSavedMessages} showOnline />
                     <div className='dialog-inner-wrapper'>
                         <div className='tile-first-row'>
                             <DialogTitle chatId={chatId} />

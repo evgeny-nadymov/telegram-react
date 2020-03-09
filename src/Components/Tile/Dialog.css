@@ -10,16 +10,15 @@
 /*}*/
 
 .dialog {
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    margin: 0 9px;
 }
 
 .dialog:hover {
     background: var(--color-accent-main22);
 }
 
-.dialog:hover .chat-status-icon {
+.dialog:hover .online-status-icon {
     background: var(--color-accent-main22);
 }
 
@@ -29,9 +28,8 @@
 }
 
 .dialog-active {
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    margin: 0 9px;
     background: var(--color-accent-main);
     color: #fff;
 }
@@ -42,11 +40,11 @@
     margin: 6px -9px;
 }
 
-.item-selected .chat-status {
+.item-selected .online-status {
     background: var(--color-accent-main);
 }
 
-.item-selected .chat-status-indicator {
+.item-selected .online-status-indicator {
     background: #fff;
 }
 

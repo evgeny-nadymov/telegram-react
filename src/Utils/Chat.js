@@ -21,6 +21,7 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 import { formatPhoneNumber } from './Phone';
+import { getChannelStatus } from './Channel';
 
 export function canUnpinMessage(chatId) {
     const chat = ChatStore.get(chatId);
@@ -473,7 +474,9 @@ function getChatSubtitleWithoutTyping(chatId) {
         case 'chatTypeSupergroup': {
             const supergroup = SupergroupStore.get(type.supergroup_id);
             if (supergroup) {
-                return getSupergroupStatus(supergroup, chatId);
+                return supergroup.is_channel
+                    ? getChannelStatus(supergroup, chatId)
+                    : getSupergroupStatus(supergroup, chatId);
             }
 
             break;

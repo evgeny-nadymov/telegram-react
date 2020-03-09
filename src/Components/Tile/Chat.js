@@ -46,7 +46,7 @@ class Chat extends React.Component {
                 <div className='chat-wrapper'>
                     <ChatTile big={big} chatId={chatId} onSelect={onTileSelect} showSavedMessages={showSavedMessages} />
                     {showTitle && (
-                        <div className='dialog-inner-wrapper'>
+                        <div className='chat-inner-wrapper'>
                             <div className='tile-first-row'>
                                 <DialogTitle chatId={chatId} showSavedMessages={showSavedMessages} />
                             </div>

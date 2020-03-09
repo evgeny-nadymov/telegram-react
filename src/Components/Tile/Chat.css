@@ -19,3 +19,10 @@
 .chat-big .chat-wrapper {
     flex-direction: column;
 }
+
+.chat-inner-wrapper {
+    margin-left: 12px;
+    overflow: hidden;
+    flex-grow: 1;
+    z-index: 1;
+}

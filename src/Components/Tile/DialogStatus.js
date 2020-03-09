@@ -114,14 +114,14 @@ class DialogStatus extends React.Component {
         }
 
         if (updateSubtitle) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 
-    updateSubtitle = chat => {
+    updateSubtitle = chatId => {
         this.setState({
-            subtitle: getChatSubtitleWithoutTyping(chat.id),
-            isAccent: isAccentChatSubtitleWithoutTyping(chat.id)
+            subtitle: getChatSubtitleWithoutTyping(chatId),
+            isAccent: isAccentChatSubtitleWithoutTyping(chatId)
         });
     };
 
@@ -138,7 +138,7 @@ class DialogStatus extends React.Component {
             (type['@type'] === 'chatTypePrivate' || type['@type'] === 'chatTypeSecret') &&
             type.user_id === update.user_id
         ) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 
@@ -151,7 +151,7 @@ class DialogStatus extends React.Component {
         if (!type) return;
 
         if (type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === update.basic_group_id) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 
@@ -164,7 +164,7 @@ class DialogStatus extends React.Component {
         if (!type) return;
 
         if (type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === update.supergroup_id) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 
@@ -177,7 +177,7 @@ class DialogStatus extends React.Component {
         if (!type) return;
 
         if (type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === update.basic_group.id) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 
@@ -190,7 +190,7 @@ class DialogStatus extends React.Component {
         if (!type) return;
 
         if (type && type['@type'] === 'chatTypeSupergroup' && type.supergroup_id === update.supergroup.id) {
-            this.updateSubtitle(chat);
+            this.updateSubtitle(chatId);
         }
     };
 

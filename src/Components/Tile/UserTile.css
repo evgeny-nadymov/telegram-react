@@ -6,8 +6,8 @@
  */
 
 .user-tile {
-    width: var(--user-tile-size);
-    height: var(--user-tile-size);
+    width: var(--tile-size-normal);
+    height: var(--tile-size-normal);
     z-index: 1;
     position: relative;
     border-radius: 50%;

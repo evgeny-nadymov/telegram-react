@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import BookmarkBorderIcon from '../../Assets/Icons/Saved';
 import DeletedAccountIcon from '../../Assets/Icons/DeletedAccount';
-import ChatStatus from './ChatStatus';
+import OnlineStatus from './OnlineStatus';
 import { getChatLetters, isMeChat, isPrivateChat, isDeletedPrivateChat } from '../../Utils/Chat';
 import { getSrc, loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
@@ -112,7 +112,7 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { chatId, showOnline, showSavedMessages, onSelect, small, big, size, t } = this.props;
+        const { chatId, showOnline, showSavedMessages, onSelect, small, dialog, big, size, t } = this.props;
         const { loaded } = this.state;
 
         let style = null;
@@ -126,7 +126,12 @@ class ChatTile extends Component {
         if (isDeletedPrivateChat(chatId)) {
             return (
                 <div
-                    className={classNames('chat-tile', { 'tile-small': small }, { 'tile-big': big })}
+                    className={classNames(
+                        'chat-tile',
+                        { 'tile-small': small },
+                        { 'tile-dialog': dialog },
+                        { 'tile-big': big }
+                    )}
                     style={style}
                     onClick={this.handleSelect}>
                     <div className={classNames('tile-photo', 'tile_color_0', { pointer: onSelect })}>
@@ -141,7 +146,12 @@ class ChatTile extends Component {
         if (isMeChat(chatId) && showSavedMessages) {
             return (
                 <div
-                    className={classNames('chat-tile', { 'tile-small': small }, { 'tile-big': big })}
+                    className={classNames(
+                        'chat-tile',
+                        { 'tile-small': small },
+                        { 'tile-dialog': dialog },
+                        { 'tile-big': big }
+                    )}
                     style={style}
                     onClick={this.handleSelect}>
                     <div className={classNames('tile-photo', 'tile_color_4', { pointer: onSelect })}>
@@ -170,6 +180,7 @@ class ChatTile extends Component {
                     'chat-tile',
                     { [tileColor]: !tileLoaded },
                     { pointer: onSelect },
+                    { 'tile-dialog': dialog },
                     { 'tile-small': small },
                     { 'tile-big': big }
                 )}
@@ -181,7 +192,7 @@ class ChatTile extends Component {
                     </div>
                 )}
                 {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
-                {showOnline && isPrivateChat(chatId) && <ChatStatus chatId={chatId} />}
+                {showOnline && isPrivateChat(chatId) && <OnlineStatus chatId={chatId} />}
             </div>
         );
     }

@@ -1,0 +1,43 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.user-status {
+    width: 8px;
+    height: 8px;
+    background: var(--online-indicator);
+    border-radius: 50%;
+    border: 2px solid;
+}
+
+.user-status-inner {
+    width: 4px;
+    height: 4px;
+    padding: 2px;
+}
+
+.online-status {
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--panel-background);
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+}
+
+.online-status-icon {
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.online-status-indicator {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--online-indicator);
+}

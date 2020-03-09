@@ -8,13 +8,14 @@
 import SupergroupStore from '../Stores/SupergroupStore';
 import ChatStore from '../Stores/ChatStore';
 
-export function getSupergroupStatus(supergroup, chatId) {
-    if (!supergroup) return null;
+export function getChannelStatus(supergroup, chatId) {
+    if (!supergroup) return '';
 
     let { status, is_channel, member_count: count } = supergroup;
+    if (!is_channel) return '';
 
     if (status && status['@type'] === 'chatMemberStatusBanned') {
-        return is_channel ? 'channel is inaccessible' : 'group is inaccessible';
+        return 'channel is inaccessible';
     }
 
     if (!count) {
@@ -24,13 +25,13 @@ export function getSupergroupStatus(supergroup, chatId) {
         }
     }
 
-    if (!count) return '0 members';
-    if (count === 1) return '1 member';
+    if (!count) return '0 subscribers';
+    if (count === 1) return '1 subscriber';
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${count} members, ${onlineCount} online`;
+        return `${count} subscribers, ${onlineCount} online`;
     }
 
-    return `${count} members`;
+    return `${count} subscribers`;
 }

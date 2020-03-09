@@ -8,8 +8,8 @@
 .chat-tile {
     z-index: 1;
     position: relative;
-    height: var(--tile-size);
-    width: var(--tile-size);
+    height: var(--tile-size-normal);
+    width: var(--tile-size-normal);
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -17,6 +17,11 @@
 .chat-tile.tile-small {
     height: var(--tile-size-small);
     width: var(--tile-size-small);
+}
+
+.chat-tile.tile-dialog {
+    height: var(--tile-size);
+    width: var(--tile-size);
 }
 
 .chat-tile.tile-big {

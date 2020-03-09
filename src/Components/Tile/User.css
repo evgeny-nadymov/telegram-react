@@ -28,8 +28,8 @@
 }
 
 .user-placeholder-tile {
-    width: var(--user-tile-size);
-    height: var(--user-tile-size);
+    width: var(--tile-size-normal);
+    height: var(--tile-size-normal);
     border-radius: 50%;
     flex-shrink: 0;
     background: var(--dialog-subtle-color);

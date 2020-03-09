@@ -477,10 +477,8 @@ class Search extends React.Component {
     };
 
     render() {
-        const { classes, chatId } = this.props;
+        const { chatId, t } = this.props;
         const { top, recentlyFound, local, global, messages, linkMessage } = this.state;
-
-        // console.log('[se] render', messages, linkMessage);
 
         const chat = ChatStore.get(chatId);
 
@@ -579,7 +577,7 @@ class Search extends React.Component {
             count++;
         }
 
-        let messagesCaption = 'No messages found';
+        let messagesCaption = t('NoMessages');
         if (count) {
             messagesCaption = count === 1 ? 'Found 1 message' : `Found ${count} messages`;
         }
@@ -604,7 +602,7 @@ class Search extends React.Component {
                 )}
                 {topChats.length > 0 && (
                     <div className='search-top-chats'>
-                        <SearchCaption caption='People' />
+                        <SearchCaption caption={t('ChatHints')} />
                         <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
                             <div className='search-top-chats-placeholder' />
                             {topChats}
@@ -614,7 +612,11 @@ class Search extends React.Component {
                 )}
                 {recentlyFoundChats.length > 0 && (
                     <div className='search-recently-found-chats'>
-                        <SearchCaption caption='Recent' command='Clear' onClick={this.handleClearRecentlyFound} />
+                        <SearchCaption
+                            caption={t('Recent')}
+                            command={t('ClearButton')}
+                            onClick={this.handleClearRecentlyFound}
+                        />
                         {recentlyFoundChats}
                     </div>
                 )}
@@ -626,7 +628,7 @@ class Search extends React.Component {
                 )}
                 {globalChats.length > 0 && (
                     <div className='search-global-chats'>
-                        <SearchCaption caption='Global search' />
+                        <SearchCaption caption={t('GlobalSearch')} />
                         {globalLinkChat}
                         {globalChats}
                     </div>

@@ -14,11 +14,11 @@
 
     --error: #e53935;
 
-    --tile-size: 54px;
-    --user-tile-size: 48px;
-    --tile-size-extra-small: 16px;
-    --tile-size-small: 33px;
     --tile-size-big: 120px;
+    --tile-size: 54px;
+    --tile-size-normal: 48px;
+    --tile-size-small: 33px;
+    --tile-size-extra-small: 16px;
 
     --color-accent-main: #50a2e9;
     --color-accent-main22: #50a2e944;

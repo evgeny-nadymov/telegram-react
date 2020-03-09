@@ -15,6 +15,7 @@
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     background: var(--panel-background);
+    padding: 0 8px;
 }
 
 .search-chat-wrapper {

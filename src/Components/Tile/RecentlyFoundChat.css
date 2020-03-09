@@ -6,13 +6,14 @@
  */
 
 .recently-found-chat {
-    padding: 0;
+    padding: 12px;
     box-sizing: border-box;
+    border-radius: 10px;
 }
 
 .recently-found-chat-content {
     width: 100%;
     height: 100%;
-    padding: 10px 22px;
+    padding: 12px;
     box-sizing: border-box;
 }

@@ -31,8 +31,8 @@
 .forward-target-chat-selection {
     border: 2px solid var(--color-accent-main);
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: calc(var(--tile-size-normal) - 4px);
+    height: calc(var(--tile-size-normal) - 4px);
     position: absolute;
     left: 0;
     top: 0;
