@@ -195,9 +195,15 @@ class DialogStatus extends React.Component {
     };
 
     render() {
+        const { subtitle: externalSubtitle } = this.props;
         const { subtitle, isAccent } = this.state;
 
-        return <div className={classNames('dialog-status', { 'dialog-status-accent': isAccent })}>{subtitle}</div>;
+        return (
+            <div className={classNames('dialog-status', { 'dialog-status-accent': isAccent })}>
+                {externalSubtitle ? externalSubtitle + ', ' : null}
+                {subtitle}
+            </div>
+        );
     }
 }
 

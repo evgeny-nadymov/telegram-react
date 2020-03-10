@@ -5,13 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.search-caption {
-    padding: 4px 22px;
+.section-header {
+    padding: 17px 16px 18px;
     display: flex;
     flex-direction: row;
 }
 
-.search-caption-title {
+.section-header-title {
+    color: var(--header-subtle-color);
     flex-grow: 1;
     flex-shrink: 1;
     user-select: none;

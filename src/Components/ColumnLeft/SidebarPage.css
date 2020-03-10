@@ -22,3 +22,13 @@
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
 }
+
+.sidebar-page-section {
+    padding: 8px 0;
+}
+
+.sidebar-page-section-divider {
+    margin: 0 -8px;
+    width: calc(100% + 16px);
+    border-bottom: 1px solid var(--border);
+}

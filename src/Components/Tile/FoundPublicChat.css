@@ -5,15 +5,20 @@
  * LICENSE file in the root directory of this source tree.
  */
 .found-public-chat {
-    box-sizing: border-box;
     padding: 0;
+    box-sizing: border-box;
+    border-radius: 10px;
 }
 
-.found-public-chat .dialog-wrapper {
-    padding: 9px 21px 9px 18px;
+.found-public-chat-wrapper {
+    box-sizing: border-box;
+    padding: 12px;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
 }
 
-.found-public-chat.item-selected .dialog-wrapper {
+.item-selected .found-public-chat-wrapper {
     background: var(--color-accent-main);
     color: #fff;
 }

@@ -15,8 +15,8 @@ import UserTile from './UserTile';
 import DialogTitle from './DialogTitle';
 import { getMessageDate, getMessageSenderFullName, getMessageSenderName } from '../../Utils/Chat';
 import { getContent } from '../../Utils/Message';
-import MessageStore from '../../Stores/MessageStore';
 import AppStore from '../../Stores/ApplicationStore';
+import MessageStore from '../../Stores/MessageStore';
 import './FoundMessage.css';
 
 class FoundMessage extends React.Component {
@@ -30,17 +30,13 @@ class FoundMessage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, theme } = this.props;
+        const { chatId, messageId } = this.props;
 
         if (nextState.nextChatId === chatId && nextState.nextMessageId === messageId) {
             return true;
         }
 
         if (nextState.previousChatId === chatId && nextState.previousMessageId === messageId) {
-            return true;
-        }
-
-        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -75,7 +71,12 @@ class FoundMessage extends React.Component {
         const content = getContent(message, t) || '\u00A0';
         const selected = chatId === selectedChatId && messageId === selectedMessageId;
 
-        const tile = sender_user_id && chatSearch ? <UserTile userId={sender_user_id} /> : <ChatTile chatId={chatId} />;
+        const tile =
+            sender_user_id && chatSearch ? (
+                <UserTile userId={sender_user_id} dialog />
+            ) : (
+                <ChatTile chatId={chatId} dialog />
+            );
 
         return (
             <ListItem button className={classNames('found-message', { 'item-selected': selected })} onClick={onClick}>

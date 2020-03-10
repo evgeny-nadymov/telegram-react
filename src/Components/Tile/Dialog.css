@@ -15,11 +15,11 @@
 }
 
 .dialog:hover {
-    background: var(--color-accent-main22);
+    background: var(--color-hover);
 }
 
 .dialog:hover .online-status-icon {
-    background: var(--color-accent-main22);
+    background: var(--color-hover);
 }
 
 .dialog-tile {
@@ -53,6 +53,7 @@
 .item-selected .dialog-content,
 .item-selected .dialog-content-accent,
 .item-selected .dialog-meta,
+.item-selected .dialog-status,
 .item-selected .status {
     color: #fff;
 }

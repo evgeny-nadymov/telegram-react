@@ -7,23 +7,22 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import './SearchCaption.css';
+import './SectionHeader.css';
 
-function SearchCaption(props) {
-    const { caption, command, onClick } = props;
+function SectionHeader(props) {
+    const { command, onClick, children } = props;
 
     return (
-        <div className='search-caption'>
-            <div className='search-caption-title'>{caption}</div>
+        <div className='section-header'>
+            <div className='section-header-title'>{children}</div>
             {Boolean(command) && <a onClick={onClick}>{command}</a>}
         </div>
     );
 }
 
-SearchCaption.propTypes = {
-    caption: PropTypes.string.isRequired,
+SectionHeader.propTypes = {
     command: PropTypes.string,
     onClick: PropTypes.func
 };
 
-export default SearchCaption;
+export default SectionHeader;

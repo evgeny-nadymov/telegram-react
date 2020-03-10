@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import ListItemText from '@material-ui/core/ListItemText';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
+import SectionHeader from '../SectionHeader';
 import NotificationStore from '../../../Stores/NotificationStore';
 import OptionStore from '../../../Stores/OptionStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Notifications.css';
-import SidebarPage from '../SidebarPage';
-import PropTypes from 'prop-types';
 
 class Notifications extends React.Component {
     constructor(props) {
@@ -130,8 +130,8 @@ class Notifications extends React.Component {
                     </div>
                 </div>
                 <div className='sidebar-page-content'>
-                    <div className='settings-section'>
-                        <div className='settings-section-header'>{t('NotificationsPrivateChats')}</div>
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('NotificationsPrivateChats')}</SectionHeader>
                         <div className='settings-item' onClick={() => this.handleMuteFor('privateChatsSettings')}>
                             <Checkbox
                                 color='primary'
@@ -167,9 +167,9 @@ class Notifications extends React.Component {
                             />
                         </div>
                     </div>
-                    <div className='settings-border' />
-                    <div className='settings-section'>
-                        <div className='settings-section-header'>{t('NotificationsGroups')}</div>
+                    <div className='sidebar-page-section-divider' />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('NotificationsGroups')}</SectionHeader>
                         <div className='settings-item' onClick={() => this.handleMuteFor('groupChatsSettings')}>
                             <Checkbox
                                 color='primary'
@@ -205,9 +205,9 @@ class Notifications extends React.Component {
                             />
                         </div>
                     </div>
-                    <div className='settings-border' />
-                    <div className='settings-section'>
-                        <div className='settings-section-header'>{t('NotificationsChannels')}</div>
+                    <div className='sidebar-page-section-divider' />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('NotificationsChannels')}</SectionHeader>
                         <div className='settings-item' onClick={() => this.handleMuteFor('channelChatsSettings')}>
                             <Checkbox
                                 color='primary'
@@ -243,9 +243,9 @@ class Notifications extends React.Component {
                             />
                         </div>
                     </div>
-                    <div className='settings-border' />
-                    <div className='settings-section'>
-                        <div className='settings-section-header'>{t('NotificationsOther')}</div>
+                    <div className='sidebar-page-section-divider' />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('NotificationsOther')}</SectionHeader>
                         <div className='settings-item' onClick={this.handleContactJoined}>
                             <Checkbox
                                 color='primary'

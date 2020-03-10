@@ -204,7 +204,7 @@ class EditProfile extends React.Component {
                         />
                         <div className='edit-profile-hint'>{t('BioAbout')}</div>
                     </div>
-                    <div className='settings-border' />
+                    <div className='sidebar-page-section-divider' />
                     <div className='edit-profile-username'>
                         <TextField
                             inputRef={this.usernameRef}

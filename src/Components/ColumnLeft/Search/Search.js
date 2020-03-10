@@ -15,7 +15,7 @@ import TopChat from '../../Tile/TopChat';
 import RecentlyFoundChat from '../../Tile/RecentlyFoundChat';
 import FoundPublicChat from '../../Tile/FoundPublicChat';
 import FoundMessage from '../../Tile/FoundMessage';
-import SearchCaption from './SearchCaption';
+import SectionHeader from '../SectionHeader';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
@@ -585,57 +585,67 @@ class Search extends React.Component {
         return (
             <div ref={this.listRef} className='search' onScroll={this.handleScroll}>
                 {chat && (
-                    <div className='search-chat'>
-                        <SearchCaption caption='Search messages in' />
-                        <div className='search-chat-wrapper'>
-                            <div className='search-chat-control'>
-                                <Chat chatId={chatId} showStatus={false} />
+                    <>
+                        <div className='sidebar-page-section'>
+                            <SectionHeader>{t('SearchMessagesIn')}</SectionHeader>
+                            <div className='search-chat-wrapper'>
+                                <div className='search-chat-control'>
+                                    <Chat chatId={chatId} showStatus={false} />
+                                </div>
+                                <IconButton
+                                    className='header-right-button'
+                                    aria-label='Search'
+                                    onMouseDown={this.handleClose}>
+                                    <CloseIcon />
+                                </IconButton>
                             </div>
-                            <IconButton
-                                className='header-right-button'
-                                aria-label='Search'
-                                onMouseDown={this.handleClose}>
-                                <CloseIcon />
-                            </IconButton>
                         </div>
-                    </div>
+                        <div className='sidebar-page-section-divider' />
+                    </>
                 )}
                 {topChats.length > 0 && (
-                    <div className='search-top-chats'>
-                        <SearchCaption caption={t('ChatHints')} />
-                        <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
-                            <div className='search-top-chats-placeholder' />
-                            {topChats}
-                            <div className='search-top-chats-placeholder' />
+                    <>
+                        <div className='sidebar-page-section'>
+                            <SectionHeader>{t('ChatHints')}</SectionHeader>
+                            <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
+                                <div className='search-top-chats-placeholder' />
+                                {topChats}
+                                <div className='search-top-chats-placeholder' />
+                            </div>
                         </div>
-                    </div>
+                        <div className='sidebar-page-section-divider' />
+                    </>
                 )}
                 {recentlyFoundChats.length > 0 && (
-                    <div className='search-recently-found-chats'>
-                        <SearchCaption
-                            caption={t('Recent')}
-                            command={t('ClearButton')}
-                            onClick={this.handleClearRecentlyFound}
-                        />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader command={t('ClearButton')} onClick={this.handleClearRecentlyFound}>
+                            {t('Recent')}
+                        </SectionHeader>
                         {recentlyFoundChats}
                     </div>
                 )}
                 {localChats.length > 0 && (
-                    <div className='search-local-chats'>
-                        <SearchCaption caption='Chats and contacts' />
-                        {localChats}
-                    </div>
+                    <>
+                        <div className='sidebar-page-section'>
+                            <SectionHeader>{t('ChatsAndContacts')}</SectionHeader>
+                            {localChats}
+                        </div>
+                        <div className='sidebar-page-section-divider' />
+                    </>
                 )}
                 {globalChats.length > 0 && (
-                    <div className='search-global-chats'>
-                        <SearchCaption caption={t('GlobalSearch')} />
-                        {globalLinkChat}
-                        {globalChats}
-                    </div>
+                    <>
+                        <div className='sidebar-page-section'>
+                            <SectionHeader>{t('GlobalSearch')}</SectionHeader>
+                            {globalLinkChat}
+                            {globalChats}
+                        </div>
+                        <div className='sidebar-page-section-divider' />
+                    </>
                 )}
                 {(messages || (linkMessage && linkMessage.message)) && (
-                    <div className='search-global-chats'>
-                        <SearchCaption caption={messagesCaption} />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{messagesCaption}</SectionHeader>
                         {globalLinkMessage}
                         {globalMessages}
                     </div>

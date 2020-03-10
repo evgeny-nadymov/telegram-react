@@ -18,6 +18,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import Session from '../../Tile/Session';
 import StopIcon from '../../../Assets/Icons/Stop';
+import SectionHeader from '../SectionHeader';
 import TdLibController from '../../../Controllers/TdLibController';
 import './ActiveSessions.css';
 
@@ -107,8 +108,8 @@ class ActiveSessions extends React.Component {
                 </div>
                 <div className='sidebar-page-content'>
                     {Boolean(current) && (
-                        <div className='settings-section'>
-                            <div className='settings-section-header'>{t('CurrentSession')}</div>
+                        <div className='sidebar-page-section'>
+                            <SectionHeader>{t('CurrentSession')}</SectionHeader>
                             <Session session={current} onTerminate={this.handleTerminate} />
                             {other.length > 0 && (
                                 <ListItem
@@ -129,9 +130,9 @@ class ActiveSessions extends React.Component {
                     )}
                     {other.length > 0 && (
                         <>
-                            <div className='settings-border' />
-                            <div className='settings-section'>
-                                <div className='settings-section-header'>{t('OtherSessions')}</div>
+                            <div className='sidebar-page-section-divider' />
+                            <div className='sidebar-page-section'>
+                                <SectionHeader>{t('OtherSessions')}</SectionHeader>
                                 {other.map(x => (
                                     <Session key={x.id} session={x} onTerminate={this.handleTerminate} />
                                 ))}

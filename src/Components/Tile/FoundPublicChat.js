@@ -9,9 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import ListItem from '@material-ui/core/ListItem';
-import ChatTile from './ChatTile';
-import DialogTitle from './DialogTitle';
-import { getChatUsername, getGroupChatMembersCount } from '../../Utils/Chat';
+import Chat from './Chat';
+import { getChatUsername } from '../../Utils/Chat';
 import AppStore from '../../Stores/ApplicationStore';
 import './FoundPublicChat.css';
 
@@ -26,17 +25,13 @@ class FoundPublicChat extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, theme } = this.props;
+        const { chatId } = this.props;
 
         if (nextState.nextChatId === chatId) {
             return true;
         }
 
         if (nextState.previousChatId === chatId) {
-            return true;
-        }
-
-        if (nextProps.theme !== theme) {
             return true;
         }
 
@@ -62,35 +57,17 @@ class FoundPublicChat extends React.Component {
 
     render() {
         const { chatId, onClick } = this.props;
-        const selectedChatId = this.state.nextChatId;
+        const { nextChatId: selectedChatId } = this.state;
 
         const username = getChatUsername(chatId);
-        const membersCount = getGroupChatMembersCount(chatId);
-        let subscribersString = '';
-        if (membersCount > 0) {
-            subscribersString = membersCount === 1 ? ', 1 subscriber' : `, ${membersCount} subscribers`;
-        }
 
         return (
             <ListItem
                 button
-                classes={classNames('found-public-chat', {
-                    'item-selected': chatId === selectedChatId
-                })}
+                className={classNames('found-public-chat', { 'item-selected': chatId === selectedChatId })}
                 onClick={onClick}>
-                <div className='dialog-wrapper'>
-                    <ChatTile chatId={chatId} />
-                    <div className='dialog-inner-wrapper'>
-                        <div className='tile-first-row'>
-                            <DialogTitle chatId={chatId} />
-                        </div>
-                        <div className='tile-second-row'>
-                            <div className='dialog-content'>
-                                @{username}
-                                {subscribersString}
-                            </div>
-                        </div>
-                    </div>
+                <div className='found-public-chat-wrapper'>
+                    <Chat chatId={chatId} subtitle={username ? '@' + username : null} />
                 </div>
             </ListItem>
         );

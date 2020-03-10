@@ -18,6 +18,7 @@ import ArrowBackIcon from '../../../Assets/Icons/Back';
 import DeviceIcon from '../../../Assets/Icons/Device';
 import RemoveMemberIcon from '../../../Assets/Icons/RemoveMember';
 import SidebarPage from '../SidebarPage';
+import SectionHeader from '../SectionHeader';
 import TdLibController from '../../../Controllers/TdLibController';
 import './PrivacySecurity.css';
 
@@ -98,7 +99,7 @@ class PrivacySecurity extends React.Component {
                     </div>
                 </div>
                 <div className='sidebar-page-content'>
-                    <div className='settings-section'>
+                    <div className='sidebar-page-section'>
                         <ListItem
                             className='settings-list-item2'
                             role={undefined}
@@ -130,9 +131,9 @@ class PrivacySecurity extends React.Component {
                             />
                         </ListItem>
                     </div>
-                    <div className='settings-border' />
-                    <div className='settings-section'>
-                        <div className='settings-section-header'>{t('PrivacyTitle')}</div>
+                    <div className='sidebar-page-section-divider' />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('PrivacyTitle')}</SectionHeader>
                         <ListItem className='settings-list-item2' role={undefined} button>
                             <ListItemText
                                 className='settings-list-item-text2'

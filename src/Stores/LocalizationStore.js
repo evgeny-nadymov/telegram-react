@@ -18,9 +18,13 @@ const lng = localStorage.getItem('i18next') || fallbackLng;
 i18n.use(initReactI18next).init({
     ns: [defaultNS, 'local'],
     defaultNS,
-    fallbackNS: ['local', 'emoji', 'settings', 'translation'],
+    fallbackNS: ['local', 'emoji', 'settings', 'translation', 'search'],
     resources: {
         en: {
+            search: {
+                ChatsAndContacts: 'Chats and contacts',
+                SearchMessagesIn: 'Search messages in'
+            },
             settings: {
                 ContactJoinedEnabled: 'Enabled',
                 ContactJoinedDisabled: 'Disabled',
@@ -95,6 +99,10 @@ i18n.use(initReactI18next).init({
             }
         },
         ru: {
+            search: {
+                ChatsAndContacts: 'Чаты и контакты',
+                SearchMessagesIn: 'Искать сообщения в'
+            },
             settings: {
                 ContactJoinedEnabled: 'Включено',
                 ContactJoinedDisabled: 'Выключено',

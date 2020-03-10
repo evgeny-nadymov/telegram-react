@@ -8,13 +8,11 @@
 .found-message {
     box-sizing: border-box;
     padding: 0;
-}
-
-.found-message .dialog-wrapper {
-    padding: 9px 21px 9px 18px;
+    border-radius: 10px;
 }
 
 .found-message.item-selected .dialog-wrapper {
     background: var(--color-accent-main);
     color: #fff;
+    border-radius: 10px;
 }
