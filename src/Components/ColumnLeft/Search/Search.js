@@ -334,22 +334,6 @@ class Search extends React.Component {
         loadChatsContent(store, recentlyFound.chat_ids);
     };
 
-    handleRecentlyFound = async () => {
-        const chats = await TdLibController.send({
-            '@type': 'getChats',
-            offset_order: '9223372036854775807',
-            offset_chat_id: 0,
-            limit: 20
-        });
-
-        for (let i = chats.chat_ids.length - 1; i >= 0; i--) {
-            TdLibController.send({
-                '@type': 'addRecentlyFoundChat',
-                chat_id: chats.chat_ids[i]
-            });
-        }
-    };
-
     handleClearRecentlyFound = event => {
         event.stopPropagation();
 

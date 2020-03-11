@@ -18,6 +18,29 @@
     padding: 0 8px;
 }
 
+.search-enter {
+    opacity: 0;
+    transform: scale(1.1);
+    will-change: transform, opacity;
+}
+
+.search-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 200ms, transform 200ms;
+}
+
+.search-exit {
+    opacity: 1;
+    will-change: transform, opacity;
+}
+
+.search-exit-active {
+    opacity: 0;
+    transform: scale(1.1);
+    transition: opacity 200ms, transform 200ms;
+}
+
 .search-chat-wrapper {
     display: flex;
     align-items: center;

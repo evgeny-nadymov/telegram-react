@@ -24,6 +24,7 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
+import CSSTransition from 'react-transition-group/CSSTransition';
 
 class Dialogs extends Component {
     constructor(props) {
@@ -412,14 +413,19 @@ class Dialogs extends Component {
                                 open={true}
                                 onSaveCache={this.handleSaveCache}
                             />
-                            {openSearch && (
+                            <CSSTransition
+                                classNames='search'
+                                timeout={200}
+                                in={openSearch}
+                                mountOnEnter={true}
+                                unmountOnExit={true}>
                                 <Search
                                     chatId={searchChatId}
                                     text={searchText}
                                     onSelectMessage={this.handleSelectMessage}
                                     onClose={this.handleClose}
                                 />
-                            )}
+                            </CSSTransition>
                         </div>
                         <UpdatePanel />
                     </div>

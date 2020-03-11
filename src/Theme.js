@@ -120,7 +120,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--color-grey700', theme.palette.grey[700]);
     style.setProperty('--color-grey', '#9AA7B2');
     style.setProperty('--color-search-input', '#424242');
-    style.setProperty('--color-hover', 'rgba(112, 117, 121, 0.08)');
+    style.setProperty('--color-hover', 'rgba(112, 117, 121, 0.15)');
 
     style.setProperty('--header-color', '#ffffff');
     style.setProperty('--header-subtle-color', theme.palette.text.secondary);
