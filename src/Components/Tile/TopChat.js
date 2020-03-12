@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { ListItem } from '@material-ui/core';
 import ChatTile from './ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
 import './TopChat.css';
@@ -19,10 +20,10 @@ class TopChat extends React.PureComponent {
         const shortTitle = getChatShortTitle(chatId, showSavedMessages, t);
 
         return (
-            <div className='top-chat'>
-                <ChatTile chatId={chatId} onSelect={onSelect} showSavedMessages={showSavedMessages} showOnline />
+            <ListItem button className='top-chat' onClick={onSelect}>
+                <ChatTile dialog chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
                 <div className='top-chat-title'>{shortTitle}</div>
-            </div>
+            </ListItem>
         );
     }
 }

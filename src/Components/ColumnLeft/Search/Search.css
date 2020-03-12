@@ -64,11 +64,12 @@
     flex-direction: row;
     overflow-x: auto;
     transform: translateZ(0);
-    position: absolute;
+    /*position: absolute;*/
     left: 0;
     top: 28px;
     right: 0;
     bottom: -17px;
+    margin: 0 -8px;
 }
 
 .search-top-chats-placeholder {
