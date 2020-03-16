@@ -7,7 +7,8 @@
 
 import React from 'react';
 import * as ReactDOM from 'react-dom';
-import { getMedia, openMedia } from '../../Utils/Message';
+import { openMedia } from '../../Utils/Message';
+import { getMedia } from '../../Utils/Media';
 import { SCROLL_PRECISION } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';

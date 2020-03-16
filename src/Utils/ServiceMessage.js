@@ -10,7 +10,6 @@ import Currency from './Currency';
 import MessageAuthor from '../Components/Message/MessageAuthor';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
-import SupergroupStore from '../Stores/SupergroupStore';
 import MessageStore from '../Stores/MessageStore';
 
 let serviceMap = new Map();

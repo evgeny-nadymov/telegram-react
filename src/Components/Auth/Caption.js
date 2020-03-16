@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
-import Lottie from '../Viewer/Lottie';
+// import Lottie from '../Viewer/Lottie';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
+
+const Lottie = React.lazy(() => import('../Viewer/Lottie'));
 
 class Caption extends React.Component {
     constructor(props) {
@@ -23,7 +25,10 @@ class Caption extends React.Component {
         this.lottieRef = React.createRef();
     }
 
-    async loadData() {
+    loadData = async () => {
+        const { closeData } = this.state;
+        if (closeData) return;
+
         try {
             const requests = [
                 fetch('data/TwoFactorSetupMonkeyClose.json'),
@@ -70,10 +75,10 @@ class Caption extends React.Component {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     async componentDidMount() {
-        this.loadData();
+        setTimeout(this.loadData, 100);
 
         AuthStore.on('clientUpdateMonkeyIdle', this.onClientUpdateMonkeyIdle);
         AuthStore.on('clientUpdateMonkeyTracking', this.onClientUpdateMonkeyTracking);
@@ -186,22 +191,24 @@ class Caption extends React.Component {
             case 'authorizationStateWaitPassword': {
                 control = (
                     <div className='auth-caption-telegram-logo'>
-                        <Lottie
-                            ref={this.lottieRef}
-                            options={{
-                                autoplay: false,
-                                loop: false,
-                                animationData: data,
-                                renderer: 'svg',
-                                rendererSettings: {
-                                    preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                    clearCanvas: false,
-                                    progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                    hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                    className: 'auth-caption-lottie'
-                                }
-                            }}
-                        />
+                        <React.Suspense fallback={null}>
+                            <Lottie
+                                ref={this.lottieRef}
+                                options={{
+                                    autoplay: false,
+                                    loop: false,
+                                    animationData: data,
+                                    renderer: 'svg',
+                                    rendererSettings: {
+                                        preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
+                                        clearCanvas: false,
+                                        progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
+                                        hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
+                                        className: 'auth-caption-lottie'
+                                    }
+                                }}
+                            />
+                        </React.Suspense>
                     </div>
                 );
                 break;

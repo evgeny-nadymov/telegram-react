@@ -20,7 +20,7 @@ import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
-const Lottie = React.lazy(() => import('./Lottie'));
+// const Lottie = React.lazy(() => import('./Lottie'));
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -318,17 +318,18 @@ class MediaViewerContent extends React.Component {
             };
             const { speed } = this.state;
 
-            content = (
-                <Lottie
-                    ref={this.lottieRef}
-                    speed={speed}
-                    options={defaultOptions}
-                    height='auto'
-                    width={400}
-                    isStopped={false}
-                    isPaused={false}
-                />
-            );
+            content = null;
+            // content = (
+            //     <Lottie
+            //         ref={this.lottieRef}
+            //         speed={speed}
+            //         options={defaultOptions}
+            //         height='auto'
+            //         width={400}
+            //         isStopped={false}
+            //         isPaused={false}
+            //     />
+            // );
         } else {
             content = <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />;
         }

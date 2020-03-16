@@ -21,10 +21,10 @@ class AuthForm extends React.Component {
     };
 
     componentDidMount() {
-        this.loadData();
+        setTimeout(this.loadData, 100);
     }
 
-    async loadData() {
+    loadData = async () => {
         const { data } = this.state;
         if (data) return;
 
@@ -56,7 +56,7 @@ class AuthForm extends React.Component {
         } catch (error) {
             console.error(error);
         }
-    }
+    };
 
     render() {
         const { authorizationState: state } = this.props;
@@ -105,7 +105,7 @@ class AuthForm extends React.Component {
         }
 
         return (
-            <div className='authorization-form'>
+            <div className='authorization-form' onLoad={this.handleLoad}>
                 <div className='authorization-form-content'>
                     <Caption state={state} />
                     {control}

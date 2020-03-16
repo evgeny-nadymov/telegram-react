@@ -21,7 +21,7 @@ import packageJson from '../package.json';
 import AuthForm from './Components/Auth/AuthForm';
 import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
-import StubPage from './Components/StubPage';
+// import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
 import { loadData } from './Utils/Phone';
 import { isMobile } from './Utils/Common';
@@ -33,8 +33,8 @@ import AuthorizationStore from './Stores/AuthorizationStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
-import MainPage from './Components/MainPage';
-// const MainPage = React.lazy(() => import('./Components/MainPage'));
+// import MainPage from './Components/MainPage';
+const MainPage = React.lazy(() => import('./Components/MainPage'));
 
 class TelegramApp extends Component {
     constructor(props) {
@@ -182,12 +182,11 @@ class TelegramApp extends Component {
         }
 
         const loading = t('Loading').replace('...', '');
-        let page = <MainPage />;
-        //     (
-        //     <React.Suspense fallback={<StubPage title='' />}>
-        //         <MainPage />
-        //     </React.Suspense>
-        // );
+        let page = ( //<MainPage />;
+            <React.Suspense fallback={null}>
+                <MainPage />
+            </React.Suspense>
+        );
 
         if (nativeMobile) {
             page = <NativeAppPage />;
@@ -205,7 +204,8 @@ class TelegramApp extends Component {
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
                 case 'authorizationStateWaitTdlib':
-                    page = <AuthForm authorizationState={authorizationState} onChangePhone={this.handleChangePhone} />;
+                    page = <AuthForm authorizationState={authorizationState //null;
+                            } onChangePhone={this.handleChangePhone} />;
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {

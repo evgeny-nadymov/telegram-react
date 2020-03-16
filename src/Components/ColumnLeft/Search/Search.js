@@ -460,6 +460,41 @@ class Search extends React.Component {
         onClose();
     };
 
+    handleDeleteRecentlyFoundChat = async chatId => {
+        if (!chatId) return;
+
+        await TdLibController.send({
+            '@type': 'removeRecentlyFoundChat',
+            chat_id: chatId
+        });
+
+        const { recentlyFound } = this.state;
+        if (!recentlyFound) return;
+
+        this.setState({
+            recentlyFound: { ...recentlyFound, chat_ids: recentlyFound.chat_ids.filter(x => x !== chatId) }
+        });
+    };
+
+    handleDeleteTopChat = async chatId => {
+        if (!chatId) return;
+
+        await TdLibController.send({
+            '@type': 'removeTopChat',
+            chat_id: chatId,
+            category: {
+                '@type': 'topChatCategoryUsers'
+            }
+        });
+
+        const { top } = this.state;
+        if (!top) return;
+
+        this.setState({
+            top: { ...top, chat_ids: top.chat_ids.filter(x => x !== chatId) }
+        });
+    };
+
     render() {
         const { chatId, t } = this.props;
         const { top, recentlyFound, local, global, messages, linkMessage } = this.state;
@@ -469,7 +504,12 @@ class Search extends React.Component {
         const topChats =
             top && top.chat_ids
                 ? top.chat_ids.map(x => (
-                      <TopChat key={x} chatId={x} onSelect={() => this.handleSelectMessage(x, null, false, false)} />
+                      <TopChat
+                          key={x}
+                          chatId={x}
+                          onSelect={() => this.handleSelectMessage(x, null, false, false)}
+                          onDelete={() => this.handleDeleteTopChat(x)}
+                      />
                   ))
                 : [];
 
@@ -480,6 +520,7 @@ class Search extends React.Component {
                           key={x}
                           chatId={x}
                           onClick={() => this.handleSelectMessage(x, null, true, false)}
+                          onDelete={() => this.handleDeleteRecentlyFoundChat(x)}
                       />
                   ))
                 : [];

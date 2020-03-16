@@ -67,7 +67,7 @@
     display: flex;
 }
 
-.chat-big .dialog-inner-wrapper {
+.chat-big .chat-inner-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;

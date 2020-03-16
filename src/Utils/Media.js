@@ -7,6 +7,21 @@
 
 import { THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
+import Animation from '../Components/Message/Media/Animation';
+import Audio from '../Components/Message/Media/Audio';
+import Call from '../Components/Message/Media/Call';
+import Contact from '../Components/Message/Media/Contact';
+import Document from '../Components/Message/Media/Document';
+import Game from '../Components/Message/Media/Game';
+import Location from '../Components/Message/Media/Location';
+import Photo from '../Components/Message/Media/Photo';
+import Poll from '../Components/Message/Media/Poll';
+import Sticker, { StickerSourceEnum } from '../Components/Message/Media/Sticker';
+import Venue from '../Components/Message/Media/Venue';
+import Video from '../Components/Message/Media/Video';
+import VideoNote from '../Components/Message/Media/VideoNote';
+import VoiceNote from '../Components/Message/Media/VoiceNote';
+import React from 'react';
 
 export function getCallTitle(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -452,4 +467,167 @@ export function getInputMediaContent(media, text) {
     }
 
     return null;
+}
+
+export function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inlineMeta = null) {
+    if (!message) return null;
+
+    const { chat_id, id, content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAnimation':
+            return (
+                <Animation
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    animation={content.animation}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messageAudio':
+            return (
+                <Audio
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    audio={content.audio}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageCall':
+            return (
+                <Call
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    duraton={content.duration}
+                    discardReason={content.discard_reason}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageContact':
+            return (
+                <Contact
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    contact={content.contact}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageDocument':
+            return (
+                <Document
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    document={content.document}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageGame':
+            return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
+        case 'messageLocation':
+            return (
+                <Location
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    location={content.location}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messagePhoto':
+            return (
+                <Photo
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    photo={content.photo}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messagePoll':
+            return <Poll chatId={chat_id} messageId={id} poll={content.poll} openMedia={openMedia} meta={inlineMeta} />;
+        case 'messageSticker':
+            return (
+                <Sticker
+                    chatId={chat_id}
+                    messageId={id}
+                    sticker={content.sticker}
+                    source={StickerSourceEnum.MESSAGE}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messageText':
+            return null;
+        case 'messageVenue':
+            return (
+                <Venue
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    venue={content.venue}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageVideo':
+            return (
+                <Video
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    video={content.video}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messageVideoNote':
+            return (
+                <VideoNote
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    videoNote={content.video_note}
+                    openMedia={openMedia}
+                />
+            );
+        case 'messageVoiceNote':
+            return (
+                <VoiceNote
+                    type='message'
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    voiceNote={content.voice_note}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        default:
+            return [`[${content['@type']}]`, inlineMeta];
+    }
 }

@@ -422,7 +422,7 @@ class Phone extends React.Component {
                     {t('StartText')}
                 </Typography>
                 <Autocomplete
-                    debug={false}
+                    debug={true}
                     id='country-select'
                     noOptionsText={t('NoResult')}
                     options={data}

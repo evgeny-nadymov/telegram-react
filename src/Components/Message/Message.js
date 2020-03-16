@@ -32,7 +32,6 @@ import WebPage from './Media/WebPage';
 import {
     getEmojiMatches,
     getText,
-    getMedia,
     getWebPage,
     openMedia,
     showMessageForward,
@@ -42,6 +41,7 @@ import {
     canMessageBeUnvoted,
     canMessageBeClosed
 } from '../../Utils/Message';
+import { getMedia } from '../../Utils/Media';
 import { canPinMessages, canSendMessages, isPrivateChat } from '../../Utils/Chat';
 import {
     openUser,

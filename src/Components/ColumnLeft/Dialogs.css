@@ -18,13 +18,6 @@
     position: relative;
 }
 
-.sidebar-page {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
 .dialogs-content {
     overflow: hidden;
     flex-grow: 1;
