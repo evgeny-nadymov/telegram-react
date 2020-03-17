@@ -139,12 +139,9 @@ class Dialogs extends Component {
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
 
-        ChatStore.on('clientUpdateOpenSettings', this.onClientUpdateOpenSettings);
-        ChatStore.on('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
-        ChatStore.on('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
-        ChatStore.on('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
-        ChatStore.on('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
-        ChatStore.on('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
+        ChatStore.on('clientUpdateArchive', this.onClientUpdateArchive);
+        ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
     }
 
     componentWillUnmount() {
@@ -160,12 +157,9 @@ class Dialogs extends Component {
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
 
-        ChatStore.off('clientUpdateOpenSettings', this.onClientUpdateOpenSettings);
-        ChatStore.off('clientUpdateCloseSettings', this.onClientUpdateCloseSettings);
-        ChatStore.off('clientUpdateOpenArchive', this.onClientUpdateOpenArchive);
-        ChatStore.off('clientUpdateCloseArchive', this.onClientUpdateCloseArchive);
-        ChatStore.off('clientUpdateOpenContacts', this.onClientUpdateOpenContacts);
-        ChatStore.off('clientUpdateCloseContacts', this.onClientUpdateCloseContacts);
+        ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
+        ChatStore.off('clientUpdateArchive', this.onClientUpdateArchive);
+        ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
     }
 
     async loadCache() {
@@ -252,28 +246,22 @@ class Dialogs extends Component {
         }
     };
 
-    onClientUpdateOpenContacts = async update => {
-        this.setState({ openContacts: true });
+    onClientUpdateContacts = async update => {
+        const { open } = update;
+
+        this.setState({ openContacts: open });
     };
 
-    onClientUpdateCloseContacts = update => {
-        this.setState({ openContacts: false });
+    onClientUpdateSettings = update => {
+        const { open, chatId } = update;
+
+        this.setState({ openSettings: open, meChatId: chatId });
     };
 
-    onClientUpdateOpenSettings = update => {
-        this.setState({ openSettings: true, meChatId: update.chatId });
-    };
+    onClientUpdateArchive = update => {
+        const { open } = update;
 
-    onClientUpdateCloseSettings = update => {
-        this.setState({ openSettings: false });
-    };
-
-    onClientUpdateOpenArchive = update => {
-        this.setState({ openArchive: true });
-    };
-
-    onClientUpdateCloseArchive = update => {
-        this.setState({ openArchive: false });
+        this.setState({ openArchive: open });
     };
 
     onClientUpdateThemeChange = update => {
@@ -368,6 +356,18 @@ class Dialogs extends Component {
         loadChatsContent(store, chatIds);
     }
 
+    handleCloseArchive = () => {
+        this.setState({ openArchive: false });
+    };
+
+    handleCloseContacts = () => {
+        this.setState({ openContacts: false });
+    };
+
+    handleCloseSettings = () => {
+        this.setState({ openSettings: false });
+    };
+
     render() {
         const {
             cache,
@@ -430,7 +430,7 @@ class Dialogs extends Component {
                         <UpdatePanel />
                     </div>
 
-                    <SidebarPage open={openArchive}>
+                    <SidebarPage open={openArchive} onClose={this.handleCloseArchive}>
                         <Archive
                             innerListRef={this.archiveListRef}
                             items={archiveItems}
@@ -438,11 +438,11 @@ class Dialogs extends Component {
                         />
                     </SidebarPage>
 
-                    <SidebarPage open={openContacts}>
+                    <SidebarPage open={openContacts} onClose={this.handleCloseContacts}>
                         <Contacts />
                     </SidebarPage>
 
-                    <SidebarPage open={openSettings}>
+                    <SidebarPage open={openSettings} onClose={this.handleCloseSettings}>
                         <Settings chatId={meChatId} />
                     </SidebarPage>
                 </div>

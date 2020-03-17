@@ -23,8 +23,8 @@ import InactivePage from './Components/InactivePage';
 import NativeAppPage from './Components/NativeAppPage';
 // import StubPage from './Components/StubPage';
 import registerServiceWorker from './registerServiceWorker';
-import { loadData } from './Utils/Phone';
 import { isMobile } from './Utils/Common';
+import { loadData } from './Utils/Phone';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
@@ -204,8 +204,7 @@ class TelegramApp extends Component {
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
                 case 'authorizationStateWaitTdlib':
-                    page = <AuthForm authorizationState={authorizationState //null;
-                            } onChangePhone={this.handleChangePhone} />;
+                    page = <AuthForm authorizationState={authorizationState} onChangePhone={this.handleChangePhone} />;
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {

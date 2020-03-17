@@ -11,22 +11,15 @@ import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '../../Assets/Icons/Back';
 import DialogsList from './DialogsList';
-import TdLibController from '../../Controllers/TdLibController';
 
 class Archive extends React.Component {
-    handleCloseArchive = () => {
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateCloseArchive'
-        });
-    };
-
     render() {
-        const { t, innerListRef, items, cacheItems } = this.props;
+        const { t, innerListRef, items, cacheItems, onClose } = this.props;
 
         return (
             <>
                 <div className='header-master'>
-                    <IconButton className='header-left-button' onClick={this.handleCloseArchive}>
+                    <IconButton className='header-left-button' onClick={onClose}>
                         <ArrowBackIcon />
                     </IconButton>
                     <div className='header-status grow cursor-pointer'>

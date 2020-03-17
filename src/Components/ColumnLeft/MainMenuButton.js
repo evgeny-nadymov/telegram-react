@@ -74,7 +74,8 @@ class MainMenuButton extends React.Component {
         this.handleMenuClose();
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateOpenContacts'
+            '@type': 'clientUpdateContacts',
+            open: true
         });
     };
 
@@ -108,7 +109,8 @@ class MainMenuButton extends React.Component {
         if (!chat) return;
 
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateOpenSettings',
+            '@type': 'clientUpdateSettings',
+            open: true,
             chatId: chat.id
         });
     };

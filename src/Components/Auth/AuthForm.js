@@ -11,6 +11,7 @@ import Code from './Code';
 import Password from './Password';
 import Phone from './Phone';
 import AuthErrorDialog from './AuthErrorDialog';
+import { loadData } from '../../Utils/Phone';
 import AppStore from '../../Stores/ApplicationStore';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './AuthForm.css';
@@ -21,36 +22,15 @@ class AuthForm extends React.Component {
     };
 
     componentDidMount() {
-        setTimeout(this.loadData, 100);
+        setTimeout(this.loadContent, 100);
     }
 
-    loadData = async () => {
+    loadContent = async () => {
         const { data } = this.state;
         if (data) return;
 
         try {
-            const response = await fetch('data/countries.dat');
-            const text = await response.text();
-
-            const lines = text.split('\n');
-            const data2 = [];
-            lines.forEach(x => {
-                const split = x.split(';');
-                const item = {
-                    prefix: split[0],
-                    code: split[1],
-                    name: split[2],
-                    pattern: split[3],
-                    count: Number(split[4]),
-                    emoji: split[5]
-                };
-                data2.push(item);
-            });
-            data2.forEach(x => {
-                x.phone = '+' + x.prefix;
-            });
-
-            AuthStore.data = data2.filter(x => x.emoji);
+            AuthStore.data = await loadData();
 
             this.setState({ data: AuthStore.data });
         } catch (error) {

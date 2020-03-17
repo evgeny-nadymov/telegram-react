@@ -9,7 +9,15 @@ import TdLibController from '../Controllers/TdLibController';
 
 export function openArchive() {
     TdLibController.clientUpdate({
-        '@type': 'clientUpdateOpenArchive'
+        '@type': 'clientUpdateArchive',
+        open: true
+    });
+}
+
+export function closeArchive() {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateArchive',
+        open: false
     });
 }
 

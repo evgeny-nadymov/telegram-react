@@ -9,9 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import ArchiveIcon from '@material-ui/icons/Archive';
-import TdLibController from '../../Controllers/TdLibController';
-import './Archive.css';
 import { openArchive } from '../../Actions/Client';
+import './Archive.css';
 
 class Archive extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {

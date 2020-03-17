@@ -12,13 +12,7 @@ import Poll from '../Components/Message/Media/Poll';
 import SafeLink from '../Components/Additional/SafeLink';
 import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
-import {
-    getChatDisableMentionNotifications,
-    getChatDisablePinnedMessageNotifications,
-    getChatTitle,
-    isChatMuted,
-    isMeChat
-} from './Chat';
+import { getChatTitle, isMeChat } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getPhotoSize } from './Common';
 import { download, saveOrDownload } from './File';
@@ -1673,27 +1667,6 @@ function getEmojiMatches(chatId, messageId) {
 
 function messageComparatorDesc(left, right) {
     return left.id - right.id;
-}
-
-export function hasMention(message) {
-    return message && message.contains_unread_mention;
-}
-
-export function hasPinnedMessage(message) {
-    return message && message.content['@type'] === 'messagePinMessage';
-}
-
-export function isMessageMuted(message) {
-    const { chat_id } = message;
-
-    if (hasMention(message)) {
-        return getChatDisableMentionNotifications(chat_id);
-    }
-    if (hasPinnedMessage(message)) {
-        return getChatDisablePinnedMessageNotifications(chat_id);
-    }
-
-    return isChatMuted(chat_id);
 }
 
 function checkInclusion(index, entities) {

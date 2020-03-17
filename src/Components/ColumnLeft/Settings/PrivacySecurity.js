@@ -171,8 +171,8 @@ class PrivacySecurity extends React.Component {
                         </ListItem>
                     </div>
                 </div>
-                <SidebarPage open={openActiveSessions}>
-                    <ActiveSessions sessions={sessions} onClose={this.closeActiveSessions} />
+                <SidebarPage open={openActiveSessions} onClose={this.closeActiveSessions}>
+                    <ActiveSessions sessions={sessions} />
                 </SidebarPage>
             </>
         );

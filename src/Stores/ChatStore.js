@@ -383,23 +383,11 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateCloseArchive': {
-                this.emitUpdate(update);
-                break;
-            }
-            case 'clientUpdateCloseContacts': {
-                this.emitUpdate(update);
-                break;
-            }
-            case 'clientUpdateCloseSettings': {
-                this.emitUpdate(update);
-                break;
-            }
             case 'clientUpdateLeaveChat': {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateOpenArchive': {
+            case 'clientUpdateArchive': {
                 this.emitUpdate(update);
                 break;
             }
@@ -407,11 +395,11 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateOpenContacts': {
+            case 'clientUpdateContacts': {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateOpenSettings': {
+            case 'clientUpdateSettings': {
                 this.emitUpdate(update);
                 break;
             }

@@ -10,7 +10,7 @@ export async function loadData() {
     if (data) return;
 
     try {
-        const response = await fetch('data/countries.dat');
+        const response = await fetch('data/countries.txt');
         const text = await response.text();
 
         const lines = text.split('\n');
@@ -32,6 +32,8 @@ export async function loadData() {
         });
 
         data = data2.filter(x => x.emoji);
+
+        return data;
     } catch (error) {
         console.error(error);
     }

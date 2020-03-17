@@ -36,7 +36,6 @@ class Settings extends React.Component {
     }
 
     componentDidMount() {
-        console.log('[perf] Settings.componentDidMount');
         this.loadContent();
     }
 
@@ -86,6 +85,8 @@ class Settings extends React.Component {
     };
 
     closeNotifications = () => {
+        console.log('[sp] closeNotifications');
+
         this.setState({
             openNotifications: false
         });
@@ -117,13 +118,15 @@ class Settings extends React.Component {
 
     handleCloseSettings = () => {
         TdLibController.clientUpdate({
-            '@type': 'clientUpdateCloseSettings'
+            '@type': 'clientUpdateSettings',
+            open: false
         });
     };
 
     render() {
         const { chatId } = this.props;
         const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage } = this.state;
+        console.log('[sp] render', this.state);
 
         return (
             <>
@@ -136,20 +139,20 @@ class Settings extends React.Component {
                     onPrivacySecurity={this.openPrivacySecurity}
                     onLanguage={this.openLanguage}
                 />
-                <SidebarPage open={openEditProfile}>
-                    <EditProfile chatId={chatId} onClose={this.closeEditProfile} />
+                <SidebarPage open={openEditProfile} onClose={this.closeEditProfile}>
+                    <EditProfile chatId={chatId} />
                 </SidebarPage>
-                <SidebarPage open={openGeneral}>
-                    <General chatId={chatId} onClose={this.closeGeneral} />
+                <SidebarPage open={openGeneral} onClose={this.closeGeneral}>
+                    <General chatId={chatId} />
                 </SidebarPage>
-                <SidebarPage open={openNotifications}>
-                    <Notifications chatId={chatId} onClose={this.closeNotifications} />
+                <SidebarPage open={openNotifications} onClose={this.closeNotifications}>
+                    <Notifications chatId={chatId} />
                 </SidebarPage>
-                <SidebarPage open={openPrivacySecurity}>
-                    <PrivacySecurity onClose={this.closePrivacySecurity} />
+                <SidebarPage open={openPrivacySecurity} onClose={this.closePrivacySecurity}>
+                    <PrivacySecurity />
                 </SidebarPage>
-                <SidebarPage open={openLanguage}>
-                    <Language onClose={this.closeLanguage} />
+                <SidebarPage open={openLanguage} onClose={this.closeLanguage}>
+                    <Language />
                 </SidebarPage>
             </>
         );

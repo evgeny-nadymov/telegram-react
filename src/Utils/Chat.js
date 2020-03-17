@@ -13,6 +13,8 @@ import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
 import { getContent } from './Message';
 import { isServiceMessage } from './ServiceMessage';
+import { formatPhoneNumber } from './Phone';
+import { getChannelStatus } from './Channel';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
@@ -20,8 +22,6 @@ import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import { formatPhoneNumber } from './Phone';
-import { getChannelStatus } from './Channel';
 
 export function canUnpinMessage(chatId) {
     const chat = ChatStore.get(chatId);
@@ -354,43 +354,6 @@ function getChatMuteFor(chatId) {
     }
 
     return mute_for;
-}
-
-export function getChatDisablePinnedMessageNotifications(chatId) {
-    const chat = ChatStore.get(chatId);
-    if (!chat) return false;
-
-    const { notification_settings } = chat;
-    if (!chat) return false;
-
-    const {
-        use_default_disable_pinned_message_notifications,
-        disable_pinned_message_notifications
-    } = notification_settings;
-    if (use_default_disable_pinned_message_notifications) {
-        const settings = getScopeNotificationSettings(chatId);
-
-        return settings ? settings.disable_pinned_message_notifications : false;
-    }
-
-    return disable_pinned_message_notifications;
-}
-
-export function getChatDisableMentionNotifications(chatId) {
-    const chat = ChatStore.get(chatId);
-    if (!chat) return false;
-
-    const { notification_settings } = chat;
-    if (!notification_settings) return false;
-
-    const { use_default_disable_mention_notifications, disable_mention_notifications } = notification_settings;
-    if (use_default_disable_mention_notifications) {
-        const settings = getScopeNotificationSettings(chatId);
-
-        return settings ? settings.disable_mention_notifications : false;
-    }
-
-    return disable_mention_notifications;
 }
 
 export function getScopeNotificationSettings(chatId) {

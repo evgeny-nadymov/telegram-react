@@ -78,7 +78,7 @@ async function registerValidSW(swUrl) {
                         // available; please refresh." message in your web app.
                         console.log('[SW] New content is available; please refresh.');
 
-                        ApplicationStore.emit('clientUpdateNewContentAvailable');
+                        TdLibController.clientUpdate({ '@type': 'clientUpdateNewContentAvailable' });
                     } else {
                         // At this point, everything has been precached.
                         // It's the perfect time to display a

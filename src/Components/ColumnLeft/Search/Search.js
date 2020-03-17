@@ -40,7 +40,24 @@ class Search extends React.Component {
         const { text } = this.props;
 
         this.searchOrLoadContent(text);
+
+        document.addEventListener('keydown', this.handleKeyDown);
     }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    handleKeyDown = event => {
+        switch (event.key) {
+            case 'Escape':
+                event.preventDefault();
+                event.stopPropagation();
+
+                this.handleClose();
+                break;
+        }
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, text } = this.props;
