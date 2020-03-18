@@ -8,26 +8,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Slide } from '@material-ui/core';
+import SidebarManager from './SidebarManager';
 import './SidebarPage.css';
-
-const pages = [];
-document.addEventListener('keydown', event => {
-    // console.log('[sp] esc', pages);
-    if (!pages.length) return;
-
-    switch (event.key) {
-        case 'Escape':
-            const page = pages[pages.length - 1];
-            if (page) {
-                event.preventDefault();
-                event.stopPropagation();
-
-                const { onClose } = page.props;
-                if (onClose) onClose();
-            }
-            break;
-    }
-});
 
 class SidebarPage extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -36,11 +18,10 @@ class SidebarPage extends React.Component {
         if (prevProps.open !== open) {
             if (open) {
                 // console.log('[sp] push', this);
-                pages.push(this);
+                SidebarManager.add(this);
             } else {
                 // console.log('[sp] pop', this);
-                const index = pages.indexOf(this);
-                pages.splice(index, 1);
+                SidebarManager.remove(this);
             }
         }
     }

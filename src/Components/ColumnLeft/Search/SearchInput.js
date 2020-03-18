@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import SearchIcon from '../../../Assets/Icons/Search';
 import './SearchInput.css';
 
 class SearchInput extends React.Component {
@@ -70,7 +71,6 @@ class SearchInput extends React.Component {
 
         return (
             <div className='search-input'>
-                {/*<SearchIcon />*/}
                 <div
                     id='search-inputbox'
                     ref={inputRef}
@@ -83,6 +83,7 @@ class SearchInput extends React.Component {
                     onInput={this.handleInput}
                     onFocus={onFocus}
                 />
+                <SearchIcon className='search-input-icon' />
             </div>
         );
     }

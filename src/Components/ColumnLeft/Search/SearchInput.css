@@ -10,6 +10,7 @@
     overflow: hidden;
     flex-grow: 1;
     flex-shrink: 1;
+    position: relative;
 }
 
 [contenteditable='true']#search-inputbox {
@@ -30,7 +31,7 @@
     border: 2px solid var(--color-search-input);
     border-radius: 22px;
     margin: 8px 12px 8px 14px;
-    padding: 8px 12px 11px 12px;
+    padding: 8px 12px 11px 40px;
 }
 
 #search-inputbox::before {
@@ -59,4 +60,15 @@
     border-color: var(--color-accent-main);
     background: transparent;
     outline: none;
+}
+
+.search-input-icon {
+    position: absolute;
+    left: 26px;
+    top: 18px;
+    color: #869c9db4;
+}
+
+#search-inputbox:focus + .search-input-icon {
+    color: var(--color-accent-main);
 }
