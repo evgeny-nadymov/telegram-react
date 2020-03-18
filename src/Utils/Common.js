@@ -266,7 +266,7 @@ function getLetters(title) {
         return getFirstLetter(split[0]);
     }
     if (split.length > 1) {
-        return getFirstLetter(split[0]) + getFirstLetter(split[1]);
+        return getFirstLetter(split[0]) + getFirstLetter(split[split.length - 1]);
     }
 
     return null;

@@ -52,6 +52,8 @@ import TdLibController from '../../Controllers/TdLibController';
 import './Dialog.css';
 
 class Dialog extends Component {
+    static contextMenuId;
+
     constructor(props) {
         super(props);
 
@@ -137,12 +139,19 @@ class Dialog extends Component {
         if (contextMenu) {
             this.setState({ contextMenu: false });
         } else {
+            const contextMenuId = new Date();
+            Dialog.contextMenuId = contextMenuId;
+
             const left = event.clientX;
             const top = event.clientY;
             const chat = ChatStore.get(chatId);
             const { is_pinned } = chat;
             const canTogglePin = (await this.canPinChats(chatId)) || is_pinned;
             const canToggleArchive = canSetChatChatList(chatId);
+
+            if (Dialog.contextMenuId !== contextMenuId) {
+                return;
+            }
 
             this.setState({
                 contextMenu: true,
