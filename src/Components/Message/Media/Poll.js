@@ -201,7 +201,7 @@ class Poll extends React.Component {
         const buttonEnabled = showViewResults || options.some(x => x.isMultiChoosen);
         let recentVoters = [];
         if (recent_voter_user_ids) {
-            recentVoters = recent_voter_user_ids.map(id => <UserTile poll userId={id} />);
+            recentVoters = recent_voter_user_ids.map(id => <UserTile key={id} poll userId={id} />);
         }
 
         return (

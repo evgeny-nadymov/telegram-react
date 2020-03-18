@@ -570,6 +570,7 @@ class Message extends Component {
         const inlineMeta = (
             <Meta
                 className='meta-hidden'
+                key={`${chatId}_${messageId}_meta`}
                 chatId={chatId}
                 messageId={messageId}
                 date={date}

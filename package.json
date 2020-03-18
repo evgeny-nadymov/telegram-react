@@ -41,12 +41,11 @@
     "stats": "react-app-rewired build --bundle-report && npx webpack-bundle-analyzer ./build/bundle-stats.json"
   },
   "devDependencies": {
-    "prop-types": "^15.7.2",
     "customize-cra": "^0.5.0",
-    "husky": "^1.3.1",
-    "gh-pages": "^2.0.1",
+    "gh-pages": "^2.2.0",
     "lint-staged": "^8.1.5",
     "prettier": "^1.16.4",
+    "prop-types": "^15.7.2",
     "react-app-rewired": "^2.1.3",
     "sw-precache-cra": "^1.0.0-alpha.2",
     "webpack-bundle-analyzer": "^3.3.2",

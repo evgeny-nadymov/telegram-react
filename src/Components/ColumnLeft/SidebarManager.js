@@ -24,7 +24,10 @@ class SidebarManager {
                     event.stopPropagation();
 
                     const { onClose } = page.props;
-                    if (onClose) onClose();
+                    if (onClose) {
+                        event.target.blur();
+                        onClose();
+                    }
                 }
                 break;
         }

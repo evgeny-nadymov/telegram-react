@@ -23,9 +23,10 @@ class SearchInput extends React.Component {
 
             if (element.innerText) {
                 event.stopPropagation();
+                event.nativeEvent.stopImmediatePropagation();
 
                 element.innerText = null;
-                onChange(element.innerText);
+                if (onChange) onChange(element.innerText);
                 return;
             }
 

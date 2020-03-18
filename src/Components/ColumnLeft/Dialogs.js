@@ -332,7 +332,7 @@ class Dialogs extends Component {
         });
     };
 
-    handleClose = () => {
+    handleCloseSearch = () => {
         this.setState({
             openSearch: false,
             searchChatId: 0,
@@ -423,7 +423,7 @@ class Dialogs extends Component {
                                     chatId={searchChatId}
                                     text={searchText}
                                     onSelectMessage={this.handleSelectMessage}
-                                    onClose={this.handleClose}
+                                    onClose={this.handleCloseSearch}
                                 />
                             </CSSTransition>
                         </div>

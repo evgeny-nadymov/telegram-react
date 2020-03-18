@@ -53,6 +53,7 @@ class Search extends React.Component {
             case 'Escape':
                 event.preventDefault();
                 event.stopPropagation();
+                event.target.blur();
 
                 this.handleClose();
                 break;
