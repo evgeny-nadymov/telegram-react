@@ -229,7 +229,7 @@ class EditProfile extends React.Component {
 }
 
 EditProfile.propTypes = {
-    chatId: PropTypes.number.isRequired
+    chatId: PropTypes.number
 };
 
 const enhance = compose(

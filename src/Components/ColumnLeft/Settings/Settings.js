@@ -160,7 +160,7 @@ class Settings extends React.Component {
 }
 
 Settings.propTypes = {
-    chatId: PropTypes.number.isRequired
+    chatId: PropTypes.number
 };
 
 const enhance = compose(

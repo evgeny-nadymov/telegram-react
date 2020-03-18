@@ -127,7 +127,7 @@ class Main extends React.Component {
 }
 
 Main.propTypes = {
-    chatId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
     onClose: PropTypes.func,
     onEditProfile: PropTypes.func,
     onGeneral: PropTypes.func,

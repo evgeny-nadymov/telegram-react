@@ -26,8 +26,10 @@
     --color-accent-dark: #50a2e9;
     --color-grey700: rgba(97, 97, 97, 0.9);
     --color-grey: #9aa7b2;
-    --color-search-input: #f4f4f5;
     --color-hover: #70757914;
+
+    --search-input-background: #f4f4f5;
+    --search-input-icon: #9aa7b2;
 
     --border: #dadce0;
     --panel-background: #ffffff;
