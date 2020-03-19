@@ -244,7 +244,7 @@ class DialogsList extends React.Component {
 
         if (order === '0') {
             // unselect deleted chat
-            if (chat_id === AppStore.getChatId()) {
+            if (chat_id === AppStore.getChatId() && !chat.last_message) {
                 TdLibController.setChatId(0);
                 AppStore.changeChatDetailsVisibility(false);
             }
