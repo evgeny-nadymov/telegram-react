@@ -21,3 +21,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.section-header-title-multiline {
+    white-space: normal;
+}

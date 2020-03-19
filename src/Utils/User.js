@@ -227,6 +227,12 @@ function getProfilePhotoDateHint(userProfilePhoto) {
     return dateFormat(date, 'H:MM:ss d.mm.yyyy');
 }
 
+export function isDeletedUser(userId) {
+    const user = UserStore.get(userId);
+
+    return user && user.type['@type'] === 'userTypeDeleted';
+}
+
 export {
     getUserStatus,
     isUserOnline,

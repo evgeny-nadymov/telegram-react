@@ -41,7 +41,7 @@ function updateLightTheme(theme) {
     style.setProperty('--color-hover', '#70757914');
 
     style.setProperty('--search-input-background', '#f4f4f5');
-    style.setProperty('--search-input-icon', '#f4f4f5');
+    style.setProperty('--search-input-icon', '#9aa7b2');
 
     style.setProperty('--header-color', '#000000');
     style.setProperty('--header-subtle-color', '#707579');

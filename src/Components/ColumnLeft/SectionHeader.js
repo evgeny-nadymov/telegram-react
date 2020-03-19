@@ -7,14 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import './SectionHeader.css';
 
-function SectionHeader(props) {
-    const { command, onClick, children } = props;
-
+function SectionHeader({ command, multiline, onClick, children }) {
     return (
         <div className='section-header'>
-            <div className='section-header-title'>{children}</div>
+            <div className={classNames('section-header-title', { 'section-header-title-multiline': multiline })}>{children}</div>
             {Boolean(command) && <a onClick={onClick}>{command}</a>}
         </div>
     );
@@ -22,6 +21,7 @@ function SectionHeader(props) {
 
 SectionHeader.propTypes = {
     command: PropTypes.string,
+    multiline: PropTypes.bool,
     onClick: PropTypes.func
 };
 
