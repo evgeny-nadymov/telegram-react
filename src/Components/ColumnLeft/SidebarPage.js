@@ -8,20 +8,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Slide } from '@material-ui/core';
-import SidebarManager from './SidebarManager';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import './SidebarPage.css';
 
 class SidebarPage extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.keyboardHandler = new KeyboardHandler(this.handleKeyDown);
+    }
+
+    handleKeyDown = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.target.blur();
+
+        switch (event.key) {
+            case 'Escape':
+                const { onClose } = this.props;
+                if (onClose) onClose();
+                break;
+        }
+    };
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { open } = this.props;
 
         if (prevProps.open !== open) {
             if (open) {
-                // console.log('[sp] push', this);
-                SidebarManager.add(this);
+                KeyboardManager.add(this.keyboardHandler);
             } else {
-                // console.log('[sp] pop', this);
-                SidebarManager.remove(this);
+                KeyboardManager.remove(this.keyboardHandler);
             }
         }
     }

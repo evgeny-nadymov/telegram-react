@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import CloseIcon from '../../Assets/Icons/Close';
 import NavigateBeforeIcon from '../../Assets/Icons/Left';
 import ReplyIcon from '../../Assets/Icons/Share';
@@ -35,6 +36,7 @@ class ProfileMediaViewer extends React.Component {
         super(props);
 
         this.history = [];
+        this.keyboardHandler = new KeyboardHandler(this.handleKeyDown);
 
         const { chatId, fileId } = this.props;
 
@@ -101,14 +103,17 @@ class ProfileMediaViewer extends React.Component {
 
         this.loadHistory(photo);
 
-        document.addEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.add(this.keyboardHandler);
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.remove(this.keyboardHandler);
     }
 
-    onKeyDown = event => {
+    handleKeyDown = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
         if (event.keyCode === 27) {
             const { deleteConfirmationOpened } = this.state;
             if (deleteConfirmationOpened) return;

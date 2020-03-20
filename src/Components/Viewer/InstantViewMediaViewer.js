@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
 import { withIV } from '../InstantView/IVContext';
 import { withTranslation } from 'react-i18next';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import CloseIcon from '../../Assets/Icons/Close';
 import NavigateBeforeIcon from '../../Assets/Icons/Left';
 import ReplyIcon from '../../Assets/Icons/Share';
@@ -25,23 +26,28 @@ import { getInputMediaContent } from '../../Utils/Media';
 import { setInstantViewViewerContent } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
-
 class InstantViewMediaViewer extends React.Component {
-    state = {
-        index: -1,
-        hasPreviousMedia: false,
-        hasNextMedia: false,
-        blocks: []
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            index: -1,
+            hasPreviousMedia: false,
+            hasNextMedia: false,
+            blocks: []
+        };
+
+        this.keyboardHandler = new KeyboardHandler(this.onKeyDown);
+    }
 
     componentDidMount() {
         this.loadContent();
 
-        document.addEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.add(this.keyboardHandler);
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.remove(this.keyboardHandler);
     }
 
     onKeyDown = event => {

@@ -181,8 +181,6 @@ class MessagesList extends React.Component {
     }
 
     componentDidMount() {
-        // document.addEventListener('keydown', this.onKeyDown, false);
-
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
@@ -201,8 +199,6 @@ class MessagesList extends React.Component {
     }
 
     componentWillUnmount() {
-        // document.removeEventListener('keydown', this.onKeyDown, false);
-
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);

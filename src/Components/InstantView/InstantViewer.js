@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import CloseIcon from '../../Assets/Icons/Close';
 import Article from './Article';
 import InstantViewMediaViewer from '../Viewer/InstantViewMediaViewer';
@@ -18,16 +19,17 @@ import { itemsInView, throttle } from '../../Utils/Common';
 import { getInnerBlocks } from '../../Utils/InstantView';
 import { openInstantView } from '../../Actions/InstantView';
 import { setInstantViewContent, setInstantViewViewerContent } from '../../Actions/Client';
+import { scrollTop } from '../../Utils/DOM';
 import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewer.css';
-import { scrollTop } from '../../Utils/DOM';
 
 class InstantViewer extends React.Component {
     constructor(props) {
         super(props);
 
+        this.keyboardHandler = new KeyboardHandler(this.onKeyDown);
         this.articleRef = React.createRef();
         this.instantViewerRef = React.createRef();
 
@@ -86,14 +88,14 @@ class InstantViewer extends React.Component {
         this.mounted = true;
         this.handleScroll();
 
-        document.addEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.add(this.keyboardHandler);
         InstantViewStore.on('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
         InstantViewStore.on('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
     }
 
     componentWillUnmount() {
         this.mounted = false;
-        document.removeEventListener('keydown', this.onKeyDown, false);
+        KeyboardManager.remove(this.keyboardHandler);
         InstantViewStore.off('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
         InstantViewStore.off('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
     }

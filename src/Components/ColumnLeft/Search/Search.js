@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import KeyboardManager, { KeyboardHandler } from '../../Additional/KeyboardManager';
 import CloseIcon from '../../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Chat from '../../Tile/Chat';
@@ -32,6 +33,7 @@ class Search extends React.Component {
     constructor(props) {
         super(props);
 
+        this.keyboardHandler = new KeyboardHandler(this.handleKeyDown);
         this.listRef = React.createRef();
         this.state = {};
     }
@@ -41,11 +43,11 @@ class Search extends React.Component {
 
         this.searchOrLoadContent(text);
 
-        document.addEventListener('keydown', this.handleKeyDown);
+        KeyboardManager.add(this.keyboardHandler);
     }
 
     componentWillUnmount() {
-        document.removeEventListener('keydown', this.handleKeyDown);
+        KeyboardManager.add(this.keyboardHandler);
     }
 
     handleKeyDown = event => {

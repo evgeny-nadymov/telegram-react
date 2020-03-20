@@ -85,8 +85,6 @@ class Settings extends React.Component {
     };
 
     closeNotifications = () => {
-        console.log('[sp] closeNotifications');
-
         this.setState({
             openNotifications: false
         });
@@ -126,7 +124,6 @@ class Settings extends React.Component {
     render() {
         const { chatId } = this.props;
         const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage } = this.state;
-        console.log('[sp] render', this.state);
 
         return (
             <>
