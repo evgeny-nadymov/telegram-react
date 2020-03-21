@@ -1,0 +1,36 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.wallpaper {
+    overflow: hidden;
+    width: 100px;
+    height: 100px;
+    margin: 6px;
+    background: aliceblue;
+}
+
+.wallpaper-photo {
+    width: 100%;
+}
+
+.wallpaper-selected {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    bottom: 2px;
+    left: 2px;
+    border: 3px solid var(--color-accent-main);
+}
+
+.wallpaper-selected-inner {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    border: 3px solid white;
+}

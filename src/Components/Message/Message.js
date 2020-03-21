@@ -42,7 +42,7 @@ import {
     canMessageBeClosed
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
-import { canPinMessages, canSendMessages, isPrivateChat } from '../../Utils/Chat';
+import { canPinMessages, canSendMessages, isChannelChat, isPrivateChat } from '../../Utils/Chat';
 import {
     openUser,
     openChat,
@@ -567,6 +567,7 @@ class Message extends Component {
 
         const { is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
+        const isOutgoing = is_outgoing && !isChannelChat(chatId);
         const inlineMeta = (
             <Meta
                 className='meta-hidden'
@@ -616,7 +617,7 @@ class Message extends Component {
                 <div
                     className={classNames('message', {
                         'message-short': !tile,
-                        'message-out': is_outgoing,
+                        'message-out': isOutgoing,
                         'message-selected': selected,
                         'message-highlighted': highlighted && !selected,
                         'message-top': showTitle && !showTail,
@@ -640,7 +641,7 @@ class Message extends Component {
                             <div
                                 className={classNames('message-content', {
                                     'message-bubble': withBubble,
-                                    'message-bubble-out': withBubble && is_outgoing
+                                    'message-bubble-out': withBubble && isOutgoing
                                 })}
                                 style={style}>
                                 {withBubble && ((showTitle && !suppressTitle) || showForward) && (

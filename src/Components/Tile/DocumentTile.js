@@ -14,13 +14,9 @@ import FileStore from '../../Stores/FileStore';
 import './DocumentTile.css';
 
 class DocumentTile extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            loaded: false
-        };
-    }
+    state = {
+        loaded: false
+    };
 
     componentDidMount() {
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);

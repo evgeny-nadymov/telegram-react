@@ -14,6 +14,7 @@ import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
 import StickerSetDialog from '../Popup/StickerSetDialog';
 import AppStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import './DialogDetails.css';
 
 class DialogDetails extends Component {
@@ -23,12 +24,14 @@ class DialogDetails extends Component {
         this.state = {
             chatId: AppStore.getChatId(),
             messageId: AppStore.getMessageId(),
-            selectedCount: 0
+            selectedCount: 0,
+            wallpaper: null,
+            wallpaperSrc: null
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, selectedCount } = this.state;
+        const { chatId, messageId, selectedCount, wallpaperSrc } = this.state;
         if (nextState.chatId !== chatId) {
             return true;
         }
@@ -38,6 +41,9 @@ class DialogDetails extends Component {
         if (nextState.selectedCount !== selectedCount) {
             return true;
         }
+        if (nextState.wallpaperSrc !== wallpaperSrc) {
+            return true;
+        }
 
         return false;
     }
@@ -45,12 +51,23 @@ class DialogDetails extends Component {
     componentDidMount() {
         AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
     }
+
+    onClientUpdateChatBackground = update => {
+        const { wallpaper, src } = update;
+
+        this.setState({
+            wallpaper,
+            wallpaperSrc: src
+        });
+    };
 
     onUpdateChatDetailsVisibility = update => {
         this.forceUpdate();
@@ -108,11 +125,19 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
-        const { chatId, messageId, selectedCount } = this.state;
+        const { chatId, messageId, selectedCount, wallpaperSrc } = this.state;
         const { isChatDetailsVisible } = AppStore;
 
+        let style = null;
+        if (wallpaperSrc) {
+            style = {
+                backgroundImage: `url(${wallpaperSrc})`,
+                backgroundSize: 'cover'
+            }
+        }
+
         return (
-            <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })}>
+            <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })} style={style}>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />

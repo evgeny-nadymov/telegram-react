@@ -1733,6 +1733,40 @@ function loadStickerSetContent(store, stickerSet) {
     loadStickersContent(store, stickers);
 }
 
+export function loadBackgroundsContent(store, backgrounds) {
+    if (!backgrounds) return;
+
+    backgrounds.forEach(background => {
+        loadBackgroundContent(store, background);
+    });
+}
+
+export function loadBackgroundContent(store, background) {
+    if (!background) return;
+
+    switch (background.type['@type']) {
+        case 'backgroundTypeFill': {
+            break;
+        }
+        case 'backgroundTypePattern': {
+            const { document } = background;
+            if (document) {
+                loadDocumentThumbnailContent(store, document, null);
+                loadDocumentContent(store, document, null, false);
+            }
+            break;
+        }
+        case 'backgroundTypeWallpaper': {
+            const { document } = background;
+            if (document) {
+                loadDocumentThumbnailContent(store, document, null);
+                loadDocumentContent(store, document, null, false);
+            }
+            break;
+        }
+    }
+}
+
 function loadStickersContent(store, stickers) {
     if (!stickers) return;
 

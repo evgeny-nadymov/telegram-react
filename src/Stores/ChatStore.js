@@ -379,6 +379,10 @@ class ChatStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateChatBackground': {
+                this.emitUpdate(update);
+                break;
+            }
             case 'clientUpdateClearHistory': {
                 this.emitUpdate(update);
                 break;

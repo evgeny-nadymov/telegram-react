@@ -120,11 +120,6 @@ class BlockedUsers extends React.Component {
            '@type': 'unblockUser',
             user_id: userId
         });
-
-        // const { users } = this.props;
-        //
-        // users.user_ids = users.user_ids.filter(x => x !== userId);
-        // this.forceUpdate();
     };
 
     render() {

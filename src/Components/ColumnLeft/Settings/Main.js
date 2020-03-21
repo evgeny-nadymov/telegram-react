@@ -27,18 +27,10 @@ import ChatStore from '../../../Stores/ChatStore';
 import './Main.css';
 
 class Main extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.themePickerRef = React.createRef();
-    }
-
-    handleAppearance = () => {
-        this.themePickerRef.current.open();
-    };
 
     handleOpenViewer = () => {
         const { chatId } = this.props;
+        
         const chat = ChatStore.get(chatId);
         if (!chat) return;
         if (!chat.photo) return;
@@ -113,13 +105,6 @@ class Main extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary={t('Language')} />
                     </ListItem>
-                    <ListItem autoFocus={false} className='settings-list-item' button onClick={this.handleAppearance}>
-                        <ListItemIcon>
-                            <PhotoIcon />
-                        </ListItemIcon>
-                        <ListItemText primary={t('Appearance')} />
-                    </ListItem>
-                    <ThemePicker ref={this.themePickerRef} />
                 </div>
             </>
         );
