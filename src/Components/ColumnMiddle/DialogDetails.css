@@ -15,12 +15,13 @@
     display: flex;
     flex-direction: column;
     background-color: var(--chat-background);
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.25s ease;
 }
 
 .light .dialog-details {
     background-image: url('../../Assets/bg.jpg');
-    background-size: cover;
-    background-position: center;
 }
 
 .dialog-details-third-column {

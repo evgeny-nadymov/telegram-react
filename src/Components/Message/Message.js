@@ -9,22 +9,13 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import withTheme from '@material-ui/core/styles/withTheme';
-import Button from '@material-ui/core/Button';
 import CheckMarkIcon from '@material-ui/icons/Check';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import Popover from '@material-ui/core/Popover';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
 import DayMeta from './DayMeta';
 import Reply from './Reply';
 import Forward from './Forward';
 import Meta from './Meta';
 import MessageAuthor from './MessageAuthor';
+import MessageMenu from './MessageMenu';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
 import UnreadSeparator from './UnreadSeparator';
@@ -35,31 +26,19 @@ import {
     getWebPage,
     openMedia,
     showMessageForward,
-    canMessageBeEdited,
-    isMessagePinned,
     isMetaBubble,
-    canMessageBeUnvoted,
-    canMessageBeClosed
+    canMessageBeForwarded,
+    getMessageStyle
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
-import { canPinMessages, canSendMessages, isChannelChat, isPrivateChat } from '../../Utils/Chat';
+import { canSendMessages, isChannelChat, isPrivateChat } from '../../Utils/Chat';
 import {
     openUser,
     openChat,
     selectMessage,
     openReply,
-    forwardMessages,
-    replyMessage,
-    editMessage,
-    clearSelection,
-    deleteMessages
 } from '../../Actions/Client';
-import { copy } from '../../Utils/Text';
-import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
-import { pinMessage, unpinMessage } from '../../Actions/Message';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import { getFitSize, getSize } from '../../Utils/Common';
-import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
@@ -76,21 +55,16 @@ class Message extends Component {
             highlighted: false,
             shook: false,
 
-            confirmStopPoll: false,
             contextMenu: false,
+            canCopyLink: false,
             left: 0,
             top: 0
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, chatId, messageId, sendingState, showUnreadSeparator, showTail, showTitle } = this.props;
-        const { contextMenu, selected, highlighted, shook, emojiMatches, confirmStopPoll } = this.state;
-
-        if (nextProps.theme !== theme) {
-            // console.log('Message.shouldComponentUpdate true theme');
-            return true;
-        }
+        const { chatId, messageId, sendingState, showUnreadSeparator, showTail, showTitle } = this.props;
+        const { contextMenu, selected, highlighted, shook, emojiMatches } = this.state;
 
         if (nextProps.chatId !== chatId) {
             // console.log('Message.shouldComponentUpdate true chatId');
@@ -119,11 +93,6 @@ class Message extends Component {
 
         if (nextProps.showTitle !== showTitle) {
             // console.log('Message.shouldComponentUpdate true showTitle');
-            return true;
-        }
-
-        if (nextState.confirmStopPoll !== confirmStopPoll) {
-            // console.log('Message.shouldComponentUpdate true confirmStopPoll');
             return true;
         }
 
@@ -169,7 +138,7 @@ class Message extends Component {
     componentWillUnmount() {
         MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
-        MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
+        MessageStore.off('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
@@ -289,8 +258,6 @@ class Message extends Component {
 
         const { chatId, messageId } = this.props;
 
-        const message = MessageStore.get(chatId, messageId);
-
         const canBeReplied = canSendMessages(chatId);
         if (canBeReplied) {
             TdLibController.clientUpdate({
@@ -301,7 +268,7 @@ class Message extends Component {
             return;
         }
 
-        const canBeForwarded = message && message.can_be_forwarded;
+        const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         if (canBeForwarded) {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateForward',
@@ -345,7 +312,7 @@ class Message extends Component {
         openReply(chatId, messageId);
     };
 
-    handleContextMenu = async event => {
+    handleOpenContextMenu = async event => {
         if (event) {
             event.preventDefault();
             event.stopPropagation();
@@ -362,12 +329,12 @@ class Message extends Component {
 
             const left = event.clientX;
             const top = event.clientY;
-            const copyLink =
+            const canCopyLink =
                 event.target && event.target.tagName === 'A' && event.target.href ? event.target.href : null;
 
             this.setState({
                 contextMenu: true,
-                copyLink,
+                canCopyLink,
                 left,
                 top
             });
@@ -382,170 +349,6 @@ class Message extends Component {
         this.setState({ contextMenu: false });
     };
 
-    handleReply = event => {
-        const { chatId, messageId } = this.props;
-
-        clearSelection();
-        this.handleCloseContextMenu(event);
-
-        replyMessage(chatId, messageId);
-    };
-
-    handlePin = event => {
-        const { chatId, messageId } = this.props;
-
-        clearSelection();
-        this.handleCloseContextMenu(event);
-
-        if (isMessagePinned(chatId, messageId)) {
-            unpinMessage(chatId);
-        } else {
-            pinMessage(chatId, messageId);
-        }
-    };
-
-    handleForward = event => {
-        const { chatId, messageId } = this.props;
-
-        this.handleCloseContextMenu(event);
-
-        forwardMessages(chatId, [messageId]);
-    };
-
-    handleEdit = event => {
-        const { chatId, messageId } = this.props;
-
-        clearSelection();
-        this.handleCloseContextMenu(event);
-
-        editMessage(chatId, messageId);
-    };
-
-    handleSelect = event => {
-        const { chatId, messageId } = this.props;
-
-        this.handleCloseContextMenu(event);
-
-        selectMessage(chatId, messageId, true);
-    };
-
-    handleDelete = event => {
-        const { chatId, messageId } = this.props;
-
-        this.handleCloseContextMenu(event);
-
-        deleteMessages(chatId, [messageId]);
-    };
-
-    getMessageStyle(chatId, messageId) {
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return null;
-
-        const { content } = message;
-        if (!content) return null;
-
-        switch (content['@type']) {
-            case 'messageAnimation': {
-                const { animation } = content;
-                if (!animation) return null;
-
-                const { width, height, thumbnail } = animation;
-
-                const size = { width, height } || thumbnail;
-                if (!size) return null;
-
-                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
-                if (!fitSize) return null;
-
-                return { width: fitSize.width };
-            }
-            case 'messagePhoto': {
-                const { photo } = content;
-                if (!photo) return null;
-
-                const size = getSize(photo.sizes, PHOTO_SIZE);
-                if (!size) return null;
-
-                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
-                if (!fitSize) return null;
-
-                return { width: fitSize.width };
-            }
-            case 'messageVideo': {
-                const { video } = content;
-                if (!video) return null;
-
-                const { thumbnail, width, height } = video;
-
-                const size = { width, height } || thumbnail;
-                if (!size) return null;
-
-                const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
-                if (!fitSize) return null;
-
-                return { width: fitSize.width };
-            }
-        }
-
-        return null;
-    }
-
-    handleUnvote = event => {
-        if (event) {
-            event.stopPropagation();
-        }
-
-        const { chatId, messageId } = this.props;
-        const { contextMenu } = this.state;
-
-        if (contextMenu) {
-            this.handleCloseContextMenu();
-        }
-
-        cancelPollAnswer(chatId, messageId);
-    };
-
-    handleConfirmStopPoll = event => {
-        const { dialog } = this.state;
-        if (dialog) return;
-
-        this.setState({
-            confirmStopPoll: true,
-            contextMenu: false
-        });
-    };
-
-    handleStopPoll = event => {
-        event.stopPropagation();
-
-        const { chatId, messageId } = this.props;
-        const { confirmStopPoll } = this.state;
-
-        if (confirmStopPoll) {
-            this.setState({ confirmStopPoll: false });
-        }
-
-        stopPoll(chatId, messageId);
-    };
-
-    handleCloseConfirm = event => {
-        if (event) {
-            event.stopPropagation();
-        }
-
-        this.setState({ confirmStopPoll: false });
-    };
-
-    handleCopyLink = event => {
-        const { copyLink } = this.state;
-
-        this.handleCloseContextMenu(event);
-
-        if (!copyLink) return;
-
-        copy(copyLink);
-    };
-
     render() {
         const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle, showDate } = this.props;
         const {
@@ -553,11 +356,10 @@ class Message extends Component {
             selected,
             highlighted,
             shook,
-            copyLink,
+            canCopyLink,
             contextMenu,
             left,
-            top,
-            confirmStopPoll
+            top
         } = this.state;
 
         // console.log('Message.render', messageId);
@@ -597,17 +399,7 @@ class Message extends Component {
             );
         }
 
-        const style = this.getMessageStyle(chatId, messageId);
-
-        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId);
-        const canBeClosed = canMessageBeClosed(chatId, messageId);
-        const canBeReplied = canSendMessages(chatId);
-        const canBePinned = canPinMessages(chatId);
-        const isPinned = isMessagePinned(chatId, messageId);
-        const canBeForwarded = message.can_be_forwarded;
-        const canBeDeleted = message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users;
-        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
-        const canBeEdited = canMessageBeEdited(chatId, messageId);
+        const style = getMessageStyle(chatId, messageId);
         const withBubble =
             message.content['@type'] !== 'messageSticker' && message.content['@type'] !== 'messageVideoNote';
 
@@ -630,7 +422,7 @@ class Message extends Component {
                     onMouseDown={this.handleMouseDown}
                     onClick={this.handleSelection}
                     onAnimationEnd={this.handleAnimationEnd}
-                    onContextMenu={this.handleContextMenu}>
+                    onContextMenu={this.handleOpenContextMenu}>
                     {showUnreadSeparator && <UnreadSeparator />}
                     <div className='message-body'>
                         <div className='message-padding'>
@@ -694,53 +486,15 @@ class Message extends Component {
                         </div>
                         <div className='message-padding' />
                     </div>
-                    <Popover
-                        open={contextMenu}
-                        onClose={this.handleCloseContextMenu}
-                        anchorReference='anchorPosition'
-                        anchorPosition={{ top, left }}
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right'
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left'
-                        }}
-                        onMouseDown={e => e.stopPropagation()}>
-                        <MenuList onClick={e => e.stopPropagation()}>
-                            {copyLink && <MenuItem onClick={this.handleCopyLink}>{t('CopyLink')}</MenuItem>}
-                            {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
-                            {canBePinned && (
-                                <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>
-                            )}
-                            {canBeSelected && <MenuItem onClick={this.handleSelect}>{t('Select')}</MenuItem>}
-                            {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
-                            {canBeEdited && <MenuItem onClick={this.handleEdit}>{t('Edit')}</MenuItem>}
-                            {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
-                            {canBeUnvoted && <MenuItem onClick={this.handleUnvote}>{t('Unvote')}</MenuItem>}
-                            {canBeClosed && <MenuItem onClick={this.handleConfirmStopPoll}>{t('StopPoll')}</MenuItem>}
-                        </MenuList>
-                    </Popover>
-                    <Dialog
-                        transitionDuration={0}
-                        open={confirmStopPoll}
-                        onClose={this.handleCloseConfirm}
-                        aria-labelledby='form-dialog-title'>
-                        <DialogTitle id='form-dialog-title'>{t('StopPollAlertTitle')}</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>{t('StopPollAlertText')}</DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={this.handleCloseConfirm} color='primary'>
-                                {t('Cancel')}
-                            </Button>
-                            <Button onClick={this.handleStopPoll} color='primary'>
-                                {t('Stop')}
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
                 </div>
+                <MessageMenu
+                    chatId={chatId}
+                    messageId={messageId}
+                    anchorPosition={{ top, left }}
+                    open={contextMenu}
+                    onClose={this.handleCloseContextMenu}
+                    canCopyLink={canCopyLink}
+                />
             </div>
         );
     }
@@ -748,7 +502,6 @@ class Message extends Component {
 
 const enhance = compose(
     withSaveRef(),
-    withTheme,
     withTranslation(),
     withRestoreRef()
 );

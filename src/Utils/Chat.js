@@ -572,7 +572,12 @@ function getChatBio(chatId) {
 
     switch (chat.type['@type']) {
         case 'chatTypeBasicGroup': {
-            return null;
+            const fullInfo = BasicGroupStore.getFullInfo(chat.type.basic_group_id);
+            if (fullInfo) {
+                return fullInfo.description;
+            }
+
+            break;
         }
         case 'chatTypePrivate':
         case 'chatTypeSecret': {

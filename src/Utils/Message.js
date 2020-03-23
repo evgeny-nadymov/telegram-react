@@ -14,13 +14,13 @@ import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle, isMeChat } from './Chat';
 import { openUser } from './../Actions/Client';
-import { getPhotoSize } from './Common';
+import { getFitSize, getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload } from './File';
 import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM } from '../Constants';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
@@ -2269,6 +2269,71 @@ export function canMessageBeClosed(chatId, messageId) {
     if (content['@type'] !== 'messagePoll') return;
 
     return can_be_edited;
+}
+
+export function canMessageBeForwarded(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+
+    return message && message.can_be_forwarded;
+}
+
+export function canMessageBeDeleted(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+
+    return message && (message.can_be_deleted_only_for_self || message.can_be_deleted_for_all_users);
+}
+
+export function getMessageStyle(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (!animation) return null;
+
+            const { width, height, thumbnail } = animation;
+
+            const size = { width, height } || thumbnail;
+            if (!size) return null;
+
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            if (!fitSize) return null;
+
+            return { width: fitSize.width };
+        }
+        case 'messagePhoto': {
+            const { photo } = content;
+            if (!photo) return null;
+
+            const size = getSize(photo.sizes, PHOTO_SIZE);
+            if (!size) return null;
+
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            if (!fitSize) return null;
+
+            return { width: fitSize.width };
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (!video) return null;
+
+            const { thumbnail, width, height } = video;
+
+            const size = { width, height } || thumbnail;
+            if (!size) return null;
+
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
+            if (!fitSize) return null;
+
+            return { width: fitSize.width };
+        }
+    }
+
+    return null;
 }
 
 export {

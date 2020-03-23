@@ -132,7 +132,7 @@ class DialogDetails extends Component {
         if (wallpaperSrc) {
             style = {
                 backgroundImage: `url(${wallpaperSrc})`,
-                backgroundSize: 'cover'
+                // transition: 'background-image .25s ease'
             }
         }
 
