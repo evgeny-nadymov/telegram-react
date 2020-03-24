@@ -244,13 +244,16 @@ function debounce(func, wait, immediate) {
     };
 }
 
-function getFirstLetter(str) {
+export function getFirstLetter(str) {
     if (!str) return '';
-    for (let i = 0; i < str.length; i++) {
-        if (str[i].toUpperCase() !== str[i].toLowerCase()) {
-            return str[i];
-        } else if (str[i] >= '0' && str[i] <= '9') {
-            return str[i];
+
+    for (let char of str) {
+        if (char.toUpperCase() !== char.toLowerCase()) {
+            return char;
+        } else if (char >= '0' && char <= '9') {
+            return char;
+        } else if (char.length > 1) {
+            return char;
         }
     }
 

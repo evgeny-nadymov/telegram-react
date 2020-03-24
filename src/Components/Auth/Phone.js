@@ -385,9 +385,9 @@ class Phone extends React.Component {
             // const phoneRegExp = '/^[+]*[(]{0,1}[0-9]{1,3}[)]{0,1}[-\s\./0-9]*$/g';
 
             let phone = '';
-            for (let i = 0; i < plainText.length; i++) {
-                if (isWhitelistKey(plainText.charAt(i))) {
-                    phone += plainText.charAt(i);
+            for (let ch of plainText) {
+                if (isWhitelistKey(ch)) {
+                    phone += ch;
                 }
             }
 

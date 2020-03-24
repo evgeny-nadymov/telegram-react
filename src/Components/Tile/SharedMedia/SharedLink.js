@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import ContextMenu from './ContextMenu';
 import Photo from '../../Message/Media/Photo';
 import SafeLink from '../../Additional/SafeLink';
+import { getFirstLetter } from '../../../Utils/Common';
 import { openMedia, substring } from '../../../Utils/Message';
 import punycode from '../../../Utils/Punycode';
 import MessageStore from '../../../Stores/MessageStore';
@@ -144,7 +145,7 @@ class SharedLink extends React.Component {
             <>
                 <div className='shared-link' onContextMenu={this.handleOpenContextMenu}>
                     <div className={classNames('shared-link-photo', tileColor)}>
-                        {title.charAt(0)}
+                        {getFirstLetter(title)}
                         {photo && (
                             <Photo
                                 displaySize={90}

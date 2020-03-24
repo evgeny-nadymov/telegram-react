@@ -6,7 +6,7 @@
  */
 
 import dateFormat from '../Utils/Date';
-import { getLetters, getSize } from './Common';
+import { getFirstLetter, getLetters, getSize } from './Common';
 import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import UserStore from '../Stores/UserStore';
 
@@ -166,10 +166,17 @@ function getUserLetters(userId, firstName, lastName, t) {
     }
 
     if (user) {
-        return user.first_name ? user.first_name.charAt(0) : user.last_name ? user.last_name.charAt(0) : '';
+        firstName = user.first_name;
+        lastName = user.last_name;
     }
 
-    return firstName ? firstName.charAt(0) : lastName ? lastName.charAt(0) : '';
+    const firstNameSymbol = getFirstLetter(firstName) || firstName.charAt(0);
+    if (firstNameSymbol) return firstNameSymbol;
+
+    const lastNameSymbol = getFirstLetter(lastName) || lastName.charAt(0);
+    if (lastNameSymbol) return lastNameSymbol;
+
+    return '';
 }
 
 function getUserStatusOrder(user) {
