@@ -16,6 +16,8 @@ import StickerSetDialog from '../Popup/StickerSetDialog';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogDetails.css';
+import { getSrc } from '../../Utils/File';
+import FileStore from '../../Stores/FileStore';
 
 class DialogDetails extends Component {
     constructor(props) {
@@ -31,7 +33,7 @@ class DialogDetails extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, selectedCount, wallpaperSrc } = this.state;
+        const { chatId, messageId, selectedCount, wallpaper } = this.state;
         if (nextState.chatId !== chatId) {
             return true;
         }
@@ -41,7 +43,7 @@ class DialogDetails extends Component {
         if (nextState.selectedCount !== selectedCount) {
             return true;
         }
-        if (nextState.wallpaperSrc !== wallpaperSrc) {
+        if (nextState.wallpaper !== wallpaper) {
             return true;
         }
 
@@ -52,20 +54,84 @@ class DialogDetails extends Component {
         AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
+        FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
+        FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
     }
 
-    onClientUpdateChatBackground = update => {
-        const { wallpaper, src } = update;
+    onClientUpdateDocumentBlob = update => {
+        const { wallpaper } = this.state;
+        if (!wallpaper) return;
 
-        this.setState({
+        const { document } = wallpaper;
+        if (!document) return;
+
+        const { document: file } = document;
+        if (!file) return;
+
+        const { fileId } = update;
+
+        if (file.id !== fileId) {
+            return;
+        }
+
+        if (this.thumbnailTime) {
+            if (this.thumbnailTime.wallpaper === wallpaper) {
+                const diff = new Date() - this.thumbnailTime.time;
+                if (diff < 250) {
+                    setTimeout(() => {
+                        this.forceUpdate();
+                    }, 250);
+                    return;
+                }
+            }
+        }
+
+        this.forceUpdate();
+    };
+
+    onClientUpdateDocumentThumbnailBlob = update => {
+        const { wallpaper } = this.state;
+        if (!wallpaper) return;
+
+        const { document } = wallpaper;
+        if (!document) return;
+
+        const { thumbnail } = document;
+        if (!thumbnail) return;
+
+        const file = thumbnail.photo;
+        if (!file) return;
+
+        const { fileId } = update;
+
+        if (file.id !== fileId) {
+            return;
+        }
+
+        this.thumbnailTime = {
             wallpaper,
-            wallpaperSrc: src
+            time: new Date()
+        };
+        this.forceUpdate();
+    };
+
+    onClientUpdateChatBackground = update => {
+        const { wallpaper } = update;
+
+        this.thumbnailTime = {
+            wallpaper,
+            time: new Date()
+        };
+        this.setState({
+            wallpaper
         });
     };
 
@@ -125,14 +191,26 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
-        const { chatId, messageId, selectedCount, wallpaperSrc } = this.state;
+        const { chatId, messageId, wallpaper } = this.state;
         const { isChatDetailsVisible } = AppStore;
 
         let style = null;
-        if (wallpaperSrc) {
+        let src = null;
+        if (wallpaper) {
+            const { document } = wallpaper;
+            if (document) {
+                const { thumbnail, document: file } = document;
+                if (file) {
+                    src = getSrc(file);
+                }
+
+                if (!src && thumbnail) {
+                    src = getSrc(thumbnail.photo);
+                }
+            }
+
             style = {
-                backgroundImage: `url(${wallpaperSrc})`,
-                // transition: 'background-image .25s ease'
+                backgroundImage: src ? `url(${src})` : null
             }
         }
 

@@ -11,14 +11,15 @@ import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import Wallpaper from '../../Tile/Wallpaper';
-import { getSrc, loadBackgroundsContent } from '../../../Utils/File';
+import { getSrc, loadBackgroundContent, loadBackgroundsContent } from '../../../Utils/File';
+import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './ChatBackground.css';
 
 class ChatBackground extends React.Component {
     state = {
-        selectedId: -1
+        selectedId: ChatStore.wallpaper ? ChatStore.wallpaper.id : -1
     };
 
     componentDidMount() {
@@ -45,12 +46,14 @@ class ChatBackground extends React.Component {
         if (!file) return;
 
         const src = getSrc(file);
-        if (!src) return;
+        if (!src) {
+            const store = FileStore.getStore();
+            loadBackgroundContent(store, wallpaper, true);
+        }
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateChatBackground',
-            wallpaper,
-            src
+            wallpaper
         });
     };
 

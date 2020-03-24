@@ -1737,11 +1737,11 @@ export function loadBackgroundsContent(store, backgrounds) {
     if (!backgrounds) return;
 
     backgrounds.forEach(background => {
-        loadBackgroundContent(store, background);
+        loadBackgroundContent(store, background, false);
     });
 }
 
-export function loadBackgroundContent(store, background) {
+export function loadBackgroundContent(store, background, full = false) {
     if (!background) return;
 
     switch (background.type['@type']) {
@@ -1752,7 +1752,7 @@ export function loadBackgroundContent(store, background) {
             const { document } = background;
             if (document) {
                 loadDocumentThumbnailContent(store, document, null);
-                loadDocumentContent(store, document, null, false);
+                if (full) loadDocumentContent(store, document, null, false);
             }
             break;
         }
@@ -1760,7 +1760,7 @@ export function loadBackgroundContent(store, background) {
             const { document } = background;
             if (document) {
                 loadDocumentThumbnailContent(store, document, null);
-                loadDocumentContent(store, document, null, false);
+                if (full) loadDocumentContent(store, document, null, false);
             }
             break;
         }

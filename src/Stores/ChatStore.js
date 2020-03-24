@@ -27,6 +27,7 @@ class ChatStore extends EventEmitter {
         this.counters = new Map();
         this.skippedUpdates = [];
         this.chatList = new Map();
+        this.wallpaper = null;
     };
 
     loadClientData = () => {
@@ -380,6 +381,9 @@ class ChatStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateChatBackground': {
+                const { wallpaper } = update;
+                this.wallpaper = wallpaper;
+
                 this.emitUpdate(update);
                 break;
             }
