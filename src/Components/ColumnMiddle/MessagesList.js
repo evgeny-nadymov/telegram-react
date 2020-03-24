@@ -441,6 +441,9 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
+        const { date } = message;
+        if (date === 0) return;
+
         const list = this.listRef.current;
 
         let scrollBehavior = message.is_outgoing ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
