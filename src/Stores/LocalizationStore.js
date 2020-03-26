@@ -95,7 +95,9 @@ i18n.use(initReactI18next).init({
                 Loading: 'Loading...',
                 Updating: 'Updating...',
                 WaitingForNetwork: 'Waiting for network...',
-                ContinueOnThisLanguage: 'Continue in English'
+                ContinueOnThisLanguage: 'Continue in English',
+                SendAsFile: 'Send as a file',
+                SendAsPhoto: 'Send as a photo'
             }
         },
         ru: {
@@ -174,7 +176,9 @@ i18n.use(initReactI18next).init({
                 Loading: 'Загрузка...',
                 Updating: 'Обновление...',
                 WaitingForNetwork: 'Ожидание сети...',
-                ContinueOnThisLanguage: 'Продолжить на русском'
+                ContinueOnThisLanguage: 'Продолжить на русском',
+                SendAsFile: 'Отправить как файл',
+                SendAsPhoto: 'Отправить как фото'
             }
         }
     },

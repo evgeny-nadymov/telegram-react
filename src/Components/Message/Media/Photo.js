@@ -70,6 +70,7 @@ class Photo extends React.Component {
         const fitPhotoSize = getFitSize(photoSize, displaySize, false);
         if (!fitPhotoSize) return null;
 
+        // console.log('[photo] render', displaySize, fitPhotoSize);
         const photoStyle = {
             width: fitPhotoSize.width,
             height: fitPhotoSize.height,

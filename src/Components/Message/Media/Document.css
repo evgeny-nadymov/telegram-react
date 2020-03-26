@@ -65,6 +65,8 @@
     text-overflow: ellipsis;
 }
 
+.document-title a,
+.document-title a:hover,
 .message .document-title a,
 .message .document-title a:hover {
     color: var(--text-primary);

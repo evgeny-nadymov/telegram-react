@@ -11,7 +11,6 @@ import { withTranslation } from 'react-i18next';
 import emojiRegex from 'emoji-regex';
 import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
-import Button from '@material-ui/core/Button';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
 import SendIcon from '../../Assets/Icons/Send';
 import AttachButton from './../ColumnMiddle/AttachButton';
@@ -23,7 +22,7 @@ import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { findLastTextNode, focusInput } from '../../Utils/DOM';
-import { isEditedMedia } from '../../Utils/Media';
+import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '../../Utils/Media';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { PHOTO_SIZE } from '../../Constants';
@@ -50,19 +49,16 @@ class InputBox extends Component {
         this.state = {
             chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
-            editMessageId: 0
+            editMessageId: 0,
+            sendFile: null
         };
 
         document.execCommand('defaultParagraphSeparator', false, 'br');
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl } = this.state;
-
-        if (nextProps.theme !== theme) {
-            return true;
-        }
+        const { t } = this.props;
+        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -85,6 +81,10 @@ class InputBox extends Component {
         }
 
         if (nextState.editMessageId !== editMessageId) {
+            return true;
+        }
+
+        if (nextState.sendFile !== sendFile) {
             return true;
         }
 
@@ -136,6 +136,7 @@ class InputBox extends Component {
         AppStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatDraftMessage);
+        FileStore.on('clientUpdateSendFiles', this.onClientUpdateSendFiles);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
@@ -150,12 +151,20 @@ class InputBox extends Component {
         AppStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatDraftMessage);
+        FileStore.off('clientUpdateSendFiles', this.onClientUpdateSendFiles);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         document.removeEventListener('selectionchange', this.selectionChangeListener, true);
     }
+
+    onClientUpdateSendFiles = update => {
+        const { files } = update;
+        if (!files) return;
+
+        this.handleSendFiles(Array.from(files));
+    };
 
     onUpdateDeleteMessages = update => {
         const { chatId, editMessageId } = this.state;
@@ -485,7 +494,7 @@ class InputBox extends Component {
             if (text) {
                 this.editMessageText(inputContent, result => {});
             } else if (caption) {
-                this.editMessageCaption(formattedText, result => {});
+                this.editMessageCaption(formattedText);
             }
         } else {
             this.sendMessage(inputContent, false, result => {});
@@ -504,15 +513,34 @@ class InputBox extends Component {
         this.attachPhotoRef.current.click();
     };
 
-    handleAttachPhotoComplete = () => {
-        const files = this.attachPhotoRef.current.files;
+    handleAttachPhotoComplete = async () => {
+        const { files } = this.attachPhotoRef.current;
         if (files.length === 0) return;
 
-        Array.from(files).forEach(file => {
-            readImageSize(file, result => {
-                this.handleSendPhoto(result);
+        if (files.length === 1) {
+            const [ newFile, ...rest ] = Array.from(files);
+            if (!newFile) return;
+
+            const newMedia = await getMediaPhotoFromFile(newFile);
+            this.setState({
+                openEditMedia: true,
+                newFile,
+                newMedia
             });
-        });
+        } else {
+            Array.from(files).forEach(async file => {
+                const [width, height] = await readImageSize(file);
+
+                const content = {
+                    '@type': 'inputMessagePhoto',
+                    photo: { '@type': 'inputFileBlob', name: file.name, size: file.size, data: file },
+                    width,
+                    height
+                };
+
+                this.handleSendPhoto(content, file);
+            });
+        }
 
         this.attachPhotoRef.current.value = '';
     };
@@ -523,13 +551,30 @@ class InputBox extends Component {
         this.attachDocumentRef.current.click();
     };
 
-    handleAttachDocumentComplete = () => {
-        const files = this.attachDocumentRef.current.files;
+    handleAttachDocumentComplete = async () => {
+        const { files } = this.attachDocumentRef.current;
         if (files.length === 0) return;
 
-        Array.from(files).forEach(file => {
-            this.handleSendDocument(file);
-        });
+        if (files.length === 1) {
+            const [ newFile, ...rest ] = Array.from(files);
+            if (!newFile) return;
+
+            const newMedia = await getMediaDocumentFromFile(newFile);
+            this.setState({
+                openEditMedia: true,
+                newFile,
+                newMedia
+            });
+        } else {
+            Array.from(files).forEach(file => {
+                const content = {
+                    '@type': 'inputMessageDocument',
+                    document: { '@type': 'inputFileBlob', name: file.name, size: file.size, data: file }
+                };
+
+                this.handleSendDocument(content, file);
+            });
+        }
 
         this.attachDocumentRef.current.value = '';
     };
@@ -784,15 +829,8 @@ class InputBox extends Component {
         }
     };
 
-    handleSendPhoto = file => {
-        if (!file) return;
-
-        const content = {
-            '@type': 'inputMessagePhoto',
-            photo: { '@type': 'inputFileBlob', name: file.name, data: file },
-            width: file.photoWidth,
-            height: file.photoHeight
-        };
+    handleSendPhoto = (content, file) => {
+        if (!content) return;
 
         this.sendMessage(content, true, result => {
             const cachedMessage = MessageStore.get(result.chat_id, result.id);
@@ -808,31 +846,63 @@ class InputBox extends Component {
         this.sendMessage(poll, true, () => {});
     };
 
-    handleSendDocument = file => {
-        if (!file) return;
-
-        const content = {
-            '@type': 'inputMessageDocument',
-            document: { '@type': 'inputFileBlob', name: file.name, data: file }
-        };
+    handleSendDocument = (content, file) => {
+        if (!content) return;
 
         this.sendMessage(content, true, result => FileStore.uploadFile(result.content.document.document.id, result));
     };
 
-    handlePaste = event => {
-        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+    async handleSendFiles(files) {
+        if (!files) return;
+        if (!files.length) return;
+
+
+        console.log('[photo] handleSendFiles', files);
+        if (files.length === 1) {
+            const newFile = files[0];
+            if (newFile.type.startsWith('image')) {
+                const newMedia = await getMediaPhotoFromFile(newFile);
+                if (newMedia) {
+                    this.setState({
+                        newMedia,
+                        newFile,
+                        openEditMedia: true
+                    });
+                }
+            } else {
+                const newMedia = await getMediaDocumentFromFile(newFile);
+                console.log('[photo] handleSendFiles newMedia', newMedia, newFile);
+                if (newMedia) {
+                    this.setState({
+                        newMedia,
+                        newFile,
+                        openEditMedia: true
+                    });
+                }
+            }
+        } else {
+            this.setState({ files });
+        }
+    }
+
+    handlePaste = async event => {
+        const { items } = event.clipboardData || event.originalEvent.clipboardData;
+        if (!items) return;
 
         const files = [];
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].kind.indexOf('file') === 0) {
-                files.push(items[i].getAsFile());
+        Array.from(items).forEach(item => {
+            if (item.kind.indexOf('file') === 0) {
+                const file = item.getAsFile();
+                if (file) {
+                    files.push(file);
+                }
             }
-        }
+        });
 
         if (files.length > 0) {
             event.preventDefault();
 
-            this.setState({ files });
+            this.handleSendFiles(files);
             return;
         }
 
@@ -850,7 +920,12 @@ class InputBox extends Component {
         if (!files.length) return;
 
         files.forEach(file => {
-            this.handleSendDocument(file);
+            const content = {
+                '@type': 'inputMessageDocument',
+                document: { '@type': 'inputFileBlob', name: file.name, data: file }
+            };
+
+            this.handleSendDocument(content, file);
         });
 
         this.handlePasteCancel();
@@ -873,21 +948,28 @@ class InputBox extends Component {
     };
 
     handleSendingMessage = (message, blob) => {
-        if (message && message.sending_state && message.sending_state['@type'] === 'messageSendingStatePending') {
-            if (message.content && message.content['@type'] === 'messagePhoto' && message.content.photo) {
-                let size = getSize(message.content.photo.sizes, PHOTO_SIZE);
-                if (!size) return;
+        if (!message) return;
 
-                let file = size.photo;
-                if (file && file.local && file.local.is_downloading_completed && !file.blob) {
-                    file.blob = blob;
-                    FileStore.updatePhotoBlob(message.chat_id, message.id, file.id);
-                }
-            }
-        }
+        const { sending_state, content, chat_id, id } = message;
+        if (!sending_state) return;
+        if (sending_state['@type'] !== 'messageSendingStatePending') return;
+        if (content['@type'] !== 'messagePhoto') return;
+
+        const { photo } = content;
+        if (!photo) return;
+
+        const size = getSize(photo.sizes, PHOTO_SIZE);
+        if (!size) return;
+
+        const { photo: file } = size;
+        if (!file) return;
+        if (file.blob) return;
+
+        file.blob = blob;
+        FileStore.updatePhotoBlob(chat_id, id, file.id);
     };
 
-    async editMessageMedia(content, callback) {
+    editMessageMedia(content) {
         const { chatId, editMessageId } = this.state;
         // console.log('[em] editMessageMedia start', chatId, editMessageId, content);
 
@@ -895,32 +977,27 @@ class InputBox extends Component {
         if (!editMessageId) return;
         if (!content) return;
 
-        // console.log('[em] editMessageMedia send', content);
-        const result = await TdLibController.send({
+        TdLibController.send({
             '@type': 'editMessageMedia',
             chat_id: chatId,
             message_id: editMessageId,
             input_message_content: content
         });
-
-        callback(result);
     }
 
-    async editMessageCaption(caption, callback) {
+    editMessageCaption(caption) {
         const { chatId, editMessageId } = this.state;
 
         if (!chatId) return;
         if (!editMessageId) return;
         if (!caption) return;
 
-        const result = await TdLibController.send({
+        TdLibController.send({
             '@type': 'editMessageCaption',
             chat_id: chatId,
             message_id: editMessageId,
             caption
         });
-
-        callback(result);
     }
 
     async editMessageText(content, callback) {
@@ -1118,13 +1195,26 @@ class InputBox extends Component {
         this.closeEditMediaDialog();
     };
 
-    handleDoneEditMedia = (caption, content) => {
+    handleEditMedia = (caption, content) => {
         if (content) {
-            this.editMessageMedia(content, () => {});
+            this.editMessageMedia(content);
             return;
         }
 
-        this.editMessageCaption(caption, () => {});
+        this.editMessageCaption(caption);
+    };
+
+    handleSendMedia = (content, file) => {
+        switch (content['@type']) {
+            case 'inputMessagePhoto': {
+                this.handleSendPhoto(content, file);
+                break;
+            }
+            case 'inputMessageDocument': {
+                this.handleSendDocument(content, file);
+                break;
+            }
+        }
     };
 
     closeEditMediaDialog() {
@@ -1147,6 +1237,8 @@ class InputBox extends Component {
         const {
             chatId,
             editMessageId,
+            newFile,
+            newMedia,
             replyToMessageId,
             files,
             newDraft,
@@ -1246,7 +1338,10 @@ class InputBox extends Component {
                     open={openEditMedia}
                     chatId={chatId}
                     messageId={editMessageId}
-                    onDone={this.handleDoneEditMedia}
+                    newFile={newFile}
+                    newMedia={newMedia}
+                    onEdit={this.handleEditMedia}
+                    onSend={this.handleSendMedia}
                     onCancel={this.handleCancelEditMedia}
                 />
             </div>

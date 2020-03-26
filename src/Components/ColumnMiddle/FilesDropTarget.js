@@ -62,45 +62,10 @@ class FilesDropTarget extends React.Component {
     handleAttachDocumentComplete = files => {
         if (files.length === 0) return;
 
-        for (let i = 0; i < files.length; i++) {
-            let file = files[i];
-            const content = {
-                '@type': 'inputMessageDocument',
-                document: { '@type': 'inputFileBlob', name: file.name, data: file }
-            };
-
-            this.onSendInternal(content, result => FileStore.uploadFile(result.content.document.document.id, result));
-        }
-    };
-
-    onSendInternal = async (content, callback) => {
-        const currentChatId = AppStore.getChatId();
-
-        if (!currentChatId) return;
-        if (!content) return;
-
-        try {
-            AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${currentChatId}`);
-
-            let result = await TdLibController.send({
-                '@type': 'sendMessage',
-                chat_id: currentChatId,
-                reply_to_message_id: 0,
-                input_message_content: content
-            });
-
-            //MessageStore.set(result);
-
-            TdLibController.send({
-                '@type': 'viewMessages',
-                chat_id: currentChatId,
-                message_ids: [result.id]
-            });
-
-            callback(result);
-        } catch (error) {
-            alert('sendMessage error ' + JSON.stringify(error));
-        }
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateSendFiles',
+            files
+        });
     };
 
     render() {
@@ -117,7 +82,7 @@ class FilesDropTarget extends React.Component {
                         <div className='files-drop-target-wrapper'>
                             <div className='files-drop-target-text'>
                                 <div className='files-drop-target-title'>Drop files here</div>
-                                <div className='files-drop-target-subtitle'>to send them without compression</div>
+                                <div className='files-drop-target-subtitle'>to send them</div>
                             </div>
                         </div>
                     </div>

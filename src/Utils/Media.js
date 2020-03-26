@@ -22,6 +22,8 @@ import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
 import React from 'react';
+import { getRandomInt, readImageSize } from './Common';
+import FileStore from '../Stores/FileStore';
 
 export function getCallTitle(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -629,5 +631,74 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
             );
         default:
             return [`[${content['@type']}]`, inlineMeta];
+    }
+}
+
+export async function getMediaDocumentFromFile(file) {
+    if (!file) {
+        return null;
+    }
+
+    const fileId = -getRandomInt(1, 1000000);
+    FileStore.setBlob(fileId, file);
+
+    return ({
+        '@type': 'messageDocument',
+        document: {
+            '@type': 'document',
+            file_name: file.name,
+            mime_type: file.type,
+            minithumbnail: null,
+            thumbnail: null,
+            document: {
+                '@type': 'file',
+                id: fileId,
+                size: file.size,
+                expected_size: file.expected_size,
+                local: {
+                    is_downloading_completed: true
+                }
+            }
+        }
+    });
+}
+
+export async function getMediaPhotoFromFile(file) {
+    if (!file) {
+        return null;
+    }
+
+    if (file.type.startsWith('image')) {
+        const [width, height] = await readImageSize(file);
+
+        const fileId = -getRandomInt(1, 1000000);
+        FileStore.setBlob(fileId, file);
+
+        const photoSize = {
+            '@type': 'photoSize',
+            photo: {
+                '@type': 'file',
+                id: fileId,
+                size: file.size,
+                expected_size: file.expected_size,
+                local: {
+                    is_downloading_completed: true
+                }
+            },
+            width,
+            height
+        };
+
+        return ({
+            '@type': 'messagePhoto',
+            photo: {
+                '@type': 'photo',
+                has_stickers: false,
+                minithumbnail: null,
+                sizes: [ photoSize ]
+            }
+        });
+    } else {
+        return null;
     }
 }

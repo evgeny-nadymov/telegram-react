@@ -13,15 +13,18 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import EditIcon from '@material-ui/icons/Edit';
 import IconButton from '@material-ui/core/IconButton';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import EditUrlDialog from './EditUrlDialog';
 import { focusInput } from '../../Utils/DOM';
 import { getEntities, getNodes } from '../../Utils/Message';
-import { getMedia } from '../../Utils/Media';
-import { readImageSize } from '../../Utils/Common';
+import { getMedia, getMediaPhotoFromFile } from '../../Utils/Media';
+import { getRandomInt, readImageSize } from '../../Utils/Common';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './EditMediaDialog.css';
+import { RadioGroup } from '@material-ui/core';
+import Radio from '@material-ui/core/Radio';
 
 class EditMediaDialog extends React.Component {
     constructor(props) {
@@ -30,7 +33,44 @@ class EditMediaDialog extends React.Component {
         this.captionRef = React.createRef();
         this.editMediaRef = React.createRef();
 
-        this.state = {};
+        this.state = {
+
+        };
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        const { prevOpen } = state;
+        const { open, chatId, messageId, newMedia } = props;
+
+        if (prevOpen !== open) {
+            if (open) {
+                const editMessage = MessageStore.get(chatId, messageId);
+                let sendAsPhoto = false;
+                if (editMessage && editMessage.content['@type'] === 'messagePhoto') {
+                    sendAsPhoto = true;
+                } else if (newMedia && newMedia['@type'] === 'messagePhoto'){
+                    sendAsPhoto = true;
+                }
+
+                return {
+                    prevOpen: true,
+                    sendAsPhoto,
+                    editMessage,
+                    editMedia: null,
+                    editFile: null
+                }
+            } else {
+                return {
+                    prevOpen: false,
+                    sendAsPhoto: false,
+                    editMessage: null,
+                    editMedia: null,
+                    editFile: null
+                }
+            }
+        }
+
+        return null;
     }
 
     componentDidMount() {
@@ -50,17 +90,17 @@ class EditMediaDialog extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId, open } = this.props;
         if (open && open !== prevProps.open) {
-            this.file = null;
-            this.media = null;
 
+            let text = null;
+            let caption = null;
             const message = MessageStore.get(chatId, messageId);
-            if (!message) return;
-
-            const { content } = message;
-            if (!content) return;
-
-            const { text, caption } = content;
-            if (!text && !caption) return;
+            if (message) {
+                const { content } = message;
+                if (content) {
+                    text = content.text;
+                    caption = content.caption;
+                }
+            }
 
             setTimeout(() => {
                 const element = this.captionRef.current;
@@ -101,7 +141,8 @@ class EditMediaDialog extends React.Component {
     }
 
     handleDone = () => {
-        const { chatId, onDone } = this.props;
+        const { chatId, newFile, newMedia, onSend, onEdit } = this.props;
+        const { editMessage, editFile, editMedia, saveAsPhoto } = this.state;
 
         const element = this.captionRef.current;
         if (!element) return;
@@ -118,33 +159,91 @@ class EditMediaDialog extends React.Component {
             entities
         };
 
-        let content = null;
-        if (this.file) {
-            readImageSize(this.file, result => {
-                content = {
+        const isEditing = Boolean(editMessage);
+        if (isEditing) {
+            if (editMedia) {
+                const { photo } = editMedia;
+                if (!photo) return;
+
+                const { sizes } = photo;
+                if (!sizes) return;
+
+                const size = sizes[sizes.length - 1];
+
+                const { width, height } = size;
+
+                const content = {
                     '@type': 'inputMessagePhoto',
-                    photo: { '@type': 'inputFileBlob', name: result.name, data: result },
-                    width: result.photoWidth,
-                    height: result.photoHeight,
+                    photo: { '@type': 'inputFileBlob', name: editFile.name, data: editFile },
+                    width,
+                    height,
                     caption
                 };
-                onDone(null, content);
+
+                onEdit(null, content);
 
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateEditMessage',
                     chatId,
                     messageId: 0
                 });
-            });
-            this.file = null;
-        } else {
-            onDone(caption, null);
+            } else {
+                onEdit(caption, null);
 
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateEditMessage',
-                chatId,
-                messageId: 0
-            });
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEditMessage',
+                    chatId,
+                    messageId: 0
+                });
+            }
+        } else {
+            const { photo, document } = newMedia;
+            if (photo) {
+                const { sizes } = photo;
+                if (!sizes) return;
+
+                const size = sizes[sizes.length - 1];
+
+                const { width, height } = size;
+
+                let content = saveAsPhoto
+                    ? {
+                        '@type': 'inputMessagePhoto',
+                        photo: { '@type': 'inputFileBlob', name: newFile.name, data: newFile },
+                        width,
+                        height,
+                        caption
+                    }
+                    : {
+                        '@type': 'inputMessageDocument',
+                        document: { '@type': 'inputFileBlob', name: newFile.name, data: newFile },
+                        thumbnail: null,
+                        caption
+                    };
+
+                onSend(content, newFile);
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEditMessage',
+                    chatId,
+                    messageId: 0
+                });
+            } else if (document) {
+                const content = {
+                    '@type': 'inputMessageDocument',
+                    document: { '@type': 'inputFileBlob', name: newFile.name, data: newFile },
+                    thumbnail: null,
+                    caption
+                };
+
+                onSend(content, newFile);
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateEditMessage',
+                    chatId,
+                    messageId: 0
+                });
+            }
         }
     };
 
@@ -405,70 +504,60 @@ class EditMediaDialog extends React.Component {
         element.click();
     };
 
-    handleEditMediaComplete = event => {
+    handleEditMediaComplete = async () => {
         const element = this.editMediaRef.current;
         if (!element) return;
 
         const { files } = element;
         if (files.length === 0) return;
 
-        Array.from(files).forEach(file => {
-            this.file = file;
-            this.getMediaFromFile(file, result => {
-                this.media = result;
-                this.forceUpdate();
-            });
+        const [file, ...rest] = Array.from(files);
+        if (!file) return;
+
+        const editMedia = await getMediaPhotoFromFile(file);
+
+        this.setState({
+            editFile: file,
+            editMedia
         });
 
         element.value = '';
     };
 
-    getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+    handleSendAsPhoto = () => {
+        const { sendAsPhoto } = this.state;
 
-    getMediaFromFile(file, callback) {
-        if (!file) {
-            callback(null);
-        }
-
-        if (file.type.startsWith('image')) {
-            readImageSize(file, result => {
-                const fileId = -this.getRandomInt(1, 1000000);
-                FileStore.setBlob(fileId, result);
-
-                callback({
-                    '@type': 'messagePhoto',
-                    photo: {
-                        '@type': 'photo',
-                        has_stickers: false,
-                        minithumbnail: null,
-                        sizes: [
-                            {
-                                '@type': 'photoSize',
-                                photo: { '@type': 'file', id: fileId },
-                                width: result.photoWidth,
-                                height: result.photoHeight
-                            }
-                        ]
-                    }
-                });
-            });
-        } else {
-            callback(null);
-        }
-    }
+        this.setState({
+            sendAsPhoto: !sendAsPhoto
+        });
+    };
 
     render() {
-        const { chatId, messageId, open, t } = this.props;
+        const { chatId, messageId, newMedia, open, t } = this.props;
+        const { defaultText, defaultUrl, openEditUrl, editMessage, editMedia, sendAsPhoto } = this.state;
         if (!open) return null;
 
-        const { defaultText, defaultUrl, openEditUrl } = this.state;
-
         const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
+        const isEditing = Boolean(message);
+        let isPhoto = false;
+        if (newMedia && newMedia['@type'] === 'messagePhoto') {
+            isPhoto = true;
+        } else if (editMedia && editMedia['@type'] === 'messagePhoto') {
+            isPhoto = true;
+        } else if (editMessage && editMessage.content['@type'] === 'messagePhoto'){
+            isPhoto = true;
+        }
 
-        const media = getMedia({ content: this.media }) || getMedia(message, null);
+        let media = null;
+        if (isEditing) {
+            media =
+            editMedia
+                ? getMedia({ content: editMedia })
+                : getMedia(message, null);
+        } else {
+            media = getMedia({ content: newMedia });
+        }
+        const doneLabel = isEditing ? t('Edit') : t('Send');
 
         return (
             <Dialog
@@ -478,21 +567,31 @@ class EditMediaDialog extends React.Component {
                 aria-labelledby='edit-media-dialog-title'>
                 <div className='edit-media-dialog-content'>
                     <div style={{ margin: 24 }}>{media}</div>
-                    <IconButton
-                        disableRipple={true}
-                        aria-label={t('Edit')}
-                        className='edit-media-dialog-edit-button'
-                        size='small'
-                        onClick={this.handleEditMedia}>
-                        <EditIcon fontSize='inherit' />
-                    </IconButton>
-                    <input
-                        ref={this.editMediaRef}
-                        className='inputbox-attach-button'
-                        type='file'
-                        accept='image/*'
-                        onChange={this.handleEditMediaComplete}
-                    />
+                    { isEditing && (
+                        <>
+                            <IconButton
+                                disableRipple={true}
+                                aria-label={t('Edit')}
+                                className='edit-media-dialog-edit-button'
+                                size='small'
+                                onClick={this.handleEditMedia}>
+                                <EditIcon fontSize='inherit' />
+                            </IconButton>
+                            <input
+                                ref={this.editMediaRef}
+                                className='inputbox-attach-button'
+                                type='file'
+                                accept='image/*'
+                                onChange={this.handleEditMediaComplete}
+                            />
+                        </>
+                    )}
+                    { !isEditing && isPhoto && (
+                        <RadioGroup value={sendAsPhoto} onChange={this.handleSendAsPhoto} style={{ margin: '0 24px 24px' }}>
+                            <FormControlLabel value={true} control={<Radio color='primary'/>} label={t('SendAsPhoto')} />
+                            <FormControlLabel value={false} control={<Radio color='primary'/>} label={t('SendAsFile')} />
+                        </RadioGroup>
+                    )}
                 </div>
                 <div
                     ref={this.captionRef}
@@ -509,7 +608,7 @@ class EditMediaDialog extends React.Component {
                         {t('Cancel')}
                     </Button>
                     <Button onClick={this.handleDone} color='primary'>
-                        {t('Edit')}
+                        {doneLabel}
                     </Button>
                 </DialogActions>
                 <EditUrlDialog
@@ -525,9 +624,16 @@ class EditMediaDialog extends React.Component {
 }
 
 EditMediaDialog.propTypes = {
+    open: PropTypes.bool,
+
     chatId: PropTypes.number,
     messageId: PropTypes.number,
-    open: PropTypes.bool
+    newFile: PropTypes.instanceOf(File),
+    newMedia: PropTypes.object,
+
+    onSend: PropTypes.func,
+    onEdit: PropTypes.func,
+    onCancel: PropTypes.func
 };
 
 export default withTranslation()(EditMediaDialog);

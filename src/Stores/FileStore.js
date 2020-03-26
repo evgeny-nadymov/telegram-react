@@ -71,6 +71,10 @@ class FileStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateSendFiles': {
+                this.emit(update['@type'], update);
+                break;
+            }
             default:
                 break;
         }

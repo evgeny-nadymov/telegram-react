@@ -275,55 +275,32 @@ function getLetters(title) {
     return null;
 }
 
-function readImageSize(file, callback) {
-    let useBlob = false;
-    // Create a new FileReader instance
-    // https://developer.mozilla.org/en/docs/Web/API/FileReader
-    const reader = new FileReader();
+async function readImageSize(file) {
+    return new Promise((resolve, reject) => {
+        let useBlob = false;
+        const reader = new FileReader();
 
-    // Once a file is successfully readed:
-    reader.addEventListener('load', function() {
-        // At this point `reader.result` contains already the Base64 Data-URL
-        // and we've could immediately show an image using
-        // `elPreview.insertAdjacentHTML("beforeend", "<img src='"+ reader.result +"'>");`
-        // But we want to get that image's width and height px values!
-        // Since the File Object does not hold the size of an image
-        // we need to create a new image and assign it's src, so when
-        // the image is loaded we can calculate it's width and height:
-        const image = new Image();
-        image.addEventListener('load', function() {
-            // Concatenate our HTML image info
-            // var imageInfo = file.name    +' '+ // get the value of `name` from the `file` Obj
-            //     image.width  +'×'+ // But get the width from our `image`
-            //     image.height +' '+
-            //     file.type    +' '+
-            //     Math.round(file.size/1024) +'KB';
+        reader.addEventListener('load', function() {
+            try {
+                const image = new Image();
+                image.addEventListener('load', function() {
+                    const { width, height } = image;
+                    if (useBlob) {
+                        window.URL.revokeObjectURL(image.src);
+                    }
 
-            //alert(imageInfo);
-            file.photoWidth = image.width;
-            file.photoHeight = image.height;
-            // Finally append our created image and the HTML info string to our `#preview`
-            //elPreview.appendChild( this );
-            //elPreview.insertAdjacentHTML("beforeend", imageInfo +'<br>');
+                    console.log('[photo]', width, height);
+                    resolve([width, height]);
+                });
 
-            // If we set the variable `useBlob` to true:
-            // (Data-URLs can end up being really large
-            // `src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAA...........etc`
-            // Blobs are usually faster and the image src will hold a shorter blob name
-            // src="blob:http%3A//example.com/2a303acf-c34c-4d0a-85d4-2136eef7d723"
-            if (useBlob) {
-                // Free some memory for optimal performance
-                window.URL.revokeObjectURL(image.src);
+                image.src = useBlob ? window.URL.createObjectURL(file) : reader.result;
+            } catch {
+                reject();
             }
-
-            callback(file);
         });
 
-        image.src = useBlob ? window.URL.createObjectURL(file) : reader.result;
+        reader.readAsDataURL(file);
     });
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
-    reader.readAsDataURL(file);
 }
 
 /**
@@ -396,7 +373,7 @@ function getDurationString(secondsTotal) {
     return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds;
 }
 
-function getRandomInt(min, max) {
+export function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
@@ -438,7 +415,6 @@ export {
     between,
     clamp,
     getDurationString,
-    getRandomInt,
     isAppleDevice,
     historyEquals,
     insertByOrder
