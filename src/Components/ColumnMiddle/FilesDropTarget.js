@@ -70,24 +70,21 @@ class FilesDropTarget extends React.Component {
 
     render() {
         const { dragParams } = this.state;
+        if (!dragParams) return null;
 
         return (
-            <>
-                {dragParams && (
-                    <div
-                        className='files-drop-target'
-                        onDragEnter={this.handleDragEnter}
-                        onDragLeave={this.handleDragLeave}
-                        onDrop={this.handleDrop}>
-                        <div className='files-drop-target-wrapper'>
-                            <div className='files-drop-target-text'>
-                                <div className='files-drop-target-title'>Drop files here</div>
-                                <div className='files-drop-target-subtitle'>to send them</div>
-                            </div>
-                        </div>
+            <div
+                className='files-drop-target'
+                onDragEnter={this.handleDragEnter}
+                onDragLeave={this.handleDragLeave}
+                onDrop={this.handleDrop}>
+                <div className='files-drop-target-wrapper'>
+                    <div className='files-drop-target-text'>
+                        <div className='files-drop-target-title'>Drop files here</div>
+                        <div className='files-drop-target-subtitle'>to send them</div>
                     </div>
-                )}
-            </>
+                </div>
+            </div>
         );
     }
 }

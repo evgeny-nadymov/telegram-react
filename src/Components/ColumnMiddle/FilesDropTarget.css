@@ -11,18 +11,17 @@
     right: 0;
     bottom: 0;
     left: 0;
-    background: #dfe5ec44;
+    background: transparent;
     padding: 12px;
 }
 
 .files-drop-target-wrapper{
-    background: #ffffff;
-    border-radius: 8px;
+    background: var(--panel-background);
+    border-radius: 10px;
     pointer-events: none;
     width: 100%;
     height: 100%;
-    box-shadow: 0 1px 0 #dfe5ec;
-    border: 1px solid #dfe5ec;
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;

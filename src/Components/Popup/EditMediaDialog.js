@@ -142,7 +142,7 @@ class EditMediaDialog extends React.Component {
 
     handleDone = () => {
         const { chatId, newFile, newMedia, onSend, onEdit } = this.props;
-        const { editMessage, editFile, editMedia, saveAsPhoto } = this.state;
+        const { editMessage, editFile, editMedia, sendAsPhoto } = this.state;
 
         const element = this.captionRef.current;
         if (!element) return;
@@ -206,7 +206,7 @@ class EditMediaDialog extends React.Component {
 
                 const { width, height } = size;
 
-                let content = saveAsPhoto
+                const content = sendAsPhoto
                     ? {
                         '@type': 'inputMessagePhoto',
                         photo: { '@type': 'inputFileBlob', name: newFile.name, data: newFile },

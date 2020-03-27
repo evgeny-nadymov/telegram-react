@@ -856,8 +856,6 @@ class InputBox extends Component {
         if (!files) return;
         if (!files.length) return;
 
-
-        console.log('[photo] handleSendFiles', files);
         if (files.length === 1) {
             const newFile = files[0];
             if (newFile.type.startsWith('image')) {
@@ -871,7 +869,6 @@ class InputBox extends Component {
                 }
             } else {
                 const newMedia = await getMediaDocumentFromFile(newFile);
-                console.log('[photo] handleSendFiles newMedia', newMedia, newFile);
                 if (newMedia) {
                     this.setState({
                         newMedia,
