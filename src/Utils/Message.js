@@ -1887,6 +1887,10 @@ export function getEntities(text) {
     const entities = [];
     if (!text) return { text, entities };
 
+    text = text.replace(/<div><br><\/div>/gi, '<br>');
+    text = text.replace(/<div>/gi, '<br>');
+    text = text.replace(/<\/div>/gi, '');
+
     text = text.split('<br>').join('\n');
 
     // console.log(`[ge] start text=${text}`);

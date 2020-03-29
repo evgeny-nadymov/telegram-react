@@ -118,6 +118,7 @@ class InputBox extends Component {
             innerHTML = element.innerHTML;
         }
 
+        console.log('saveDraft', innerHTML);
         const draftMessage = this.getDraftMessage(chatId, replyToMessageId, innerHTML);
         this.setChatDraftMessage(draftMessage);
     }
@@ -464,10 +465,6 @@ class InputBox extends Component {
 
         if (!innerHTML) return;
         if (!innerHTML.trim()) return;
-
-        innerHTML = innerHTML.replace(/<div><br><\/div>/gi, '<br>');
-        innerHTML = innerHTML.replace(/<div>/gi, '<br>');
-        innerHTML = innerHTML.replace(/<\/div>/gi, '');
 
         const { text, entities } = getEntities(innerHTML);
 
