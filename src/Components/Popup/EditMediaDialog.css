@@ -49,10 +49,6 @@
     word-break: break-word;
 }
 
-[contenteditable='true']#edit-media-dialog-caption br {
-    display: none;
-}
-
 #edit-media-dialog-caption::before {
     /*content: attr(placeholder);*/
     color: #8e9396;
