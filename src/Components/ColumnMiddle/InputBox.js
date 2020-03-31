@@ -510,6 +510,26 @@ class InputBox extends Component {
         this.attachPhotoRef.current.click();
     };
 
+    async getNewItem(file, sendAsFile) {
+        if (!file) return null;
+
+        const caption = this.newMessageRef.current.innerHTML;
+        if (caption) {
+            this.newMessageRef.current.innerHTML = null;
+            this.handleInput();
+        }
+
+        const media = sendAsFile
+            ? await getMediaPhotoFromFile(file)
+            : await getMediaDocumentFromFile(file);
+
+        return {
+            file,
+            media,
+            caption
+        }
+    };
+
     handleAttachPhotoComplete = async () => {
         const { files } = this.attachPhotoRef.current;
         if (files.length === 0) return;
@@ -518,17 +538,11 @@ class InputBox extends Component {
             const [ newFile, ...rest ] = Array.from(files);
             if (!newFile) return;
 
-            const newCaption = this.newMessageRef.current.innerHTML;
-            if (newCaption) {
-                this.newMessageRef.current.innerHTML = null;
-            }
+            const newItem = await this.getNewItem(newFile, true);
 
-            const newMedia = await getMediaPhotoFromFile(newFile);
             this.setState({
                 openEditMedia: true,
-                newFile,
-                newMedia,
-                newCaption
+                newItem
             });
         } else {
             Array.from(files).forEach(async file => {
@@ -562,17 +576,11 @@ class InputBox extends Component {
             const [ newFile, ...rest ] = Array.from(files);
             if (!newFile) return;
 
-            const newCaption = this.newMessageRef.current.innerHTML;
-            if (newCaption) {
-                this.newMessageRef.current.innerHTML = null;
-            }
+            const newItem = await this.getNewItem(newFile, false);
 
-            const newMedia = await getMediaDocumentFromFile(newFile);
             this.setState({
                 openEditMedia: true,
-                newFile,
-                newMedia,
-                newCaption
+                newItem
             });
         } else {
             Array.from(files).forEach(file => {
@@ -858,26 +866,13 @@ class InputBox extends Component {
         if (!files.length) return;
 
         if (files.length === 1) {
-            const newFile = files[0];
-            if (newFile.type.startsWith('image')) {
-                const newMedia = await getMediaPhotoFromFile(newFile);
-                if (newMedia) {
-                    this.setState({
-                        newMedia,
-                        newFile,
-                        openEditMedia: true
-                    });
-                }
-            } else {
-                const newMedia = await getMediaDocumentFromFile(newFile);
-                if (newMedia) {
-                    this.setState({
-                        newMedia,
-                        newFile,
-                        openEditMedia: true
-                    });
-                }
-            }
+            const newItem = await this.getNewItem(files[0], files[0].type.startsWith('image'));
+            if (!newItem) return;
+
+            this.setState({
+                openEditMedia: true,
+                newItem
+            });
         } else {
             this.setState({ files });
         }
@@ -1221,19 +1216,18 @@ class InputBox extends Component {
     };
 
     closeEditMediaDialog(cancel = true) {
-        const { newCaption } = this.state;
+        const { newItem } = this.state;
 
         this.setState(
             {
                 openEditMedia: false,
-                newCaption: null,
-                newFile: null,
-                newMedia: null
+                newItem: null
             },
             () => {
-                if (cancel && newCaption) {
-                    this.newMessageRef.current.innerHTML = newCaption;
+                if (cancel && newItem && newItem.caption) {
+                    this.newMessageRef.current.innerHTML = newItem.caption;
                     this.focusInput();
+                    this.handleInput();
                 } else {
                     this.restoreSelection();
                 }
@@ -1250,9 +1244,7 @@ class InputBox extends Component {
         const {
             chatId,
             editMessageId,
-            newFile,
-            newMedia,
-            newCaption,
+            newItem,
             replyToMessageId,
             files,
             newDraft,
@@ -1352,9 +1344,7 @@ class InputBox extends Component {
                     open={openEditMedia}
                     chatId={chatId}
                     messageId={editMessageId}
-                    newFile={newFile}
-                    newMedia={newMedia}
-                    newCaption={newCaption}
+                    newItem={newItem}
                     onEdit={this.handleEditMedia}
                     onSend={this.handleSendMedia}
                     onCancel={this.handleCancelEditMedia}
