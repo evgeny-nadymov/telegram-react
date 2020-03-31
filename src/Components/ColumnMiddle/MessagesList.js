@@ -21,7 +21,7 @@ import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../U
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendMediaMessages, getChatFullInfo, getSupergroupId, isChannelChat, isPrivateChat } from '../../Utils/Chat';
-import { highlightMessage, openChat } from '../../Actions/Client';
+import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -234,11 +234,7 @@ class MessagesList extends React.Component {
             for (let i = history.length - 1; i >= 0; i--) {
                 const message = history[i];
                 if (canMessageBeEdited(message.chat_id, message.id)) {
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateEditMessage',
-                        chatId: message.chat_id,
-                        messageId: message.id
-                    });
+                    editMessage(message.chat_id, message.id);
 
                     return;
                 }
@@ -259,11 +255,7 @@ class MessagesList extends React.Component {
         for (let i = 0; i < result.messages.length; i++) {
             const message = result.messages[i];
             if (canMessageBeEdited(message.chat_id, message.id)) {
-                TdLibController.clientUpdate({
-                    '@type': 'clientUpdateEditMessage',
-                    chatId: message.chat_id,
-                    messageId: message.id
-                });
+                editMessage(message.chat_id, message.id);
 
                 return;
             }

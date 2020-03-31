@@ -45,6 +45,13 @@ export function replyMessage(chatId, messageId) {
     });
 }
 
+export function forward(info) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateForward',
+        info
+    });
+}
+
 export function forwardMessages(chatId, messageIds) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateForward',

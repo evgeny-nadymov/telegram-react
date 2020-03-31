@@ -11,6 +11,7 @@ import { withTranslation } from 'react-i18next';
 import CloseIcon from '../../Assets/Icons/Close';
 import IconButton from '@material-ui/core/IconButton';
 import Reply from '../Message/Reply';
+import { editMessage, replyMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBoxHeader.css';
@@ -38,17 +39,9 @@ class InputBoxHeader extends React.Component {
         const { chatId, editMessageId } = this.props;
 
         if (editMessageId) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateEditMessage',
-                chatId,
-                messageId: 0
-            });
+            editMessage(chatId, 0);
         } else {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateReply',
-                chatId,
-                messageId: 0
-            });
+            replyMessage(chatId, 0);
         }
     };
 
@@ -67,7 +60,7 @@ class InputBoxHeader extends React.Component {
                 <div className='inputbox-header-middle-column'>
                     <Reply
                         chatId={chatId}
-                        messageId={messageId || editMessageId}
+                        messageId={editMessageId || messageId}
                         title={editMessageId ? t('EditMessage') : null}
                         onClick={onClick}
                     />

@@ -28,7 +28,7 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
-import { setMediaViewerContent } from '../../Actions/Client';
+import { forwardMessages, setMediaViewerContent } from '../../Actions/Client';
 import {
     cancelPreloadMediaViewerContent,
     getMediaFile,
@@ -473,13 +473,7 @@ class MediaViewer extends React.Component {
         const { chatId } = this.props;
         const { currentMessageId } = this.state;
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: {
-                chatId: chatId,
-                messageIds: [currentMessageId]
-            }
-        });
+        forwardMessages(chatId, [currentMessageId]);
     };
 
     handleDelete = () => {

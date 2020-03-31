@@ -36,7 +36,7 @@ import {
     openUser,
     openChat,
     selectMessage,
-    openReply,
+    openReply, replyMessage, forwardMessages
 } from '../../Actions/Client';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import MessageStore from '../../Stores/MessageStore';
@@ -260,23 +260,14 @@ class Message extends Component {
 
         const canBeReplied = canSendMessages(chatId);
         if (canBeReplied) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateReply',
-                chatId: chatId,
-                messageId: messageId
-            });
+            replyMessage(chatId, messageId);
+
             return;
         }
 
         const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         if (canBeForwarded) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateForward',
-                info: {
-                    chatId: chatId,
-                    messageIds: [messageId]
-                }
-            });
+            forwardMessages(chatId, [messageId]);
         }
     };
 

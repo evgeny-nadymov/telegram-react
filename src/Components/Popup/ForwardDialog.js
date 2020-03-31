@@ -21,7 +21,7 @@ import { copy } from '../../Utils/Text';
 import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '../../Utils/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
-import { clearSelection } from '../../Actions/Client';
+import { clearSelection, forward } from '../../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -102,10 +102,7 @@ class ForwardDialog extends React.Component {
     };
 
     handleClose = () => {
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: null
-        });
+        forward(null);
     };
 
     handleCopyLink = () => {

@@ -19,6 +19,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import { forward } from '../../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import OptionStore from '../../Stores/OptionStore';
 import StickerStore from '../../Stores/StickerStore';
@@ -118,10 +119,7 @@ class ShareStickerSetButton extends React.Component {
             clear_draft: false
         };
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: { inputMessageContent }
-        });
+        forward(inputMessageContent);
     };
 
     render() {

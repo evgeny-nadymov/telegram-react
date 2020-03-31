@@ -20,7 +20,7 @@ import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
 import ProfileMediaInfo from '../Tile/ProfileMediaInfo';
-import { setProfileMediaViewerContent } from '../../Actions/Client';
+import { forward, setProfileMediaViewerContent } from '../../Actions/Client';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
@@ -237,10 +237,7 @@ class ProfileMediaViewer extends React.Component {
             ttl: 0
         };
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: { inputMessageContent }
-        });
+        forward(inputMessageContent);
     };
 
     handleDelete = () => {

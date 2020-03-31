@@ -23,9 +23,9 @@ import MediaViewerDownloadButton from './MediaViewerDownloadButton';
 import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
 import { getViewerFile, saveMedia } from '../../Utils/File';
 import { getInputMediaContent } from '../../Utils/Media';
-import { setInstantViewViewerContent } from '../../Actions/Client';
-import TdLibController from '../../Controllers/TdLibController';
+import { forward, setInstantViewViewerContent } from '../../Actions/Client';
 import './InstantViewMediaViewer.css';
+
 class InstantViewMediaViewer extends React.Component {
     constructor(props) {
         super(props);
@@ -130,10 +130,7 @@ class InstantViewMediaViewer extends React.Component {
         const inputMessageContent = getInputMediaContent(media, null);
         if (!inputMessageContent) return;
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateForward',
-            info: { inputMessageContent }
-        });
+        forward(inputMessageContent);
     };
 
     handleSave = () => {

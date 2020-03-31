@@ -33,6 +33,7 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
+import { editMessage, replyMessage } from '../../Actions/Client';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -118,7 +119,6 @@ class InputBox extends Component {
             innerHTML = element.innerHTML;
         }
 
-        console.log('saveDraft', innerHTML);
         const draftMessage = this.getDraftMessage(chatId, replyToMessageId, innerHTML);
         this.setChatDraftMessage(draftMessage);
     }
@@ -189,16 +189,19 @@ class InputBox extends Component {
             this.saveDraftAndSelection();
         }
 
+        const openEditMedia = messageId !== 0 && isEditedMedia(chatId, messageId);
         this.setState(
             {
                 editMessageId: messageId,
-                openEditMedia: messageId !== 0 && isEditedMedia(chatId, messageId)
+                openEditMedia
             },
             () => {
                 if (!this.state.openEditMedia) {
                     this.setEditMessage();
                     this.handleInput();
-                    this.focusInput();
+                    setTimeout(() => {
+                        this.focusInput();
+                    }, 0);
                 }
             }
         );
@@ -457,11 +460,8 @@ class InputBox extends Component {
 
         element.innerText = null;
         this.handleInput();
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateEditMessage',
-            chatId,
-            messageId: 0
-        });
+
+        editMessage(chatId, 0);
 
         if (!innerHTML) return;
         if (!innerHTML.trim()) return;
@@ -518,11 +518,17 @@ class InputBox extends Component {
             const [ newFile, ...rest ] = Array.from(files);
             if (!newFile) return;
 
+            const newCaption = this.newMessageRef.current.innerHTML;
+            if (newCaption) {
+                this.newMessageRef.current.innerHTML = null;
+            }
+
             const newMedia = await getMediaPhotoFromFile(newFile);
             this.setState({
                 openEditMedia: true,
                 newFile,
-                newMedia
+                newMedia,
+                newCaption
             });
         } else {
             Array.from(files).forEach(async file => {
@@ -556,11 +562,17 @@ class InputBox extends Component {
             const [ newFile, ...rest ] = Array.from(files);
             if (!newFile) return;
 
+            const newCaption = this.newMessageRef.current.innerHTML;
+            if (newCaption) {
+                this.newMessageRef.current.innerHTML = null;
+            }
+
             const newMedia = await getMediaDocumentFromFile(newFile);
             this.setState({
                 openEditMedia: true,
                 newFile,
-                newMedia
+                newMedia,
+                newCaption
             });
         } else {
             Array.from(files).forEach(file => {
@@ -718,17 +730,9 @@ class InputBox extends Component {
     handleCancel = () => {
         const { chatId, editMessageId, replyToMessageId } = this.state;
         if (editMessageId) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateEditMessage',
-                chatId,
-                messageId: 0
-            });
+            editMessage(chatId, 0);
         } else if (replyToMessageId) {
-            TdLibController.clientUpdate({
-                '@type': 'clientUpdateReply',
-                chatId,
-                messageId: 0
-            });
+            replyMessage(chatId, 0);
         }
     };
 
@@ -1102,6 +1106,9 @@ class InputBox extends Component {
 
     saveSelection() {
         this.selection = document.getSelection();
+        if (!this.selection) return;
+        if (!this.selection.rangeCount) return;
+
         this.range = this.selection.getRangeAt(0);
     }
 
@@ -1199,6 +1206,8 @@ class InputBox extends Component {
     };
 
     handleSendMedia = (content, file) => {
+        this.closeEditMediaDialog(false);
+
         switch (content['@type']) {
             case 'inputMessagePhoto': {
                 this.handleSendPhoto(content, file);
@@ -1211,13 +1220,23 @@ class InputBox extends Component {
         }
     };
 
-    closeEditMediaDialog() {
+    closeEditMediaDialog(cancel = true) {
+        const { newCaption } = this.state;
+
         this.setState(
             {
-                openEditMedia: false
+                openEditMedia: false,
+                newCaption: null,
+                newFile: null,
+                newMedia: null
             },
             () => {
-                this.restoreSelection();
+                if (cancel && newCaption) {
+                    this.newMessageRef.current.innerHTML = newCaption;
+                    this.focusInput();
+                } else {
+                    this.restoreSelection();
+                }
             }
         );
     }
@@ -1233,6 +1252,7 @@ class InputBox extends Component {
             editMessageId,
             newFile,
             newMedia,
+            newCaption,
             replyToMessageId,
             files,
             newDraft,
@@ -1334,6 +1354,7 @@ class InputBox extends Component {
                     messageId={editMessageId}
                     newFile={newFile}
                     newMedia={newMedia}
+                    newCaption={newCaption}
                     onEdit={this.handleEditMedia}
                     onSend={this.handleSendMedia}
                     onCancel={this.handleCancelEditMedia}
