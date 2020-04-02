@@ -5,11 +5,26 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-export function copy(text) {
-    let element;
+export async function copy(text) {
+    try {
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (e) {
+        console.error('[clipboard] unable to copy with clipboard.writeText', e);
+    }
 
+    return copyOld(text);
+}
+
+function copyOld(text) {
+    let element;
+    let successful;
     try {
         element = document.createElement('textarea');
+        element.contentEditable = true;
+        element.readOnly = true;
         element.value = text;
         element.style.all = 'unset';
         element.style.position = 'fixed';
@@ -23,16 +38,21 @@ export function copy(text) {
 
         document.body.appendChild(element);
 
+        element.focus();
         element.select();
 
-        const successful = document.execCommand('copy');
+        successful = document.execCommand('copy');
         if (!successful) {
-            console.error('unable to copy using execCommand');
+            throw new Error();
         }
+        return true;
     } catch {
+        console.error('[clipboard] unable to copy with document.execCommand', successful);
     } finally {
         if (element) {
             document.body.removeChild(element);
         }
     }
+
+    return false;
 }
