@@ -89,6 +89,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.on('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
+        PlayerStore.on('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
 
         AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -105,6 +106,7 @@ class HeaderPlayer extends React.Component {
         PlayerStore.off('clientUpdateMediaViewerEnded', this.onClientUpdateMediaViewerEnded);
         PlayerStore.off('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.off('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
+        PlayerStore.off('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
 
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
@@ -125,6 +127,22 @@ class HeaderPlayer extends React.Component {
         if (!player) return;
 
         player.volume = volume;
+    };
+
+    onClientUpdateMediaSeek = update => {
+        const { chatId, messageId, value } = update;
+        const { message } = this.state;
+
+        if (!message) return;
+
+        const { chat_id, id, content } = message;
+        if (!content) return;
+        if (chatId !== chat_id || messageId !== id) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        player.currentTime = value * player.duration;
     };
 
     onClientUpdateMediaViewerContent = update => {

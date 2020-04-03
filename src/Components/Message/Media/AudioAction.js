@@ -84,10 +84,11 @@ class AudioAction extends React.Component {
         const { active, file } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
+            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
             this.setState({
                 active: false,
                 currentTime: 0,
-                timeString: this.getTimeString(0, duration, false, file)
+                timeString: this.getTimeString(0, playerDuration, false, file)
             });
         }
     };
@@ -114,7 +115,7 @@ class AudioAction extends React.Component {
             this.setState({
                 active: true,
                 currentTime: active ? currentTime : 0,
-                timeString: this.getTimeString(active ? currentTime : 0, duration, true, file)
+                timeString: active ? this.state.timeString : this.getTimeString(0, duration, true, file)
             });
         } else if (active) {
             this.setState({
@@ -141,7 +142,7 @@ class AudioAction extends React.Component {
         const durationString = getDurationString(Math.floor(duration || 0));
         const currentTimeString = getDurationString(Math.floor(currentTime || 0));
 
-        return active && isDownloadingCompleted ? `${currentTimeString}/${durationString}` : `${durationString}`;
+        return active && isDownloadingCompleted ? `${currentTimeString} / ${durationString}` : `${durationString}`;
     };
 
     render() {
@@ -161,7 +162,7 @@ class AudioAction extends React.Component {
         } else if (isUploadingActive) {
             progressSize = getUploadedSize(file);
         }
-        const sizeString = progressSize ? `${progressSize}/${size}` : `${size}`;
+        const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
 
         return (
             <div className='audio-action'>

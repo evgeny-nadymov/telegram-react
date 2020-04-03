@@ -127,8 +127,8 @@ class Audio extends React.Component {
 
         const { album_cover_thumbnail, duration, audio: file } = audio;
 
-        const audioTitle = getAudioShortTitle(audio);
-        const audioSubtitle = getAudioSubtitle(audio);
+        const audioTitle = getAudioSubtitle(audio);
+        const audioSubtitle = getAudioShortTitle(audio);
 
         return (
             <div className={classNames('audio', 'document', { 'media-title': title })}>

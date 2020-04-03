@@ -179,6 +179,10 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaSeek': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaStop': {
                 this.emit(update['@type'], update);
                 break;

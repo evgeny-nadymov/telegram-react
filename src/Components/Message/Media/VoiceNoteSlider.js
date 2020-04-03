@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import Slider from '@material-ui/core/Slider';
 import { PLAYER_PROGRESS_TIMEOUT_MS } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
+import TdLibController from '../../../Controllers/TdLibController';
 import './VoiceNoteSlider.css';
 
 class VoiceNoteSlider extends React.Component {
@@ -94,12 +95,21 @@ class VoiceNoteSlider extends React.Component {
 
     onClientUpdateMediaTime = update => {
         const { chatId, messageId, duration } = this.props;
-        const { active } = this.state;
+        const { active, dragging } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
-            const value = this.getValue(update.currentTime, playerDuration, active);
+        if (chatId !== update.chatId) return;
+        if (messageId !== update.messageId) return;
 
+        const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+        const value = this.getValue(update.currentTime, playerDuration, active);
+
+        console.log('[clientUpdate] mediaTime', dragging, update.currentTime, value);
+        if (dragging) {
+            this.setState({
+                currentTime: update.currentTime,
+                duration: playerDuration
+            });
+        } else {
             this.setState({
                 currentTime: update.currentTime,
                 duration: playerDuration,
@@ -110,11 +120,14 @@ class VoiceNoteSlider extends React.Component {
 
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, duration } = this.props;
-        const { active, currentTime } = this.state;
+        const { active, currentTime, dragging } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
-            const value = this.getValue(active ? currentTime : 0, playerDuration, true);
+            let value = this.state.value;
+            if (!dragging) {
+                value = this.getValue(active ? currentTime : 0, playerDuration, true);
+            }
 
             this.setState({
                 active: true,
@@ -128,6 +141,41 @@ class VoiceNoteSlider extends React.Component {
 
     getValue = (currentTime, duration, active) => {
         return active ? currentTime / duration : 0;
+    };
+
+    handleMouseDown = event => {
+        event.stopPropagation();
+
+        console.log('[clientUpdate] handleDragStart');
+        this.setState({
+            dragging: true
+        });
+    };
+
+    handleChangeCommitted = () => {
+        console.log('[clientUpdate] handleDragEnd');
+        const { chatId, messageId } = this.props;
+        const { value } = this.state;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaSeek',
+            chatId,
+            messageId,
+            value
+        });
+
+        this.setState({
+            dragging: false
+        });
+    };
+
+    handleChange = (event, value) => {
+        const { active } = this.state;
+        if (!active) return;
+
+        this.setState({
+            value
+        });
     };
 
     render() {
@@ -144,7 +192,11 @@ class VoiceNoteSlider extends React.Component {
                     }}
                     min={0}
                     max={1}
+                    step={0.01}
                     value={value}
+                    onChange={this.handleChange}
+                    onChangeCommitted={this.handleChangeCommitted}
+                    onMouseDown={this.handleMouseDown}
                 />
             </div>
         );
