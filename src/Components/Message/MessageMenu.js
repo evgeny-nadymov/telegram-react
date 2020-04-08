@@ -24,6 +24,7 @@ import { copy } from '../../Utils/Text';
 import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
 import { pinMessage, unpinMessage } from '../../Actions/Message';
 import MessageStore from '../../Stores/MessageStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
 
 class MessageMenu extends React.PureComponent {
@@ -133,6 +134,44 @@ class MessageMenu extends React.PureComponent {
         deleteMessages(chatId, [messageId]);
     };
 
+    handleDownload = async event => {
+        const { chatId, messageId, onClose } = this.props;
+
+        onClose(event);
+
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        const { audio } = content;
+        if (!audio) return;
+
+        const { audio: file } = audio;
+        if (!file) return;
+
+        const { id: file_id } = file;
+
+        const result = await TdLibController.send({
+            '@type': 'downloadFile',
+            file_id,
+            priority: 1,
+            offset: 10 * 1024,
+            limit: 1024,
+            synchronous: true
+        });
+
+        const blob = await TdLibController.send({
+            '@type': 'readFilePart',
+            file_id,
+            offset: 10 * 1024,
+            count: 1024
+        });
+
+        console.log('[file] result', result, blob);
+    };
+
     render() {
         const { t, chatId, messageId, anchorPosition, canCopyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
@@ -164,6 +203,7 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
+                        {/*<MenuItem onClick={this.handleDownload}>{t('Download')}</MenuItem>*/}
                         {canCopyLink && <MenuItem onClick={this.handleCopyLink}>{t('CopyLink')}</MenuItem>}
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
                         {canBePinned && (

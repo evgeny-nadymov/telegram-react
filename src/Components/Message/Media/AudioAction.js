@@ -28,6 +28,7 @@ class AudioAction extends React.Component {
         this.state = {
             active: active,
             currentTime: currentTime,
+            seekProgress: 0,
             duration: audioDuration,
             timeString: this.getTimeString(currentTime, duration, active, currentFile),
 
@@ -69,6 +70,8 @@ class AudioAction extends React.Component {
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaTime', this.onClientUpdateMediaTime);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+        PlayerStore.on('clientUpdateMediaSeeking', this.onClientUpdateMediaSeeking);
+        PlayerStore.on('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
     }
 
     componentWillUnmount() {
@@ -77,7 +80,39 @@ class AudioAction extends React.Component {
         PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.off('clientUpdateMediaTime', this.onClientUpdateMediaTime);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+        PlayerStore.off('clientUpdateMediaSeeking', this.onClientUpdateMediaSeeking);
+        PlayerStore.off('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
     }
+
+    onClientUpdateMediaSeeking = update => {
+        const { chatId, messageId, duration } = this.props;
+        const { duration: playerDuration, active, file } = this.state;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const d = playerDuration || duration;
+
+            this.setState({
+                seekProgress: update.value,
+                seeking: true,
+                timeString: this.getTimeString(d * update.value, d, active, file)
+            });
+        }
+    };
+
+    onClientUpdateMediaSeek = update => {
+        const { chatId, messageId, duration } = this.props;
+        const { duration: playerDuration, active, file } = this.state;
+
+        if (chatId === update.chatId && messageId === update.messageId) {
+            const d = playerDuration || duration;
+
+            this.setState({
+                seekProgress: 0,
+                seeking: false,
+                timeString: this.getTimeString(d * update.value, d, active, file)
+            });
+        }
+    };
 
     onClientUpdateMediaEnd = update => {
         const { chatId, messageId, duration } = this.props;
@@ -95,14 +130,16 @@ class AudioAction extends React.Component {
 
     onClientUpdateMediaTime = update => {
         const { chatId, messageId, duration } = this.props;
-        const { active, file } = this.state;
+        const { active, file, seekProgress, seeking } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+            const time = seeking ? seekProgress * playerDuration : update.currentTime;
+
             this.setState({
                 currentTime: update.currentTime,
                 duration: playerDuration,
-                timeString: this.getTimeString(update.currentTime, playerDuration, active, file)
+                timeString: this.getTimeString(time, playerDuration, active, file)
             });
         }
     };
@@ -163,12 +200,18 @@ class AudioAction extends React.Component {
             progressSize = getUploadedSize(file);
         }
         const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
+        const strings = [];
+        if (!isDownloadingCompleted) {
+            strings.push(sizeString);
+        }
+        if (!isDownloadingActive) {
+            strings.push(timeString);
+        }
 
         return (
             <div className='audio-action'>
                 {!active && <span>{title}</span>}
-                {!isDownloadingCompleted && <span>{`${sizeString}, `}</span>}
-                <span>{timeString}</span>
+                {<span>{strings.join(', ')}</span>}
                 {meta}
             </div>
         );

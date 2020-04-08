@@ -13,6 +13,7 @@ import PlayArrowIcon from '../../../Assets/Icons/PlayArrow';
 import PauseIcon from '../../../Assets/Icons/Pause';
 import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
+import VoiceNoteSlider from './VoiceNoteSlider';
 import { getAudioShortTitle, getAudioSubtitle, getAudioTitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './Audio.css';
@@ -122,7 +123,7 @@ class Audio extends React.Component {
 
     render() {
         const { chatId, messageId, audio, openMedia, title, meta, caption } = this.props;
-        const { playing } = this.state;
+        const { playing, active } = this.state;
         if (!audio) return null;
 
         const { album_cover_thumbnail, duration, audio: file } = audio;
@@ -139,13 +140,14 @@ class Audio extends React.Component {
                     icon={<DownloadIcon />}
                     completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
                 />
-                <div className='document-content'>
+                <div className='audio-content'>
                     <div className='document-title'>
                         <a className='document-name' onClick={openMedia} title={audioTitle}>
                             {audioTitle}
                         </a>
                     </div>
-                    <div className='audio-action'>{audioSubtitle}</div>
+                    <div className='audio-action' style={{ opacity: active ? 0 : 1 }}>{audioSubtitle}</div>
+                    <VoiceNoteSlider className='audio-slider' chatId={chatId} messageId={messageId} duration={duration} style={{ opacity: active ? 1 : 0 }}/>
                     <AudioAction
                         chatId={chatId}
                         messageId={messageId}

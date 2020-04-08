@@ -19,6 +19,15 @@
 
 .voice-note-slider-thumb {
     transition: transform 0ms linear 0ms, box-shadow 0ms linear 0ms;
+    box-shadow: 0 0 0 0 transparent;
+}
+
+.voice-note-slider-thumb:hover {
+    box-shadow: 0 0 0 0 transparent;
+}
+
+.voice-note-slider-thumb.voice-note-slider-active {
+    box-shadow: 0 0 0 0 transparent;
 }
 
 .voice-note-slider-thumb-wrapper {

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import Slider from '@material-ui/core/Slider';
 import { PLAYER_PROGRESS_TIMEOUT_MS } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
@@ -103,7 +104,6 @@ class VoiceNoteSlider extends React.Component {
         const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
         const value = this.getValue(update.currentTime, playerDuration, active);
 
-        console.log('[clientUpdate] mediaTime', dragging, update.currentTime, value);
         if (dragging) {
             this.setState({
                 currentTime: update.currentTime,
@@ -146,16 +146,15 @@ class VoiceNoteSlider extends React.Component {
     handleMouseDown = event => {
         event.stopPropagation();
 
-        console.log('[clientUpdate] handleDragStart');
         this.setState({
             dragging: true
         });
     };
 
     handleChangeCommitted = () => {
-        console.log('[clientUpdate] handleDragEnd');
         const { chatId, messageId } = this.props;
-        const { value } = this.state;
+        const { value, active } = this.state;
+        if (!active) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaSeek',
@@ -170,8 +169,18 @@ class VoiceNoteSlider extends React.Component {
     };
 
     handleChange = (event, value) => {
-        const { active } = this.state;
+        const { chatId, messageId } = this.props;
+        const { active, dragging } = this.state;
         if (!active) return;
+
+        if (dragging) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaSeeking',
+                chatId,
+                messageId,
+                value
+            });
+        }
 
         this.setState({
             value
@@ -179,16 +188,17 @@ class VoiceNoteSlider extends React.Component {
     };
 
     render() {
+        const { className, style } = this.props;
         const { value } = this.state;
 
         return (
-            <div className='voice-note-slider'>
+            <div className={classNames('voice-note-slider', className)} style={style}>
                 <Slider
                     className='voice-note-slider-component'
                     classes={{
                         track: 'voice-note-slider-track',
-                        // thumbWrapper: 'voice-note-slider-thumb-wrapper',
-                        thumb: 'voice-note-slider-thumb'
+                        thumb: 'voice-note-slider-thumb',
+                        active: 'voice-note-slider-active'
                     }}
                     min={0}
                     max={1}
