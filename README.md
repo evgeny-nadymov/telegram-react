@@ -13,7 +13,7 @@ Install [node.js](http://nodejs.org/).
 Install dependencies with:
 
 ```lang=bash
-npm install
+npm ci
 ```
 
 This will install all the needed dependencies.
