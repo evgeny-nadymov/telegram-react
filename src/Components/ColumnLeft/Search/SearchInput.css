@@ -13,6 +13,10 @@
     position: relative;
 }
 
+.page-small .search-input {
+    display: none;
+}
+
 [contenteditable='true']#search-inputbox {
     white-space: nowrap;
     overflow: hidden;

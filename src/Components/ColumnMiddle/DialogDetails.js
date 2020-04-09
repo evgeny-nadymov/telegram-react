@@ -13,11 +13,11 @@ import Header from './Header';
 import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
 import StickerSetDialog from '../Popup/StickerSetDialog';
+import { getSrc } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
-import './DialogDetails.css';
-import { getSrc } from '../../Utils/File';
 import FileStore from '../../Stores/FileStore';
+import './DialogDetails.css';
 
 class DialogDetails extends Component {
     constructor(props) {

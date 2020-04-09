@@ -19,7 +19,7 @@ class Archive extends React.Component {
         return (
             <>
                 <div className='header-master'>
-                    <IconButton className='header-left-button' onClick={onClose}>
+                    <IconButton className='header-left-button main-menu-button' onClick={onClose}>
                         <ArrowBackIcon />
                     </IconButton>
                     <div className='header-status grow cursor-pointer'>

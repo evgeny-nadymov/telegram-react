@@ -8,6 +8,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
+import DownloadIcon from '../../Assets/Icons/Download';
 import AppStore from '../../Stores/ApplicationStore';
 import './UpdatePanel.css';
 
@@ -15,18 +16,29 @@ class UpdatePanel extends React.Component {
     constructor(props) {
         super(props);
 
+        const { isSmallWidth } = AppStore;
+
         this.state = {
-            newContentAvailable: false
+            newContentAvailable: false,
+            isSmallWidth
         };
     }
 
     componentDidMount() {
         AppStore.on('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
+        AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateNewContentAvailable', this.onClientUpdateNewContentAvailable);
+        AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
     }
+
+    onClientUpdatePageWidth = update => {
+        const { isSmallWidth } = update;
+
+        this.setState({ isSmallWidth });
+    };
 
     onClientUpdateNewContentAvailable = () => {
         this.setState({ newContentAvailable: true });
@@ -42,7 +54,7 @@ class UpdatePanel extends React.Component {
     };
 
     render() {
-        const { newContentAvailable } = this.state;
+        const { newContentAvailable, isSmallWidth } = this.state;
         const { t } = this.props;
 
         if (!newContentAvailable) {
@@ -51,7 +63,7 @@ class UpdatePanel extends React.Component {
 
         return (
             <Button className='update-button' variant='contained' color='primary' onClick={this.handleUpdate}>
-                {t('Update')}
+                {isSmallWidth ? <DownloadIcon/> : t('Update')}
             </Button>
         );
     }

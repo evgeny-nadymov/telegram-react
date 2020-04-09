@@ -20,7 +20,7 @@ import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
 import { getChatCounters } from '../../Actions/Chat';
 import { getPhotoFromChat, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { loadProfileMediaViewerContent } from '../../Utils/File';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -33,7 +33,7 @@ class ChatInfo extends React.Component {
         this.detailsRef = React.createRef();
 
         const { popup } = props;
-        const { chatId, dialogChatId } = ApplicationStore;
+        const { chatId, dialogChatId } = AppStore;
 
         this.state = {
             chatId: popup ? dialogChatId : chatId,
@@ -53,14 +53,15 @@ class ChatInfo extends React.Component {
     }
 
     componentDidMount() {
-        // console.log('ChatDetails.ChatInfo.componentDidMount');
         this.loadContent(this.state.chatId);
 
-        ApplicationStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -69,6 +70,16 @@ class ChatInfo extends React.Component {
             this.loadContent(chatId);
         }
     }
+
+    onClientUpdatePageWidth = update => {
+        const { isSmallWidth } = update;
+        if (!isSmallWidth) return;
+
+        const { popup } = this.props;
+        if (popup) return;
+
+        this.handleCloseChatDetails();
+    };
 
     onClientUpdateChatId = update => {
         const { popup } = this.props;
@@ -172,7 +183,7 @@ class ChatInfo extends React.Component {
                 chatId: 0
             });
         } else {
-            ApplicationStore.changeChatDetailsVisibility(false);
+            AppStore.changeChatDetailsVisibility(false);
         }
     };
 
@@ -225,8 +236,7 @@ class ChatInfo extends React.Component {
     };
 
     render() {
-        // console.log('ChatDetails.ChatInfo.render', this.state);
-        const { classes, className, popup } = this.props;
+        const { className, popup } = this.props;
         const {
             chatId,
             counters,

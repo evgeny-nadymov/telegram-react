@@ -26,6 +26,7 @@ import { openArchive, openChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
+import './MainMenuButton.css';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -120,7 +121,7 @@ class MainMenuButton extends React.Component {
     };
 
     render() {
-        const { t, showClose, onClose } = this.props;
+        const { t, timeout, showClose, onClose } = this.props;
         const { anchorEl, authorizationState } = this.state;
 
         const mainMenuControl =
@@ -181,10 +182,14 @@ class MainMenuButton extends React.Component {
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
                     aria-haspopup='true'
-                    className='header-left-button'
+                    className='header-left-button main-menu-button'
                     aria-label='Menu'
                     onClick={showClose ? onClose : this.handleMenuOpen}>
-                    <SpeedDialIcon open={showClose} openIcon={<ArrowBackIcon />} icon={<MenuIcon />} />
+                    { timeout
+                        ? (<SpeedDialIcon open={showClose} openIcon={<ArrowBackIcon />} icon={<MenuIcon />} />)
+                        : (<>{showClose ? <ArrowBackIcon /> : <MenuIcon />}</>)
+                    }
+
                 </IconButton>
                 {mainMenuControl}
             </>

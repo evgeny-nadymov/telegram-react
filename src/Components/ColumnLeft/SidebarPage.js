@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { number } from 'prop-types';
 import { Slide } from '@material-ui/core';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import './SidebarPage.css';
@@ -44,10 +44,10 @@ class SidebarPage extends React.Component {
     }
 
     render() {
-        const { children, open, onClose } = this.props;
+        const { children, open, timeout, onClose } = this.props;
 
         return (
-            <Slide direction='right' in={open} mountOnEnter unmountOnExit>
+            <Slide direction='right' in={open} timeout={timeout} mountOnEnter unmountOnExit>
                 <div className='sidebar-page'>{onClose ? React.cloneElement(children, { onClose }) : children}</div>
             </Slide>
         );
@@ -56,6 +56,7 @@ class SidebarPage extends React.Component {
 
 SidebarPage.propTypes = {
     open: PropTypes.bool.isRequired,
+    timeout: PropTypes.object,
     onClose: PropTypes.func
 };
 

@@ -112,14 +112,12 @@ class DialogBadge extends React.Component {
 
         const { is_pinned, unread_count } = chat;
 
-        const showUnreadMessageIcon = false; //showChatUnreadMessageIcon(chatId);
         const showUnreadMentionCount = showChatUnreadMentionCount(chatId);
         const showUnreadCount = showChatUnreadCount(chatId);
         const isMuted = isChatMuted(chatId);
 
         return (
             <>
-                {showUnreadMessageIcon && <i className='dialog-badge-unread' />}
                 {showUnreadMentionCount && (
                     <div className='dialog-badge'>
                         <div className='dialog-badge-mention'>@</div>
@@ -130,7 +128,7 @@ class DialogBadge extends React.Component {
                         <span className='dialog-badge-text'>{unread_count > 0 ? unread_count : ''}</span>
                     </div>
                 )}
-                {is_pinned && !showUnreadMessageIcon && !showUnreadCount && !showUnreadMentionCount && (
+                {is_pinned && !showUnreadCount && !showUnreadMentionCount && (
                     <div className='dialog-badge-pinned'>
                         <PinIcon className='dialog-badge-pinned-icon' />
                     </div>

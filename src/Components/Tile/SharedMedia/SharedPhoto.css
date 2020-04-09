@@ -7,6 +7,17 @@
 
 .shared-photo {
     position: relative;
+    flex: 0 0 33%;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: 2px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.right-column .shared-photo {
+    position: relative;
     flex: 0 0 100%;
     display: flex;
     justify-content: center;
@@ -17,7 +28,7 @@
 }
 
 @media (min-width: 960px) {
-    .shared-photo {
+    .right-column .shared-photo {
         position: relative;
         flex: 0 0 50%;
         display: flex;
@@ -30,7 +41,7 @@
 }
 
 @media (min-width: 1280px) {
-    .shared-photo {
+    .right-column .shared-photo {
         position: relative;
         flex: 0 0 33%;
         display: flex;

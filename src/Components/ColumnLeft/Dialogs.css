@@ -6,9 +6,7 @@
  */
 
 .dialogs {
-    /*float: left;*/
-    /*width: calc(25% - 0px);*/
-    width: 25%;
+    max-width: 25%;
     flex: 1 1 25%;
     margin: 0;
     box-sizing: border-box;
@@ -28,7 +26,11 @@
 }
 
 .page-third-column .dialogs {
-    width: 25%;
+    max-width: 25%;
     flex: 1 1 25%;
-    /*width: calc(25% - 0px);*/
+}
+
+.page-small .dialogs {
+    flex: 0 0 89px;
+    max-width: 89px;
 }

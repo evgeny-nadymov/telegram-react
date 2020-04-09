@@ -9,6 +9,7 @@ import EventEmitter from './EventEmitter';
 import ActionScheduler from '../Utils/ActionScheduler';
 import { closeChat } from '../Actions/Client';
 import { subscribeNotifications } from '../registerServiceWorker';
+import { PAGE_WIDTH_SMALL } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
 class ApplicationStore extends EventEmitter {
@@ -19,7 +20,23 @@ class ApplicationStore extends EventEmitter {
 
         this.addTdLibListener();
         this.addStatistics();
+
+        this.isSmallWidth = window.innerWidth < PAGE_WIDTH_SMALL;
+        window.addEventListener('resize', this.onWindowResize);
     }
+
+    onWindowResize = () => {
+        const { isSmallWidth } = this;
+
+        const nextIsSmallWidth = window.innerWidth < PAGE_WIDTH_SMALL;
+        if (nextIsSmallWidth !== isSmallWidth) {
+            this.isSmallWidth = nextIsSmallWidth;
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdatePageWidth',
+                isSmallWidth: nextIsSmallWidth
+            })
+        }
+    };
 
     reset = () => {
         this.dialogsReady = false;
@@ -222,6 +239,10 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateNewContentAvailable': {
                 this.emit('clientUpdateNewContentAvailable', update);
+                break;
+            }
+            case 'clientUpdatePageWidth': {
+                this.emit('clientUpdatePageWidth', update);
                 break;
             }
             case 'clientUpdateProfileMediaViewerContent': {

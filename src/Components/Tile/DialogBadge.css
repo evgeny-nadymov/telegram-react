@@ -52,9 +52,26 @@
     justify-content: center;
 }
 
+.page-small .dialog-badge,
+.page-small .dialog-badge-pinned,
+.page-small .dialog-badge-unread{
+    margin: 0;
+    position: absolute;
+    right: 9px;
+    bottom: 9px;
+}
+
 .item-selected .dialog-badge,
 .item-selected .dialog-badge-pinned {
     background: #ffffff77;
+}
+
+.page-small .item-selected .dialog-badge,
+.page-small .item-selected .dialog-badge-pinned {
+    background: #ffffff;
+    color: var(--color-accent-main)
+    /*background-color: white;*/
+    /*background-blend-mode: multiply;*/
 }
 
 .dialog-badge-pinned-icon {
@@ -75,7 +92,7 @@
     background: var(--color-accent-light);
 }
 
-.dialog-active .dialog-badge-unread {
+.dialog.item-selected .dialog-badge-unread {
     background: #ffffff77;
 }
 

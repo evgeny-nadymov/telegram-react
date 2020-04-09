@@ -18,10 +18,10 @@
     color: var(--dialog-color);
 }
 
-.dialog-active .dialog-content,
-.dialog-active .dialog-content-accent,
-.dialog-active .dialog-content-draft,
-.dialog-active .dialog-badge-pinned {
+.dialog.item-selected .dialog-content,
+.dialog.item-selected .dialog-content-accent,
+.dialog.item-selected .dialog-content-draft,
+.dialog.item-selected .dialog-badge-pinned {
     color: #fff;
 }
 

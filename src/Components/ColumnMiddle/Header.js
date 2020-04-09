@@ -30,7 +30,7 @@ import {
     isAccentChatSubtitle, isChannelChat,
     isPrivateChat, isSupergroup
 } from '../../Utils/Chat';
-import { clearSelection, searchChat } from '../../Actions/Client';
+import { clearSelection, openChat, searchChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -152,7 +152,13 @@ class Header extends Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        AppStore.changeChatDetailsVisibility(true);
+        const { isSmallWidth } = AppStore;
+
+        if (isSmallWidth) {
+            openChat(chatId, null, true);
+        } else {
+            AppStore.changeChatDetailsVisibility(true);
+        }
     };
 
     handleSearchChat = () => {

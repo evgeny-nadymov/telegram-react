@@ -107,7 +107,7 @@ class DialogsHeader extends React.Component {
     };
 
     render() {
-        const { openSearch } = this.props;
+        const { openSearch, timeout } = this.props;
 
         let content = null;
         let showClose = false;
@@ -126,7 +126,7 @@ class DialogsHeader extends React.Component {
 
         return (
             <div className='header-master'>
-                <MainMenuButton showClose={showClose} onClose={this.handleCloseSearch} />
+                <MainMenuButton timeout={timeout} showClose={showClose} onClose={this.handleCloseSearch} />
                 {content}
             </div>
         );
@@ -137,7 +137,8 @@ DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
     onClick: PropTypes.func.isRequired,
     onSearch: PropTypes.func.isRequired,
-    onSearchTextChange: PropTypes.func.isRequired
+    onSearchTextChange: PropTypes.func.isRequired,
+    timeout: PropTypes.bool
 };
 
 export default DialogsHeader;

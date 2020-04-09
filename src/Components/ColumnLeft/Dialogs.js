@@ -7,6 +7,7 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
+import CSSTransition from 'react-transition-group/CSSTransition';
 import Archive from './Archive';
 import Search from './Search/Search';
 import DialogsHeader from './DialogsHeader';
@@ -18,13 +19,18 @@ import UpdatePanel from './UpdatePanel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
 import { loadChatsContent } from '../../Utils/File';
+import { duration } from '@material-ui/core/styles/transitions';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-import CSSTransition from 'react-transition-group/CSSTransition';
+
+const defaultTimeout = {
+    enter: duration.enteringScreen,
+    exit: duration.leavingScreen
+};
 
 class Dialogs extends Component {
     constructor(props) {
@@ -43,6 +49,7 @@ class Dialogs extends Component {
             mainItems: [],
             archiveItems: [],
 
+            timeout: defaultTimeout,
             openSearch: false,
             openArchive: false,
             openContacts: false,
@@ -121,6 +128,7 @@ class Dialogs extends Component {
 
         AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+        AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
         ChatStore.on('updateChatChatList', this.onUpdateChatChatList);
 
@@ -138,6 +146,7 @@ class Dialogs extends Component {
     componentWillUnmount() {
         AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
+        AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
         ChatStore.off('updateChatChatList', this.onUpdateChatChatList);
 
@@ -151,6 +160,26 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
     }
+
+    onClientUpdatePageWidth = update => {
+        const { isSmallWidth } = update;
+
+        if (!isSmallWidth) return;
+
+        const { openSettings, openContacts, openSearch } = this.state;
+        if (openSettings || openContacts || openSearch) {
+            this.setState({
+                    openContacts: false,
+                    openSettings: false,
+                    openSearch: false,
+                    timeout: 0
+                }, () => {
+                    this.setState({
+                        timeout: defaultTimeout
+                    });
+            });
+        }
+    };
 
     async loadCache() {
         const cache = (await CacheStore.loadCache()) || {};
@@ -364,6 +393,7 @@ class Dialogs extends Component {
             openContacts,
             openArchive,
             openSearch,
+            timeout,
             searchChatId,
             searchText
         } = this.state;
@@ -378,6 +408,7 @@ class Dialogs extends Component {
                         <DialogsHeader
                             ref={this.dialogsHeaderRef}
                             openSearch={openSearch}
+                            timeout={timeout !== 0}
                             onClick={this.handleHeaderClick}
                             onSearch={this.handleSearch}
                             onSearchTextChange={this.handleSearchTextChange}
@@ -395,7 +426,7 @@ class Dialogs extends Component {
                             />
                             <CSSTransition
                                 classNames='search'
-                                timeout={200}
+                                timeout={timeout}
                                 in={openSearch}
                                 mountOnEnter={true}
                                 unmountOnExit={true}>
@@ -410,7 +441,7 @@ class Dialogs extends Component {
                         <UpdatePanel />
                     </div>
 
-                    <SidebarPage open={openArchive} onClose={this.handleCloseArchive}>
+                    <SidebarPage open={openArchive} timeout={timeout} onClose={this.handleCloseArchive}>
                         <Archive
                             innerListRef={this.archiveListRef}
                             items={archiveItems}
@@ -418,11 +449,11 @@ class Dialogs extends Component {
                         />
                     </SidebarPage>
 
-                    <SidebarPage open={openContacts} onClose={this.handleCloseContacts}>
+                    <SidebarPage open={openContacts} timeout={timeout} onClose={this.handleCloseContacts}>
                         <Contacts />
                     </SidebarPage>
 
-                    <SidebarPage open={openSettings} onClose={this.handleCloseSettings}>
+                    <SidebarPage open={openSettings} timeout={timeout} onClose={this.handleCloseSettings}>
                         <Settings chatId={meChatId} />
                     </SidebarPage>
                 </div>

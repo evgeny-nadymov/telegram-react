@@ -12,9 +12,7 @@
 
 .right-column {
     position: relative;
-    /*float: left;*/
-    /*width: calc(25% - 0px);*/
-    width: 25%;
+    max-width: 25%;
     flex: 1 1 25%;
     margin: 0;
     box-sizing: border-box;

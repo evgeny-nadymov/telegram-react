@@ -16,6 +16,7 @@ import HeaderProgress from './ColumnMiddle/HeaderProgress';
 import MenuIcon from '../Assets/Icons/Menu';
 import Placeholder from './ColumnMiddle/Placeholder';
 import SearchIcon from '../Assets/Icons/Search';
+import AppStore from '../Stores/ApplicationStore';
 import './ColumnMiddle/Header.css';
 import './ColumnLeft/Dialogs.css';
 import './ColumnMiddle/DialogDetails.css';
@@ -23,14 +24,42 @@ import '../TelegramApp.css';
 import Dialog from './ColumnLeft/DialogsList';
 
 class StubPage extends React.Component {
+    constructor(props) {
+        super(props);
+
+        const { isSmallWidth } = AppStore;
+
+        this.setState({
+            isSmallWidth
+        });
+    }
+
+    componentDidMount() {
+        AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
+    }
+
+    componentWillUnmount() {
+        AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
+    }
+
+    onClientUpdatePageWidth = update => {
+        const { isSmallWidth } = update;
+
+        this.setState({ isSmallWidth });
+    };
+
     render() {
         const { title, t } = this.props;
+        const { isSmallWidth } = this.state;
 
         const dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
 
         return (
             <>
-                <div className='page'>
+                <div
+                    className={classNames('page', {
+                        'page-small': isSmallWidth
+                    })}>
                     <div className='dialogs'>
                         <div className='header-master'>
                             <IconButton className='header-left-button' aria-label='Menu'>
