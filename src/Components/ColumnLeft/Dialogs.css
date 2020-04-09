@@ -25,6 +25,6 @@
     position: relative;
 }
 
-.dialogs-third-column {
+.page-third-column .dialogs {
     width: calc(25% - 0px);
 }

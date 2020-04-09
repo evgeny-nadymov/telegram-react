@@ -192,7 +192,6 @@ class DialogDetails extends Component {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
         const { chatId, messageId, wallpaper } = this.state;
-        const { isChatDetailsVisible } = AppStore;
 
         let style = null;
         let src = null;
@@ -215,7 +214,7 @@ class DialogDetails extends Component {
         }
 
         return (
-            <div className={classNames('dialog-details', { 'dialog-details-third-column': isChatDetailsVisible })} style={style}>
+            <div className='dialog-details' style={style}>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />

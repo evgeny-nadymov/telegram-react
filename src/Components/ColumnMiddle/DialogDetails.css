@@ -24,6 +24,6 @@
     background-image: url('../../Assets/bg.jpg');
 }
 
-.dialog-details-third-column {
+.page-third-column .dialog-details {
     width: calc(50% - 0px);
 }

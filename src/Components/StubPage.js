@@ -25,20 +25,13 @@ import Dialog from './ColumnLeft/DialogsList';
 class StubPage extends React.Component {
     render() {
         const { title, t } = this.props;
-        const isChatDetailsVisible = false;
 
         const dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
 
         return (
             <>
-                <div
-                    className={classNames('page', {
-                        'page-third-column': isChatDetailsVisible
-                    })}>
-                    <div
-                        className={classNames('dialogs', {
-                            'dialogs-third-column': isChatDetailsVisible
-                        })}>
+                <div className='page'>
+                    <div className='dialogs'>
                         <div className='header-master'>
                             <IconButton className='header-left-button' aria-label='Menu'>
                                 <MenuIcon />
@@ -52,10 +45,7 @@ class StubPage extends React.Component {
                         </div>
                         {dialogs}
                     </div>
-                    <div
-                        className={classNames('dialog-details', {
-                            'dialog-details-third-column': isChatDetailsVisible
-                        })}>
+                    <div className='dialog-details'>
                         <div className='header-details'>
                             <div className={classNames('header-status', 'grow', 'cursor-default')}>
                                 <span className='header-status-content'>{title}</span>

@@ -34,8 +34,6 @@ class Dialogs extends Component {
         this.archiveListRef = React.createRef();
         this.dialogsHeaderRef = React.createRef();
 
-        const { isChatDetailsVisible } = AppStore;
-
         this.state = {
             cache: null,
 
@@ -45,7 +43,6 @@ class Dialogs extends Component {
             mainItems: [],
             archiveItems: [],
 
-            isChatDetailsVisible,
             openSearch: false,
             openArchive: false,
             openContacts: false,
@@ -64,7 +61,6 @@ class Dialogs extends Component {
             archiveTitle,
             mainItems,
             archiveItems,
-            isChatDetailsVisible,
             openSearch,
             openArchive,
             openSettings,
@@ -90,10 +86,6 @@ class Dialogs extends Component {
         }
 
         if (nextState.mainItems !== mainItems) {
-            return true;
-        }
-
-        if (nextState.isChatDetailsVisible !== isChatDetailsVisible) {
             return true;
         }
 
@@ -127,7 +119,6 @@ class Dialogs extends Component {
     componentDidMount() {
         this.loadCache();
 
-        AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
 
@@ -145,7 +136,6 @@ class Dialogs extends Component {
     }
 
     componentWillUnmount() {
-        AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
 
@@ -268,12 +258,6 @@ class Dialogs extends Component {
         this.forceUpdate();
     };
 
-    onClientUpdateChatDetailsVisibility = update => {
-        const { isChatDetailsVisible } = AppStore;
-
-        this.setState({ isChatDetailsVisible });
-    };
-
     onClientUpdateSearchChat = update => {
         const { chatId, query } = update;
         const { openSearch, searchChatId, searchText } = this.state;
@@ -375,7 +359,6 @@ class Dialogs extends Component {
             archiveTitle,
             mainItems,
             archiveItems,
-            isChatDetailsVisible,
             meChatId,
             openSettings,
             openContacts,
@@ -390,10 +373,7 @@ class Dialogs extends Component {
 
         return (
             <>
-                <div
-                    className={classNames('dialogs', {
-                        'dialogs-third-column': isChatDetailsVisible
-                    })}>
+                <div className='dialogs'>
                     <div className='sidebar-page'>
                         <DialogsHeader
                             ref={this.dialogsHeaderRef}
