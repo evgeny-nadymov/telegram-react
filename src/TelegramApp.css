@@ -71,6 +71,8 @@ mark {
 
 .page {
     height: calc(100% - 0px);
+    display: flex;
+    flex-direction: row;
     max-width: 1680px;
     min-width: 300px;
     margin: 0 auto;

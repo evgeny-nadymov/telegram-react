@@ -6,8 +6,10 @@
  */
 
 .dialogs {
-    float: left;
-    width: calc(25% - 0px);
+    /*float: left;*/
+    /*width: calc(25% - 0px);*/
+    width: 25%;
+    flex: 1 1 25%;
     margin: 0;
     box-sizing: border-box;
     border-right: 1px solid var(--border);
@@ -26,5 +28,7 @@
 }
 
 .page-third-column .dialogs {
-    width: calc(25% - 0px);
+    width: 25%;
+    flex: 1 1 25%;
+    /*width: calc(25% - 0px);*/
 }

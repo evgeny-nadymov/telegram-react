@@ -6,9 +6,11 @@
  */
 
 .dialog-details {
-    float: left;
-    width: calc(75% - 0px);
+    /*float: left;*/
+    /*width: calc(75% - 0px);*/
     /*max-width: 672px;*/
+    width: 75%;
+    flex: 1 1 75%;
     margin: 0;
     box-sizing: border-box;
     height: 100%;
@@ -25,5 +27,7 @@
 }
 
 .page-third-column .dialog-details {
-    width: calc(50% - 0px);
+    /*width: calc(50% - 0px);*/
+    width: 50%;
+    flex: 1 1 50%;
 }
