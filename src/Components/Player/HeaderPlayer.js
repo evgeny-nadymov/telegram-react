@@ -363,7 +363,7 @@ class HeaderPlayer extends React.Component {
                 }
 
                 if (video_note) {
-                    return video_note.mime_type;
+                    return 'video/mp4';
                 }
 
                 if (web_page) {
@@ -376,7 +376,7 @@ class HeaderPlayer extends React.Component {
                     }
 
                     if (web_page.video_note) {
-                        return web_page.video_note.mime_type;
+                        return 'video/mp4';
                     }
                 }
             }

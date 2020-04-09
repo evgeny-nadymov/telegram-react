@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
-import { getAnimationData, getMediaFile, getMediaPreviewFile } from '../../Utils/File';
+import { getAnimationData, getMediaFile, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
@@ -38,7 +38,7 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size, t } = props;
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
-            let [width, height, file] = getMediaFile(chatId, messageId, size);
+            let [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
             file = FileStore.get(file.id) || file;
 
             let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
@@ -56,6 +56,8 @@ class MediaViewerContent extends React.Component {
                 width,
                 height,
                 file,
+                src: getSrc(file),
+                mimeType,
                 text,
                 thumbnailWidth,
                 thumbnailHeight,
@@ -88,9 +90,17 @@ class MediaViewerContent extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { chatId, messageId } = this.props;
+        const { src } = this.state;
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.updateAnimationData();
+        }
+
+        if (prevState.src !== src) {
+            const player = this.videoRef.current;
+            if (!player) return;
+
+            player.load();
         }
     }
 
@@ -119,11 +129,14 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            const [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
+
             this.setState({
                 width,
                 height,
-                file
+                file,
+                src: getSrc(file),
+                mimeType
             });
         }
     };
@@ -146,13 +159,15 @@ class MediaViewerContent extends React.Component {
         const { chat_id, message_id } = update;
 
         if (chatId === chat_id && messageId === message_id) {
-            const [width, height, file] = getMediaFile(chatId, messageId, size);
+            const [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
             this.setState({
                 width,
                 height,
                 file,
+                src: getSrc(file),
+                mimeType,
                 text
             });
         }
@@ -175,6 +190,8 @@ class MediaViewerContent extends React.Component {
             width,
             height,
             file,
+            src,
+            mimeType,
             text,
             thumbnailWidth,
             thumbnailHeight,
@@ -183,8 +200,7 @@ class MediaViewerContent extends React.Component {
         } = this.state;
         if (!file) return null;
 
-        const blob = FileStore.getBlob(file.id) || file.blob;
-        const src = FileStore.getBlobUrl(blob) || '';
+        // const src = getSrc(file);
 
         const thumbnailBlob = thumbnail ? FileStore.getBlob(thumbnail.id) || thumbnail.blob : null;
         const thumbnailSrc = FileStore.getBlobUrl(thumbnailBlob);
@@ -203,13 +219,13 @@ class MediaViewerContent extends React.Component {
         }
 
         let content = null;
+        const source = src ? <source src={src} type={mimeType}/> : null;
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
                     <video
                         ref={this.videoRef}
                         className='media-viewer-content-video-player'
-                        src={src}
                         onClick={this.handleContentClick}
                         controls
                         autoPlay
@@ -246,7 +262,9 @@ class MediaViewerContent extends React.Component {
                                 });
                             }
                         }}
-                    />
+                    >
+                        {source}
+                    </video>
                     {!isPlaying &&
                         (!src && thumbnailSrc ? (
                             <img
@@ -273,8 +291,8 @@ class MediaViewerContent extends React.Component {
             content = (
                 <div className='media-viewer-content-wrapper'>
                     <video
+                        ref={this.videoRef}
                         className='media-viewer-content-video-player'
-                        src={src}
                         onClick={this.handleContentClick}
                         loop
                         autoPlay
@@ -283,7 +301,9 @@ class MediaViewerContent extends React.Component {
                         onPlay={() => {
                             this.setState({ isPlaying: true });
                         }}
-                    />
+                    >
+                        {source}
+                    </video>
                     {!isPlaying &&
                         (!src && thumbnailSrc ? (
                             <img

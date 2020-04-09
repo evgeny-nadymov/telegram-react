@@ -15,7 +15,7 @@ import FileProgress from '../../Viewer/FileProgress';
 import MediaStatus from './MediaStatus';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
-import { getDurationString } from '../../../Utils/Common';
+import { clamp, getDurationString } from '../../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
 import FileStore from '../../../Stores/FileStore';
@@ -33,6 +33,7 @@ class VideoNote extends React.Component {
         super(props);
 
         this.videoRef = React.createRef();
+        this.sourceRef = React.createRef();
 
         const { chatId, messageId } = props;
         const { video } = props.videoNote;
@@ -82,8 +83,13 @@ class VideoNote extends React.Component {
             //console.log('clientUpdate release video.srcObject');
             player.srcObject = null;
         }
-        if (player.src !== src) {
-            player.src = src;
+
+        const source = this.sourceRef.current;
+        if (!source) return;
+
+        if (source.src !== src) {
+            source.src = src;
+            player.load();
         }
     }
 
@@ -319,7 +325,7 @@ class VideoNote extends React.Component {
         let progress = 0;
         if (videoDuration && currentTime) {
             const progressTime = currentTime + 0.25;
-            progress = (progressTime / videoDuration) * 100;
+            progress = clamp(progressTime / videoDuration * 100, 0, 100);
         }
 
         return (
@@ -340,7 +346,9 @@ class VideoNote extends React.Component {
                             width={style.width}
                             height={style.height}
                             onCanPlay={this.handleCanPlay}
-                        />
+                        >
+                            <source ref={this.sourceRef} src={null} type='video/mp4'/>
+                        </video>
                         <div className='video-note-player'>
                             <div className='video-note-progress'>
                                 <CircularProgress

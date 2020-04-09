@@ -806,7 +806,7 @@ class MediaViewer extends React.Component {
             </Dialog>
         ) : null;
 
-        const [width, height, file] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
+        const [width, height, file, mimeType] = getMediaFile(chatId, currentMessageId, PHOTO_BIG_SIZE);
 
         const fileId = file ? file.id : 0;
         let title = t('AttachPhoto');

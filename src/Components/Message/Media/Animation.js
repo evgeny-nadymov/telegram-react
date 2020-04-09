@@ -73,16 +73,16 @@ class Animation extends React.Component {
 
     startStopPlayer = () => {
         const player = this.videoRef.current;
-        if (player) {
-            if (
-                this.windowFocused &&
-                ((this.inView && !this.openMediaViewer && !this.openProfileMediaViewer && !this.openIV) ||
-                    (this.ivInView && !this.openIVMedia))
-            ) {
-                player.play();
-            } else {
-                player.pause();
-            }
+        if (!player) return;
+
+        if (
+            this.windowFocused &&
+            ((this.inView && !this.openMediaViewer && !this.openProfileMediaViewer && !this.openIV) ||
+                (this.ivInView && !this.openIVMedia))
+        ) {
+            player.play();
+        } else {
+            player.pause();
         }
     };
 
@@ -177,6 +177,7 @@ class Animation extends React.Component {
 
         const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
         const isGif = isGifMimeType(mime_type);
+        const source = src ? <source src={src} type={mime_type}/> : null;
 
         return (
             <div
@@ -196,7 +197,6 @@ class Animation extends React.Component {
                         <video
                             ref={this.videoRef}
                             className='media-viewer-content-animation'
-                            src={src}
                             poster={thumbnailSrc || miniSrc}
                             muted
                             autoPlay
@@ -204,7 +204,9 @@ class Animation extends React.Component {
                             playsInline
                             width={animationStyle.width}
                             height={animationStyle.height}
-                        />
+                        >
+                            {source}
+                        </video>
                     )
                 ) : (
                     <>

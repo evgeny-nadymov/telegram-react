@@ -329,6 +329,18 @@ function loadAudioThumbnailContent(store, audio, message) {
     return true;
 }
 
+function cancelLoadAnimationContent(animation) {
+    const { animation: file } = animation;
+    if (!file) return;
+
+    const { id } = file;
+
+    const blob = file.blob || FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.cancelGetRemoteFile(id);
+}
+
 function loadAnimationContent(store, animation, message, useFileSize = true) {
     if (!animation) return;
 
@@ -355,6 +367,24 @@ function loadAnimationContent(store, animation, message, useFileSize = true) {
             }
         }
     );
+}
+
+function cancelLoadAnimationThumbnailContent(animation){
+    if (!animation) return;
+
+    const { thumbnail: photoSize } = animation;
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    if (!file) return;
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.cancelGetRemoteFile(id);
 }
 
 function loadAnimationThumbnailContent(store, animation, message) {
@@ -555,6 +585,27 @@ async function loadLocationContent(store, location, message) {
     );
 }
 
+function cancelLoadBigPhotoContent(photo) {
+    if (!photo) return;
+
+    const { sizes } = photo;
+    if (!sizes) return;
+
+    const photoSize = getSize(sizes, PHOTO_BIG_SIZE);
+    if (!photoSize) return;
+
+    let { photo: file } = photoSize;
+    if (!file) return;
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.cancelGetRemoteFile(id);
+}
+
 function loadBigPhotoContent(store, photo, message) {
     if (!photo) return;
 
@@ -702,6 +753,21 @@ function loadStickerThumbnailContent(store, sticker, message) {
     return true;
 }
 
+function cancelLoadVideoContent(video) {
+    if (!video) return;
+
+    let { video: file } = video;
+    if (!file) return;
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(id);
+    if (blob) return;
+
+    FileStore.cancelGetRemoteFile(id);
+}
+
 function loadVideoContent(store, video, message, useFileSize = true) {
     if (!video) return;
 
@@ -728,6 +794,24 @@ function loadVideoContent(store, video, message, useFileSize = true) {
             }
         }
     );
+}
+
+function cancelLoadVideoThumbnailContent(video) {
+    if (!video) return;
+
+    const { thumbnail: photoSize } = video;
+    if (!photoSize) return false;
+
+    let { photo: file } = photoSize;
+    if (!file) return false;
+
+    file = FileStore.get(file.id) || file;
+    const { id } = file;
+
+    const blob = FileStore.getBlob(id);
+    if (blob) return true;
+
+    FileStore.cancelGetRemoteFile(id);
 }
 
 function loadVideoThumbnailContent(store, video, message) {
@@ -1259,45 +1343,46 @@ function getMediaPreviewFile(chatId, messageId) {
 }
 
 function getViewerFile(media, size) {
-    if (!size) return [0, 0, null];
+    if (!size) return [0, 0, null, ''];
 
     switch (media['@type']) {
         case 'animation': {
-            return [media.width, media.height, media.animation];
+            return [media.width, media.height, media.animation, media.mime_type];
         }
         case 'photo': {
             const photoSize = getSize(media.sizes, size);
             if (photoSize) {
-                return [photoSize.width, photoSize.height, photoSize.photo];
+                return [photoSize.width, photoSize.height, photoSize.photo, ''];
             }
             break;
         }
         case 'document': {
-            return [50, 50, document.document];
+            return [50, 50, document.document, document.mime_type];
         }
         case 'video': {
-            return [media.width, media.height, media.video];
+            return [media.width, media.height, media.video, media.mime_type];
         }
         default: {
         }
     }
 
-    return [0, 0, null];
+    return [0, 0, null, ''];
 }
 
 function getMediaFile(chatId, messageId, size) {
     if (!size) return [0, 0, null];
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return [0, 0, null];
+    if (!message) return [0, 0, null, ''];
 
     const { content } = message;
-    if (!content) return [0, 0, null];
+    if (!content) return [0, 0, null, ''];
 
     switch (content['@type']) {
         case 'messageAnimation': {
             const { animation } = content;
             if (animation) {
-                return [animation.width, animation.height, animation.animation];
+                const { width, height, animation: file, mime_type } = animation;
+                return [width, height, file, mime_type];
             }
             break;
         }
@@ -1306,7 +1391,8 @@ function getMediaFile(chatId, messageId, size) {
             if (photo) {
                 const photoSize = getSize(photo.sizes, size);
                 if (photoSize) {
-                    return [photoSize.width, photoSize.height, photoSize.photo];
+                    const { width, height, photo: file } = photoSize;
+                    return [width, height, file, ''];
                 }
             }
             break;
@@ -1314,7 +1400,8 @@ function getMediaFile(chatId, messageId, size) {
         case 'messageDocument': {
             const { document } = content;
             if (document) {
-                return [50, 50, document.document];
+                const { document: file, mime_type } = document;
+                return [50, 50, file, mime_type];
             }
             break;
         }
@@ -1323,7 +1410,8 @@ function getMediaFile(chatId, messageId, size) {
             if (photo) {
                 const photoSize = getSize(photo.sizes, size);
                 if (photoSize) {
-                    return [photoSize.width, photoSize.height, photoSize.photo];
+                    const { width, height, photo: file } = photoSize;
+                    return [width, height, file, ''];
                 }
             }
             break;
@@ -1333,23 +1421,27 @@ function getMediaFile(chatId, messageId, size) {
             if (web_page) {
                 const { animation, document, photo, video } = web_page;
                 if (animation) {
-                    return [animation.width, animation.height, animation.animation];
+                    const { width, height, animation: file, mime_type } = animation;
+                    return [width, height, file, mime_type];
                 }
 
                 if (document) {
-                    return [50, 50, document.document];
+                    const { document: file, mime_type } = document;
+                    return [50, 50, file, mime_type];
                 }
 
                 if (photo) {
                     const photoSize = getSize(photo.sizes, size);
                     if (photoSize) {
-                        return [photoSize.width, photoSize.height, photoSize.photo];
+                        const { width, height, photo: file } = photoSize;
+                        return [width, height, file, ''];
                     }
                     break;
                 }
 
                 if (video) {
-                    return [video.width, video.height, video.video];
+                    const { width, height, video: file, mime_type } = video;
+                    return [width, height, file, mime_type];
                 }
             }
             break;
@@ -1357,7 +1449,8 @@ function getMediaFile(chatId, messageId, size) {
         case 'messageVideo': {
             const { video } = content;
             if (video) {
-                return [video.width, video.height, video.video];
+                const { width, height, video: file, mime_type } = video;
+                return [width, height, file, mime_type];
             }
             break;
         }
@@ -1365,7 +1458,43 @@ function getMediaFile(chatId, messageId, size) {
         }
     }
 
-    return [0, 0, null];
+    return [0, 0, null, ''];
+}
+
+export function cancelLoadIVMediaViewerContent(blocks) {
+    if (!blocks) return;
+    if (!blocks.length) return;
+
+    for (let i = 0; i < blocks.length; i++) {
+        const content = blocks[i];
+        if (content) {
+            switch (content['@type']) {
+                case 'pageBlockAnimation': {
+                    const { animation } = content;
+                    if (!animation) break;
+
+                    cancelLoadAnimationThumbnailContent(animation);
+                    cancelLoadAnimationContent(animation);
+                    break;
+                }
+                case 'pageBlockPhoto': {
+                    const { photo } = content;
+                    if (!photo) break;
+
+                    cancelLoadBigPhotoContent(photo);
+                    break;
+                }
+                case 'pageBlockVideo': {
+                    const { video } = content;
+                    if (!video) break;
+
+                    cancelLoadVideoThumbnailContent(video);
+                    cancelLoadVideoContent(video);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 function cancelLoadMediaViewerContent(messages) {
@@ -1377,79 +1506,84 @@ function cancelLoadMediaViewerContent(messages) {
         const { content } = message;
         if (content) {
             switch (content['@type']) {
+                case 'messageAnimation': {
+                    const { animation } = content;
+                    if (!animation) break;
+
+                    cancelLoadAnimationThumbnailContent(animation);
+                    cancelLoadAnimationContent(animation);
+                    break;
+                }
                 case 'messagePhoto': {
                     const { photo } = content;
                     if (!photo) break;
 
-                    // preview
-                    /*let [previewId, previewPid, previewIdbKey] = getPhotoPreviewFile(message);
-                    if (previewPid) {
-                        let preview = this.getPreviewPhotoSize(message.content.photo.sizes);
-                        if (!preview.blob){
-                            FileStore.getLocalFile(store, preview, null,
-                                () => MessageStore.updateMessagePhoto(message.id),
-                                () => { if (loadRemote)  FileStore.getRemoteFile(previewId, 2, message); },
-                                'load_contents_preview_',
-                                message.id);
-
-                        }
-                    }*/
-
-                    const photoSize = getSize(photo.sizes, PHOTO_BIG_SIZE);
-                    if (!photoSize) break;
-
-                    const { photo: file } = photoSize;
-                    const blob = file.blob || FileStore.getBlob(file.id);
-                    if (blob) return;
-
-                    FileStore.cancelGetRemoteFile(file.id);
+                    cancelLoadBigPhotoContent(photo);
                     break;
                 }
                 case 'messageVideo': {
                     const { video } = content;
                     if (!video) break;
 
-                    if (video.thumbnail) {
-                        const { photo: file } = video.thumbnail;
-                        const blob = file.blob || FileStore.getBlob(file.id);
-                        if (blob) break;
-
-                        FileStore.cancelGetRemoteFile(file.id);
-                    }
-
-                    const { video: file } = video;
-                    if (!file) break;
-
-                    const blob = file.blob || FileStore.getBlob(file.id);
-                    if (blob) break;
-
-                    FileStore.cancelGetRemoteFile(file.id);
+                    cancelLoadVideoThumbnailContent(video);
+                    cancelLoadVideoContent(video);
                     break;
                 }
                 case 'messageText': {
                     const { web_page } = message.content;
                     if (web_page) {
-                        const { video } = web_page;
+                        const { animation, photo, video } = web_page;
+
+                        if (animation) {
+                            cancelLoadAnimationThumbnailContent(animation);
+                            cancelLoadAnimationContent(animation);
+                        }
+
+                        if (photo) {
+                            cancelLoadBigPhotoContent(photo);
+                        }
 
                         if (video) {
-                            if (video.thumbnail) {
-                                const { photo: file } = video.thumbnail;
-                                const blob = file.blob || FileStore.getBlob(file.id);
-                                if (blob) break;
-
-                                FileStore.cancelGetRemoteFile(file.id);
-                            }
-
-                            const { video: file } = video;
-                            if (!file) break;
-
-                            const blob = file.blob || FileStore.getBlob(file.id);
-                            if (blob) break;
-
-                            FileStore.cancelGetRemoteFile(file.id);
+                            cancelLoadVideoThumbnailContent(video);
+                            cancelLoadVideoContent(video);
                         }
                     }
 
+                    break;
+                }
+            }
+        }
+    }
+}
+
+export function loadIVMediaViewerContent(blocks, useSizeLimit = false) {
+    if (!blocks) return;
+    if (!blocks.length) return;
+
+    const store = FileStore.getStore();
+
+    for (let i = 0; i < blocks.length; i++) {
+        const content = blocks[i];
+        if (content) {
+            switch (content['@type']) {
+                case 'pageBlockAnimation': {
+                    const { animation } = content;
+
+                    loadAnimationContent(store, animation, null, useSizeLimit);
+                    loadAnimationThumbnailContent(store, animation, null);
+                    break;
+                }
+                case 'pageBlockPhoto': {
+                    const { photo } = content;
+
+                    loadBigPhotoContent(store, photo, null);
+                    break;
+                }
+                case 'pageBlockVideo': {
+                    const { video } = content;
+
+                    loadVideoThumbnailContent(store, video, null);
+                    loadVideoContent(store, video, null, useSizeLimit);
                     break;
                 }
             }
@@ -1535,6 +1669,21 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
     }
 }
 
+export function cancelPreloadIVMediaViewerContent(index, blocks) {
+    if (!blocks.length) return;
+
+    const preload = [];
+    if (index > 0) {
+        preload.push(blocks[index - 1]);
+    }
+    if (index < blocks.length - 1) {
+        preload.push(blocks[index + 1]);
+    }
+
+    cancelLoadIVMediaViewerContent([blocks[index]]);
+    cancelLoadIVMediaViewerContent(blocks);
+}
+
 function cancelPreloadMediaViewerContent(index, history) {
     if (!history.length) return;
 
@@ -1563,6 +1712,21 @@ function preloadMediaViewerContent(index, history) {
 
     loadMediaViewerContent([history[index]], false);
     loadMediaViewerContent(messages, true);
+}
+
+export function preloadIVMediaViewerContent(index, blocks) {
+    if (!blocks.length) return;
+
+    const preload = [];
+    if (index > 0) {
+        preload.push(blocks[index - 1]);
+    }
+    if (index < blocks.length - 1) {
+        preload.push(blocks[index + 1]);
+    }
+
+    loadIVMediaViewerContent([blocks[index]], false);
+    loadIVMediaViewerContent(preload, true);
 }
 
 function loadUserFileContent(store, file, userId) {
