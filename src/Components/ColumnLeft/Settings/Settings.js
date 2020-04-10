@@ -122,13 +122,14 @@ class Settings extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, popup } = this.props;
         const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage } = this.state;
 
         return (
             <>
                 <Main
                     chatId={chatId}
+                    popup={popup}
                     onClose={this.handleCloseSettings}
                     onEditProfile={this.openEditProfile}
                     onGeneral={this.openGeneral}
@@ -157,7 +158,8 @@ class Settings extends React.Component {
 }
 
 Settings.propTypes = {
-    chatId: PropTypes.number
+    chatId: PropTypes.number,
+    popup: PropTypes.bool
 };
 
 const enhance = compose(

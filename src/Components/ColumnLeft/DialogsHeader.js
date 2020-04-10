@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import MainMenuButton from './MainMenuButton';
 import SearchInput from './Search/SearchInput';
 import { isAuthorizationReady } from '../../Utils/Common';
-import { ANIMATION_DURATION_100MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import '../ColumnMiddle/Header.css';
 
@@ -47,23 +46,32 @@ class DialogsHeader extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { openSearch, text } = this.props;
+        const { openSearch } = this.props;
 
         if (openSearch !== prevProps.openSearch) {
-            const searchInput = this.searchInputRef.current;
             if (openSearch) {
-                setTimeout(() => {
-                    if (searchInput) {
-                        searchInput.focus();
-                    }
-                }, ANIMATION_DURATION_100MS);
+                this.focusInput();
             } else {
-                searchInput.innerText = null;
+                const searchInput = this.searchInputRef.current;
+                if (searchInput) {
+                    searchInput.innerText = null;
+                }
             }
         }
     }
 
+    focusInput() {
+        const searchInput = this.searchInputRef.current;
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
+
     componentDidMount() {
+        if (this.props.popup) {
+            this.focusInput();
+        }
+
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
     }
 
@@ -107,12 +115,12 @@ class DialogsHeader extends React.Component {
     };
 
     render() {
-        const { openSearch, timeout } = this.props;
+        const { openSearch, timeout, popup } = this.props;
 
         let content = null;
-        let showClose = false;
+        let showBack = false;
         if (openSearch) {
-            showClose = true;
+            showBack = true;
             content = (
                 <SearchInput
                     inputRef={this.searchInputRef}
@@ -126,7 +134,7 @@ class DialogsHeader extends React.Component {
 
         return (
             <div className='header-master'>
-                <MainMenuButton timeout={timeout} showClose={showClose} onClose={this.handleCloseSearch} />
+                <MainMenuButton timeout={timeout} showClose={showBack} popup={popup} onClose={this.handleCloseSearch} />
                 {content}
             </div>
         );
@@ -135,10 +143,11 @@ class DialogsHeader extends React.Component {
 
 DialogsHeader.propTypes = {
     openSearch: PropTypes.bool.isRequired,
-    onClick: PropTypes.func.isRequired,
+    onClick: PropTypes.func,
     onSearch: PropTypes.func.isRequired,
     onSearchTextChange: PropTypes.func.isRequired,
-    timeout: PropTypes.bool
+    timeout: PropTypes.bool,
+    popup: PropTypes.bool
 };
 
 export default DialogsHeader;

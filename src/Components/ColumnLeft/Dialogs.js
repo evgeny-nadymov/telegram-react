@@ -26,6 +26,7 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
+import SidebarDialog from '../Popup/SidebarDialog';
 
 const defaultTimeout = {
     enter: duration.enteringScreen,
@@ -126,7 +127,6 @@ class Dialogs extends Component {
     componentDidMount() {
         this.loadCache();
 
-        AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
@@ -138,13 +138,13 @@ class Dialogs extends Component {
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
 
+        AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.on('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
     }
 
     componentWillUnmount() {
-        AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
@@ -156,6 +156,7 @@ class Dialogs extends Component {
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
 
+        AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.off('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
@@ -266,12 +267,18 @@ class Dialogs extends Component {
     };
 
     onClientUpdateContacts = async update => {
+        const { isSmallWidth } = AppStore;
+        if (isSmallWidth) return;
+
         const { open } = update;
 
         this.setState({ openContacts: open });
     };
 
     onClientUpdateSettings = update => {
+        const { isSmallWidth } = AppStore;
+        if (isSmallWidth) return;
+
         const { open, chatId } = update;
 
         this.setState({ openSettings: open, meChatId: chatId });
@@ -288,6 +295,9 @@ class Dialogs extends Component {
     };
 
     onClientUpdateSearchChat = update => {
+        const { isSmallWidth } = AppStore;
+        if (isSmallWidth) return;
+
         const { chatId, query } = update;
         const { openSearch, searchChatId, searchText } = this.state;
 
@@ -339,9 +349,9 @@ class Dialogs extends Component {
         const searchText = openSearch ? this.state.searchText : null;
 
         this.setState({
-            openSearch: openSearch,
-            searchChatId: searchChatId,
-            searchText: searchText
+            openSearch,
+            searchChatId,
+            searchText
         });
     };
 
@@ -456,6 +466,8 @@ class Dialogs extends Component {
                     <SidebarPage open={openSettings} timeout={timeout} onClose={this.handleCloseSettings}>
                         <Settings chatId={meChatId} />
                     </SidebarPage>
+
+                    <SidebarDialog/>
                 </div>
             </>
         );

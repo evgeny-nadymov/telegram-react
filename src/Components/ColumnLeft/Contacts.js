@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ArrowBackIcon from '../../Assets/Icons/Back';
+import CloseIcon from '../../Assets/Icons/Close';
 import User from '../Tile/User';
 import SearchInput from './Search/SearchInput';
 import VirtualizedList from '../Additional/VirtualizedList';
@@ -160,19 +161,21 @@ class Contacts extends React.Component {
     };
 
     handleClose = () => {
-        const { onClose } = this.props;
-
-        if (onClose) onClose();
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateContacts',
+            open: false
+        });
     };
 
     render() {
+        const { popup } = this.props;
         const { items, searchItems } = this.state;
 
         return (
             <>
                 <div className='header-master'>
                     <IconButton className='header-left-button' onClick={this.handleClose}>
-                        <ArrowBackIcon />
+                        { popup ? <CloseIcon/> : <ArrowBackIcon /> }
                     </IconButton>
                     <SearchInput inputRef={this.searchInputRef} onChange={this.handleSearch} />
                 </div>
@@ -205,6 +208,8 @@ class Contacts extends React.Component {
     }
 }
 
-Contacts.propTypes = {};
+Contacts.propTypes = {
+    popup: PropTypes.bool
+};
 
 export default Contacts;
