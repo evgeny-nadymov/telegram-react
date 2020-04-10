@@ -185,7 +185,7 @@ class EditMediaDialog extends React.Component {
             editMessageAction(chatId, 0);
         } else {
             const { media, file } = newItem;
-            const { photo, document } = media;
+            const { audio, photo, document } = media;
 
             let content = null;
             if (photo) {
@@ -215,6 +215,18 @@ class EditMediaDialog extends React.Component {
                     '@type': 'inputMessageDocument',
                     document: { '@type': 'inputFileBlob', name: file.name, data: file },
                     thumbnail: null,
+                    caption
+                };
+            } else if (audio) {
+                const { duration, title, performer } = audio;
+
+                content = {
+                    '@type': 'inputMessageAudio',
+                    audio: { '@type': 'inputFileBlob', name: file.name, data: file },
+                    thumbnail: null,
+                    duration,
+                    title,
+                    performer,
                     caption
                 };
             }

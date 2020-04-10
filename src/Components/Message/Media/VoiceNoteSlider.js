@@ -214,8 +214,8 @@ class VoiceNoteSlider extends React.Component {
 }
 
 VoiceNoteSlider.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     duration: PropTypes.number.isRequired
 };
 

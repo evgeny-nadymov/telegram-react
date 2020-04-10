@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import jsmediatags from 'jsmediatags';
 import { THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 import Animation from '../Components/Message/Media/Animation';
@@ -634,6 +635,29 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
     }
 }
 
+export async function getMediaTags(file) {
+    return new Promise(resolve => {
+        jsmediatags.read(file, {
+            onSuccess: async function(tag) {
+                const { tags } = tag;
+                const { artist, title } = tags;
+
+                new AudioContext().decodeAudioData(
+                    await file.arrayBuffer(),
+                    result => {
+                        resolve({ title, performer: artist, duration: Math.trunc(result.duration) });
+                    },
+                    error => {
+                        resolve(null);
+                });
+            },
+            onError: function(error) {
+                resolve(null);
+            }
+        });
+    })
+}
+
 export async function getMediaDocumentFromFile(file) {
     if (!file) {
         return null;
@@ -642,19 +666,51 @@ export async function getMediaDocumentFromFile(file) {
     const fileId = -getRandomInt(1, 1000000);
     FileStore.setBlob(fileId, file);
 
+    const { name, type, size } = file;
+
+    if (type === 'audio/mp3') {
+        const tags = await getMediaTags(file);
+        if (tags) {
+            const { title, performer, duration } = tags;
+
+            return ({
+                '@type': 'messageAudio',
+                audio: {
+                    '@type': 'audio',
+                    duration,
+                    title,
+                    performer,
+                    file_name: name,
+                    mime_type: type,
+                    album_cover_minithumbnail: null,
+                    album_cover_thumbnail: null,
+                    audio: {
+                        '@type': 'file',
+                        id: fileId,
+                        size,
+                        expected_size: size,
+                        local: {
+                            is_downloading_completed: true
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     return ({
         '@type': 'messageDocument',
         document: {
             '@type': 'document',
-            file_name: file.name,
-            mime_type: file.type,
+            file_name: name,
+            mime_type: type,
             minithumbnail: null,
             thumbnail: null,
             document: {
                 '@type': 'file',
                 id: fileId,
-                size: file.size,
-                expected_size: file.expected_size,
+                size,
+                expected_size: size,
                 local: {
                     is_downloading_completed: true
                 }
