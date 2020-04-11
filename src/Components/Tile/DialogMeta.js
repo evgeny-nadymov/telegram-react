@@ -7,7 +7,7 @@
 
 import React from 'react';
 import Status from '../Message/Status';
-import { getLastMessageDate } from '../../Utils/Chat';
+import { getLastMessageDate, isMeChat } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import './DialogMeta.css';
 
@@ -71,6 +71,8 @@ class DialogMeta extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
+        const isMe = isMeChat(chatId);
+
         const { last_message } = chat;
         if (!last_message) return null;
 
@@ -81,7 +83,7 @@ class DialogMeta extends React.Component {
 
         return (
             <div className='dialog-meta'>
-                {is_outgoing && (
+                {is_outgoing && !isMe && (
                     <>
                         <Status chatId={chatId} messageId={id} />
                         <span> </span>
