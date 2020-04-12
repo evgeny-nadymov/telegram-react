@@ -12,6 +12,7 @@ import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import { StylesProvider } from '@material-ui/core/styles';
 import { getDisplayName } from './Utils/HOC';
 import ApplicationStore from './Stores/ApplicationStore';
+import { getBadgeSelectedColor } from './Utils/Color';
 
 function updateLightTheme(theme) {
     // const root = document.querySelector(':root');
@@ -48,6 +49,7 @@ function updateLightTheme(theme) {
 
     style.setProperty('--badge-unmuted', '#4DCD5E');
     style.setProperty('--badge-muted', '#C4C9CC');
+    style.setProperty('--badge-item-selected', getBadgeSelectedColor(theme.palette.primary.main));
 
     style.setProperty('--online-indicator', '#0AC630');
 
@@ -131,6 +133,7 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--badge-unmuted', '#4DCD5E');
     style.setProperty('--badge-muted', 'rgba(255, 255, 255, 0.5)');
+    style.setProperty('--badge-item-selected', getBadgeSelectedColor(theme.palette.primary.main));
 
     style.setProperty('--online-indicator', '#0AC630');
 

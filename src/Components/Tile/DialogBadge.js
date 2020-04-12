@@ -11,8 +11,7 @@ import PinIcon from '../../Assets/Icons/Pin';
 import {
     isChatMuted,
     showChatUnreadCount,
-    showChatUnreadMentionCount,
-    showChatUnreadMessageIcon
+    showChatUnreadMentionCount
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import NotificationStore from '../../Stores/NotificationStore';

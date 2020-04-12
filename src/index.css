@@ -43,6 +43,7 @@
 
     --badge-unmuted: #4dcd5e;
     --badge-muted: #c4c9cc;
+    --badge-item-selected: hsl(208, 77.7%, 76.4%);
 
     --online-indicator: #0ac630;
 
