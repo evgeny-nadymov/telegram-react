@@ -4,7 +4,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "fef4515afbdbeeec3ea41c11e4b32f18",
+    "revision": "4d0d3a938b984c38943ac9e37c2286b0",
     "url": "/telegram-react/index.html"
   },
   {
@@ -12,16 +12,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.885200b4.chunk.css"
   },
   {
-    "revision": "6269b7452e7dddb8e00e",
-    "url": "/telegram-react/static/css/4.bb568ad1.chunk.css"
+    "revision": "99bd99827cea9243fff3",
+    "url": "/telegram-react/static/css/4.110c8979.chunk.css"
   },
   {
     "revision": "c33ab6f84ba574c8f06e",
     "url": "/telegram-react/static/css/8.1d23aaa5.chunk.css"
   },
   {
-    "revision": "59ebb851c02d3d37c1bf",
-    "url": "/telegram-react/static/css/main.d0e85e44.chunk.css"
+    "revision": "bed81cebe1f4c671a12d",
+    "url": "/telegram-react/static/css/main.78702666.chunk.css"
   },
   {
     "revision": "a9c64c16808c2f6a6674",
@@ -32,8 +32,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/1.865df1a9.chunk.js"
   },
   {
-    "revision": "6269b7452e7dddb8e00e",
-    "url": "/telegram-react/static/js/4.759c253d.chunk.js"
+    "revision": "99bd99827cea9243fff3",
+    "url": "/telegram-react/static/js/4.8e568b41.chunk.js"
   },
   {
     "revision": "c1e3d8eb833af965499d",
@@ -52,12 +52,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/8.ee0cac35.chunk.js"
   },
   {
-    "revision": "59ebb851c02d3d37c1bf",
-    "url": "/telegram-react/static/js/main.7175bd1c.chunk.js"
+    "revision": "bed81cebe1f4c671a12d",
+    "url": "/telegram-react/static/js/main.013eb490.chunk.js"
   },
   {
-    "revision": "119e8227bd89ba1a628d",
-    "url": "/telegram-react/static/js/runtime~main.a8aac825.js"
+    "revision": "3176b4b10badcdd2934d",
+    "url": "/telegram-react/static/js/runtime~main.84ffd341.js"
   },
   {
     "revision": "9b7ea631ddb3103beee05cec006af20e",
