@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import jsmediatags from 'jsmediatags';
 import { THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 import Animation from '../Components/Message/Media/Animation';
@@ -25,6 +24,7 @@ import VoiceNote from '../Components/Message/Media/VoiceNote';
 import React from 'react';
 import { getRandomInt, readImageSize } from './Common';
 import FileStore from '../Stores/FileStore';
+import { ID3Parser } from '../Components/Player/Steaming/MP3/ID3Parser';
 
 export function getCallTitle(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -636,24 +636,24 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
 }
 
 export async function getMediaTags(file) {
-    return new Promise(resolve => {
-        jsmediatags.read(file, {
-            onSuccess: async function(tag) {
-                const { tags } = tag;
-                const { artist, title } = tags;
+    return new Promise(async resolve => {
+        const tag = await new ID3Parser().parse(file);
 
-                new AudioContext().decodeAudioData(
-                    await file.arrayBuffer(),
-                    result => {
-                        resolve({ title, performer: artist, duration: Math.trunc(result.duration) });
-                    },
-                    error => {
-                        resolve(null);
-                });
-            },
-            onError: function(error) {
-                resolve(null);
-            }
+        const { tags } = tag;
+        const { artist, title } = tags;
+
+        const audio = document.createElement('audio');
+        const url = URL.createObjectURL(file);
+
+        audio.src = url;
+        audio.addEventListener('loadedmetadata', function(){
+            URL.revokeObjectURL(url);
+            const duration = audio.duration;
+            audio.src = null;
+            resolve({ title, performer : artist, duration : Math.trunc(duration) });
+        },false);
+        audio.addEventListener('error', function() {
+            resolve(null);
         });
     })
 }
