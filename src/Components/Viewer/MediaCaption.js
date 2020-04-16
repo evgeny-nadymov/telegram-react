@@ -26,7 +26,7 @@ class MediaCaption extends React.Component {
 }
 
 MediaCaption.propTypes = {
-    text: PropTypes.object
+    text: PropTypes.array
 };
 
 MediaCaption.defaultProps = {};

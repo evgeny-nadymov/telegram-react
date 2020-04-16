@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
-import { getAnimationData, getMediaFile, getMediaPreviewFile, getSrc } from '../../Utils/File';
+import { getAnimationData, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
@@ -44,6 +44,8 @@ class MediaViewerContent extends React.Component {
             let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
             thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
+            const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getMediaMiniPreview(chatId, messageId);
+
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
 
@@ -61,7 +63,10 @@ class MediaViewerContent extends React.Component {
                 text,
                 thumbnailWidth,
                 thumbnailHeight,
-                thumbnail
+                thumbnail,
+                minithumbnailWidth,
+                minithumbnailHeight,
+                minithumbnail
             };
         }
 
@@ -186,7 +191,7 @@ class MediaViewerContent extends React.Component {
     render() {
         const { chatId, messageId } = this.props;
         const {
-            animationData,
+            // animationData,
             width,
             height,
             file,
@@ -195,16 +200,16 @@ class MediaViewerContent extends React.Component {
             text,
             thumbnailWidth,
             thumbnailHeight,
+            minithumbnail,
             thumbnail,
             isPlaying
         } = this.state;
+
         if (!file) return null;
 
-        // const src = getSrc(file);
-
-        const thumbnailBlob = thumbnail ? FileStore.getBlob(thumbnail.id) || thumbnail.blob : null;
-        const thumbnailSrc = FileStore.getBlobUrl(thumbnailBlob);
-        const isBlurred = isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight });
+        const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
+        const thumbnailSrc = getSrc(thumbnail);
+        const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight }) : Boolean(miniSrc);
 
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
@@ -266,12 +271,12 @@ class MediaViewerContent extends React.Component {
                         {source}
                     </video>
                     {!isPlaying &&
-                        (!src && thumbnailSrc ? (
+                        ((thumbnailSrc || miniSrc) ? (
                             <img
                                 className={classNames('media-viewer-content-video-thumbnail', {
                                     'media-blurred': isBlurred
                                 })}
-                                src={thumbnailSrc}
+                                src={thumbnailSrc || miniSrc}
                                 alt=''
                                 width={videoWidth}
                                 height={videoHeight}
@@ -305,12 +310,12 @@ class MediaViewerContent extends React.Component {
                         {source}
                     </video>
                     {!isPlaying &&
-                        (!src && thumbnailSrc ? (
+                        ((thumbnailSrc || miniSrc) ? (
                             <img
                                 className={classNames('media-viewer-content-video-thumbnail', {
                                     'media-blurred': isBlurred
                                 })}
-                                src={thumbnailSrc}
+                                src={thumbnailSrc || miniSrc}
                                 alt=''
                                 width={videoWidth}
                                 height={videoHeight}
@@ -327,18 +332,18 @@ class MediaViewerContent extends React.Component {
                 </div>
             );
         } else if (isLottie) {
-            const defaultOptions = {
-                loop: true,
-                autoplay: true,
-                //path: src,
-                animationData: animationData,
-                rendererSettings: {
-                    preserveAspectRatio: 'xMidYMid slice'
-                }
-            };
-            const { speed } = this.state;
-
-            content = null;
+            // const defaultOptions = {
+            //     loop: true,
+            //     autoplay: true,
+            //     //path: src,
+            //     animationData: animationData,
+            //     rendererSettings: {
+            //         preserveAspectRatio: 'xMidYMid slice'
+            //     }
+            // };
+            // const { speed } = this.state;
+            //
+            // content = null;
             // content = (
             //     <Lottie
             //         ref={this.lottieRef}
@@ -351,13 +356,17 @@ class MediaViewerContent extends React.Component {
             //     />
             // );
         } else {
-            content = <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />;
+            content = (
+                <>
+                    <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
+                    {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
+                </>
+            );
         }
 
         return (
             <div className='media-viewer-content'>
-                <React.Suspense fallback=''>{content}</React.Suspense>
-                {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
+                {content}
                 <FileProgress file={file} zIndex={2} />
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>

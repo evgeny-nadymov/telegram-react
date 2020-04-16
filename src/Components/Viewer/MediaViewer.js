@@ -54,7 +54,6 @@ class MediaViewer extends React.Component {
         super(props);
 
         this.keyboardHandler = new KeyboardHandler(this.onKeyDown);
-        this.contentRef = React.createRef();
         this.history = [];
 
         const { chatId, messageId } = this.props;
@@ -711,20 +710,6 @@ class MediaViewer extends React.Component {
         });
     };
 
-    handleChangeSpeed = () => {
-        if (!this.contentRef) return;
-
-        const { current } = this.contentRef;
-        if (!current) return;
-
-        const { speed } = this.state;
-        const nextSpeed = speed < 1 ? 1 : 0.1;
-
-        this.setState({ speed: nextSpeed });
-
-        current.changeSpeed(nextSpeed);
-    };
-
     canBeForwarded = (chatId, messageId) => {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return false;
@@ -849,7 +834,6 @@ class MediaViewer extends React.Component {
 
                     <div className='media-viewer-content-column'>
                         <MediaViewerContent
-                            ref={this.contentRef}
                             chatId={chatId}
                             messageId={currentMessageId}
                             size={PHOTO_BIG_SIZE}

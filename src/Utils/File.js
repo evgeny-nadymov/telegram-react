@@ -1240,6 +1240,46 @@ function download(file, obj, callback) {
     }
 }
 
+export function getViewerMinithumbnail(media) {
+    if (!media) return [0, 0, null];
+
+    switch (media['@type']) {
+        case 'animation': {
+            const { minithumbnail } = media;
+            if (minithumbnail) {
+                return [minithumbnail.width, minithumbnail.height, minithumbnail];
+            }
+            break;
+        }
+        case 'document': {
+            const { minithumbnail } = media;
+            if (minithumbnail) {
+                return [minithumbnail.width, minithumbnail.height, minithumbnail];
+            }
+            break;
+        }
+        case 'photo': {
+            const { minithumbnail } = media;
+            if (minithumbnail) {
+                return [minithumbnail.width, minithumbnail.height, minithumbnail];
+            }
+            break;
+        }
+        case 'video': {
+            const { minithumbnail } = media;
+            if (minithumbnail) {
+                return [minithumbnail.width, minithumbnail.height, minithumbnail];
+            }
+            break;
+        }
+        default: {
+            return [0, 0, null];
+        }
+    }
+
+    return [0, 0, null];
+}
+
 function getViewerThumbnail(media) {
     if (!media) return [0, 0, null];
 
@@ -1265,6 +1305,80 @@ function getViewerThumbnail(media) {
             const { thumbnail } = media;
             if (thumbnail) {
                 return [thumbnail.width, thumbnail.height, thumbnail.photo];
+            }
+            break;
+        }
+        default: {
+            return [0, 0, null];
+        }
+    }
+
+    return [0, 0, null];
+}
+
+export function getMediaMiniPreview(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return [0, 0, null];
+
+    const { content } = message;
+    if (!content) return [0, 0, null];
+
+    switch (content['@type']) {
+        case 'messageAnimation': {
+            const { animation } = content;
+            if (animation && animation.minithumbnail) {
+                return [animation.minithumbnail.width, animation.minithumbnail.height, animation.minithumbnail];
+            }
+            break;
+        }
+        case 'messageChatChangePhoto': {
+            const { photo } = content;
+            if (photo && photo.minithumbnail) {
+                return [photo.minithumbnail.width, photo.minithumbnail.height, photo.minithumbnail];
+            }
+            break;
+        }
+        case 'messageDocument': {
+            const { document } = content;
+            if (document && document.minithumbnail) {
+                return [document.minithumbnail.width, document.minithumbnail.height, document.minithumbnail];
+            }
+            break;
+        }
+        case 'messagePhoto': {
+            const { photo } = content;
+            if (photo && photo.minithumbnail) {
+                return [photo.minithumbnail.width, photo.minithumbnail.height, photo.minithumbnail];
+            }
+            break;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { animation, document, video, photo } = web_page;
+
+                if (animation && animation.minithumbnail) {
+                    return [animation.minithumbnail.width, animation.minithumbnail.height, animation.minithumbnail];
+                }
+
+                if (document && document.minithumbnail) {
+                    return [document.minithumbnail.width, document.minithumbnail.height, document.minithumbnail];
+                }
+
+                if (video.minithumbnail) {
+                    return [video.minithumbnail.width, video.minithumbnail.height, video.minithumbnail];
+                }
+
+                if (photo && photo.minithumbnail) {
+                    return [photo.minithumbnail.width, photo.minithumbnail.height, photo.minithumbnail];
+                }
+            }
+            break;
+        }
+        case 'messageVideo': {
+            const { video } = content;
+            if (video && video.minithumbnail) {
+                return [video.minithumbnail.width, video.minithumbnail.height, video.minithumbnail];
             }
             break;
         }
