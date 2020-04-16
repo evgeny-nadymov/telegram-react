@@ -19,14 +19,16 @@ class SidebarPage extends React.Component {
     }
 
     handleKeyDown = event => {
-        event.preventDefault();
-        event.stopPropagation();
-        event.target.blur();
-
         switch (event.key) {
             case 'Escape':
                 const { onClose } = this.props;
-                if (onClose) onClose();
+                if (onClose) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.target.blur();
+
+                    onClose();
+                }
                 break;
         }
     };
