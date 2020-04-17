@@ -855,6 +855,7 @@ function hasBasicGroupId(chatId, basicGroupId) {
     return type && type['@type'] === 'chatTypeBasicGroup' && type.basic_group_id === basicGroupId;
 }
 
+
 function isSupergroup(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
@@ -1416,6 +1417,45 @@ function isChatSecret(chatId) {
         }
         case 'chatTypeSupergroup': {
             return false;
+        }
+    }
+
+    return false;
+}
+
+export function isCreator(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+    if (!type) return false;
+
+    switch (type['@type']) {
+        case 'chatTypeBasicGroup': {
+            const { basic_group_id } = type;
+            const basicGroup = BasicGroupStore.get(basic_group_id);
+            if (!basicGroup) return false;
+
+            const { status } = basicGroup;
+            if (status) return false;
+
+            return status['@type'] === 'chatMemberStatusCreator';
+        }
+        case 'chatTypePrivate': {
+            return false;
+        }
+        case 'chatTypeSecret': {
+            return false;
+        }
+        case 'chatTypeSupergroup': {
+            const { supergroup_id } = type;
+            const supergroup = SupergroupStore.get(supergroup_id);
+            if (!supergroup) return false;
+
+            const { status } = supergroup;
+            if (!status) return false;
+
+            return status['@type'] === 'chatMemberStatusCreator';
         }
     }
 

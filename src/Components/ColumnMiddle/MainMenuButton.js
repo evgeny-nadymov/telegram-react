@@ -21,7 +21,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
-import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, getSupergroupId, isCreator, isPrivateChat, isSupergroup } from '../../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -184,9 +184,13 @@ class MainMenuButton extends React.Component {
 
         const chatId = ApplicationStore.getChatId();
         const message = this.getLeaveChatNotification(chatId);
-        const request = isPrivateChat(chatId)
+        let request = isPrivateChat(chatId)
             ? { '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true }
             : { '@type': 'leaveChat', chat_id: chatId };
+
+        if (isSupergroup(chatId) && isCreator(chatId)) {
+            request = { '@type': 'deleteSupergroup', supergroup_id: getSupergroupId(chatId) };
+        }
 
         this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, request);
     };

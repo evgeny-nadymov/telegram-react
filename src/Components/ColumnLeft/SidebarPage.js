@@ -58,7 +58,7 @@ class SidebarPage extends React.Component {
 
 SidebarPage.propTypes = {
     open: PropTypes.bool.isRequired,
-    timeout: PropTypes.object,
+    timeout: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
     onClose: PropTypes.func
 };
 

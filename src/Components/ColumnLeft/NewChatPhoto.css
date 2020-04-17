@@ -1,0 +1,62 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.cropper-view-box {
+    border-radius: 50%;
+    outline-color: transparent;
+}
+
+.cropper-face {
+    border-radius: 50%;
+}
+
+.cropper-line {
+    background: transparent;
+}
+
+.cropper-point {
+    background: #ffffff99;
+}
+
+.new-chat-photo {
+    margin-bottom: 8px;
+}
+
+.new-chat-photo-button {
+    background: var(--color-accent-main);
+}
+
+.new-chat-photo-image-button {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.new-chat-photo-icon {
+    font-size: 48px;
+}
+
+.new-chat-photo-done-button {
+    border-radius: 50%;
+    background: var(--color-accent-main);
+    color: white;
+    width: 54px;
+    height: 54px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+}

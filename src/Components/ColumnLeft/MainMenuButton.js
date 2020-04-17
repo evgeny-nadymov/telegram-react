@@ -14,6 +14,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import ArrowBackIcon from '../../Assets/Icons/Back';
+import ChannelIcon from '../../Assets/Icons/Channel';
 import CloseIcon from '../../Assets/Icons/Close';
 import ArchiveIcon from '../../Assets/Icons/Archive';
 import SearchIcon from '../../Assets/Icons/Search';
@@ -26,6 +27,7 @@ import UserIcon from '../../Assets/Icons/User';
 import { isAuthorizationReady } from '../../Utils/Common';
 import { openArchive, openChat, searchChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
+import CacheStore from '../../Stores/CacheStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
@@ -78,8 +80,22 @@ class MainMenuButton extends React.Component {
         //await update();
     };
 
+    handleNewChannel = event => {
+        this.handleMenuClose();
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateNewChannel',
+            open: true
+        });
+    };
+
     handleNewGroup = event => {
         this.handleMenuClose();
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateNewGroup',
+            open: true
+        });
     };
 
     handleContacts = event => {
@@ -100,11 +116,15 @@ class MainMenuButton extends React.Component {
     handleSaved = async event => {
         this.handleMenuClose();
 
-        const chat = await TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: UserStore.getMyId(),
-            force: true
-        });
+        let chat = CacheStore.cache ? CacheStore.cache.meChat : null;
+        if (!chat) {
+            chat = await TdLibController.send({
+                '@type': 'createPrivateChat',
+                user_id: UserStore.getMyId(),
+                force: false
+            });
+        }
+
         if (!chat) return;
 
         openChat(chat.id);
@@ -113,11 +133,15 @@ class MainMenuButton extends React.Component {
     handleSettings = async event => {
         this.handleMenuClose();
 
-        const chat = await TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: UserStore.getMyId(),
-            force: true
-        });
+        let chat = CacheStore.cache ? CacheStore.cache.meChat : null;
+        if (!chat) {
+            chat = await TdLibController.send({
+                '@type': 'createPrivateChat',
+                user_id: UserStore.getMyId(),
+                force: false
+            });
+        }
+
         if (!chat) return;
 
         TdLibController.clientUpdate({
@@ -155,6 +179,12 @@ class MainMenuButton extends React.Component {
                         vertical: 'bottom',
                         horizontal: 'left'
                     }}>
+                    <MenuItem onClick={this.handleNewChannel}>
+                        <ListItemIcon>
+                            <ChannelIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('NewChannel')} />
+                    </MenuItem>
                     <MenuItem onClick={this.handleNewGroup}>
                         <ListItemIcon>
                             <GroupIcon />

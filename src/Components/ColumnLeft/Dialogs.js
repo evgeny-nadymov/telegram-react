@@ -27,6 +27,8 @@ import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
 import SidebarDialog from '../Popup/SidebarDialog';
+import NewGroup from './NewGroup';
+import NewChannel from './NewChannel';
 
 const defaultTimeout = {
     enter: duration.enteringScreen,
@@ -55,6 +57,8 @@ class Dialogs extends Component {
             openArchive: false,
             openContacts: false,
             openSettings: false,
+            openNewGroup: false,
+            openNewChannel: false,
 
             searchChatId: 0,
             searchText: null,
@@ -73,6 +77,8 @@ class Dialogs extends Component {
             openArchive,
             openSettings,
             openContacts,
+            openNewGroup,
+            openNewChannel,
             searchChatId,
             searchText
         } = this.state;
@@ -113,6 +119,14 @@ class Dialogs extends Component {
             return true;
         }
 
+        if (nextState.openNewGroup !== openNewGroup) {
+            return true;
+        }
+
+        if (nextState.openNewChannel !== openNewChannel) {
+            return true;
+        }
+
         if (nextState.searchChatId !== searchChatId) {
             return true;
         }
@@ -142,6 +156,8 @@ class Dialogs extends Component {
         ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.on('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
+        ChatStore.on('clientUpdateNewGroup', this.onClientUpdateNewGroup);
+        ChatStore.on('clientUpdateNewChannel', this.onClientUpdateNewChannel);
     }
 
     componentWillUnmount() {
@@ -160,6 +176,8 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.off('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
+        ChatStore.off('clientUpdateNewGroup', this.onClientUpdateNewGroup);
+        ChatStore.off('clientUpdateNewChannel', this.onClientUpdateNewChannel);
     }
 
     onClientUpdatePageWidth = update => {
@@ -167,12 +185,14 @@ class Dialogs extends Component {
 
         if (!isSmallWidth) return;
 
-        const { openSettings, openContacts, openSearch } = this.state;
-        if (openSettings || openContacts || openSearch) {
+        const { openSettings, openContacts, openSearch, openNewGroup, openNewChannel } = this.state;
+        if (openSettings || openContacts || openSearch || openNewGroup || openNewChannel) {
             this.setState({
                     openContacts: false,
                     openSettings: false,
                     openSearch: false,
+                    openNewGroup: false,
+                    openNewChannel: false,
                     timeout: 0
                 }, () => {
                     this.setState({
@@ -284,6 +304,24 @@ class Dialogs extends Component {
         this.setState({ openSettings: open, meChatId: chatId });
     };
 
+    onClientUpdateNewGroup = async update => {
+        const { isSmallWidth } = AppStore;
+        if (isSmallWidth) return;
+
+        const { open } = update;
+
+        this.setState({ openNewGroup: open });
+    };
+
+    onClientUpdateNewChannel = async update => {
+        const { isSmallWidth } = AppStore;
+        if (isSmallWidth) return;
+
+        const { open } = update;
+
+        this.setState({ openNewChannel: open });
+    };
+
     onClientUpdateArchive = update => {
         const { open } = update;
 
@@ -391,6 +429,14 @@ class Dialogs extends Component {
         this.setState({ openSettings: false });
     };
 
+    handleCloseNewGroup = () => {
+        this.setState({ openNewGroup: false });
+    };
+
+    handleCloseNewChannel = () => {
+        this.setState({ openNewChannel: false });
+    };
+
     render() {
         const {
             cache,
@@ -403,6 +449,8 @@ class Dialogs extends Component {
             openContacts,
             openArchive,
             openSearch,
+            openNewGroup,
+            openNewChannel,
             timeout,
             searchChatId,
             searchText
@@ -465,6 +513,14 @@ class Dialogs extends Component {
 
                     <SidebarPage open={openSettings} timeout={timeout} onClose={this.handleCloseSettings}>
                         <Settings chatId={meChatId} />
+                    </SidebarPage>
+
+                    <SidebarPage open={openNewGroup} timeout={timeout} onClose={this.handleCloseNewGroup}>
+                        <NewGroup />
+                    </SidebarPage>
+
+                    <SidebarPage open={openNewChannel} timeout={timeout} onClose={this.handleCloseNewChannel}>
+                        <NewChannel />
                     </SidebarPage>
 
                     <SidebarDialog/>

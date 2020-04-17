@@ -1365,7 +1365,7 @@ export function getMediaMiniPreview(chatId, messageId) {
                     return [document.minithumbnail.width, document.minithumbnail.height, document.minithumbnail];
                 }
 
-                if (video.minithumbnail) {
+                if (video && video.minithumbnail) {
                     return [video.minithumbnail.width, video.minithumbnail.height, video.minithumbnail];
                 }
 
@@ -1443,7 +1443,7 @@ function getMediaPreviewFile(chatId, messageId) {
         }
         case 'messageVideo': {
             const { video } = content;
-            if (video.thumbnail) {
+            if (video && video.thumbnail) {
                 return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
             }
             break;

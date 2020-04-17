@@ -411,6 +411,14 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
+            case 'clientUpdateNewGroup': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateNewChannel': {
+                this.emitUpdate(update);
+                break;
+            }
             case 'clientUpdateSetChatClientData': {
                 const { chatId, clientData } = update;
 

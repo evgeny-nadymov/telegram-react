@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.630",
+  "version": "0.0.633",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.7",
@@ -16,6 +16,7 @@
     "notistack": "^0.9.9",
     "pako": "^1.0.11",
     "react": "^16.12.0",
+    "react-cropper": "^1.3.0",
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^16.12.0",
     "react-i18next": "^11.3.4",

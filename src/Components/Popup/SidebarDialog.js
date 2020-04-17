@@ -15,6 +15,8 @@ import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import './ChatInfoDialog.css';
 import { openChat } from '../../Actions/Client';
+import NewChannel from '../ColumnLeft/NewChannel';
+import NewGroup from '../ColumnLeft/NewGroup';
 
 class SidebarDialog extends React.Component {
     constructor(props) {
@@ -25,12 +27,14 @@ class SidebarDialog extends React.Component {
         this.state = {
             openSearch: false,
             openSettings: false,
-            openContacts: false
+            openContacts: false,
+            openNewGroup: false,
+            openNewChannel: false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { openSearch, searchText, openSettings, openContacts } = this.state;
+        const { openSearch, searchText, openSettings, openContacts, openNewGroup, openNewChannel } = this.state;
 
         if (nextState.openSearch !== openSearch) {
             return true;
@@ -48,6 +52,14 @@ class SidebarDialog extends React.Component {
             return true;
         }
 
+        if (nextState.openNewGroup !== openNewGroup) {
+            return true;
+        }
+
+        if (nextState.openNewChannel !== openNewChannel) {
+            return true;
+        }
+
         return false;
     }
 
@@ -55,12 +67,16 @@ class SidebarDialog extends React.Component {
         AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
+        ChatStore.on('clientUpdateNewGroup', this.onClientUpdateNewGroup);
+        ChatStore.on('clientUpdateNewChannel', this.onClientUpdateNewChannel);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
+        ChatStore.off('clientUpdateNewGroup', this.onClientUpdateNewGroup);
+        ChatStore.off('clientUpdateNewChannel', this.onClientUpdateNewChannel);
     }
 
     onClientUpdateSearchChat = update => {
@@ -113,10 +129,30 @@ class SidebarDialog extends React.Component {
         this.setState({ openContacts: open });
     };
 
+    onClientUpdateNewGroup = async update => {
+        const { isSmallWidth } = AppStore;
+        if (!isSmallWidth) return;
+
+        const { open } = update;
+
+        this.setState({ openNewGroup: open });
+    };
+
+    onClientUpdateNewChannel = async update => {
+        const { isSmallWidth } = AppStore;
+        if (!isSmallWidth) return;
+
+        const { open } = update;
+
+        this.setState({ openNewChannel: open });
+    };
+
     handleClose = () => {
         this.setState({
             openSettings: false,
             openContacts: false,
+            openNewGroup: false,
+            openNewChannel: false,
             openSearch: false
         });
     };
@@ -151,8 +187,8 @@ class SidebarDialog extends React.Component {
     };
 
     render() {
-        const { meChatId, searchChatId, searchText, openSearch, openContacts, openSettings } = this.state;
-        if (!openSearch && !openContacts && !openSettings) {
+        const { meChatId, searchChatId, searchText, openSearch, openContacts, openSettings, openNewGroup, openNewChannel } = this.state;
+        if (!openSearch && !openContacts && !openSettings && !openNewGroup && !openNewChannel) {
             return null;
         }
 
@@ -170,6 +206,8 @@ class SidebarDialog extends React.Component {
                 >
                 {openSettings && <Settings chatId={meChatId} popup/>}
                 {openContacts && <Contacts popup />}
+                {openNewGroup && <NewGroup popup/>}
+                {openNewChannel && <NewChannel popup />}
                 {openSearch && (
                     <>
                         <DialogsHeader
