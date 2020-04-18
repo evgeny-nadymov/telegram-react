@@ -7,20 +7,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import AddImageIcon from '../../Assets/Icons/AddImage';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import Cropper from 'react-cropper';
-import 'cropperjs/dist/cropper.css';
-import './NewChatPhoto.css';
-import { getFitSize, readImageSize } from '../../Utils/Common';
 import { withTranslation } from 'react-i18next';
+import Cropper from 'react-cropper';
 import IconButton from '@material-ui/core/IconButton';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import AddImageIcon from '../../Assets/Icons/AddImage';
 import CloseIcon from '../../Assets/Icons/Close';
 import CheckIcon from '../../Assets/Icons/Check';
+import { getFitSize, readImageSize } from '../../Utils/Common';
+import 'cropperjs/dist/cropper.css';
+import './NewChatPhoto.css';
 
 class NewChatPhoto extends React.Component {
     constructor(props) {
@@ -29,7 +26,10 @@ class NewChatPhoto extends React.Component {
         this.attachPhotoRef = React.createRef();
         this.cropperRef = React.createRef();
 
+        const { defaultURL } = this.props;
+
         this.state = {
+            blobURL: defaultURL,
             open: false
         }
     }
@@ -45,8 +45,6 @@ class NewChatPhoto extends React.Component {
         if (!cropper) return;
 
         cropper.getCroppedCanvas().toBlob(blob => {
-            console.log('[crop]', blob);
-
             this.setState({
                 blob,
                 blobURL: URL.createObjectURL(blob)
@@ -139,12 +137,6 @@ class NewChatPhoto extends React.Component {
                         <div className='new-chat-photo-done-button ' onClick={this.handleDone}>
                             <CheckIcon/>
                         </div>
-
-                        {/*<DialogActions>*/}
-                        {/*    <Button onClick={this.handleDone} color='primary'>*/}
-                        {/*        {t('Ok')}*/}
-                        {/*    </Button>*/}
-                        {/*</DialogActions>*/}
                     </Dialog>
                 )}
             </>
@@ -154,6 +146,7 @@ class NewChatPhoto extends React.Component {
 }
 
 NewChatPhoto.propTypes = {
+    defaultURL: PropTypes.string,
     onChoose: PropTypes.func
 };
 

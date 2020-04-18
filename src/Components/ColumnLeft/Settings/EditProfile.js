@@ -12,11 +12,14 @@ import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import TextField from '@material-ui/core/TextField';
 import { IconButton } from '@material-ui/core';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
-import Chat from '../../Tile/Chat';
-import SidebarPage from '../SidebarPage';
+import NewChatPhoto from '../NewChatPhoto';
+import { getSrc, loadChatContent } from '../../../Utils/File';
+import ChatStore from '../../../Stores/ChatStore';
+import FileStore from '../../../Stores/FileStore';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditProfile.css';
+import { getBoldItalicEntities, getFormattedText } from '../../../Utils/Message';
 
 class EditProfile extends React.Component {
     constructor(props) {
@@ -126,6 +129,18 @@ class EditProfile extends React.Component {
         }
     };
 
+    handleChoosePhoto = async data => {
+        const { chatId } = this.props;
+
+        await TdLibController.send({
+            '@type': 'setProfilePhoto',
+            photo: { '@type': 'inputFileBlob', name: 'profile_photo.jpg', data }
+        });
+
+        const store = FileStore.getStore();
+        loadChatContent(store, chatId, true);
+    };
+
     render() {
         let { chatId, t, onClose } = this.props;
         const { firstName, lastName, bio, username, usernameCheck } = this.state;
@@ -154,7 +169,15 @@ class EditProfile extends React.Component {
             }
         }
 
-        // console.log('[un] render', hasError, usernameLabel);
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+
+        const { photo } = chat;
+
+        const src = getSrc(photo ? photo.small : null);
+        const entities = [];
+        const text = getBoldItalicEntities(t('UsernameHelp'), entities);
+        const formattedText = getFormattedText({ '@type': 'formattedText', text, entities })
 
         return (
             <>
@@ -167,16 +190,7 @@ class EditProfile extends React.Component {
                     </div>
                 </div>
                 <div className='sidebar-page-content'>
-                    <div className='chat-details-info'>
-                        <Chat
-                            chatId={chatId}
-                            showTitle={false}
-                            big={true}
-                            showStatus={true}
-                            showSavedMessages={false}
-                            onTileSelect={null}
-                        />
-                    </div>
+                    <NewChatPhoto defaultURL={src} onChoose={this.handleChoosePhoto}/>
                     <div className='edit-profile-name'>
                         <TextField
                             inputRef={this.firstNameRef}
@@ -217,9 +231,7 @@ class EditProfile extends React.Component {
                             onChange={this.handleUsernameChange}
                         />
                         <div className='edit-profile-hint'>
-                            You can choose a username on Telegram. If you do, other people will be able to find you by
-                            this username and contact you without knowing your phone number. You can use a-z, 0-9 and
-                            underscores. Minimum length is 5 characters.
+                            {formattedText}
                         </div>
                     </div>
                 </div>

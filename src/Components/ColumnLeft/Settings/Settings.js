@@ -16,7 +16,8 @@ import Language from '../Language';
 import Notifications from './Notifications';
 import PrivacySecurity from './PrivacySecurity';
 import SidebarPage from '../SidebarPage';
-import { loadChatsContent } from '../../../Utils/File';
+import { loadChatContent } from '../../../Utils/File';
+import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
@@ -37,14 +38,31 @@ class Settings extends React.Component {
 
     componentDidMount() {
         this.loadContent();
+
+        ChatStore.on('updateChatPhoto', this.onUpdateChatPhoto);
     }
+
+    componentWillUnmount() {
+        ChatStore.off('updateChatPhoto', this.onUpdateChatPhoto);
+    }
+
+    onUpdateChatPhoto = update => {
+        const { chatId } = this.props;
+        const { chat_id, photo } = update;
+
+        if (chat_id !== chatId) return;
+        if (!photo) return;
+
+        const store = FileStore.get();
+        loadChatContent(store, chatId, true);
+    };
 
     async loadContent() {
         const { chatId } = this.props;
 
         const store = FileStore.getStore();
 
-        loadChatsContent(store, [chatId]);
+        loadChatContent(store, chatId, true);
 
         const result = await TdLibController.send({
             '@type': 'getUserFullInfo',

@@ -27,7 +27,8 @@ class General extends React.Component {
         super(props);
 
         this.state = {
-            backgrounds: null
+            backgrounds: null,
+            openChatBackground: false
         };
 
         this.themePickerRef = React.createRef();

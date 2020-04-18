@@ -1890,24 +1890,26 @@ export function getEntities(text) {
     text = text.replace(/<div><br><\/div>/gi, '<br>');
     text = text.replace(/<div>/gi, '<br>');
     text = text.replace(/<\/div>/gi, '');
-
     text = text.split('<br>').join('\n');
 
-    // console.log(`[ge] start text=${text}`);
-
-    let index = -1; // first index of end tag
-    let lastIndex = 0; // first index after end tag
-    let start = -1; // first index of start tag
-    let isPre = false;
-    const mono = '`';
-    const pre = '```';
-    const bold = '**';
-    const italic = '__';
-
     // 0 looking for html entities
+    text = getHTMLEntities(text, entities);
+
+    // 1 looking for ``` and ` in order to find mono and pre entities
+    text = getMonoPreEntities(text, entities);
+
+    // 2 looking for bold, italic entities
+    text = getBoldItalicEntities(text, entities);
+
+    return { text, entities };
+}
+
+export function getHTMLEntities(text, entities) {
     const result = new DOMParser().parseFromString(text, 'text/html');
+
     let offset = 0;
     let length = 0;
+
     let finalText = '';
     result.body.childNodes.forEach(node => {
         const { textContent, nodeName } = node;
@@ -2001,9 +2003,21 @@ export function getEntities(text) {
         }
     });
     text = finalText;
-    // console.log(`[ge] HTML nodes text=${text}`, entities);
 
-    // 1 looking for ``` and ` in order to find mono and pre entities
+    return text;
+}
+
+export function getMonoPreEntities(text, entities) {
+    const mono = '`';
+    const pre = '```';
+    let isPre = false;
+
+    let index = -1;     // first index of end tag
+    let lastIndex = 0;  // first index after end tag
+    let start = -1;     // first index of start tag
+
+    let offset = 0, length = 0;
+
     while ((index = text.indexOf(isPre ? pre : mono, lastIndex)) !== -1) {
         if (start === -1) {
             // find start tag
@@ -2153,8 +2167,20 @@ export function getEntities(text) {
         }
     }
 
-    // console.log(`[ge] pre and code text=${text}`, entities);
-    // 2 looking for bold, italic entities
+    return text;
+}
+
+export function getBoldItalicEntities(text, entities) {
+    const bold = '**';
+    const italic = '__';
+
+
+    let index = -1;     // first index of end tag
+    let lastIndex = 0;  // first index after end tag
+    let start = -1;     // first index of start tag
+
+    let offset = 0, length = 0;
+
     for (let c = 0; c < 2; c++) {
         lastIndex = 0;
         start = -1;
@@ -2207,9 +2233,8 @@ export function getEntities(text) {
             }
         }
     }
-    // console.log(`[ge] result text=${text}`, entities);
 
-    return { text, entities };
+    return text;
 }
 
 export function canMessageBeEdited(chatId, messageId) {

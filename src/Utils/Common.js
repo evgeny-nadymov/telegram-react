@@ -289,7 +289,6 @@ async function readImageSize(file) {
                         window.URL.revokeObjectURL(image.src);
                     }
 
-                    console.log('[photo]', width, height);
                     resolve([width, height]);
                 });
 

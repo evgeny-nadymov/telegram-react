@@ -1962,20 +1962,21 @@ function loadUsersContent(store, ids) {
     ids.forEach(id => loadUserContent(store, id));
 }
 
-function loadChatContent(store, chatId) {
+function loadChatContent(store, chatId, full = false) {
     const chat = ChatStore.get(chatId);
     if (!chat) return;
 
     const { photo } = chat;
-    loadChatPhotoContent(store, photo, chat.id);
+    loadChatPhotoContent(store, photo, chat.id, full);
 }
 
-function loadChatPhotoContent(store, photo, chatId) {
+function loadChatPhotoContent(store, photo, chatId, full) {
     if (!photo) return;
 
-    const { small: file } = photo;
+    const { small, big } = photo;
 
-    loadChatFileContent(store, file, chatId);
+    loadChatFileContent(store, small, chatId);
+    if (full) loadChatFileContent(store, big, chatId);
 }
 
 function loadChatsContent(store, ids) {
