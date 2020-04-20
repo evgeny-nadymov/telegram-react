@@ -88,27 +88,29 @@ class NewChannel extends React.Component {
                         <span className='header-status-content'>{t('NewChannel')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content new-chat-content'>
-                    <NewChatPhoto onChoose={this.handleChoosePhoto}/>
-                    <div className='new-chat-title'>
-                        <TextField
-                            inputRef={this.titleRef}
-                            error={error}
-                            className='new-chat-input'
-                            variant='outlined'
-                            fullWidth
-                            label={t('EnterChannelName')}
-                            defaultValue={''}
-                        />
-                        <TextField
-                            inputRef={this.descriptionRef}
-                            className='new-chat-input'
-                            variant='outlined'
-                            fullWidth
-                            label={t('DescriptionOptionalPlaceholder')}
-                            defaultValue={''}
-                        />
-                        <div className='edit-profile-hint'>{t('DescriptionInfo')}</div>
+                <div className='sidebar-page-content'>
+                    <div className='new-chat-content'>
+                        <NewChatPhoto onChoose={this.handleChoosePhoto}/>
+                        <div className='new-chat-title'>
+                            <TextField
+                                inputRef={this.titleRef}
+                                error={error}
+                                className='new-chat-input'
+                                variant='outlined'
+                                fullWidth
+                                label={t('EnterChannelName')}
+                                defaultValue={''}
+                            />
+                            <TextField
+                                inputRef={this.descriptionRef}
+                                className='new-chat-input'
+                                variant='outlined'
+                                fullWidth
+                                label={t('DescriptionOptionalPlaceholder')}
+                                defaultValue={''}
+                            />
+                            <div className='edit-profile-hint'>{t('DescriptionInfo')}</div>
+                        </div>
                     </div>
                 </div>
 

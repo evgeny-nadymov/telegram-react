@@ -213,7 +213,7 @@ class SidebarDialog extends React.Component {
                         <DialogsHeader
                             ref={this.headerRef}
                             openSearch={true}
-                            timeout={0}
+                            timeout={false}
                             onClick={this.handleHeaderClick}
                             onSearch={this.handleSearch}
                             onSearchTextChange={this.handleSearchTextChange}

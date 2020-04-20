@@ -126,23 +126,25 @@ class NewGroup extends React.Component {
                         <span className='header-status-content'>{t('NewGroup')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content new-chat-content'>
-                    <NewChatPhoto onChoose={this.handleChoosePhoto}/>
-                    <div className='new-chat-title'>
-                        <TextField
-                            inputRef={this.titleRef}
-                            error={error}
-                            className='new-chat-input'
-                            variant='outlined'
-                            fullWidth
-                            label={t('GroupName')}
-                            defaultValue={''}
-                        />
-                    </div>
-                    {/*<div className='sidebar-page-section'>*/}
+                <div className='sidebar-page-content'>
+                    <div className='new-chat-content'>
+                        <NewChatPhoto onChoose={this.handleChoosePhoto}/>
+                        <div className='new-chat-title'>
+                            <TextField
+                                inputRef={this.titleRef}
+                                error={error}
+                                className='new-chat-input'
+                                variant='outlined'
+                                fullWidth
+                                label={t('GroupName')}
+                                defaultValue={''}
+                            />
+                        </div>
+                        {/*<div className='sidebar-page-section'>*/}
                         <SectionHeader>{itemsCaption}</SectionHeader>
                         {items}
-                    {/*</div>*/}
+                        {/*</div>*/}
+                    </div>
                 </div>
 
                 <div className='new-chat-bottom-button' onClick={this.handleDone}>
