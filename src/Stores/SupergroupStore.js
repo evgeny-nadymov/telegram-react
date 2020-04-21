@@ -37,11 +37,14 @@ class SupergroupStore extends EventEmitter {
 
                 break;
             }
-            case 'updateSupergroup':
+            case 'updateSupergroup': {
+                const prevSupergroup = this.get(update.supergroup.id);
+
                 this.set(update.supergroup);
 
-                this.emit(update['@type'], update);
+                this.emit(update['@type'], { ...update, prevSupergroup });
                 break;
+            }
             case 'updateSupergroupFullInfo':
                 this.setFullInfo(update.supergroup_id, update.supergroup_full_info);
 

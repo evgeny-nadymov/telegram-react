@@ -21,10 +21,11 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
-import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, getSupergroupId, isCreator, isPrivateChat, isSupergroup } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, isCreator, isPrivateChat, isSupergroup } from '../../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
+import UserStore from '../../Stores/UserStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
@@ -191,7 +192,15 @@ class MainMenuButton extends React.Component {
             : { '@type': 'leaveChat', chat_id: chatId };
 
         if (isSupergroup(chatId) && isCreator(chatId)) {
-            request = { '@type': 'deleteSupergroup', supergroup_id: getSupergroupId(chatId) };
+            request = {
+                '@type': 'setChatMemberStatus',
+                chat_id: chatId,
+                user_id: UserStore.getMyId(),
+                status: {
+                    '@type': 'chatMemberStatusCreator',
+                    is_member: false
+                }
+            };
         }
 
         this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, request);

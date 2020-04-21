@@ -592,7 +592,7 @@ class ChatDetails extends React.Component {
 }
 
 ChatDetails.propTypes = {
-    chatId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
     popup: PropTypes.bool,
     onClose: PropTypes.func,
     onOpenGroupInCommon: PropTypes.func,
