@@ -37,7 +37,6 @@ import {
     POLL_QUESTION_LENGTH,
     POLL_QUESTION_MAX_LENGTH
 } from '../../Constants';
-import AppStore from '../../Stores/ApplicationStore';
 import PollStore from '../../Stores/PollStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './CreatePollDialog.css';
@@ -411,28 +410,23 @@ class CreatePollDialog extends React.Component {
         });
     };
 
-    handleScheduledAction = (key, message, action) => {
-        if (!key) return;
+    handleScheduledAction = message => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
 
-        const { enqueueSnackbar } = this.props;
-        if (!enqueueSnackbar) return;
-
-        const TRANSITION_DELAY = 150;
-        if (AppStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS + 2 * TRANSITION_DELAY, action)) {
-            enqueueSnackbar(message, {
-                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
-                action: [
-                    <IconButton
-                        key='close'
-                        aria-label='Close'
-                        color='inherit'
-                        className='notification-close-button'
-                        onClick={() => AppStore.removeScheduledAction(key)}>
-                        <CloseIcon />
-                    </IconButton>
-                ]
-            });
-        }
+        const snackKey = enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: [
+                <IconButton
+                    key='close'
+                    aria-label='Close'
+                    color='inherit'
+                    className='notification-close-button'
+                    onClick={() => closeSnackbar(snackKey)}>
+                    <CloseIcon />
+                </IconButton>
+            ]
+        });
     };
 
     handleAllowMultipleAnswersClick = event => {
@@ -444,11 +438,7 @@ class CreatePollDialog extends React.Component {
         if (quizPoll) {
             event.stopPropagation();
 
-            const key = 'disallow_multiple_answers';
-            const message = t('PollQuizOneRightAnswer');
-            const action = null;
-
-            this.handleScheduledAction(key, message, action);
+            this.handleScheduledAction(t('PollQuizOneRightAnswer'));
         }
     };
 

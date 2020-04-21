@@ -58,7 +58,6 @@ import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import OptionStore from '../../Stores/OptionStore';
 import FileStore from '../../Stores/FileStore';
-import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatDetails.css';
 
@@ -230,37 +229,28 @@ class ChatDetails extends React.Component {
 
         copy(usernameLink + username);
 
-        const key = `${chatId}_copy_username`;
-        const message = t('TextCopied');
-        const action = null;
-
-        this.handleScheduledAction(key, message, action);
+        this.handleScheduledAction(t('TextCopied'));
     };
 
-    handleScheduledAction = (key, message, action) => {
-        if (!key) return;
+    handleScheduledAction = message => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
 
-        const { enqueueSnackbar } = this.props;
-        if (!enqueueSnackbar) return;
-
-        const TRANSITION_DELAY = 150;
-        if (
-            ApplicationStore.addScheduledAction(key, NOTIFICATION_AUTO_HIDE_DURATION_MS + 2 * TRANSITION_DELAY, action)
-        ) {
-            enqueueSnackbar(message, {
-                autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
-                action: [
-                    <IconButton
-                        key='close'
-                        aria-label='Close'
-                        color='inherit'
-                        className='notification-close-button'
-                        onClick={() => ApplicationStore.removeScheduledAction(key)}>
-                        <CloseIcon />
-                    </IconButton>
-                ]
-            });
-        }
+        const snackKey = enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: [
+                <IconButton
+                    key='close'
+                    aria-label='Close'
+                    color='inherit'
+                    className='notification-close-button'
+                    onClick={() => {
+                        closeSnackbar(snackKey);
+                    }}>
+                    <CloseIcon />
+                </IconButton>
+            ]
+        });
     };
 
     handlePhoneHint = () => {
@@ -270,11 +260,7 @@ class ChatDetails extends React.Component {
 
         copy(formatPhoneNumber(phoneNumber));
 
-        const key = `${chatId}_copy_phone`;
-        const message = t('PhoneCopied');
-        const action = null;
-
-        this.handleScheduledAction(key, message, action);
+        this.handleScheduledAction(t('PhoneCopied'));
     };
 
     handleHeaderClick = () => {

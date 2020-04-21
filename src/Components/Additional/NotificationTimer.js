@@ -42,6 +42,11 @@ class NotificationTimer extends React.Component {
             if (this.timerId) {
                 clearInterval(this.timerId);
                 this.timerId = null;
+
+                const { onTimeout } = this.props;
+                if (onTimeout) {
+                    onTimeout();
+                }
             }
         }
     };
@@ -70,7 +75,8 @@ class NotificationTimer extends React.Component {
 }
 
 NotificationTimer.propTypes = {
-    timeout: PropTypes.number.isRequired
+    timeout: PropTypes.number.isRequired,
+    onTimeout: PropTypes.func
 };
 
 export default NotificationTimer;

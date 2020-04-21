@@ -23,6 +23,11 @@
     background: var(--color-hover);
 }
 
+.dialog-hidden {
+    opacity: 0.15;
+    pointer-events: none;
+}
+
 .dialog-tile {
     height: 48px;
     position: relative;

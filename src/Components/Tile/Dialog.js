@@ -284,8 +284,6 @@ class Dialog extends Component {
         const { chatId, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
 
-        if (hidden) return null;
-
         const chat = ChatStore.get(chatId);
         const { is_pinned } = chat;
         const currentChatId = ApplicationStore.getChatId();
@@ -296,7 +294,7 @@ class Dialog extends Component {
         return (
             <div
                 ref={this.dialog}
-                className={classNames('dialog', { 'item-selected': isSelected })}
+                className={classNames('dialog', { 'item-selected': isSelected }, { 'dialog-hidden': hidden })}
                 onMouseDown={this.handleSelect}
                 onContextMenu={this.handleContextMenu}
                 style={style}>

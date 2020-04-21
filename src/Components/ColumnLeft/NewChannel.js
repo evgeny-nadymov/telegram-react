@@ -14,6 +14,7 @@ import ArrowBackIcon from '../../Assets/Icons/Back';
 import CloseIcon from '../../Assets/Icons/Close';
 import NextIcon from '../../Assets/Icons/Back';
 import NewChatPhoto from './NewChatPhoto';
+import { openChat } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './NewGroup.css';
 
@@ -49,6 +50,8 @@ class NewChannel extends React.Component {
             });
         }
 
+        this.handleClose();
+
         const description = this.descriptionRef.current.value;
 
         const chat = await TdLibController.send({
@@ -67,7 +70,7 @@ class NewChannel extends React.Component {
             });
         }
 
-        this.handleClose();
+        openChat(chat.id);
     };
 
     handleChoosePhoto = blob => {

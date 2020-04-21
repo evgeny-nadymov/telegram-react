@@ -18,6 +18,7 @@ import SectionHeader from './SectionHeader';
 import User from '../Tile/User';
 import NewChatPhoto from './NewChatPhoto';
 import { loadUsersContent } from '../../Utils/File';
+import { openChat } from '../../Actions/Client';
 import FileStore from '../../Stores/FileStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -84,6 +85,8 @@ class NewGroup extends React.Component {
             });
         }
 
+        this.handleClose();
+
         const chat = await TdLibController.send({
             '@type': 'createNewSupergroupChat',
             title,
@@ -100,7 +103,7 @@ class NewGroup extends React.Component {
             });
         }
 
-        this.handleClose();
+        openChat(chat.id);
     };
 
     handleChoosePhoto = blob => {
