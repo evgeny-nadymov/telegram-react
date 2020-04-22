@@ -365,12 +365,14 @@ class Sticker extends React.Component {
 
             return (
                 <div className={classNames('sticker', className)} style={style} onClick={openMedia}>
-                    <img
-                        className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
-                        draggable={false}
-                        src={thumbnailSrc}
-                        alt=''
-                    />
+                    { thumbnailSrc && (
+                        <img
+                            className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                            draggable={false}
+                            src={thumbnailSrc}
+                            alt=''
+                        />
+                    )}
                 </div>
             );
         }
@@ -407,12 +409,16 @@ class Sticker extends React.Component {
                             />
                         </React.Suspense>
                     ) : (
-                        <img
-                            className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
-                            draggable={false}
-                            src={thumbnailSrc}
-                            alt=''
-                        />
+                        <>
+                            {thumbnailSrc && (
+                                <img
+                                    className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                                    draggable={false}
+                                    src={thumbnailSrc}
+                                    alt=''
+                                />
+                            )}
+                        </>
                     )}
                 </>
             ) : (
@@ -420,12 +426,16 @@ class Sticker extends React.Component {
                     {src && !preview ? (
                         <img className='sticker-image' draggable={false} src={src} alt='' />
                     ) : (
-                        <img
-                            className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
-                            draggable={false}
-                            src={thumbnailSrc}
-                            alt=''
-                        />
+                        <>
+                            { thumbnailSrc && (
+                                <img
+                                    className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                                    draggable={false}
+                                    src={thumbnailSrc}
+                                    alt=''
+                                />
+                            )}
+                        </>
                     )}
                 </>
             );

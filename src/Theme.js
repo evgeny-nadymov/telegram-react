@@ -132,7 +132,7 @@ function updateDarkTheme(theme) {
     style.setProperty('--header-subtle-color', theme.palette.text.secondary);
 
     style.setProperty('--badge-unmuted', '#4DCD5E');
-    style.setProperty('--badge-muted', 'rgba(255, 255, 255, 0.5)');
+    style.setProperty('--badge-muted', '#979797');
     style.setProperty('--badge-item-selected', getBadgeSelectedColor(theme.palette.primary.main));
 
     style.setProperty('--online-indicator', '#0AC630');
