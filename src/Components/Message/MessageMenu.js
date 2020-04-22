@@ -14,9 +14,20 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
+import CopyIcon from '../../Assets/Icons/Copy';
+import DeleteIcon from '../../Assets/Icons/Delete';
+import FrameCheckIcon from '../../Assets/Icons/FrameCheck';
+import EditIcon from '../../Assets/Icons/Edit';
+import RemoveCheckIcon from '../../Assets/Icons/RemoveCheck';
+import ShareIcon from '../../Assets/Icons/Share';
+import StopIcon from '../../Assets/Icons/Stop';
+import PinIcon from '../../Assets/Icons/Pin2';
+import UnpinIcon from '../../Assets/Icons/Pin2';
 import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isMessagePinned } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
@@ -204,17 +215,89 @@ class MessageMenu extends React.PureComponent {
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
                         {/*<MenuItem onClick={this.handleDownload}>{t('Download')}</MenuItem>*/}
-                        {canCopyLink && <MenuItem onClick={this.handleCopyLink}>{t('CopyLink')}</MenuItem>}
-                        {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
-                        {canBePinned && (
-                            <MenuItem onClick={this.handlePin}>{isPinned ? t('Unpin') : t('Pin')}</MenuItem>
+                        {canCopyLink && (
+                            <MenuItem onClick={this.handleCopyLink}>
+                                <ListItemIcon>
+                                    <CopyIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('CopyLink')} />
+                            </MenuItem>
                         )}
-                        {canBeSelected && <MenuItem onClick={this.handleSelect}>{t('Select')}</MenuItem>}
-                        {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
-                        {canBeEdited && <MenuItem onClick={this.handleEdit}>{t('Edit')}</MenuItem>}
-                        {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
-                        {canBeUnvoted && <MenuItem onClick={this.handleUnvote}>{t('Unvote')}</MenuItem>}
-                        {canBeClosed && <MenuItem onClick={this.handleConfirmStopPoll}>{t('StopPoll')}</MenuItem>}
+                        {canBeReplied && (
+                            <MenuItem onClick={this.handleReply}>
+                                <ListItemIcon>
+                                    <ShareIcon style={{transform: 'scaleX(-1)'}}/>
+                                </ListItemIcon>
+                                <ListItemText primary={t('Reply')} />
+                            </MenuItem>
+                        )}
+                        {canBePinned && (
+                            <MenuItem onClick={this.handlePin}>
+                                {isPinned ? (
+                                    <>
+                                        <ListItemIcon>
+                                            <UnpinIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('UnpinFromTop')} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <ListItemIcon>
+                                            <PinIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('PinToTop')} />
+                                    </>
+                                )}
+                            </MenuItem>
+                        )}
+                        {canBeSelected && (
+                            <MenuItem onClick={this.handleSelect}>
+                                <ListItemIcon>
+                                    <FrameCheckIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Select')} />
+                            </MenuItem>
+                        )}
+                        {canBeForwarded && (
+                            <MenuItem onClick={this.handleForward}>
+                                <ListItemIcon>
+                                    <ShareIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Forward')} />
+                            </MenuItem>
+                        )}
+                        {canBeEdited && (
+                            <MenuItem onClick={this.handleEdit}>
+                                <ListItemIcon>
+                                    <EditIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Edit')} />
+                            </MenuItem>
+                        )}
+                        {canBeDeleted && (
+                            <MenuItem color='secondary' onClick={this.handleDelete}>
+                                <ListItemIcon>
+                                    <DeleteIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Delete')} />
+                            </MenuItem>
+                        )}
+                        {canBeUnvoted && (
+                            <MenuItem onClick={this.handleUnvote}>
+                                <ListItemIcon>
+                                    <RemoveCheckIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('Unvote')} />
+                            </MenuItem>
+                        )}
+                        {canBeClosed && (
+                            <MenuItem onClick={this.handleConfirmStopPoll}>
+                                <ListItemIcon>
+                                    <StopIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('StopPoll')} />
+                            </MenuItem>
+                        )}
                     </MenuList>
                 </Popover>
                 <Dialog
