@@ -56,7 +56,7 @@ class Message extends Component {
             shook: false,
 
             contextMenu: false,
-            canCopyLink: false,
+            copyLink: null,
             left: 0,
             top: 0
         };
@@ -320,12 +320,12 @@ class Message extends Component {
 
             const left = event.clientX;
             const top = event.clientY;
-            const canCopyLink =
+            const copyLink =
                 event.target && event.target.tagName === 'A' && event.target.href ? event.target.href : null;
 
             this.setState({
                 contextMenu: true,
-                canCopyLink,
+                copyLink,
                 left,
                 top
             });
@@ -347,7 +347,7 @@ class Message extends Component {
             selected,
             highlighted,
             shook,
-            canCopyLink,
+            copyLink,
             contextMenu,
             left,
             top
@@ -484,7 +484,7 @@ class Message extends Component {
                     anchorPosition={{ top, left }}
                     open={contextMenu}
                     onClose={this.handleCloseContextMenu}
-                    canCopyLink={canCopyLink}
+                    copyLink={copyLink}
                 />
             </div>
         );

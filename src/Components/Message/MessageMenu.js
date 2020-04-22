@@ -75,8 +75,7 @@ class MessageMenu extends React.PureComponent {
     };
 
     handleCopyLink = event => {
-        const { onClose } = this.props;
-        const { copyLink } = this.state;
+        const { onClose, copyLink } = this.props;
 
         onClose(event);
 
@@ -173,7 +172,7 @@ class MessageMenu extends React.PureComponent {
     };
 
     render() {
-        const { t, chatId, messageId, anchorPosition, canCopyLink, open, onClose } = this.props;
+        const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
 
         const isPinned = isMessagePinned(chatId, messageId);
@@ -185,6 +184,7 @@ class MessageMenu extends React.PureComponent {
         const canBeDeleted = canMessageBeDeleted(chatId, messageId);
         const canBeEdited = canMessageBeEdited(chatId, messageId);
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
+        const canCopyLink = Boolean(copyLink);
 
         return (
             <>
@@ -247,7 +247,7 @@ MessageMenu.propTypes = {
     anchorPosition: PropTypes.object,
     open: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    canCopyLink: PropTypes.bool
+    copyLink: PropTypes.string
 };
 
 export default withTranslation()(MessageMenu);
