@@ -8,60 +8,84 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import IconButton from '@material-ui/core/IconButton';
-import ListItem from '@material-ui/core/ListItem';
-import TextField from '@material-ui/core/TextField';
-import ArrowBackIcon from '../../Assets/Icons/Back';
-import CloseIcon from '../../Assets/Icons/Close';
+import AddParticipants from './AddParticipants';
+import NewGroupParams from './NewGroupParams';
+import SidebarPage from './SidebarPage';
 import NextIcon from '../../Assets/Icons/Back';
-import SectionHeader from './SectionHeader';
-import User from '../Tile/User';
-import NewChatPhoto from './NewChatPhoto';
-import { loadUsersContent } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
-import FileStore from '../../Stores/FileStore';
-import UserStore from '../../Stores/UserStore';
+import { THUMBNAIL_PRIORITY } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './NewGroup.css';
-
-class UserListItem extends React.Component {
-    shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { userId } = this.props;
-        if (nextProps.userId !== userId) {
-            return true;
-        }
-
-        return false;
-    }
-
-    render() {
-        const { userId, style } = this.props;
-
-        return (
-            <ListItem className='user-list-item' button style={style}>
-                <User userId={userId} />
-            </ListItem>
-        );
-    }
-}
 
 class NewGroup extends React.Component {
     constructor(props) {
         super(props);
 
-        this.titleRef = React.createRef();
+        this.addParticipantsRef = React.createRef();
+        this.newGroupParamsRef = React.createRef();
 
-        this.state = { };
+        this.state = {
+            openParams: false,
+            userIds: [],
+            defaultPhoto: null,
+            defaultPhotoURL: null,
+            defaultPhotoFile: null
+        };
     }
 
-    componentDidMount() {
-        let { userIds } = this.props;
+    handleDone = async () => {
+        const { openParams } = this.state;
+        if (!openParams) {
+            const userIds = Array.from(this.addParticipantsRef.current.getUserIds().keys());
+            if (!userIds.length) return;
 
-        userIds = [UserStore.getMyId()];
+            this.setState({
+                openParams: true,
+                userIds
+            })
+        } else {
+            const { userIds, defaultPhoto, defaultPhotoFile } = this.state;
 
-        const store = FileStore.getStore();
-        loadUsersContent(store, userIds);
-    }
+            const title = this.newGroupParamsRef.current.getTitle();
+            if (!title) {
+                return;
+            }
+
+            this.handleClose();
+
+            const chat = await TdLibController.send({
+                '@type': 'createNewSupergroupChat',
+                title,
+                is_channel: false,
+                description: '',
+                location: null
+            });
+
+            if (defaultPhotoFile) {
+                TdLibController.send({
+                    '@type': 'setChatPhoto',
+                    chat_id: chat.id,
+                    photo: { '@type': 'inputFileId', id: defaultPhotoFile.id }
+                });
+            } else if (defaultPhoto) {
+                TdLibController.send({
+                    '@type': 'setChatPhoto',
+                    chat_id: chat.id,
+                    photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto }
+                });
+            }
+
+            if (userIds.length > 0) {
+                TdLibController.send({
+                    '@type': 'addChatMembers',
+                    chat_id: chat.id,
+                    user_ids: userIds
+                });
+            }
+
+            openChat(chat.id);
+        }
+    };
 
     handleClose = () => {
         TdLibController.clientUpdate({
@@ -70,85 +94,52 @@ class NewGroup extends React.Component {
         });
     };
 
-    handleDone = async () => {
-        const title = this.titleRef.current.value;
-        if (!title.trim()) {
-            this.setState({
-                error: true
-            });
-            return;
-        }
+    handleCloseParams = () => {
+        this.setState({
+            openParams: false,
+            userIds: []
+        })
+    };
 
-        if (this.state.error) {
-            this.setState({
-                error: false
-            });
-        }
-
-        this.handleClose();
-
-        const chat = await TdLibController.send({
-            '@type': 'createNewSupergroupChat',
-            title,
-            is_channel: false,
-            description: '',
-            location: null
+    handleChoosePhoto = async (blob, blobURL) => {
+        this.setState({
+            defaultPhoto: blob,
+            defaultPhotoURL: blobURL
         });
 
-        if (this.photo) {
-            TdLibController.send({
-                '@type': 'setChatPhoto',
-                chat_id: chat.id,
-                photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: this.photo }
-            });
-        }
+        const result = await TdLibController.send({
+            '@type': 'uploadFile',
+            file: {
+                '@type': 'inputFileBlob',
+                name: 'photo.jpg',
+                data: blob
+            },
+            file_type: { '@type': 'fileTypePhoto' },
+            priority: THUMBNAIL_PRIORITY
+        });
 
-        openChat(chat.id);
-    };
-
-    handleChoosePhoto = blob => {
-        this.photo = blob;
-    };
+        this.setState({
+            defaultPhotoFile: result
+        });
+    }
 
     render() {
-        let { popup, t, userIds } = this.props;
-        const { error } = this.state;
-
-        userIds = [UserStore.getMyId()];
-
-        const items = userIds.map(userId => (<UserListItem key={userId} userId={userId} />));
-        const itemsCaption = userIds.length > 1 ? `${userIds.length} members` : '1 member';
+        const { popup } = this.props;
+        const { openParams, userIds, defaultPhotoURL } = this.state;
 
         return (
             <>
-                <div className='header-master'>
-                    <IconButton className='header-left-button' onClick={this.handleClose}>
-                        { popup ? <CloseIcon/> : <ArrowBackIcon /> }
-                    </IconButton>
-                    <div className='header-status grow cursor-pointer'>
-                        <span className='header-status-content'>{t('NewGroup')}</span>
-                    </div>
-                </div>
-                <div className='sidebar-page-content'>
-                    <div className='new-chat-content'>
-                        <NewChatPhoto onChoose={this.handleChoosePhoto}/>
-                        <div className='new-chat-title'>
-                            <TextField
-                                inputRef={this.titleRef}
-                                error={error}
-                                className='new-chat-input'
-                                variant='outlined'
-                                fullWidth
-                                label={t('GroupName')}
-                                defaultValue={''}
-                            />
-                        </div>
-                        {/*<div className='sidebar-page-section'>*/}
-                        <SectionHeader>{itemsCaption}</SectionHeader>
-                        {items}
-                        {/*</div>*/}
-                    </div>
-                </div>
+                <AddParticipants ref={this.addParticipantsRef} popup={popup} onClose={this.handleClose}/>
+
+                <SidebarPage open={openParams}>
+                    <NewGroupParams
+                        ref={this.newGroupParamsRef}
+                        defaultPhotoURL={defaultPhotoURL}
+                        userIds={userIds}
+                        onChoosePhoto={this.handleChoosePhoto}
+                        onClose={this.handleCloseParams}
+                    />
+                </SidebarPage>
 
                 <div className='new-chat-bottom-button' onClick={this.handleDone}>
                     <NextIcon/>
@@ -162,9 +153,5 @@ NewGroup.propTypes = {
     popup: PropTypes.bool,
     userIds: PropTypes.array
 };
-
-NewGroup.defaultProps = {
-    userIds: [UserStore.getMyId()]
-}
 
 export default withTranslation()(NewGroup);

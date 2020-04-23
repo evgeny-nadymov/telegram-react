@@ -10,6 +10,7 @@ import i18n from 'i18next';
 import LocalizationCache from '../Localization/Cache';
 import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
+import React from 'react';
 
 const fallbackLng = 'en';
 const defaultNS = 'translation';
@@ -39,6 +40,7 @@ i18n.use(initReactI18next).init({
                 GeneralSettings: 'General Settings'
             },
             local: {
+                DragToReposition: 'Drag to Reposition',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Left channel',
                 LeftGroup: 'Left group',
@@ -120,6 +122,7 @@ i18n.use(initReactI18next).init({
                 GeneralSettings: 'Основные настройки'
             },
             local: {
+                DragToReposition: 'Перетащите, чтобы изменить положение',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Канал покинут',
                 LeftGroup: 'Группа покинута',

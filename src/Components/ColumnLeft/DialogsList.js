@@ -7,22 +7,20 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import Archive from '../Tile/Archive';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
 import VirtualizedList from '../Additional/VirtualizedList';
 import { loadChatsContent } from '../../Utils/File';
 import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
+import { scrollTop } from '../../Utils/DOM';
+import { isChatMember } from '../../Utils/Chat';
 import { CHAT_SLICE_LIMIT, SCROLL_CHATS_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
-import BasicGroupStore from '../../Stores/BasicGroupStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
-import { scrollTop } from '../../Utils/DOM';
-import { isChatMember } from '../../Utils/Chat';
 
 class DialogListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -255,8 +253,6 @@ class DialogsList extends React.Component {
                 newChatIds.push(chat_id);
             }
         }
-
-        console.log('[updateChatOrder] newChatIds', update, newChatIds);
 
         this.reorderChats(chatIds, newChatIds, () => {
             this.loadChatContents(newChatIds);

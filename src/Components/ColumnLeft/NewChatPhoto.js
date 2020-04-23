@@ -45,15 +45,17 @@ class NewChatPhoto extends React.Component {
         if (!cropper) return;
 
         cropper.getCroppedCanvas().toBlob(blob => {
+            const blobURL = URL.createObjectURL(blob);
+
             this.setState({
                 blob,
-                blobURL: URL.createObjectURL(blob)
+                blobURL
             });
 
             const { onChoose } = this.props;
             if (!onChoose) return;
 
-            onChoose(blob);
+            onChoose(blob, blobURL);
         }, 'image/jpeg');
 
         this.handleCancel();
@@ -121,7 +123,7 @@ class NewChatPhoto extends React.Component {
                                 <CloseIcon/>
                             </IconButton>
                             <div className='header-status grow cursor-pointer'>
-                                <span className='header-status-content'>Drag to Reposition</span>
+                                <span className='header-status-content'>{t('DragToReposition')}</span>
                             </div>
                         </div>
                         <DialogContent>

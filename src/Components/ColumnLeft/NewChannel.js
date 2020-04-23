@@ -15,6 +15,7 @@ import CloseIcon from '../../Assets/Icons/Close';
 import NextIcon from '../../Assets/Icons/Back';
 import NewChatPhoto from './NewChatPhoto';
 import { openChat } from '../../Actions/Client';
+import { THUMBNAIL_PRIORITY } from '../../Constants';
 import TdLibController from '../../Controllers/TdLibController';
 import './NewGroup.css';
 
@@ -25,7 +26,12 @@ class NewChannel extends React.Component {
         this.titleRef = React.createRef();
         this.descriptionRef = React.createRef();
 
-        this.state = { };
+        this.state = {
+            error: false,
+            defaultPhoto: null,
+            defaultPhotoURL: null,
+            defaultPhotoFile: null
+        };
     }
 
     handleClose = () => {
@@ -36,15 +42,18 @@ class NewChannel extends React.Component {
     };
 
     handleDone = async () => {
-        const title = this.titleRef.current.value;
-        if (!title.trim()) {
+        const { error } = this.state;
+        const { defaultPhoto, defaultPhotoFile } = this.state;
+
+        const title = this.titleRef.current.value.trim();
+        if (!title) {
             this.setState({
                 error: true
             });
             return;
         }
 
-        if (this.state.error) {
+        if (error) {
             this.setState({
                 error: false
             });
@@ -62,19 +71,43 @@ class NewChannel extends React.Component {
             location: null
         });
 
-        if (this.photo) {
+        if (defaultPhotoFile) {
             TdLibController.send({
                 '@type': 'setChatPhoto',
                 chat_id: chat.id,
-                photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: this.photo }
+                photo: { '@type': 'inputFileId', id: defaultPhotoFile.id }
+            });
+        } else if (defaultPhoto) {
+            TdLibController.send({
+                '@type': 'setChatPhoto',
+                chat_id: chat.id,
+                photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto }
             });
         }
 
         openChat(chat.id);
     };
 
-    handleChoosePhoto = blob => {
-        this.photo = blob;
+    handleChoosePhoto = async (blob, blobURL) => {
+        this.setState({
+            defaultPhoto: blob,
+            defaultPhotoURL: blobURL
+        });
+
+        const result = await TdLibController.send({
+            '@type': 'uploadFile',
+            file: {
+                '@type': 'inputFileBlob',
+                name: 'photo.jpg',
+                data: blob
+            },
+            file_type: { '@type': 'fileTypePhoto' },
+            priority: THUMBNAIL_PRIORITY
+        });
+
+        this.setState({
+            defaultPhotoFile: result
+        });
     };
 
     render() {

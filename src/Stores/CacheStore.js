@@ -21,6 +21,8 @@ class CacheStore extends EventEmitter {
     constructor() {
         super();
 
+        this.cacheContacts = false;
+
         this.reset();
 
         this.addTdLibListener();
@@ -30,8 +32,13 @@ class CacheStore extends EventEmitter {
 
     reset = () => {
         this.chatIds = [];
+        this.archiveChatIds = [];
+        this.meChat = null;
+        if (this.cacheContacts) {
+            this.contacts = null;
+        }
+
         this.cache = null;
-        this.contacts = null;
     };
 
     onUpdate = update => {
@@ -52,7 +59,9 @@ class CacheStore extends EventEmitter {
                     case 'authorizationStateWaitRegistration': {
                         CacheManager.remove('cache');
                         CacheManager.remove('files');
-                        CacheManager.remove('contacts');
+                        if (this.cacheContacts) {
+                            CacheManager.remove('contacts');
+                        }
                         break;
                     }
                 }
@@ -89,15 +98,32 @@ class CacheStore extends EventEmitter {
         const promises = [];
         promises.push(CacheManager.load('cache').catch(error => null));
         promises.push(CacheManager.load('files').catch(error => null));
-        const [cache, files] = await Promise.all(promises);
+        if (this.cacheContacts) {
+            promises.push(CacheManager.load('contacts').catch(error => null));
+        }
+        const [cache, files, contacts] = await Promise.all(promises);
         this.cache = cache;
         if (this.cache) {
             this.cache.files = files || [];
         }
-        // console.log('[cm] getChats result', this.cache);
-        if (!this.cache) return null;
 
-        this.parseCache(this.cache);
+        if (this.cacheContacts) {
+            if (contacts) {
+                (contacts || []).forEach(x => {
+                    UserStore.set(x);
+                })
+
+                this.contacts = {
+                    '@type': 'users',
+                    user_ids: contacts.map(x => x.id),
+                    total_count: contacts.length
+                };
+            }
+        }
+
+        if (this.cache) {
+            this.parseCache(this.cache);
+        }
 
         return this.cache;
     }
@@ -106,7 +132,7 @@ class CacheStore extends EventEmitter {
         if (!cache) return;
 
         const { meChat, chats, archiveChats, users, basicGroups, supergroups, files, options } = cache;
-        console.log('[cache] parseCache', cache);
+        // console.log('[cache] parseCache', cache);
 
         (files || []).filter(x => Boolean(x)).forEach(({ id, url }) => {
             FileStore.setDataUrl(id, url);
@@ -152,11 +178,7 @@ class CacheStore extends EventEmitter {
         const userMap = new Map();
         const basicGroupMap = new Map();
         const supergroupMap = new Map();
-        const meChat = await TdLibController.send({
-            '@type': 'createPrivateChat',
-            user_id: UserStore.getMyId(),
-            force: true
-        });
+        const meChat = this.meChat;
         const chats = chatIds.map(x => ChatStore.get(x));
         const archiveChats = archiveChatIds.map(x => ChatStore.get(x));
 
@@ -218,9 +240,20 @@ class CacheStore extends EventEmitter {
         };
     }
 
-    saveChats(chatIds, archiveChatIds) {
+    async saveChats(chatIds, archiveChatIds) {
         this.chatIds = chatIds;
         this.archiveChatIds = archiveChatIds;
+        this.meChat = this.meChat || await TdLibController.send({
+            '@type': 'createPrivateChat',
+            user_id: UserStore.getMyId(),
+            force: false
+        });
+        if (this.cacheContacts) {
+            this.contacts = this.contacts || await TdLibController.send({
+                '@type': 'getContacts'
+            });
+        }
+
         this.saveChatsInternal();
     }
 
@@ -229,7 +262,7 @@ class CacheStore extends EventEmitter {
         const cache = await this.getCache(this.chatIds, this.archiveChatIds);
         const files = cache.files;
         cache.files = [];
-        console.log('[cm] save cache', cache);
+        // console.log('[cm] save cache', cache);
         await CacheManager.save('cache', cache);
 
         const promises = [];
@@ -252,6 +285,11 @@ class CacheStore extends EventEmitter {
         const results = await Promise.all(promises);
         // console.log('[cm] save files', results);
         await CacheManager.save('files', results);
+
+        if (this.cacheContacts) {
+            const contacts = this.contacts.user_ids.map(x => UserStore.get(x));
+            await CacheManager.save('contacts', contacts);
+        }
     }
 
     clear() {
