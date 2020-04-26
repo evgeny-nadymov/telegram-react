@@ -171,6 +171,8 @@ class Contacts extends React.Component {
         const { popup } = this.props;
         const { items, searchItems } = this.state;
 
+        const style = popup ? { minHeight: 800 } : null;
+
         return (
             <>
                 <div className='header-master'>
@@ -179,7 +181,7 @@ class Contacts extends React.Component {
                     </IconButton>
                     <SearchInput inputRef={this.searchInputRef} onChange={this.handleSearch} />
                 </div>
-                <div className='contacts-content'>
+                <div className='contacts-content' style={style}>
                     {items && (
                         <VirtualizedList
                             ref={this.listRef}

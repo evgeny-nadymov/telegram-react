@@ -36,7 +36,7 @@ class NewGroup extends React.Component {
     handleDone = async () => {
         const { openParams } = this.state;
         if (!openParams) {
-            const userIds = Array.from(this.addParticipantsRef.current.getUserIds().keys());
+            const userIds = this.addParticipantsRef.current.getUserIds();
             if (!userIds.length) return;
 
             this.setState({
