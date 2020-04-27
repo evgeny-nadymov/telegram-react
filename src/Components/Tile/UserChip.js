@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import UserTile from './UserTile';
 import CloseIcon from '../../Assets/Icons/Close';
 import { getUserShortName } from '../../Utils/User';
@@ -31,10 +32,10 @@ class UserChip extends React.Component {
     }
 
     render() {
-        const { userId, onClick } = this.props;
+        const { userId, selected, onClick } = this.props;
 
         return (
-            <div className='user-chip' ref={this.divRef} onClick={onClick}>
+            <div ref={this.divRef} className={classNames('user-chip', { 'item-selected': selected })} onClick={onClick}>
                 <UserTile userId={userId} small={true}/>
                 <div className='user-chip-delete'>
                     <CloseIcon className='user-chip-delete-icon'/>
@@ -47,6 +48,7 @@ class UserChip extends React.Component {
 
 UserChip.propTypes = {
     userId: PropTypes.number,
+    selected: PropTypes.bool,
     onClick: PropTypes.func
 };
 

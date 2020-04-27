@@ -76,3 +76,20 @@
 #search-inputbox:focus + .search-input-icon {
     color: var(--color-accent-main);
 }
+
+.animated-wrap-panel .search-input {
+    margin: 4px;
+}
+
+.animated-wrap-panel #search-inputbox {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    margin: 0;
+    padding: 6px 0;
+    min-width: 100px;
+}
+
+.animated-wrap-panel .search-input-icon {
+    display: none;
+}

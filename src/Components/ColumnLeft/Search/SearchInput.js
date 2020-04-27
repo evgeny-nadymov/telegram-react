@@ -31,9 +31,18 @@ class SearchInput extends React.Component {
             }
 
             if (onClose) {
+                onClose(event);
+            }
+        } else if (event.keyCode === 8) {
+            const { onBackspace } = this.props;
+
+            const element = event.target;
+            if (!element) return;
+            if (element.innerText) return;
+
+            if (onBackspace) {
                 event.stopPropagation();
-                event.target.blur();
-                onClose();
+                onBackspace();
             }
         }
     };
@@ -68,14 +77,14 @@ class SearchInput extends React.Component {
     };
 
     render() {
-        const { inputRef, t, onFocus } = this.props;
+        const { inputRef, t, onFocus, hint, showIcon } = this.props;
 
         return (
             <div className='search-input'>
                 <div
                     id='search-inputbox'
                     ref={inputRef}
-                    placeholder={t('Search')}
+                    placeholder={hint || t('Search')}
                     contentEditable
                     suppressContentEditableWarning
                     onKeyDown={this.handleKeyDown}
@@ -84,7 +93,7 @@ class SearchInput extends React.Component {
                     onInput={this.handleInput}
                     onFocus={onFocus}
                 />
-                <SearchIcon className='search-input-icon' />
+                {showIcon && <SearchIcon className='search-input-icon' />}
             </div>
         );
     }
@@ -92,9 +101,16 @@ class SearchInput extends React.Component {
 
 SearchInput.propTypes = {
     inputRef: PropTypes.object,
+    hint: PropTypes.string,
+    showIcon: PropTypes.bool,
+    onBackspace: PropTypes.func,
     onChange: PropTypes.func,
     onFocus: PropTypes.func,
     onClose: PropTypes.func
 };
+
+SearchInput.defaultProps = {
+    showIcon: true
+}
 
 export default withTranslation()(SearchInput);

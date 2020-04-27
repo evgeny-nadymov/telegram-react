@@ -7,6 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
@@ -72,7 +73,8 @@ class AddParticipants extends React.Component {
             selectedItems: {
                 array: [],
                 map: new Map()
-            }
+            },
+            focusedItem: null
         };
 
         this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100, false);
@@ -144,19 +146,29 @@ class AddParticipants extends React.Component {
     }
 
     handleOpenUser = userId => {
-        const { selectedItems } = this.state;
+        const { selectedItems, focusedItem } = this.state;
         const { map, array } = selectedItems;
 
         const newMap = new Map(map);
         let newArray;
+        let newFocusedItem = null;
         let isDeleting = false;
         if (map.has(userId)) {
             newMap.delete(userId);
             newArray = array.filter(x => x !== userId);
+            newFocusedItem = focusedItem === userId ? null : focusedItem;
             isDeleting = true;
         } else {
             newMap.set(userId, userId);
             newArray = array.concat([userId]);
+            newFocusedItem = null;
+        }
+
+        const input = this.searchInputRef.current;
+        input.focus();
+        if (!isDeleting) {
+            input.innerText = '';
+            this.handleSearch('');
         }
 
         const wrapPanel = this.wrapPanelRef.current;
@@ -179,6 +191,7 @@ class AddParticipants extends React.Component {
         }
 
         this.setState({
+            focusedItem: newFocusedItem,
             selectedItems: {
                 array: newArray,
                 map: newMap
@@ -269,7 +282,8 @@ class AddParticipants extends React.Component {
         const query = text.trim();
         if (!query) {
             this.setState({
-                searchItems: null
+                searchItems: null,
+                focusedItem: null
             });
             return;
         }
@@ -286,7 +300,7 @@ class AddParticipants extends React.Component {
         const store = FileStore.getStore();
         loadUsersContent(store, searchItems.user_ids.slice(0, 20));
 
-        this.setState({ searchItems });
+        this.setState({ searchItems, focusedItem: null });
     };
 
     handleClose = () => {
@@ -296,9 +310,45 @@ class AddParticipants extends React.Component {
         });
     };
 
+    handleSearchClose = event => {
+        const { selectedItems, focusedItem } = this.state;
+        if (!selectedItems) return;
+
+        const { map } = selectedItems;
+        if (!map.has(focusedItem)) return;
+
+        event.stopPropagation();
+        event.nativeEvent.stopImmediatePropagation();
+
+        this.setState({
+            focusedItem: null
+        })
+    };
+
+    handleBackspace = () => {
+        const { selectedItems, focusedItem } = this.state;
+        if (!selectedItems) return;
+
+        const { array, map } = selectedItems;
+        if (!array) return;
+        if (!array.length) return;
+
+        if (map.has(focusedItem)) {
+            this.handleOpenUser(focusedItem);
+            return;
+        }
+
+        const lastItem = array[array.length - 1];
+        if (!lastItem) return;
+
+        this.setState({
+            focusedItem: lastItem
+        });
+    };
+
     render() {
-        const { popup } = this.props;
-        const { items, searchItems, selectedItems } = this.state;
+        const { popup, t } = this.props;
+        const { items, searchItems, selectedItems, focusedItem } = this.state;
 
         const style = popup ? { minHeight: 800 } : null;
 
@@ -310,13 +360,16 @@ class AddParticipants extends React.Component {
                     <IconButton className='header-left-button' onClick={this.handleClose}>
                         { popup ? <CloseIcon/> : <ArrowBackIcon /> }
                     </IconButton>
-                    <SearchInput inputRef={this.searchInputRef} onChange={this.handleSearch} />
+                    <div className='header-status grow cursor-pointer'>
+                        <span className='header-status-content'>{t('GroupAddMembers')}</span>
+                    </div>
                 </div>
                 <div ref={this.wrapPanelRef} className='animated-wrap-panel'>
-                    {selectedItems.array.map(x => <UserChip ref={el => { this.itemsRef.set(x, el); }} key={x} userId={x} onClick={() => this.handleOpenUser(x)}/>)}
-                    <div ref={this.lastItemRef}/>
+                    {selectedItems.array.map(x => <UserChip selected={focusedItem === x} ref={el => { this.itemsRef.set(x, el); }} key={x} userId={x} onClick={() => this.handleOpenUser(x)}/>)}
+                    <div ref={this.lastItemRef} style={{ height: 33, margin: '4px 0'}}/>
+                    <SearchInput inputRef={this.searchInputRef} hint={t('SendMessageTo')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
                 </div>
-                {/*<div className='contacts-border'/>*/}
+                <div className='contacts-border'/>
                 <div className='contacts-content' style={style}>
                     {items && (
                         <VirtualizedList
@@ -351,4 +404,4 @@ AddParticipants.propTypes = {
     onClose: PropTypes.func
 };
 
-export default AddParticipants;
+export default withTranslation()(AddParticipants);

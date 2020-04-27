@@ -11,7 +11,7 @@
     margin: 4px;
     height: 33px;
     max-width: 140px;
-    border-radius: 32px;
+    border-radius: 33px;
     background: var(--search-input-background);
     display: flex;
     align-items: center;
@@ -43,9 +43,15 @@
     transition: transform 0.25s ease;
 }
 
-.user-chip:hover {
+.user-chip:hover,
+.item-selected.user-chip:hover {
     background: #FAE2E3;
     color: black;
+}
+
+.item-selected.user-chip {
+    background: var(--color-accent-main);
+    color: white;
 }
 
 .user-chip:hover .user-chip-delete {
