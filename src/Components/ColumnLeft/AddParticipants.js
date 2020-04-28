@@ -21,6 +21,7 @@ import { loadUsersContent } from '../../Utils/File';
 import { debounce, throttle } from '../../Utils/Common';
 import { getUserFullName } from '../../Utils/User';
 import CacheStore from '../../Stores/CacheStore';
+import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Contacts.css';
@@ -272,7 +273,7 @@ class AddParticipants extends React.Component {
     };
 
     renderItem = ({ index, style }, items, selectedItemsMap) => {
-        const userId = items.user_ids[index];
+        const userId = items[index];
         const isSelected = selectedItemsMap.has(userId);
 
         return <UserListItem key={userId} userId={userId} selected={isSelected} onClick={() => this.handleOpenUser(userId)} style={style} />;
@@ -283,24 +284,46 @@ class AddParticipants extends React.Component {
         if (!query) {
             this.setState({
                 searchItems: null,
+                publicItems: null,
                 focusedItem: null
             });
             return;
         }
 
-        const searchItems = await TdLibController.send({
-            '@type': 'searchContacts',
-            query,
-            limit: 1000
-        });
+        const promises = [];
+        promises.push(
+            TdLibController.send({
+                '@type': 'searchContacts',
+                query,
+                limit: 20
+            })
+        );
+        promises.push(
+            TdLibController.send({
+                '@type': 'searchPublicChats',
+                query
+            })
+        );
+        const [searchItems, publicChats] = await Promise.all(promises);
+
         searchItems.user_ids = searchItems.user_ids.sort((x, y) =>
             getUserFullName(x).localeCompare(getUserFullName(y))
         );
 
-        const store = FileStore.getStore();
-        loadUsersContent(store, searchItems.user_ids.slice(0, 20));
+        const publicItems = { '@type': 'users', user_ids: [] };
+        publicChats.chat_ids.reduce((array, chatId) => {
+            const chat = ChatStore.get(chatId);
+            if (chat && chat.type['@type'] === 'chatTypePrivate') {
+                array.push(chat.type.user_id);
+            }
+            return array;
+        }, publicItems.user_ids);
 
-        this.setState({ searchItems, focusedItem: null });
+        const store = FileStore.getStore();
+        loadUsersContent(store, searchItems.user_ids);
+        loadUsersContent(store, publicItems.user_ids);
+
+        this.setState({ searchItems, publicItems, focusedItem: null });
     };
 
     handleClose = () => {
@@ -348,7 +371,7 @@ class AddParticipants extends React.Component {
 
     render() {
         const { popup, t } = this.props;
-        const { items, searchItems, selectedItems, focusedItem } = this.state;
+        const { items, searchItems, publicItems, selectedItems, focusedItem } = this.state;
 
         const style = popup ? { minHeight: 800 } : null;
 
@@ -378,18 +401,18 @@ class AddParticipants extends React.Component {
                             source={items.user_ids}
                             rowHeight={72}
                             overScanCount={20}
-                            renderItem={x => this.renderItem(x, items, selectedItems.map)}
+                            renderItem={x => this.renderItem(x, items.user_ids, selectedItems.map)}
                             onScroll={this.handleScroll}
                         />
                     )}
-                    {searchItems && (
+                    {searchItems && publicItems && (
                         <VirtualizedList
                             ref={this.searchListRef}
                             className='contacts-list contacts-search-list'
-                            source={searchItems.user_ids}
+                            source={searchItems.user_ids.concat(publicItems.user_ids)}
                             rowHeight={72}
                             overScanCount={20}
-                            renderItem={x => this.renderItem(x, searchItems, selectedItems.map)}
+                            renderItem={x => this.renderItem(x, searchItems.user_ids.concat(publicItems.user_ids), selectedItems.map)}
                             onScroll={this.handleScroll}
                         />
                     )}
