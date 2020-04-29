@@ -246,6 +246,7 @@ class AddParticipants extends React.Component {
             } else {
                 if (isDeleting) {
                     wrapPanel.style.cssText = prevCSSText;
+                    wrapPanel.scrollTop = prevScrollTop;
                 } else {
                     // console.log('[wrap] scrollIntoView');
                     this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -294,20 +295,21 @@ class AddParticipants extends React.Component {
             setTimeout(() => {
                 for (let el of doubleTransform.keys()) {
                     const { currentOffset } = doubleTransform.get(el);
-                    const transition = `transform: translate(${currentOffset.width}px, 0)`;
+                    const transition = `transform: translate(${currentOffset.width}px, 0);`
+                                     + 'transition: transform 0s ease;';
 
                     el.setStyleCSSText(transition);
                 }
 
                 requestAnimationFrame(() => {
                     for (let el of doubleTransform.keys()) {
-                        const transition = `transition: transform 0.15s ease`;
+                        const transition = 'transition: transform 0.15s ease';
 
                         el.setStyleCSSText(transition);
                     }
                 });
 
-            }, 100);
+            }, 101);
         });
     }
 

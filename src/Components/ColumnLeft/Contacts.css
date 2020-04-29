@@ -51,6 +51,7 @@
 
 .animated-wrap-panel {
     transition: max-height 0.25s ease, min-height 0.25s ease;
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex-grow: 1;
