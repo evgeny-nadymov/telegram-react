@@ -39,6 +39,9 @@ class User extends React.Component {
 
         const fullName = getUserFullName(userId, null, t);
 
+        const user = UserStore.get(userId);
+        const { is_contact, username } = user;
+
         return (
             <div className='user' onClick={this.handleClick}>
                 <div className='user-wrapper'>
@@ -49,7 +52,7 @@ class User extends React.Component {
                         </div>
                         {showStatus && (
                             <div className='tile-second-row'>
-                                <UserStatus userId={userId} />
+                                {!is_contact && username ? <div className='user-content dialog-content'>{'@' + username}</div> : <UserStatus userId={userId} /> }
                             </div>
                         )}
                     </div>
