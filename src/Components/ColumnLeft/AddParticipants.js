@@ -66,7 +66,6 @@ class AddParticipants extends React.Component {
         this.listRef = React.createRef();
         this.searchListRef = React.createRef();
         this.wrapPanelRef = React.createRef();
-        this.lastItemRef = React.createRef();
         this.itemsRef = new Map();
 
         this.state = {
@@ -188,6 +187,7 @@ class AddParticipants extends React.Component {
         }
 
         const prevCSSText = wrapPanel.style.cssText;
+        const prevScrollTop = wrapPanel.scrollTop;
         if (isDeleting) {
             wrapPanel.style.cssText = null;
         }
@@ -215,7 +215,8 @@ class AddParticipants extends React.Component {
                     requestAnimationFrame(() => {
                         wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
                         setTimeout(() => {
-                            this.lastItemRef.current.scrollIntoView({ behavior: 'auto' });
+                            // console.log('[wrap] scrollIntoView');
+                            this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
                         }, 250);
                         // console.log('[wrap] animate expand', wrapPanel.style.cssText);
                     });
@@ -223,7 +224,8 @@ class AddParticipants extends React.Component {
                     // console.log('[wrap] expand', prevHeight, maxHeight);
                     wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
                     //wrapPanel.scrollTop = wrapPanel.scrollHeight;
-                    this.lastItemRef.current.scrollIntoView({ behavior: 'smooth' });
+                    // console.log('[wrap] scrollIntoView');
+                    this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
                     // console.log('[wrap] expand', wrapPanel.style.cssText);
                 }
             } else if (collapsed) {
@@ -236,42 +238,78 @@ class AddParticipants extends React.Component {
                         // console.log('[wrap] animate collapse', wrapPanel.style.cssText);
                     });
                 } else {
-                    // console.log('[wrap] collapse', prevHeight, maxHeight);
+                    // console.log('[wrap] collapse', prevHeight, maxHeight, wrapPanel.scrollTop, prevScrollTop);
                     wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                    // console.log('[wrap] collapse', wrapPanel.style.cssText);
+                    wrapPanel.scrollTop = prevScrollTop;
+                    // console.log('[wrap] collapse', wrapPanel.style.cssText, wrapPanel.scrollTop);
                 }
             } else {
                 if (isDeleting) {
                     wrapPanel.style.cssText = prevCSSText;
                 } else {
-                    this.lastItemRef.current.scrollIntoView({ behavior: 'smooth' });
+                    // console.log('[wrap] scrollIntoView');
+                    this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
                 }
             }
 
+            this.animateItems(prevMap);
+        });
+    };
+
+    animateItems(prevOffsets) {
+        const doubleTransform = new Map();
+        for (let key of this.itemsRef.keys()) {
+            const el = this.itemsRef.get(key);
+            if (el) {
+                const currentOffset = el.getOffset();
+                const prevOffset = prevOffsets.has(key) ? prevOffsets.get(key) : null;
+                if (prevOffset) {
+                    if (prevOffset.left < currentOffset.left) {
+                        doubleTransform.set(el, { prevOffset, currentOffset });
+                    }
+
+                    const transform = `transform: translate(${prevOffset.left - currentOffset.left}px, ${prevOffset.top - currentOffset.top}px)`;
+                    el.setStyleCSSText(transform);
+                }
+            }
+        }
+
+        requestAnimationFrame(() => {
             for (let key of this.itemsRef.keys()) {
                 const el = this.itemsRef.get(key);
                 if (el) {
-                    const currentOffset = el.getOffset();
-                    const prevOffset = prevMap.has(key) ? prevMap.get(key) : null;
-                    if (prevOffset) {
-                        const text = `transform: translate(${prevOffset.left - currentOffset.left}px, ${prevOffset.top - currentOffset.top}px)`;
-                        el.setStyleCSSText(text);
+                    let transition = `transition: transform 0.25s ease`;
+                    if (doubleTransform.has(el)) {
+                        const { prevOffset, currentOffset } = doubleTransform.get(el);
+                        transition = `transform: translate(${prevOffset.left - currentOffset.left - prevOffset.width}px, ${prevOffset.top - currentOffset.top}px);`
+                                   + 'transition: transform 0.1s ease;'
                     }
+
+                    el.setStyleCSSText(transition);
                 }
             }
 
-            requestAnimationFrame(() => {
-                for (let key of this.itemsRef.keys()) {
-                    const el = this.itemsRef.get(key);
-                    if (el) {
-                        const transition = `transition: transform 0.25s ease`;
+            if (!doubleTransform.size) return;
+
+            setTimeout(() => {
+                for (let el of doubleTransform.keys()) {
+                    const { currentOffset } = doubleTransform.get(el);
+                    const transition = `transform: translate(${currentOffset.width}px, 0)`;
+
+                    el.setStyleCSSText(transition);
+                }
+
+                requestAnimationFrame(() => {
+                    for (let el of doubleTransform.keys()) {
+                        const transition = `transition: transform 0.15s ease`;
 
                         el.setStyleCSSText(transition);
                     }
-                }
-            });
+                });
+
+            }, 100);
         });
-    };
+    }
 
     renderItem = ({ index, style }, items, selectedItemsMap) => {
         const userId = items[index];
@@ -390,7 +428,6 @@ class AddParticipants extends React.Component {
                 </div>
                 <div ref={this.wrapPanelRef} className='animated-wrap-panel'>
                     {selectedItems.array.map(x => <UserChip selected={focusedItem === x} ref={el => { this.itemsRef.set(x, el); }} key={x} userId={x} onClick={() => this.handleOpenUser(x)}/>)}
-                    <div ref={this.lastItemRef} style={{ height: 33, margin: '4px 0'}}/>
                     <SearchInput inputRef={this.searchInputRef} hint={t('SendMessageTo')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
                 </div>
                 <div className='contacts-border'/>

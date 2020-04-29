@@ -21,7 +21,12 @@ class UserChip extends React.Component {
     }
 
     getOffset() {
-        return { left: this.divRef.current.offsetLeft, top: this.divRef.current.offsetTop }
+        return {
+            left: this.divRef.current.offsetLeft,
+            top: this.divRef.current.offsetTop,
+            width: this.divRef.current.offsetWidth,
+            height: this.divRef.current.offsetHeight
+        }
     }
 
     setStyleCSSText(text) {
