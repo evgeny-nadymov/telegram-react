@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
@@ -427,4 +428,10 @@ AddParticipants.propTypes = {
     onClose: PropTypes.func
 };
 
-export default withTranslation()(AddParticipants);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(AddParticipants);
