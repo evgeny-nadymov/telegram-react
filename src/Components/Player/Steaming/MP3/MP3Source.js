@@ -1,4 +1,4 @@
-import { LOG, ERROR } from './Utils/Common';
+import { LOG, ERROR } from '../Utils/Common';
 
 export class MP3Source {
     constructor(audio, getBufferAsync) {
@@ -63,6 +63,40 @@ export class MP3Source {
         });
 
         this.mediaSource = mediaSource;
+    }
+
+    getHeaderStart(buffer) {
+        let headerStart = 0;
+        const SyncByte1 = 0xFF;
+        const SyncByte2 = 0xFB;
+        const SyncByte3 = 224;
+        const SyncByte4 = 64;
+
+        const arr = new Uint8Array(buffer);
+
+        for (let i = 0; i + 1 < arr.length; i++) {
+            if (arr[i] === SyncByte1 && arr[i + 1] === SyncByte2 && arr[i + 2] === SyncByte3 && arr[i + 3] === SyncByte4) {
+                LOG('[MP3Source] getHeaderStart', i, arr[i], arr[i + 1]);
+                return i;
+            }
+        }
+
+        return headerStart;
+    }
+
+    needNextBuffer() {
+        const { sourceBuffer } = this;
+        const { buffered, timestampOffset } = sourceBuffer;
+
+        for (let i = 0; i < buffered.length; i++) {
+            const end = buffered.end(i);
+
+            if (timestampOffset + 1.0 > end) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     getURL() {
@@ -133,40 +167,6 @@ export class MP3Source {
                 }
             }
         };
-    }
-
-    getHeaderStart(buffer) {
-        let headerStart = 0;
-        const SyncByte1 = 0xFF;
-        const SyncByte2 = 0xFB;
-        const SyncByte3 = 224;
-        const SyncByte4 = 64;
-
-        const arr = new Uint8Array(buffer);
-
-        for (let i = 0; i + 1 < arr.length; i++) {
-            if (arr[i] === SyncByte1 && arr[i + 1] === SyncByte2 && arr[i + 2] === SyncByte3 && arr[i + 3] === SyncByte4) {
-                LOG('[MP3Source] getHeaderStart', i, arr[i], arr[i + 1]);
-                return i;
-            }
-        }
-
-        return headerStart;
-    }
-
-    needNextBuffer() {
-        const { sourceBuffer } = this;
-        const { buffered, timestampOffset } = sourceBuffer;
-
-        for (let i = 0; i < buffered.length; i++) {
-            const end = buffered.end(i);
-
-            if (timestampOffset + 1.0 > end) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     async loadNextBuffer() {

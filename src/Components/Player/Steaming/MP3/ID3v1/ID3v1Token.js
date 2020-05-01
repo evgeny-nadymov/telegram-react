@@ -1,4 +1,4 @@
-import {Id3v1StringType, UINT8} from '../Utils/Token';
+import {Id3v1StringType, UINT8} from '../../Utils/Token';
 
 /**
  * Spec: http://id3.org/ID3v1

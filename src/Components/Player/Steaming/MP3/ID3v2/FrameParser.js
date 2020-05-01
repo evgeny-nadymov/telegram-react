@@ -1,5 +1,5 @@
 import {TextEncodingToken} from './ID3v2Token';
-import {decodeString} from '../Utils/Common';
+import {decodeString} from '../../Utils/Common';
 
 const defaultEnc = 'iso-8859-1';
 

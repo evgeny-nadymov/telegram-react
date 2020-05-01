@@ -1,3 +1,20 @@
+export function LOG(message, ...optionalParams) {
+    console.log(message, ...optionalParams);
+}
+
+export function ERROR(message, ...optionalParams) {
+    console.error(message, ...optionalParams);
+}
+
+export function logSourceBufferRanges (sourceBuffer, currentTime, duration) {
+    const ranges = [];
+    for (let i = 0; i < sourceBuffer.buffered.length; i++) {
+        ranges.push({ start: sourceBuffer.buffered.start(i), end: sourceBuffer.buffered.end(i)})
+    }
+
+    LOG('[SourceBuffer] ranges', sourceBuffer.id, currentTime, duration, sourceBuffer.pendingUpdates.length, JSON.stringify(ranges));
+}
+
 export const strtokBITSET = {
     get: (buf, off, bit) => {
         return (buf[off] & (1 << bit)) !== 0;
@@ -54,14 +71,6 @@ export function decodeString(buffer, encoding) {
 export function trimRightNull(x) {
     const pos0 = x.indexOf('\0');
     return pos0 === -1 ? x : x.substr(0, pos0);
-}
-
-export function LOG(message, ...optionalParams) {
-    console.log(message, optionalParams);
-}
-
-export function ERROR(message, ...optionalParams) {
-    console.error(message, optionalParams);
 }
 
 /**

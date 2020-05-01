@@ -1,4 +1,4 @@
-import { getBitAllignedNumber, isBitSet } from './Utils/Common';
+import { getBitAllignedNumber, isBitSet } from '../Utils/Common';
 
 const syncByte1 = 0xFF;
 const syncByte2 = 0xFB;

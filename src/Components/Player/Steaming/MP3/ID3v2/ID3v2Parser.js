@@ -1,6 +1,6 @@
 import { ExtendedHeader, ID3v2Header } from './ID3v2Token';
-import { strtokBITSET } from '../Utils/Common';
-import { ASCII_TEXT, UINT24_BE, UINT32_BE, UINT32SYNCSAFE } from '../Utils/Token';
+import { strtokBITSET } from '../../Utils/Common';
+import { ASCII_TEXT, UINT24_BE, UINT32_BE, UINT32SYNCSAFE } from '../../Utils/Token';
 import { FrameParser } from './FrameParser';
 
 export class ID3v2Parser {

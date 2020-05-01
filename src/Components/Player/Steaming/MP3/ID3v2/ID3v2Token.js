@@ -1,5 +1,5 @@
-import { strtokBITSET } from '../Utils/Common';
-import { UINT16_BE, UINT32_BE, ASCII_TEXT, UINT32SYNCSAFE } from '../Utils/Token';
+import { strtokBITSET } from '../../Utils/Common';
+import { UINT16_BE, UINT32_BE, ASCII_TEXT, UINT32SYNCSAFE } from '../../Utils/Token';
 
 /**
  * ID3v2 header
