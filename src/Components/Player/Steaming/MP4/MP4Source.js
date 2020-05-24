@@ -14,10 +14,13 @@ export default class MP4Source {
         this.nextBufferStart = 0;
         this.mediaSource = null;
         this.ready = false;
+        this.bufferedTime = 30;
 
         this.beforeMoovBufferSize = 32 * 1024;
         this.moovBufferSize = 512 * 1024;
-        this.bufferSize = 512 * 1024;
+        this.bufferSize = 256 * 1024;
+        this.seekBufferSize = 512 * 1024;
+
         this.currentBufferSize = this.beforeMoovBufferSize;
         this.nbSamples = 10;
         this.video = video;
@@ -163,39 +166,86 @@ export default class MP4Source {
         return this.url;
     }
 
-    seek(time) {
-        const seekInfo = this.mp4file.seek(time, true);
+    seek(currentTime, buffered) {
+        const seekInfo = this.mp4file.seek(currentTime, true);
         this.nextBufferStart = seekInfo.offset;
-        LOG('[player] seeked', time, seekInfo, this.nextBufferStart);
-    }
 
-    async loadNextBuffer() {
-        const { nextBufferStart, currentBufferSize, mp4file } = this;
-        LOG('[MP4Box] handleAppend start', nextBufferStart, mp4file);
+        let loadNextBuffer = buffered.length === 0;
+        for (let i = 0; i < buffered.length; i++) {
+            const start = buffered.start(i);
+            const end = buffered.end(i);
 
-        if (nextBufferStart === undefined) return;
-        if (this.loading) return;
-
-        this.loading = true;
-        const nextBuffer = await this.getBufferAsync(nextBufferStart, nextBufferStart + currentBufferSize);
-        nextBuffer.fileStart = nextBufferStart;
-
-        if (nextBuffer.byteLength) {
-            this.nextBufferStart = mp4file.appendBuffer(nextBuffer);
-            LOG('[MP4Box] handleAppend stop', nextBufferStart, this.nextBufferStart);
-        } else {
-            this.nextBufferStart = undefined;
-            LOG('[MP4Box] handleAppend stop', nextBufferStart, this.nextBufferStart);
+            if (start <= currentTime && currentTime + this.bufferedTime > end) {
+                loadNextBuffer = true;
+                break;
+            }
         }
 
+        LOG('[player] onSeeked', loadNextBuffer, currentTime, seekInfo, this.nextBufferStart);
+        if (loadNextBuffer) {
+            this.loadNextBuffer(true);
+        }
+    }
+
+    timeUpdate(currentTime, duration, buffered) {
+        const ranges = [];
+        for (let i = 0; i < buffered.length; i++) {
+            ranges.push({ start: buffered.start(i), end: buffered.end(i)})
+        }
+
+        let loadNextBuffer = buffered.length === 0;
+        let hasRange = false;
+        for (let i = 0; i < buffered.length; i++) {
+            const start = buffered.start(i);
+            const end = buffered.end(i);
+
+            if (start <= currentTime && currentTime <= end) {
+                hasRange = true;
+                if (end < duration && currentTime + this.bufferedTime > end) {
+                    loadNextBuffer = true;
+                    break;
+                }
+            }
+        }
+
+        if (!hasRange) {
+            loadNextBuffer = true;
+        }
+
+        LOG('[player] timeUpdate', loadNextBuffer, currentTime, duration, JSON.stringify(ranges));
+        if (loadNextBuffer) {
+            this.loadNextBuffer();
+        }
+    }
+
+    async loadNextBuffer(seek = false) {
+        const { nextBufferStart, loading, currentBufferSize, mp4file } = this;
+        LOG('[player] loadNextBuffer', nextBufferStart === undefined, loading, !mp4file);
+        if (!mp4file) return;
+        if (nextBufferStart === undefined) return;
+        if (loading) return;
+
+        this.loading = true;
+        const bufferSize = seek ? this.seekBufferSize : this.bufferSize;
+        const nextBuffer = await this.getBufferAsync(nextBufferStart, nextBufferStart + bufferSize);
+        nextBuffer.fileStart = nextBufferStart;
+
+        LOG('[player] loadNextBuffer start', nextBuffer.byteLength, nextBufferStart);
+        if (nextBuffer.byteLength) {
+            this.nextBufferStart = mp4file.appendBuffer(nextBuffer);
+        } else {
+            this.nextBufferStart = undefined;
+        }
+        LOG('[player] loadNextBuffer stop', nextBuffer.byteLength, nextBufferStart, this.nextBufferStart);
+
         if (nextBuffer.byteLength < currentBufferSize) {
-            LOG('[MP4Box] handleAppend flush');
+            LOG('[player] loadNextBuffer flush');
             this.mp4file.flush();
         }
 
         this.loading = false;
-
         if (!this.ready) {
+            LOG('[player] loadNextBuffer next');
             this.loadNextBuffer();
         }
     }

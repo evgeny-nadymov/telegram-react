@@ -1,4 +1,5 @@
 export function LOG(message, ...optionalParams) {
+    return;
     console.log(message, ...optionalParams);
 }
 

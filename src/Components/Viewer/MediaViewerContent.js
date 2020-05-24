@@ -20,6 +20,7 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
+import { LOG } from '../Player/Steaming/Utils/Common';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -47,7 +48,7 @@ class MediaViewerContent extends React.Component {
         const offset = start;
         const limit = end - start;
 
-        console.log('[GET_BUFFER] downloadFile');
+        // console.log('[GET_BUFFER] downloadFile');
 
         const result = await TdLibController.send({
             '@type': 'downloadFile',
@@ -58,7 +59,7 @@ class MediaViewerContent extends React.Component {
             synchronous: true
         });
 
-        console.log('[GET_BUFFER] readFilePart');
+        // console.log('[GET_BUFFER] readFilePart');
 
         const filePart = await TdLibController.send({
             '@type': 'readFilePart',
@@ -67,11 +68,11 @@ class MediaViewerContent extends React.Component {
             count: limit
         });
 
-        console.log('[GET_BUFFER] getArrayBuffer');
+        // console.log('[GET_BUFFER] getArrayBuffer');
 
         const buffer = await MediaViewerContent.getArrayBuffer(filePart.data);
 
-        console.log('[GET_BUFFER] result', result, buffer);
+        // console.log('[GET_BUFFER] result', result, buffer);
 
         return buffer;
     }
@@ -263,21 +264,72 @@ class MediaViewerContent extends React.Component {
     handleSeeking = () => {
         const video = this.videoRef.current;
 
-        const { currentTime } = video;
-        setTimeout(() => {
+        const { currentTime, buffered } = video;
+        LOG('[player] onSeeking', currentTime);
+
+        if (this.prevTimeout) {
+            clearTimeout(this.prevTimeout);
+            this.prevTimeout = null;
+        }
+
+        this.prevTimeout = setTimeout(() => {
+            LOG('[player] onSeeking timeout', currentTime === video.currentTime, currentTime, video.currentTime);
             if (currentTime === video.currentTime) {
-                this.handleSeeked(currentTime);
+                this.handleSeeked(currentTime, buffered);
             }
         }, 150);
     }
 
-    handleSeeked = time => {
+    handleSeeked = (time, buffered) => {
         const { source, supportsStreaming } = this.state;
         if (!supportsStreaming) return;
         if (!source) return;
 
-        source.seek(time);
+        source.seek(time, buffered);
     }
+
+    handlePlayerSeeked = () => {
+        const { source, supportsStreaming } = this.state;
+        if (!supportsStreaming) return;
+        if (!source) return;
+
+        const video = this.videoRef.current;
+
+        const { currentTime, buffered } = video;
+        LOG('[player] onPlayerSeeked', currentTime);
+
+        source.seek(currentTime, buffered);
+    };
+
+    handleTimeUpdate = () => {
+        const { source, supportsStreaming } = this.state;
+        if (!supportsStreaming) return;
+        if (!source) return;
+
+        const video = this.videoRef.current;
+        const { currentTime, duration, buffered } = video;
+        source.timeUpdate(currentTime, duration, buffered);
+    };
+
+    handleProgress = () => {
+        const { source, supportsStreaming } = this.state;
+        if (!supportsStreaming) return;
+        if (!source) return;
+
+        const video = this.videoRef.current;
+        const { currentTime, duration, buffered } = video;
+        source.timeUpdate(currentTime, duration, buffered);
+    };
+
+    handleWaiting = () => {
+        const { source, supportsStreaming } = this.state;
+        if (!supportsStreaming) return;
+        if (!source) return;
+
+        const video = this.videoRef.current;
+        const { currentTime, buffered } = video;
+        source.seek(currentTime, buffered);
+    };
 
     render() {
         const { chatId, messageId } = this.props;
@@ -360,6 +412,10 @@ class MediaViewerContent extends React.Component {
                             }
                         }}
                         onSeeking={this.handleSeeking}
+                        onSeeked={this.handlePlayerSeeked}
+                        onTimeUpdate={this.handleTimeUpdate}
+                        onWaiting={this.handleWaiting}
+                        onProgress={this.handleProgress}
                     >
                         {source}
                     </video>
@@ -460,7 +516,7 @@ class MediaViewerContent extends React.Component {
         return (
             <div className='media-viewer-content'>
                 {content}
-                { supportsStreaming && <a style={{ left: 0, top: 0, position: 'absolute' }} onClick={this.handleClick}>Load Buffer</a>}
+                {/*{ supportsStreaming && <a style={{ left: 0, top: 0, position: 'absolute' }} onClick={this.handleClick}>Load Buffer</a>}*/}
                 {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
