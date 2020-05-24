@@ -47,6 +47,7 @@ class TdLibController extends EventEmitter {
         };
 
         this.disableLog = true;
+        this.streaming = false;
     }
 
     init = location => {
@@ -154,6 +155,9 @@ class TdLibController extends EventEmitter {
         }
         if (params.has('clientlog')) {
             this.disableLog = !stringToBoolean(params.get('clientlog'));
+        }
+        if (params.has('streaming')) {
+            this.streaming = stringToBoolean(params.get('streaming'));
         }
     };
 

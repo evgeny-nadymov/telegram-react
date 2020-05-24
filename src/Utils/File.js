@@ -771,7 +771,7 @@ function cancelLoadVideoContent(video) {
 function loadVideoContent(store, video, message, useFileSize = true) {
     if (!video) return;
 
-    let { video: file } = video;
+    let { video: file, supports_streaming } = video;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -779,6 +779,8 @@ function loadVideoContent(store, video, message, useFileSize = true) {
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
+
+    if (supports_streaming && TdLibController.streaming) return;
 
     const chatId = message ? message.chat_id : 0;
     const messageId = message ? message.id : 0;
@@ -1496,7 +1498,7 @@ function getMediaFile(chatId, messageId, size) {
             const { animation } = content;
             if (animation) {
                 const { width, height, animation: file, mime_type } = animation;
-                return [width, height, file, mime_type];
+                return [width, height, file, mime_type, false];
             }
             break;
         }
@@ -1506,7 +1508,7 @@ function getMediaFile(chatId, messageId, size) {
                 const photoSize = getSize(photo.sizes, size);
                 if (photoSize) {
                     const { width, height, photo: file } = photoSize;
-                    return [width, height, file, ''];
+                    return [width, height, file, '', false];
                 }
             }
             break;
@@ -1515,7 +1517,7 @@ function getMediaFile(chatId, messageId, size) {
             const { document } = content;
             if (document) {
                 const { document: file, mime_type } = document;
-                return [50, 50, file, mime_type];
+                return [50, 50, file, mime_type, false];
             }
             break;
         }
@@ -1525,7 +1527,7 @@ function getMediaFile(chatId, messageId, size) {
                 const photoSize = getSize(photo.sizes, size);
                 if (photoSize) {
                     const { width, height, photo: file } = photoSize;
-                    return [width, height, file, ''];
+                    return [width, height, file, '', false];
                 }
             }
             break;
@@ -1536,26 +1538,26 @@ function getMediaFile(chatId, messageId, size) {
                 const { animation, document, photo, video } = web_page;
                 if (animation) {
                     const { width, height, animation: file, mime_type } = animation;
-                    return [width, height, file, mime_type];
+                    return [width, height, file, mime_type, false];
                 }
 
                 if (document) {
                     const { document: file, mime_type } = document;
-                    return [50, 50, file, mime_type];
+                    return [50, 50, file, mime_type, false];
                 }
 
                 if (photo) {
                     const photoSize = getSize(photo.sizes, size);
                     if (photoSize) {
                         const { width, height, photo: file } = photoSize;
-                        return [width, height, file, ''];
+                        return [width, height, file, '', false];
                     }
                     break;
                 }
 
                 if (video) {
-                    const { width, height, video: file, mime_type } = video;
-                    return [width, height, file, mime_type];
+                    const { width, height, video: file, mime_type, supports_streaming } = video;
+                    return [width, height, file, mime_type, supports_streaming && TdLibController.streaming];
                 }
             }
             break;
@@ -1563,8 +1565,8 @@ function getMediaFile(chatId, messageId, size) {
         case 'messageVideo': {
             const { video } = content;
             if (video) {
-                const { width, height, video: file, mime_type } = video;
-                return [width, height, file, mime_type];
+                const { width, height, video: file, mime_type, supports_streaming } = video;
+                return [width, height, file, mime_type, supports_streaming && TdLibController.streaming];
             }
             break;
         }
@@ -1572,7 +1574,7 @@ function getMediaFile(chatId, messageId, size) {
         }
     }
 
-    return [0, 0, null, ''];
+    return [0, 0, null, '', false];
 }
 
 export function cancelLoadIVMediaViewerContent(blocks) {

@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
+import MP4Source from '../Player/Steaming/MP4/MP4Source';
 import { getAnimationData, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
@@ -19,8 +20,6 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
-
-// const Lottie = React.lazy(() => import('./Lottie'));
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -34,20 +33,71 @@ class MediaViewerContent extends React.Component {
         this.updateAnimationData();
     }
 
+    static async getArrayBuffer(blob) {
+        return new Promise((resolve) => {
+            let fr = new FileReader();
+            fr.onload = () => {
+                resolve(fr.result);
+            };
+            fr.readAsArrayBuffer(blob);
+        })
+    }
+
+    static async getBufferAsync(fileId, start, end) {
+        const offset = start;
+        const limit = end - start;
+
+        console.log('[GET_BUFFER] downloadFile');
+
+        const result = await TdLibController.send({
+            '@type': 'downloadFile',
+            file_id: fileId,
+            priority: 1,
+            offset,
+            limit,
+            synchronous: true
+        });
+
+        console.log('[GET_BUFFER] readFilePart');
+
+        const filePart = await TdLibController.send({
+            '@type': 'readFilePart',
+            file_id: fileId,
+            offset,
+            count: limit
+        });
+
+        console.log('[GET_BUFFER] getArrayBuffer');
+
+        const buffer = await MediaViewerContent.getArrayBuffer(filePart.data);
+
+        console.log('[GET_BUFFER] result', result, buffer);
+
+        return buffer;
+    }
+
     static getDerivedStateFromProps(props, state) {
         const { chatId, messageId, size, t } = props;
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
-            let [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
-            file = FileStore.get(file.id) || file;
-
             let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
             thumbnail = FileStore.get(thumbnail.id) || thumbnail;
-
             const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getMediaMiniPreview(chatId, messageId);
 
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
+
+            let [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+            file = FileStore.get(file.id) || file;
+            let src = getSrc(file);
+            let source = null;
+            if (!src && supportsStreaming) {
+                const { video } = message.content;
+                if (video) {
+                    source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
+                    src = source.getURL();
+                }
+            }
 
             return {
                 prevChatId: chatId,
@@ -58,7 +108,9 @@ class MediaViewerContent extends React.Component {
                 width,
                 height,
                 file,
-                src: getSrc(file),
+                src,
+                source,
+                supportsStreaming,
                 mimeType,
                 text,
                 thumbnailWidth,
@@ -134,13 +186,14 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
+            const [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
 
             this.setState({
                 width,
                 height,
                 file,
                 src: getSrc(file),
+                supportsStreaming,
                 mimeType
             });
         }
@@ -164,14 +217,28 @@ class MediaViewerContent extends React.Component {
         const { chat_id, message_id } = update;
 
         if (chatId === chat_id && messageId === message_id) {
-            const [width, height, file, mimeType] = getMediaFile(chatId, messageId, size);
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
+
+            const [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+            let src = getSrc(file);
+            let source = null;
+            if (!src && supportsStreaming) {
+                const { video } = message.content;
+                if (video) {
+                    source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
+
+                    src = source.getURL();
+                }
+            }
+
             this.setState({
                 width,
                 height,
                 file,
-                src: getSrc(file),
+                src,
+                source,
+                supportsStreaming,
                 mimeType,
                 text
             });
@@ -182,11 +249,35 @@ class MediaViewerContent extends React.Component {
         if (event) event.stopPropagation();
     };
 
-    changeSpeed = speed => {
-        this.setState({
-            speed
-        });
+    handleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+
+        const { source } = this.state;
+        if (!source) return;
+
+        source.loadNextBuffer();
     };
+
+    handleSeeking = () => {
+        const video = this.videoRef.current;
+
+        const { currentTime } = video;
+        setTimeout(() => {
+            if (currentTime === video.currentTime) {
+                this.handleSeeked(currentTime);
+            }
+        }, 150);
+    }
+
+    handleSeeked = time => {
+        const { source, supportsStreaming } = this.state;
+        if (!supportsStreaming) return;
+        if (!source) return;
+
+        source.seek(time);
+    }
 
     render() {
         const { chatId, messageId } = this.props;
@@ -196,6 +287,7 @@ class MediaViewerContent extends React.Component {
             height,
             file,
             src,
+            supportsStreaming,
             mimeType,
             text,
             thumbnailWidth,
@@ -233,7 +325,7 @@ class MediaViewerContent extends React.Component {
                         className='media-viewer-content-video-player'
                         onClick={this.handleContentClick}
                         controls
-                        autoPlay
+                        autoPlay={!supportsStreaming}
                         width={videoWidth}
                         height={videoHeight}
                         onPlay={() => {
@@ -267,10 +359,11 @@ class MediaViewerContent extends React.Component {
                                 });
                             }
                         }}
+                        onSeeking={this.handleSeeking}
                     >
                         {source}
                     </video>
-                    {!isPlaying &&
+                    {!isPlaying && !supportsStreaming &&
                         ((thumbnailSrc || miniSrc) ? (
                             <img
                                 className={classNames('media-viewer-content-video-thumbnail', {
@@ -367,7 +460,8 @@ class MediaViewerContent extends React.Component {
         return (
             <div className='media-viewer-content'>
                 {content}
-                <FileProgress file={file} zIndex={2} />
+                { supportsStreaming && <a style={{ left: 0, top: 0, position: 'absolute' }} onClick={this.handleClick}>Load Buffer</a>}
+                {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>
         );
