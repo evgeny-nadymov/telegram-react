@@ -14,7 +14,7 @@ export default class MP4Source {
         this.nextBufferStart = 0;
         this.mediaSource = null;
         this.ready = false;
-        this.bufferedTime = 30;
+        this.bufferedTime = 40;
 
         this.beforeMoovBufferSize = 32 * 1024;
         this.moovBufferSize = 512 * 1024;
@@ -30,10 +30,10 @@ export default class MP4Source {
         this.loading = false;
         this.url = null;
 
-        this.init();
+        this.init(video.duration);
     }
 
-    init() {
+    init(duration) {
         const mediaSource = new MediaSource();
         mediaSource.addEventListener('sourceopen', async () => {
             LOG('[MediaSource] sourceopen start', this.mediaSource, this);
@@ -54,9 +54,14 @@ export default class MP4Source {
                 this.currentBufferSize = this.bufferSize;
                 const { isFragmented, timescale, fragment_duration, duration } = info;
 
-                this.mediaSource.duration = isFragmented
-                    ? fragment_duration / timescale
-                    : duration / timescale;
+                if (!fragment_duration && !duration) {
+                    this.mediaSource.duration = duration;
+                    this.bufferedTime = duration;
+                } else {
+                    this.mediaSource.duration = isFragmented
+                        ? fragment_duration / timescale
+                        : duration / timescale;
+                }
 
                 for (let i = 0; i < info.tracks.length; i++) {
                     this.addSourceBuffer(mp4File, this.mediaSource, info.tracks[i]);
@@ -81,9 +86,14 @@ export default class MP4Source {
                 const isLast = (sampleNum + this.nbSamples) > sourceBuffer.nb_samples;
 
                 LOG('[MP4Box] onSegment', id, buffer, `${sampleNum}/${sourceBuffer.nb_samples}`, isLast, sourceBuffer.timestampOffset);
+
+                if (mediaSource.readyState !== 'open') {
+                    return;
+                }
+
                 sourceBuffer.pendingUpdates.push({ id, buffer, isLast });
                 if (sourceBuffer.initSegs && !sourceBuffer.updating) {
-                    this.handleSourceBufferUpdateEnd({ target: sourceBuffer });
+                    this.handleSourceBufferUpdateEnd({ target: sourceBuffer, mediaSource: this.mediaSource });
                 }
             };
 
@@ -94,10 +104,10 @@ export default class MP4Source {
             this.loadNextBuffer();
         });
         mediaSource.addEventListener('sourceended', () => {
-            LOG('[MP3Source] sourceended', mediaSource.readyState);
+            LOG('[MediaSource] sourceended', mediaSource.readyState);
         });
         mediaSource.addEventListener('sourceclose', () => {
-            LOG('[MP3Source] sourceclose', mediaSource.readyState);
+            LOG('[MediaSource] sourceclose', mediaSource.readyState);
         });
 
         this.mediaSource = mediaSource;
@@ -129,13 +139,18 @@ export default class MP4Source {
 
     handleSourceBufferUpdateEnd = event => {
         const sourceBuffer = event.target;
+        const mediaSource = event.mediaSource;
 
         // const video = document.getElementById('v');
 
-        logSourceBufferRanges(sourceBuffer, 0, 0);
-
         if (!sourceBuffer) return;
         if (sourceBuffer.updating) return;
+
+        try {
+            logSourceBufferRanges(sourceBuffer, 0, 0);
+        } catch (e) {
+            console.error('[sb] log', sourceBuffer, mediaSource);
+        }
 
         const { pendingUpdates } = sourceBuffer;
         if (!pendingUpdates) return;

@@ -377,7 +377,7 @@ class MediaViewerContent extends React.Component {
                         className='media-viewer-content-video-player'
                         onClick={this.handleContentClick}
                         controls
-                        autoPlay={!supportsStreaming}
+                        autoPlay
                         width={videoWidth}
                         height={videoHeight}
                         onPlay={() => {
@@ -416,6 +416,7 @@ class MediaViewerContent extends React.Component {
                         onTimeUpdate={this.handleTimeUpdate}
                         onWaiting={this.handleWaiting}
                         onProgress={this.handleProgress}
+                        poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}
                     >
                         {source}
                     </video>
