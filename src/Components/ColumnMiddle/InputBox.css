@@ -27,7 +27,7 @@
 
 .inputbox-icon-button {
     padding: 6px;
-    margin: 7px;
+    margin: 9px;
 }
 
 .inputbox-bubble {
@@ -41,6 +41,7 @@
     box-shadow: 0 1px 2px 0 rgba(16, 35, 47, 0.15);
     margin-right: 9px;
     background: var(--message-in-background);
+    min-height: 54px;
 }
 
 .inputbox-bubble::after {
@@ -107,8 +108,7 @@
 }
 
 .inputbox-left-column {
-    margin-right: 1px;
-    width: 48px;
+
 }
 
 .inputbox-middle-column {
@@ -118,7 +118,6 @@
 }
 
 .inputbox-right-column {
-    margin-left: 20px;
     flex-shrink: 0;
     flex-grow: 0;
 }
