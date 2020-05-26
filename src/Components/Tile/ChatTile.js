@@ -12,7 +12,7 @@ import { withTranslation } from 'react-i18next';
 import BookmarkBorderIcon from '../../Assets/Icons/Saved';
 import DeletedAccountIcon from '../../Assets/Icons/DeletedAccount';
 import OnlineStatus from './OnlineStatus';
-import { getChatLetters, isMeChat, isPrivateChat, isDeletedPrivateChat } from '../../Utils/Chat';
+import { getChatLetters, isMeChat, isPrivateChat, isDeletedPrivateChat, getChatTypeId } from '../../Utils/Chat';
 import { getSrc, loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -154,7 +154,7 @@ class ChatTile extends Component {
                     )}
                     style={style}
                     onClick={this.handleSelect}>
-                    <div className={classNames('tile-photo', 'tile_color_4', { pointer: onSelect })}>
+                    <div className={classNames('tile-photo', 'tile_color_6', { pointer: onSelect })}>
                         <div className='tile-saved-messages'>
                             <BookmarkBorderIcon fontSize={big ? 'large' : 'default'} />
                         </div>
@@ -172,7 +172,8 @@ class ChatTile extends Component {
         const src = getSrc(photo ? photo.small : null);
         const tileLoaded = src && loaded;
 
-        const tileColor = `tile_color_${(Math.abs(chatId) % 8) + 1}`;
+        const typeId = getChatTypeId(chatId);
+        const tileColor = `tile_color_${(Math.abs(typeId) % 7) + 1}`;
 
         return (
             <div

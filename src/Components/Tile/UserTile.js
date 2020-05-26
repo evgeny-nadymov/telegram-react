@@ -194,7 +194,7 @@ class UserTile extends Component {
         const src = getSrc(user && user.profile_photo ? user.profile_photo.small : null);
         const tileLoaded = src && loaded;
 
-        const tileColor = `tile_color_${(Math.abs(userId) % 8) + 1}`;
+        const tileColor = `tile_color_${(Math.abs(userId) % 7) + 1}`;
 
         return (
             <div

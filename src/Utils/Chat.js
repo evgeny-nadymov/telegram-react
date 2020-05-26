@@ -1462,6 +1462,27 @@ export function isCreator(chatId) {
     return false;
 }
 
+export function getChatTypeId(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return 0;
+
+    const { type } = chat;
+    if (!type) return 0;
+
+    switch (type['@type']) {
+        case 'chatTypeSupergroup': {
+            return type.supergroup_id;
+        }
+        case 'chatTypeBasicGroup': {
+            return type.basic_group_id;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return type.user_id;
+        }
+    }
+}
+
 export {
     showChatDraft,
     getChatDraft,

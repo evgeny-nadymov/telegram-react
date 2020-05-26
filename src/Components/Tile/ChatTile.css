@@ -34,28 +34,25 @@
 }
 
 .tile_color_1 {
-    background: #cc90e2;
+    background: #e36f74;
 }
 .tile_color_2 {
-    background: #80d066;
+    background: #fca76f;
 }
 .tile_color_3 {
-    background: #ecd074;
+    background: #a693e9;
 }
 .tile_color_4 {
-    background: #6fb1e4;
+    background: #78ca5c;
 }
 .tile_color_5 {
-    background: #e57979;
+    background: #6ac9cc;
 }
 .tile_color_6 {
-    background: #f98bae;
+    background: #50a2e9;
 }
 .tile_color_7 {
-    background: #73cdd0;
-}
-.tile_color_8 {
-    background: #fba76f;
+    background: #f078ae;
 }
 
 .tile-text {

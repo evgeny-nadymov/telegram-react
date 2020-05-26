@@ -139,7 +139,7 @@ class SharedLink extends React.Component {
             }
         }
 
-        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 8) + 1}`;
+        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 7) + 1}`;
 
         return (
             <>
