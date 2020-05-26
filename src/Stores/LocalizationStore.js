@@ -40,6 +40,7 @@ i18n.use(initReactI18next).init({
                 GeneralSettings: 'General Settings'
             },
             local: {
+                CopyMessageLink: 'Copy Message Link',
                 DragToReposition: 'Drag to Reposition',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Left channel',
@@ -122,6 +123,7 @@ i18n.use(initReactI18next).init({
                 GeneralSettings: 'Основные настройки'
             },
             local: {
+                CopyMessageLink: 'Копировать ссылку на сообщение',
                 DragToReposition: 'Перетащите, чтобы изменить положение',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',
                 LeftChannel: 'Канал покинут',

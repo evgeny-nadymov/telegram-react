@@ -7,6 +7,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from '../../Utils/HOC';
+import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -14,11 +16,13 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import IconButton from '@material-ui/core/IconButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
+import CloseIcon from '../../Assets/Icons/Close';
 import CopyIcon from '../../Assets/Icons/Copy';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import FrameCheckIcon from '../../Assets/Icons/FrameCheck';
@@ -28,12 +32,14 @@ import ShareIcon from '../../Assets/Icons/Share';
 import StopIcon from '../../Assets/Icons/Stop';
 import PinIcon from '../../Assets/Icons/Pin2';
 import UnpinIcon from '../../Assets/Icons/Pin2';
+import { isPublicSupergroup } from '../../Utils/Supergroup';
 import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isMessagePinned } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
 import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
 import { pinMessage, unpinMessage } from '../../Actions/Message';
+import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
@@ -86,12 +92,56 @@ class MessageMenu extends React.PureComponent {
     };
 
     handleCopyLink = event => {
-        const { onClose, copyLink } = this.props;
+        const { onClose, copyLink, t } = this.props;
 
         onClose(event);
 
         if (!copyLink) return;
+
         copy(copyLink);
+        this.handleScheduledAction(t('LinkCopied'));
+    };
+
+    handleCopyPublicMessageLink = async event => {
+        const { onClose, chatId, messageId, t } = this.props;
+
+        onClose(event);
+
+        const httpUrl = await TdLibController.send({
+            '@type': 'getPublicMessageLink',
+            chat_id: chatId,
+            message_id: messageId,
+            for_album: false
+        });
+
+        if (!httpUrl) return;
+        const { link: copyLink } = httpUrl;
+
+        if (!copyLink) return;
+
+        copy(copyLink);
+        this.handleScheduledAction(t('LinkCopied'));
+    };
+
+    handleScheduledAction = message => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
+
+        const snackKey = enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: [
+                <IconButton
+                    key='close'
+                    aria-label='Close'
+                    color='inherit'
+                    className='notification-close-button'
+                    onClick={() => {
+                        closeSnackbar(snackKey);
+                    }}>
+                    <CloseIcon />
+                </IconButton>
+            ]
+        });
     };
 
     handleReply = event => {
@@ -196,6 +246,7 @@ class MessageMenu extends React.PureComponent {
         const canBeEdited = canMessageBeEdited(chatId, messageId);
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
         const canCopyLink = Boolean(copyLink);
+        const canCopyPublicMessageLink = isPublicSupergroup(chatId);
 
         return (
             <>
@@ -214,7 +265,14 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
-                        {/*<MenuItem onClick={this.handleDownload}>{t('Download')}</MenuItem>*/}
+                        {canCopyPublicMessageLink && (
+                            <MenuItem onClick={this.handleCopyPublicMessageLink}>
+                                <ListItemIcon>
+                                    <CopyIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={t('CopyMessageLink')} />
+                            </MenuItem>
+                        )}
                         {canCopyLink && (
                             <MenuItem onClick={this.handleCopyLink}>
                                 <ListItemIcon>
@@ -333,4 +391,9 @@ MessageMenu.propTypes = {
     copyLink: PropTypes.string
 };
 
-export default withTranslation()(MessageMenu);
+const enhance = compose(
+    withTranslation(),
+    withSnackbar
+);
+
+export default enhance(MessageMenu);
