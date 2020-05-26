@@ -18,8 +18,8 @@ export default class MP4Source {
 
         this.beforeMoovBufferSize = 32 * 1024;
         this.moovBufferSize = 512 * 1024;
-        this.bufferSize = 256 * 1024;
-        this.seekBufferSize = 512 * 1024;
+        this.bufferSize = 1024 * 1024;
+        this.seekBufferSize = 1024 * 1024;
 
         this.currentBufferSize = this.beforeMoovBufferSize;
         this.nbSamples = 10;
@@ -33,7 +33,7 @@ export default class MP4Source {
         this.init(video.duration);
     }
 
-    init(duration) {
+    init(videoDuration) {
         const mediaSource = new MediaSource();
         mediaSource.addEventListener('sourceopen', async () => {
             LOG('[MediaSource] sourceopen start', this.mediaSource, this);
@@ -55,8 +55,8 @@ export default class MP4Source {
                 const { isFragmented, timescale, fragment_duration, duration } = info;
 
                 if (!fragment_duration && !duration) {
-                    this.mediaSource.duration = duration;
-                    this.bufferedTime = duration;
+                    this.mediaSource.duration = videoDuration;
+                    this.bufferedTime = videoDuration;
                 } else {
                     this.mediaSource.duration = isFragmented
                         ? fragment_duration / timescale
@@ -91,7 +91,7 @@ export default class MP4Source {
                     return;
                 }
 
-                sourceBuffer.pendingUpdates.push({ id, buffer, isLast });
+                sourceBuffer.pendingUpdates.push({ id, buffer, sampleNum, isLast });
                 if (sourceBuffer.initSegs && !sourceBuffer.updating) {
                     this.handleSourceBufferUpdateEnd({ target: sourceBuffer, mediaSource: this.mediaSource });
                 }
@@ -138,27 +138,21 @@ export default class MP4Source {
     }
 
     handleSourceBufferUpdateEnd = event => {
-        const sourceBuffer = event.target;
-        const mediaSource = event.mediaSource;
-
-        // const video = document.getElementById('v');
+        const { target: sourceBuffer } = event;
+        const { mediaSource, mp4file } = this;
 
         if (!sourceBuffer) return;
         if (sourceBuffer.updating) return;
 
-        try {
-            logSourceBufferRanges(sourceBuffer, 0, 0);
-        } catch (e) {
-            console.error('[sb] log', sourceBuffer, mediaSource);
-        }
+        logSourceBufferRanges(sourceBuffer, 0, 0);
 
         const { pendingUpdates } = sourceBuffer;
         if (!pendingUpdates) return;
         if (!pendingUpdates.length) {
-            if (sourceBuffer.isLast && this.mediaSource.readyState === 'open') {
+            if (sourceBuffer.isLast && mediaSource.readyState === 'open') {
                 LOG('[SourceBuffer] updateend endOfStream start', sourceBuffer.id);
-                if (Array.from(this.mediaSource.sourceBuffers).every(x => !x.pendingUpdates.length && !x.updating)) {
-                    this.mediaSource.endOfStream();
+                if (Array.from(mediaSource.sourceBuffers).every(x => !x.pendingUpdates.length && !x.updating)) {
+                    mediaSource.endOfStream();
                     LOG('[SourceBuffer] updateend endOfStream stop', sourceBuffer.id);
                 }
             }
@@ -168,7 +162,12 @@ export default class MP4Source {
         const update = pendingUpdates.shift();
         if (!update) return;
 
-        const { buffer, isLast } = update;
+        const { id, buffer, sampleNum, isLast } = update;
+
+        if (sampleNum) {
+            LOG('[SourceBuffer] updateend releaseUsedSamples', id, sampleNum);
+            mp4file.releaseUsedSamples(id, sampleNum);
+        }
 
         LOG('[SourceBuffer] updateend end', sourceBuffer.id, sourceBuffer.pendingUpdates.length);
         sourceBuffer.isLast = isLast;
