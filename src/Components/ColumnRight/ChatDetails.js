@@ -229,7 +229,7 @@ class ChatDetails extends React.Component {
 
         copy(usernameLink + username);
 
-        this.handleScheduledAction(t('TextCopied'));
+        this.handleScheduledAction(t('LinkCopied'));
     };
 
     handleScheduledAction = message => {
