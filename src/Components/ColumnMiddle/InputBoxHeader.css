@@ -8,12 +8,12 @@
 .inputbox-header {
     display: flex;
     flex-direction: row;
-    align-items: flex-end;
-    margin-bottom: -12px;
+    align-items: center;
+    margin-bottom: -18px;
 }
 
 .inputbox-header-left-column {
-    margin-right: 2px;
+
 }
 
 .inputbox-header-middle-column {
@@ -23,6 +23,5 @@
 }
 
 .inputbox-header-right-column {
-    margin-left: 20px;
-    min-width: 48px;
+    min-width: 54px;
 }
