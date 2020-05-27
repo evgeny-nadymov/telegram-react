@@ -14,10 +14,11 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import { isGroupChat } from '../../Utils/Chat';
+import { modalManager } from '../../Utils/Modal';
 import { openChat, openUser } from '../../Actions/Client';
 import TdLibController from '../../Controllers/TdLibController';
 import './MentionLink.css';
-import { isGroupChat } from '../../Utils/Chat';
 
 class MentionLink extends React.Component {
     constructor(props) {
@@ -85,6 +86,7 @@ class MentionLink extends React.Component {
                 </a>
                 {error && (
                     <Dialog
+                        manager={modalManager}
                         transitionDuration={0}
                         open={true}
                         onClose={this.handleClose}

@@ -30,6 +30,7 @@ import CreatePollOption from './CreatePollOption';
 import { focusNode } from '../../Utils/Component';
 import { utils } from '../../Utils/Key';
 import { hasPollData, isValidPoll } from '../../Utils/Poll';
+import { modalManager } from '../../Utils/Modal';
 import {
     NOTIFICATION_AUTO_HIDE_DURATION_MS,
     POLL_OPTIONS_MAX_COUNT,
@@ -474,6 +475,7 @@ class CreatePollDialog extends React.Component {
                 <Dialog
                     className={classNames('create-poll-dialog', { 'create-quiz-dialog': quizPoll })}
                     open
+                    manager={modalManager}
                     transitionDuration={0}
                     onClose={this.handleClose}
                     aria-labelledby='dialog-title'>
@@ -569,6 +571,7 @@ class CreatePollDialog extends React.Component {
                 <Dialog
                     className='create-poll-dialog-root'
                     open={confirm}
+                    manager={modalManager}
                     transitionDuration={0}
                     onClose={this.handleConfirmationClose}
                     aria-labelledby='dialog-title'>

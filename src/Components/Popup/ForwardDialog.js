@@ -22,6 +22,7 @@ import { canSendMessages, getChatTitle, getChatUsername, isSupergroup } from '..
 import { loadChatsContent } from '../../Utils/File';
 import { getCyrillicInput, getLatinInput } from '../../Utils/Language';
 import { clearSelection, forward } from '../../Actions/Client';
+import { modalManager } from '../../Utils/Modal';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -453,6 +454,8 @@ class ForwardDialog extends React.Component {
         return (
             <Dialog
                 open
+                manager={modalManager}
+                transitionDuration={0}
                 onClose={this.handleClose}
                 aria-labelledby='forward-dialog-title'
                 aria-describedby='forward-dialog-description'

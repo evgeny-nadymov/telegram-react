@@ -19,14 +19,13 @@ class KeyboardManager {
     }
 
     handleKeyDown = event => {
+        // console.log('[keydown KeyboardManager] handleKeyDown', this.handlers.length, event.key);
+
         const { handlers } = this;
         if (!handlers.length) return;
 
         const handler = handlers[handlers.length - 1];
         if (handler) {
-            // event.preventDefault();
-            // event.stopPropagation();
-
             const { onKeyDown } = handler;
             if (onKeyDown) {
                 onKeyDown(event);
@@ -35,12 +34,12 @@ class KeyboardManager {
     };
 
     add(handler) {
-        // console.log('[sm] add', page);
+        // console.log('[KeyboardManager] add', handler);
         this.handlers.push(handler);
     }
 
     remove(handler) {
-        // console.log('[sm] remove', page);
+        // console.log('[KeyboardManager] remove', handler);
         const index = this.handlers.indexOf(handler);
         if (index === -1) return;
 

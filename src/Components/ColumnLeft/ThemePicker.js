@@ -26,6 +26,7 @@ import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import indigo from '@material-ui/core/colors/indigo';
 import deepPurple from '@material-ui/core/colors/deepPurple';
+import { modalManager } from '../../Utils/Modal';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './ThemePicker.css';
 
@@ -114,6 +115,7 @@ class ThemePicker extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={open}
                 onClose={this.handleClose}

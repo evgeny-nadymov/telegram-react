@@ -25,11 +25,14 @@ import NativeAppPage from './Components/NativeAppPage';
 import registerServiceWorker from './registerServiceWorker';
 import { isMobile } from './Utils/Common';
 import { loadData } from './Utils/Phone';
+import KeyboardManager, { KeyboardHandler } from './Components/Additional/KeyboardManager';
+import { openPinnedChat } from './Actions/Chat';
+import { modalManager } from './Utils/Modal';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
-import ChatStore from './Stores/ChatStore';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore from './Stores/AuthorizationStore';
+import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
 
@@ -51,7 +54,77 @@ class TelegramApp extends Component {
             nativeMobile: isMobile(),
             isSmall: window.innerWidth < 800
         };
+
+        this.replyMessageId = 0;
+        this.editMessageId = 0;
+        this.keyboardHandler = new KeyboardHandler(this.handleKeyDown);
+        this.keyMap = new Map();
+
+        document.addEventListener('keyup', event => {
+            this.keyMap.delete(event.key);
+        });
     }
+
+    handleKeyDown = async event => {
+        const { altKey, ctrlKey, keyCode, key, metaKey, repeat, shiftKey } = event;
+
+        this.keyMap.set(key, key);
+
+        const { authorizationState, chatId } = AppStore;
+        if (!authorizationState) return;
+        if (authorizationState['@type'] !== 'authorizationStateReady') return;
+        if (this.keyMap.size > 3) return;
+
+        switch (key) {
+            case 'Escape': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                    if (this.editMessageId) return;
+                    if (this.replyMessageId) return;
+                    if (!chatId) return;
+
+                    TdLibController.setChatId(0);
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            case '0': {
+                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                    if (this.editMessageId) return;
+                    if (this.replyMessageId) return;
+
+                    const chat = await TdLibController.send({
+                        '@type': 'createPrivateChat',
+                        user_id: UserStore.getMyId(),
+                        force: true
+                    });
+
+                    if (!chat) return;
+
+                    TdLibController.setChatId(chat.id);
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5': {
+                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                    if (this.editMessageId) return;
+                    if (this.replyMessageId) return;
+
+                    openPinnedChat(Number(key) - 1);
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                break;
+            }
+        }
+    };
 
     componentWillMount() {
         const { location } = this.props;
@@ -64,19 +137,43 @@ class TelegramApp extends Component {
         TdLibController.on('update', this.onUpdate);
 
         AppStore.on('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.on('updateFatalError', this.onUpdateFatalError);
+        MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        AppStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
+        KeyboardManager.add(this.keyboardHandler);
     }
 
     componentWillUnmount() {
         TdLibController.off('update', this.onUpdate);
 
         AppStore.off('clientUpdateAppInactive', this.onClientUpdateAppInactive);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('updateFatalError', this.onUpdateFatalError);
+        MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
+        AppStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
+        KeyboardManager.remove(this.keyboardHandler);
     }
+
+    onClientUpdateEditMessage = update => {
+        const { messageId } = update;
+
+        this.editMessageId = messageId;
+    };
+
+    onClientUpdateReply = update => {
+        const { messageId } = update;
+
+        this.replyMessageId = messageId;
+    };
+
+    onClientUpdateFocusWindow = update => {
+        this.keyMap.clear();
+    };
 
     onClientUpdateTdLibDatabaseExists = update => {
         const { exists } = update;
@@ -151,10 +248,6 @@ class TelegramApp extends Component {
     handleDestroy = () => {
         this.setState({ fatalError: false });
         TdLibController.send({ '@type': 'destroy' });
-    };
-
-    handleKeyDown = event => {
-        //console.log('KeyDown', event);
     };
 
     render() {
@@ -239,9 +332,11 @@ class TelegramApp extends Component {
                 className={theme.palette.type === 'dark' ? 'dark' : 'light'}
                 onDragOver={this.handleDragOver}
                 onDrop={this.handleDrop}
-                onKeyDown={this.handleKeyDown}>
+                // onKeyDown={KeyboardManager.handleKeyDown} tabIndex={-1}
+            >
                 {page}
                 <Dialog
+                    manager={modalManager}
                     transitionDuration={0}
                     open={fatalError}
                     onClose={this.handleRefresh}
@@ -267,110 +362,11 @@ class TelegramApp extends Component {
     }
 }
 
-const keyMap = new Map();
-window.keyMap = keyMap;
-
-async function openPinnedChat(index) {
-    const chats = await TdLibController.send({
-        '@type': 'getChats',
-        offset_order: '9223372036854775807',
-        offset_chat_id: 0,
-        limit: 10
-    });
-
-    if (chats) {
-        let pinnedIndex = -1;
-        for (let i = 0; i < chats.chat_ids.length; i++) {
-            const chat = ChatStore.get(chats.chat_ids[i]);
-            if (chat && chat.is_pinned) {
-                pinnedIndex++;
-            }
-
-            if (pinnedIndex === index) {
-                TdLibController.setChatId(chat.id);
-                return;
-            }
-        }
-    }
-}
-
-document.addEventListener('keyup', event => {
-    keyMap.delete(event.key);
-    //console.log('keyup key=' + event.key, keyMap);
-});
-
-document.addEventListener('keydown', async event => {
-    keyMap.set(event.key, event.key);
-    //console.log('keydown key=' + event.key, event.altKey, event.ctrlKey, event, keyMap);
-
-    const { authorizationState } = AppStore;
-    if (!authorizationState) return;
-    if (authorizationState['@type'] !== 'authorizationStateReady') return;
-    if (keyMap.size > 3) return;
-
-    if (event.altKey && event.ctrlKey) {
-        switch (event.key) {
-            case '0': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                const chat = await TdLibController.send({
-                    '@type': 'createPrivateChat',
-                    user_id: UserStore.getMyId(),
-                    force: true
-                });
-
-                if (chat) {
-                    TdLibController.setChatId(chat.id);
-                }
-                break;
-            }
-            case '1': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                openPinnedChat(0);
-                break;
-            }
-            case '2': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                openPinnedChat(1);
-                break;
-            }
-            case '3': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                openPinnedChat(2);
-                break;
-            }
-            case '4': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                openPinnedChat(3);
-                break;
-            }
-            case '5': {
-                event.preventDefault();
-                event.stopPropagation();
-
-                openPinnedChat(4);
-                break;
-            }
-        }
-    }
-});
-
 window.hasFocus = true;
 
 // set offline on page lost focus
 // console.log('[ns] window.onblur attach');
 window.onblur = function() {
-    keyMap.clear();
-
     window.hasFocus = false;
 
     TdLibController.clientUpdate({
@@ -382,8 +378,6 @@ window.onblur = function() {
 // set online on page get focus
 // console.log('[ns] window.onfocus attach');
 window.onfocus = function() {
-    keyMap.clear();
-
     window.hasFocus = true;
 
     TdLibController.clientUpdate({

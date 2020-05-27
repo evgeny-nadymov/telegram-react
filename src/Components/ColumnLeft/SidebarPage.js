@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes, { number } from 'prop-types';
 import { Slide } from '@material-ui/core';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
+import { modalManager } from '../../Utils/Modal';
 import './SidebarPage.css';
 
 class SidebarPage extends React.Component {
@@ -21,6 +22,10 @@ class SidebarPage extends React.Component {
     handleKeyDown = event => {
         switch (event.key) {
             case 'Escape':
+                if (modalManager.modals.length > 0) {
+                    return;
+                }
+
                 const { onClose } = this.props;
                 if (onClose) {
                     event.preventDefault();

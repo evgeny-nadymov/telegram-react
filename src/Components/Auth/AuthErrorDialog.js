@@ -12,6 +12,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import { modalManager } from '../../Utils/Modal';
 import TdLibController from '../../Controllers/TdLibController';
 
 class AuthErrorDialog extends React.Component {
@@ -66,6 +67,7 @@ class AuthErrorDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={this.state.open}
                 onKeyDown={this.handleKeyDown}

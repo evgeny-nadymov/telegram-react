@@ -44,6 +44,7 @@ import {
     isVideoMessage
 } from '../../Utils/Message';
 import { between } from '../../Utils/Common';
+import { modalManager } from '../../Utils/Modal';
 import { PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -145,8 +146,9 @@ class MediaViewer extends React.Component {
 
     onKeyDown = event => {
         if (event.keyCode === 27) {
-            const { deleteConfirmationOpened } = this.state;
-            if (deleteConfirmationOpened) return;
+            if (modalManager.modals.length > 0) {
+                return;
+            }
 
             this.handleClose();
         } else if (event.keyCode === 39) {
@@ -763,6 +765,7 @@ class MediaViewer extends React.Component {
         }
         const deleteConfirmation = deleteConfirmationOpened ? (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={deleteConfirmationOpened}
                 onClose={this.handleDialogClose}

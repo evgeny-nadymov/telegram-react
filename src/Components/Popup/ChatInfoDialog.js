@@ -8,6 +8,7 @@
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import ChatInfo from '../ColumnRight/ChatInfo';
+import { modalManager } from '../../Utils/Modal';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ChatInfoDialog.css';
@@ -59,6 +60,7 @@ class ChatInfoDialog extends React.Component {
         return (
             <Dialog
                 open
+                manager={modalManager}
                 transitionDuration={0}
                 onClose={this.handleClose}
                 classes={{

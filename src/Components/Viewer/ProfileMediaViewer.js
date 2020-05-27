@@ -24,6 +24,7 @@ import { forward, setProfileMediaViewerContent } from '../../Actions/Client';
 import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
+import { modalManager } from '../../Utils/Modal';
 import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -115,8 +116,9 @@ class ProfileMediaViewer extends React.Component {
         event.stopPropagation();
 
         if (event.keyCode === 27) {
-            const { deleteConfirmationOpened } = this.state;
-            if (deleteConfirmationOpened) return;
+            if (modalManager.modals.length > 0) {
+                return;
+            }
 
             this.handleClose();
         } else if (event.keyCode === 39) {

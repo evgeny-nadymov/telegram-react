@@ -19,6 +19,7 @@ import ArrowBackIcon from '../../../Assets/Icons/Back';
 import Session from '../../Tile/Session';
 import StopIcon from '../../../Assets/Icons/Stop';
 import SectionHeader from '../SectionHeader';
+import { modalManager } from '../../../Utils/Modal';
 import TdLibController from '../../../Controllers/TdLibController';
 import './ActiveSessions.css';
 
@@ -141,6 +142,7 @@ class ActiveSessions extends React.Component {
                     )}
                 </div>
                 <Dialog
+                    manager={modalManager}
                     transitionDuration={0}
                     open={open}
                     onClose={this.handleCloseConfirmation}
@@ -161,6 +163,7 @@ class ActiveSessions extends React.Component {
                     </DialogActions>
                 </Dialog>
                 <Dialog
+                    manager={modalManager}
                     transitionDuration={0}
                     open={openAll}
                     onClose={this.handleCloseAllConfirmation}

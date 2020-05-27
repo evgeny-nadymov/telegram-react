@@ -19,6 +19,7 @@ import { canPinMessages } from '../../Utils/Chat';
 import { getContent, getReplyMinithumbnail, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
 import { loadMessageContents } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
+import { modalManager } from '../../Utils/Modal';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -262,6 +263,7 @@ class PinnedMessage extends React.Component {
                 </div>
                 {confirm && (
                     <Dialog
+                        manager={modalManager}
                         transitionDuration={0}
                         open
                         onClose={this.handleClose}

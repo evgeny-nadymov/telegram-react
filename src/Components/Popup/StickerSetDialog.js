@@ -19,6 +19,7 @@ import ShareStickerSetButton from './ShareStickerSetButton';
 import Sticker, { StickerSourceEnum } from '../Message/Media/Sticker';
 import StickerPreview from '../ColumnMiddle/StickerPreview';
 import { loadStickerContent, loadStickerSetContent } from '../../Utils/File';
+import { modalManager } from '../../Utils/Modal';
 import { STICKER_SMALL_DISPLAY_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import StickerStore from '../../Stores/StickerStore';
@@ -269,6 +270,7 @@ class StickerSetDialog extends React.Component {
             <Dialog
                 className='sticker-set-dialog'
                 open
+                manager={modalManager}
                 transitionDuration={0}
                 onClose={this.handleClose}
                 aria-labelledby='sticker-set-dialog-title-text'

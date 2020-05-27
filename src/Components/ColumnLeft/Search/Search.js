@@ -21,6 +21,7 @@ import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
+import { modalManager } from '../../../Utils/Modal';
 import { SCROLL_PRECISION, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
@@ -47,12 +48,16 @@ class Search extends React.Component {
     }
 
     componentWillUnmount() {
-        KeyboardManager.add(this.keyboardHandler);
+        KeyboardManager.remove(this.keyboardHandler);
     }
 
     handleKeyDown = event => {
         switch (event.key) {
             case 'Escape':
+                if (modalManager.modals.length > 0) {
+                    return;
+                }
+
                 event.preventDefault();
                 event.stopPropagation();
                 event.target.blur();

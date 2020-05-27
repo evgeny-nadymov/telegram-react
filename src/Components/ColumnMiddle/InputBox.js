@@ -34,6 +34,8 @@ import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
 import { editMessage, replyMessage } from '../../Actions/Client';
+import UserStore from '../../Stores/UserStore';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -739,29 +741,44 @@ class InputBox extends Component {
         const { chatId, editMessageId, replyToMessageId } = this.state;
         if (editMessageId) {
             editMessage(chatId, 0);
+            return true;
         } else if (replyToMessageId) {
             replyMessage(chatId, 0);
+            return true;
         }
+
+        return false;
     };
 
     handleKeyDown = event => {
-        const { altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey } = event;
+        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
+        const { editMessageId, replyToMessageId } = this.state;
 
-        // console.log('[k] handleKeyDown', altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey);
+        // console.log('[keydown] input.handleKeyDown', key, keyCode, altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey);
 
         switch (keyCode) {
-            // enter
+            // ctrl+alt+0 fix
+            case 48: {
+                if (altKey && ctrlKey && !metaKey && !shiftKey) {
+                    if (editMessageId) return;
+                    if (replyToMessageId) return;
+
+                    event.preventDefault();
+                }
+
+                break;
+            }
             case 13: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) {
-                        // new line on Enter+Cmd or Enter+Ctrl
-                        document.execCommand('insertLineBreak');
-                    }
+                // enter+cmd or enter+ctrl
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    document.execCommand('insertLineBreak');
 
                     event.preventDefault();
                     event.stopPropagation();
-                } else if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    if (!repeat) this.handleSubmit();
+                }
+                // enter
+                else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
+                    this.handleSubmit();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -771,10 +788,10 @@ class InputBox extends Component {
             // esc
             case 27: {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    if (!repeat) this.handleCancel();
-
-                    event.preventDefault();
-                    event.stopPropagation();
+                    if (!repeat && this.handleCancel()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
                 }
                 break;
             }
@@ -798,8 +815,8 @@ class InputBox extends Component {
             }
             // cmd + b
             case 66: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleBold();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleBold();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -808,8 +825,8 @@ class InputBox extends Component {
             }
             // cmd + i
             case 73: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleItalic();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleItalic();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -818,15 +835,15 @@ class InputBox extends Component {
             }
             case 75: {
                 // cmd + k
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleUrl();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleUrl();
 
                     event.preventDefault();
                     event.stopPropagation();
                 }
                 // alt + cmd + k
-                else if (altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleMono();
+                else if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleMono();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -835,8 +852,8 @@ class InputBox extends Component {
             }
             // alt + cmd + n
             case 192: {
-                if (altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleClear();
+                if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleClear();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -1303,6 +1320,7 @@ class InputBox extends Component {
                                     contentEditable
                                     suppressContentEditableWarning
                                     onKeyDown={this.handleKeyDown}
+                                    // onKeyDownCapture={this.handleKeyDownCapture}
                                     onPaste={this.handlePaste}
                                     onInput={this.handleInput}
                                 />

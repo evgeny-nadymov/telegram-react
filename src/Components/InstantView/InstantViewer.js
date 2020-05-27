@@ -20,6 +20,7 @@ import { getInnerBlocks } from '../../Utils/InstantView';
 import { openInstantView } from '../../Actions/InstantView';
 import { setInstantViewContent, setInstantViewViewerContent } from '../../Actions/Client';
 import { scrollTop } from '../../Utils/DOM';
+import { modalManager } from '../../Utils/Modal';
 import { IV_PHOTO_SIZE } from '../../Constants';
 import InstantViewStore from '../../Stores/InstantViewStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -220,6 +221,10 @@ class InstantViewer extends React.Component {
 
     onKeyDown = event => {
         if (event.keyCode === 27) {
+            if (modalManager.modals.length > 0) {
+                return;
+            }
+
             const { media } = this.state;
 
             if (media) {

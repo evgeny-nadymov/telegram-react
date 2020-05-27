@@ -1,3 +1,10 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
@@ -7,7 +14,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
-import { validateUrl } from './../../Utils/Url';
+import { validateUrl } from '../../Utils/Url';
+import { modalManager } from '../../Utils/Modal';
 import './EditUrlDialog.css';
 
 class EditUrlDialog extends React.Component {
@@ -186,6 +194,7 @@ class EditUrlDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClose={this.handleCancel}

@@ -14,11 +14,12 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import { openChat } from '../../Actions/Client';
+import { modalManager } from '../../Utils/Modal';
 import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './SafeLink.css';
-import { openChat } from '../../Actions/Client';
 
 class SafeLink extends React.Component {
     constructor(props) {
@@ -147,6 +148,7 @@ class SafeLink extends React.Component {
                         </a>
                         {confirm && (
                             <Dialog
+                                manager={modalManager}
                                 transitionDuration={0}
                                 open={confirm}
                                 onClose={this.handleClose}

@@ -15,6 +15,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import LogOutIcon from '../../../Assets/Icons/LogOut';
 import MoreIcon from '../../../Assets/Icons/More';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core';
+import { modalManager } from '../../../Utils/Modal';
 import TdLibController from '../../../Controllers/TdLibController';
 
 class SettingsMenuButton extends React.Component {
@@ -84,6 +85,7 @@ class SettingsMenuButton extends React.Component {
                     </MenuItem>
                 </Menu>
                 <Dialog
+                    manager={modalManager}
                     transitionDuration={0}
                     open={open}
                     onClose={this.handleClose}

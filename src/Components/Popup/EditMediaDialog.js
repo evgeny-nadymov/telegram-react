@@ -21,6 +21,7 @@ import { focusInput } from '../../Utils/DOM';
 import { editMessage as editMessageAction } from '../../Actions/Client';
 import { getEntities, getNodes } from '../../Utils/Message';
 import { getMedia, getMediaPhotoFromFile } from '../../Utils/Media';
+import { modalManager } from '../../Utils/Modal';
 import MessageStore from '../../Stores/MessageStore';
 import './EditMediaDialog.css';
 
@@ -250,21 +251,20 @@ class EditMediaDialog extends React.Component {
     };
 
     handleKeyDown = event => {
-        const { altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey } = event;
+        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
 
         switch (keyCode) {
-            // enter
             case 13: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) {
-                        // new line on Enter+Cmd or Enter+Ctrl
-                        document.execCommand('insertLineBreak');
-                    }
+                // enter+cmd or enter+ctrl
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    document.execCommand('insertLineBreak');
 
                     event.preventDefault();
                     event.stopPropagation();
-                } else if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    if (!repeat) this.handleDone();
+                }
+                // enter
+                else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
+                    this.handleDone();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -273,8 +273,8 @@ class EditMediaDialog extends React.Component {
             }
             // cmd + b
             case 66: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleBold();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleBold();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -283,8 +283,8 @@ class EditMediaDialog extends React.Component {
             }
             // cmd + i
             case 73: {
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleItalic();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleItalic();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -293,15 +293,15 @@ class EditMediaDialog extends React.Component {
             }
             case 75: {
                 // cmd + k
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleUrl();
+                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleUrl();
 
                     event.preventDefault();
                     event.stopPropagation();
                 }
                 // alt + cmd + k
-                else if (altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleMono();
+                else if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleMono();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -310,8 +310,8 @@ class EditMediaDialog extends React.Component {
             }
             // alt + cmd + n
             case 192: {
-                if (altKey && (ctrlKey || metaKey) && !shiftKey) {
-                    if (!repeat) this.handleClear();
+                if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                    this.handleClear();
 
                     event.preventDefault();
                     event.stopPropagation();
@@ -562,6 +562,7 @@ class EditMediaDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClose={this.handleCancel}

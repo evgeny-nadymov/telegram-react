@@ -15,6 +15,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import { modalManager } from '../../Utils/Modal';
 import './UpdateDraftDialog.css';
 
 class UpdateDraftDialog extends React.Component {
@@ -34,6 +35,7 @@ class UpdateDraftDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClose={this.handleCancel}

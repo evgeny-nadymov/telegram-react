@@ -15,6 +15,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
+import { modalManager } from '../../Utils/Modal';
 import './PasteFilesDialog.css';
 
 class PasteFilesDialog extends React.Component {
@@ -34,6 +35,7 @@ class PasteFilesDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClose={this.handleCancel}

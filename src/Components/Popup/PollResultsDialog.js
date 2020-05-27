@@ -13,6 +13,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import PollOptionResults from './PollOptionResults';
 import PollStore from '../../Stores/PollStore';
+import { modalManager } from '../../Utils/Modal';
 import './PollResultsDialog.css';
 
 class PollResultsDialog extends React.Component {
@@ -61,6 +62,7 @@ class PollResultsDialog extends React.Component {
                     container: 'chat-info-dialog-container',
                     paper: 'chat-info-dialog-paper'
                 }}
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClick={this.handleClick}

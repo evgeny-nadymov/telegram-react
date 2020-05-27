@@ -24,6 +24,7 @@ import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from
 import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerContent, saveMedia } from '../../Utils/File';
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
+import { modalManager } from '../../Utils/Modal';
 import './InstantViewMediaViewer.css';
 
 class InstantViewMediaViewer extends React.Component {
@@ -52,6 +53,10 @@ class InstantViewMediaViewer extends React.Component {
 
     onKeyDown = event => {
         if (event.keyCode === 27) {
+            if (modalManager.modals.length > 0) {
+                return;
+            }
+
             this.handleClose();
         } else if (event.keyCode === 39) {
             this.handlePrevious();
