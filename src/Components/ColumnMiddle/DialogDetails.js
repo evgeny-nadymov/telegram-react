@@ -51,19 +51,19 @@ class DialogDetails extends Component {
     }
 
     componentDidMount() {
-        AppStore.on('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
-        FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
         FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
+        FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     componentWillUnmount() {
-        AppStore.off('clientUpdateChatDetailsVisibility', this.onUpdateChatDetailsVisibility);
+        AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
-        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
         FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
+        FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
     onClientUpdateDocumentBlob = update => {
@@ -135,7 +135,7 @@ class DialogDetails extends Component {
         });
     };
 
-    onUpdateChatDetailsVisibility = update => {
+    onClientUpdateChatDetailsVisibility = update => {
         this.forceUpdate();
     };
 

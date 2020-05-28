@@ -17,7 +17,7 @@ import SharedMedia from './SharedMedia';
 import SharedPhotos from './SharedMedia/SharedPhotos';
 import SharedVideos from './SharedMedia/SharedVideos';
 import SharedVoiceNotes from './SharedMedia/SharedVoiceNotes';
-import { getChatCounters } from '../../Actions/Chat';
+import { changeChatDetailsVisibility, getChatCounters } from '../../Actions/Chat';
 import { getPhotoFromChat, getSupergroupId, isSupergroup } from '../../Utils/Chat';
 import { loadProfileMediaViewerContent } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
@@ -110,6 +110,10 @@ class ChatInfo extends React.Component {
             counters: ChatStore.getCounters(update.nextChatId),
             migratedCounters: null
         });
+
+        if (!update.nextChatId) {
+            this.handleCloseChatDetails();
+        }
     };
 
     loadContent = chatId => {
@@ -183,7 +187,7 @@ class ChatInfo extends React.Component {
                 chatId: 0
             });
         } else {
-            AppStore.changeChatDetailsVisibility(false);
+            changeChatDetailsVisibility(false);
         }
     };
 

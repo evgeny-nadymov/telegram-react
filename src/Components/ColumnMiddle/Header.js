@@ -23,6 +23,7 @@ import HeaderChat from '../Tile/HeaderChat';
 import HeaderCommand from './HeaderCommand';
 import HeaderProgress from './HeaderProgress';
 import PinnedMessage from './PinnedMessage';
+import { changeChatDetailsVisibility } from '../../Actions/Chat';
 import {
     getChatShortTitle,
     getChatSubtitle,
@@ -157,7 +158,7 @@ class Header extends Component {
         if (isSmallWidth) {
             openChat(chatId, null, true);
         } else {
-            AppStore.changeChatDetailsVisibility(true);
+            changeChatDetailsVisibility(true);
         }
     };
 

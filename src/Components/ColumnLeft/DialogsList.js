@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import Dialog from '../Tile/Dialog';
 import DialogPlaceholder from '../Tile/DialogPlaceholder';
 import VirtualizedList from '../Additional/VirtualizedList';
+import { changeChatDetailsVisibility } from '../../Actions/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
 import { scrollTop } from '../../Utils/DOM';
@@ -246,7 +247,7 @@ class DialogsList extends React.Component {
             // unselect deleted chat
             if (chat_id === AppStore.getChatId() && !chat.last_message) {
                 TdLibController.setChatId(0);
-                AppStore.changeChatDetailsVisibility(false);
+                changeChatDetailsVisibility(false);
             }
         } else {
             if (currentIndex === -1) {

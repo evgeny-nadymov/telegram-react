@@ -191,6 +191,13 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateCacheLoaded');
                 break;
             }
+            case 'clientUpdateChatDetailsVisibility': {
+                const { visibility } = update;
+
+                this.isChatDetailsVisible = visibility;
+                this.emit('clientUpdateChatDetailsVisibility', update);
+                break;
+            }
             case 'clientUpdateChatId': {
                 const extendedUpdate = {
                     '@type': 'clientUpdateChatId',
@@ -384,11 +391,6 @@ class ApplicationStore extends EventEmitter {
 
     getMessageId() {
         return this.messageId;
-    }
-
-    changeChatDetailsVisibility(visibility) {
-        this.isChatDetailsVisible = visibility;
-        this.emit('clientUpdateChatDetailsVisibility', visibility);
     }
 
     getConnectionState() {

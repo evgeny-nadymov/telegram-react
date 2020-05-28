@@ -9,6 +9,13 @@ import ChatStore from '../Stores/ChatStore';
 import { isChatMuted } from '../Utils/Chat';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
 
+export function changeChatDetailsVisibility(visibility) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateChatDetailsVisibility',
+        visibility
+    });
+}
+
 export async function openPinnedChat(index) {
     const chats = await TdLibController.send({
         '@type': 'getChats',
