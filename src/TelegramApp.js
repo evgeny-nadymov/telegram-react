@@ -81,7 +81,16 @@ class TelegramApp extends Component {
                     // console.log('[keydown] esc', this.editMessageId, this.replyMessageId);
                     if (this.editMessageId) return;
                     if (this.replyMessageId) return;
-                    if (!chatId) return;
+                    if (!chatId) {
+                        // open search if no one dialog opened
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateSearchChat',
+                            chatId: null,
+                            query: null
+                        })
+
+                        return;
+                    }
 
                     TdLibController.setChatId(0);
 
