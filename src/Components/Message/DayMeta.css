@@ -22,10 +22,6 @@
     background: var(--message-service-background);
     padding: 0 6px;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: center;
-}
-
-.day-meta-wrapper div {
-    transform: translate(0, 1px);
 }
