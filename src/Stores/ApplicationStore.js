@@ -226,10 +226,6 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateDragging', update);
                 break;
             }
-            case 'clientUpdateEditMessage': {
-                this.emit('clientUpdateEditMessage', update);
-                break;
-            }
             case 'clientUpdateMediaViewerContent': {
                 const { content } = update;
                 this.mediaViewerContent = content;

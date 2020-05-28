@@ -161,6 +161,10 @@ class MessageStore extends EventEmitter {
                 this.emit('clientUpdateClearSelection', update);
                 break;
             }
+            case 'clientUpdateEditMessage': {
+                this.emit('clientUpdateEditMessage', update);
+                break;
+            }
             case 'clientUpdateMessageShake': {
                 this.emit('clientUpdateMessageShake', update);
                 break;

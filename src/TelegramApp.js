@@ -78,6 +78,7 @@ class TelegramApp extends Component {
         switch (key) {
             case 'Escape': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                    // console.log('[keydown] esc', this.editMessageId, this.replyMessageId);
                     if (this.editMessageId) return;
                     if (this.replyMessageId) return;
                     if (!chatId) return;
@@ -141,8 +142,8 @@ class TelegramApp extends Component {
         AppStore.on('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.on('updateFatalError', this.onUpdateFatalError);
+        MessageStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
-        AppStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         KeyboardManager.add(this.keyboardHandler);
     }
 
@@ -154,8 +155,8 @@ class TelegramApp extends Component {
         AppStore.off('clientUpdateTdLibDatabaseExists', this.onClientUpdateTdLibDatabaseExists);
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('updateFatalError', this.onUpdateFatalError);
+        MessageStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
-        AppStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         KeyboardManager.remove(this.keyboardHandler);
     }
 
