@@ -28,6 +28,7 @@ import { loadData } from './Utils/Phone';
 import KeyboardManager, { KeyboardHandler } from './Components/Additional/KeyboardManager';
 import { openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
+import { editMessage, replyMessage, searchChat } from './Actions/Client';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
@@ -79,15 +80,17 @@ class TelegramApp extends Component {
             case 'Escape': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
                     // console.log('[keydown] esc', this.editMessageId, this.replyMessageId);
-                    if (this.editMessageId) return;
-                    if (this.replyMessageId) return;
-                    if (!chatId) {
+                    if (this.editMessageId) {
+                        editMessage(chatId, 0);
+                        return;
+                    }
+                    else if (this.replyMessageId) {
+                        replyMessage(chatId, 0);
+                        return;
+                    }
+                    else if (!chatId) {
                         // open search if no one dialog opened
-                        TdLibController.clientUpdate({
-                            '@type': 'clientUpdateSearchChat',
-                            chatId: null,
-                            query: null
-                        })
+                        searchChat(0, null);
 
                         return;
                     }
