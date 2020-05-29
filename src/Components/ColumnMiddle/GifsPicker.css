@@ -1,0 +1,30 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.gifs-picker {
+    width: 338px;
+    height: 358px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.gifs-picker-scroll {
+    background: transparent;
+    margin-right: -15px;
+    padding: 6px 12px 6px 6px;
+    height: 356px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateZ(0);
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+}

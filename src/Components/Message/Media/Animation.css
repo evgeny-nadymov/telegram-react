@@ -36,6 +36,7 @@
     display: block;
     /*border-radius: 4px;*/
     user-select: none;
+    object-fit: cover;
 }
 
 .animation-play {

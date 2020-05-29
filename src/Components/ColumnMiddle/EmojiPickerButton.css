@@ -7,6 +7,7 @@
 
 .emoji-picker-header {
     display: flex;
+    height: 48px;
 }
 
 .emoji-picker-header-button {
@@ -17,14 +18,18 @@
 .emoji-picker-content {
     display: flex;
     flex-direction: row;
-    width: 676px;
+    width: 1014px;
     will-change: transform;
-    transition: transform 250ms ease-out;
+    transition: transform 150ms ease-out;
     overflow: hidden;
 }
 
 .emoji-picker-content-stickers {
     transform: translateX(-338px);
+}
+
+.emoji-picker-content-gifs {
+    transform: translateX(-676px);
 }
 
 .emoji-picker-root {

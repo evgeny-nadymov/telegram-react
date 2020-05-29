@@ -9,11 +9,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
+import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import FileProgress from '../../Viewer/FileProgress';
 import { getFitSize } from '../../../Utils/Common';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFileSize, getSrc, isGifMimeType } from '../../../Utils/File';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
+import AnimationStore from '../../../Stores/AnimationStore';
 import AppStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
@@ -48,11 +50,12 @@ class Animation extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
-        FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
+        AnimationStore.on('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
+        FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         InstantViewStore.on('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
@@ -60,11 +63,12 @@ class Animation extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
-        FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
+        AnimationStore.on('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateAnimationThumbnailBlob);
+        FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateAnimationBlob);
         MessageStore.off('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         InstantViewStore.off('clientUpdateInstantViewViewerContent', this.onClientUpdateInstantViewViewerContent);
@@ -78,7 +82,8 @@ class Animation extends React.Component {
         if (
             this.windowFocused &&
             ((this.inView && !this.openMediaViewer && !this.openProfileMediaViewer && !this.openIV) ||
-                (this.ivInView && !this.openIVMedia))
+                (this.ivInView && !this.openIVMedia) ||
+                this.pickerInView)
         ) {
             player.play();
         } else {
@@ -134,6 +139,15 @@ class Animation extends React.Component {
         this.startStopPlayer();
     };
 
+    onClientUpdateAnimationsInView = update => {
+        const { animation } = this.props;
+        if (!animation) return;
+
+        this.pickerInView = update.animations.has(animation);
+
+        this.startStopPlayer();
+    }
+
     onClientUpdateAnimationBlob = update => {
         const { animation } = this.props.animation;
         const { fileId } = update;
@@ -158,8 +172,12 @@ class Animation extends React.Component {
         }
     };
 
+    handleCanPlay = () => {
+        this.canPlay = true;
+    };
+
     render() {
-        const { displaySize, openMedia, t, title, caption, type, style } = this.props;
+        const { displaySize, openMedia, t, title, caption, type, picker, style } = this.props;
         const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
 
         const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
@@ -190,37 +208,38 @@ class Animation extends React.Component {
                 })}
                 style={animationStyle}
                 onClick={openMedia}>
-                {src ? (
-                    isGif ? (
-                        <img className='animation-preview' src={src} alt='' />
+                    {src ? (
+                        isGif ? (
+                            <img className='animation-preview' src={src} alt='' />
+                        ) : (
+                            <video
+                                ref={this.videoRef}
+                                className='media-viewer-content-animation'
+                                poster={thumbnailSrc || miniSrc}
+                                muted
+                                autoPlay={!picker}
+                                loop
+                                playsInline
+                                width={animationStyle.width}
+                                height={animationStyle.height}
+                                onCanPlay={this.handleCanPlay}
+                            >
+                                {source}
+                            </video>
+                        )
                     ) : (
-                        <video
-                            ref={this.videoRef}
-                            className='media-viewer-content-animation'
-                            poster={thumbnailSrc || miniSrc}
-                            muted
-                            autoPlay
-                            loop
-                            playsInline
-                            width={animationStyle.width}
-                            height={animationStyle.height}
-                        >
-                            {source}
-                        </video>
-                    )
-                ) : (
-                    <>
-                        <img
-                            className={classNames('animation-preview', {
-                                'media-blurred': isBlurred,
-                                'media-mini-blurred': !src && !thumbnailSrc && isBlurred
-                            })}
-                            src={thumbnailSrc || miniSrc}
-                            alt=''
-                        />
-                        <div className='animation-meta'>{getFileSize(animation)}</div>
-                    </>
-                )}
+                        <>
+                            <img
+                                className={classNames('animation-preview', {
+                                    'media-blurred': isBlurred,
+                                    'media-mini-blurred': !src && !thumbnailSrc && isBlurred
+                                })}
+                                src={thumbnailSrc || miniSrc}
+                                alt=''
+                            />
+                            {!picker && <div className='animation-meta'>{getFileSize(animation)}</div>}
+                        </>
+                    )}
                 <FileProgress
                     file={animation}
                     download
@@ -241,13 +260,21 @@ Animation.propTypes = {
     openMedia: PropTypes.func,
     size: PropTypes.number,
     displaySize: PropTypes.number,
-    iv: PropTypes.bool
+    iv: PropTypes.bool,
+    picker: PropTypes.bool
 };
 
 Animation.defaultProps = {
     size: PHOTO_SIZE,
     displaySize: PHOTO_DISPLAY_SIZE,
-    iv: false
+    iv: false,
+    picker: false
 };
 
-export default withTranslation()(Animation);
+const enhance = compose(
+    withSaveRef(),
+    withTranslation(),
+    withRestoreRef()
+);
+
+export default enhance(Animation);

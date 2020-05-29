@@ -419,6 +419,8 @@ class MessagesList extends React.Component {
             if (scrollBehavior !== ScrollBehaviorEnum.KEEP_SCROLL_POSITION) {
                 this.handleScrollBehavior(scrollBehavior, this.snapshot);
             }
+
+            this.updateItemsInView();
         });
 
         const store = FileStore.getStore();

@@ -25,7 +25,9 @@ import { findLastTextNode, focusInput } from '../../Utils/DOM';
 import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '../../Utils/Media';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
+import { editMessage, replyMessage } from '../../Actions/Client';
 import { PHOTO_SIZE } from '../../Constants';
+import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -33,9 +35,6 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
-import { editMessage, replyMessage } from '../../Actions/Client';
-import UserStore from '../../Stores/UserStore';
-import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -135,6 +134,7 @@ class InputBox extends Component {
     componentDidMount() {
         document.addEventListener('selectionchange', this.selectionChangeListener, true);
 
+        AnimationStore.on('clientUpdateAnimationSend', this.onClientUpdateAnimationSend);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatDraftMessage);
@@ -150,6 +150,7 @@ class InputBox extends Component {
     componentWillUnmount() {
         this.saveDraft();
 
+        AnimationStore.off('clientUpdateAnimationSend', this.onClientUpdateAnimationSend);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatDraftMessage);
@@ -260,6 +261,47 @@ class InputBox extends Component {
         if (chatId !== chat_id) return;
 
         this.loadDraft();
+    };
+
+    onClientUpdateAnimationSend = update => {
+        const { animation: item } = update;
+        if (!item) return;
+
+        const { animation, thumbnail, width, height, duration } = item;
+        if (!animation) return;
+
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        element.innerText = null;
+
+        this.restoreSelection();
+
+        const content = {
+            '@type': 'inputMessageAnimation',
+            animation: {
+                '@type': 'inputFileId',
+                id: animation.id
+            },
+            width,
+            height,
+            duration
+        };
+
+        if (thumbnail) {
+            const { width: thumbnailWidth, height: thumbnailHeight, photo } = thumbnail;
+
+            content.thumbnail = {
+                thumbnail: {
+                    '@type': 'inputFileId',
+                    id: photo.id
+                },
+                width: thumbnailWidth,
+                height: thumbnailHeight
+            };
+        }
+
+        this.sendMessage(content, false, result => {});
     };
 
     onClientUpdateStickerSend = update => {

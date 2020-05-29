@@ -164,6 +164,7 @@ class StickersPicker extends React.Component {
     };
 
     loadInViewContent = (padding = 0) => {
+        // console.log('[sp] loadInViewContent');
         const scroll = this.scrollRef.current;
 
         const { sets } = this.state;
@@ -231,6 +232,7 @@ class StickersPicker extends React.Component {
     };
 
     handleScroll = async () => {
+        // console.log('[sp] handleScroll');
         //this.loadInViewContentOnScroll();
         this.loadInViewContentOnScrollEnd();
         this.updatePosition();

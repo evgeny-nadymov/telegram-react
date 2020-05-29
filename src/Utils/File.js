@@ -341,7 +341,7 @@ function cancelLoadAnimationContent(animation) {
     FileStore.cancelGetRemoteFile(id);
 }
 
-function loadAnimationContent(store, animation, message, useFileSize = true) {
+export function loadAnimationContent(store, animation, message, useFileSize = true) {
     if (!animation) return;
 
     let { animation: file } = animation;
@@ -387,7 +387,7 @@ function cancelLoadAnimationThumbnailContent(animation){
     FileStore.cancelGetRemoteFile(id);
 }
 
-function loadAnimationThumbnailContent(store, animation, message) {
+export function loadAnimationThumbnailContent(store, animation, message) {
     if (!animation) return false;
 
     const { thumbnail: photoSize } = animation;
@@ -697,6 +697,7 @@ function loadPhotoThumbnailContent(store, photo, message) {
 }
 
 function loadStickerContent(store, sticker, message, useFileSize = true) {
+    // console.log('[sp] loadStickerContent')
     if (!sticker) return;
 
     let { sticker: file } = sticker;
@@ -2008,6 +2009,7 @@ export function loadRecentStickersContent(store, recent) {
 }
 
 function loadStickerSetContent(store, stickerSet) {
+    // console.log('[sp] loadStickerSetContent');
     if (!stickerSet) return;
 
     const { stickers } = stickerSet;

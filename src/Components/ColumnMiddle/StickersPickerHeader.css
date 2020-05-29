@@ -6,7 +6,7 @@
  */
 
 .stickers-picker-header {
-    min-height: 44px;
+    min-height: 48px;
     border-bottom-width: 1px;
     border-bottom-style: solid;
     border-color: var(--border);
@@ -38,8 +38,9 @@
 }
 
 .stickers-picker-header-anchor {
-    height: 3px;
-    width: 44px;
+    height: 4px;
+    border-radius: 4px 4px 0 0;
+    width: 48px;
     will-change: transform;
     position: absolute;
     bottom: 16px;

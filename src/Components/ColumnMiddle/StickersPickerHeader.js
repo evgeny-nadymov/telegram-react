@@ -53,10 +53,10 @@ class StickersPickerHeader extends React.Component {
         const anchorNode = ReactDOM.findDOMNode(anchor);
 
         const scrollFrom = scroll.scrollLeft;
-        const scrollTo = position * 44 - 147;
+        const scrollTo = position * 48 - 147;
 
         const anchorFrom = Number(anchorNode.style.left.replace('px', ''));
-        const anchorTo = position * 44;
+        const anchorTo = position * 48;
 
         if (animator) {
             animator.stop();
@@ -109,7 +109,7 @@ class StickersPickerHeader extends React.Component {
             <Sticker
                 key={x.sticker.id}
                 className='stickers-picker-header-sticker'
-                style={{ width: 32, height: 32 }}
+                style={{ width: 36, height: 36 }}
                 sticker={x}
                 play={false}
                 autoplay={false}
