@@ -41,6 +41,11 @@ class Animation extends React.Component {
 
         this.ivInView = false;
         this.openIVMedia = Boolean(InstantViewStore.viewerContent);
+
+        const player = this.videoRef.current;
+        if (player) {
+            player.load();
+        }
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {

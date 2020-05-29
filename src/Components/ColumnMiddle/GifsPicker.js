@@ -17,6 +17,8 @@ import TdLibController from '../../Controllers/TdLibController';
 import './GifsPicker.css'
 import * as ReactDOM from 'react-dom';
 import { compareMaps, debounce, throttle } from '../../Utils/Common';
+import StickerSet from './StickerSet';
+import { getStickers } from '../../Utils/Media';
 
 class GifsPicker extends React.Component {
 
@@ -150,26 +152,97 @@ class GifsPicker extends React.Component {
         // });
     };
 
+    handleMouseDown = event => {
+        const stickerId = Number(event.currentTarget.dataset.animationIndex);
+
+        this.mouseDownStickerId = stickerId;
+        const now = Date.now();
+
+        this.setState({ previewStickerId: stickerId, timestamp: now, showPreview: false, cancelSend: false });
+        setTimeout(() => {
+            const { timestamp } = this.state;
+            if (timestamp === now) {
+                this.setState({ showPreview: true, cancelSend: true }, () => {
+                    const { onPreview } = this.props;
+                    const { recent, sets } = this.state;
+
+                    const { savedAnimations } = AnimationStore;
+
+                    const sticker = savedAnimations.animations[stickerId];
+                    onPreview(sticker);
+                });
+            }
+        }, 500);
+
+        // this.loadPreviewContent(stickerId);
+
+        this.mouseDown = true;
+        document.addEventListener('mouseup', this.handleMouseUp);
+
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    handleMouseEnter = event => {
+        const stickerId = Number(event.currentTarget.dataset.animationIndex);
+
+        if (!this.mouseDown) return;
+
+        if (this.mouseDownStickerId !== stickerId) {
+            this.mouseDownStickerId = null;
+        }
+        this.setState({ previewStickerId: stickerId });
+        // this.loadPreviewContent(stickerId);
+
+        const { onPreview } = this.props;
+        const { savedAnimations } = AnimationStore;
+
+        const sticker = savedAnimations.animations[stickerId];
+        onPreview(sticker);
+    };
+
+    handleMouseUp = () => {
+        this.setState({ previewStickerId: 0, timestamp: 0, showPreview: false });
+
+        const { onPreview } = this.props;
+
+        onPreview(null);
+
+        this.mouseDown = false;
+        document.removeEventListener('mouseup', this.handleMouseUp);
+    };
+
+    openAnimation = animation => {
+        const { onSelect } = this.props;
+        const { cancelSend } = this.state;
+
+        if (cancelSend) return;
+
+        onSelect(animation);
+    };
+
     render() {
-        const { t, onSelect } = this.props;
+        const { t } = this.props;
         const { savedAnimations } = AnimationStore;
         if (!savedAnimations) return null;
 
         this.itemsMap.clear();
         const items = savedAnimations.animations.map((x, index) => (
-            // <div
-            //     key={`${index}_${x.animation.id}`}
-            //     ref={el => this.itemsMap.set(`${index}_${x.animation.id}`, el)}
-            //     >
+            <div
+                data-animation-index={index}
+                key={`${index}_${x.animation.id}`}
+                ref={el => this.itemsMap.set(`${index}_${x.animation.id}`, el)}
+                onMouseDown={this.handleMouseDown}
+                onMouseEnter={this.handleMouseEnter}
+                >
                 <Animation
-                    key={`${index}_${x.animation.id}`}
-                    ref={el => this.itemsMap.set(`${index}_${x.animation.id}`, el)}
                     animation={x}
-                    openMedia={() => onSelect(x)}
+                    openMedia={() => this.openAnimation(x)}
                     picker={true}
                     style={{ width: 105, height: 105, margin: 2, borderRadius: 0 }}
                 />
-            // </div>
+            </div>
         ));
 
         return (

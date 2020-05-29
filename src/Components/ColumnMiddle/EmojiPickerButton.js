@@ -145,8 +145,8 @@ class EmojiPickerButton extends React.Component {
     };
 
     tryClosePicker = () => {
-        const { sticker } = this.state;
-        if (this.paperEnter || this.buttonEnter || sticker) return;
+        const { animation, sticker } = this.state;
+        if (this.paperEnter || this.buttonEnter || sticker || animation) return;
 
         this.updatePicker(false);
     };
