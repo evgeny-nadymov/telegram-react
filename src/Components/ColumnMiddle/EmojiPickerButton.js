@@ -16,6 +16,7 @@ import InsertEmoticonIcon from '../../Assets/Icons/Smile';
 import { Picker as EmojiPicker } from 'emoji-mart';
 // import { NimblePicker as EmojiPicker } from 'emoji-mart';
 // import data from 'emoji-mart/data/messenger.json'
+import AnimationPreview from './AnimationPreview';
 import StickerPreview from './StickerPreview';
 import StickersPicker from './StickersPicker';
 import GifsPicker from './GifsPicker';
@@ -83,7 +84,7 @@ class EmojiPickerButton extends React.Component {
         const store = FileStore.getStore();
         const previewAnimations = savedAnimations.animations.slice(0, 1000);
 
-        console.log('[sp] loadAnimationThumbnailContent', previewAnimations);
+        // console.log('[sp] loadAnimationThumbnailContent', previewAnimations);
         previewAnimations.forEach(x => {
             loadAnimationThumbnailContent(store, x);
         });
@@ -258,7 +259,7 @@ class EmojiPickerButton extends React.Component {
 
     render() {
         const { theme, t } = this.props;
-        const { open, tab, sticker } = this.state;
+        const { open, tab, animation, sticker } = this.state;
 
         if (open && !this.picker) {
             const i18n = {
@@ -356,6 +357,7 @@ class EmojiPickerButton extends React.Component {
                         </Button>
                     </div>
                     {Boolean(sticker) && <StickerPreview sticker={sticker} />}
+                    {Boolean(animation) && <AnimationPreview animation={animation} />}
                 </div>
             </>
         );

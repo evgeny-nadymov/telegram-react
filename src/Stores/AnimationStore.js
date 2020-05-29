@@ -18,7 +18,7 @@ class AnimationStore extends EventEmitter {
 
     reset = () => {
         this.savedAnimations = null;
-        this.pickerAnimationsInView = null;
+        this.animationsInView = null;
     };
 
     onUpdate = async update => {
@@ -56,7 +56,7 @@ class AnimationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateAnimationsInView': {
-                this.pickerAnimationsInView = update.animations;
+                this.animationsInView = update.animations;
                 this.emit('clientUpdateAnimationsInView', update);
                 break;
             }
