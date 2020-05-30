@@ -48,8 +48,22 @@ class Sticker extends React.Component {
 
         this.state = {
             animationDate: null,
+            loaded: false,
             hasError: false
         };
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        const { sticker } = props;
+
+        if (state.prevSticker !== sticker) {
+            return {
+                prevSticker: sticker,
+                loaded: false,
+            };
+        }
+
+        return null;
     }
 
     static getDerivedStateFromError(error) {
@@ -62,9 +76,13 @@ class Sticker extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { chatId, messageId, sticker, blur, displaySize } = this.props;
-        const { animationData } = this.state;
+        const { animationData, loaded } = this.state;
 
         if (animationData !== nextState.animationData) {
+            return true;
+        }
+
+        if (loaded !== nextState.loaded) {
             return true;
         }
 
@@ -331,6 +349,12 @@ class Sticker extends React.Component {
         this.entered = false;
     };
 
+    handleLoad = () => {
+        this.setState({
+            loaded: true
+        });
+    };
+
     render() {
         const {
             chatId,
@@ -338,20 +362,19 @@ class Sticker extends React.Component {
             autoplay,
             className,
             displaySize,
-            blur,
             sticker: source,
             style,
             openMedia,
             preview
         } = this.props;
         const { thumbnail, sticker, width, height } = source;
-        const { animationData, hasError } = this.state;
+        const { animationData, loaded, hasError } = this.state;
 
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const src = getSrc(sticker);
-        const isBlurred = isBlurredThumbnail(thumbnail);
+        const isBlurred = isBlurredThumbnail(thumbnail) || !preview;
 
         if (hasError) {
             const style = {
@@ -367,7 +390,7 @@ class Sticker extends React.Component {
                 <div className={classNames('sticker', className)} style={style} onClick={openMedia}>
                     { thumbnailSrc && (
                         <img
-                            className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                            className={classNames('sticker-image', { 'media-blurred': isBlurred })}
                             draggable={false}
                             src={thumbnailSrc}
                             alt=''
@@ -412,7 +435,7 @@ class Sticker extends React.Component {
                         <>
                             {thumbnailSrc && (
                                 <img
-                                    className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
+                                    className={classNames('sticker-image', { 'media-blurred': isBlurred })}
                                     draggable={false}
                                     src={thumbnailSrc}
                                     alt=''
@@ -423,20 +446,15 @@ class Sticker extends React.Component {
                 </>
             ) : (
                 <>
-                    {src && !preview ? (
-                        <img className='sticker-image' draggable={false} src={src} alt='' />
-                    ) : (
-                        <>
-                            { thumbnailSrc && (
-                                <img
-                                    className={classNames('sticker-image', { 'media-blurred': isBlurred && blur })}
-                                    draggable={false}
-                                    src={thumbnailSrc}
-                                    alt=''
-                                />
-                            )}
-                        </>
+                    { thumbnailSrc && !loaded && (
+                        <img
+                            className={classNames('sticker-image', { 'media-blurred': isBlurred })}
+                            draggable={false}
+                            src={thumbnailSrc}
+                            alt=''
+                        />
                     )}
+                    { src && !preview && <img key={sticker.id} className='sticker-image' src={src} draggable={false} alt='' onLoad={this.handleLoad} /> }
                 </>
             );
         }
@@ -467,7 +485,6 @@ Sticker.propTypes = {
 
     autoplay: PropTypes.bool,
     play: PropTypes.bool,
-    blur: PropTypes.bool,
     displaySize: PropTypes.number,
     preview: PropTypes.bool,
     source: PropTypes.string
@@ -480,7 +497,6 @@ Sticker.defaultProps = {
 
     autoplay: true,
     play: true,
-    blur: true,
     displaySize: STICKER_DISPLAY_SIZE,
     preview: false,
     source: StickerSourceEnum.UNKNOWN

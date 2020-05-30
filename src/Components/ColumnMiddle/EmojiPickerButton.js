@@ -55,7 +55,13 @@ class EmojiPickerButton extends React.Component {
     }
 
     onClientUpdateChange = update => {
-        this.picker = null;
+        const { open } = this.state;
+
+        if (open) {
+            this.removePicker = true;
+        } else {
+            this.picker = null;
+        }
     };
 
     handleButtonMouseEnter = event => {
@@ -66,6 +72,13 @@ class EmojiPickerButton extends React.Component {
             this.updatePicker(true);
             this.loadStickerSets();
             this.loadSavedAnimations();
+
+            if (this.state.tab === 2) {
+                const gifsPicker = this.gifsPickerRef.current;
+                if (gifsPicker) {
+                    gifsPicker.start();
+                }
+            }
         }, EMOJI_PICKER_TIMEOUT_MS);
     };
 
@@ -165,40 +178,68 @@ class EmojiPickerButton extends React.Component {
     };
 
     updatePicker = open => {
-        this.setState({ open });
+        this.setState({ open }, () => {
+            if (!this.state.open) {
+                if (this.removePicker) {
+                    this.picker = null;
+                    this.removePicker = false;
+                }
+
+                const gifsPicker = this.gifsPickerRef.current;
+                if (gifsPicker) {
+                    gifsPicker.stop();
+                }
+            }
+        });
     };
 
     handleEmojiClick = () => {
         this.setState({ tab: 0 });
 
         const gifsPicker = this.gifsPickerRef.current;
-        gifsPicker.stop();
+        if (gifsPicker) {
+            gifsPicker.stop();
+        }
+
+        const stickersPicker = this.stickersPickerRef.current;
+        if (stickersPicker) {
+            stickersPicker.stop();
+        }
     };
 
     handleStickersClick = () => {
         const stickersPicker = this.stickersPickerRef.current;
         const { tab } = this.state;
 
-        setTimeout(() => {
-            // console.log('[sp] handleStickersClick.loadContent');
-            stickersPicker.loadContent(this.recent, this.stickerSets, this.sets);
-        }, 150);
-
         // console.log('[sp] handleStickersClick');
-        this.setState({ tab: 1 });
+
         if (tab === 1) {
-            stickersPicker.scrollTop();
+            if (stickersPicker) {
+                stickersPicker.scrollTop();
+            }
+        } else {
+            setTimeout(() => {
+                // console.log('[sp] handleStickersClick.loadContent');
+                stickersPicker.loadContent(this.recent, this.stickerSets, this.sets);
+            }, 150);
+
+            this.setState({ tab: 1 });
         }
 
         const gifsPicker = this.gifsPickerRef.current;
-        gifsPicker.stop();
+        if (gifsPicker) {
+            gifsPicker.stop();
+        }
     };
 
     handleGifsClick = () => {
         const gifsPicker = this.gifsPickerRef.current;
         const { tab } = this.state;
+
         if (tab === 2) {
-            gifsPicker.scrollTop();
+            if (gifsPicker) {
+                gifsPicker.scrollTop();
+            }
         } else {
             const { savedAnimations } = AnimationStore;
 
@@ -208,6 +249,11 @@ class EmojiPickerButton extends React.Component {
             }, 150);
 
             this.setState({ tab: 2 });
+        }
+
+        const stickersPicker = this.stickersPickerRef.current;
+        if (stickersPicker) {
+            stickersPicker.stop();
         }
     };
 
@@ -292,7 +338,7 @@ class EmojiPickerButton extends React.Component {
                     color={theme.palette.primary.dark}
                     i18n={i18n}
                     native={isAppleDevice()}
-                    style={{ width: 338, overflowX: 'hidden' }}
+                    style={{ width: 338, overflowX: 'hidden', position: 'absolute', left: 0, top: 0 }}
                 />
             );
 
@@ -301,6 +347,7 @@ class EmojiPickerButton extends React.Component {
                     ref={this.stickersPickerRef}
                     onSelect={this.handleStickerSend}
                     onPreview={this.handleStickerPreview}
+                    style={{ position: 'absolute', left: 338, top: 0 }}
                 />
             );
 
@@ -309,6 +356,7 @@ class EmojiPickerButton extends React.Component {
                     ref={this.gifsPickerRef}
                     onSelect={this.handleGifSend}
                     onPreview={this.handleGifPreview}
+                    style={{ width: 338, overflowX: 'hidden', position: 'absolute', left: 676, top: 0 }}
                 />
             );
         }

@@ -78,6 +78,10 @@ class StickersPicker extends React.Component {
         StickerStore.off('updateRecentStickers', this.onUpdateRecentStickers);
     }
 
+    stop() {
+
+    }
+
     onUpdateInstalledStickerSets = update => {
         const { is_masks, sticker_set_ids } = update;
         if (!is_masks) return;
@@ -414,7 +418,7 @@ class StickersPicker extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, style } = this.props;
         const { recent, stickerSets, sets, headerStickers } = this.state;
         // console.log('[sp] render', recent, stickerSets, sets);
         // if (!stickerSets) return null;
@@ -443,7 +447,7 @@ class StickersPicker extends React.Component {
                 : null;
 
         return (
-            <div className='stickers-picker'>
+            <div className='stickers-picker' style={style}>
                 <StickersPickerHeader onSelect={this.handleSelectSet} stickers={headerStickers} />
                 <div ref={this.scrollRef} className='stickers-picker-scroll' onScroll={this.handleScroll}>
                     {Boolean(recentInfo) && (

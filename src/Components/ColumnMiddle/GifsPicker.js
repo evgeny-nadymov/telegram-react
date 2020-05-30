@@ -7,18 +7,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import * as ReactDOM from 'react-dom';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import Animation from '../Message/Media/Animation';
-import { loadAnimationContent, loadAnimationThumbnailContent, loadStickerSetContent } from '../../Utils/File';
+import { loadAnimationContent, loadAnimationThumbnailContent } from '../../Utils/File';
+import { compareMaps, debounce, throttle } from '../../Utils/Common';
 import AnimationStore from '../../Stores/AnimationStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './GifsPicker.css'
-import * as ReactDOM from 'react-dom';
-import { compareMaps, debounce, throttle } from '../../Utils/Common';
-import StickerSet from './StickerSet';
-import { getStickers } from '../../Utils/Media';
 
 class GifsPicker extends React.Component {
 
@@ -78,6 +76,10 @@ class GifsPicker extends React.Component {
 
             AnimationStore.savedAnimations = result;
             savedAnimations = result;
+
+            this.forceUpdate(() => {
+                this.start();
+            });
         }
 
         // load content
@@ -100,14 +102,17 @@ class GifsPicker extends React.Component {
     };
 
     loadInViewContent = (padding = 0) => {
-        // console.log('[gp] loadInViewContent');
+        console.log('[gp] loadInViewContent');
         const scroll = this.scrollRef.current;
 
         const { savedAnimations } = AnimationStore;
+        if (!savedAnimations) return;
+
+        const { animations } = savedAnimations;
 
         const inViewMap = new Map();
         const inViewIndexes = [];
-        savedAnimations.animations.forEach((x, index) => {
+        animations.forEach((x, index) => {
             const item = this.itemsMap.get(`${index}_${x.animation.id}`);
             const node = ReactDOM.findDOMNode(item);
             if (node) {
@@ -132,12 +137,12 @@ class GifsPicker extends React.Component {
 
         const { animationsInView } = AnimationStore;
         if (compareMaps(animationsInView, inViewMap)) {
-            // console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
+            console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
             return;
         }
 
 
-        // console.log('[gp] inViewItems', inViewIndexes);
+        console.log('[gp] inViewItems', inViewIndexes);
         TdLibController.clientUpdate({
             '@type': 'clientUpdateAnimationsInView',
             animations: inViewMap
@@ -223,7 +228,7 @@ class GifsPicker extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, style } = this.props;
         const { savedAnimations } = AnimationStore;
         if (!savedAnimations) return null;
 
@@ -240,13 +245,13 @@ class GifsPicker extends React.Component {
                     animation={x}
                     openMedia={() => this.openAnimation(x)}
                     picker={true}
-                    style={{ width: 105, height: 105, margin: 2, borderRadius: 0 }}
+                    style={{ width: 104, height: 104, margin: 2, borderRadius: 0 }}
                 />
             </div>
         ));
 
         return (
-            <div className='gifs-picker'>
+            <div className='gifs-picker' style={style}>
                 <div ref={this.scrollRef} className='gifs-picker-scroll' onScroll={this.handleScroll}>
                     {items}
                 </div>

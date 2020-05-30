@@ -157,8 +157,8 @@ class Code extends React.Component {
     }
 
     getSubtitle(codeInfo, t = k => k) {
-        if (!codeInfo) return 'Subtitle';
-        if (!codeInfo.type) return 'Subtitle';
+        if (!codeInfo) return '';
+        if (!codeInfo.type) return '';
 
         switch (codeInfo.type['@type']) {
             case 'authenticationCodeTypeCall': {
@@ -171,11 +171,11 @@ class Code extends React.Component {
                 return 'We have sent you a message with activation code to your phone. Please enter it below.';
             }
             case 'authenticationCodeTypeTelegramMessage': {
-                return "Please enter the code you've just received in your previous Telegram app.";
+                return 'Please enter the code you\'ve just received in your previous Telegram app.';
             }
         }
 
-        return 'Subtitle';
+        return '';
     }
 
     render() {

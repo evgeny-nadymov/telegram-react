@@ -32,8 +32,8 @@
 .stickers-picker-header-sticker {
     flex-grow: 0;
     flex-shrink: 0;
-    min-width: 32px;
-    padding: 6px;
+    min-width: 36px;
+    margin: 6px;
     cursor: pointer;
 }
 
