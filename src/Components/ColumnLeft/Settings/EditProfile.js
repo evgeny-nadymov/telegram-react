@@ -177,7 +177,7 @@ class EditProfile extends React.Component {
         const src = getSrc(photo ? photo.small : null);
         const entities = [];
         const text = getBoldItalicEntities(t('UsernameHelp'), entities);
-        const formattedText = getFormattedText({ '@type': 'formattedText', text, entities })
+        const formattedText = getFormattedText({ '@type': 'formattedText', text, entities });
 
         return (
             <>

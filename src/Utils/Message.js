@@ -1904,6 +1904,67 @@ export function getEntities(text) {
     return { text, entities };
 }
 
+const twitterInstagramEntities = new Map();
+const mentionHashtagRegExp = /(^|\s|\()@[a-zA-Z\d_.]{1,32}|(^|\s|\()#[\w]+/g;
+
+// based on https://github.com/DrKLO/Telegram/blob/5a2a813dc029ba1b9a31b514a78eb85fced0183f/TMessagesProj/src/main/java/org/telegram/messenger/MessageObject.java#L3191
+export function getTwitterInstagramEntities(patternType, text, entities) {
+    const key = `${patternType}_${text}`;
+
+    let e = [];
+    if (!twitterInstagramEntities.has(key)) {
+        let result = mentionHashtagRegExp.exec(text);
+        while (result) {
+            let { index: offset } = result;
+            let i = 1;
+
+            let ch = text[offset];
+            if (ch !== '@' && ch !== '#') {
+                offset++;
+                i++;
+                ch = text[offset];
+            }
+
+            const length = result[0].length - i + 1;
+            const foundText = result[0].substr(i);
+            let url = null;
+
+            // instagram
+            if (patternType === 1) {
+                if (ch === '@') {
+                    url = 'https://instagram.com/' + foundText;
+                } else if (ch === '#') {
+                    url = 'https://instagram.com/explore/tags/' + foundText;
+                }
+                // twitter
+            } else if (patternType === 2) {
+                if (ch === '@') {
+                    url = 'https://twitter.com/' + foundText;
+                } else if (ch === '#') {
+                    url = 'https://twitter.com/hashtag/' + foundText;
+                }
+            }
+
+            if (url) {
+                e.push({
+                    '@type': 'textEntity',
+                    type: { '@type': 'textEntityTypeTextUrl', url },
+                    length,
+                    offset
+                });
+            }
+
+            result = mentionHashtagRegExp.exec(text);
+        }
+
+        twitterInstagramEntities.set(key, e);
+    } else {
+        e = twitterInstagramEntities.get(key);
+    }
+
+    return { text, entities: [...entities, ...e] };
+}
+
 export function getHTMLEntities(text, entities) {
     const result = new DOMParser().parseFromString(text, 'text/html');
 
