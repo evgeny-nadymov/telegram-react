@@ -33,8 +33,8 @@ import User from '../Tile/User';
 import Chat from '../Tile/Chat';
 import ChatDetailsHeader from './ChatDetailsHeader';
 import NotificationsListItem from './NotificationsListItem';
-import MoreListItem from './MoreListItem';
 import { copy } from '../../Utils/Text';
+import { getFormattedText, getUrlMentionHashtagEntities } from '../../Utils/Message';
 import {
     getChatUsername,
     getChatPhoneNumber,
@@ -43,8 +43,7 @@ import {
     getGroupChatMembers,
     getChatFullInfo,
     isPrivateChat,
-    getChatUserId,
-    isMeChat
+    isMeChat, isChannelChat
 } from '../../Utils/Chat';
 import { getUserStatusOrder } from '../../Utils/User';
 import { loadUsersContent, loadChatsContent } from '../../Utils/File';
@@ -350,7 +349,7 @@ class ChatDetails extends React.Component {
 
         const username = getChatUsername(chatId);
         const phoneNumber = getChatPhoneNumber(chatId);
-        const bio = getChatBio(chatId);
+        let bio = getChatBio(chatId);
         const isGroup = isGroupChat(chatId);
         const isMe = isMeChat(chatId);
 
@@ -375,6 +374,13 @@ class ChatDetails extends React.Component {
         ));
 
         const { photo } = chat;
+
+        if (isGroupChat(chatId) || isChannelChat(chatId)) {
+            const { text: bioText, entities: bioEntities } = getUrlMentionHashtagEntities(bio, []);
+            if (bioEntities.length > 0) {
+                bio = getFormattedText({ '@type': 'formattedText', text: bioText, entities: bioEntities });
+            }
+        }
 
         const content = (
             <>
