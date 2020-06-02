@@ -155,11 +155,11 @@ class NotificationStore extends EventEmitter {
             }
             case 'updateNewMessage': {
                 const { windowFocused } = this;
-                // console.log('[ns] updateNewMessage', windowFocused);
                 if (!windowFocused) {
                     const { message } = update;
                     const { chat_id, id } = message;
 
+                    // dismiss notifications for last visited public channels and groups
                     if (!isChatMember(chat_id) && AppStore.chatId !== chat_id) {
                         break;
                     }
@@ -172,7 +172,6 @@ class NotificationStore extends EventEmitter {
                     if (!message.is_outgoing && !isMessageMuted(message) && this.enableSound) {
                         const now = new Date();
                         if (now > this.nextSoundAt) {
-                            // console.log('[ns] audio play');
                             try {
                                 const audio = new Audio('sound_a.mp3');
                                 audio.play();
