@@ -255,18 +255,27 @@ function createTheme(type, primary) {
             MuiListItemIcon: {
                 root: {
                     minWidth: 40
+                },
+                alignItemsFlexStart: {
+                    marginTop: 6
                 }
             },
-            MuiListItemText: {
-                root: {
-                    marginTop: 0,
-                    marginBottom: 0
-                }
-            },
+            // MuiListItemText: {
+            //     root: {
+            //         marginTop: 0,
+            //         marginBottom: 0
+            //     }
+            // },
+            // MuiListItem: {
+            //     root: {
+            //         paddingTop: 10,
+            //         paddingBottom: 10
+            //     }
+            // },
             MuiMenuItem: {
                 root: {
-                    paddingTop: 16,
-                    paddingBottom: 16
+                    paddingTop: 10,
+                    paddingBottom: 10
                 }
             },
             MuiTouchRipple
