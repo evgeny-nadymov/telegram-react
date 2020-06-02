@@ -82,7 +82,9 @@ class MediaViewerContent extends React.Component {
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
             let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
-            thumbnail = FileStore.get(thumbnail.id) || thumbnail;
+            if (thumbnail){
+                thumbnail = FileStore.get(thumbnail.id) || thumbnail;
+            }
             const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getMediaMiniPreview(chatId, messageId);
 
             const message = MessageStore.get(chatId, messageId);
