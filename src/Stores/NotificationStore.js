@@ -8,9 +8,11 @@
 import EventEmitter from './EventEmitter';
 import { isMessageMuted } from '../Utils/Store';
 import { APP_NAME, NOTIFICATION_AUDIO_DELAY_MS } from '../Constants';
+import AppStore from './ApplicationStore';
 import ChatStore from './ChatStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
+import { isChatMember } from '../Utils/Chat';
 
 class NotificationStore extends EventEmitter {
     constructor() {
@@ -157,6 +159,10 @@ class NotificationStore extends EventEmitter {
                 if (!windowFocused) {
                     const { message } = update;
                     const { chat_id, id } = message;
+
+                    if (!isChatMember(chat_id) && AppStore.chatId !== chat_id) {
+                        break;
+                    }
 
                     const chatMap = this.newMessages.get(chat_id) || new Map();
                     chatMap.set(id, message);
