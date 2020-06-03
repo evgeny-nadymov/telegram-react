@@ -32,7 +32,7 @@ class DocumentTile extends React.Component {
         const { thumbnail } = this.props;
         if (!thumbnail) return;
 
-        const file = thumbnail.photo;
+        const { thumbnail: file } = thumbnail;
         if (!file) return;
 
         const { fileId } = update;
@@ -53,7 +53,7 @@ class DocumentTile extends React.Component {
         const { loaded } = this.state;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
         const tileLoaded = thumbnailSrc && loaded;
         const src = thumbnailSrc || miniSrc;
 

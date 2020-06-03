@@ -303,10 +303,10 @@ function loadAudioContent(store, audio, message, useFileSize = true) {
 function loadAudioThumbnailContent(store, audio, message) {
     if (!audio) return false;
 
-    const { album_cover_thumbnail: photoSize } = audio;
-    if (!photoSize) return false;
+    const { album_cover_thumbnail: thumbnail } = audio;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -372,10 +372,10 @@ export function loadAnimationContent(store, animation, message, useFileSize = tr
 function cancelLoadAnimationThumbnailContent(animation){
     if (!animation) return;
 
-    const { thumbnail: photoSize } = animation;
-    if (!photoSize) return;
+    const { thumbnail } = animation;
+    if (!thumbnail) return;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -390,10 +390,10 @@ function cancelLoadAnimationThumbnailContent(animation){
 export function loadAnimationThumbnailContent(store, animation, message) {
     if (!animation) return false;
 
-    const { thumbnail: photoSize } = animation;
-    if (!photoSize) return false;
+    const { thumbnail } = animation;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -458,10 +458,10 @@ function loadDocumentContent(store, document, message, useFileSize = true) {
 function loadDocumentThumbnailContent(store, document, message) {
     if (!document) return false;
 
-    const { thumbnail: photoSize } = document;
-    if (!photoSize) return false;
+    const { thumbnail } = document;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -728,10 +728,10 @@ function loadStickerContent(store, sticker, message, useFileSize = true) {
 function loadStickerThumbnailContent(store, sticker, message) {
     if (!sticker) return false;
 
-    const { thumbnail: photoSize } = sticker;
-    if (!photoSize) return false;
+    const { thumbnail } = sticker;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -802,10 +802,10 @@ function loadVideoContent(store, video, message, useFileSize = true) {
 function cancelLoadVideoThumbnailContent(video) {
     if (!video) return;
 
-    const { thumbnail: photoSize } = video;
-    if (!photoSize) return false;
+    const { thumbnail } = video;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -820,10 +820,10 @@ function cancelLoadVideoThumbnailContent(video) {
 function loadVideoThumbnailContent(store, video, message) {
     if (!video) return false;
 
-    const { thumbnail: photoSize } = video;
-    if (!photoSize) return false;
+    const { thumbnail } = video;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -877,10 +877,10 @@ function loadVideoNoteContent(store, videoNote, message, useFileSize = true) {
 function loadVideoNoteThumbnailContent(store, videoNote, message) {
     if (!videoNote) return false;
 
-    const { thumbnail: photoSize } = videoNote;
-    if (!photoSize) return false;
+    const { thumbnail } = videoNote;
+    if (!thumbnail) return false;
 
-    let { photo: file } = photoSize;
+    let { thumbnail: file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -1290,14 +1290,14 @@ function getViewerThumbnail(media) {
         case 'animation': {
             const { thumbnail } = media;
             if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.photo];
+                return [thumbnail.width, thumbnail.height, thumbnail.file];
             }
             break;
         }
         case 'document': {
             const { thumbnail } = media;
             if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.photo];
+                return [thumbnail.width, thumbnail.height, thumbnail.file];
             }
             break;
         }
@@ -1307,7 +1307,7 @@ function getViewerThumbnail(media) {
         case 'video': {
             const { thumbnail } = media;
             if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.photo];
+                return [thumbnail.width, thumbnail.height, thumbnail.file];
             }
             break;
         }
@@ -1404,7 +1404,7 @@ function getMediaPreviewFile(chatId, messageId) {
         case 'messageAnimation': {
             const { animation } = content;
             if (animation && animation.thumbnail) {
-                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
+                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.file];
             }
             break;
         }
@@ -1427,7 +1427,7 @@ function getMediaPreviewFile(chatId, messageId) {
                 const { animation, document, video, photo } = web_page;
 
                 if (animation && animation.thumbnail) {
-                    return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.photo];
+                    return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.file];
                 }
 
                 if (document) {
@@ -1435,7 +1435,7 @@ function getMediaPreviewFile(chatId, messageId) {
                 }
 
                 if (video && video.thumbnail) {
-                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.file];
                 }
 
                 if (photo) {
@@ -1447,7 +1447,7 @@ function getMediaPreviewFile(chatId, messageId) {
         case 'messageVideo': {
             const { video } = content;
             if (video && video.thumbnail) {
-                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.photo];
+                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.file];
             }
             break;
         }

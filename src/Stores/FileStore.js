@@ -362,7 +362,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (animation.thumbnail) {
-            const source = animation.thumbnail.photo;
+            const source = animation.thumbnail.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,
@@ -393,7 +393,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (audio.album_cover_thumbnail) {
-            const source = audio.album_cover_thumbnail.photo;
+            const source = audio.album_cover_thumbnail.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,
@@ -531,7 +531,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (sticker.thumbnail) {
-            const source = sticker.thumbnail.photo;
+            const source = sticker.thumbnail.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,
@@ -580,7 +580,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (videoNote.thumbnail) {
-            const source = videoNote.thumbnail.photo;
+            const source = videoNote.thumbnail.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,
@@ -611,7 +611,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (video.thumbnail) {
-            const source = video.thumbnail.photo;
+            const source = video.thumbnail.thumbnail;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,

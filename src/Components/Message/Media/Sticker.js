@@ -265,7 +265,8 @@ class Sticker extends React.Component {
 
         const { fileId } = update;
 
-        if (thumbnail.photo && thumbnail.photo.id === fileId) {
+        const { thumbnail: file } = thumbnail;
+        if (file && file.id === fileId) {
             this.forceUpdate();
         }
     };
@@ -372,7 +373,7 @@ class Sticker extends React.Component {
 
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
         const src = getSrc(sticker);
         const isBlurred = isBlurredThumbnail(thumbnail) || !preview;
 

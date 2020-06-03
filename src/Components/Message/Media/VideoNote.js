@@ -289,7 +289,8 @@ class VideoNote extends React.Component {
 
         const { fileId } = update;
 
-        if (thumbnail.photo && thumbnail.photo.id === fileId) {
+        const { thumbnail: file } = thumbnail;
+        if (file && file.id === fileId) {
             this.forceUpdate();
         }
     };
@@ -318,7 +319,7 @@ class VideoNote extends React.Component {
         if (!style) return null;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
         const src = getSrc(video);
         const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
