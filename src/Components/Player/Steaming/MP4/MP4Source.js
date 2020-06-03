@@ -25,6 +25,7 @@ export default class MP4Source {
         this.nbSamples = 10;
         this.video = video;
         this.getBufferAsync = getBufferAsync;
+        this.expectedSize = this.video.video.expected_size;
 
         this.seeking = false;
         this.loading = false;
@@ -240,7 +241,10 @@ export default class MP4Source {
         if (loading) return;
 
         this.loading = true;
-        const bufferSize = seek ? this.seekBufferSize : this.bufferSize;
+        let bufferSize = seek ? this.seekBufferSize : this.bufferSize;
+        if (nextBufferStart + bufferSize > this.expectedSize) {
+            bufferSize = this.expectedSize - nextBufferStart;
+        }
         const nextBuffer = await this.getBufferAsync(nextBufferStart, nextBufferStart + bufferSize);
         nextBuffer.fileStart = nextBufferStart;
 
