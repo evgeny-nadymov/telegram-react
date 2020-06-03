@@ -181,8 +181,9 @@ class WebPage extends React.Component {
         const { instant_view_version, site_name } = web_page;
         let { description, title } = web_page;
 
-
-        if (site_name && (site_name.toLowerCase() === 'twitter' || site_name.toLowerCase() === 'instagram')) {
+        if (description['@type'] === 'formattedText') {
+            description = getFormattedText(description);
+        } else if (typeof description === 'string' && site_name && (site_name.toLowerCase() === 'twitter' || site_name.toLowerCase() === 'instagram')) {
             // const { text: t2, entities: e2 } = getTwitterInstagramEntities(site_name.toLowerCase() === 'twitter' ? 1 : 2, title, []);
             // title = getFormattedText({ '@type': 'formattedText', text: title, entities: e2 });
 
