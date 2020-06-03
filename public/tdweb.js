@@ -228,7 +228,7 @@ module.exports = _slicedToArray;
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = function() {
-  return new Worker(__webpack_require__.p + "ead4614006a580316820.worker.js");
+  return new Worker(__webpack_require__.p + "f1db7f94b655f112c80c.worker.js");
 };
 
 /***/ }),
@@ -3113,7 +3113,7 @@ function () {
                   '@type': 'readFilePart',
                   path: info.file.local.path,
                   offset: offset,
-                  size: size
+                  count: size
                 });
 
               case 14:
@@ -3204,7 +3204,7 @@ function () {
                 }
 
                 query.offset = query.offset || 0;
-                query.size = query.size || 0;
+                query.size = query.count || query.size || 0;
                 _context8.next = 11;
                 return this.doLoad(info, query.offset, query.size);
 
