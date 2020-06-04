@@ -144,7 +144,7 @@ class DialogsList extends React.Component {
 
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.on('updateChatPosition', this.onUpdateChatOrder);
+        ChatStore.on('updateChatPosition', this.onUpdateChatPosition);
 
         SupergroupStore.on('updateSupegroup', this.onUpdateSupergroup);
 
@@ -157,7 +157,7 @@ class DialogsList extends React.Component {
 
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.off('updateChatPosition', this.onUpdateChatOrder);
+        ChatStore.off('updateChatPosition', this.onUpdateChatPosition);
 
         SupergroupStore.off('updateSupegroup', this.onUpdateSupergroup);
 
@@ -209,6 +209,17 @@ class DialogsList extends React.Component {
         const { onSaveCache } = this.props;
 
         if (onSaveCache) onSaveCache();
+    };
+
+    onUpdateChatPosition = update => {
+        const { type } = this.props;
+        const { position } = update;
+
+        if (position['@type'] !== type) {
+            return;
+        }
+
+        this.onUpdateChatOrder(update);
     };
 
     onUpdateChatOrder = update => {
