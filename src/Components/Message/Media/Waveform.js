@@ -9,23 +9,31 @@ import PropTypes from 'prop-types';
 import './Waveform.css';
 
 class Waveform extends React.Component {
+    reverse(str) {
+        return str.split('').reverse().join('');
+    }
+
     render() {
         const { id, data, value, dragging } = this.props;
         if (!data) return null;
 
-        const bitsString = Array.from(atob(data), c => {
+        const bitsString = Array
+            .from(atob(data), c => {
             const n = c.charCodeAt(0).toString(2);
-            return '00000000'.substr(n.length) + n;
+            return this.reverse(n) + '00000000'.substr(n.length);
         });
+        // console.log('[waveform] bitsString', bitsString, data);
+
         const str = bitsString.join('');
+        // console.log('[waveform] str', str, data);
 
         const chunkLength = 5;
         let nums = [];
-
-        for (let i = 0, charsLength = str.length; i < charsLength; i += chunkLength) {
-            const c = str.substring(i, i + chunkLength);
-            nums.push(parseInt(c, 2));
+        for (let i = 0, charsLength = str.length; i < charsLength && i < 500; i += chunkLength) {
+            const c = this.reverse(str.substring(i, i + chunkLength));
+            nums.push(parseInt(c, 2) / 31.0);
         }
+        // console.log('[waveform] bitsString', nums, data);
 
         const transition = dragging ? null : 'width 0.25s'
         const waveformMaxHeight = 23;
@@ -35,10 +43,10 @@ class Waveform extends React.Component {
                 <svg className='waveform-clip-path' width={202} height={waveformMaxHeight}>
                     <defs>
                         <clipPath id={id}>
-                            {nums.filter((x, index) => index % 2 === 0).map((x, index) => {
-                                const height = Math.min(Math.max(2, x), waveformMaxHeight);
-                                const y = waveformMaxHeight - height;
-                                return (<rect key={index} x={1 + 4 * index} y={y} width='2' height={height} rx='1' ry='1'/>)
+                            {nums.filter((x, index) => index % 2 === 1).map((x, index) => {
+                                const height = Math.min(Math.max(2, x * waveformMaxHeight), waveformMaxHeight);
+                                const y = waveformMaxHeight - Math.floor(height);
+                                return (<rect key={index} x={1 + 4 * index} y={y} width='2' height={Math.floor(height)} rx='1' ry='1'/>)
                             })}
                         </clipPath>
                     </defs>

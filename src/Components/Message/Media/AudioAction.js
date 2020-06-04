@@ -199,7 +199,8 @@ class AudioAction extends React.Component {
         } else if (isUploadingActive) {
             progressSize = getUploadedSize(file);
         }
-        const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
+        // const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
+        const sizeString = progressSize ? `${progressSize}` : `${size}`;
         const strings = [];
         if (!isDownloadingCompleted) {
             strings.push(sizeString);

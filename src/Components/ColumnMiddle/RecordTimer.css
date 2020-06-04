@@ -1,0 +1,29 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.record-timer {
+    display: flex;
+    align-items: center;
+}
+
+.record-timer-icon {
+    width: 10px;
+    height: 10px;
+    background: red;
+    border-radius: 50%;
+    margin: 0 18px;
+    animation: blinker .5s cubic-bezier(.5, 0, 1, 1) infinite alternate;
+}
+
+.Blink {
+
+}
+
+@keyframes blinker {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}

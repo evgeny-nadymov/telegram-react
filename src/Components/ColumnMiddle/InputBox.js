@@ -14,6 +14,8 @@ import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
 import SendIcon from '../../Assets/Icons/Send';
+import MicrophoneIcon from '../../Assets/Icons/Microphone';
+import DeleteIcon from '../../Assets/Icons/Delete';
 import AttachButton from './../ColumnMiddle/AttachButton';
 import CreatePollDialog from '../Popup/CreatePollDialog';
 import EditUrlDialog from '../Popup/EditUrlDialog';
@@ -36,6 +38,10 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
+import RecordTimer from './RecordTimer';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import ArrowBackIcon from '../../Assets/Icons/Back';
+import MenuIcon from '../../Assets/Icons/Menu';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -53,6 +59,8 @@ class InputBox extends Component {
             chatId,
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
             editMessageId: 0,
+            recordingReady: true,
+            recording: false,
             sendFile: null
         };
 
@@ -61,7 +69,7 @@ class InputBox extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile } = this.state;
+        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile, recordingReady, recording } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -96,6 +104,14 @@ class InputBox extends Component {
         }
 
         if (nextState.openEditMedia !== openEditMedia) {
+            return true;
+        }
+
+        if (nextState.recordingReady !== recordingReady) {
+            return true;
+        }
+
+        if (nextState.recording !== recording) {
             return true;
         }
 
@@ -497,7 +513,16 @@ class InputBox extends Component {
     };
 
     handleSubmit = () => {
-        const { chatId, editMessageId, replyToMessageId } = this.state;
+        const { chatId, editMessageId, replyToMessageId, recordingReady, recording } = this.state;
+
+        if (recording) {
+            this.handleStopRecord();
+            return;
+        } else if (recordingReady) {
+            this.handleRecord();
+            return;
+        }
+
         const element = this.newMessageRef.current;
         if (!element) return;
 
@@ -1142,7 +1167,22 @@ class InputBox extends Component {
     handleInput = async event => {
         this.setTyping();
         this.setHints();
+        this.setRecordingReadyState();
     };
+
+    setRecordingReadyState() {
+        const { editMessageId } = this.state;
+        const innerText = this.newMessageRef.current.innerText;
+        if (!innerText && !editMessageId) {
+            this.setState({
+                recordingReady: true
+            });
+        } else {
+            this.setState({
+                recordingReady: false
+            });
+        }
+    }
 
     openEditUrlDialog = () => {
         let defaultText = '';
@@ -1326,12 +1366,25 @@ class InputBox extends Component {
         setTimeout(() => this.restoreSelection(), 0);
     };
 
-    handleRecord = async () => {
+    handleStopRecord = () => {
         if (this.recorder) {
             this.recorder.stop();
-            this.recorder = null;
+            // this.recorder = null;
             return;
         }
+    }
+
+    handleCancelRecord = () => {
+        if (this.recorder) {
+            this.recorder.cancelled = true;
+            this.recorder.stop();
+            // this.recorder = null;
+            return;
+        }
+    }
+
+    handleRecord = async () => {
+        if (this.recorder) return;
 
         // console.log('start recording called');
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -1354,6 +1407,7 @@ class InputBox extends Component {
 
             this.recorder = new MediaRecorder(stream, options, workerOptions);
             this.recorder.start(50);
+
             const chunks = [];
 
             this.recorder.addEventListener('dataavailable', (e) => {
@@ -1361,18 +1415,28 @@ class InputBox extends Component {
                 chunks.push(e.data);
             });
             this.recorder.addEventListener('start', (e) => {
+                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
                 // console.log('start');
-                this.setState({state: 'recording'});
+                this.setState({ recording: true });
             })
             this.recorder.addEventListener('stop', (e) => {
+                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
+                this.setState({ recording: false });
+
+                const { cancelled } = this.recorder;
+                this.recorder = null;
+                if (cancelled) {
+
+                    return;
+                }
+
                 // console.log('stop');
                 const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
                 const audioURL = window.URL.createObjectURL(blob);
 
                 const audio = new Audio(audioURL);
-                // audio.play();
                 audio.oncanplay = () => {
-                    console.log("recorder stopped", audioURL, audio.duration);
+                    // console.log('recorder stopped', audioURL, audio.duration);
 
                     const content = {
                         '@type': 'inputMessageVoiceNote',
@@ -1384,18 +1448,12 @@ class InputBox extends Component {
 
                     this.handleSendVoiceNote(content, blob);
                 };
-            })
-            this.recorder.addEventListener('pause', (e) => {
-                // console.log('pause');
-                this.setState({state: 'paused'});
-            })
-            this.recorder.addEventListener('resume', (e) => {
-                // console.log('resume');
-                this.setState({state: 'recording'});
-            })
+            });
             this.recorder.addEventListener('error', (e) => {
+                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordError' });
+                this.setState({ recording: false });
                 // console.log('error', e);
-            })
+            });
         });
 
         // if (navigator.mediaDevices.getUserMedia) {
@@ -1475,10 +1533,16 @@ class InputBox extends Component {
             defaultText,
             defaultUrl,
             openEditUrl,
-            openEditMedia
+            openEditMedia,
+            recordingReady,
+            recording
         } = this.state;
 
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
+        let icon = (<SpeedDialIcon open={!recording && recordingReady} openIcon={<MicrophoneIcon />} icon={<SendIcon />} />);
+        if (editMessageId) {
+            icon = <DoneIcon/>;
+        }
 
         return (
             <div className='inputbox-background'>
@@ -1515,6 +1579,7 @@ class InputBox extends Component {
                                 />
                             </div>
                             <div className='inputbox-right-column'>
+                                <RecordTimer/>
                                 <input
                                     ref={this.attachDocumentRef}
                                     className='inputbox-attach-button'
@@ -1530,7 +1595,7 @@ class InputBox extends Component {
                                     accept='image/*'
                                     onChange={this.handleAttachPhotoComplete}
                                 />
-                                {!Boolean(editMessageId) && (
+                                {!Boolean(editMessageId) && !recording && (
                                     <AttachButton
                                         chatId={chatId}
                                         onAttachPhoto={this.handleAttachPhoto}
@@ -1545,22 +1610,25 @@ class InputBox extends Component {
                             </div>
                         </div>
                     </div>
+                    { recording && (
+                        <div className='inputbox-cancel-record-button-background'>
+                            <IconButton
+                                className='inputbox-cancel-record-button'
+                                aria-label='Delete'
+                                size='small'
+                                color='secondary'
+                                onClick={this.handleCancelRecord}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </div>
+                    )}
                     <div className='inputbox-send-button-background'>
                         <IconButton
-                            className='inputbox-send-button'
-                            aria-label='Send'
-                            size='small'
-                            onClick={this.handleRecord}>
-                            <DoneIcon />
-                        </IconButton>
-                    </div>
-                    <div className='inputbox-send-button-background'>
-                        <IconButton
-                            className='inputbox-send-button'
+                            className={classNames('inputbox-send-button', {'inputbox-send-accent-button': recording || !recordingReady})}
                             aria-label='Send'
                             size='small'
                             onClick={this.handleSubmit}>
-                            {editMessageId ? <DoneIcon /> : <SendIcon />}
+                            {icon}
                         </IconButton>
                     </div>
                 </div>

@@ -187,7 +187,7 @@ class WebPage extends React.Component {
             // const { text: t2, entities: e2 } = getTwitterInstagramEntities(site_name.toLowerCase() === 'twitter' ? 1 : 2, title, []);
             // title = getFormattedText({ '@type': 'formattedText', text: title, entities: e2 });
 
-            const { text: t1, entities: e1 } = getTwitterInstagramEntities(site_name.toLowerCase() === 'twitter' ? 1 : 2, description, []);
+            const { text: t1, entities: e1 } = getTwitterInstagramEntities(site_name.toLowerCase() === 'instagram' ? 1 : 2, description, []);
             description = getFormattedText({ '@type': 'formattedText', text: description, entities: e1 });
         }
 
