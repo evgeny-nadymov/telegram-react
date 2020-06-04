@@ -4,8 +4,9 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-import ChatStore from '../Stores/ChatStore';
 import { orderCompare } from './Common';
+import { getChatOrder } from './Chat';
+import ChatStore from '../Stores/ChatStore';
 
 export function getArchiveTitle() {
     const archive = ChatStore.chatList.get('chatListArchive');
@@ -15,13 +16,14 @@ export function getArchiveTitle() {
         for (const chatId of archive.keys()) {
             const chat = ChatStore.get(chatId);
             if (chat) {
-                if (chat.order !== '0') chats.push(chat);
-                chatsOrder.push({ order: chat.order, id: chat.id, title: chat.title });
+                const order = getChatOrder(chatId, { '@type': 'chatListArchive' });
+                if (order !== '0') chats.push(chat);
+                chatsOrder.push({ order, id: chatId, title: chat.title });
             }
         }
     }
 
-    const orderedChats = chats.sort((a, b) => orderCompare(b.order, a.order));
+    const orderedChats = chats.sort((a, b) => orderCompare(getChatOrder(b, { '@type': 'chatListArchive' }), getChatOrder(a, { '@type': 'chatListArchive' })));
 
     return orderedChats.map(x => x.title).join(', ');
 }

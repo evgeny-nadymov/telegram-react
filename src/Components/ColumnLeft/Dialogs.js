@@ -144,13 +144,9 @@ class Dialogs extends Component {
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
-        ChatStore.on('updateChatChatList', this.onUpdateChatChatList);
-
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatOrder);
-        ChatStore.on('updateChatIsPinned', this.onUpdateChatOrder);
-        ChatStore.on('updateChatIsSponsored', this.onUpdateChatOrder);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.on('updateChatPosition', this.onUpdateChatOrder);
 
         AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
@@ -164,13 +160,9 @@ class Dialogs extends Component {
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
 
-        ChatStore.off('updateChatChatList', this.onUpdateChatChatList);
-
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatOrder);
-        ChatStore.off('updateChatIsPinned', this.onUpdateChatOrder);
-        ChatStore.off('updateChatIsSponsored', this.onUpdateChatOrder);
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.off('updateChatPosition', this.onUpdateChatOrder);
 
         AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
@@ -233,25 +225,6 @@ class Dialogs extends Component {
     }
 
     onUpdateChatOrder = update => {
-        const { chat_id } = update;
-
-        const { current: mainCurrent } = this.dialogListRef;
-        if (mainCurrent && mainCurrent.loading) {
-            return;
-        }
-
-        const { current: archiveCurrent } = this.archiveListRef;
-        if (archiveCurrent && archiveCurrent.loading) {
-            return;
-        }
-
-        const archive = ChatStore.chatList.get('chatListArchive');
-        if (archive && archive.has(chat_id)) {
-            this.setState({ archiveTitle: getArchiveTitle() });
-        }
-    };
-
-    onUpdateChatChatList = update => {
         const { showArchive: prevShowArchive } = this.state;
 
         const { current: mainCurrent } = this.dialogListRef;

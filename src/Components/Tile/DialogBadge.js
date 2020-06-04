@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import PinIcon from '../../Assets/Icons/Pin';
 import {
     isChatMuted,
+    isChatPinned,
     showChatUnreadCount,
     showChatUnreadMentionCount
 } from '../../Utils/Chat';
@@ -19,9 +20,13 @@ import './DialogBadge.css';
 
 class DialogBadge extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId } = this.props;
+        const { chatId, chatList } = this.props;
 
         if (nextProps.chatId !== chatId) {
+            return true;
+        }
+
+        if (nextProps.chatList !== chatList) {
             return true;
         }
 
@@ -33,7 +38,7 @@ class DialogBadge extends React.Component {
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.on('updateChatDraftMessage', this.onUpdate);
         ChatStore.on('updateChatIsMarkedAsUnread', this.onUpdate);
-        ChatStore.on('updateChatIsPinned', this.onUpdate);
+        ChatStore.on('updateChatPosition', this.onUpdate);
         ChatStore.on('updateChatNotificationSettings', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateChatLastMessage', this.onUpdate);
@@ -48,7 +53,7 @@ class DialogBadge extends React.Component {
         ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
         ChatStore.off('updateChatDraftMessage', this.onUpdate);
         ChatStore.off('updateChatIsMarkedAsUnread', this.onUpdate);
-        ChatStore.off('updateChatIsPinned', this.onUpdate);
+        ChatStore.off('updateChatPosition', this.onUpdate);
         ChatStore.off('updateChatNotificationSettings', this.onUpdate);
         ChatStore.off('updateChatReadInbox', this.onUpdate);
         ChatStore.off('updateChatLastMessage', this.onUpdate);
@@ -104,12 +109,13 @@ class DialogBadge extends React.Component {
     render() {
         if (this.clearHistory) return null;
 
-        const { chatId } = this.props;
+        const { chatId, chatList } = this.props;
 
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { is_pinned, unread_count } = chat;
+        const { unread_count } = chat;
+        const isPinned = isChatPinned(chatId, chatList);
 
         const showUnreadMentionCount = showChatUnreadMentionCount(chatId);
         const showUnreadCount = showChatUnreadCount(chatId);
@@ -127,7 +133,7 @@ class DialogBadge extends React.Component {
                         <span className='dialog-badge-text'>{unread_count > 0 ? unread_count : ''}</span>
                     </div>
                 )}
-                {is_pinned && !showUnreadCount && !showUnreadMentionCount && (
+                {isPinned && !showUnreadCount && !showUnreadMentionCount && (
                     <div className='dialog-badge-pinned'>
                         <PinIcon className='dialog-badge-pinned-icon' />
                     </div>

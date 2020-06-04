@@ -7,6 +7,7 @@
 
 import EventEmitter from './EventEmitter';
 import InputTypingManager from '../Utils/InputTypingManager';
+import { positionListEquals } from '../Utils/Chat';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -59,26 +60,32 @@ class ChatStore extends EventEmitter {
         localStorage.setItem('clientData', JSON.stringify(obj));
     };
 
-    updateChatChatList(chatId, chatList) {
-        if (!chatList) {
-            for (const key of this.chatList.keys()) {
-                this.chatList.get(key).delete(chatId);
-            }
+    updateChatChatLists(chatId) {
+        const { chat } = this.get(chatId);
+        if (!chat) return;
 
-            return;
-        }
+        const { positions } = chat;
+        if (!positions) return;
 
-        let idMap = this.chatList.get(chatList['@type']);
-        if (!idMap) {
-            idMap = new Map();
-            this.chatList.set(chatList['@type'], idMap);
-        }
-
-        idMap.set(chatId, chatId);
         for (const key of this.chatList.keys()) {
-            if (key !== chatList['@type']) {
-                this.chatList.get(key).delete(chatId);
+            this.chatList.get(key).delete(chatId);
+        }
+
+        if (!positions.length) return;
+
+        for (let i = 0; i < positions.length; i++) {
+            const position = positions[i];
+
+            const { list } = position;
+
+            const key = `${list['@type']}_filter_id=${list.filter_id}`;
+            let idMap = this.chatList.get(key);
+            if (!idMap) {
+                idMap = new Map();
+                this.chatList.set(key, idMap);
             }
+
+            idMap.set(chatId, chatId);
         }
     }
 
@@ -125,19 +132,6 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
-            case 'updateChatChatList': {
-                const { chat_id, chat_list } = update;
-
-                const chat = this.get(chat_id);
-                if (chat) {
-                    this.assign(chat, { chat_list });
-                }
-
-                this.updateChatChatList(chat_id, chat_list);
-
-                this.emitFastUpdate(update);
-                break;
-            }
             case 'updateChatDefaultDisableNotification': {
                 //TODO: handle updateChatDefaultDisableNotification
 
@@ -151,15 +145,17 @@ class ChatStore extends EventEmitter {
                 break;
             }
             case 'updateChatDraftMessage': {
-                const { chat_id, order, draft_message } = update;
+                const { chat_id, positions, draft_message } = update;
 
                 const chat = this.get(chat_id);
                 if (chat) {
                     this.assign(chat, {
-                        order: order === '0' ? chat.order : order,
+                        positions: !positions.length ? chat.positions : positions,
                         draft_message
                     });
                 }
+
+                this.updateChatChatLists(chat_id);
 
                 this.emitFastUpdate(update);
                 break;
@@ -175,38 +171,18 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
-            case 'updateChatIsPinned': {
-                const { chat_id, order, is_pinned } = update;
-
-                const chat = this.get(chat_id);
-                if (chat) {
-                    this.assign(chat, { order, is_pinned });
-                }
-
-                this.emitFastUpdate(update);
-                break;
-            }
-            case 'updateChatIsSponsored': {
-                const { chat_id, order, is_sponsored } = update;
-
-                const chat = this.get(chat_id);
-                if (chat) {
-                    this.assign(chat, { order, is_sponsored });
-                }
-
-                this.emitFastUpdate(update);
-                break;
-            }
             case 'updateChatLastMessage': {
-                const { chat_id, order, last_message } = update;
+                const { chat_id, positions, last_message } = update;
 
                 const chat = this.get(chat_id);
                 if (chat) {
                     this.assign(chat, {
-                        order: order === '0' ? chat.order : order,
+                        positions: !positions.length ? chat.positions : positions,
                         last_message
                     });
                 }
+
+                this.updateChatChatLists(chat_id);
 
                 this.emitFastUpdate(update);
                 break;
@@ -217,17 +193,6 @@ class ChatStore extends EventEmitter {
                 const chat = this.get(chat_id);
                 if (chat) {
                     this.assign(chat, { notification_settings });
-                }
-
-                this.emitFastUpdate(update);
-                break;
-            }
-            case 'updateChatOrder': {
-                const { chat_id, order } = update;
-
-                const chat = this.get(chat_id);
-                if (chat) {
-                    this.assign(chat, { order });
                 }
 
                 this.emitFastUpdate(update);
@@ -268,6 +233,19 @@ class ChatStore extends EventEmitter {
                 if (chat) {
                     this.assign(chat, { pinned_message_id });
                 }
+
+                this.emitFastUpdate(update);
+                break;
+            }
+            case 'updateChatPosition': {
+                const { chat_id, position } = update;
+
+                const chat = this.get(chat_id);
+                if (chat) {
+                    this.assign(chat, { positions: [...chat.positions.filter(x => !positionListEquals(x, position)), position] });
+                }
+
+                this.updateChatChatLists(chat_id);
 
                 this.emitFastUpdate(update);
                 break;

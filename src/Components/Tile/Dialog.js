@@ -33,6 +33,7 @@ import {
     canSetChatChatList,
     isChatArchived,
     isChatMuted,
+    isChatPinned,
     isChatSecret,
     isChatUnread,
     isPrivateChat
@@ -133,7 +134,7 @@ class Dialog extends Component {
             event.preventDefault();
             event.stopPropagation();
         }
-        const { chatId } = this.props;
+        const { chatId, chatList } = this.props;
         const { contextMenu } = this.state;
 
         if (contextMenu) {
@@ -144,9 +145,8 @@ class Dialog extends Component {
 
             const left = event.clientX;
             const top = event.clientY;
-            const chat = ChatStore.get(chatId);
-            const { is_pinned } = chat;
-            const canTogglePin = (await this.canPinChats(chatId)) || is_pinned;
+            const isPinned = isChatPinned(chatId, chatList);
+            const canTogglePin = (await this.canPinChats(chatId)) || isPinned;
             const canToggleArchive = canSetChatChatList(chatId);
 
             if (Dialog.contextMenuId !== contextMenuId) {
@@ -180,6 +180,8 @@ class Dialog extends Component {
     };
 
     canPinChats = async chatId => {
+        const { chatList } = this.props;
+
         const pinnedSumMaxOption = isChatArchived(chatId)
             ? OptionStore.get('pinned_archived_chat_count_max')
             : OptionStore.get('pinned_chat_count_max');
@@ -188,7 +190,7 @@ class Dialog extends Component {
         const isSecret = isChatSecret(chatId);
         const chats = await TdLibController.send({
             '@type': 'getChats',
-            chat_list: isChatArchived(chatId) ? { '@type': 'chatListArchive' } : { '@type': 'chatListMain' },
+            chat_list: chatList,
             offset_order: '9223372036854775807',
             offset_chat_id: 0,
             limit: pinnedSumMaxOption.value + 10
@@ -199,7 +201,7 @@ class Dialog extends Component {
 
             const chat = ChatStore.get(id);
 
-            return x + (chat && chat.is_pinned ? 1 : 0);
+            return x + (chat && isChatPinned(chat.id, chatList) ? 1 : 0);
         }, 0);
 
         return pinnedSum < pinnedSumMaxOption.value;
@@ -208,14 +210,12 @@ class Dialog extends Component {
     handlePin = async event => {
         this.handleCloseContextMenu(event);
 
-        const { chatId } = this.props;
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-        const { is_pinned } = chat;
+        const { chatId, chatList } = this.props;
+        const isPinned = isChatPinned(chatId, chatList);
 
-        if (!is_pinned && !this.canPinChats(chatId)) return;
+        if (!isPinned && !this.canPinChats(chatId)) return;
 
-        toggleChatIsPinned(chatId, !is_pinned);
+        toggleChatIsPinned(chatId, !isPinned);
     };
 
     handleArchive = async event => {
@@ -281,11 +281,11 @@ class Dialog extends Component {
     };
 
     render() {
-        const { chatId, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
+        const { chatId, chatList, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
 
         const chat = ChatStore.get(chatId);
-        const { is_pinned } = chat;
+        const isPinned = isChatPinned(chatId, chatList);
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
         const isMuted = isChatMuted(chatId);
@@ -307,7 +307,7 @@ class Dialog extends Component {
                         </div>
                         <div className='tile-second-row'>
                             <DialogContent chatId={chatId} />
-                            <DialogBadge chatId={chatId} />
+                            <DialogBadge chatId={chatId} chatList={chatList} />
                         </div>
                     </div>
                 </div>
@@ -347,7 +347,7 @@ class Dialog extends Component {
                         )}
                         {canTogglePin && (
                             <MenuItem onClick={this.handlePin}>
-                                {is_pinned ? (
+                                {isPinned ? (
                                     <>
                                         <ListItemIcon>
                                             <UnpinIcon />
@@ -424,6 +424,7 @@ class Dialog extends Component {
 
 Dialog.propTypes = {
     chatId: PropTypes.number.isRequired,
+    chatList: PropTypes.object.isRequired,
     hidden: PropTypes.bool,
     showSavedMessages: PropTypes.bool,
     isLastPinned: PropTypes.bool,
