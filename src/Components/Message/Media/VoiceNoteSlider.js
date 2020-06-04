@@ -13,6 +13,7 @@ import { PLAYER_PROGRESS_TIMEOUT_MS } from '../../../Constants';
 import PlayerStore from '../../../Stores/PlayerStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './VoiceNoteSlider.css';
+import Waveform from './Waveform';
 
 class VoiceNoteSlider extends React.Component {
     constructor(props) {
@@ -102,6 +103,7 @@ class VoiceNoteSlider extends React.Component {
         if (messageId !== update.messageId) return;
 
         const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+        this.playerDuration = playerDuration;
         const value = this.getValue(update.currentTime, playerDuration, active);
 
         if (dragging) {
@@ -123,7 +125,7 @@ class VoiceNoteSlider extends React.Component {
         const { active, currentTime, dragging } = this.state;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+            const playerDuration = this.playerDuration >= 0 && this.playerDuration < Infinity ? this.playerDuration : duration;
             let value = this.state.value;
             if (!dragging) {
                 value = this.getValue(active ? currentTime : 0, playerDuration, true);
@@ -153,8 +155,7 @@ class VoiceNoteSlider extends React.Component {
 
     handleChangeCommitted = () => {
         const { chatId, messageId } = this.props;
-        const { value, active } = this.state;
-        if (!active) return;
+        const { value } = this.state;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaSeek',
@@ -188,13 +189,16 @@ class VoiceNoteSlider extends React.Component {
     };
 
     render() {
-        const { className, style } = this.props;
-        const { value } = this.state;
+        const { chatId, messageId, waveform, className, style } = this.props;
+        const { value, dragging } = this.state;
 
         return (
             <div className={classNames('voice-note-slider', className)} style={style}>
+                { waveform && (
+                    <Waveform id={`waveform_${chatId}_${messageId}`} dragging={dragging} data={waveform} value={value}/>
+                )}
                 <Slider
-                    className='voice-note-slider-component'
+                    className={classNames('voice-note-slider-component', { 'voice-note-slider-component-hidden': Boolean(waveform) })}
                     classes={{
                         track: 'voice-note-slider-track',
                         thumb: 'voice-note-slider-thumb',

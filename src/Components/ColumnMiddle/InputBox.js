@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import emojiRegex from 'emoji-regex';
+import MediaRecorder from 'opus-media-recorder';
 import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
@@ -933,6 +934,12 @@ class InputBox extends Component {
         this.sendMessage(content, true, result => FileStore.uploadFile(result.content.audio.audio.id, result));
     };
 
+    handleSendVoiceNote = (content, file) => {
+        if (!content) return;
+
+        this.sendMessage(content, true, result => FileStore.uploadFile(result.content.voice_note.voice.id, result));
+    };
+
     async handleSendFiles(files) {
         if (!files) return;
         if (!files.length) return;
@@ -1319,6 +1326,143 @@ class InputBox extends Component {
         setTimeout(() => this.restoreSelection(), 0);
     };
 
+    handleRecord = async () => {
+        if (this.recorder) {
+            this.recorder.stop();
+            this.recorder = null;
+            return;
+        }
+
+        // console.log('start recording called');
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+
+            const constraints = {
+                channelCount: 1,
+                sampleRate: 48000,
+            };
+
+            const track = stream.getAudioTracks()[0];
+            track.applyConstraints(constraints)
+
+            const options = { mimeType: 'audio/ogg; codecs=opus', audioBitsPerSecond: 64000 };
+            const workerOptions = {
+                encoderWorkerFactory: function () {
+                    return new Worker(process.env.PUBLIC_URL + '/opus-media-recorder/encoderWorker.umd.js')
+                },
+                OggOpusEncoderWasmPath: process.env.PUBLIC_URL + '/opus-media-recorder/OggOpusEncoder.wasm'
+            };
+
+            this.recorder = new MediaRecorder(stream, options, workerOptions);
+            this.recorder.start(50);
+            const chunks = [];
+
+            this.recorder.addEventListener('dataavailable', (e) => {
+                // console.log('Recording stopped, data available', e.data);
+                chunks.push(e.data);
+            });
+            this.recorder.addEventListener('start', (e) => {
+                // console.log('start');
+                this.setState({state: 'recording'});
+            })
+            this.recorder.addEventListener('stop', (e) => {
+                // console.log('stop');
+                const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+                const audioURL = window.URL.createObjectURL(blob);
+
+                const audio = new Audio(audioURL);
+                // audio.play();
+                audio.oncanplay = () => {
+                    console.log("recorder stopped", audioURL, audio.duration);
+
+                    const content = {
+                        '@type': 'inputMessageVoiceNote',
+                        voice_note: { '@type': 'inputFileBlob', name: '', size: blob.size, data: blob },
+                        duration: Math.trunc(audio.duration),
+                        waveform: '',
+                        caption: null
+                    };
+
+                    this.handleSendVoiceNote(content, blob);
+                };
+            })
+            this.recorder.addEventListener('pause', (e) => {
+                // console.log('pause');
+                this.setState({state: 'paused'});
+            })
+            this.recorder.addEventListener('resume', (e) => {
+                // console.log('resume');
+                this.setState({state: 'recording'});
+            })
+            this.recorder.addEventListener('error', (e) => {
+                // console.log('error', e);
+            })
+        });
+
+        // if (navigator.mediaDevices.getUserMedia) {
+        //     console.log('getUserMedia supported.');
+        //
+        //     let chunks = [];
+        //
+        //     const onSuccess = stream => {
+        //
+        //     };
+        //
+        //     const onError = error => {
+        //         console.log('The following error occured: ' + error);
+        //     };
+        //
+        //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        //
+        //     const constraints = {
+        //         channelCount: 1,
+        //         sampleRate: 48000,
+        //     };
+        //
+        //     const track = stream.getAudioTracks()[0];
+        //     track.applyConstraints(constraints)
+        //     // console.log('track', track);
+        //
+        //     // console.log('mediaRecorder', MediaRecorder.isTypeSupported('audio/ogg;codecs=opus'));
+        //
+        //     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg;codecs=opus' });
+        //
+        //     console.log('mediaRecorder', mediaRecorder);
+        //
+        //     mediaRecorder.onstop = event => {
+        //         console.log("data available after MediaRecorder.stop() called.");
+        //
+        //         const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+        //         chunks = [];
+        //         const audioURL = window.URL.createObjectURL(blob);
+        //
+        //         const audio = new Audio(audioURL);
+        //         audio.play();
+        //         console.log("recorder stopped", audioURL, audio);
+        //
+        //         const content = {
+        //             '@type': 'inputMessageVoiceNote',
+        //             voice_note: { '@type': 'inputFileBlob', name: '', size: blob.size, data: blob },
+        //             duration: 10,
+        //             waveform: '',
+        //             caption: null
+        //         };
+        //
+        //         this.handleSendVoiceNote(content, blob);
+        //     };
+        //
+        //     mediaRecorder.ondataavailable = e => {
+        //         console.log("recorder dataavailable", e.data);
+        //         chunks.push(e.data);
+        //     };
+        //
+        //     mediaRecorder.start(100);
+        //
+        //     this.mediaRecorder = mediaRecorder;
+        // } else {
+        //     console.log('getUserMedia not supported on your browser!');
+        // }
+    }
+
     render() {
         const { t } = this.props;
         const {
@@ -1400,6 +1544,15 @@ class InputBox extends Component {
                                 {/*</IconButton>*/}
                             </div>
                         </div>
+                    </div>
+                    <div className='inputbox-send-button-background'>
+                        <IconButton
+                            className='inputbox-send-button'
+                            aria-label='Send'
+                            size='small'
+                            onClick={this.handleRecord}>
+                            <DoneIcon />
+                        </IconButton>
                     </div>
                     <div className='inputbox-send-button-background'>
                         <IconButton

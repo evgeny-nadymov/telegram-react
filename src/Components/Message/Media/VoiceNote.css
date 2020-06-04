@@ -18,7 +18,17 @@
     line-height: normal;
     user-select: none;
     display: flex;
+    align-items: center;
     color: var(--message-in-subtle-color);
+}
+
+.voice-note-meta-unread {
+    margin-left: 6px;
+    margin-top: 2px;
+    background: currentColor;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
 }
 
 .message-out .voice-note-meta {
