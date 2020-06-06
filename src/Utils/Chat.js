@@ -55,9 +55,8 @@ export function isChatPinned(chatId, chatList = { '@type': 'chatListMain'}) {
 
 export function hasChatList(chatId, chatList = { '@type': 'chatListMain'}) {
     const position = getChatPosition(chatId, chatList);
-    if (!position) return false;
 
-    return position && position.order !== '0';
+    return Boolean(position);
 }
 
 export function getChatOrder(chatId, chatList = { '@type': 'chatListMain' }) {
@@ -105,24 +104,27 @@ export function isChatArchived(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { chat_list } = chat;
-    if (!chat_list) return false;
+    const { positions } = chat;
+    if (!positions) return false;
 
-    return chat_list['@type'] === 'chatListArchive';
+    const archivePosition = positions.find(x => x.list['@type'] === 'chatListArchive');
+    if (!archivePosition) return false;
+    if (archivePosition.order === '0') return false;
+
+    return true;
 }
 
-export function canSetChatChatList(chatId) {
+export function canAddChatToList(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
 
-    const { is_sponsored, chat_list } = chat;
+    const { is_sponsored, positions } = chat;
     if (is_sponsored) return false;
-    if (!chat_list) return false;
+    if (!positions) return false;
 
-    if (chat_list['@type'] === 'chatListMain') {
-        if (isMeChat(chatId) || chatId === SERVICE_NOTIFICATIONS_USER_ID) {
-            return false;
-        }
+    const mainPosition = positions.find(x => x.list['@type'] === 'chatListMain');
+    if (mainPosition && isMeChat(chatId) || chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+        return false;
     }
 
     return true;

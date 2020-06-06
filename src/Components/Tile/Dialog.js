@@ -30,7 +30,7 @@ import GroupIcon from '../../Assets/Icons/Group';
 import MessageIcon from '../../Assets/Icons/Message';
 import UnreadIcon from '../../Assets/Icons/Unread';
 import {
-    canSetChatChatList,
+    canAddChatToList,
     isChatArchived,
     isChatMuted,
     isChatPinned,
@@ -39,7 +39,7 @@ import {
     isPrivateChat
 } from '../../Utils/Chat';
 import {
-    setChatChatList,
+    addChatToList,
     toggleChatIsMarkedAsUnread,
     toggleChatIsPinned,
     toggleChatNotificationSettings
@@ -147,7 +147,7 @@ class Dialog extends Component {
             const top = event.clientY;
             const isPinned = isChatPinned(chatId, chatList);
             const canTogglePin = (await this.canPinChats(chatId)) || isPinned;
-            const canToggleArchive = canSetChatChatList(chatId);
+            const canToggleArchive = canAddChatToList(chatId);
 
             if (Dialog.contextMenuId !== contextMenuId) {
                 return;
@@ -215,16 +215,16 @@ class Dialog extends Component {
 
         if (!isPinned && !this.canPinChats(chatId)) return;
 
-        toggleChatIsPinned(chatId, !isPinned);
+        toggleChatIsPinned(chatId, chatList, !isPinned);
     };
 
     handleArchive = async event => {
         this.handleCloseContextMenu(event);
 
         const { chatId } = this.props;
-        if (!canSetChatChatList(chatId)) return;
+        if (!canAddChatToList(chatId)) return;
 
-        setChatChatList(chatId, { '@type': isChatArchived(chatId) ? 'chatListMain' : 'chatListArchive' });
+        addChatToList(chatId, { '@type': isChatArchived(chatId) ? 'chatListMain' : 'chatListArchive' });
     };
 
     getViewInfoTitle = () => {

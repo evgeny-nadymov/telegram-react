@@ -51,18 +51,19 @@ export async function getChat(chatId) {
     return chat;
 }
 
-export function setChatChatList(chatId, chatList) {
+export function addChatToList(chatId, chatList) {
     TdLibController.send({
-        '@type': 'setChatChatList',
+        '@type': 'addChatToList',
         chat_id: chatId,
         chat_list: chatList
     });
 }
 
-export function toggleChatIsPinned(chatId, isPinned) {
+export function toggleChatIsPinned(chatId, chatList, isPinned) {
     TdLibController.send({
         '@type': 'toggleChatIsPinned',
         chat_id: chatId,
+        chat_list: chatList,
         is_pinned: isPinned
     });
 }

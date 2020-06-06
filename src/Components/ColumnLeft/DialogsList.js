@@ -215,7 +215,7 @@ class DialogsList extends React.Component {
         const { type } = this.props;
         const { position } = update;
 
-        if (position['@type'] !== type) {
+        if (position.list['@type'] !== type) {
             return;
         }
 
@@ -237,20 +237,24 @@ class DialogsList extends React.Component {
             return;
         }
 
+        console.log('[update]', type, update, chat.positions);
         if (!hasChatList(chat_id, { '@type': type })) {
+            console.log('[update] hasChatList=false', type, chat.id);
             return;
         }
 
         const order = getChatOrder(chat_id, { '@type': type });
         const currentIndex = chats.findIndex(x => x === chat_id);
         if (currentIndex === -1 && order === '0') {
+            console.log('[update] currentIndex=-1', type, chat.id);
             return;
         }
 
         const chatIds = [];
         for (let i = 0; i < chats.length; i++) {
             const chat = ChatStore.get(chats[i]);
-            if (chat && order !== '0' && isChatMember(chat.id)) {
+            const chatOrder = getChatOrder(chats[i], { '@type': type });
+            if (chat && chatOrder !== '0') {
                 chatIds.push(chat.id);
             }
         }
@@ -268,6 +272,7 @@ class DialogsList extends React.Component {
             }
         }
 
+        console.log('[update] add', type, update, chats, chatIds, newChatIds);
         this.reorderChats(chatIds, newChatIds, () => {
             this.loadChatContents(newChatIds);
             this.saveCache();

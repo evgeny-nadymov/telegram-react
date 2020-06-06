@@ -159,7 +159,7 @@ class CacheStore extends EventEmitter {
                     if (x.photo.small) FileStore.set(x.photo.small);
                     if (x.photo.big) FileStore.set(x.photo.big);
                 }
-                if (x.chat_list) {
+                if (x.position) {
                     ChatStore.updateChatChatLists(x.id);
                 }
                 if (x.last_message) {

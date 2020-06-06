@@ -239,6 +239,7 @@ class Search extends React.Component {
         } else {
             messages = await TdLibController.send({
                 '@type': 'searchMessages',
+                chat_list: { '@type': 'chatListMain' },
                 query: text,
                 offset_date: 0,
                 offset_chat_id: 0,
@@ -444,6 +445,7 @@ class Search extends React.Component {
         } else {
             result = await TdLibController.send({
                 '@type': 'searchMessages',
+                chat_list: { '@type': 'chatListMain' },
                 query: this.text,
                 ...offset,
                 limit: 50
