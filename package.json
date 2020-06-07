@@ -24,7 +24,7 @@
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.1.1",
     "react-transition-group": "^4.3.0",
-    "@arseny30/tdweb": "1.6.8"
+    "@arseny30/tdweb": "1.6.9"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [

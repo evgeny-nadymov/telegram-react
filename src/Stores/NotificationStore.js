@@ -12,7 +12,7 @@ import AppStore from './ApplicationStore';
 import ChatStore from './ChatStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
-import { isChatMember } from '../Utils/Chat';
+import { isChatMember, isMeChat } from '../Utils/Chat';
 
 class NotificationStore extends EventEmitter {
     constructor() {
@@ -161,6 +161,11 @@ class NotificationStore extends EventEmitter {
 
                     // dismiss notifications for last visited public channels and groups
                     if (!isChatMember(chat_id) && AppStore.chatId !== chat_id) {
+                        break;
+                    }
+
+                    // dismiss notifications for me chat
+                    if (isMeChat(chat_id)) {
                         break;
                     }
 
