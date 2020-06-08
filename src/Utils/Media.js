@@ -26,6 +26,29 @@ import { getRandomInt, readImageSize } from './Common';
 import FileStore from '../Stores/FileStore';
 import { ID3Parser } from '../Components/Player/Steaming/MP3/ID3Parser';
 
+const waveformCache = new Map();
+
+export function getNormalizedWaveform(data) {
+    if (waveformCache.has(data)) {
+        return waveformCache.get(data);
+    }
+
+    const bytes = Array.from(atob(data)).map(x => x.charCodeAt(0) & 0xFF);
+    const waveform = [];
+    const barsCount = Math.floor(bytes.length * 8 / 5);
+    for (let i = 0; i < barsCount; i++) {
+        const byteIndex = Math.floor(i * 5 / 8);
+        const barPadding = i * 5 % 8;
+
+        const bits = bytes[byteIndex] | (((byteIndex + 1 < bytes.length) ? bytes[byteIndex + 1] : 0) << 8);
+        waveform.push(((bits >>> barPadding) & 0x1F) / 31.0);
+    }
+
+    waveformCache.set(data, waveform);
+
+    return waveform;
+}
+
 export function getCallTitle(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return null;
