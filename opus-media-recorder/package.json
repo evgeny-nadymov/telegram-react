@@ -1,37 +1,39 @@
 {
-  "_from": "opus-media-recorder",
+  "_args": [
+    [
+      "opus-media-recorder@0.7.19",
+      "/Users/evgeny/telegram-react"
+    ]
+  ],
+  "_from": "opus-media-recorder@0.7.19",
   "_id": "opus-media-recorder@0.7.19",
   "_inBundle": false,
   "_integrity": "sha512-5KmT/dSEuonD4GEZWzmfnqoAuYexcgiDlQUQhtYneTorKDhZDHQ0fS9gQe00bOWyyIumBZMMUithTQD6+dr74g==",
   "_location": "/opus-media-recorder",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "version",
     "registry": true,
-    "raw": "opus-media-recorder",
+    "raw": "opus-media-recorder@0.7.19",
     "name": "opus-media-recorder",
     "escapedName": "opus-media-recorder",
-    "rawSpec": "",
+    "rawSpec": "0.7.19",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "0.7.19"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.7.19.tgz",
-  "_shasum": "47696cd5723ae24b6242bba91dd98f7c2a99dc1b",
-  "_spec": "opus-media-recorder",
+  "_spec": "0.7.19",
   "_where": "/Users/evgeny/telegram-react",
   "author": {
     "name": "Bumsik Kim"
   },
-  "bundleDependencies": false,
   "dependencies": {
     "detect-browser": "^4.1.0",
     "event-target-shim": "^3.0.2"
   },
-  "deprecated": false,
   "description": "MedialRecorer polyfill for Opus recording using WebAssembly",
   "devDependencies": {
     "@babel/cli": "^7.2.3",
