@@ -35,7 +35,7 @@ class Wallpaper extends React.Component {
         const { thumbnail } = document;
         if (!thumbnail) return;
 
-        const file = thumbnail.photo;
+        const { file } = thumbnail;
         if (!file) return;
 
         const { fileId } = update;
@@ -67,7 +67,7 @@ class Wallpaper extends React.Component {
         const { minithumbnail, thumbnail } = document;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbSrc = getSrc(thumbnail ? thumbnail.photo : null);
+        const thumbSrc = getSrc(thumbnail ? thumbnail.file : null);
         const tileLoaded = thumbSrc && loaded;
         const src = thumbSrc || miniSrc;
 

@@ -21,6 +21,7 @@ import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { filterDuplicateMessages } from '../../../Utils/Message';
 import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
+import { getChatOrder } from '../../../Utils/Chat';
 import { modalManager } from '../../../Utils/Modal';
 import { SCROLL_PRECISION, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
@@ -104,7 +105,7 @@ class Search extends React.Component {
         }
 
         arr.sort((a, b) => {
-            return orderCompare(ChatStore.get(b).order, ChatStore.get(a).order);
+            return orderCompare(getChatOrder(b), getChatOrder(a));
         });
 
         return arr;
@@ -238,6 +239,7 @@ class Search extends React.Component {
         } else {
             messages = await TdLibController.send({
                 '@type': 'searchMessages',
+                chat_list: { '@type': 'chatListMain' },
                 query: text,
                 offset_date: 0,
                 offset_chat_id: 0,
@@ -443,6 +445,7 @@ class Search extends React.Component {
         } else {
             result = await TdLibController.send({
                 '@type': 'searchMessages',
+                chat_list: { '@type': 'chatListMain' },
                 query: this.text,
                 ...offset,
                 limit: 50

@@ -6,7 +6,7 @@
  */
 import TdLibController from '../Controllers/TdLibController';
 import ChatStore from '../Stores/ChatStore';
-import { isChatMuted } from '../Utils/Chat';
+import { isChatMuted, isChatPinned } from '../Utils/Chat';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
 
 export function changeChatDetailsVisibility(visibility) {
@@ -19,6 +19,7 @@ export function changeChatDetailsVisibility(visibility) {
 export async function openPinnedChat(index) {
     const chats = await TdLibController.send({
         '@type': 'getChats',
+        chat_list: { '@type': 'chatListMain' },
         offset_order: '9223372036854775807',
         offset_chat_id: 0,
         limit: 10
@@ -28,7 +29,7 @@ export async function openPinnedChat(index) {
         let pinnedIndex = -1;
         for (let i = 0; i < chats.chat_ids.length; i++) {
             const chat = ChatStore.get(chats.chat_ids[i]);
-            if (chat && chat.is_pinned) {
+            if (chat && isChatPinned(chat.id, { '@type': 'chatListMain' })) {
                 pinnedIndex++;
             }
 
@@ -50,18 +51,19 @@ export async function getChat(chatId) {
     return chat;
 }
 
-export function setChatChatList(chatId, chatList) {
+export function addChatToList(chatId, chatList) {
     TdLibController.send({
-        '@type': 'setChatChatList',
+        '@type': 'addChatToList',
         chat_id: chatId,
         chat_list: chatList
     });
 }
 
-export function toggleChatIsPinned(chatId, isPinned) {
+export function toggleChatIsPinned(chatId, chatList, isPinned) {
     TdLibController.send({
         '@type': 'toggleChatIsPinned',
         chat_id: chatId,
+        chat_list: chatList,
         is_pinned: isPinned
     });
 }

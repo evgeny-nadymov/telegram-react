@@ -14,7 +14,7 @@ import { changeChatDetailsVisibility } from '../../Actions/Chat';
 import { loadChatsContent } from '../../Utils/File';
 import { isAuthorizationReady, orderCompare } from '../../Utils/Common';
 import { scrollTop } from '../../Utils/DOM';
-import { isChatMember } from '../../Utils/Chat';
+import { getChatOrder, hasChatList, isChatMember, isChatPinned } from '../../Utils/Chat';
 import { CHAT_SLICE_LIMIT, SCROLL_CHATS_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -25,8 +25,13 @@ import './DialogsList.css';
 
 class DialogListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { chatId, style, hidden } = this.props;
+        const { chatId, chatList, style, hidden } = this.props;
         if (nextProps.chatId !== chatId) {
+            // console.log('[vl] UserListItem.shouldUpdate true userId');
+            return true;
+        }
+
+        if (nextProps.chatList !== chatList) {
             // console.log('[vl] UserListItem.shouldUpdate true userId');
             return true;
         }
@@ -46,11 +51,11 @@ class DialogListItem extends React.Component {
     }
 
     render() {
-        const { chatId, hidden, style } = this.props;
+        const { chatId, chatList, hidden, style } = this.props;
 
         return (
             <div className='dialog-list-item' style={style}>
-                <Dialog chatId={chatId} hidden={hidden} />
+                <Dialog chatId={chatId} chatList={chatList} hidden={hidden} />
             </div>
         );
     }
@@ -138,10 +143,8 @@ class DialogsList extends React.Component {
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
 
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatOrder);
-        ChatStore.on('updateChatIsPinned', this.onUpdateChatOrder);
-        ChatStore.on('updateChatIsSponsored', this.onUpdateChatOrder);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.on('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.on('updateChatPosition', this.onUpdateChatPosition);
 
         SupergroupStore.on('updateSupegroup', this.onUpdateSupergroup);
 
@@ -153,10 +156,8 @@ class DialogsList extends React.Component {
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
 
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatOrder);
-        ChatStore.off('updateChatIsPinned', this.onUpdateChatOrder);
-        ChatStore.off('updateChatIsSponsored', this.onUpdateChatOrder);
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
-        ChatStore.off('updateChatOrder', this.onUpdateChatOrder);
+        ChatStore.off('updateChatPosition', this.onUpdateChatPosition);
 
         SupergroupStore.off('updateSupegroup', this.onUpdateSupergroup);
 
@@ -210,25 +211,37 @@ class DialogsList extends React.Component {
         if (onSaveCache) onSaveCache();
     };
 
+    onUpdateChatPosition = update => {
+        const { type } = this.props;
+        const { position } = update;
+
+        if (position.list['@type'] !== type) {
+            return;
+        }
+
+        this.onUpdateChatOrder(update);
+    };
+
     onUpdateChatOrder = update => {
         const { type } = this.props;
         const { chats } = this.state;
+        if (!chats) return;
 
         const { loading } = this;
         if (loading) return;
 
-        const { chat_id, order } = update;
+        const { chat_id } = update;
 
         const chat = ChatStore.get(chat_id);
         if (!chat) {
             return;
         }
 
-        const { chat_list } = chat;
-        if (chat_list && chat_list['@type'] !== type) {
+        if (!hasChatList(chat_id, { '@type': type })) {
             return;
         }
 
+        const order = getChatOrder(chat_id, { '@type': type });
         const currentIndex = chats.findIndex(x => x === chat_id);
         if (currentIndex === -1 && order === '0') {
             return;
@@ -237,7 +250,8 @@ class DialogsList extends React.Component {
         const chatIds = [];
         for (let i = 0; i < chats.length; i++) {
             const chat = ChatStore.get(chats[i]);
-            if (chat && chat.order !== '0' && isChatMember(chat.id)) {
+            const chatOrder = getChatOrder(chats[i], { '@type': type });
+            if (chat && chatOrder !== '0') {
                 chatIds.push(chat.id);
             }
         }
@@ -262,8 +276,10 @@ class DialogsList extends React.Component {
     };
 
     reorderChats(chatIds, newChatIds = [], callback) {
+        const { type } = this.props;
+
         const orderedChatIds = chatIds.concat(newChatIds).sort((a, b) => {
-            return orderCompare(ChatStore.get(b).order, ChatStore.get(a).order);
+            return orderCompare(getChatOrder(b, { '@type': type }), getChatOrder(a, { '@type': type }));
         });
 
         if (!DialogsList.isDifferentOrder(this.state.chats, orderedChatIds)) {
@@ -326,12 +342,12 @@ class DialogsList extends React.Component {
         if (!replace && chats && chats.length > 0) {
             const chat = ChatStore.get(chats[chats.length - 1]);
             if (chat) {
-                offsetOrder = chat.order;
+                offsetOrder = getChatOrder(chat.id, { '@type': type });
                 offsetChatId = chat.id;
             }
         }
 
-        if (type === 'chatListMain') console.log('[update] GETCHATS start');
+        if (type === 'chatListMain') console.log('[p] GETCHATS start', offsetOrder, offsetChatId);
         this.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -341,17 +357,11 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
-            if (type === 'chatListMain') console.log('[update] GETCHATS stop');
+            if (type === 'chatListMain') console.log('[p] GETCHATS stop');
             if (replace) {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
             }
         });
-        // TdLibController.send({
-        //     '@type': 'getChats',
-        //     offset_chat_id: offsetChatId,
-        //     offset_order: offsetOrder,
-        //     limit: CHAT_SLICE_LIMIT + 100
-        // });
 
         if (result.chat_ids.length > 0 && result.chat_ids[0] === offsetChatId) {
             result.chat_ids.shift();
@@ -399,9 +409,10 @@ class DialogsList extends React.Component {
     }
 
     renderItem = ({ index, style }, source) => {
+        const { type } = this.props;
         const x = source[index];
 
-        return <DialogListItem key={x} chatId={x} hidden={this.hiddenChats.has(x)} style={style} />;
+        return <DialogListItem key={x} chatId={x} chatList={{ '@type': type }} hidden={this.hiddenChats.has(x)} style={style} />;
 
         // return <Dialog key={x} chatId={x} hidden={this.hiddenChats.has(x)} style={style} />
     };
@@ -418,8 +429,7 @@ class DialogsList extends React.Component {
         if (chats) {
             let lastPinnedId = 0;
             chats.forEach(x => {
-                const chat = ChatStore.get(x);
-                if (chat && chat.is_pinned) {
+                if (isChatPinned(x, { '@type': type })) {
                     lastPinnedId = x;
                 }
             });
@@ -430,8 +440,7 @@ class DialogsList extends React.Component {
         } else if (cacheItems) {
             let lastPinnedId = 0;
             cacheItems.forEach(x => {
-                const chat = ChatStore.get(x);
-                if (chat && chat.is_pinned) {
+                if (isChatPinned(x, { '@type': type })) {
                     lastPinnedId = x;
                 }
             });
