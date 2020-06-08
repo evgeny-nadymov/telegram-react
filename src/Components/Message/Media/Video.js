@@ -31,7 +31,7 @@ class Video extends React.Component {
 
         if (!thumbnail) return;
 
-        const { thumbnail: file } = thumbnail;
+        const { file } = thumbnail;
         if (file && file.id === fileId) {
             this.forceUpdate();
         }
@@ -51,7 +51,7 @@ class Video extends React.Component {
         };
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
         const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
         return (

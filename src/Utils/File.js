@@ -306,7 +306,7 @@ function loadAudioThumbnailContent(store, audio, message) {
     const { album_cover_thumbnail: thumbnail } = audio;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -375,7 +375,7 @@ function cancelLoadAnimationThumbnailContent(animation){
     const { thumbnail } = animation;
     if (!thumbnail) return;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
@@ -393,7 +393,7 @@ export function loadAnimationThumbnailContent(store, animation, message) {
     const { thumbnail } = animation;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -461,7 +461,7 @@ function loadDocumentThumbnailContent(store, document, message) {
     const { thumbnail } = document;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -731,7 +731,7 @@ function loadStickerThumbnailContent(store, sticker, message) {
     const { thumbnail } = sticker;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -805,7 +805,7 @@ function cancelLoadVideoThumbnailContent(video) {
     const { thumbnail } = video;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -823,7 +823,7 @@ function loadVideoThumbnailContent(store, video, message) {
     const { thumbnail } = video;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
@@ -880,7 +880,7 @@ function loadVideoNoteThumbnailContent(store, videoNote, message) {
     const { thumbnail } = videoNote;
     if (!thumbnail) return false;
 
-    let { thumbnail: file } = thumbnail;
+    let { file } = thumbnail;
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;

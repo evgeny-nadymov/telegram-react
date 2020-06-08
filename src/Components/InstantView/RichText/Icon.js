@@ -28,7 +28,7 @@ class Icon extends React.Component {
         const { thumbnail } = document;
         if (!thumbnail) return;
 
-        const { thumbnail: file } = thumbnail;
+        const { file } = thumbnail;
         if (!file) return;
 
         const { fileId } = update;
@@ -65,7 +65,7 @@ class Icon extends React.Component {
         if (!document) return null;
 
         const { thumbnail, document: file } = document;
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
         const src = getSrc(file);
 
         return (

@@ -172,7 +172,7 @@ class Animation extends React.Component {
 
         const { fileId } = update;
 
-        const { thumbnail: file } = thumbnail;
+        const { file } = thumbnail;
         if (file && file.id === fileId) {
             this.forceUpdate();
         }
@@ -196,7 +196,7 @@ class Animation extends React.Component {
         };
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
         const src = getSrc(animation);
 
         const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);

@@ -107,7 +107,7 @@ class DialogDetails extends Component {
         const { thumbnail } = document;
         if (!thumbnail) return;
 
-        const { thumbnail: file } = thumbnail;
+        const { file } = thumbnail;
         if (!file) return;
 
         const { fileId } = update;
@@ -204,7 +204,7 @@ class DialogDetails extends Component {
                 }
 
                 if (!src && thumbnail) {
-                    src = getSrc(thumbnail.thumbnail);
+                    src = getSrc(thumbnail.file);
                 }
             }
 

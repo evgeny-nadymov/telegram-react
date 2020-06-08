@@ -37,7 +37,7 @@ class SharedVideo extends React.Component {
 
         if (!thumbnail) return;
 
-        const { thumbnail: file } = thumbnail;
+        const { file } = thumbnail;
         if (file && file.id === fileId) {
             this.forceUpdate();
         }
@@ -78,7 +78,7 @@ class SharedVideo extends React.Component {
         const { contextMenu, left, top } = this.state;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbSrc = getSrc(thumbnail ? thumbnail.thumbnail : null);
+        const thumbSrc = getSrc(thumbnail ? thumbnail.file : null);
         const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90) : Boolean(miniSrc);
 
         return (
