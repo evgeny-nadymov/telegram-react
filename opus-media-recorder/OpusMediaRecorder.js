@@ -226,7 +226,7 @@ class OpusMediaRecorder extends EventTarget {
         let { channelBuffers, length, duration } = message;
         this.worker.postMessage({
           command, channelBuffers, length, duration
-        }, channelBuffers.map(a => a.buffer));
+        });
         break;
 
       case 'getEncodedData':

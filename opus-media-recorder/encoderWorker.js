@@ -48,7 +48,10 @@ function initWorker (workerGlobalScope) {
 
       case 'pushInputData':
         const { channelBuffers, length, duration } = e.data; // eslint-disable-line
-        // On Chrome, Float32Array doesn't recognize its buffer after transferred.
+        // On Chrome, Float32Array doesn't recognize its buffer after
+        // being transferred, making the size of ArrayBuffer 0.
+        // This bug is found in Chrome 66.0.3359.181 (2018).
+        // It is fixed since 2019.
         // So re-create Float32Array right after a web worker received it.
         for (let i = 0; i < channelBuffers.length; i++) {
           channelBuffers[i] = new Float32Array(channelBuffers[i].buffer);
