@@ -9,10 +9,15 @@ import PropTypes from 'prop-types';
 import { getNormalizedWaveform } from '../../../Utils/Media';
 import './Waveform.css';
 
+const defaultData = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+
 class Waveform extends React.Component {
     render() {
-        const { id, data, value, dragging } = this.props;
-        if (!data) return null;
+        const { id, value, dragging } = this.props;
+        let { data } = this.props;
+        if (!data) {
+            data = defaultData;
+        }
 
         const waveform = getNormalizedWaveform(data);
 

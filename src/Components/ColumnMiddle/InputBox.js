@@ -1371,6 +1371,7 @@ class InputBox extends Component {
     handleStopRecord = () => {
         if (this.recorder) {
             this.recorder.stop();
+            this.recorder.stream.getAudioTracks().forEach(track => track.stop());
             // this.recorder = null;
             return;
         }
@@ -1380,6 +1381,8 @@ class InputBox extends Component {
         if (this.recorder) {
             this.recorder.cancelled = true;
             this.recorder.stop();
+            this.recorder.stream.getAudioTracks().forEach(track => track.stop());
+
             // this.recorder = null;
             return;
         }
