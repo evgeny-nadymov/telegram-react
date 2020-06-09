@@ -306,12 +306,13 @@ class InputBox extends Component {
         };
 
         if (thumbnail) {
-            const { width: thumbnailWidth, height: thumbnailHeight, photo } = thumbnail;
+            const { width: thumbnailWidth, height: thumbnailHeight, file } = thumbnail;
 
             content.thumbnail = {
+                '@type': 'inputThumbnail',
                 thumbnail: {
                     '@type': 'inputFileId',
-                    id: photo.id
+                    id: file.id
                 },
                 width: thumbnailWidth,
                 height: thumbnailHeight
@@ -346,12 +347,13 @@ class InputBox extends Component {
         };
 
         if (thumbnail) {
-            const { width: thumbnailWidth, height: thumbnailHeight, photo } = thumbnail;
+            const { width: thumbnailWidth, height: thumbnailHeight, file } = thumbnail;
 
             content.thumbnail = {
+                '@type': 'inputThumbnail',
                 thumbnail: {
                     '@type': 'inputFileId',
-                    id: photo.id
+                    id: file.id
                 },
                 width: thumbnailWidth,
                 height: thumbnailHeight

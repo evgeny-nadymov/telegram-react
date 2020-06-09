@@ -303,14 +303,14 @@ function toIndex(row, column, sets, stickersPerRow) {
 function getInputMediaThumbnail(thumbnail) {
     if (!thumbnail) return null;
 
-    const { photo, width, height } = thumbnail;
-    if (!photo) return null;
+    const { file, width, height } = thumbnail;
+    if (!file) return null;
 
     return {
         '@type': 'inputThumbnail',
         thumbnail: {
             '@type': 'inputFileId',
-            id: photo.id
+            id: file.id
         },
         width,
         height
