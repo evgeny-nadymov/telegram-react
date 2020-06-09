@@ -6,6 +6,8 @@
  */
 
 import EventEmitter from './EventEmitter';
+import { getBlob } from '../Utils/File';
+import FileStore from './FileStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class MessageStore extends EventEmitter {
@@ -68,14 +70,39 @@ class MessageStore extends EventEmitter {
                 break;
             }
             case 'updateMessageContent': {
-                const chat = this.items.get(update.chat_id);
-                if (chat) {
-                    const message = chat.get(update.message_id);
-                    if (message) {
-                        update.old_content = message.content;
-                        message.content = update.new_content;
+                const { chat_id, message_id, new_content } = update;
+
+                const message = this.get(chat_id, message_id);
+                if (message) {
+                    update.old_content = message.content;
+                    message.content = new_content;
+
+                    switch (new_content['@type']) {
+                        case 'messagePhoto': {
+                            if (update.old_content['@type'] === 'messagePhoto') {
+                                const { photo: oldPhoto } = update.old_content;
+                                if (!oldPhoto) break;
+
+                                const { photo: newPhoto } = new_content;
+                                if (!newPhoto) break;
+
+                                const oldSize = oldPhoto.sizes.find(x => x.type === 'i');
+                                if (!oldSize) break;
+
+                                const newSize = newPhoto.sizes.find(x => x.type === 'i');
+                                if (newSize.photo.id === oldSize.photo.id) break;
+
+                                const oldBlob = getBlob(oldSize.photo);
+                                if (!oldBlob) break;
+
+                                FileStore.setBlob(newSize.photo.id, oldBlob);
+                            }
+
+                            break;
+                        }
                     }
                 }
+
                 this.emit('updateMessageContent', update);
                 break;
             }
@@ -106,9 +133,6 @@ class MessageStore extends EventEmitter {
                     const message = chat.get(update.old_message_id);
                     if (message) {
                         message.sending_state = update.message.sending_state;
-                    }
-                    if (update.old_message_id !== update.message.id) {
-                        this.set(update.message);
                     }
                 }
 
