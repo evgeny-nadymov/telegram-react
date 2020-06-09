@@ -437,7 +437,7 @@ class FileStore extends EventEmitter {
         const messageId = obj ? obj.id : 0;
 
         if (document.thumbnail) {
-            const { photo: source } = document.thumbnail;
+            const source = document.thumbnail.file;
             if (source && source.id === file.id) {
                 this.getLocalFile(
                     store,

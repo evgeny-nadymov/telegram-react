@@ -30,6 +30,7 @@ class DocumentTile extends React.Component {
 
     onClientUpdateDocumentThumbnailBlob = update => {
         const { thumbnail } = this.props;
+
         if (!thumbnail) return;
 
         const { file } = thumbnail;

@@ -9,43 +9,61 @@
     color: var(--text-primary);
 }
 
-.sticker-set-dialog-paper {
-    width: 344px;
+.sticker-set-dialog-scroll .sticker-set-dialog-actions,
+.sticker-set-dialog-scroll-top .sticker-set-dialog-actions {
+    border-color: var(--border);
+}
+
+.sticker-set-dialog-scroll .sticker-set-dialog-title,
+.sticker-set-dialog-scroll-bottom .sticker-set-dialog-title {
+    border-color: var(--border);
 }
 
 .sticker-set-dialog-title {
-    display: flex;
-    align-items: center;
-    padding-right: 12px;
-}
-
-.sticker-set-dialog-title-typography {
-    flex-grow: 1;
-    flex-shrink: 1;
-}
-
-#sticker-set-dialog-title-text {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.5s ease;
     flex-grow: 1;
     flex-shrink: 1;
     display: flex;
     flex-direction: row;
     align-items: center;
+    padding: 8px 14px;
+}
+
+.sticker-set-dialog-title-typography {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 20px;
+}
+
+.sticker-set-dialog-actions {
+    border-top: 1px solid transparent;
+    transition: border-color 0.5s ease;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticker-set-dialog-action-button {
+    color: white;
+}
+
+.sticker-set-dialog-paper {
+    width: 420px;
+    max-height: 420px;
 }
 
 .sticker-set-dialog-content-root {
     display: flex;
     flex-wrap: wrap;
-    max-height: 480px;
-    padding: 0 12px 24px;
+    padding: 3px 21px 3px 6px;
+    margin-right: -15px;
     background: transparent;
 }
 
 .sticker-set-dialog-disabled {
     pointer-events: none;
-}
-
-.sticker-set-dialog-share-button {
-    margin: -24px -12px -24px 0;
 }
 
 .sticker-set-dialog-item {
@@ -54,11 +72,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 80px;
+    height: 80px;
 }
 
 .sticker-set-dialog-item-sticker {
     /*pointer-events: none;*/
-    padding: 6px;
+    /*padding: 6px;*/
     cursor: pointer;
 }
 

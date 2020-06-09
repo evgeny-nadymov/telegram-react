@@ -221,7 +221,7 @@ function createTheme(type, primary) {
             useNextVariants: true
         },
         shape: {
-            borderRadius: 8
+            borderRadius: 10
         },
         overrides: {
             MuiOutlinedInput: {
@@ -240,6 +240,13 @@ function createTheme(type, primary) {
                     '& > ul': {
                         maxHeight: 56 * 5.5
                     }
+                }
+            },
+            MuiButton: {
+                root: {
+                    padding: '12px 16px 11px',
+                    fontSize: 16,
+                    lineHeight: 'normal'
                 }
             },
             MuiMenuList: {
