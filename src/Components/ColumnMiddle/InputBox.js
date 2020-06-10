@@ -78,7 +78,8 @@ class InputBox extends Component {
             sendFile,
             recordingReady,
             recordingTime,
-            recordPermissionDenied
+            recordPermissionDenied,
+            shook
         } = this.state;
 
         if (nextProps.t !== t) {
@@ -129,6 +130,10 @@ class InputBox extends Component {
             return true;
         }
 
+        if (nextState.shook !== shook) {
+            return true;
+        }
+
         return false;
     }
 
@@ -166,6 +171,7 @@ class InputBox extends Component {
         document.addEventListener('selectionchange', this.selectionChangeListener, true);
 
         AnimationStore.on('clientUpdateAnimationSend', this.onClientUpdateAnimationSend);
+        AppStore.on('clientUpdateInputShake', this.onClientUpdateInputShake);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatDraftMessage);
@@ -182,6 +188,7 @@ class InputBox extends Component {
         this.saveDraft();
 
         AnimationStore.off('clientUpdateAnimationSend', this.onClientUpdateAnimationSend);
+        AppStore.off('clientUpdateInputShake', this.onClientUpdateInputShake);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatDraftMessage);
@@ -197,6 +204,21 @@ class InputBox extends Component {
             this.handleCancelRecord();
         }
     }
+
+    onClientUpdateInputShake = update => {
+        const { chatId, messageId } = this.props;
+        const { shook } = this.state;
+
+        if (shook) {
+            this.setState({ shook: false }, () => {
+                setTimeout(() => {
+                    this.setState({ shook: true });
+                }, 0);
+            });
+        } else {
+            this.setState({ shook: true });
+        }
+    };
 
     onClientUpdateSendFiles = update => {
         const { files } = update;
@@ -1521,7 +1543,8 @@ class InputBox extends Component {
             openEditUrl,
             openEditMedia,
             recordingReady,
-            recordingTime
+            recordingTime,
+            shook
         } = this.state;
 
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
@@ -1532,8 +1555,8 @@ class InputBox extends Component {
 
         return (
             <div className='inputbox-background'>
-                <div className={classNames('inputbox', { 'inputbox-recording': recordingTime })}>
-                    <div className='inputbox-bubble'>
+                <div className={classNames('inputbox', { 'inputbox-recording': recordingTime }, { 'shook': shook })}>
+                    <div className={classNames('inputbox-bubble')}>
                         <InputBoxHeader
                             chatId={chatId}
                             messageId={replyToMessageId}

@@ -199,6 +199,11 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateChatId': {
+                if (this.recording) {
+                    this.emit('clientUpdateInputShake');
+                    break;
+                }
+
                 const extendedUpdate = {
                     '@type': 'clientUpdateChatId',
                     nextChatId: update.chatId,
@@ -253,6 +258,18 @@ class ApplicationStore extends EventEmitter {
                 this.profileMediaViewerContent = content;
 
                 this.emit('clientUpdateProfileMediaViewerContent', update);
+                break;
+            }
+            case 'clientUpdateRecordStart': {
+                this.recording = true;
+                break;
+            }
+            case 'clientUpdateRecordStop': {
+                this.recording = false;
+                break;
+            }
+            case 'clientUpdateRecordError': {
+                this.recording = false;
                 break;
             }
             case 'clientUpdateSearchChat': {

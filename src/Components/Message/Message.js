@@ -419,7 +419,7 @@ class Message extends Component {
                         <div className='message-padding'>
                             <CheckMarkIcon className='message-select-tick' />
                         </div>
-                        <div className={classNames('message-wrapper', { 'message-wrapper-shook': shook })}>
+                        <div className={classNames('message-wrapper', { 'shook': shook })}>
                             {tile}
                             <div
                                 className={classNames('message-content', {

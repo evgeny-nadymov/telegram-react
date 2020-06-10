@@ -137,7 +137,7 @@ pre code {
     transform-origin: 75% 50%;
 }
 
-.message-wrapper-shook {
+.shook {
     animation: shake-animation 500ms;
 }
 
