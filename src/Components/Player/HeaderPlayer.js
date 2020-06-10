@@ -24,9 +24,10 @@ import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
-import PlayerStore from '../../Stores/PlayerStore';
-import FileStore from '../../Stores/FileStore';
 import AppStore from '../../Stores/ApplicationStore';
+import FileStore from '../../Stores/FileStore';
+import MessageStore from '../../Stores/MessageStore';
+import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
 
@@ -79,9 +80,12 @@ class HeaderPlayer extends React.Component {
     }
 
     componentDidMount() {
+        AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         FileStore.on('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
+        MessageStore.on('clientUpdateRecordStart', this.onClientUpdateRecordStart);
+        MessageStore.on('clientUpdateRecordStop', this.onClientUpdateRecordStop);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaClose', this.onClientUpdateMediaClose);
         PlayerStore.on('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
@@ -91,14 +95,16 @@ class HeaderPlayer extends React.Component {
         PlayerStore.on('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.on('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
         PlayerStore.on('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
-
-        AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
 
     componentWillUnmount() {
+
+        AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         FileStore.off('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateAudioBlob', this.onClientUpdateMediaBlob);
+        MessageStore.off('clientUpdateRecordStart', this.onClientUpdateRecordStart);
+        MessageStore.off('clientUpdateRecordStop', this.onClientUpdateRecordStop);
         PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.off('clientUpdateMediaClose', this.onClientUpdateMediaClose);
         PlayerStore.off('clientUpdateMediaPlaylist', this.onClientUpdateMediaPlaylist);
@@ -108,9 +114,66 @@ class HeaderPlayer extends React.Component {
         PlayerStore.off('clientUpdateMediaVolume', this.onClientUpdateMediaVolume);
         PlayerStore.off('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
         PlayerStore.off('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
-
-        AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
     }
+
+    fadeOutVolume(duration) {
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        const totalIterations = 20;
+        let count = 0;
+        const currentVolume = player.volume;
+        this.volumeInterval = setInterval(() => {
+            if (count >= totalIterations) {
+                player.pause();
+                player.volume = currentVolume;
+                clearInterval(this.volumeInterval);
+            } else {
+                player.volume = currentVolume / (count + 1);
+                count++;
+            }
+        }, duration / totalIterations);
+    }
+
+    fadeInVolume(duration) {
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        const totalIterations = 20;
+        let count = 0;
+        const currentVolume = player.volume;
+        player.volume = 0;
+        player.play();
+        this.volumeInterval = setInterval(() => {
+            if (count >= totalIterations) {
+                player.volume = currentVolume;
+                clearInterval(this.volumeInterval);
+            } else {
+                player.volume = currentVolume / totalIterations * (count + 1);
+                count++;
+            }
+        }, duration / totalIterations);
+    }
+
+    onClientUpdateRecordStart = update => {
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        if (!player.paused) {
+            this.fadeOutVolume(250);
+            this.pausedForRecord = true;
+        }
+    };
+
+    onClientUpdateRecordStop = update => {
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        if (player.paused && this.pausedForRecord) {
+            this.fadeInVolume(250);
+            this.pausedForRecord = false;
+        }
+    };
 
     onClientUpdateMediaPlaybackRate = update => {
         const { playbackRate } = update;
@@ -315,6 +378,7 @@ class HeaderPlayer extends React.Component {
             const player = this.videoRef.current;
             if (!player) return;
 
+            this.pausedForRecord = false;
             if (player.paused) {
                 player.play();
             } else {

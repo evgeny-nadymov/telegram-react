@@ -67,7 +67,19 @@ class InputBox extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile, recordingReady, recordingTime } = this.state;
+        const {
+            chatId,
+            newDraft,
+            files,
+            replyToMessageId,
+            editMessageId,
+            openEditMedia,
+            openEditUrl,
+            sendFile,
+            recordingReady,
+            recordingTime,
+            recordPermissionDenied
+        } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -110,6 +122,10 @@ class InputBox extends Component {
         }
 
         if (nextState.recordingReady !== recordingReady) {
+            return true;
+        }
+
+        if (nextState.recordPermissionDenied !== recordPermissionDenied) {
             return true;
         }
 
@@ -203,6 +219,8 @@ class InputBox extends Component {
 
     onClientUpdateEditMessage = update => {
         const { chatId, messageId } = update;
+        const { recordingTime } = this.state;
+        if (recordingTime) return;
         if (this.state.chatId !== chatId) return;
 
         if (!messageId) {
@@ -275,8 +293,9 @@ class InputBox extends Component {
 
     onUpdateChatDraftMessage = update => {
         const { chat_id } = update;
-        const { chatId } = this.state;
+        const { chatId, recordingTime } = this.state;
 
+        if (recordingTime) return;
         if (chatId !== chat_id) return;
 
         this.loadDraft();
@@ -371,7 +390,7 @@ class InputBox extends Component {
     };
 
     onClientUpdateReply = update => {
-        const { chatId: currentChatId } = this.state;
+        const { chatId: currentChatId, recordingTime } = this.state;
         const { chatId, messageId } = update;
 
         if (currentChatId !== chatId) {
@@ -380,7 +399,7 @@ class InputBox extends Component {
 
         this.setState({ replyToMessageId: messageId });
 
-        if (messageId) {
+        if (messageId && !recordingTime) {
             this.setInputFocus();
         }
     };
@@ -465,6 +484,9 @@ class InputBox extends Component {
     }
 
     setInputFocus = () => {
+        const { recordingTime } = this.state;
+        if (recordingTime) return;
+
         setTimeout(() => {
             const element = this.newMessageRef.current;
 
@@ -1400,7 +1422,17 @@ class InputBox extends Component {
     handleRecord = async () => {
         if (this.recorder) return;
 
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        let stream = null;
+        try{
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch { }
+
+        if (!stream) {
+            this.setState({
+                recordPermissionDenied: true
+            });
+            return;
+        }
 
         const constraints = {
             channelCount: 1,
@@ -1437,8 +1469,9 @@ class InputBox extends Component {
             const { cancelled } = this.recorder;
             console.log('[recorder] onstop', this.recorder, cancelled);
             this.recorder = null;
-            if (cancelled) {
 
+            this.loadDraft();
+            if (cancelled) {
                 return;
             }
 
@@ -1462,6 +1495,8 @@ class InputBox extends Component {
         recorder.onerror = () => {
             TdLibController.clientUpdate({ '@type': 'clientUpdateRecordError' });
             this.setState({ recordingTime: null });
+
+            this.loadDraft();
             // console.log('error', e);
         };
 
@@ -1470,74 +1505,6 @@ class InputBox extends Component {
         this.startTime = new Date();
 
         console.log('[recorder] start', this.recorder);
-
-        // if (navigator.mediaDevices.getUserMedia) {
-        //     console.log('getUserMedia supported.');
-        //
-        //     let chunks = [];
-        //
-        //     const onSuccess = stream => {
-        //
-        //     };
-        //
-        //     const onError = error => {
-        //         console.log('The following error occured: ' + error);
-        //     };
-        //
-        //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        //
-        //     const constraints = {
-        //         channelCount: 1,
-        //         sampleRate: 48000,
-        //     };
-        //
-        //     const track = stream.getAudioTracks()[0];
-        //     track.applyConstraints(constraints)
-        //     // console.log('track', track);
-        //
-        //     // console.log('mediaRecorder', MediaRecorder.isTypeSupported('audio/ogg;codecs=opus'));
-        //
-        //     const mediaRecorder = new MediaRecorder(stream);
-        //
-        //     console.log('mediaRecorder', mediaRecorder);
-        //
-        //     mediaRecorder.onstop = event => {
-        //         console.log("data available after MediaRecorder.stop() called.");
-        //         TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
-        //         this.setState({ recording: false });
-        //
-        //         const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-        //         chunks = [];
-        //         const audioURL = window.URL.createObjectURL(blob);
-        //
-        //         const audio = new Audio(audioURL);
-        //         audio.play();
-        //         console.log("recorder stopped", audioURL, audio);
-        //
-        //         const content = {
-        //             '@type': 'inputMessageVoiceNote',
-        //             voice_note: { '@type': 'inputFileBlob', name: '', size: blob.size, data: blob },
-        //             duration: 10,
-        //             waveform: '',
-        //             caption: null
-        //         };
-        //
-        //         this.handleSendVoiceNote(content, blob);
-        //     };
-        //
-        //     mediaRecorder.ondataavailable = e => {
-        //         console.log("recorder dataavailable", e.data);
-        //         chunks.push(e.data);
-        //     };
-        //
-        //     mediaRecorder.start(100);
-        //     TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
-        //     this.setState({ recording: true });
-        //
-        //     this.recorder = mediaRecorder;
-        // } else {
-        //     console.log('getUserMedia not supported on your browser!');
-        // }
     }
 
     render() {
@@ -1565,7 +1532,7 @@ class InputBox extends Component {
 
         return (
             <div className='inputbox-background'>
-                <div className='inputbox'>
+                <div className={classNames('inputbox', { 'inputbox-recording': recordingTime })}>
                     <div className='inputbox-bubble'>
                         <InputBoxHeader
                             chatId={chatId}

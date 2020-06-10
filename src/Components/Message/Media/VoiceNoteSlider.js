@@ -193,14 +193,14 @@ class VoiceNoteSlider extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, waveform, className, style } = this.props;
+        const { chatId, messageId, audio, waveform, className, style } = this.props;
         const { value, dragging } = this.state;
 
         return (
             <div className={classNames('voice-note-slider', className)} style={style}>
-                <Waveform id={`waveform_${chatId}_${messageId}`} dragging={dragging} data={waveform} value={value}/>
+                {!audio && <Waveform id={`waveform_${chatId}_${messageId}`} dragging={dragging} data={waveform} value={value}/>}
                 <Slider
-                    className={classNames('voice-note-slider-component', { 'voice-note-slider-component-hidden': Boolean(waveform) || true })}
+                    className={classNames('voice-note-slider-component', { 'voice-note-slider-component-hidden': !audio })}
                     classes={{
                         track: 'voice-note-slider-track',
                         thumb: 'voice-note-slider-thumb',
@@ -222,6 +222,7 @@ class VoiceNoteSlider extends React.Component {
 VoiceNoteSlider.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
+    audio: PropTypes.bool,
     duration: PropTypes.number.isRequired,
     waveform: PropTypes.string
 };

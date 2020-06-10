@@ -63,6 +63,12 @@
     align-items: flex-end;
 }
 
+.inputbox-recording #inputbox-message,
+.inputbox-recording .inputbox-wrapper {
+    pointer-events: none;
+}
+
+
 #inputbox-message {
     box-shadow: 0 0 0 0;
     max-height: 150px;
