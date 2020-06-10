@@ -40,6 +40,12 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -1529,6 +1535,12 @@ class InputBox extends Component {
         console.log('[recorder] start', this.recorder);
     }
 
+    handleClosePermission = () => {
+        this.setState({
+            recordPermissionDenied: false
+        })
+    };
+
     render() {
         const { t } = this.props;
         const {
@@ -1544,6 +1556,7 @@ class InputBox extends Component {
             openEditMedia,
             recordingReady,
             recordingTime,
+            recordPermissionDenied,
             shook
         } = this.state;
 
@@ -1660,6 +1673,21 @@ class InputBox extends Component {
                     onSend={this.handleSendMedia}
                     onCancel={this.handleCancelEditMedia}
                 />
+                <Dialog
+                    transitionDuration={0}
+                    open={recordPermissionDenied}
+                    onClose={this.handleClosePermission}
+                    aria-labelledby='form-dialog-title'>
+                    <DialogTitle id='form-dialog-title'>{t('RecordDeniedTitle')}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>{t('RecordDeniedDescription')}</DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleClosePermission} color='primary'>
+                            {t('Ok')}
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }

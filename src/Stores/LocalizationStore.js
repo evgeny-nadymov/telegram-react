@@ -73,7 +73,9 @@ i18n.use(initReactI18next).init({
                 PhotosTitle: 'Photos',
                 VideosTitle: 'Videos',
                 VoiceTitle: 'Voice messages',
-                UpdateDraftConfirmation: 'Are you sure you want to update draft?'
+                UpdateDraftConfirmation: 'Are you sure you want to update draft?',
+                RecordDeniedTitle: 'Permission Denied',
+                RecordDeniedDescription: 'You must allow your browser to access your microphone before being able to record voice notes. Click on the padlock icon next to the URL and then make sure you click Allow in the microphone settings to enable Telegram to access your microphone.',
             },
             emoji: {
                 Search: 'Search',
