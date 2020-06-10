@@ -52,11 +52,14 @@
     width: 14px;
     height: 12px;
     margin: 2px 1px;
-    line-height: 12px;
     font-size: 8px;
+    line-height: normal;
     font-weight: bold;
     border: 2px solid;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .header-player-play-icon {
