@@ -10,6 +10,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import emojiRegex from 'emoji-regex';
 import MediaRecorder from 'opus-media-recorder';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
 import InsertEmoticonIcon from '../../Assets/Icons/Smile';
@@ -21,6 +22,7 @@ import CreatePollDialog from '../Popup/CreatePollDialog';
 import EditUrlDialog from '../Popup/EditUrlDialog';
 import InputBoxHeader from './InputBoxHeader';
 import PasteFilesDialog from '../Popup/PasteFilesDialog';
+import RecordTimer from './RecordTimer';
 import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
@@ -29,7 +31,7 @@ import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { editMessage, replyMessage } from '../../Actions/Client';
-import { PHOTO_SIZE } from '../../Constants';
+import { PHOTO_SIZE, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
 import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -38,10 +40,6 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
-import RecordTimer from './RecordTimer';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
-import ArrowBackIcon from '../../Assets/Icons/Back';
-import MenuIcon from '../../Assets/Icons/Menu';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -60,7 +58,7 @@ class InputBox extends Component {
             replyToMessageId: getChatDraftReplyToMessageId(chatId),
             editMessageId: 0,
             recordingReady: true,
-            recording: false,
+            recordingTime: null,
             sendFile: null
         };
 
@@ -69,7 +67,7 @@ class InputBox extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { t } = this.props;
-        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile, recordingReady, recording } = this.state;
+        const { chatId, newDraft, files, replyToMessageId, editMessageId, openEditMedia, openEditUrl, sendFile, recordingReady, recordingTime } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -107,11 +105,11 @@ class InputBox extends Component {
             return true;
         }
 
-        if (nextState.recordingReady !== recordingReady) {
+        if (nextState.recordingTime !== recordingTime) {
             return true;
         }
 
-        if (nextState.recording !== recording) {
+        if (nextState.recordingReady !== recordingReady) {
             return true;
         }
 
@@ -178,6 +176,10 @@ class InputBox extends Component {
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         document.removeEventListener('selectionchange', this.selectionChangeListener, true);
+
+        if (this.recorder) {
+            this.handleCancelRecord();
+        }
     }
 
     onClientUpdateSendFiles = update => {
@@ -515,9 +517,13 @@ class InputBox extends Component {
     };
 
     handleSubmit = () => {
-        const { chatId, editMessageId, replyToMessageId, recordingReady, recording } = this.state;
+        const { chatId, editMessageId, replyToMessageId, recordingReady, recordingTime } = this.state;
 
-        if (recording) {
+        if (recordingTime) {
+            if ((new Date() - recordingTime) < VOICENOTE_MIN_RECORD_DURATION) {
+                return;
+            }
+
             this.handleStopRecord();
             return;
         } else if (recordingReady) {
@@ -1369,6 +1375,8 @@ class InputBox extends Component {
     };
 
     handleStopRecord = () => {
+        console.log('[recorder] stop', this.recorder);
+
         if (this.recorder) {
             this.recorder.stop();
             this.recorder.stream.getAudioTracks().forEach(track => track.stop());
@@ -1378,6 +1386,7 @@ class InputBox extends Component {
     }
 
     handleCancelRecord = () => {
+        console.log('[recorder] cancel', this.recorder);
         if (this.recorder) {
             this.recorder.cancelled = true;
             this.recorder.stop();
@@ -1391,75 +1400,76 @@ class InputBox extends Component {
     handleRecord = async () => {
         if (this.recorder) return;
 
-        // console.log('start recording called');
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-            const constraints = {
-                channelCount: 1,
-                sampleRate: 48000,
-            };
+        const constraints = {
+            channelCount: 1,
+            sampleRate: 48000,
+        };
 
-            const track = stream.getAudioTracks()[0];
-            track.applyConstraints(constraints)
+        const track = stream.getAudioTracks()[0];
+        track.applyConstraints(constraints)
 
-            const options = { mimeType: 'audio/ogg; codecs=opus', audioBitsPerSecond: 64000 };
-            const workerOptions = {
-                encoderWorkerFactory: function () {
-                    return new Worker(process.env.PUBLIC_URL + '/opus-media-recorder/encoderWorker.umd.js')
-                },
-                OggOpusEncoderWasmPath: process.env.PUBLIC_URL + '/opus-media-recorder/OggOpusEncoder.wasm'
-            };
+        const options = { mimeType: 'audio/ogg; codecs=opus', audioBitsPerSecond: 64000 };
+        const workerOptions = {
+            encoderWorkerFactory: function () {
+                return new Worker(process.env.PUBLIC_URL + '/opus-media-recorder/encoderWorker.umd.js')
+            },
+            OggOpusEncoderWasmPath: process.env.PUBLIC_URL + '/opus-media-recorder/OggOpusEncoder.wasm'
+        };
 
-            this.recorder = new MediaRecorder(stream, options, workerOptions);
-            this.recorder.start(50);
+        const recorder = new MediaRecorder(stream, options, workerOptions);
 
-            const chunks = [];
+        const chunks = [];
 
-            this.recorder.addEventListener('dataavailable', (e) => {
-                // console.log('Recording stopped, data available', e.data);
-                chunks.push(e.data);
-            });
-            this.recorder.addEventListener('start', (e) => {
-                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
-                // console.log('start');
-                this.setState({ recording: true });
-            })
-            this.recorder.addEventListener('stop', (e) => {
-                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
-                this.setState({ recording: false });
+        recorder.ondataavailable = e => {
+            chunks.push(e.data);
+        };
+        recorder.onstart = () => {
+            console.log('[recorder] onstart', this.recorder);
+            TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
+            this.setState({ recordingTime: new Date() });
+        };
+        recorder.onstop = () => {
+            TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
+            this.setState({ recordingTime: null });
 
-                const { cancelled } = this.recorder;
-                this.recorder = null;
-                if (cancelled) {
+            const { cancelled } = this.recorder;
+            console.log('[recorder] onstop', this.recorder, cancelled);
+            this.recorder = null;
+            if (cancelled) {
 
-                    return;
-                }
+                return;
+            }
 
-                // console.log('stop');
-                const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
-                const audioURL = window.URL.createObjectURL(blob);
+            // console.log('stop');
+            const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+            const audioURL = window.URL.createObjectURL(blob);
 
-                const audio = new Audio(audioURL);
-                audio.oncanplay = () => {
-                    // console.log('recorder stopped', audioURL, audio.duration);
-
-                    const content = {
-                        '@type': 'inputMessageVoiceNote',
-                        voice_note: { '@type': 'inputFileBlob', name: '', size: blob.size, data: blob },
-                        duration: Math.trunc(audio.duration),
-                        waveform: '',
-                        caption: null
-                    };
-
-                    this.handleSendVoiceNote(content, blob);
+            const audio = new Audio(audioURL);
+            audio.oncanplay = () => {
+                const content = {
+                    '@type': 'inputMessageVoiceNote',
+                    voice_note: { '@type': 'inputFileBlob', name: '', size: blob.size, data: blob },
+                    duration: Math.trunc(audio.duration),
+                    waveform: '',
+                    caption: null
                 };
-            });
-            this.recorder.addEventListener('error', (e) => {
-                TdLibController.clientUpdate({ '@type': 'clientUpdateRecordError' });
-                this.setState({ recording: false });
-                // console.log('error', e);
-            });
-        });
+
+                this.handleSendVoiceNote(content, blob);
+            };
+        };
+        recorder.onerror = () => {
+            TdLibController.clientUpdate({ '@type': 'clientUpdateRecordError' });
+            this.setState({ recordingTime: null });
+            // console.log('error', e);
+        };
+
+        this.recorder = recorder;
+        this.recorder.start(50);
+        this.startTime = new Date();
+
+        console.log('[recorder] start', this.recorder);
 
         // if (navigator.mediaDevices.getUserMedia) {
         //     console.log('getUserMedia supported.');
@@ -1487,12 +1497,14 @@ class InputBox extends Component {
         //
         //     // console.log('mediaRecorder', MediaRecorder.isTypeSupported('audio/ogg;codecs=opus'));
         //
-        //     const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/ogg;codecs=opus' });
+        //     const mediaRecorder = new MediaRecorder(stream);
         //
         //     console.log('mediaRecorder', mediaRecorder);
         //
         //     mediaRecorder.onstop = event => {
         //         console.log("data available after MediaRecorder.stop() called.");
+        //         TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
+        //         this.setState({ recording: false });
         //
         //         const blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
         //         chunks = [];
@@ -1519,8 +1531,10 @@ class InputBox extends Component {
         //     };
         //
         //     mediaRecorder.start(100);
+        //     TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
+        //     this.setState({ recording: true });
         //
-        //     this.mediaRecorder = mediaRecorder;
+        //     this.recorder = mediaRecorder;
         // } else {
         //     console.log('getUserMedia not supported on your browser!');
         // }
@@ -1540,11 +1554,11 @@ class InputBox extends Component {
             openEditUrl,
             openEditMedia,
             recordingReady,
-            recording
+            recordingTime
         } = this.state;
 
         const isMediaEditing = editMessageId > 0 && !isTextMessage(chatId, editMessageId);
-        let icon = (<SpeedDialIcon open={!recording && recordingReady} openIcon={<MicrophoneIcon />} icon={<SendIcon />} />);
+        let icon = (<SpeedDialIcon open={!recordingTime && recordingReady} openIcon={<MicrophoneIcon />} icon={<SendIcon />} />);
         if (editMessageId) {
             icon = <DoneIcon/>;
         }
@@ -1600,7 +1614,7 @@ class InputBox extends Component {
                                     accept='image/*'
                                     onChange={this.handleAttachPhotoComplete}
                                 />
-                                {!Boolean(editMessageId) && !recording && (
+                                {!Boolean(editMessageId) && !recordingTime && (
                                     <AttachButton
                                         chatId={chatId}
                                         onAttachPhoto={this.handleAttachPhoto}
@@ -1615,7 +1629,7 @@ class InputBox extends Component {
                             </div>
                         </div>
                     </div>
-                    { recording && (
+                    { recordingTime && (
                         <div className='inputbox-cancel-record-button-background'>
                             <IconButton
                                 className='inputbox-cancel-record-button'
@@ -1629,7 +1643,7 @@ class InputBox extends Component {
                     )}
                     <div className='inputbox-send-button-background'>
                         <IconButton
-                            className={classNames('inputbox-send-button', {'inputbox-send-accent-button': recording || !recordingReady})}
+                            className={classNames('inputbox-send-button', {'inputbox-send-accent-button': recordingTime || !recordingReady})}
                             aria-label='Send'
                             size='small'
                             onClick={this.handleSubmit}>

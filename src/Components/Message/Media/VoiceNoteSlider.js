@@ -30,7 +30,7 @@ class VoiceNoteSlider extends React.Component {
             active: active,
             currentTime: currentTime,
             duration: audioDuration,
-            value: this.getValue(currentTime, audioDuration, active, waveform)
+            value: this.getValue(currentTime, audioDuration, active, waveform, false)
         };
     }
 
@@ -62,7 +62,7 @@ class VoiceNoteSlider extends React.Component {
 
     reset = () => {
         const { duration, waveform } = this.props;
-        const { value } = this.state;
+        const { value, dragging } = this.state;
 
         if (value === 1) {
             this.setState({
@@ -74,7 +74,7 @@ class VoiceNoteSlider extends React.Component {
                 const { currentTime } = this.state;
                 if (!currentTime) {
                     this.setState({
-                        value: this.getValue(0, duration, false, waveform)
+                        value: this.getValue(0, duration, false, waveform, dragging)
                     });
                 }
             }, PLAYER_PROGRESS_TIMEOUT_MS);
@@ -82,7 +82,7 @@ class VoiceNoteSlider extends React.Component {
             this.setState({
                 active: false,
                 currentTime: 0,
-                value: this.getValue(0, duration, false, waveform)
+                value: this.getValue(0, duration, false, waveform, dragging)
             });
         }
     };
@@ -104,7 +104,7 @@ class VoiceNoteSlider extends React.Component {
 
         const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
         this.playerDuration = playerDuration;
-        const value = this.getValue(update.currentTime, playerDuration, active, waveform);
+        const value = this.getValue(update.currentTime, playerDuration, active, waveform, dragging);
 
         if (dragging) {
             this.setState({
@@ -128,7 +128,7 @@ class VoiceNoteSlider extends React.Component {
             const playerDuration = this.playerDuration >= 0 && this.playerDuration < Infinity ? this.playerDuration : duration;
             let value = this.state.value;
             if (!dragging) {
-                value = this.getValue(active ? currentTime : 0, playerDuration, true, waveform);
+                value = this.getValue(active ? currentTime : 0, playerDuration, true, waveform, dragging);
             }
 
             this.setState({
@@ -141,10 +141,10 @@ class VoiceNoteSlider extends React.Component {
         }
     };
 
-    getValue = (currentTime, duration, active, waveform) => {
-        if (waveform) {
-            currentTime += 0.25;
-        }
+    getValue = (currentTime, duration, active, waveform, dragging) => {
+        // if (waveform && !dragging) {
+        //     currentTime += 0.25;
+        // }
 
         return active ? currentTime / duration : 0;
     };

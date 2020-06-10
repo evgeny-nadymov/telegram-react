@@ -44,6 +44,10 @@ export function getNormalizedWaveform(data) {
         waveform.push(((bits >>> barPadding) & 0x1F) / 31.0);
     }
 
+    for (let i = 0; i < (100 - barsCount); i++) {
+        waveform.push(0);
+    }
+
     waveformCache.set(data, waveform);
 
     return waveform;
