@@ -40,6 +40,7 @@ import { copy } from '../../Utils/Text';
 import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
 import { pinMessage, unpinMessage } from '../../Actions/Message';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
+import AppStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
@@ -243,7 +244,7 @@ class MessageMenu extends React.PureComponent {
         const canBePinned = canPinMessages(chatId);
         const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         const canBeDeleted = canMessageBeDeleted(chatId, messageId);
-        const canBeEdited = canMessageBeEdited(chatId, messageId);
+        const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording;
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
         const canCopyLink = Boolean(copyLink);
         const canCopyPublicMessageLink = isPublicSupergroup(chatId);
