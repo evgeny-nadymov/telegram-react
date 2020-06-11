@@ -206,9 +206,7 @@ class InputBox extends Component {
 
         document.removeEventListener('selectionchange', this.selectionChangeListener, true);
 
-        if (this.recorder) {
-            this.handleCancelRecord();
-        }
+        this.handleCancelRecord();
     }
 
     onClientUpdateInputShake = update => {
@@ -449,6 +447,8 @@ class InputBox extends Component {
                 this.loadDraft();
             }
         );
+
+        this.handleCancelRecord();
     };
 
     setDraft = () => {
@@ -1424,27 +1424,17 @@ class InputBox extends Component {
         setTimeout(() => this.restoreSelection(), 0);
     };
 
-    handleStopRecord = () => {
-        console.log('[recorder] stop', this.recorder);
+    handleStopRecord = (cancelled = false) => {
+        console.log('[recorder] stop', this.recorder, cancelled);
+        if (!this.recorder) return;
 
-        if (this.recorder) {
-            this.recorder.stop();
-            this.recorder.stream.getAudioTracks().forEach(track => track.stop());
-            // this.recorder = null;
-            return;
-        }
+        this.recorder.cancelled = cancelled;
+        this.recorder.stop();
+        this.recorder.stream.getAudioTracks().forEach(track => track.stop());
     }
 
     handleCancelRecord = () => {
-        console.log('[recorder] cancel', this.recorder);
-        if (this.recorder) {
-            this.recorder.cancelled = true;
-            this.recorder.stop();
-            this.recorder.stream.getAudioTracks().forEach(track => track.stop());
-
-            // this.recorder = null;
-            return;
-        }
+        this.handleStopRecord(true);
     }
 
     handleRecord = async () => {
