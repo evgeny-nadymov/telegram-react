@@ -1480,8 +1480,6 @@ class InputBox extends Component {
         };
         recorder.onstart = () => {
             console.log('[recorder] onstart', this.recorder);
-            TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
-            this.setState({ recordingTime: new Date() });
         };
         recorder.onstop = () => {
             TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStop' });
@@ -1526,6 +1524,8 @@ class InputBox extends Component {
         this.startTime = new Date();
 
         console.log('[recorder] start', this.recorder);
+        TdLibController.clientUpdate({ '@type': 'clientUpdateRecordStart' });
+        this.setState({ recordingTime: new Date() });
     }
 
     handleClosePermission = () => {
