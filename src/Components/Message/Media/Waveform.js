@@ -24,22 +24,27 @@ class Waveform extends React.Component {
         const transition = dragging ? null : 'width 0.25s'
         const waveformMaxHeight = 23;
 
+        const d = waveform.filter((x, index) => index % 2 === 1).map((x, index) => {
+            const height = Math.min(Math.max(2, x * waveformMaxHeight), waveformMaxHeight);
+            const y = waveformMaxHeight - Math.floor(height);
+            return `M${1 + 4 * index + 1},${y + 1}v${Math.floor(height) - 2}Z`
+        }).join('');
+
+        const svg = (
+            <svg className='waveform-bars' viewBox='0 0 202 32'>
+                <path d={d}/>
+            </svg>
+        );
+
         return (
             <div className='waveform'>
-                <svg className='waveform-clip-path' width={202} height={waveformMaxHeight}>
-                    <defs>
-                        <clipPath id={id}>
-                            {waveform.filter((x, index) => index % 2 === 1).map((x, index) => {
-                                const height = Math.min(Math.max(2, x * waveformMaxHeight), waveformMaxHeight);
-                                const y = waveformMaxHeight - Math.floor(height);
-                                return (<rect key={index} x={1 + 4 * index} y={y} width='2' height={Math.floor(height)} rx='1' ry='1'/>)
-                            })}
-                        </clipPath>
-                    </defs>
-                </svg>
-                <div className='waveform-content' style={{ clipPath: `url(#${id})`}}>
-                    <div className='waveform-background'/>
-                    <div className='waveform-progress' style={{ transition, width: value * 100 + '%'}}/>
+                <div className='waveform-content'>
+                    <div className='waveform-background'>
+                        {svg}
+                    </div>
+                    <div className='waveform-progress' style={{ transition, width: value * 100 + '%'}}>
+                        {svg}
+                    </div>
                 </div>
             </div>
         );

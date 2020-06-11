@@ -12,22 +12,23 @@
     top: -8px;
 }
 
-.waveform-clip-path {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-}
-
 .waveform-content {
     position: relative;
     width: 100%;
     height: 100%;
 }
 
+.waveform-bars {
+    width: 202px;
+    height: 32px;
+    stroke: currentColor;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 .waveform-background {
-    background: var(--color-accent-main);
+    color: var(--color-accent-main);
     opacity: 0.4;
     position: absolute;
     top: 0;
@@ -37,11 +38,12 @@
 }
 
 .message-bubble-out .waveform-background {
-    background: var(--message-out-meta-color);
+    color: var(--message-out-meta-color);
 }
 
 .waveform-progress {
-    background: var(--color-accent-main);
+    overflow: hidden;
+    color: var(--color-accent-main);
     position: absolute;
     top: 0;
     right: 0;
@@ -50,5 +52,5 @@
 }
 
 .message-bubble-out .waveform-progress {
-    background: var(--message-out-meta-color);
+    color: var(--message-out-meta-color);
 }
