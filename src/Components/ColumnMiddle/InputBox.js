@@ -1442,7 +1442,10 @@ class InputBox extends Component {
 
         let stream = null;
         try{
+            console.log('[recorder] stream start', this.recorder);
             stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('[recorder] stream ready', this.recorder);
+            if (this.recorder) return;
         } catch { }
 
         if (!stream) {
