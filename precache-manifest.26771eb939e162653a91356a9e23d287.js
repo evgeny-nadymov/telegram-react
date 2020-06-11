@@ -4,7 +4,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/e33e8791554f674a437f.worker.js"
   },
   {
-    "revision": "beb4f973da9315f6e67070ba45783793",
+    "revision": "1aedbbe988c79db8f9fe835c9f6b004a",
     "url": "/telegram-react/index.html"
   },
   {
@@ -12,7 +12,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.885200b4.chunk.css"
   },
   {
-    "revision": "c73363d69b64ce44301a",
+    "revision": "4bf87bdc662a560f7ea1",
     "url": "/telegram-react/static/css/5.9776a471.chunk.css"
   },
   {
@@ -24,8 +24,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/8.3015292a.chunk.css"
   },
   {
-    "revision": "dfe5e6b6d7830e0679c7",
-    "url": "/telegram-react/static/css/main.55d83219.chunk.css"
+    "revision": "7c7d79e931db0e4cf24d",
+    "url": "/telegram-react/static/css/main.decd9524.chunk.css"
   },
   {
     "revision": "187509818fae1ab22a08",
@@ -40,8 +40,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/4.31bc9580.chunk.js"
   },
   {
-    "revision": "c73363d69b64ce44301a",
-    "url": "/telegram-react/static/js/5.1a66bc3b.chunk.js"
+    "revision": "4bf87bdc662a560f7ea1",
+    "url": "/telegram-react/static/js/5.5244babb.chunk.js"
   },
   {
     "revision": "33ad7f8dd2a7695206cc",
@@ -56,12 +56,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/8.506d144d.chunk.js"
   },
   {
-    "revision": "dfe5e6b6d7830e0679c7",
-    "url": "/telegram-react/static/js/main.499de3fa.chunk.js"
+    "revision": "7c7d79e931db0e4cf24d",
+    "url": "/telegram-react/static/js/main.167bb941.chunk.js"
   },
   {
-    "revision": "04b3c6a9fa0115a3534f",
-    "url": "/telegram-react/static/js/runtime~main.86f89acf.js"
+    "revision": "1b5ee528820a51e9641a",
+    "url": "/telegram-react/static/js/runtime~main.50cd8ccb.js"
   },
   {
     "revision": "9b7ea631ddb3103beee05cec006af20e",
