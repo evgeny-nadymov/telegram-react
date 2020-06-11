@@ -160,7 +160,7 @@ class SharedLink extends React.Component {
                     </div>
                     <div className='shared-link-content'>
                         {title && <div className='web-page-title'>{title}</div>}
-                        {description && <div className='web-page-description'>{description}</div>}
+                        {description && <div className='web-page-description'>{description.text}</div>}
                         {content}
                     </div>
                 </div>
