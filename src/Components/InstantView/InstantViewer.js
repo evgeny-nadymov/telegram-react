@@ -119,11 +119,11 @@ class InstantViewer extends React.Component {
         console.log('[IV] clientUpdateInstantViewUrl', update);
         const { url } = update;
         const active = InstantViewStore.getCurrent();
-        const { instantView } = this.props;
+        const { instantView, url: oldUrl } = this.props;
 
         if (active !== instantView) return;
 
-        if (instantView && url.startsWith(instantView.url)) {
+        if (instantView && url.startsWith(oldUrl)) {
             const hash = new URL(url).hash;
             if (url.indexOf('#') === url.length - 1) {
                 this.scrollTop('smooth');
@@ -190,12 +190,12 @@ class InstantViewer extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { instantView, url } = this.props;
-        console.log('[IV] componentDidUpdate', instantView.url, instantView.url === prevProps.instantView.url);
+        console.log('[IV] componentDidUpdate', url, url === prevProps.url);
 
-        const hash = new URL(instantView.url).hash;
+        const hash = new URL(url).hash;
         if (prevProps.instantView !== instantView) {
-            if (prevProps.instantView.url !== instantView.url) {
-                if (instantView.url.indexOf('#') === instantView.url.length - 1) {
+            if (prevProps.url !== url) {
+                if (url.indexOf('#') === url.length - 1) {
                     console.log('[IV] componentDidUpdate scrollTop auto');
                     this.scrollTop('auto');
                 } else if (hash) {

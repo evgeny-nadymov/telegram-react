@@ -23,7 +23,7 @@ export async function openInstantView(url) {
 
         console.log('[IV] open', result);
         loadInstantViewContent(result);
-        setInstantViewContent({ instantView: result });
+        setInstantViewContent({ instantView: result, url });
     } catch {
         const newWindow = window.open();
         newWindow.opener = null;
