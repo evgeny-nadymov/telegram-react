@@ -10,12 +10,16 @@ import classNames from 'classnames';
 import CSSTransition from 'react-transition-group/CSSTransition';
 import Archive from './Archive';
 import Search from './Search/Search';
+import Filters from './Filters';
 import DialogsHeader from './DialogsHeader';
 import DialogsList from './DialogsList';
 import SidebarPage from './SidebarPage';
 import Settings from './Settings/Settings';
 import Contacts from './Contacts';
 import UpdatePanel from './UpdatePanel';
+import SidebarDialog from '../Popup/SidebarDialog';
+import NewGroup from './NewGroup';
+import NewChannel from './NewChannel';
 import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
 import { loadChatsContent } from '../../Utils/File';
@@ -26,9 +30,6 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
-import SidebarDialog from '../Popup/SidebarDialog';
-import NewGroup from './NewGroup';
-import NewChannel from './NewChannel';
 
 const defaultTimeout = {
     enter: duration.enteringScreen,
@@ -141,14 +142,12 @@ class Dialogs extends Component {
     componentDidMount() {
         this.loadCache();
 
+        AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
-
         ChatStore.on('updateChatDraftMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.on('updateChatPosition', this.onUpdateChatOrder);
-
-        AppStore.on('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.on('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.on('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
@@ -157,14 +156,12 @@ class Dialogs extends Component {
     }
 
     componentWillUnmount() {
+        AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         AppStore.off('clientUpdateThemeChange', this.onClientUpdateThemeChange);
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
-
         ChatStore.off('updateChatDraftMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatLastMessage', this.onUpdateChatOrder);
         ChatStore.off('updateChatPosition', this.onUpdateChatOrder);
-
-        AppStore.off('clientUpdateSearchChat', this.onClientUpdateSearchChat);
         ChatStore.off('clientUpdateSettings', this.onClientUpdateSettings);
         ChatStore.off('clientUpdateArchive', this.onClientUpdateArchive);
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
@@ -444,6 +441,7 @@ class Dialogs extends Component {
                             onSearch={this.handleSearch}
                             onSearchTextChange={this.handleSearchTextChange}
                         />
+                        <Filters/>
                         <div className='dialogs-content'>
                             <DialogsList
                                 type='chatListMain'

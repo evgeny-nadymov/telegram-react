@@ -70,7 +70,7 @@ class Dialog extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, t, hidden, isLastPinned, style } = this.props;
+        const { chatId, t, hidden, isLastPinned, chatList, style } = this.props;
         const { contextMenu } = this.state;
 
         if (nextProps.chatId !== chatId) {
@@ -94,6 +94,11 @@ class Dialog extends Component {
         }
 
         if (nextState.contextMenu !== contextMenu) {
+            // console.log('[vl] Dialog.shouldUpdate true contextMenu');
+            return true;
+        }
+
+        if (nextState.chatList !== chatList) {
             // console.log('[vl] Dialog.shouldUpdate true contextMenu');
             return true;
         }

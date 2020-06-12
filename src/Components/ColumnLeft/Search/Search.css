@@ -72,6 +72,7 @@
     display: flex;
     flex-direction: row;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     /*position: absolute;*/
     left: 0;

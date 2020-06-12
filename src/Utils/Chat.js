@@ -66,13 +66,10 @@ export function getChatOrder(chatId, chatList = { '@type': 'chatListMain' }) {
     return position.order;
 }
 
-export function positionListEquals(p1, p2) {
-    if (p1 && !p2) return false;
-    if (!p1 && p2) return false;
-    if (!p1 && !p2) return true;
-
-    const { list: list1 } = p1;
-    const { list: list2 } = p2;
+export function chatListEquals(list1, list2) {
+    if (list1 && !list2) return false;
+    if (!list1 && list2) return false;
+    if (!list1 && !list2) return true;
 
     if (list1['@type'] !== list2['@type']) return false;
 
@@ -84,11 +81,22 @@ export function positionListEquals(p1, p2) {
             return true;
         }
         case 'chatListFilter': {
-            return list1.filter_id === list2.filter_id;
+            return list1.chat_filter_id === list2.chat_filter_id;
         }
     }
 
     return false;
+}
+
+export function positionListEquals(p1, p2) {
+    if (p1 && !p2) return false;
+    if (!p1 && p2) return false;
+    if (!p1 && !p2) return true;
+
+    const { list: list1 } = p1;
+    const { list: list2 } = p2;
+
+    return chatListEquals(list1, list2);
 }
 
 export function canUnpinMessage(chatId) {

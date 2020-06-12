@@ -10,6 +10,12 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import emojiRegex from 'emoji-regex';
 import MediaRecorder from 'opus-media-recorder';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import DoneIcon from '../../Assets/Icons/Done';
 import IconButton from '@material-ui/core/IconButton';
@@ -40,12 +46,6 @@ import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
 
 const EmojiPickerButton = React.lazy(() => import('./../ColumnMiddle/EmojiPickerButton'));
 
@@ -65,6 +65,7 @@ class InputBox extends Component {
             editMessageId: 0,
             recordingReady: true,
             recordingTime: null,
+            recordPermissionDenied: false,
             sendFile: null
         };
 
@@ -1438,6 +1439,7 @@ class InputBox extends Component {
     }
 
     handleRecord = async () => {
+        console.log('[recorder] handleRecord', this.recorder);
         if (this.recorder) return;
 
         let stream = null;

@@ -1,0 +1,46 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.filters {
+    height: 40px;
+    margin-bottom: -15px;
+    padding: 0 9px 15px;
+    display: flex;
+    flex-shrink: 0;
+    flex-grow: 0;
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: hidden;
+    position: relative;
+}
+
+.filter-selection {
+    transition: left 0.15s ease, width 0.15s ease;
+    position: absolute;
+    will-change: left;
+    bottom: 15px;
+    height: 3px;
+    min-width: 30px;
+    border-radius: 2px 2px 0 0;
+    background: var(--color-accent-main);
+}
+
+.filter {
+    user-select: none;
+    white-space: nowrap;
+    padding: 0 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.filter.item-selected {
+    color: var(--color-accent-main);
+}
