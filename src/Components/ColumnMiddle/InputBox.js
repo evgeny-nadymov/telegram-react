@@ -567,7 +567,7 @@ class InputBox extends Component {
         return { chatId, draftMessage };
     };
 
-    handleSubmit = () => {
+    handleSubmit = (startRecord = true) => {
         const { chatId, editMessageId, replyToMessageId, recordingReady, recordingTime } = this.state;
 
         if (recordingTime) {
@@ -578,7 +578,7 @@ class InputBox extends Component {
             this.handleStopRecord();
             return;
         } else if (recordingReady) {
-            this.handleRecord();
+            if (startRecord) this.handleRecord();
             return;
         }
 
@@ -904,7 +904,7 @@ class InputBox extends Component {
                 }
                 // enter
                 else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
-                    this.handleSubmit();
+                    this.handleSubmit(false);
 
                     event.preventDefault();
                     event.stopPropagation();
