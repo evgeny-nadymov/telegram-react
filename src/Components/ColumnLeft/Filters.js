@@ -74,7 +74,7 @@ class Filters extends React.Component {
         }
 
         if (item){
-            item.scrollIntoView({ behavior: 'smooth' });
+            item.scrollIntoView();
         }
     }
 
@@ -104,7 +104,7 @@ class Filters extends React.Component {
     };
 
     handleMainClick = event => {
-        if (event.button !== 0) return;
+        if (event && event.button !== 0) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateChatList',
@@ -115,7 +115,7 @@ class Filters extends React.Component {
     };
 
     handleFilterClick = (event, id) => {
-        if (event.button !== 0) return;
+        if (event && event.button !== 0) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateChatList',
@@ -126,6 +126,15 @@ class Filters extends React.Component {
         });
     };
 
+    handleWheel = event => {
+        if (!event.deltaY) {
+            return;
+        }
+
+        event.currentTarget.scrollLeft += event.deltaY ;
+        event.stopPropagation();
+    };
+
     render() {
         const { t } = this.props;
         const { filters, chatList } = this.state;
@@ -134,7 +143,7 @@ class Filters extends React.Component {
 
         this.filterRef = new Map();
         return (
-            <div ref={this.filtersRef} className='filters'>
+            <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
                 <div ref={r => this.filterRef.set('chatListMain', r)} className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})} onMouseDown={this.handleMainClick}>{t('FilterAllChats')}</div>
                 {filters.map(x => <div ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)} className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})} key={x.id} onMouseDown={e => this.handleFilterClick(e, x.id)}>{x.title}</div>)}
                 <div ref={this.filterSelectionRef} className='filter-selection'/>

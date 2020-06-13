@@ -7,8 +7,8 @@
 
 .filters {
     height: 40px;
-    margin-bottom: -15px;
-    padding: 0 9px 15px;
+    margin-bottom: -17px;
+    padding: 0 9px 17px;
     display: flex;
     flex-shrink: 0;
     flex-grow: 0;
@@ -23,7 +23,7 @@
     transition: left 0.15s ease, width 0.15s ease;
     position: absolute;
     will-change: left;
-    bottom: 15px;
+    top: 37px;
     height: 3px;
     min-width: 30px;
     border-radius: 2px 2px 0 0;
@@ -31,6 +31,7 @@
 }
 
 .filter {
+    height: 40px;
     user-select: none;
     white-space: nowrap;
     padding: 0 19px;

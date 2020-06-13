@@ -39,7 +39,7 @@ export function getChatPosition(chatId, chatList = { '@type': 'chatListMain'}) {
             return positions.find(x => x.list['@type'] === 'chatListArchive');
         }
         case 'chatListFilter': {
-            return positions.find(x => x.list['@type'] === 'chatListFilter' && x.list.filter_id === chatList.filter_id);
+            return positions.find(x => x.list['@type'] === 'chatListFilter' && x.list.chat_filter_id === chatList.chat_filter_id);
         }
     }
 
