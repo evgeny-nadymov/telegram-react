@@ -20,7 +20,7 @@
 }
 
 .filter-selection {
-    transition: left 0.15s ease, width 0.15s ease;
+    /*transition: left 0.15s ease, width 0.15s ease;*/
     position: absolute;
     will-change: left;
     top: 37px;
@@ -40,6 +40,10 @@
     justify-content: center;
     cursor: pointer;
     color: var(--text-secondary);
+}
+
+.page-small .filter {
+    padding: 0 9px;
 }
 
 .filter.item-selected {

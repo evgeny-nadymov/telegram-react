@@ -27,10 +27,11 @@ class CacheStore extends EventEmitter {
 
         this.addTdLibListener();
 
-        this.saveChatsInternal = debounce(this.saveChatsInternal, 2000);
+        this.saveInternal = debounce(this.saveInternal, 2000);
     }
 
     reset = () => {
+        this.filters = null;
         this.chatIds = [];
         this.archiveChatIds = [];
         this.meChat = null;
@@ -93,15 +94,16 @@ class CacheStore extends EventEmitter {
         TdLibController.off('clientUpdate', this.onClientUpdate);
     };
 
-    async loadCache() {
+    async load() {
         // console.log('[cm] getChats start');
         const promises = [];
         promises.push(CacheManager.load('cache').catch(error => null));
         promises.push(CacheManager.load('files').catch(error => null));
+        promises.push(CacheManager.load('filters').catch(error => null));
         if (this.cacheContacts) {
             promises.push(CacheManager.load('contacts').catch(error => null));
         }
-        const [cache, files, contacts] = await Promise.all(promises);
+        const [cache, files, filters, contacts] = await Promise.all(promises);
         this.cache = cache;
         if (this.cache) {
             this.cache.files = files || [];
@@ -121,10 +123,13 @@ class CacheStore extends EventEmitter {
             }
         }
 
+        this.filters = filters;
+
         if (this.cache) {
             this.parseCache(this.cache);
         }
 
+        console.log('[cm] load', this.filters, filters);
         return this.cache;
     }
 
@@ -240,7 +245,7 @@ class CacheStore extends EventEmitter {
         };
     }
 
-    async saveChats(chatIds, archiveChatIds) {
+    async save(filters, chatIds, archiveChatIds) {
         this.chatIds = chatIds;
         this.archiveChatIds = archiveChatIds;
         this.meChat = this.meChat || await TdLibController.send({
@@ -253,12 +258,13 @@ class CacheStore extends EventEmitter {
                 '@type': 'getContacts'
             });
         }
+        this.filters = filters;
 
-        this.saveChatsInternal();
+        this.saveInternal();
     }
 
-    async saveChatsInternal() {
-        // console.log('[cm] saveChatsInternal', this.chatIds, this.archiveChatIds);
+    async saveInternal() {
+        // console.log('[cm] saveInternal', this.filters, this.chatIds, this.archiveChatIds);
         const cache = await this.getCache(this.chatIds, this.archiveChatIds);
         const files = cache.files;
         cache.files = [];
@@ -289,6 +295,10 @@ class CacheStore extends EventEmitter {
         if (this.cacheContacts) {
             const contacts = this.contacts.user_ids.map(x => UserStore.get(x));
             await CacheManager.save('contacts', contacts);
+        }
+
+        if (this.filters) {
+            await CacheManager.save('filters', this.filters);
         }
     }
 

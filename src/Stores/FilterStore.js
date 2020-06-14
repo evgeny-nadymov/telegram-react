@@ -19,7 +19,7 @@ class FilterStore extends EventEmitter {
 
     reset = () => {
         this.chatList = { '@type': 'chatListMain' };
-        this.filters = [];
+        this.filters = null;
     };
 
     onUpdate = update => {

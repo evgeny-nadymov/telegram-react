@@ -28,6 +28,7 @@ import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
+import FilterStore from '../../Stores/FilterStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialogs.css';
 
@@ -153,6 +154,7 @@ class Dialogs extends Component {
         ChatStore.on('clientUpdateContacts', this.onClientUpdateContacts);
         ChatStore.on('clientUpdateNewGroup', this.onClientUpdateNewGroup);
         ChatStore.on('clientUpdateNewChannel', this.onClientUpdateNewChannel);
+        FilterStore.on('updateChatFilters', this.onUpdateChatFilters);
     }
 
     componentWillUnmount() {
@@ -167,7 +169,12 @@ class Dialogs extends Component {
         ChatStore.off('clientUpdateContacts', this.onClientUpdateContacts);
         ChatStore.off('clientUpdateNewGroup', this.onClientUpdateNewGroup);
         ChatStore.off('clientUpdateNewChannel', this.onClientUpdateNewChannel);
+        FilterStore.off('updateChatFilters', this.onUpdateChatFilters);
     }
+
+    onUpdateChatFilters = update => {
+        this.saveCache();
+    };
 
     onClientUpdatePageWidth = update => {
         const { isSmallWidth } = update;
@@ -192,10 +199,11 @@ class Dialogs extends Component {
     };
 
     async loadCache() {
-        const cache = (await CacheStore.loadCache()) || {};
+        const cache = (await CacheStore.load()) || {};
 
         const { chats, archiveChats } = cache;
 
+        FilterStore.filters = FilterStore.filters || CacheStore.filters;
         this.setState({
             cache,
 
@@ -218,7 +226,9 @@ class Dialogs extends Component {
         const { current: mainCurrent } = this.dialogListRef;
         const mainChatIds = mainCurrent && mainCurrent.state.chats ? mainCurrent.state.chats.slice(0, 25) : [];
 
-        CacheStore.saveChats(mainChatIds, archiveChatIds);
+        const { filters } = FilterStore;
+
+        CacheStore.save(filters, mainChatIds, archiveChatIds);
     }
 
     onUpdateChatOrder = update => {
