@@ -36,8 +36,7 @@
 .dialog.item-selected {
     border-radius: 10px;
     cursor: pointer;
-    background: var(--color-accent-main);
-    color: #fff;
+    background: var(--color-hover);
 }
 
 .dialog-bottom-separator {
@@ -61,7 +60,7 @@
 .item-selected .dialog-meta,
 .item-selected .dialog-status,
 .item-selected .status {
-    color: #fff;
+    /*color: #fff;*/
 }
 
 .tile-first-row {

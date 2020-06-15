@@ -12,7 +12,6 @@
 }
 
 .found-message.item-selected .dialog-wrapper {
-    background: var(--color-accent-main);
-    color: #fff;
+    background: var(--color-hover);
     border-radius: 10px;
 }

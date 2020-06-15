@@ -22,7 +22,7 @@
 .dialog.item-selected .dialog-content-accent,
 .dialog.item-selected .dialog-content-draft,
 .dialog.item-selected .dialog-badge-pinned {
-    color: #fff;
+    /*color: #fff;*/
 }
 
 .dialog-content-draft {
