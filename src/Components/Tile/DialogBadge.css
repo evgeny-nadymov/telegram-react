@@ -67,7 +67,7 @@
 
 .item-selected .dialog-badge,
 .item-selected .dialog-badge-pinned {
-    background: var(--badge-item-selected);
+    /*background: var(--badge-item-selected);*/
 }
 
 .dialog-badge-pinned-icon {

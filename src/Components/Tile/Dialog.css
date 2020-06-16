@@ -23,6 +23,10 @@
     background: var(--color-hover);
 }
 
+.dialog.item-selected .online-status-icon {
+    background: var(--color-hover);
+}
+
 .dialog-hidden {
     opacity: 0.15;
     pointer-events: none;
@@ -46,11 +50,11 @@
 }
 
 .item-selected .online-status {
-    background: var(--color-accent-main);
+    /*background: var(--color-hover);*/
 }
 
 .item-selected .online-status-indicator {
-    background: #fff;
+    /*background: #fff;*/
 }
 
 .item-selected .dialog-title,
