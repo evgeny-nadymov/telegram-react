@@ -9,7 +9,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
-import { getFirstLetter, throttle } from '../../Utils/Common';
+import Animator from '../../Utils/Animatior';
+import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
 import FilterStore from '../../Stores/FilterStore';
 import CacheStore from '../../Stores/CacheStore';
@@ -81,6 +82,8 @@ class Filters extends React.Component {
     setSelection(transition = true) {
         const { chatList, filters, isSmallWidth } = this.state;
 
+        const scroll = this.filtersRef.current;
+
         let item = null;
         let left = 9;
         if (chatList['@type'] === 'chatListMain') {
@@ -109,12 +112,34 @@ class Filters extends React.Component {
 
         const filterSelection = this.filterSelectionRef.current;
         if (filterSelection) {
-            const transitionStyle = transition ? 'transition: left 0.15s ease, width 0.15s ease' : null;
+            const transitionStyle = transition ? 'transition: left 0.25s ease, width 0.25s ease' : null;
             filterSelection.style.cssText = `left: ${left}px; width: ${item.scrollWidth - 14}px; ${transitionStyle}`;
         }
 
-        if (item){
-            item.scrollIntoView();
+        if (item && transition){
+            const { animator } = this;
+
+
+            if (animator) {
+                animator.stop();
+            }
+
+            this.animator = new Animator(250, [
+                {
+                    from: scroll.scrollLeft,
+                    to: clamp(left - scroll.offsetWidth / 2 + item.offsetWidth / 2, 0, scroll.scrollWidth - scroll.offsetWidth),
+                    func: left => (scroll.scrollLeft = left)
+                }
+            ]);
+
+            setTimeout(() => {
+                if (!this.animator) return;
+
+                this.animator.start();
+            }, 0);
+
+
+            // item.scrollIntoView();
         }
     }
 
