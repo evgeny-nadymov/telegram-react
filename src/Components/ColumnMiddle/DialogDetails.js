@@ -213,6 +213,8 @@ class DialogDetails extends Component {
             }
         }
 
+        // console.log('[p] dialogDetails.render');
+
         return (
             <div className='dialog-details' style={style}>
                 <HeaderPlayer />

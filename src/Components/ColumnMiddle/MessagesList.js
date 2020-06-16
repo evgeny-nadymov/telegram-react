@@ -263,6 +263,13 @@ class MessagesList extends React.Component {
     };
 
     onClientUpdateDialogsReady = async update => {
+        const { list } = update;
+        if (!list) return;
+        if (list['@type'] !== 'chatListMain') return;
+
+        const { history } = this.state;
+        if (history) return;
+
         await FileStore.initDB(async () => {
             const { chatId, messageId } = this.props;
             if (chatId) {
@@ -1287,6 +1294,7 @@ class MessagesList extends React.Component {
 
                   return m;
               });
+        // console.log('[p] messagesList.render');
 
         return (
             <div

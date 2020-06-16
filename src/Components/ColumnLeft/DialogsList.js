@@ -381,7 +381,7 @@ class DialogsList extends React.Component {
             this.loading = false;
             if (type === 'chatListMain') console.log('[p] GETCHATS stop');
             if (replace) {
-                TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady' });
+                TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady', list: chatList });
             }
         });
 
