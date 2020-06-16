@@ -129,7 +129,7 @@ class CacheStore extends EventEmitter {
             this.parseCache(this.cache);
         }
 
-        console.log('[cm] load', this.filters, filters);
+        // console.log('[cm] load', this.filters, filters);
         return this.cache;
     }
 

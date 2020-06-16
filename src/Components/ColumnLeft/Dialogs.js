@@ -451,18 +451,20 @@ class Dialogs extends Component {
                             onSearch={this.handleSearch}
                             onSearchTextChange={this.handleSearchTextChange}
                         />
-                        <Filters/>
                         <div className='dialogs-content'>
-                            <DialogsList
-                                type='chatListMain'
-                                ref={this.dialogListRef}
-                                cacheItems={mainCacheItems}
-                                items={mainItems}
-                                showArchive={showArchive}
-                                archiveTitle={archiveTitle}
-                                open={true}
-                                onSaveCache={this.handleSaveCache}
-                            />
+                            <div className='dialogs-content-internal'>
+                                <Filters/>
+                                <DialogsList
+                                    type='chatListMain'
+                                    ref={this.dialogListRef}
+                                    cacheItems={mainCacheItems}
+                                    items={mainItems}
+                                    showArchive={showArchive}
+                                    archiveTitle={archiveTitle}
+                                    open={true}
+                                    onSaveCache={this.handleSaveCache}
+                                />
+                            </div>
                             <CSSTransition
                                 classNames='search'
                                 timeout={timeout}

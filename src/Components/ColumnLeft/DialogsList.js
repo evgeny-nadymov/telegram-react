@@ -23,6 +23,8 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './DialogsList.css';
 import FilterStore from '../../Stores/FilterStore';
+import DialogsHeader from './DialogsHeader';
+import Filters from './Filters';
 
 class DialogListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -488,19 +490,17 @@ class DialogsList extends React.Component {
         }
 
         return (
-            <VirtualizedList
-                ref={this.listRef}
-                className='dialogs-list'
-                source={this.source}
-                rowHeight={76}
-                overScanCount={20}
-                renderItem={x => this.renderItem(x, this.source)}
-                onScroll={this.handleScroll}
-            />
-            // <div ref={this.listRef} className='dialogs-list' onScroll={this.handleScroll}>
-            //     {showArchive && offset === 0 && <Archive title={archiveTitle} />}
-            //     {dialogs}
-            // </div>
+            <>
+                <VirtualizedList
+                    ref={this.listRef}
+                    className='dialogs-list'
+                    source={this.source}
+                    rowHeight={76}
+                    overScanCount={20}
+                    renderItem={x => this.renderItem(x, this.source)}
+                    onScroll={this.handleScroll}
+                />
+            </>
         );
     }
 }

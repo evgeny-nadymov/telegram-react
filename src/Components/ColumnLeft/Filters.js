@@ -179,7 +179,7 @@ class Filters extends React.Component {
         const { t } = this.props;
         const { filters, chatList, isSmallWidth } = this.state;
 
-        console.log('[cm] filters.render', filters);
+        // console.log('[cm] filters.render', filters);
 
         if (!filters) return null;
         if (!filters.length) return null;
