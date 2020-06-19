@@ -6,6 +6,8 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
+import './VirtualizedList.css';
 
 const style = {
     listWrapper: height => ({
@@ -155,8 +157,9 @@ export class VirtualizedList extends React.Component {
         // console.log('[vl] render', source, renderIds);
 
         return (
-            <div ref={this.listRef} className={className}>
+            <div ref={this.listRef} className={classNames('vlist', className)}>
                 <div style={style.listWrapper((source || []).length * rowHeight)}>{items}</div>
+                {/*<div className='vlist-top-border'/>*/}
             </div>
         );
     }

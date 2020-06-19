@@ -11,6 +11,7 @@ import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import Main from './Main';
 import EditProfile from './EditProfile';
+import Filters from './Filters';
 import General from './General';
 import Language from '../Language';
 import Notifications from './Notifications';
@@ -32,7 +33,8 @@ class Settings extends React.Component {
             openGeneral: false,
             openNotifications: false,
             openPrivacySecurity: false,
-            openLanguage: false
+            openLanguage: false,
+            openFilters: false
         };
     }
 
@@ -132,6 +134,18 @@ class Settings extends React.Component {
         });
     };
 
+    openFilters = () => {
+        this.setState({
+            openFilters: true
+        });
+    };
+
+    closeFilters = () => {
+        this.setState({
+            openFilters: false
+        });
+    };
+
     handleCloseSettings = () => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateSettings',
@@ -141,7 +155,7 @@ class Settings extends React.Component {
 
     render() {
         const { chatId, popup } = this.props;
-        const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage } = this.state;
+        const { openEditProfile, openGeneral, openNotifications, openPrivacySecurity, openLanguage, openFilters } = this.state;
 
         return (
             <>
@@ -154,6 +168,7 @@ class Settings extends React.Component {
                     onNotifications={this.openNotifications}
                     onPrivacySecurity={this.openPrivacySecurity}
                     onLanguage={this.openLanguage}
+                    onFilters={this.openFilters}
                 />
                 <SidebarPage open={openEditProfile} onClose={this.closeEditProfile}>
                     <EditProfile chatId={chatId} />
@@ -166,6 +181,9 @@ class Settings extends React.Component {
                 </SidebarPage>
                 <SidebarPage open={openPrivacySecurity} onClose={this.closePrivacySecurity}>
                     <PrivacySecurity />
+                </SidebarPage>
+                <SidebarPage open={openFilters} onClose={this.closeFilters}>
+                    <Filters />
                 </SidebarPage>
                 <SidebarPage open={openLanguage} onClose={this.closeLanguage}>
                     <Language />

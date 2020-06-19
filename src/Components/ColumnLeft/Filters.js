@@ -12,8 +12,8 @@ import classNames from 'classnames';
 import Animator from '../../Utils/Animatior';
 import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
-import FilterStore from '../../Stores/FilterStore';
 import CacheStore from '../../Stores/CacheStore';
+import FilterStore from '../../Stores/FilterStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Filters.css';
 
@@ -25,10 +25,13 @@ class Filters extends React.Component {
         this.filtersRef = React.createRef();
         this.filterSelectionRef = React.createRef();
 
+        const { isSmallWidth } = AppStore;
+        const { filters, chatList } = FilterStore;
+
         this.state = {
-            isSmallWidth: AppStore.isSmallWidth,
-            filters: FilterStore.filters,
-            chatList: FilterStore.chatList
+            isSmallWidth,
+            filters,
+            chatList
         };
 
         this.onWindowResize = throttle(this.onWindowResize, 250);
@@ -118,7 +121,6 @@ class Filters extends React.Component {
 
         if (item && transition){
             const { animator } = this;
-
 
             if (animator) {
                 animator.stop();

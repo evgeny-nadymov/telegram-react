@@ -490,17 +490,15 @@ class DialogsList extends React.Component {
         }
 
         return (
-            <>
-                <VirtualizedList
-                    ref={this.listRef}
-                    className='dialogs-list'
-                    source={this.source}
-                    rowHeight={76}
-                    overScanCount={20}
-                    renderItem={x => this.renderItem(x, this.source)}
-                    onScroll={this.handleScroll}
-                />
-            </>
+            <VirtualizedList
+                ref={this.listRef}
+                className='dialogs-list'
+                source={this.source}
+                rowHeight={76}
+                overScanCount={20}
+                renderItem={x => this.renderItem(x, this.source)}
+                onScroll={this.handleScroll}
+            />
         );
     }
 }

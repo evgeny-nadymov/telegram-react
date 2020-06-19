@@ -1,0 +1,34 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.filters-create {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+}
+
+.filters-create-animation {
+    width: 80px;
+    height: 80px;
+}
+
+.filters-create-hint {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: normal;
+    margin: 40px 40px 0 40px;
+    text-align: center;
+}
+
+.filters-create-button {
+    color: white;
+    padding: 9px 16px 10px;
+    text-transform: none;
+    border-radius: 20px;
+    margin: 16px 0;
+}

@@ -13,6 +13,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import CloseIcon from '../../../Assets/Icons/Close';
+import FilterIcon from '../../../Assets/Icons/Folder';
 import Chat from '../../Tile/Chat';
 import EditIcon from '../../../Assets/Icons/Edit';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -47,7 +48,8 @@ class Main extends React.Component {
             onGeneral,
             onNotifications,
             onPrivacySecurity,
-            onLanguage
+            onLanguage,
+            onFilters
         } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
@@ -99,6 +101,12 @@ class Main extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary={t('PrivacySettings')} />
                     </ListItem>
+                    <ListItem autoFocus={false} className='settings-list-item' button onClick={onFilters}>
+                        <ListItemIcon>
+                            <FilterIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={t('Filters')} />
+                    </ListItem>
                     <ListItem autoFocus={false} className='settings-list-item' button onClick={onLanguage}>
                         <ListItemIcon>
                             <LanguageIcon />
@@ -119,7 +127,8 @@ Main.propTypes = {
     onGeneral: PropTypes.func,
     onNotifications: PropTypes.func,
     onPrivacySecurity: PropTypes.func,
-    onLanguage: PropTypes.func
+    onLanguage: PropTypes.func,
+    onFilters: PropTypes.func
 };
 
 export default withTranslation()(Main);
