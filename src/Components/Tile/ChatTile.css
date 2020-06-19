@@ -65,7 +65,8 @@
     user-select: none;
 }
 
-.tile-small .tile-text {
+.tile-small .tile-text,
+.tile-small .tile-saved-messages svg {
     font-size: 14px;
     line-height: normal;
 }

@@ -209,7 +209,7 @@ class Filters extends React.Component {
             && recommendedFilters.chat_filters.length > 0
             && (!filters || filters.length < FILTER_COUNT_MAX);
 
-        console.log('[f] filters.render');
+        // console.log('[f] filters.render');
 
         return (
             <>

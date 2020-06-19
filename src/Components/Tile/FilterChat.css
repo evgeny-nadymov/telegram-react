@@ -1,0 +1,21 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.filter-chat-tile {
+    margin-right: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 33px;
+    min-height: 33px;
+}
+
+.filter-chat-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

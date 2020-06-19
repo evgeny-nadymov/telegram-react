@@ -89,8 +89,7 @@ export function isChatRead(chatId) {
 }
 
 export function getFilterSubtitle(t, filter, chats) {
-    // console.log('[f] getSubtitle', filter, chats)
-
+    // console.log('[f] getSubtitle', filter, chats);
     if (!chats) return null;
     if (!filter) return null;
 
@@ -103,7 +102,7 @@ export function getFilterSubtitle(t, filter, chats) {
         included_chat_ids
     } = filter;
 
-    const includedMap = new Map(included_chat_ids.map(i => [i.key, i.val]));
+    const includedMap = new Map(included_chat_ids.map(i => [i, i]));
 
     const {
         exclude_muted,
@@ -112,7 +111,7 @@ export function getFilterSubtitle(t, filter, chats) {
         excluded_chat_ids
     } = filter;
 
-    const excludedMap = new Map(excluded_chat_ids.map(i => [i.key, i.val]));
+    const excludedMap = new Map(excluded_chat_ids.map(i => [i, i]));
 
     let count = 0;
     for (let i = 0; i < chats.chat_ids.length; i++) {
@@ -126,8 +125,8 @@ export function getFilterSubtitle(t, filter, chats) {
         } else if (include_non_contacts && isNonContactChat(chatId)){
             included = true;
         } else if (include_bots && isBotChat(chatId)) {
-            included = true;}
-        else if (include_groups && isGroupChat(chatId)) {
+            included = true;
+        } else if (include_groups && isGroupChat(chatId)) {
             included = true;
         } else if (include_channels && isChannelChat(chatId)) {
             included = true;
