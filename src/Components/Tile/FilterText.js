@@ -61,12 +61,12 @@ class FilterText extends React.Component {
     };
 
     render() {
-        const { t, className, icon, text, checked, onClick, onChange } = this.props;
+        const { t, className, icon, text, checked, onClick } = this.props;
         const { contextMenu, left, top } = this.state;
 
         return (
             <>
-                <ListItem className={classNames(className, 'settings-list-item2', 'filter-chat-text')} role={undefined} button onClick={onClick} onContextMenu={this.handleOpenContextMenu}>
+                <ListItem className={classNames(className, 'settings-list-item2', 'filter-chat-text')} role={undefined} button onMouseDown={onClick} onContextMenu={this.handleOpenContextMenu}>
                     <div className='filter-chat-tile'>
                         {icon}
                     </div>
@@ -74,7 +74,7 @@ class FilterText extends React.Component {
                         {text}
                     </div>
                     { checked !== undefined && (
-                        <Radio className='filter-chat-checkbox' color='primary' checked={checked} onChange={onChange} />
+                        <Radio className='filter-chat-checkbox' color='primary' checked={checked} />
                     )}
                 </ListItem>
                 <Popover

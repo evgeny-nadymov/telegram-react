@@ -10,8 +10,8 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
-import './EditFilterChats.css';
 import ContactsIcon from '../../../Assets/Icons/NewPrivate';
+import FilterChat from '../../Tile/FilterChat';
 import FilterText from '../../Tile/FilterText';
 import NonContactsIcon from '../../../Assets/Icons/NonContacts';
 import GroupsIcon from '../../../Assets/Icons/NewGroup';
@@ -21,11 +21,12 @@ import SectionHeader from '../SectionHeader';
 import MutedIcon from '../../../Assets/Icons/Mute';
 import ReadIcon from '../../../Assets/Icons/ReadChats';
 import ArchivedIcon from '../../../Assets/Icons/Archive';
+import './EditFilterChats.css';
 
 class EditFilterChats extends React.Component {
 
     render() {
-        const { t, filter, mode, onClose, onChange } = this.props;
+        const { t, filter, chats, limit, mode, onClose, onChange, onScroll } = this.props;
 
         const {
             include_contacts,
@@ -43,7 +44,6 @@ class EditFilterChats extends React.Component {
             excluded_chat_ids
         } = filter;
 
-
         return (
             <>
                 <div className='header-master'>
@@ -54,7 +54,7 @@ class EditFilterChats extends React.Component {
                         <span className='header-status-content'>{mode === 'include' ? t('FilterInclude') : t('FilterExclude')}</span>
                     </div>
                 </div>
-                <div className='sidebar-page-content'>
+                <div ref={this.scrollRef} className='sidebar-page-content' onScroll={onScroll}>
                     <SectionHeader>{t('FilterChatTypes')}</SectionHeader>
                     {mode === 'include' && (
                         <>
@@ -72,6 +72,12 @@ class EditFilterChats extends React.Component {
                             <FilterText onClick={() => onChange('exclude_archived')} checked={exclude_archived} icon={<ArchivedIcon className='filter-text-subtle-icon'/>} text={t('FilterArchived')} />
                         </>
                     )}
+                    { chats && chats.length > 0 && (
+                        <>
+                            <SectionHeader>{t('FilterChats')}</SectionHeader>
+                            { (chats || []).slice(0, limit).map(x => <FilterChat onClick={() => onChange(mode === 'include' ? 'included_chat_ids' : 'excluded_chat_ids', x)} key={x} chatId={x} checked={mode === 'include' ? included_chat_ids.includes(x) : excluded_chat_ids.includes(x)}/>) }
+                        </>
+                    )}
                 </div>
             </>
         );
@@ -80,8 +86,10 @@ class EditFilterChats extends React.Component {
 
 EditFilterChats.propTypes = {
     filter: PropTypes.object,
+    chats: PropTypes.array,
     mode: PropTypes.string,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    onScroll: PropTypes.func
 };
 
 export default withTranslation()(EditFilterChats);

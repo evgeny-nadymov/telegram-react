@@ -50,10 +50,12 @@ class Filters extends React.Component {
         this.loadData();
 
         FilterStore.on('updateChatFilters', this.onUpdateChatFilters);
+        // ChatStore.on('updateChatChatList', this.onUpdateChatFilters);
     }
 
     componentWillUnmount() {
         FilterStore.off('updateChatFilters', this.onUpdateChatFilters);
+        // ChatStore.off('updateChatChatList', this.onUpdateChatFilters);
     }
 
     onUpdateChatFilters = update => {
@@ -70,12 +72,6 @@ class Filters extends React.Component {
             offset_order: '9223372036854775807',
             limit: 1000
         });
-
-        // console.log('[f] chats', chats.chat_ids.map(chatId => ({
-        //     c: ChatStore.get(chatId).title,
-        //     d: ChatStore.get(chatId),
-        //     params: [isContactChat(chatId), isNonContactChat(chatId), isBotChat(chatId), isGroupChat(chatId), isChannelChat(chatId), isChatMuted(chatId), isChatRead(chatId), isChatArchived(chatId)]
-        // })));
 
         const { filters: filterInfo } = FilterStore;
         const promises = [];

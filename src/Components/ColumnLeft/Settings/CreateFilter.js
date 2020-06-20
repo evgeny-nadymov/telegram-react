@@ -27,7 +27,8 @@ import FilterChat from '../../Tile/FilterChat';
 import FilterText from '../../Tile/FilterText';
 import SectionHeader from '../SectionHeader';
 import SidebarPage from '../SidebarPage';
-import { FILTER_TITLE_MAX_LENGTH } from '../../../Constants';
+import { CHAT_SLICE_LIMIT, FILTER_TITLE_MAX_LENGTH } from '../../../Constants';
+import TdLibController from '../../../Controllers/TdLibController';
 import './CreateFilter.css';
 
 const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
@@ -45,7 +46,9 @@ class CreateFilter extends React.Component {
             data: null,
             openFilterChats: false,
             mode: null,
-            title: ''
+            title: '',
+            chats: [],
+            limit: 0
         }
     }
 
@@ -259,10 +262,20 @@ class CreateFilter extends React.Component {
         })
     };
 
-    handleOpenFilterChats = mode => {
+    handleOpenFilterChats = async mode => {
+        const result = await TdLibController.send({
+            '@type': 'getChats',
+            chat_list: { '@type': 'chatListMain' },
+            offset_order: '9223372036854775807',
+            offset_chat_id: 0,
+            limit: 1000
+        });
+
         this.setState({
             openFilterChats: true,
-            mode
+            mode,
+            chats: result.chat_ids,
+            limit: CHAT_SLICE_LIMIT
         })
     };
 
@@ -354,6 +367,23 @@ class CreateFilter extends React.Component {
                 newEditFilter = { ...editFilter, include_channels: !editFilter.include_channels };
                 break;
             }
+            case 'included_chat_ids': {
+                let included, excluded;
+                if (editFilter.included_chat_ids.includes(value)) {
+                    included = editFilter.included_chat_ids.filter(x => x !== value);
+                    excluded = editFilter.excluded_chat_ids;
+                } else {
+                    included = [ ...editFilter.included_chat_ids, value ];
+                    excluded = editFilter.excluded_chat_ids.filter(x => x !== value);
+                }
+
+                newEditFilter = {
+                    ...editFilter,
+                    included_chat_ids: included,
+                    excluded_chat_ids: excluded
+                };
+                break;
+            }
             case 'exclude_muted': {
                 newEditFilter = { ...editFilter, exclude_muted: !editFilter.exclude_muted };
                 break;
@@ -366,8 +396,27 @@ class CreateFilter extends React.Component {
                 newEditFilter = { ...editFilter, exclude_archived: !editFilter.exclude_archived };
                 break;
             }
+            case 'excluded_chat_ids': {
+                let included, excluded;
+                if (editFilter.excluded_chat_ids.includes(value)) {
+                    excluded = editFilter.excluded_chat_ids.filter(x => x !== value);
+                    included = editFilter.included_chat_ids;
+                } else {
+                    excluded = [ ...editFilter.excluded_chat_ids, value ];
+                    included = editFilter.included_chat_ids.filter(x => x !== value);
+                }
+
+                newEditFilter = {
+                    ...editFilter,
+                    included_chat_ids: included,
+                    excluded_chat_ids: excluded
+                };
+
+                break;
+            }
         }
 
+        // console.log('[f] onChange', type, value, newEditFilter);
         if (!newEditFilter) return;
 
         this.setState({
@@ -383,11 +432,20 @@ class CreateFilter extends React.Component {
         });
     }
 
+    handleScroll = event => {
+        const scroll = event.target;
+        if (scroll.scrollTop + scroll.offsetHeight >= scroll.scrollHeight) {
+            this.setState({
+                limit: this.state.limit + CHAT_SLICE_LIMIT
+            })
+        }
+    };
+
     render() {
         const { t, filter, id, onClose } = this.props;
         if (!filter) return null;
 
-        const { editFilter, data, openFilterChats, mode, title } = this.state;
+        const { editFilter, data, openFilterChats, mode, chats, limit, title } = this.state;
 
         const {
             include_contacts,
@@ -476,7 +534,7 @@ class CreateFilter extends React.Component {
                     </div>
                 </div>
                 <SidebarPage open={openFilterChats} onClose={this.handleCloseFilterChats}>
-                    <EditFilterChats filter={editFilter} mode={mode} onChange={this.handleChange}/>
+                    <EditFilterChats filter={editFilter} mode={mode} chats={chats} limit={limit} onChange={this.handleChange} onScroll={this.handleScroll}/>
                 </SidebarPage>
             </>
         );

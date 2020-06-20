@@ -14,6 +14,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
+import Radio from '@material-ui/core/Radio';
 import ChatTile from './ChatTile';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import { getChatTitle } from '../../Utils/Chat';
@@ -24,7 +25,8 @@ class FilterChat extends React.Component {
     state = {
         contextMenu: false,
         left: 0,
-        top: 0
+        top: 0,
+        checked: false
     };
 
     handleOpenContextMenu = event => {
@@ -60,20 +62,23 @@ class FilterChat extends React.Component {
     };
 
     render() {
-        const { chatId, t } = this.props;
+        const { chatId, t, checked, onClick } = this.props;
         const { contextMenu, left, top } = this.state;
 
         const title = getChatTitle(chatId, true, t);
 
         return (
             <>
-                <ListItem className='settings-list-item2' role={undefined} button onContextMenu={this.handleOpenContextMenu}>
+                <ListItem className='settings-list-item2' role={undefined} button onClick={onClick} onContextMenu={this.handleOpenContextMenu}>
                     <div className='filter-chat-tile'>
                         <ChatTile chatId={chatId} small={true} showSavedMessages={true}/>
                     </div>
                     <div className='filter-chat-title'>
                         {title}
                     </div>
+                    { checked !== undefined && (
+                        <Radio className='filter-chat-checkbox' color='primary' checked={checked} />
+                    )}
                 </ListItem>
                 <Popover
                     open={contextMenu}
@@ -105,7 +110,9 @@ class FilterChat extends React.Component {
 
 FilterChat.propTypes = {
     chatId: PropTypes.number.isRequired,
-    onDelete: PropTypes.func
+    onDelete: PropTypes.func,
+    checked: PropTypes.bool,
+    onChange: PropTypes.func
 };
 
 export default withTranslation()(FilterChat);

@@ -8,17 +8,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import MenuList from '@material-ui/core/MenuList';
-import MenuItem from '@material-ui/core/MenuItem';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import { getFilterSubtitle } from '../../Utils/Filter';
@@ -90,13 +90,13 @@ class Filter extends React.Component {
     };
 
     render() {
-        const { t, info, filter, onEdit, chats } = this.props;
+        const { t, info, onEdit, chats } = this.props;
         if (!info) return null;
 
         const { dialog, contextMenu, top, left } = this.state;
 
         const { title } = info;
-        const subtitle = getFilterSubtitle(t, filter, chats);
+        const subtitle = getFilterSubtitle(t, info.id, chats);
 
         return (
             <>

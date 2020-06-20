@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { hasChatList, isChannelChat, isChatArchived, isChatMuted, isGroupChat } from './Chat';
+import { hasChatList } from './Chat';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import { isMessageUnread } from './Message';
@@ -88,63 +88,13 @@ export function isChatRead(chatId) {
     return !isMessageUnread(chatId, id);
 }
 
-export function getFilterSubtitle(t, filter, chats) {
-    // console.log('[f] getSubtitle', filter, chats);
+export function getFilterSubtitle(t, filterId, chats) {
+    // console.log('[f] getSubtitle', filterId, chats);
     if (!chats) return ' ';
-    if (!filter) return ' ';
-
-    const {
-        include_contacts,
-        include_non_contacts,
-        include_bots,
-        include_groups,
-        include_channels,
-        included_chat_ids
-    } = filter;
-
-    const includedMap = new Map(included_chat_ids.map(i => [i, i]));
-
-    const {
-        exclude_muted,
-        exclude_read,
-        exclude_archived,
-        excluded_chat_ids
-    } = filter;
-
-    const excludedMap = new Map(excluded_chat_ids.map(i => [i, i]));
 
     let count = 0;
     for (let i = 0; i < chats.chat_ids.length; i++) {
-        let included = false;
-        const chatId = chats.chat_ids[i];
-
-        if (includedMap.has(chatId)){
-            included = true;
-        } else if (include_contacts && isContactChat(chatId)){
-            included = true;
-        } else if (include_non_contacts && isNonContactChat(chatId)){
-            included = true;
-        } else if (include_bots && isBotChat(chatId)) {
-            included = true;
-        } else if (include_groups && isGroupChat(chatId)) {
-            included = true;
-        } else if (include_channels && isChannelChat(chatId)) {
-            included = true;
-        }
-
-        if (included) {
-            if (excludedMap.has(chatId)) {
-                included = false;
-            } else if (exclude_muted && isChatMuted(chatId)) {
-                included = false;
-            } else if (exclude_read && isChatRead(chatId)) {
-                included = false;
-            } else if (exclude_archived && isChatArchived(chatId)) {
-                included = false;
-            }
-        }
-
-        if (included) {
+        if (hasChatList(chats.chat_ids[i], { '@type': 'chatListFilter', chat_filter_id: filterId })) {
             count++;
         }
     }
