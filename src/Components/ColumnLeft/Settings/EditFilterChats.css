@@ -5,11 +5,3 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.filter-chat-text {
-    display: flex;
-    flex-direction: row;
-}
-
-.filter-text-subtle-icon {
-    color: var(--header-subtle-color);
-}

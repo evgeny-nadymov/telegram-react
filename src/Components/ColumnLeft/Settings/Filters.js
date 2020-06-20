@@ -18,9 +18,12 @@ import RecommendedFilter from '../../Tile/RecommendedFilter';
 import SectionHeader from '../SectionHeader';
 import SidebarPage from '../SidebarPage';
 import { FILTER_COUNT_MAX } from '../../../Constants';
+import ChatStore from '../../../Stores/ChatStore';
 import FilterStore from '../../../Stores/FilterStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Filters.css';
+import { isBotChat, isChatRead, isContactChat, isNonContactChat } from '../../../Utils/Filter';
+import { isChannelChat, isChatArchived, isChatMuted, isGroupChat } from '../../../Utils/Chat';
 
 const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
 
@@ -68,7 +71,11 @@ class Filters extends React.Component {
             limit: 1000
         });
 
-        // console.log('[f] chats', chats);
+        // console.log('[f] chats', chats.chat_ids.map(chatId => ({
+        //     c: ChatStore.get(chatId).title,
+        //     d: ChatStore.get(chatId),
+        //     params: [isContactChat(chatId), isNonContactChat(chatId), isBotChat(chatId), isGroupChat(chatId), isChannelChat(chatId), isChatMuted(chatId), isChatRead(chatId), isChatArchived(chatId)]
+        // })));
 
         const { filters: filterInfo } = FilterStore;
         const promises = [];
@@ -138,7 +145,7 @@ class Filters extends React.Component {
                 exclude_muted: false,
                 exclude_read: false,
                 exclude_archived: false,
-                include_contacts: true,
+                include_contacts: false,
                 include_non_contacts: false,
                 include_bots: false,
                 include_groups: false,

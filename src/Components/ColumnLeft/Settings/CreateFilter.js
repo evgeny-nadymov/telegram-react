@@ -22,9 +22,12 @@ import BotsIcon from '../../../Assets/Icons/Bots';
 import RemoveIcon from '@material-ui/icons/Remove';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import DoneIcon from '../../../Assets/Icons/Done';
+import EditFilterChats from './EditFilterChats';
 import FilterChat from '../../Tile/FilterChat';
 import FilterText from '../../Tile/FilterText';
 import SectionHeader from '../SectionHeader';
+import SidebarPage from '../SidebarPage';
+import { FILTER_TITLE_MAX_LENGTH } from '../../../Constants';
 import './CreateFilter.css';
 
 const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
@@ -39,7 +42,10 @@ class CreateFilter extends React.Component {
 
         this.state = {
             prevFilterId: -1,
-            data: null
+            data: null,
+            openFilterChats: false,
+            mode: null,
+            title: ''
         }
     }
 
@@ -50,7 +56,8 @@ class CreateFilter extends React.Component {
         if (filter && prevFilterId !== filterId){
             return {
                 prevFilterId: filterId,
-                editFilter: {...filter}
+                editFilter: {...filter},
+                title: filter.title
             }
         }
 
@@ -103,6 +110,7 @@ class CreateFilter extends React.Component {
     };
 
     handleDeleteIncludeContacts = () => {
+        const { t } = this.props;
         const { editFilter } = this.state;
         if (!editFilter) return;
 
@@ -111,9 +119,17 @@ class CreateFilter extends React.Component {
         this.setState({
             editFilter: newEditFilter
         })
+
+        const title = this.titleRef.current.value;
+        if (title === t('FilterContacts')){
+            this.setState({
+                title: ''
+            });
+        }
     };
 
     handleDeleteIncludeNonContacts = () => {
+        const { t } = this.props;
         const { editFilter } = this.state;
         if (!editFilter) return;
 
@@ -121,10 +137,18 @@ class CreateFilter extends React.Component {
 
         this.setState({
             editFilter: newEditFilter
-        })
+        });
+
+        const title = this.titleRef.current.value;
+        if (title === t('FilterNonContacts')){
+            this.setState({
+                title: ''
+            });
+        }
     };
 
     handleDeleteIncludeGroups = () => {
+        const { t } = this.props;
         const { editFilter } = this.state;
         if (!editFilter) return;
 
@@ -132,10 +156,18 @@ class CreateFilter extends React.Component {
 
         this.setState({
             editFilter: newEditFilter
-        })
+        });
+
+        const title = this.titleRef.current.value;
+        if (title === t('FilterGroups')){
+            this.setState({
+                title: ''
+            });
+        }
     };
 
     handleDeleteIncludeChannels = () => {
+        const { t } = this.props;
         const { editFilter } = this.state;
         if (!editFilter) return;
 
@@ -143,10 +175,18 @@ class CreateFilter extends React.Component {
 
         this.setState({
             editFilter: newEditFilter
-        })
+        });
+
+        const title = this.titleRef.current.value;
+        if (title === t('FilterChannels')){
+            this.setState({
+                title: ''
+            });
+        }
     };
 
     handleDeleteIncludeBots = () => {
+        const { t } = this.props;
         const { editFilter } = this.state;
         if (!editFilter) return;
 
@@ -154,7 +194,14 @@ class CreateFilter extends React.Component {
 
         this.setState({
             editFilter: newEditFilter
-        })
+        });
+
+        const title = this.titleRef.current.value;
+        if (title === t('FilterBots')){
+            this.setState({
+                title: ''
+            });
+        }
     };
 
     handleDeleteIncludedChat = chatId => {
@@ -212,11 +259,135 @@ class CreateFilter extends React.Component {
         })
     };
 
+    handleOpenFilterChats = mode => {
+        this.setState({
+            openFilterChats: true,
+            mode
+        })
+    };
+
+    setDefaultFilterTitle() {
+        const { t } = this.props;
+        const { editFilter } = this.state;
+
+        const title = this.titleRef.current.value;
+        if (!title) {
+            const {
+                include_contacts,
+                include_non_contacts,
+                include_bots,
+                include_groups,
+                include_channels,
+                included_chat_ids
+            } = editFilter;
+
+            const {
+                exclude_muted,
+                exclude_read,
+                exclude_archived,
+                excluded_chat_ids
+            } = editFilter;
+
+            if (!included_chat_ids.length) {
+                if (include_contacts && !include_non_contacts && !include_bots && !include_groups && !include_channels) {
+                    this.setState({
+                        title: t('FilterContacts')
+                    });
+                } else if (!include_contacts && include_non_contacts && !include_bots && !include_groups && !include_channels) {
+                    this.setState({
+                        title: t('FilterNonContacts')
+                    });
+                } else if (include_contacts && include_non_contacts && !include_bots && !include_groups && !include_channels) {
+                    this.setState({
+                        title: t('ChatHints')
+                    });
+                } else if (!include_contacts && !include_non_contacts && include_bots && !include_groups && !include_channels) {
+                    this.setState({
+                        title: t('FilterBots')
+                    });
+                } else if (!include_contacts && !include_non_contacts && !include_bots && include_groups && !include_channels) {
+                    this.setState({
+                        title: t('FilterGroups')
+                    });
+                } else if (!include_contacts && !include_non_contacts && !include_bots && !include_groups && include_channels) {
+                    this.setState({
+                        title: t('FilterChannels')
+                    });
+                }
+            }
+        }
+    }
+
+    handleCloseFilterChats = () => {
+
+        this.setDefaultFilterTitle();
+
+        this.setState({
+            openFilterChats: false,
+            mode: null
+        })
+    };
+
+    handleChange = (type, value) => {
+        const { editFilter } = this.state;
+        if (!editFilter) return;
+
+        let newEditFilter = null;
+        switch (type) {
+            case 'include_contacts': {
+                newEditFilter = { ...editFilter, include_contacts: !editFilter.include_contacts };
+                break;
+            }
+            case 'include_non_contacts': {
+                newEditFilter = { ...editFilter, include_non_contacts: !editFilter.include_non_contacts };
+                break;
+            }
+            case 'include_bots': {
+                newEditFilter = { ...editFilter, include_bots: !editFilter.include_bots };
+                break;
+            }
+            case 'include_groups': {
+                newEditFilter = { ...editFilter, include_groups: !editFilter.include_groups };
+                break;
+            }
+            case 'include_channels': {
+                newEditFilter = { ...editFilter, include_channels: !editFilter.include_channels };
+                break;
+            }
+            case 'exclude_muted': {
+                newEditFilter = { ...editFilter, exclude_muted: !editFilter.exclude_muted };
+                break;
+            }
+            case 'exclude_read': {
+                newEditFilter = { ...editFilter, exclude_read: !editFilter.exclude_read };
+                break;
+            }
+            case 'exclude_archived': {
+                newEditFilter = { ...editFilter, exclude_archived: !editFilter.exclude_archived };
+                break;
+            }
+        }
+
+        if (!newEditFilter) return;
+
+        this.setState({
+            editFilter: newEditFilter
+        })
+    };
+
+    handleTitleChange = () => {
+        const title = this.titleRef.current.value.substr(0, FILTER_TITLE_MAX_LENGTH);
+
+        this.setState({
+            title
+        });
+    }
+
     render() {
         const { t, filter, id, onClose } = this.props;
         if (!filter) return null;
 
-        const { editFilter, data } = this.state;
+        const { editFilter, data, openFilterChats, mode, title } = this.state;
 
         const {
             include_contacts,
@@ -233,8 +404,6 @@ class CreateFilter extends React.Component {
             exclude_archived,
             excluded_chat_ids
         } = editFilter;
-
-        const defaultTitle = filter.title;
 
         return (
             <>
@@ -279,12 +448,13 @@ class CreateFilter extends React.Component {
                             variant='outlined'
                             fullWidth
                             label={t('FilterNameHint')}
-                            defaultValue={defaultTitle}
+                            value={title}
+                            onChange={this.handleTitleChange}
                         />
                     </div>
                     <div className='sidebar-page-section'>
                         <SectionHeader>{t('FilterInclude')}</SectionHeader>
-                        <FilterText className='create-filter-add-chats' icon={<AddIcon/>} text={t('FilterAddChats')} />
+                        <FilterText className='create-filter-add-chats' icon={<AddIcon/>} text={t('FilterAddChats')} onClick={() => this.handleOpenFilterChats('include')}/>
                         {include_contacts && <FilterText onDelete={this.handleDeleteIncludeContacts} icon={<ContactsIcon className='filter-text-subtle-icon' viewBox='0 0 36 36'/>} text={t('FilterContacts')} />}
                         {include_non_contacts && <FilterText onDelete={this.handleDeleteIncludeNonContacts} icon={<NonContactsIcon className='filter-text-subtle-icon'/>} text={t('FilterNonContacts')} />}
                         {include_groups && <FilterText onDelete={this.handleDeleteIncludeGroups} icon={<GroupsIcon className='filter-text-subtle-icon' viewBox='0 0 36 36'/>} text={t('FilterGroups')} />}
@@ -296,7 +466,7 @@ class CreateFilter extends React.Component {
                     </div>
                     <div className='sidebar-page-section'>
                         <SectionHeader>{t('FilterExclude')}</SectionHeader>
-                        <FilterText className='create-filter-remove-chats' icon={<RemoveIcon/>} text={t('FilterRemoveChats')}/>
+                        <FilterText className='create-filter-remove-chats' icon={<RemoveIcon/>} text={t('FilterRemoveChats')} onClick={() => this.handleOpenFilterChats('exclude')}/>
                         {exclude_muted && <FilterText onDelete={this.handleDeleteExcludeMuted} icon={<MutedIcon className='filter-text-subtle-icon'/>} text={t('FilterMuted')} />}
                         {exclude_read && <FilterText onDelete={this.handleDeleteExcludeRead} icon={<ReadIcon className='filter-text-subtle-icon'/>} text={t('FilterRead')} />}
                         {exclude_archived && <FilterText onDelete={this.handleDeleteExcludeArchived} icon={<ArchivedIcon className='filter-text-subtle-icon'/>} text={t('FilterArchived')} />}
@@ -305,6 +475,9 @@ class CreateFilter extends React.Component {
                         ))}
                     </div>
                 </div>
+                <SidebarPage open={openFilterChats} onClose={this.handleCloseFilterChats}>
+                    <EditFilterChats filter={editFilter} mode={mode} onChange={this.handleChange}/>
+                </SidebarPage>
             </>
         );
     }

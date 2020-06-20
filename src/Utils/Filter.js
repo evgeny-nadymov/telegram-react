@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { isChannelChat, isChatArchived, isChatMuted, isGroupChat } from './Chat';
+import { hasChatList, isChannelChat, isChatArchived, isChatMuted, isGroupChat } from './Chat';
 import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import { isMessageUnread } from './Message';
@@ -90,8 +90,8 @@ export function isChatRead(chatId) {
 
 export function getFilterSubtitle(t, filter, chats) {
     // console.log('[f] getSubtitle', filter, chats);
-    if (!chats) return null;
-    if (!filter) return null;
+    if (!chats) return ' ';
+    if (!filter) return ' ';
 
     const {
         include_contacts,
