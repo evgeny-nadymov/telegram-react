@@ -14,12 +14,22 @@
     min-height: 33px;
 }
 
+.filter-chat-content {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+}
+
 .filter-chat-title {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    flex-grow: 1;
-    flex-shrink: 1;
+}
+
+.filter-chat-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: normal;
 }
 
 .filter-chat-checkbox {

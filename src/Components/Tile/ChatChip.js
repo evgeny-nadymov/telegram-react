@@ -8,12 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import UserTile from './UserTile';
+import ChatTile from './ChatTile';
 import CloseIcon from '../../Assets/Icons/Close';
-import { getUserShortName } from '../../Utils/User';
-import './UserChip.css';
+import { getChatShortTitle } from '../../Utils/Chat';
+import './ChatChip.css';
 
-class UserChip extends React.Component {
+class ChatChip extends React.Component {
     constructor(props) {
         super(props);
 
@@ -39,24 +39,24 @@ class UserChip extends React.Component {
     }
 
     render() {
-        const { userId, selected, onClick } = this.props;
+        const { chatId, selected, onClick } = this.props;
 
         return (
             <div ref={this.divRef} className={classNames('chip', { 'item-selected': selected })} onClick={onClick}>
-                <UserTile userId={userId} small={true}/>
+                <ChatTile chatId={chatId} small={true}/>
                 <div className='chip-delete'>
                     <CloseIcon className='chip-delete-icon'/>
                 </div>
-                <div className='chip-text'>{getUserShortName(userId)}</div>
+                <div className='chip-text'>{getChatShortTitle(chatId)}</div>
             </div>
         )
     }
 }
 
-UserChip.propTypes = {
-    userId: PropTypes.number,
+ChatChip.propTypes = {
+    chatId: PropTypes.number,
     selected: PropTypes.bool,
     onClick: PropTypes.func
 };
 
-export default UserChip;
+export default ChatChip;

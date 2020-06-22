@@ -8,12 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import UserTile from './UserTile';
 import CloseIcon from '../../Assets/Icons/Close';
-import { getUserShortName } from '../../Utils/User';
-import './UserChip.css';
+import './Chip.css';
 
-class UserChip extends React.Component {
+class Chip extends React.Component {
     constructor(props) {
         super(props);
 
@@ -39,24 +37,27 @@ class UserChip extends React.Component {
     }
 
     render() {
-        const { userId, selected, onClick } = this.props;
+        const { icon, text, selected, onClick } = this.props;
 
         return (
             <div ref={this.divRef} className={classNames('chip', { 'item-selected': selected })} onClick={onClick}>
-                <UserTile userId={userId} small={true}/>
+                <div className='chip-icon'>
+                    {icon}
+                </div>
                 <div className='chip-delete'>
                     <CloseIcon className='chip-delete-icon'/>
                 </div>
-                <div className='chip-text'>{getUserShortName(userId)}</div>
+                <div className='chip-text'>{text}</div>
             </div>
         )
     }
 }
 
-UserChip.propTypes = {
-    userId: PropTypes.number,
+Chip.propTypes = {
+    icon: PropTypes.object,
+    text: PropTypes.string,
     selected: PropTypes.bool,
     onClick: PropTypes.func
 };
 
-export default UserChip;
+export default Chip;

@@ -16,6 +16,11 @@
     flex-direction: column;
 }
 
+.sidebar-page-top-divider {
+    min-height: 3px;
+    background: linear-gradient(0deg, transparent 0%, var(--border) 100%);;
+}
+
 .sidebar-page-content {
     padding: 0 8px 8px;
     overflow-y: auto;

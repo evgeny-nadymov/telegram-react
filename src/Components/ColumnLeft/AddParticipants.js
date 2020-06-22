@@ -173,7 +173,6 @@ class AddParticipants extends React.Component {
         }
 
         const wrapPanel = this.wrapPanelRef.current;
-
         const prevHeight = wrapPanel.scrollHeight;
         const prevOffsetHeight = wrapPanel.offsetHeight;
 
@@ -199,63 +198,53 @@ class AddParticipants extends React.Component {
                 map: newMap
             }
         }, () => {
-            const currentHeight = wrapPanel.scrollHeight;
-            const currentOffsetHeight = wrapPanel.offsetHeight;
-
-            const expanded = currentHeight > prevHeight;
-            const collapsed = currentHeight < prevHeight;
-            // console.log('[wrap]', prevHeight, prevOffsetHeight, currentHeight, currentOffsetHeight, expanded, collapsed);
-
-            const maxHeight = 123;
-            if (expanded) {
-                if (prevHeight < maxHeight) {
-                    // console.log('[wrap] animate expand', Math.min(prevHeight, maxHeight), Math.min(currentHeight, maxHeight));
-                    wrapPanel.style.cssText = `max-height: ${Math.min(prevHeight, maxHeight)}px;`;
-                    // console.log('[wrap] animate expand', wrapPanel.style.cssText);
-                    requestAnimationFrame(() => {
-                        wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
-                        setTimeout(() => {
-                            // console.log('[wrap] scrollIntoView');
-                            this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
-                        }, 250);
-                        // console.log('[wrap] animate expand', wrapPanel.style.cssText);
-                    });
-                } else {
-                    // console.log('[wrap] expand', prevHeight, maxHeight);
-                    wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                    //wrapPanel.scrollTop = wrapPanel.scrollHeight;
-                    // console.log('[wrap] scrollIntoView');
-                    this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
-                    // console.log('[wrap] expand', wrapPanel.style.cssText);
-                }
-            } else if (collapsed) {
-                if (currentHeight < maxHeight) {
-                    // console.log('[wrap] animate collapse', Math.min(prevHeight, maxHeight), Math.min(currentHeight, maxHeight));
-                    wrapPanel.style.cssText = `min-height: ${Math.min(prevOffsetHeight, maxHeight)}px;`;
-                    // console.log('[wrap] animate collapse', wrapPanel.style.cssText);
-                    requestAnimationFrame(() => {
-                        wrapPanel.style.cssText = `min-height: ${Math.min(currentHeight, maxHeight)}px;`;
-                        // console.log('[wrap] animate collapse', wrapPanel.style.cssText);
-                    });
-                } else {
-                    // console.log('[wrap] collapse', prevHeight, maxHeight, wrapPanel.scrollTop, prevScrollTop);
-                    wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                    wrapPanel.scrollTop = prevScrollTop;
-                    // console.log('[wrap] collapse', wrapPanel.style.cssText, wrapPanel.scrollTop);
-                }
-            } else {
-                if (isDeleting) {
-                    wrapPanel.style.cssText = prevCSSText;
-                    wrapPanel.scrollTop = prevScrollTop;
-                } else {
-                    // console.log('[wrap] scrollIntoView');
-                    this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-
+            this.animatePanel(isDeleting, prevHeight, prevOffsetHeight, prevScrollTop, prevCSSText);
             this.animateItems(prevMap);
         });
     };
+
+    animatePanel(isDeleting, prevHeight, prevOffsetHeight, prevScrollTop, prevCSSText) {
+        const wrapPanel = this.wrapPanelRef.current;
+
+        const currentHeight = wrapPanel.scrollHeight;
+        const currentOffsetHeight = wrapPanel.offsetHeight;
+
+        const expanded = currentHeight > prevHeight;
+        const collapsed = currentHeight < prevHeight;
+
+        const maxHeight = 123;
+        if (expanded) {
+            if (prevHeight < maxHeight) {
+                wrapPanel.style.cssText = `max-height: ${Math.min(prevHeight, maxHeight)}px;`;
+                requestAnimationFrame(() => {
+                    wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
+                    setTimeout(() => {
+                        this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
+                    }, 250);
+                });
+            } else {
+                wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else if (collapsed) {
+            if (currentHeight < maxHeight) {
+                wrapPanel.style.cssText = `min-height: ${Math.min(prevOffsetHeight, maxHeight)}px;`;
+                requestAnimationFrame(() => {
+                    wrapPanel.style.cssText = `min-height: ${Math.min(currentHeight, maxHeight)}px;`;
+                });
+            } else {
+                wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
+                wrapPanel.scrollTop = prevScrollTop;
+            }
+        } else {
+            if (isDeleting) {
+                wrapPanel.style.cssText = prevCSSText;
+                wrapPanel.scrollTop = prevScrollTop;
+            } else {
+                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
 
     animateItems(prevOffsets) {
         const doubleTransform = new Map();

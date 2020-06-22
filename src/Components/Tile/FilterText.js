@@ -70,7 +70,7 @@ class FilterText extends React.Component {
                     <div className='filter-chat-tile'>
                         {icon}
                     </div>
-                    <div className='filter-chat-title'>
+                    <div className='filter-chat-content'>
                         {text}
                     </div>
                     { checked !== undefined && (

@@ -17,7 +17,7 @@ import Popover from '@material-ui/core/Popover';
 import Radio from '@material-ui/core/Radio';
 import ChatTile from './ChatTile';
 import DeleteIcon from '../../Assets/Icons/Delete';
-import { getChatTitle } from '../../Utils/Chat';
+import { getChatTitle, getChatType } from '../../Utils/Chat';
 import './FilterChat.css';
 
 class FilterChat extends React.Component {
@@ -62,7 +62,7 @@ class FilterChat extends React.Component {
     };
 
     render() {
-        const { chatId, t, checked, onClick } = this.props;
+        const { chatId, t, type, checked, onClick } = this.props;
         const { contextMenu, left, top } = this.state;
 
         const title = getChatTitle(chatId, true, t);
@@ -73,8 +73,15 @@ class FilterChat extends React.Component {
                     <div className='filter-chat-tile'>
                         <ChatTile chatId={chatId} small={true} showSavedMessages={true}/>
                     </div>
-                    <div className='filter-chat-title'>
-                        {title}
+                    <div className='filter-chat-content'>
+                        <div className='filter-chat-title'>
+                            {title}
+                        </div>
+                        { type && (
+                            <div className='filter-chat-subtitle'>
+                                {getChatType(chatId, t)}
+                            </div>
+                        )}
                     </div>
                     { checked !== undefined && (
                         <Radio className='filter-chat-checkbox' color='primary' checked={checked} />
@@ -110,6 +117,7 @@ class FilterChat extends React.Component {
 
 FilterChat.propTypes = {
     chatId: PropTypes.number.isRequired,
+    type: PropTypes.bool,
     onDelete: PropTypes.func,
     checked: PropTypes.bool,
     onChange: PropTypes.func

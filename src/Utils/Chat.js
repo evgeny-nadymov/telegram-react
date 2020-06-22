@@ -11,7 +11,7 @@ import { getUserFullName, getUserShortName, getUserStatus, isUserOnline } from '
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
-import { getContent } from './Message';
+import { getContent, isMessageUnread } from './Message';
 import { isServiceMessage } from './ServiceMessage';
 import { formatPhoneNumber } from './Phone';
 import { getChannelStatus } from './Channel';
@@ -807,6 +807,83 @@ function isChatMember(chatId) {
 
     return false;
 }
+export function isContactChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            const user = UserStore.get(chat.type.user_id);
+            if (!user) return false;
+
+            return user.is_contact || user.is_mutual_contact;
+        }
+    }
+
+    return false;
+}
+
+export function isNonContactChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            const user = UserStore.get(chat.type.user_id);
+            if (!user) return false;
+
+            return !user.is_contact;
+        }
+    }
+
+    return false;
+}
+
+export function isBotChat(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+    if (!chat.type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            const user = UserStore.get(chat.type.user_id);
+            if (!user) return false;
+
+            return user.type['@type'] === 'userTypeBot';
+        }
+    }
+
+    return false;
+}
+
+export function isChatRead(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return true;
+
+    const { last_message } = chat;
+    if (!last_message) return true;
+
+    const { id } = last_message;
+
+    return !isMessageUnread(chatId, id);
+}
 
 function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     const chat = ChatStore.get(chatId);
@@ -817,6 +894,38 @@ function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
     }
 
     return chat.title || t('HiddenName');
+}
+
+export function getChatType(chatId, t = key => key) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return '';
+
+    switch (chat.type['@type']) {
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            if (isMeChat(chatId)) {
+                return '';
+            }
+
+            if (isBotChat(chatId)) {
+                return t('Bot');
+            }
+
+            if (isContactChat(chatId)) {
+                return t('FilterContact');
+            }
+
+            return t('FilterNonContact');
+        }
+        case 'chatTypeBasicGroup': {
+            return t('AccDescrGroup');
+        }
+        case 'chatTypeSupergroup': {
+            return isChannelChat(chatId) ? t('AccDescrGroup') : t('AccDescrChannel');
+        }
+    }
+
+    return '';
 }
 
 export function isDeletedPrivateChat(chatId) {

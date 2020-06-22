@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.user-chip {
+.chip {
     position: relative;
     will-change: transform;
     margin: 4px;
@@ -20,12 +20,24 @@
     user-select: none;
 }
 
-.user-chip-delete {
+.chip-icon {
+    min-width: 33px;
+    min-height: 33px;
+    border-radius: 50%;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: var(--color-accent-main);
+}
+
+.chip-delete {
     position: absolute;
     left: 0;
     top: 0;
-    width: 33px;
-    height: 33px;
+    min-width: 33px;
+    min-height: 33px;
     background: #DF3F40;
     border-radius: 50%;
     opacity: 0;
@@ -36,38 +48,38 @@
     transition: opacity 0.25s ease;
 }
 
-.user-chip-delete-icon {
+.chip-delete-icon {
     font-size: 24px;
     color: white;
     transform: rotate(45deg) scale(0.5);
     transition: transform 0.25s ease;
 }
 
-.user-chip:hover,
-.item-selected.user-chip:hover {
+.chip:hover,
+.item-selected.chip:hover {
     background: #FAE2E3;
     color: black;
 }
 
-.item-selected.user-chip {
+.item-selected.chip {
     background: var(--color-accent-main);
     color: white;
 }
 
-.user-chip:hover .user-chip-delete {
+.chip:hover .chip-delete {
     opacity: 1;
 }
 
-.user-chip:hover .user-chip-delete-icon {
+.chip:hover .chip-delete-icon {
     transform: rotate(0deg) scale(1);
 }
 
-.user-chip:hover .user-tile {
+.chip:hover .user-tile {
     opacity: 0;
     transition: opacity 0.25s ease;
 }
 
-.user-chip-name {
+.chip-text {
     margin: 0 16px 0 8px;
     text-overflow: ellipsis;
     overflow: hidden;
