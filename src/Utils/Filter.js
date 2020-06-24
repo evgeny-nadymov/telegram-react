@@ -7,6 +7,24 @@
 
 import { getChatOrder } from './Chat';
 
+export function isFilterValid(filter) {
+    if (!filter) return false;
+
+    const {
+        include_contacts,
+        include_non_contacts,
+        include_bots,
+        include_groups,
+        include_channels,
+        included_chat_ids,
+        title
+    } = filter;
+
+    if (!title) return false;
+
+    return include_contacts || include_non_contacts || include_bots || include_groups || include_channels || included_chat_ids.length > 0;
+}
+
 export function getFilterSubtitle(t, filterId, chats) {
     if (!chats) return ' ';
 

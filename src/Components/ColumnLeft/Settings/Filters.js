@@ -7,23 +7,23 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from '../../../Utils/HOC';
+import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '../../../Assets/Icons/Add';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
+import CloseIcon from '../../../Assets/Icons/Close';
 import CreateFilter from './CreateFilter';
 import Filter from '../../Tile/Filter';
 import RecommendedFilter from '../../Tile/RecommendedFilter';
 import SectionHeader from '../SectionHeader';
 import SidebarPage from '../SidebarPage';
-import { FILTER_COUNT_MAX } from '../../../Constants';
-import ChatStore from '../../../Stores/ChatStore';
+import { FILTER_COUNT_MAX, NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../../Constants';
 import FilterStore from '../../../Stores/FilterStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Filters.css';
-import { isBotChat, isChatRead, isContactChat, isNonContactChat } from '../../../Utils/Filter';
-import { isChannelChat, isChatArchived, isChatMuted, isGroupChat } from '../../../Utils/Chat';
 
 const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
 
@@ -128,25 +128,34 @@ class Filters extends React.Component {
     };
 
     handleCreateFilter = () => {
+        const { t } = this.props;
+        const { filters } = FilterStore;
+        if (filters.length >= FILTER_COUNT_MAX) {
+            this.handleScheduledAction(t('FilterCreateError'));
+            return;
+        }
+
+        const filter = {
+            '@type': 'chatFiler',
+            title: '',
+            icon_name: '',
+            pinned_chat_ids: [],
+            included_chat_ids: [],
+            excluded_chat_ids: [],
+            exclude_muted: false,
+            exclude_read: false,
+            exclude_archived: false,
+            include_contacts: false,
+            include_non_contacts: false,
+            include_bots: false,
+            include_groups: false,
+            include_channels: false
+        };
+
         this.setState({
             openFilter: true,
             filterId: -1,
-            filter: {
-                '@type': 'chatFiler',
-                title: '',
-                icon_name: '',
-                pinned_chat_ids: [],
-                included_chat_ids: [],
-                excluded_chat_ids: [],
-                exclude_muted: false,
-                exclude_read: false,
-                exclude_archived: false,
-                include_contacts: false,
-                include_non_contacts: false,
-                include_bots: false,
-                include_groups: false,
-                include_channels: false
-            }
+            filter
         });
     };
 
@@ -202,6 +211,25 @@ class Filters extends React.Component {
         lottie.anim.goToAndPlay(0);
     };
 
+    handleScheduledAction = message => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
+
+        const snackKey = enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: [
+                <IconButton
+                    key='close'
+                    aria-label='Close'
+                    color='inherit'
+                    className='notification-close-button'
+                    onClick={() => closeSnackbar(snackKey)}>
+                    <CloseIcon />
+                </IconButton>
+            ]
+        });
+    };
+
     render() {
         const { t, onClose } = this.props;
         const { recommendedFilters, openFilter, filter, filterId, data, chats, filtersMap } = this.state;
@@ -240,7 +268,6 @@ class Filters extends React.Component {
                                             clearCanvas: false,
                                             progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
                                             hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-
                                         }
                                     }}
                                     onClick={this.handleAnimationClick}
@@ -284,4 +311,9 @@ Filters.propTypes = {
     onClose: PropTypes.func
 };
 
-export default withTranslation()(Filters);
+const enhance = compose(
+    withTranslation(),
+    withSnackbar,
+);
+
+export default enhance(Filters);

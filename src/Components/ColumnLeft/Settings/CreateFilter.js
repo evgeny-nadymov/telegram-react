@@ -7,10 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose } from '../../../Utils/HOC';
+import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import AddIcon from '../../../Assets/Icons/Add';
+import CloseIcon from '../../../Assets/Icons/Close';
 import ContactsIcon from '../../../Assets/Icons/NewPrivate';
 import NonContactsIcon from '../../../Assets/Icons/NonContacts';
 import GroupsIcon from '../../../Assets/Icons/NewGroup';
@@ -27,7 +30,8 @@ import FilterChat from '../../Tile/FilterChat';
 import FilterText from '../../Tile/FilterText';
 import SectionHeader from '../SectionHeader';
 import SidebarPage from '../SidebarPage';
-import { CHAT_SLICE_LIMIT, FILTER_TITLE_MAX_LENGTH } from '../../../Constants';
+import { isFilterValid } from '../../../Utils/Filter';
+import { CHAT_SLICE_LIMIT, FILTER_TITLE_MAX_LENGTH, NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../../Constants';
 import TdLibController from '../../../Controllers/TdLibController';
 import './CreateFilter.css';
 
@@ -47,6 +51,8 @@ class CreateFilter extends React.Component {
             openFilterChats: false,
             mode: null,
             title: '',
+            error: false,
+            shook: false,
             chats: [],
             limit: 0
         }
@@ -98,7 +104,25 @@ class CreateFilter extends React.Component {
         const { onDone } = this.props;
         const { editFilter } = this.state;
 
-        editFilter.title = this.titleRef.current.value;
+        const title = this.titleRef.current.value.trim();
+        if (!title) {
+            this.titleRef.current.focus();
+            this.setState({
+                error: true
+            })
+            return;
+        } else {
+            this.setState({
+                error: false
+            })
+        }
+
+        editFilter.title = title;
+
+        if (!isFilterValid(editFilter)) {
+            this.handleScheduledAction('Please choose at least one chat for this folder.');
+            return;
+        }
 
         onDone && onDone(editFilter);
     };
@@ -441,11 +465,30 @@ class CreateFilter extends React.Component {
         }
     };
 
+    handleScheduledAction = message => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
+
+        const snackKey = enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: [
+                <IconButton
+                    key='close'
+                    aria-label='Close'
+                    color='inherit'
+                    className='notification-close-button'
+                    onClick={() => closeSnackbar(snackKey)}>
+                    <CloseIcon />
+                </IconButton>
+            ]
+        });
+    };
+
     render() {
         const { t, filter, id, onClose } = this.props;
         if (!filter) return null;
 
-        const { editFilter, data, openFilterChats, mode, chats, limit, title } = this.state;
+        const { editFilter, data, openFilterChats, mode, chats, limit, title, error, shook } = this.state;
 
         const {
             include_contacts,
@@ -507,6 +550,7 @@ class CreateFilter extends React.Component {
                             fullWidth
                             label={t('FilterNameHint')}
                             value={title}
+                            error={error}
                             onChange={this.handleTitleChange}
                         />
                     </div>
@@ -549,4 +593,9 @@ CreateFilter.propTypes = {
     onClose: PropTypes.func
 };
 
-export default withTranslation()(CreateFilter);
+const enhance = compose(
+    withTranslation(),
+    withSnackbar,
+);
+
+export default enhance(CreateFilter);

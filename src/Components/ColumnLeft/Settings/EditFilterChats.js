@@ -40,7 +40,8 @@ class EditFilterChats extends React.Component {
 
         this.state = {
             focusedItem: null,
-            searchItems: null
+            searchItems: null,
+            error: false
         }
     }
 

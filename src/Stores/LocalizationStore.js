@@ -37,7 +37,9 @@ i18n.use(initReactI18next).init({
                 Archived: 'Archived',
                 Saved: 'Saved',
                 EditProfile: 'Edit Profile',
-                GeneralSettings: 'General Settings'
+                GeneralSettings: 'General Settings',
+                FilterChooseChats: 'Please choose at least one chat for this folder.',
+                FilterCreateError: 'Sorry, you can\'t add more then 10 folders.'
             },
             local: {
                 CopyMessageLink: 'Copy Message Link',
