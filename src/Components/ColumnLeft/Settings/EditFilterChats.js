@@ -410,7 +410,7 @@ class EditFilterChats extends React.Component {
                     {items.map(x => <ChatChip selected={focusedItem === x} ref={el => { this.itemsRef.set(x, el); }} key={x} chatId={x} onClick={() => this.handleChatChange(x)}/>)}
                     <SearchInput inputRef={this.searchInputRef} hint={t('Search')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
                 </div>
-                <div className='sidebar-page-top-divider'/>
+                <div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>
                 <div ref={this.scrollRef} className='sidebar-page-content' style={{ marginTop: -3, position: 'relative', height: '100%' }} onScroll={onScroll}>
                     <SectionHeader>{t('FilterChatTypes')}</SectionHeader>
                     {include && (

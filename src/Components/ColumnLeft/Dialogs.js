@@ -454,6 +454,7 @@ class Dialogs extends Component {
                         <div className='dialogs-content'>
                             <div className='dialogs-content-internal'>
                                 <Filters/>
+                                <div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>
                                 <DialogsList
                                     type='chatListMain'
                                     ref={this.dialogListRef}

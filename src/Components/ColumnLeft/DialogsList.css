@@ -6,6 +6,7 @@
  */
 
 .dialogs-list {
+    margin-top: -3px;
     background: var(--panel-background);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -18,7 +19,7 @@
     /*right: 0;*/
     /*bottom: 0;*/
     /*left: 0;*/
-    padding: 0 8px;
+    padding: 4px 8px 8px;
 }
 
 .dialogs-list-item {
