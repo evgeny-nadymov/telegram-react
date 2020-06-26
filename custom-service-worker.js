@@ -12,8 +12,13 @@
 const SMALLEST_CHUNK_LIMIT = 1024 * 4;
 const STREAM_CHUNK_UPPER_LIMIT = 256 * 1024;
 
+function LOG(message, ...optionalParams) {
+    return;
+    console.log(message, ...optionalParams);
+}
+
 self.addEventListener('push', event => {
-    console.log(`[SW] Push received with data "${event.data.text()}"`);
+    LOG(`[SW] Push received with data "${event.data.text()}"`);
 
     let obj;
     try{
@@ -39,7 +44,7 @@ self.addEventListener('push', event => {
 
 function isSafari() {
     const is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    console.log('[stream] isSafari', is_safari);
+    LOG('[stream] isSafari', is_safari);
     return is_safari;
 
 }
@@ -71,7 +76,7 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
         return;
     }
 
-    console.log('[stream] fetchStreamRequest', info);
+    LOG('[stream] fetchStreamRequest', info);
 
     // safari workaround
     if (offset === 0 && end === 1) {
@@ -91,7 +96,7 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
     const limit = end && end < STREAM_CHUNK_UPPER_LIMIT ? alignLimit(end - offset + 1) : STREAM_CHUNK_UPPER_LIMIT;
     const alignedOffset = alignOffset(offset, limit);
 
-    console.log(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
+    LOG(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
     get(info.location, alignedOffset, limit, info.options, async (blob, type) => {
         const headers = {
             'Accept-Ranges': 'bytes',
@@ -122,7 +127,7 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
 async function getFilePartRequest(location, offset, limit, options, ready) {
     const { fileId } = options;
 
-    console.log('[stream] getFilePartRequest', offset, limit);
+    LOG('[stream] getFilePartRequest', offset, limit);
     const result =
         await getBufferFromClientAsync(fileId, offset, limit, options);
 
@@ -136,7 +141,7 @@ self.addEventListener('fetch', event => {
         case 'streaming': {
             const [offset, end] = parseRange(event.request.headers.get('Range') || '');
 
-            console.log(`[SW] fetch offset=${offset} end=${end}`, event.request.url, scope);
+            LOG(`[SW] fetch offset=${offset} end=${end}`, event.request.url, scope);
 
             event.respondWith(new Promise((resolve) => {
                 fetchStreamRequest(url, offset, end, resolve, getFilePartRequest);
@@ -155,7 +160,7 @@ async function getBufferFromClientAsync(fileId, offset, limit, options) {
         queue.set(key, { resolve, reject });
         self.clients.matchAll().then(clients => {
             clients.forEach(client => {
-                console.log('[stream] getBufferFromClientAsync', fileId, offset, limit, client);
+                LOG('[stream] getBufferFromClientAsync', fileId, offset, limit, client);
                 client.postMessage({
                     '@type': 'getFile',
                     fileId,
@@ -181,20 +186,20 @@ async function getArrayBuffer(blob) {
 const streams = new Map();
 
 self.addEventListener('message', async e => {
-    console.log('[stream] sw.message', e.data);
+    LOG('[stream] sw.message', e.data);
     switch (e.data['@type']) {
         case 'getFileResult': {
             const { fileId, offset, limit, data } = e.data;
             const key = `${fileId}_${offset}_${limit}`;
             const request = queue.get(key);
-            console.log('[stream] sw.message request', request, queue, e.data);
+            LOG('[stream] sw.message request', request, queue, e.data);
             if (request) {
                 queue.delete(key);
                 const { resolve } = request;
 
                 // const buffer = await getArrayBuffer(data);
 
-                console.log('[stream] sw.message resolve', data);
+                LOG('[stream] sw.message resolve', data);
                 resolve(data);
             }
             break;
@@ -202,7 +207,7 @@ self.addEventListener('message', async e => {
         case 'file': {
             const { url, options } = e.data;
 
-            console.log('[stream] set options', url, options);
+            LOG('[stream] set options', url, options);
             this.setFileOptions(url, null, options);
             break;
         }
