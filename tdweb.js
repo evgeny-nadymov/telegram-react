@@ -2429,7 +2429,7 @@ function () {
     key: "onResponse",
     value: function onResponse(response) {
       logger.debug('receive from worker: ', JSON.parse(JSON.stringify(response, function (key, value) {
-        if (key === 'arr') {
+        if (key === 'arr' || key == 'data') {
           return undefined;
         }
 
@@ -3074,7 +3074,7 @@ function () {
             switch (_context7.prev = _context7.next) {
               case 0:
                 if (!(!info.arr && !info.idb_key && info.file.local.path)) {
-                  _context7.next = 24;
+                  _context7.next = 22;
                   break;
                 }
 
@@ -3088,27 +3088,26 @@ function () {
 
               case 4:
                 count = _context7.sent;
-                logger.error(count, size);
 
                 if (size) {
-                  _context7.next = 10;
+                  _context7.next = 9;
                   break;
                 }
 
                 size = count.count;
-                _context7.next = 12;
+                _context7.next = 11;
                 break;
 
-              case 10:
+              case 9:
                 if (!(size > count.count)) {
-                  _context7.next = 12;
+                  _context7.next = 11;
                   break;
                 }
 
                 throw new Error('File not loaded yet');
 
-              case 12:
-                _context7.next = 14;
+              case 11:
+                _context7.next = 13;
                 return this.client.sendInternal({
                   '@type': 'readFilePart',
                   path: info.file.local.path,
@@ -3116,23 +3115,23 @@ function () {
                   count: size
                 });
 
-              case 14:
+              case 13:
                 _res = _context7.sent;
                 _res.data = new Blob([_res.data]);
-                _res.transaction_id = -2;
-                logger.error(_res);
+                _res.transaction_id = -2; //log.error(res);
+
                 return _context7.abrupt("return", _res);
 
-              case 21:
-                _context7.prev = 21;
+              case 19:
+                _context7.prev = 19;
                 _context7.t0 = _context7["catch"](1);
                 logger.info('readFilePart failed', info, offset, size, _context7.t0);
 
-              case 24:
-                _context7.next = 26;
+              case 22:
+                _context7.next = 24;
                 return this.doLoadFull(info);
 
-              case 26:
+              case 24:
                 res = _context7.sent;
                 // return slice(size, offset + size)
                 data_size = res.data.size;
@@ -3148,12 +3147,12 @@ function () {
                 res.data = res.data.slice(offset, offset + size);
                 return _context7.abrupt("return", res);
 
-              case 32:
+              case 30:
               case "end":
                 return _context7.stop();
             }
           }
-        }, _callee7, this, [[1, 21]]);
+        }, _callee7, this, [[1, 19]]);
       }));
 
       function doLoad(_x5, _x6, _x7) {
