@@ -11,16 +11,17 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
-import MP4Source from '../Player/Steaming/MP4/MP4Source';
-import { getAnimationData, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
+// import MP4Source from '../Player/Steaming/MP4/MP4Source';
+import { getAnimationData, getArrayBuffer, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
+import { LOG } from '../Player/Steaming/Utils/Common';
+import { setFileOptions } from '../../registerServiceWorker';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
-import { LOG } from '../Player/Steaming/Utils/Common';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -32,16 +33,6 @@ class MediaViewerContent extends React.Component {
         this.lottieRef = React.createRef();
 
         this.updateAnimationData();
-    }
-
-    static async getArrayBuffer(blob) {
-        return new Promise((resolve) => {
-            let fr = new FileReader();
-            fr.onload = () => {
-                resolve(fr.result);
-            };
-            fr.readAsArrayBuffer(blob);
-        })
     }
 
     static async getBufferAsync(fileId, start, end) {
@@ -70,7 +61,7 @@ class MediaViewerContent extends React.Component {
 
         // console.log('[GET_BUFFER] getArrayBuffer');
 
-        const buffer = await MediaViewerContent.getArrayBuffer(filePart.data);
+        const buffer = await getArrayBuffer(filePart.data);
 
         // console.log('[GET_BUFFER] result', result, buffer);
 
@@ -97,8 +88,10 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
-                    src = source.getURL();
+                    // source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
+                    // src = source.getURL();
+                    src = `/streaming/file_id=${file.id}`;
+                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
 
@@ -229,9 +222,11 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
+                    // source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
+                    // src = source.getURL();
 
-                    src = source.getURL();
+                    src = `/streaming/file_id=${file.id}`;
+                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
 

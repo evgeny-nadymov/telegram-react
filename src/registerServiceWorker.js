@@ -5,12 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
-import { OPTIMIZATIONS_FIRST_START } from './Constants';
-import ApplicationStore from './Stores/ApplicationStore';
-import NotificationStore from './Stores/NotificationStore';
-import TdLibController from './Controllers/TdLibController';
-
 // In production, we register a service worker to serve assets from local cache.
 
 // This lets the app load faster on subsequent visits in production, and gives
@@ -20,6 +14,12 @@ import TdLibController from './Controllers/TdLibController';
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
+
+import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
+import { OPTIMIZATIONS_FIRST_START } from './Constants';
+import ApplicationStore from './Stores/ApplicationStore';
+import NotificationStore from './Stores/NotificationStore';
+import TdLibController from './Controllers/TdLibController';
 
 const isLocalhost =
     //false;
@@ -64,7 +64,7 @@ export default async function register() {
 }
 
 async function registerValidSW(swUrl) {
-    console.log('[SW] RegisterValidSW');
+    console.log('[SW] register');
     try {
         const registration = await navigator.serviceWorker.register(swUrl);
         registration.onupdatefound = () => {
@@ -91,6 +91,7 @@ async function registerValidSW(swUrl) {
     } catch (error) {
         console.error('[SW] Error during service worker registration: ', error);
     }
+    console.log('[SW] register complete', navigator.serviceWorker, navigator.serviceWorker.controller);
 }
 
 export async function subscribeNotifications() {
@@ -132,13 +133,14 @@ export async function subscribeNotifications() {
 }
 
 async function checkValidServiceWorker(swUrl) {
-    console.log('[SW] CheckValidServiceWorker');
+    console.log('[SW] checkValid');
     // Check if the service worker can be found. If it can't reload the page.
     try {
         const response = await fetch(swUrl);
 
         // Ensure service worker exists, and that we really are getting a JS file.
         if (response.status === 404 || response.headers.get('content-type').indexOf('javascript') === -1) {
+            console.log('[SW] unregister');
             // No service worker found. Probably a different app. Reload the page.
             const registration = await navigator.serviceWorker.ready;
             await registration.unregister();
@@ -168,3 +170,55 @@ export async function update() {
         await registration.update();
     }
 }
+
+export function setFileOptions(url, options) {
+    if ('serviceWorker' in navigator) {
+
+        console.log('[SW] setFileOptions ', navigator.serviceWorker, navigator.serviceWorker.controller);
+        navigator.serviceWorker.controller.postMessage({
+            '@type': 'file',
+            url,
+            options
+        });
+    }
+}
+
+navigator.serviceWorker.onmessage = async (e) => {
+    // console.log('[stream] client.onmessage', e.data);
+
+    switch (e.data['@type']) {
+        case 'getFile': {
+            const { fileId, offset, limit, size } = e.data;
+
+            const l = offset + limit < size ? limit : (size - offset)
+
+            await TdLibController.send({
+                '@type': 'downloadFile',
+                file_id: fileId,
+                priority: 1,
+                offset,
+                limit: l,
+                synchronous: true
+            });
+
+            const filePart = await TdLibController.send({
+                '@type': 'readFilePart',
+                file_id: fileId,
+                offset,
+                count: l
+            });
+
+            // const buffer = await getArrayBuffer(filePart.data);
+
+            // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
+            navigator.serviceWorker.controller.postMessage({
+                '@type': 'getFileResult',
+                fileId,
+                offset,
+                limit,
+                data: filePart.data
+            });
+            break;
+        }
+    }
+};

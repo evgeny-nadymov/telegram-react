@@ -39,7 +39,7 @@ i18n.use(initReactI18next).init({
                 EditProfile: 'Edit Profile',
                 GeneralSettings: 'General Settings',
                 FilterChooseChats: 'Please choose at least one chat for this folder.',
-                FilterCreateError: 'Sorry, you can\'t add more then 10 folders.'
+                FilterCreateError: 'Sorry, you can\'t add more than 10 folders.'
             },
             local: {
                 CopyMessageLink: 'Copy Message Link',

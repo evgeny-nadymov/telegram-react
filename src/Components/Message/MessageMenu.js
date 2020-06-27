@@ -44,6 +44,7 @@ import AppStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
+import { getArrayBuffer } from '../../Utils/File';
 
 class MessageMenu extends React.PureComponent {
     state = {
@@ -233,6 +234,47 @@ class MessageMenu extends React.PureComponent {
         console.log('[file] result', result, blob);
     };
 
+    handleTest = async () => {
+        const { chatId, messageId } = this.props;
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        const { video } = content;
+        if (!video) return;
+
+        const { video: file } = video;
+        if (!file) return;
+
+        const { size } = file;
+
+        const chunk = 512 * 1024;
+        const count = size / chunk;
+
+        for (let i = 0; i < count; i++) {
+            console.log('[d] filePart', file.id, chunk * i);
+            await TdLibController.send({
+                '@type': 'downloadFile',
+                file_id: file.id,
+                priority: 1,
+                offset: chunk * i,
+                limit: chunk,
+                synchronous: true
+            });
+
+            const filePart = await TdLibController.send({
+                '@type': 'readFilePart',
+                file_id: file.id,
+                offset: chunk * i,
+                count: chunk
+            });
+
+            const buffer = await getArrayBuffer(filePart.data);
+        }
+    };
+
     render() {
         const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
@@ -266,6 +308,12 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
+                        <MenuItem onClick={this.handleTest}>
+                            <ListItemIcon>
+                                <CopyIcon />
+                            </ListItemIcon>
+                            <ListItemText primary='Test' />
+                        </MenuItem>
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>

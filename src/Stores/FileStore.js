@@ -20,6 +20,8 @@ class FileStore extends EventEmitter {
         this.reset();
 
         this.addTdLibListener();
+
+        // this.suppressUpdateFile = true;
     }
 
     reset = () => {
@@ -49,7 +51,9 @@ class FileStore extends EventEmitter {
 
                 this.onUpdateFile(update);
 
-                this.emit(update['@type'], update);
+                if (!this.suppressUpdateFile) {
+                    this.emit(update['@type'], update);
+                }
                 break;
             }
             default:

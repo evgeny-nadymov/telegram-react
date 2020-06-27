@@ -35,6 +35,16 @@ import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export async function getArrayBuffer(blob) {
+    return new Promise((resolve) => {
+        let fr = new FileReader();
+        fr.onload = () => {
+            resolve(fr.result);
+        };
+        fr.readAsArrayBuffer(blob);
+    })
+}
+
 function getSizeString(size) {
     if (!size) return `0 B`;
 

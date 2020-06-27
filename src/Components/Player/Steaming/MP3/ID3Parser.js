@@ -7,17 +7,9 @@
 
 import { hasID3v1Header, ID3v1Parser } from './ID3v1/ID3v1Parser';
 import { hasID3v2Header, ID3v2Parser } from './ID3v2/ID3v2Parser';
+import { getArrayBuffer } from '../../../../Utils/File';
 
 export class ID3Parser {
-    getArrayBuffer(blob) {
-        return new Promise((resolve) => {
-            let fr = new FileReader();
-            fr.onload = () => {
-                resolve(fr.result);
-            };
-            fr.readAsArrayBuffer(blob);
-        })
-    }
 
     async parse(file) {
         const tags = { artist: '', title: '' };
@@ -25,7 +17,7 @@ export class ID3Parser {
 
         if (!file) return result;
 
-        const arrayBuffer = await this.getArrayBuffer(file);
+        const arrayBuffer = await getArrayBuffer(file);
         if (!arrayBuffer) return result;
 
         const buffer = new Uint8Array(arrayBuffer);

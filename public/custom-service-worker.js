@@ -9,8 +9,16 @@
 // importScripts('./tdweb.js');
 // importScripts('./subworkers.js');
 
-self.addEventListener('push', function(event) {
-    console.log(`[SW] Push received with data "${event.data.text()}"`);
+const SMALLEST_CHUNK_LIMIT = 1024 * 4;
+const STREAM_CHUNK_UPPER_LIMIT = 256 * 1024;
+
+function LOG(message, ...optionalParams) {
+    return;
+    console.log(message, ...optionalParams);
+}
+
+self.addEventListener('push', event => {
+    LOG(`[SW] Push received with data "${event.data.text()}"`);
 
     let obj;
     try{
@@ -32,6 +40,178 @@ self.addEventListener('push', function(event) {
         //loadUpdates()
         self.registration.showNotification(title, options)
     );
+});
+
+function isSafari() {
+    const is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    LOG('[stream] isSafari', is_safari);
+    return is_safari;
+
+}
+
+function parseRange(header) {
+    const [, chunks] = header.split('=');
+    const ranges = chunks.split(', ');
+    const [offset, end] = ranges[0].split('-');
+
+    return [+offset, +end || 0];
+}
+
+function alignLimit(limit) {
+    return 2 ** Math.ceil(Math.log(limit) / Math.log(2));
+}
+
+function alignOffset(offset, base = SMALLEST_CHUNK_LIMIT) {
+    return offset - (offset % base);
+}
+
+function setFileOptions(url, location, options) {
+    if (!streams.get(url)) streams.set(url, { url, location, options });
+}
+
+function fetchStreamRequest(url, offset, end, resolve, get) {
+    const info = streams.get(url);
+    if (!info) {
+        resolve(new Response(null, { status: 302, headers: { Location: url } }));
+        return;
+    }
+
+    LOG('[stream] fetchStreamRequest', info);
+
+    // safari workaround
+    if (offset === 0 && end === 1) {
+        resolve(new Response(new Uint8Array(2).buffer, {
+            status: 206,
+            statusText: 'Partial Content',
+            headers: {
+                'Accept-Ranges': 'bytes',
+                'Content-Range': `bytes 0-1/${info.options.size || '*'}`,
+                'Content-Length': '2',
+                'Content-Type': info.options.mime_type || 'video/mp4',
+            },
+        }));
+        return;
+    }
+
+    const limit = end && end < STREAM_CHUNK_UPPER_LIMIT ? alignLimit(end - offset + 1) : STREAM_CHUNK_UPPER_LIMIT;
+    const alignedOffset = alignOffset(offset, limit);
+
+    LOG(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
+    get(info.location, alignedOffset, limit, info.options, async (blob, type) => {
+        const headers = {
+            'Accept-Ranges': 'bytes',
+            'Content-Range': `bytes ${alignedOffset}-${alignedOffset + blob.size - 1}/${info.options.size || '*'}`,
+            'Content-Length': `${blob.size}`,
+        };
+
+        if (type) headers['Content-Type'] = type;
+
+        if (isSafari()) {
+            let ab = await getArrayBuffer(blob);
+
+            ab = ab.slice(offset - alignedOffset, end - alignedOffset + 1);
+            headers['Content-Range'] = `bytes ${offset}-${offset + ab.byteLength - 1}/${info.options.size || '*'}`;
+            headers['Content-Length'] = `${ab.byteLength}`;
+
+            blob = ab;
+        }
+
+        resolve(new Response(blob, {
+            status: 206,
+            statusText: 'Partial Content',
+            headers,
+        }));
+    });
+}
+
+async function getFilePartRequest(location, offset, limit, options, ready) {
+    const { fileId } = options;
+
+    LOG('[stream] getFilePartRequest', offset, limit);
+    const result =
+        await getBufferFromClientAsync(fileId, offset, limit, options);
+
+    ready(result, options.mimeType);
+}
+
+self.addEventListener('fetch', event => {
+    const [, url, scope] = /http[:s]+\/\/.*?(\/(.*?)\/.*$)/.exec(event.request.url) || [];
+
+    switch (scope) {
+        case 'streaming': {
+            const [offset, end] = parseRange(event.request.headers.get('Range') || '');
+
+            LOG(`[SW] fetch offset=${offset} end=${end}`, event.request.url, scope);
+
+            event.respondWith(new Promise((resolve) => {
+                fetchStreamRequest(url, offset, end, resolve, getFilePartRequest);
+            }));
+            break;
+        }
+    }
+});
+
+const queue = new Map();
+
+async function getBufferFromClientAsync(fileId, offset, limit, options) {
+    return new Promise((resolve, reject) => {
+
+        const key = `${fileId}_${offset}_${limit}`;
+        queue.set(key, { resolve, reject });
+        self.clients.matchAll().then(clients => {
+            clients.forEach(client => {
+                LOG('[stream] getBufferFromClientAsync', fileId, offset, limit, client);
+                client.postMessage({
+                    '@type': 'getFile',
+                    fileId,
+                    offset,
+                    limit,
+                    size: options.size
+                });
+            });
+        })
+    });
+}
+
+async function getArrayBuffer(blob) {
+    return new Promise((resolve) => {
+        let fr = new FileReader();
+        fr.onload = () => {
+            resolve(fr.result);
+        };
+        fr.readAsArrayBuffer(blob);
+    })
+}
+
+const streams = new Map();
+
+self.addEventListener('message', async e => {
+    LOG('[stream] sw.message', e.data);
+    switch (e.data['@type']) {
+        case 'getFileResult': {
+            const { fileId, offset, limit, data } = e.data;
+            const key = `${fileId}_${offset}_${limit}`;
+            const request = queue.get(key);
+            LOG('[stream] sw.message request', request, queue, e.data);
+            if (request) {
+                queue.delete(key);
+                const { resolve } = request;
+
+                // const buffer = await getArrayBuffer(data);
+
+                LOG('[stream] sw.message resolve', data);
+                resolve(data);
+            }
+            break;
+        }
+        case 'file': {
+            const { url, options } = e.data;
+
+            LOG('[stream] set options', url, options);
+            this.setFileOptions(url, null, options);
+            break;
+        }
+    }
 });
 
 // function loadUpdates(){

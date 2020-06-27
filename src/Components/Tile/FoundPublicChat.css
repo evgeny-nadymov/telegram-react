@@ -19,6 +19,6 @@
 }
 
 .item-selected .found-public-chat-wrapper {
-    background: var(--color-accent-main);
+    background: var(--color-hover);
     color: #fff;
 }
