@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.662",
+  "version": "0.0.664",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.7",
@@ -24,7 +24,7 @@
     "react-router-dom": "^5.0.0",
     "react-scripts": "^3.1.1",
     "react-transition-group": "^4.3.0",
-    "@arseny30/tdweb": "1.6.10"
+    "@arseny30/tdweb": "1.6.12"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [

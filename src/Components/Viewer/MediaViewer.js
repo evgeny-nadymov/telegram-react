@@ -37,6 +37,7 @@ import {
     saveMedia
 } from '../../Utils/File';
 import {
+    canMessageBeDeleted, canMessageBeForwarded,
     filterDuplicateMessages,
     isAnimationMessage,
     isLottieMessage,
@@ -750,9 +751,10 @@ class MediaViewer extends React.Component {
         const maxCount = Math.max(this.history.length, totalCount);
 
         const message = MessageStore.get(chatId, currentMessageId);
-        const { can_be_deleted_for_all_users, can_be_deleted_only_for_self } = message;
+        const { can_be_deleted_for_all_users } = message;
 
-        const canBeDeleted = can_be_deleted_for_all_users || can_be_deleted_only_for_self;
+        const canBeDeleted = canMessageBeDeleted(chatId, currentMessageId);
+        console.log('[mv] render', canBeDeleted);
         const canBeForwarded = this.canBeForwarded(chatId, currentMessageId);
 
         let deleteConfirmationContent = '';

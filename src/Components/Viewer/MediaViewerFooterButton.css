@@ -17,9 +17,10 @@
 
 .media-viewer-footer-button-disabled {
     cursor: default;
+    opacity: 0.25;
 }
 
-.media-viewer-footer-button:hover {
+.media-viewer-footer-button:hover:not(.media-viewer-footer-button-disabled) {
     opacity: 1;
     background: rgba(0, 0, 0, 0.2);
 }

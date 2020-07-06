@@ -308,12 +308,12 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
-                        <MenuItem onClick={this.handleTest}>
-                            <ListItemIcon>
-                                <CopyIcon />
-                            </ListItemIcon>
-                            <ListItemText primary='Test' />
-                        </MenuItem>
+                        {/*<MenuItem onClick={this.handleTest}>*/}
+                        {/*    <ListItemIcon>*/}
+                        {/*        <CopyIcon />*/}
+                        {/*    </ListItemIcon>*/}
+                        {/*    <ListItemText primary='Test' />*/}
+                        {/*</MenuItem>*/}
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>
