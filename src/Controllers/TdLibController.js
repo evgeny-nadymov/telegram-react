@@ -47,7 +47,7 @@ class TdLibController extends EventEmitter {
         };
 
         this.disableLog = true;
-        this.streaming = false;
+        this.streaming = true;
     }
 
     init = location => {
