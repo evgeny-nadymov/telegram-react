@@ -30,6 +30,7 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
+import { setFileOptions } from '../../registerServiceWorker';
 
 class HeaderPlayer extends React.Component {
     constructor(props) {
@@ -235,6 +236,7 @@ class HeaderPlayer extends React.Component {
         const { chat_id, id } = message;
 
         const { src: prevSrc } = this.state;
+        if (prevSrc) return;
 
         const src = this.getMediaSrc(message);
         const mimeType = this.getMediaMimeType(message);
@@ -289,7 +291,7 @@ class HeaderPlayer extends React.Component {
                     const { audio, voice_note, video_note } = web_page;
 
                     if (audio) {
-                        const file = audio.audio;
+                        const { audio: file } = audio;
                         if (file) {
                             this.startPlayingFile(message);
                         }
@@ -315,7 +317,7 @@ class HeaderPlayer extends React.Component {
             case 'messageAudio': {
                 const { audio } = content;
                 if (audio) {
-                    const file = audio.audio;
+                    const { audio: file } = audio;
                     if (file) {
                         this.startPlayingFile(message);
                     }
@@ -456,9 +458,15 @@ class HeaderPlayer extends React.Component {
                 const { audio, voice_note, video_note, web_page } = content;
 
                 if (audio) {
-                    const file = audio.audio;
+                    const { audio: file } = audio;
                     if (file) {
-                        return getSrc(file);
+                        let src = getSrc(file);
+                        if (!src && TdLibController.streaming) {
+                            src = `/streaming/file_id=${file.id}`;
+                            setFileOptions(src, { fileId: file.id, size: file.size, mimeType: audio.mime_type });
+                        }
+
+                        return src;
                     }
                 }
 

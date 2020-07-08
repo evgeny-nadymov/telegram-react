@@ -292,7 +292,7 @@ class InstantViewer extends React.Component {
     }
 
     render() {
-        const { classes, instantView } = this.props;
+        const { instantView } = this.props;
         const { hasPrev, hasScroll, media, caption, url } = this.state;
         if (!instantView) return null;
 

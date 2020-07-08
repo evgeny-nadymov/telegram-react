@@ -37,7 +37,7 @@ import {
     saveMedia
 } from '../../Utils/File';
 import {
-    canMessageBeDeleted, canMessageBeForwarded,
+    canMessageBeDeleted,
     filterDuplicateMessages,
     isAnimationMessage,
     isLottieMessage,

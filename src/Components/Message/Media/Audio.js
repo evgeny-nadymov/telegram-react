@@ -14,8 +14,9 @@ import PauseIcon from '../../../Assets/Icons/Pause';
 import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
 import VoiceNoteSlider from './VoiceNoteSlider';
-import { getAudioShortTitle, getAudioSubtitle, getAudioTitle } from '../../../Utils/Media';
+import { getAudioShortTitle, getAudioSubtitle } from '../../../Utils/Media';
 import PlayerStore from '../../../Stores/PlayerStore';
+import TdLibController from '../../../Controllers/TdLibController';
 import './Audio.css';
 
 class Audio extends React.Component {
@@ -130,6 +131,8 @@ class Audio extends React.Component {
 
         const audioTitle = getAudioSubtitle(audio);
         const audioSubtitle = getAudioShortTitle(audio);
+        const { streaming } = TdLibController;
+        const completeIcon = playing ? <PauseIcon /> : <PlayArrowIcon />;
 
         return (
             <div className={classNames('audio', 'document', { 'media-title': title })}>
@@ -137,8 +140,8 @@ class Audio extends React.Component {
                     thumbnail={album_cover_thumbnail}
                     file={file}
                     openMedia={openMedia}
-                    icon={<DownloadIcon />}
-                    completeIcon={playing ? <PauseIcon /> : <PlayArrowIcon />}
+                    icon={streaming ? completeIcon : <DownloadIcon />}
+                    completeIcon={completeIcon}
                 />
                 <div className='audio-content'>
                     <div className='document-title'>
