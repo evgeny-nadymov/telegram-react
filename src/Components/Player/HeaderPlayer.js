@@ -236,7 +236,6 @@ class HeaderPlayer extends React.Component {
         const { chat_id, id } = message;
 
         const { src: prevSrc } = this.state;
-        if (prevSrc) return;
 
         const src = this.getMediaSrc(message);
         const mimeType = this.getMediaMimeType(message);
@@ -284,6 +283,8 @@ class HeaderPlayer extends React.Component {
         if (!content) return;
         if (chatId !== chat_id || messageId !== id) return;
 
+        const { streaming } = TdLibController;
+
         switch (content['@type']) {
             case 'messageText': {
                 const { web_page } = content;
@@ -291,6 +292,8 @@ class HeaderPlayer extends React.Component {
                     const { audio, voice_note, video_note } = web_page;
 
                     if (audio) {
+                        if (streaming) return;
+
                         const { audio: file } = audio;
                         if (file) {
                             this.startPlayingFile(message);
@@ -317,6 +320,8 @@ class HeaderPlayer extends React.Component {
             case 'messageAudio': {
                 const { audio } = content;
                 if (audio) {
+                    if (streaming) return;
+
                     const { audio: file } = audio;
                     if (file) {
                         this.startPlayingFile(message);

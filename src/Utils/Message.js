@@ -938,14 +938,17 @@ function openAudio(audio, message, fileCancel) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    if (fileCancel && file.local.is_downloading_active) {
+    const { streaming } = TdLibController;
+    if (fileCancel && file.local.is_downloading_active && !streaming) {
         FileStore.cancelGetRemoteFile(file.id, message);
         return;
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     } else {
-        download(file, message, () => FileStore.updateAudioBlob(chat_id, id, file.id));
+        if (!streaming) {
+            download(file, message, () => FileStore.updateAudioBlob(chat_id, id, file.id));
+        }
     }
 
     TdLibController.send({

@@ -50,7 +50,7 @@ class DocumentTile extends React.Component {
     };
 
     render() {
-        const { minithumbnail, thumbnail, file, icon, completeIcon, openMedia } = this.props;
+        const { minithumbnail, thumbnail, file, icon, completeIcon, openMedia, streaming } = this.props;
         const { loaded } = this.state;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
@@ -66,7 +66,7 @@ class DocumentTile extends React.Component {
                     <FileProgress
                         file={file}
                         thumbnailSrc={src}
-                        download
+                        download={!streaming}
                         upload
                         cancelButton
                         zIndex={1}
@@ -80,6 +80,10 @@ class DocumentTile extends React.Component {
         );
     }
 }
+
+DocumentTile.defaultProps = {
+    streaming: false
+};
 
 DocumentTile.propTypes = {
     minithumbnail: PropTypes.object,

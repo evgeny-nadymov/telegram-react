@@ -77,7 +77,7 @@ class SharedDocument extends React.Component {
 SharedDocument.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    showOpenMessage: PropTypes.number.isRequired
+    showOpenMessage: PropTypes.bool.isRequired
 };
 
 export default SharedDocument;

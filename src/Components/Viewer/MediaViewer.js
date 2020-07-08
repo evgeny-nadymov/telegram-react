@@ -754,7 +754,6 @@ class MediaViewer extends React.Component {
         const { can_be_deleted_for_all_users } = message;
 
         const canBeDeleted = canMessageBeDeleted(chatId, currentMessageId);
-        console.log('[mv] render', canBeDeleted);
         const canBeForwarded = this.canBeForwarded(chatId, currentMessageId);
 
         let deleteConfirmationContent = '';

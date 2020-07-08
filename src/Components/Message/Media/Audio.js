@@ -140,6 +140,7 @@ class Audio extends React.Component {
                     thumbnail={album_cover_thumbnail}
                     file={file}
                     openMedia={openMedia}
+                    streaming={streaming}
                     icon={streaming ? completeIcon : <DownloadIcon />}
                     completeIcon={completeIcon}
                 />
@@ -157,6 +158,7 @@ class Audio extends React.Component {
                         duration={duration}
                         file={file}
                         meta={caption ? null : meta}
+                        streaming={streaming}
                     />
                 </div>
             </div>
