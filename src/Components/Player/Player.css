@@ -1,0 +1,208 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.player {
+    min-width: 320px;
+    min-height: 320px;
+}
+
+.player-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.player-video {
+    width: 100%;
+    height: 100%;
+    background: black;
+}
+
+.player-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 47px;
+    background: linear-gradient(0, #000 0, transparent);
+    display: flex;
+    flex-direction: column;
+    padding: 0 16px;
+}
+
+.player-controls {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 6px;
+    background: transparent;
+    user-select: none;
+}
+
+.player-button {
+    width: 24px;
+    height: 24px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: 3px;
+    color: white;
+    outline: none;
+    cursor: pointer;
+}
+
+.player-button:hover{
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.player-button:disabled {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.player-button:disabled:hover {
+    background: transparent;
+    cursor: default;
+}
+
+.player-time {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    pointer-events: none;
+    padding: 0 24px;
+}
+
+.player-button svg {
+    font-size: inherit;
+    display: block;
+}
+
+.player-slider {
+    position: relative;
+    height: 17px;
+}
+
+.player-slider-rail {
+    height: 5px;
+    border-radius: 3px;
+    background-color: white;
+    opacity: 0.2;
+}
+
+.player-slider-root {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 5px;
+    padding: 6px 0;
+    display: block;
+    /*color: #50A2E9;*/
+}
+
+.player-slider-track {
+    height: 5px;
+    border-radius: 3px;
+}
+
+.player-slider-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -4px;
+    box-shadow: none !important;
+}
+
+.player-slider-thumb::after {
+    display: none;
+}
+
+.player-volume {
+    width: 50px;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.player-volume-rail {
+    border-radius: 3px;
+    background-color: white;
+    opacity: 0.4;
+}
+
+.player-volume-root {
+    padding: 6px 0;
+    display: block;
+    color: white;
+}
+
+.player-volume-track {
+    border-radius: 3px;
+}
+
+.player-volume-thumb {
+    width: 12px;
+    height: 12px;
+    margin-top: -5px;
+    box-shadow: none !important;
+}
+
+.player-volume-thumb::after {
+    display: none !important;
+}
+
+.player-slider-buffer-track {
+    height: 5px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.4);
+    position: absolute;
+    width: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 6px 0;
+}
+
+.player-waiting {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.player-waiting::after{
+    content: '';
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    background-color: rgb(255, 255, 255);
+    left: 50%;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0px);
+    border-radius: 2px;
+}
+
+@keyframes player-spin { 100% { transform: rotate(360deg); } }
+
+.player-waiting svg {
+    animation: player-spin 3s linear infinite;
+}

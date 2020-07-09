@@ -23,6 +23,7 @@ import { getSrc } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
+import { setFileOptions } from '../../registerServiceWorker';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -30,7 +31,6 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './HeaderPlayer.css';
-import { setFileOptions } from '../../registerServiceWorker';
 
 class HeaderPlayer extends React.Component {
     constructor(props) {

@@ -22,6 +22,7 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
+import Player from '../Player/Player';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -369,54 +370,63 @@ class MediaViewerContent extends React.Component {
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
-                    <video
+                    <Player
                         ref={this.videoRef}
                         className='media-viewer-content-video-player'
-                        onClick={this.handleContentClick}
-                        controls
-                        autoPlay
                         width={videoWidth}
                         height={videoHeight}
-                        onPlay={() => {
-                            this.setState({ isPlaying: true });
-                            TdLibController.clientUpdate({
-                                '@type': 'clientUpdateMediaViewerPlay'
-                            });
-                        }}
-                        onCanPlay={() => {
-                            const player = this.videoRef.current;
-                            if (player) {
-                                player.volume = PlayerStore.volume;
-                            }
-                        }}
-                        onPause={() => {
-                            TdLibController.clientUpdate({
-                                '@type': 'clientUpdateMediaViewerPause'
-                            });
-                        }}
-                        onEnded={() => {
-                            TdLibController.clientUpdate({
-                                '@type': 'clientUpdateMediaViewerEnded'
-                            });
-                        }}
-                        onVolumeChange={() => {
-                            const player = this.videoRef.current;
-                            if (player) {
-                                TdLibController.clientUpdate({
-                                    '@type': 'clientUpdateMediaVolume',
-                                    volume: player.volume
-                                });
-                            }
-                        }}
-                        onSeeking={this.handleSeeking}
-                        onSeeked={this.handlePlayerSeeked}
-                        onTimeUpdate={this.handleTimeUpdate}
-                        onWaiting={this.handleWaiting}
-                        onProgress={this.handleProgress}
-                        poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}
-                    >
+                        poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}>
                         {source}
-                    </video>
+                    </Player>
+
+                    {/*<video*/}
+                    {/*    ref={this.videoRef}*/}
+                    {/*    className='media-viewer-content-video-player'*/}
+                    {/*    onClick={this.handleContentClick}*/}
+                    {/*    controls*/}
+                    {/*    autoPlay*/}
+                    {/*    width={videoWidth}*/}
+                    {/*    height={videoHeight}*/}
+                    {/*    onPlay={() => {*/}
+                    {/*        this.setState({ isPlaying: true });*/}
+                    {/*        TdLibController.clientUpdate({*/}
+                    {/*            '@type': 'clientUpdateMediaViewerPlay'*/}
+                    {/*        });*/}
+                    {/*    }}*/}
+                    {/*    onCanPlay={() => {*/}
+                    {/*        const player = this.videoRef.current;*/}
+                    {/*        if (player) {*/}
+                    {/*            player.volume = PlayerStore.volume;*/}
+                    {/*        }*/}
+                    {/*    }}*/}
+                    {/*    onPause={() => {*/}
+                    {/*        TdLibController.clientUpdate({*/}
+                    {/*            '@type': 'clientUpdateMediaViewerPause'*/}
+                    {/*        });*/}
+                    {/*    }}*/}
+                    {/*    onEnded={() => {*/}
+                    {/*        TdLibController.clientUpdate({*/}
+                    {/*            '@type': 'clientUpdateMediaViewerEnded'*/}
+                    {/*        });*/}
+                    {/*    }}*/}
+                    {/*    onVolumeChange={() => {*/}
+                    {/*        const player = this.videoRef.current;*/}
+                    {/*        if (player) {*/}
+                    {/*            TdLibController.clientUpdate({*/}
+                    {/*                '@type': 'clientUpdateMediaVolume',*/}
+                    {/*                volume: player.volume*/}
+                    {/*            });*/}
+                    {/*        }*/}
+                    {/*    }}*/}
+                    {/*    onSeeking={this.handleSeeking}*/}
+                    {/*    onSeeked={this.handlePlayerSeeked}*/}
+                    {/*    onTimeUpdate={this.handleTimeUpdate}*/}
+                    {/*    onWaiting={this.handleWaiting}*/}
+                    {/*    onProgress={this.handleProgress}*/}
+                    {/*    poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}*/}
+                    {/*>*/}
+                    {/*    {source}*/}
+                    {/*</video>*/}
                     {!isPlaying && !supportsStreaming &&
                         ((thumbnailSrc || miniSrc) ? (
                             <img
