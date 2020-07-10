@@ -11,6 +11,8 @@
 
 const SMALLEST_CHUNK_LIMIT = 1024 * 4;
 const STREAM_CHUNK_UPPER_LIMIT = 256 * 1024;
+const STREAM_CHUNK_BIG_FILE = 700 * 1024 * 1024;
+const STREAM_CHUNK_BIG_FILE_UPPER_LIMIT = 512 * 1024;
 
 function LOG(message, ...optionalParams) {
     return;
@@ -93,7 +95,12 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
         return;
     }
 
-    const limit = end && end < STREAM_CHUNK_UPPER_LIMIT ? alignLimit(end - offset + 1) : STREAM_CHUNK_UPPER_LIMIT;
+    const isBigFile = info.options.size > STREAM_CHUNK_BIG_FILE;
+    const upperLimit = isBigFile ? STREAM_CHUNK_BIG_FILE_UPPER_LIMIT : STREAM_CHUNK_UPPER_LIMIT;
+    // LOG('[stream] GET', end, isBigFile, upperLimit, info);
+
+
+    const limit = end && end < upperLimit ? alignLimit(end - offset + 1) : upperLimit;
     const alignedOffset = alignOffset(offset, limit);
 
     LOG(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
