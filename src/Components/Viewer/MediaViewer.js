@@ -146,6 +146,8 @@ class MediaViewer extends React.Component {
     }
 
     onKeyDown = event => {
+        event.stopPropagation();
+
         if (event.keyCode === 27) {
             if (modalManager.modals.length > 0) {
                 return;
@@ -730,6 +732,19 @@ class MediaViewer extends React.Component {
         }
     };
 
+    handleWrapperClick = event => {
+        const { mouseDownTarget } = this;
+        this.mouseDownTarget = null;
+
+        if (event.currentTarget !== mouseDownTarget) return;
+
+        this.handleClose();
+    };
+
+    handleWrapperMouseDown = event => {
+        this.mouseDownTarget = event.currentTarget;
+    }
+
     render() {
         const { chatId, t } = this.props;
         const {
@@ -829,7 +844,7 @@ class MediaViewer extends React.Component {
                         <CloseIcon />
                     </MediaViewerFooterButton>
                 </div>
-                <div className='media-viewer-wrapper' onClick={this.handlePrevious}>
+                <div className='media-viewer-wrapper' onMouseDown={this.handleWrapperMouseDown} onClick={this.handleWrapperClick}>
                     <div className='media-viewer-left-column'>
                         <MediaViewerButton disabled={!hasPreviousMedia} grow onClick={this.handlePrevious}>
                             <NavigateBeforeIcon />

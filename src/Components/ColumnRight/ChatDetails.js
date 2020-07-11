@@ -456,12 +456,12 @@ class ChatDetails extends React.Component {
                                 {popup && !isGroup && (
                                     <ListItem button className='list-item' onClick={this.handleOpenChat}>
                                         <ListItemText
-                                            inset
                                             primary={
                                                 <Typography color='primary' variant='inherit' noWrap>
                                                     {t('SendMessage').toUpperCase()}
                                                 </Typography>
                                             }
+                                            style={{ paddingLeft: 40 }}
                                         />
                                     </ListItem>
                                 )}

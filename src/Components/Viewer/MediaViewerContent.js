@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
+import Player from '../Player/Player';
 // import MP4Source from '../Player/Steaming/MP4/MP4Source';
 import { getAnimationData, getArrayBuffer, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
@@ -22,7 +23,6 @@ import MessageStore from '../../Stores/MessageStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
-import Player from '../Player/Player';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -375,7 +375,11 @@ class MediaViewerContent extends React.Component {
                         className='media-viewer-content-video-player'
                         width={videoWidth}
                         height={videoHeight}
-                        poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}>
+                        poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}
+                        onPlay={() => {
+                            this.setState({ isPlaying: true });
+                        }}
+                    >
                         {source}
                     </Player>
 

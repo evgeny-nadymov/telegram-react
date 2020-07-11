@@ -175,34 +175,3 @@
     left: 0;
     margin: 6px 0;
 }
-
-.player-waiting {
-    position: absolute;
-    margin: auto;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.4);
-}
-
-.player-waiting::after{
-    content: '';
-    position: absolute;
-    width: 13px;
-    height: 13px;
-    background-color: rgb(255, 255, 255);
-    left: 50%;
-    top: 50%;
-    transform: translate3d(-50%, -50%, 0px);
-    border-radius: 2px;
-}
-
-@keyframes player-spin { 100% { transform: rotate(360deg); } }
-
-.player-waiting svg {
-    animation: player-spin 3s linear infinite;
-}

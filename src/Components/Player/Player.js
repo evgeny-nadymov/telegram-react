@@ -16,7 +16,10 @@ import PictureInPictureIcon from '@material-ui/icons/PictureInPicture';
 import FullScreen from '../../Assets/Icons/FullScreen';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
 import PauseIcon from '../../Assets/Icons/Pause';
+import Progress from './Progress';
 import { getDurationString } from '../../Utils/Common';
+import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './Player.css';
 
 class Player extends React.Component {
@@ -30,12 +33,12 @@ class Player extends React.Component {
         this.state = {
             duration: 0,
             currentTime: 0,
-            volume: 0.25,
-            play: false,
+            volume: PlayerStore.volume,
+            play: true,
             dragging: false,
             buffered: null,
             waiting: true
-        }
+        };
     }
 
     componentDidMount() {
@@ -54,9 +57,12 @@ class Player extends React.Component {
         video.load();
 
         this.setState({
-            waiting: true,
+            duration: 0,
             currentTime: 0,
-            buffered: null
+            play: true,
+            dragging: false,
+            buffered: null,
+            waiting: true
         });
     }
 
@@ -77,29 +83,48 @@ class Player extends React.Component {
         }
     };
 
-    handlePlay = () => {
+    handlePlay = event => {
+        const { onPlay } = this.props;
+
         this.setState({
             play: true
         });
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerPlay' });
+        onPlay && onPlay(event);
     };
 
-    handlePause = () => {
+    handlePause = event => {
+        const { onPause } = this.props;
+
         this.setState({
             play: false
-        })
+        });
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerPause' });
+        onPause && onPause(event);
+    };
+
+    handleEnded = event => {
+        const { onEnded } = this.props;
+
+        TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerEnded' });
+        onEnded && onEnded(event);
     };
 
     handleTimeUpdate = () => {
         const video = this.videoRef.current;
         if (!video) return;
 
-        console.log('[pl] timeUpdate', video.currentTime, video.duration);
+        const { currentTime, duration, volume, buffered } = video;
+
+        console.log('[pl] timeUpdate', currentTime, duration);
 
         this.setState({
-            duration: video.duration,
-            currentTime: video.currentTime,
-            volume: video.volume,
-            buffered: video.buffered
+            duration,
+            currentTime,
+            volume,
+            buffered
         })
     };
 
@@ -114,16 +139,23 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
-        console.log('[pl] loadedMetadata', video.currentTime, video.duration);
+        const { currentTime, duration, volume, buffered } = video;
+
+        console.log(`[pl] loadedMetadata waiting=${true} play=${this.state.play}`);
 
         this.setState({
-            duration: video.duration,
-            currentTime: 0,
-            play: false,
-            volume: video.volume,
-            waiting: true,
-            buffered: video.buffered
-        });
+                duration,
+                currentTime: 0,
+                volume,
+                waiting: true,
+                buffered
+            },
+            () => {
+                const { play } = this.state;
+                if (play) {
+                    video.play();
+                }
+            });
 
         return;
         const stream = video.captureStream();
@@ -207,8 +239,9 @@ class Player extends React.Component {
         this.startStopPlayer();
     }
 
-    handleMouseDownRoot = () => {
+    handleMouseDownRoot = event => {
         this.mouseDownRoot = true;
+        event.stopPropagation();
     }
 
     getVolumeIcon = value => {
@@ -227,13 +260,20 @@ class Player extends React.Component {
         return <VolumeUpIcon fontSize='small' />;
     };
 
-    handleVolumeChange = () => {
+    handleVolumeChange = event => {
+        const { onVolumeChange } = this.props;
+
         const video = this.videoRef.current;
         if (!video) return;
 
+        const { volume } = video;
+
         this.setState({
-            volume: video.volume
+            volume
         });
+
+        TdLibController.clientUpdate({ '@type' : 'clientUpdateMediaVolume', volume });
+        onVolumeChange && onVolumeChange(event);
     };
 
     handleVolumeSliderChange = (event, value) => {
@@ -285,25 +325,17 @@ class Player extends React.Component {
     }
 
     handleWaiting = () => {
-        console.log('[pl] waiting');
-        const waitingId = Math.random();
-        this.waitingId = waitingId;
-
-        setTimeout(() => {
-            if (waitingId !== this.waitingId) return;
-
-            this.setState({
-                waiting: true
-            })
-        }, 250);
+        console.log('[pl] handleWaiting');
+        this.setState({
+            waiting: true
+        });
     };
 
     handleCanPlay = () => {
         console.log('[pl] canPlay');
-        this.waitingId = null;
         this.setState({
             waiting: false
-        })
+        });
     };
 
     handlePictureInPicture = () => {
@@ -333,16 +365,16 @@ class Player extends React.Component {
 
     handleDoubleClick = event => {
         this.handleFullScreen(event);
-    }
+    };
 
     render() {
         const { children, src, className, style, width, height, poster } = this.props;
         const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered } = this.state;
 
         const time = dragging ? draggingTime : currentTime;
-        const value = time / duration;
+        const value = duration > 0 ? time / duration : 0;
         const bufferedTime = this.getBufferedTime(time, buffered);
-        const bufferedValue = bufferedTime / duration;
+        const bufferedValue = duration > 0 ? bufferedTime / duration : 0;
 
         const timeString = getDurationString(Math.floor(time) || 0);
         const durationString = getDurationString(Math.floor(duration) || 0);
@@ -365,23 +397,23 @@ class Player extends React.Component {
                 style={rootStyle}>
                 <div ref={this.contentRef} className='player-content'>
                     <video
-                        id='v'
                         className='player-video'
                         ref={this.videoRef}
+                        autoPlay={false}
                         controls={false}
-                        autoPlay={true}
                         playsInline={true}
                         src={src}
                         poster={poster}
-                        onPlay={this.handlePlay}
-                        onPause={this.handlePause}
-                        onTimeUpdate={this.handleTimeUpdate}
                         onLoadedMetadata={this.handleLoadedMetadata}
                         onLoadedData={this.handleLoadedData}
+                        onCanPlay={this.handleCanPlay}
+                        onPlay={this.handlePlay}
+                        onPause={this.handlePause}
+                        onEnded={this.handleEnded}
+                        onTimeUpdate={this.handleTimeUpdate}
                         onVolumeChange={this.handleVolumeChange}
                         onProgress={this.handleProgress}
                         onWaiting={this.handleWaiting}
-                        onCanPlay={this.handleCanPlay}
                     >
                         {children}
                     </video>
@@ -443,13 +475,7 @@ class Player extends React.Component {
                             </button>
                         </div>
                     </div>
-                    { waiting && (
-                        <div className='player-waiting'>
-                            <svg viewBox='0 0 54 54' height='54' width='54'>
-                                <circle stroke='white' fill='transparent' strokeWidth='3' strokeDasharray='120 100' strokeDashoffset='25' strokeLinecap='round' r='21' cx='27' cy='27'/>
-                            </svg>
-                        </div>
-                    )}
+                    <Progress waiting={waiting}/>
                 </div>
             </div>
         );
