@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 import React from 'react';
-import createSvgIcon from '@material-ui/core/esm/internal/svg-icons/createSvgIcon';
+import createSvgIcon from '@material-ui/core/esm/utils/createSvgIcon';
 
 export default createSvgIcon(
     <g transform='translate(-1.000000, -1.000000)' fillRule='nonzero'>

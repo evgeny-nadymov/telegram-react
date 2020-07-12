@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import createSvgIcon from '@material-ui/core/esm/internal/svg-icons/createSvgIcon';
+import createSvgIcon from '@material-ui/core/esm/utils/createSvgIcon';
 
 export default createSvgIcon(
     <g strokeWidth='1' fill='none' fillRule='evenodd' strokeLinecap='round' strokeLinejoin='round'>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import createSvgIcon from '@material-ui/core/esm/internal/svg-icons/createSvgIcon';
+import createSvgIcon from '@material-ui/core/esm/utils/createSvgIcon';
 
 export default createSvgIcon(
     <path
