@@ -1470,39 +1470,39 @@ function getMediaPreviewFile(chatId, messageId) {
 }
 
 function getViewerFile(media, size) {
-    if (!size) return [0, 0, null, ''];
+    if (!size) return [0, 0, null, '', false];
 
     switch (media['@type']) {
         case 'animation': {
-            return [media.width, media.height, media.animation, media.mime_type];
+            return [media.width, media.height, media.animation, media.mime_type, false];
         }
         case 'photo': {
             const photoSize = getSize(media.sizes, size);
             if (photoSize) {
-                return [photoSize.width, photoSize.height, photoSize.photo, ''];
+                return [photoSize.width, photoSize.height, photoSize.photo, '', false];
             }
             break;
         }
         case 'document': {
-            return [50, 50, document.document, document.mime_type];
+            return [50, 50, document.document, document.mime_type, false];
         }
         case 'video': {
-            return [media.width, media.height, media.video, media.mime_type];
+            return [media.width, media.height, media.video, media.mime_type, media.supports_streaming && TdLibController.streaming];
         }
         default: {
         }
     }
 
-    return [0, 0, null, ''];
+    return [0, 0, null, '', false];
 }
 
 function getMediaFile(chatId, messageId, size) {
-    if (!size) return [0, 0, null];
+    if (!size) return [0, 0, null, '', false];
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return [0, 0, null, ''];
+    if (!message) return [0, 0, null, '', false];
 
     const { content } = message;
-    if (!content) return [0, 0, null, ''];
+    if (!content) return [0, 0, null, '', false];
 
     switch (content['@type']) {
         case 'messageAnimation': {

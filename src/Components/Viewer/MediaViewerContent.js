@@ -12,16 +12,12 @@ import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import Player from '../Player/Player';
-// import MP4Source from '../Player/Steaming/MP4/MP4Source';
-import { getAnimationData, getArrayBuffer, getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
-import { getText, isAnimationMessage, isLottieMessage, isVideoMessage } from '../../Utils/Message';
+import { getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
+import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
-import { LOG } from '../Player/Steaming/Utils/Common';
 import { setFileOptions } from '../../registerServiceWorker';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
-import PlayerStore from '../../Stores/PlayerStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
 class MediaViewerContent extends React.Component {
@@ -31,42 +27,6 @@ class MediaViewerContent extends React.Component {
         this.state = {};
 
         this.videoRef = React.createRef();
-        this.lottieRef = React.createRef();
-
-        this.updateAnimationData();
-    }
-
-    static async getBufferAsync(fileId, start, end) {
-        const offset = start;
-        const limit = end - start;
-
-        // console.log('[GET_BUFFER] downloadFile');
-
-        const result = await TdLibController.send({
-            '@type': 'downloadFile',
-            file_id: fileId,
-            priority: 1,
-            offset,
-            limit,
-            synchronous: true
-        });
-
-        // console.log('[GET_BUFFER] readFilePart');
-
-        const filePart = await TdLibController.send({
-            '@type': 'readFilePart',
-            file_id: fileId,
-            offset,
-            count: limit
-        });
-
-        // console.log('[GET_BUFFER] getArrayBuffer');
-
-        const buffer = await getArrayBuffer(filePart.data);
-
-        // console.log('[GET_BUFFER] result', result, buffer);
-
-        return buffer;
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -89,8 +49,6 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    // source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
-                    // src = source.getURL();
                     src = `/streaming/file_id=${file.id}`;
                     setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
@@ -123,7 +81,6 @@ class MediaViewerContent extends React.Component {
     }
 
     componentDidMount() {
-        FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
@@ -133,7 +90,6 @@ class MediaViewerContent extends React.Component {
     }
 
     componentWillUnmount() {
-        FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.off('clientUpdatePhotoBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateVideoBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
@@ -143,12 +99,7 @@ class MediaViewerContent extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { chatId, messageId } = this.props;
         const { src } = this.state;
-
-        if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
-            this.updateAnimationData();
-        }
 
         if (prevState.src !== src) {
             const player = this.videoRef.current;
@@ -157,27 +108,6 @@ class MediaViewerContent extends React.Component {
             player.load();
         }
     }
-
-    onClientUpdateDocumentBlob = update => {
-        const { chatId, messageId } = this.props;
-
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.updateAnimationData();
-        }
-    };
-
-    updateAnimationData = async () => {
-        const { chatId, messageId } = this.props;
-
-        if (!isLottieMessage(chatId, messageId)) {
-            return;
-        }
-
-        const { file } = this.state;
-        const animationData = await getAnimationData(file);
-
-        this.setState({ animationData });
-    };
 
     onClientUpdateMediaBlob = update => {
         const { chatId, messageId, size } = this.props;
@@ -223,9 +153,6 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    // source = new MP4Source(video, (start, end) => MediaViewerContent.getBufferAsync(file.id, start, end));
-                    // src = source.getURL();
-
                     src = `/streaming/file_id=${file.id}`;
                     setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
@@ -259,80 +186,9 @@ class MediaViewerContent extends React.Component {
         source.loadNextBuffer();
     };
 
-    handleSeeking = () => {
-        const video = this.videoRef.current;
-
-        const { currentTime, buffered } = video;
-        LOG('[player] onSeeking', currentTime);
-
-        if (this.prevTimeout) {
-            clearTimeout(this.prevTimeout);
-            this.prevTimeout = null;
-        }
-
-        this.prevTimeout = setTimeout(() => {
-            LOG('[player] onSeeking timeout', currentTime === video.currentTime, currentTime, video.currentTime);
-            if (currentTime === video.currentTime) {
-                this.handleSeeked(currentTime, buffered);
-            }
-        }, 150);
-    }
-
-    handleSeeked = (time, buffered) => {
-        const { source, supportsStreaming } = this.state;
-        if (!supportsStreaming) return;
-        if (!source) return;
-
-        source.seek(time, buffered);
-    }
-
-    handlePlayerSeeked = () => {
-        const { source, supportsStreaming } = this.state;
-        if (!supportsStreaming) return;
-        if (!source) return;
-
-        const video = this.videoRef.current;
-
-        const { currentTime, buffered } = video;
-        LOG('[player] onPlayerSeeked', currentTime);
-
-        source.seek(currentTime, buffered);
-    };
-
-    handleTimeUpdate = () => {
-        const { source, supportsStreaming } = this.state;
-        if (!supportsStreaming) return;
-        if (!source) return;
-
-        const video = this.videoRef.current;
-        const { currentTime, duration, buffered } = video;
-        source.timeUpdate(currentTime, duration, buffered);
-    };
-
-    handleProgress = () => {
-        const { source, supportsStreaming } = this.state;
-        if (!supportsStreaming) return;
-        if (!source) return;
-
-        const video = this.videoRef.current;
-        const { currentTime, duration, buffered } = video;
-        source.timeUpdate(currentTime, duration, buffered);
-    };
-
-    handleWaiting = () => {
-        const { source, supportsStreaming } = this.state;
-        if (!supportsStreaming) return;
-        if (!source) return;
-
-        const video = this.videoRef.current;
-        const { currentTime, buffered } = video;
-        source.seek(currentTime, buffered);
-    };
-
     render() {
         const { chatId, messageId } = this.props;
         const {
-            // animationData,
             width,
             height,
             file,
@@ -355,7 +211,6 @@ class MediaViewerContent extends React.Component {
 
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
-        const isLottie = isLottieMessage(chatId, messageId);
 
         let videoWidth = width;
         let videoHeight = height;
@@ -373,6 +228,7 @@ class MediaViewerContent extends React.Component {
                     <Player
                         ref={this.videoRef}
                         className='media-viewer-content-video-player'
+                        fileId={file.id}
                         width={videoWidth}
                         height={videoHeight}
                         poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}
@@ -382,55 +238,6 @@ class MediaViewerContent extends React.Component {
                     >
                         {source}
                     </Player>
-
-                    {/*<video*/}
-                    {/*    ref={this.videoRef}*/}
-                    {/*    className='media-viewer-content-video-player'*/}
-                    {/*    onClick={this.handleContentClick}*/}
-                    {/*    controls*/}
-                    {/*    autoPlay*/}
-                    {/*    width={videoWidth}*/}
-                    {/*    height={videoHeight}*/}
-                    {/*    onPlay={() => {*/}
-                    {/*        this.setState({ isPlaying: true });*/}
-                    {/*        TdLibController.clientUpdate({*/}
-                    {/*            '@type': 'clientUpdateMediaViewerPlay'*/}
-                    {/*        });*/}
-                    {/*    }}*/}
-                    {/*    onCanPlay={() => {*/}
-                    {/*        const player = this.videoRef.current;*/}
-                    {/*        if (player) {*/}
-                    {/*            player.volume = PlayerStore.volume;*/}
-                    {/*        }*/}
-                    {/*    }}*/}
-                    {/*    onPause={() => {*/}
-                    {/*        TdLibController.clientUpdate({*/}
-                    {/*            '@type': 'clientUpdateMediaViewerPause'*/}
-                    {/*        });*/}
-                    {/*    }}*/}
-                    {/*    onEnded={() => {*/}
-                    {/*        TdLibController.clientUpdate({*/}
-                    {/*            '@type': 'clientUpdateMediaViewerEnded'*/}
-                    {/*        });*/}
-                    {/*    }}*/}
-                    {/*    onVolumeChange={() => {*/}
-                    {/*        const player = this.videoRef.current;*/}
-                    {/*        if (player) {*/}
-                    {/*            TdLibController.clientUpdate({*/}
-                    {/*                '@type': 'clientUpdateMediaVolume',*/}
-                    {/*                volume: player.volume*/}
-                    {/*            });*/}
-                    {/*        }*/}
-                    {/*    }}*/}
-                    {/*    onSeeking={this.handleSeeking}*/}
-                    {/*    onSeeked={this.handlePlayerSeeked}*/}
-                    {/*    onTimeUpdate={this.handleTimeUpdate}*/}
-                    {/*    onWaiting={this.handleWaiting}*/}
-                    {/*    onProgress={this.handleProgress}*/}
-                    {/*    poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}*/}
-                    {/*>*/}
-                    {/*    {source}*/}
-                    {/*</video>*/}
                     {!isPlaying && !supportsStreaming &&
                         ((thumbnailSrc || miniSrc) ? (
                             <img
@@ -492,43 +299,15 @@ class MediaViewerContent extends React.Component {
                         ))}
                 </div>
             );
-        } else if (isLottie) {
-            // const defaultOptions = {
-            //     loop: true,
-            //     autoplay: true,
-            //     //path: src,
-            //     animationData: animationData,
-            //     rendererSettings: {
-            //         preserveAspectRatio: 'xMidYMid slice'
-            //     }
-            // };
-            // const { speed } = this.state;
-            //
-            // content = null;
-            // content = (
-            //     <Lottie
-            //         ref={this.lottieRef}
-            //         speed={speed}
-            //         options={defaultOptions}
-            //         height='auto'
-            //         width={400}
-            //         isStopped={false}
-            //         isPaused={false}
-            //     />
-            // );
         } else {
             content = (
-                <>
-                    <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
-                    {/*<img className='media-viewer-content-image-preview' src={previewSrc} alt='' />*/}
-                </>
+                <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
             );
         }
 
         return (
             <div className='media-viewer-content'>
                 {content}
-                {/*{ supportsStreaming && <a style={{ left: 0, top: 0, position: 'absolute' }} onClick={this.handleClick}>Load Buffer</a>}*/}
                 {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
                 {text && text.length > 0 && <MediaCaption text={text} />}
             </div>

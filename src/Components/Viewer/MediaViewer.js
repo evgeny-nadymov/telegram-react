@@ -40,7 +40,6 @@ import {
     canMessageBeDeleted,
     filterDuplicateMessages,
     isAnimationMessage,
-    isLottieMessage,
     isMediaContent,
     isVideoMessage
 } from '../../Utils/Message';
@@ -61,7 +60,6 @@ class MediaViewer extends React.Component {
         const { chatId, messageId } = this.props;
 
         this.state = {
-            speed: 1,
             background: 'media-viewer-default',
             prevChatId: chatId,
             prevMessageId: messageId,
@@ -82,7 +80,6 @@ class MediaViewer extends React.Component {
             firstSliceLoaded,
             hasNextMedia,
             hasPreviousMedia,
-            speed,
             totalCount
         } = this.state;
 
@@ -122,10 +119,6 @@ class MediaViewer extends React.Component {
             return true;
         }
 
-        if (nextState.speed !== speed) {
-            return true;
-        }
-
         return false;
     }
 
@@ -148,16 +141,36 @@ class MediaViewer extends React.Component {
     onKeyDown = event => {
         event.stopPropagation();
 
-        if (event.keyCode === 27) {
-            if (modalManager.modals.length > 0) {
+        const { chatId } = this.props;
+        const { currentMessageId } = this.state;
+
+        const { key } = event;
+        switch (key) {
+            case 'Escape': {
+                if (modalManager.modals.length > 0) {
+                    return;
+                }
+
+                this.handleClose();
                 return;
             }
+        }
 
-            this.handleClose();
-        } else if (event.keyCode === 39) {
-            this.handleNext();
-        } else if (event.keyCode === 37) {
-            this.handlePrevious();
+        const isVideo = isVideoMessage(chatId, currentMessageId);
+        if (isVideo) {
+            TdLibController.clientUpdate({ '@type': 'clientUpdateMediaShortcut', event });
+            return;
+        }
+
+        switch (key) {
+            case 'ArrowLeft': {
+                this.handlePrevious();
+                break;
+            }
+            case 'ArrowRight': {
+                this.handleNext();
+                break;
+            }
         }
     };
 
@@ -755,7 +768,6 @@ class MediaViewer extends React.Component {
             firstSliceLoaded,
             hasNextMedia,
             hasPreviousMedia,
-            speed,
             totalCount
         } = this.state;
 
@@ -818,8 +830,6 @@ class MediaViewer extends React.Component {
             title = t('AttachVideo');
         } else if (isAnimationMessage(chatId, currentMessageId)) {
             title = t('AttachGif');
-        } else if (isLottieMessage(chatId, currentMessageId)) {
-            title = '';
         }
 
         return (

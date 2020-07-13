@@ -10,14 +10,14 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
+import Caption from '../InstantView/Blocks/Caption';
+import SafeLink from '../Additional/SafeLink';
+import Player from '../Player/Player';
 import { getSrc, getViewerFile, getViewerMinithumbnail, getViewerThumbnail } from '../../Utils/File';
 import { isBlurredThumbnail } from '../../Utils/Media';
-import FileStore from '../../Stores/FileStore';
-import PlayerStore from '../../Stores/PlayerStore';
-import TdLibController from '../../Controllers/TdLibController';
-import Caption from '../InstantView/Blocks/Caption';
 import { isEmptyText } from '../../Utils/InstantView';
-import SafeLink from '../Additional/SafeLink';
+import { setFileOptions } from '../../registerServiceWorker';
+import FileStore from '../../Stores/FileStore';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -32,13 +32,23 @@ class InstantViewMediaViewerContent extends React.Component {
         const { media, size, caption, url } = props;
 
         if (media !== state.prevMedia) {
-            let [width, height, file, mimeType] = getViewerFile(media, size);
-            file = FileStore.get(file.id) || file;
 
             let [thumbnailWidth, thumbnailHeight, thumbnail] = getViewerThumbnail(media);
             thumbnail = FileStore.get(thumbnail.id) || thumbnail;
 
             const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getViewerMinithumbnail(media);
+
+            let [width, height, file, mimeType, supportsStreaming] = getViewerFile(media, size);
+            file = FileStore.get(file.id) || file;
+            let src = getSrc(file);
+            let source = null;
+            if (!src && supportsStreaming) {
+                const { video } = media;
+                if (video) {
+                    src = `/streaming/file_id=${file.id}`;
+                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
+                }
+            }
 
             return {
                 prevMedia: media,
@@ -48,7 +58,9 @@ class InstantViewMediaViewerContent extends React.Component {
                 width,
                 height,
                 file,
-                src: getSrc(file),
+                src,
+                source,
+                supportsStreaming,
                 mimeType,
                 thumbnailWidth,
                 thumbnailHeight,
@@ -95,13 +107,14 @@ class InstantViewMediaViewerContent extends React.Component {
         const { file } = this.state;
 
         if (file && file.id === fileId) {
-            const [width, height, file, mimeType] = getViewerFile(media, size);
+            const [width, height, file, mimeType, supportsStreaming] = getViewerFile(media, size);
 
             this.setState({
                 width,
                 height,
                 file,
                 src: getSrc(file),
+                supportsStreaming,
                 mimeType
             });
         }
@@ -120,7 +133,7 @@ class InstantViewMediaViewerContent extends React.Component {
         const { media, caption, url } = this.props;
         if (!media) return null;
 
-        const { width, height, file, src, mimeType, thumbnailWidth, thumbnailHeight, thumbnail, minithumbnail, isPlaying } = this.state;
+        const { width, height, file, src, mimeType, thumbnailWidth, thumbnailHeight, thumbnail, minithumbnail, isPlaying, supportsStreaming } = this.state;
         if (!file) return null;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
@@ -141,49 +154,20 @@ class InstantViewMediaViewerContent extends React.Component {
             case 'video': {
                 content = (
                     <div className='media-viewer-content-wrapper'>
-                        <video
+                        <Player
                             ref={this.videoRef}
                             className='media-viewer-content-video-player'
-                            onClick={this.handleContentClick}
-                            controls
-                            autoPlay
+                            fileId={file.id}
                             width={videoWidth}
                             height={videoHeight}
+                            poster={supportsStreaming ? (thumbnailSrc || miniSrc) : null}
                             onPlay={() => {
                                 this.setState({ isPlaying: true });
-                                TdLibController.clientUpdate({
-                                    '@type': 'clientUpdateMediaViewerPlay'
-                                });
-                            }}
-                            onCanPlay={() => {
-                                const player = this.videoRef.current;
-                                if (player) {
-                                    player.volume = PlayerStore.volume;
-                                }
-                            }}
-                            onPause={() => {
-                                TdLibController.clientUpdate({
-                                    '@type': 'clientUpdateMediaViewerPause'
-                                });
-                            }}
-                            onEnded={() => {
-                                TdLibController.clientUpdate({
-                                    '@type': 'clientUpdateMediaViewerEnded'
-                                });
-                            }}
-                            onVolumeChange={() => {
-                                const player = this.videoRef.current;
-                                if (player) {
-                                    TdLibController.clientUpdate({
-                                        '@type': 'clientUpdateMediaVolume',
-                                        volume: player.volume
-                                    });
-                                }
                             }}
                         >
                             {source}
-                        </video>
-                        {!isPlaying &&
+                        </Player>
+                        {!isPlaying && !supportsStreaming &&
                             ((thumbnailSrc || miniSrc) ? (
                                 <img
                                     className={classNames('media-viewer-content-video-thumbnail', {
@@ -258,7 +242,7 @@ class InstantViewMediaViewerContent extends React.Component {
         return (
             <div className='media-viewer-content'>
                 {content}
-                <FileProgress file={file} zIndex={2} />
+                {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
                 {caption && (!isEmptyText(caption.text) || !isEmptyText(caption.credit) || url) && (
                     <MediaCaption
                         text={

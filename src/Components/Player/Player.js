@@ -41,7 +41,32 @@ class Player extends React.Component {
         };
     }
 
+    onKeyDown = event => {
+        const { key, keyCode } = event;
+        console.log(`[pl] player.keyDown key=${key}`, key, keyCode);
+
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        switch (key) {
+            case 'ArrowLeft': {
+                video.currentTime -= 5;
+                break;
+            }
+            case 'ArrowRight': {
+                video.currentTime += 5;
+                break;
+            }
+            case ' ': {
+                this.startStopPlayer();
+                break;
+            }
+        }
+    };
+
     componentDidMount() {
+        PlayerStore.on('clientUpdateMediaShortcut', this.onClientUpdateMediaShortcut);
+
         const video = this.videoRef.current;
         if (!video) return;
 
@@ -49,6 +74,17 @@ class Player extends React.Component {
 
         video.volume = volume;
     }
+
+    componentWillUnmount() {
+        PlayerStore.off('clientUpdateMediaShortcut', this.onClientUpdateMediaShortcut);
+    }
+
+    onClientUpdateMediaShortcut = update => {
+        const { event } = update;
+        if (!event) return;
+
+        this.onKeyDown(event);
+    };
 
     load() {
         const video = this.videoRef.current;
@@ -116,13 +152,21 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
+        const { fileId } = this.props;
         const { currentTime, duration, volume, buffered } = video;
-
-        console.log('[pl] timeUpdate', currentTime, duration);
 
         this.setState({
             duration,
             currentTime,
+            volume,
+            buffered
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaViewerTimeUpdate',
+            fileId,
+            currentTime,
+            duration,
             volume,
             buffered
         })
@@ -303,8 +347,18 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
+        const { fileId } = this.props;
+
+        const { buffered } = video;
+
         this.setState({
-            buffered: video.buffered
+            buffered
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaViewerProgress',
+            fileId,
+            buffered
         });
     };
 
@@ -325,14 +379,12 @@ class Player extends React.Component {
     }
 
     handleWaiting = () => {
-        console.log('[pl] handleWaiting');
         this.setState({
             waiting: true
         });
     };
 
     handleCanPlay = () => {
-        console.log('[pl] canPlay');
         this.setState({
             waiting: false
         });
