@@ -19,7 +19,7 @@ class KeyboardManager {
     }
 
     handleKeyDown = event => {
-        console.log('[keydown KeyboardManager] handleKeyDown', this.handlers, event.key);
+        // console.log('[keydown KeyboardManager] handleKeyDown', this.handlers, event.key);
 
         const { handlers } = this;
         if (!handlers.length) return;

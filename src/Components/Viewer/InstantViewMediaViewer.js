@@ -25,7 +25,6 @@ import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerC
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
 import { modalManager } from '../../Utils/Modal';
-import { isVideoMessage } from '../../Utils/Message';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
 

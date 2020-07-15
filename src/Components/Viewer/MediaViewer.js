@@ -140,6 +140,7 @@ class MediaViewer extends React.Component {
 
     onKeyDown = event => {
         event.stopPropagation();
+        event.preventDefault();
 
         const { chatId } = this.props;
         const { currentMessageId } = this.state;

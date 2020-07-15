@@ -17,7 +17,7 @@ import FullScreen from '../../Assets/Icons/FullScreen';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
 import PauseIcon from '../../Assets/Icons/Pause';
 import Progress from './Progress';
-import { getDurationString } from '../../Utils/Common';
+import { clamp, getDurationString } from '../../Utils/Common';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Player.css';
@@ -42,25 +42,109 @@ class Player extends React.Component {
     }
 
     onKeyDown = event => {
-        const { key, keyCode } = event;
-        console.log(`[pl] player.keyDown key=${key}`, key, keyCode);
+        const { key, keyCode, code, altKey, ctrlKey, metaKey, shiftKey } = event;
+        console.log(`[pl] player.keyDown key=${key}`, key, keyCode, code, event);
 
         const video = this.videoRef.current;
         if (!video) return;
 
-        switch (key) {
+        switch (code) {
             case 'ArrowLeft': {
-                video.currentTime -= 5;
+                video.currentTime = clamp(video.currentTime - 5.0, 0.0, video.duration);
+                break;
+            }
+            case 'KeyJ': {
+                video.currentTime = clamp(video.currentTime - 10.0, 0.0, video.duration);
                 break;
             }
             case 'ArrowRight': {
-                video.currentTime += 5;
+                video.currentTime = clamp(video.currentTime + 5.0, 0.0, video.duration);
                 break;
             }
-            case ' ': {
-                this.startStopPlayer();
+            case 'KeyL': {
+                video.currentTime = clamp(video.currentTime + 10.0, 0.0, video.duration);
                 break;
             }
+            case 'ArrowUp': {
+                video.volume = clamp(video.volume + 0.05, 0.0, 1.0);
+                break;
+            }
+            case 'ArrowDown': {
+                video.volume = clamp(video.volume - 0.05, 0.0, 1.0);
+                break;
+            }
+            case 'Space':
+            case 'KeyK': {
+                this.handleClick();
+                break;
+            }
+            case 'KeyM': {
+                this.handleMute();
+                break;
+            }
+            case 'KeyF': {
+                this.handleFullScreen();
+                break;
+            }
+            case 'Digit0':
+            case 'Digit1':
+            case 'Digit2':
+            case 'Digit3':
+            case 'Digit4':
+            case 'Digit5':
+            case 'Digit6':
+            case 'Digit7':
+            case 'Digit8':
+            case 'Digit9': {
+                const progress = new Number(key.replace('Digit', '')) / 10.0;
+                this.handleSeekProgress(progress);
+                break;
+            }
+            case 'Home': {
+                this.handleSeek(0);
+                break;
+            }
+            case 'End': {
+                this.handleSeek(clamp(video.duration - 1.0, 0.0, video.duration));
+                break;
+            }
+            case 'Comma': {
+                if (!altKey && !ctrlKey && !metaKey && shiftKey) {
+                    this.handlePlaybackRate(clamp(video.playbackRate - 0.25, 0.25, 1.75));
+                }
+                break;
+            }
+            case 'Period': {
+                if (!altKey && !ctrlKey && !metaKey && shiftKey) {
+                    this.handlePlaybackRate(clamp(video.playbackRate + 0.25, 0.25, 1.75));
+                }
+                break;
+            }
+        }
+    };
+
+    handlePlaybackRate = rate => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        if (Number.isFinite(rate)) {
+            video.playbackRate = rate;
+        }
+    };
+
+    handleSeekProgress = progress => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.handleSeek(progress * video.duration);
+    };
+
+    handleSeek = time => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        if (Number.isFinite(time)) {
+            video.currentTime = time;
         }
     };
 
@@ -102,9 +186,7 @@ class Player extends React.Component {
         });
     }
 
-    handleClick = event => {
-        event.stopPropagation();
-
+    handleClick = () => {
         this.startStopPlayer();
     };
 
@@ -247,7 +329,7 @@ class Player extends React.Component {
     };
 
     handleFullScreen = event => {
-        event.stopPropagation();
+        event && event.stopPropagation();
 
         const root = this.contentRef.current;
         if (!root) return;
