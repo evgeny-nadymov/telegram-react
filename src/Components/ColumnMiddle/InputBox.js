@@ -877,24 +877,23 @@ class InputBox extends Component {
     };
 
     handleKeyDown = event => {
-        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
+        const { altKey, ctrlKey, key, keyCode, charCode, metaKey, shiftKey, repeat, nativeEvent } = event;
         const { editMessageId, replyToMessageId } = this.state;
 
-        // console.log('[keydown] input.handleKeyDown', key, keyCode, altKey, ctrlKey, keyCode, metaKey, repeat, shiftKey);
+        // console.log('[input] handleKeyDown', key, keyCode, charCode, altKey, ctrlKey, metaKey, shiftKey, repeat, event, nativeEvent);
 
-        switch (keyCode) {
+        switch (nativeEvent.code) {
             // ctrl+alt+0 fix
-            case 48: {
+            case 'Digit0': {
                 if (altKey && ctrlKey && !metaKey && !shiftKey) {
                     if (editMessageId) return;
                     if (replyToMessageId) return;
 
                     event.preventDefault();
                 }
-
                 break;
             }
-            case 13: {
+            case 'Enter': {
                 // enter+cmd or enter+ctrl
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     document.execCommand('insertLineBreak');
@@ -912,7 +911,7 @@ class InputBox extends Component {
                 break;
             }
             // esc
-            case 27: {
+            case 'Escape': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     if (!repeat && this.handleCancel()) {
                         event.preventDefault();
@@ -922,7 +921,7 @@ class InputBox extends Component {
                 break;
             }
             // arrow up
-            case 38: {
+            case 'ArrowUp': {
                 if (!repeat && !altKey && !ctrlKey && !metaKey && !shiftKey) {
                     const element = this.newMessageRef.current;
                     if (element && !element.innerText) {
@@ -940,7 +939,7 @@ class InputBox extends Component {
                 break;
             }
             // cmd + b
-            case 66: {
+            case 'KeyB': {
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleBold();
 
@@ -950,7 +949,7 @@ class InputBox extends Component {
                 break;
             }
             // cmd + i
-            case 73: {
+            case 'KeyI': {
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleItalic();
 
@@ -959,7 +958,7 @@ class InputBox extends Component {
                 }
                 break;
             }
-            case 75: {
+            case 'KeyK': {
                 // cmd + k
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleUrl();
@@ -977,7 +976,7 @@ class InputBox extends Component {
                 break;
             }
             // alt + cmd + n
-            case 192: {
+            case 'KeyN': {
                 if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleClear();
 

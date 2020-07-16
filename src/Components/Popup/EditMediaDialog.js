@@ -251,10 +251,10 @@ class EditMediaDialog extends React.Component {
     };
 
     handleKeyDown = event => {
-        const { altKey, ctrlKey, key, keyCode, metaKey, repeat, shiftKey } = event;
+        const { altKey, ctrlKey, key, keyCode, code, metaKey, shiftKey, repeat, nativeEvent } = event;
 
-        switch (keyCode) {
-            case 13: {
+        switch (nativeEvent.code) {
+            case 'Enter': {
                 // enter+cmd or enter+ctrl
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     document.execCommand('insertLineBreak');
@@ -272,7 +272,7 @@ class EditMediaDialog extends React.Component {
                 break;
             }
             // cmd + b
-            case 66: {
+            case 'KeyB': {
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleBold();
 
@@ -282,7 +282,7 @@ class EditMediaDialog extends React.Component {
                 break;
             }
             // cmd + i
-            case 73: {
+            case 'KeyI': {
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleItalic();
 
@@ -291,7 +291,7 @@ class EditMediaDialog extends React.Component {
                 }
                 break;
             }
-            case 75: {
+            case 'KeyK': {
                 // cmd + k
                 if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleUrl();
@@ -309,7 +309,7 @@ class EditMediaDialog extends React.Component {
                 break;
             }
             // alt + cmd + n
-            case 192: {
+            case 'KeyN': {
                 if (altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
                     this.handleClear();
 
