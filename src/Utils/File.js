@@ -35,6 +35,17 @@ import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function hasServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        const { controller } = navigator.serviceWorker;
+        if (!controller) console.log('[SW] no running SW');
+
+        return !!controller;
+    }
+
+    return false;
+}
+
 export async function getArrayBuffer(blob) {
     return new Promise((resolve) => {
         let fr = new FileReader();
@@ -791,7 +802,7 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
-    if (supports_streaming && TdLibController.streaming) return;
+    if (supports_streaming && TdLibController.streaming && hasServiceWorker()) return;
 
     const chatId = message ? message.chat_id : 0;
     const messageId = message ? message.id : 0;
@@ -1487,7 +1498,7 @@ function getViewerFile(media, size) {
             return [50, 50, document.document, document.mime_type, false];
         }
         case 'video': {
-            return [media.width, media.height, media.video, media.mime_type, media.supports_streaming && TdLibController.streaming];
+            return [media.width, media.height, media.video, media.mime_type, media.supports_streaming && TdLibController.streaming && hasServiceWorker()];
         }
         default: {
         }
@@ -1568,7 +1579,7 @@ function getMediaFile(chatId, messageId, size) {
 
                 if (video) {
                     const { width, height, video: file, mime_type, supports_streaming } = video;
-                    return [width, height, file, mime_type, supports_streaming && TdLibController.streaming];
+                    return [width, height, file, mime_type, supports_streaming && TdLibController.streaming && hasServiceWorker()];
                 }
             }
             break;
@@ -1577,7 +1588,7 @@ function getMediaFile(chatId, messageId, size) {
             const { video } = content;
             if (video) {
                 const { width, height, video: file, mime_type, supports_streaming } = video;
-                return [width, height, file, mime_type, supports_streaming && TdLibController.streaming];
+                return [width, height, file, mime_type, supports_streaming && TdLibController.streaming && hasServiceWorker()];
             }
             break;
         }
