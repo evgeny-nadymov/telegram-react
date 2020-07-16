@@ -26,6 +26,7 @@ class Animation extends React.Component {
     constructor(props) {
         super(props);
 
+        this.state = { };
         this.videoRef = React.createRef();
 
         this.setPlayerParams();
@@ -41,6 +42,7 @@ class Animation extends React.Component {
 
         this.ivInView = false;
         this.openIVMedia = Boolean(InstantViewStore.viewerContent);
+        this.playing = false;
 
         const player = this.videoRef.current;
         if (player) {
@@ -178,13 +180,15 @@ class Animation extends React.Component {
         }
     };
 
-    handleCanPlay = () => {
-        this.canPlay = true;
+    handlePlay = () => {
+        this.playing = true;
+        this.forceUpdate();
     };
 
     render() {
         const { displaySize, openMedia, t, title, caption, type, picker, style } = this.props;
         const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
+        const { playing } = this;
 
         const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
         if (!fitPhotoSize) return null;
@@ -214,7 +218,7 @@ class Animation extends React.Component {
                 })}
                 style={animationStyle}
                 onClick={openMedia}>
-                    {src ? (
+                    {src && (
                         isGif ? (
                             <img className='animation-preview' src={src} alt='' />
                         ) : (
@@ -228,12 +232,13 @@ class Animation extends React.Component {
                                 playsInline
                                 width={animationStyle.width}
                                 height={animationStyle.height}
-                                onCanPlay={this.handleCanPlay}
+                                onPlay={this.handlePlay}
                             >
                                 {source}
                             </video>
                         )
-                    ) : (
+                    )}
+                    { !playing && (
                         <>
                             <img
                                 className={classNames('animation-preview', {
