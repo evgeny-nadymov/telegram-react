@@ -1,57 +1,11 @@
 {
-  "_from": "opus-media-recorder@^0.8.0",
-  "_id": "opus-media-recorder@0.8.0",
-  "_inBundle": false,
-  "_integrity": "sha512-AIvJMpnJqZ18dFAU7Amtt5cZZp8oPzDoAOtobdTcLzwVNm/j815+GJmBupBzBZGBa4L940TEulm7Uu4tGOYDGQ==",
-  "_location": "/opus-media-recorder",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "range",
-    "registry": true,
-    "raw": "opus-media-recorder@^0.8.0",
-    "name": "opus-media-recorder",
-    "escapedName": "opus-media-recorder",
-    "rawSpec": "^0.8.0",
-    "saveSpec": null,
-    "fetchSpec": "^0.8.0"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.8.0.tgz",
-  "_shasum": "fd60017e91ef82a5c03d4a31df63d358c1c62702",
-  "_spec": "opus-media-recorder@^0.8.0",
-  "_where": "/Users/evgeny/telegram-react",
-  "author": {
-    "name": "Bumsik Kim"
-  },
-  "bundleDependencies": false,
-  "dependencies": {
-    "detect-browser": "^4.1.0",
-    "event-target-shim": "^3.0.2"
-  },
-  "deprecated": false,
+  "name": "opus-media-recorder",
+  "version": "0.8.0",
+  "author": "Bumsik Kim",
+  "license": "MIT",
+  "homepage": "https://github.com/kbumsik/opus-media-recorder",
   "description": "MedialRecorer polyfill for Opus recording using WebAssembly",
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
-    "babel-loader": "^8.0.5",
-    "eslint": "^5.12.0",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-loader": "^2.1.1",
-    "eslint-plugin-html": "^4.0.6",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^7.0.1",
-    "eslint-plugin-promise": "^4.0.1",
-    "eslint-plugin-standard": "^3.1.0",
-    "jsdoc": "^3.5.5",
-    "magic-string": "^0.25.2",
-    "webpack": "^4.28.4",
-    "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14",
-    "wrapper-webpack-plugin": "^2.1.0"
-  },
+  "main": "OpusMediaRecorder.js",
   "files": [
     "OpusMediaRecorder.js",
     "OpusMediaRecorder.umd.js",
@@ -66,7 +20,10 @@
     "WaveEncoder.js",
     "commonFunctions.js"
   ],
-  "homepage": "https://github.com/kbumsik/opus-media-recorder",
+  "repository": {
+    "type": "git",
+    "url": "https+git://github.com/kbumsik/opus-media-recorder"
+  },
   "keywords": [
     "MediaRecorder",
     "MediaStream",
@@ -86,19 +43,39 @@
     "Wav",
     "Wave"
   ],
-  "license": "MIT",
-  "main": "OpusMediaRecorder.js",
-  "name": "opus-media-recorder",
-  "repository": {
-    "type": "git",
-    "url": "https+git://github.com/kbumsik/opus-media-recorder"
-  },
   "scripts": {
     "build": "make",
     "build:production": "make PRODUCTION=1",
-    "clean": "make clean",
+    "webpack": "webpack-cli",
     "serve": "webpack-dev-server",
-    "webpack": "webpack-cli"
+    "clean": "make clean"
   },
-  "version": "0.8.0"
+  "dependencies": {
+    "detect-browser": "^4.1.0",
+    "event-target-shim": "^3.0.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.12.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-loader": "^2.1.1",
+    "eslint-plugin-html": "^4.0.6",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^3.1.0",
+    "jsdoc": "^3.5.5",
+    "magic-string": "^0.25.2",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14",
+    "wrapper-webpack-plugin": "^2.1.0"
+  }
+
+,"_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.8.0.tgz"
+,"_integrity": "sha512-AIvJMpnJqZ18dFAU7Amtt5cZZp8oPzDoAOtobdTcLzwVNm/j815+GJmBupBzBZGBa4L940TEulm7Uu4tGOYDGQ=="
+,"_from": "opus-media-recorder@0.8.0"
 }
