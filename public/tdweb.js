@@ -2500,7 +2500,7 @@ function () {
       for (var key in response) {
         var field = response[key];
 
-        if (field && typeof_default()(field) === 'object') {
+        if (field && typeof_default()(field) === 'object' && key != 'data' && key != 'arr') {
           response[key] = this.prepareResponse(field);
         }
       }
