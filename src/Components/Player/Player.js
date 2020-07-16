@@ -42,48 +42,75 @@ class Player extends React.Component {
     }
 
     onKeyDown = event => {
-        const { key, keyCode, code, altKey, ctrlKey, metaKey, shiftKey } = event;
-        console.log(`[pl] player.keyDown key=${key}`, key, keyCode, code, event);
+        const { key, code, altKey, ctrlKey, metaKey, shiftKey } = event;
 
         const video = this.videoRef.current;
         if (!video) return;
 
         switch (code) {
             case 'ArrowLeft': {
-                video.currentTime = clamp(video.currentTime - 5.0, 0.0, video.duration);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const time = clamp(video.currentTime - 5.0, 0.0, video.duration);
+                    this.handleSeek(time);
+                }
                 break;
             }
             case 'KeyJ': {
-                video.currentTime = clamp(video.currentTime - 10.0, 0.0, video.duration);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const time = clamp(video.currentTime - 10.0, 0.0, video.duration);
+                    this.handleSeek(time);
+                }
                 break;
             }
             case 'ArrowRight': {
-                video.currentTime = clamp(video.currentTime + 5.0, 0.0, video.duration);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const time = clamp(video.currentTime + 5.0, 0.0, video.duration);
+                    this.handleSeek(time);
+                }
                 break;
             }
             case 'KeyL': {
-                video.currentTime = clamp(video.currentTime + 10.0, 0.0, video.duration);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const time = clamp(video.currentTime + 10.0, 0.0, video.duration);
+                    this.handleSeek(time);
+                }
                 break;
             }
             case 'ArrowUp': {
-                video.volume = clamp(video.volume + 0.05, 0.0, 1.0);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    video.volume = clamp(video.volume + 0.05, 0.0, 1.0);
+                }
                 break;
             }
             case 'ArrowDown': {
-                video.volume = clamp(video.volume - 0.05, 0.0, 1.0);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    video.volume = clamp(video.volume - 0.05, 0.0, 1.0);
+                }
                 break;
             }
             case 'Space':
             case 'KeyK': {
-                this.handleClick();
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleClick();
+                }
                 break;
             }
             case 'KeyM': {
-                this.handleMute();
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleMute();
+                }
                 break;
             }
             case 'KeyF': {
-                this.handleFullScreen();
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleFullScreen();
+                }
+                break;
+            }
+            case 'KeyI': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handlePictureInPicture();
+                }
                 break;
             }
             case 'Digit0':
@@ -96,16 +123,22 @@ class Player extends React.Component {
             case 'Digit7':
             case 'Digit8':
             case 'Digit9': {
-                const progress = new Number(key.replace('Digit', '')) / 10.0;
-                this.handleSeekProgress(progress);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const progress = new Number(key.replace('Digit', '')) / 10.0;
+                    this.handleSeekProgress(progress);
+                }
                 break;
             }
             case 'Home': {
-                this.handleSeek(0);
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(0);
+                }
                 break;
             }
             case 'End': {
-                this.handleSeek(clamp(video.duration - 1.0, 0.0, video.duration));
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(clamp(video.duration - 1.0, 0.0, video.duration));
+                }
                 break;
             }
             case 'Comma': {
@@ -139,12 +172,15 @@ class Player extends React.Component {
         this.handleSeek(progress * video.duration);
     };
 
-    handleSeek = time => {
+    handleSeek = currentTime => {
         const video = this.videoRef.current;
         if (!video) return;
 
-        if (Number.isFinite(time)) {
-            video.currentTime = time;
+        if (Number.isFinite(currentTime)) {
+            this.setState({ currentTime },
+                () => {
+                    video.currentTime = currentTime;
+                });
         }
     };
 
@@ -257,8 +293,6 @@ class Player extends React.Component {
     handleLoadedData = () => {
         const video = this.videoRef.current;
         if (!video) return;
-
-        console.log('[pl] loadedData', video.currentTime, video.duration);
     };
 
     handleLoadedMetadata = () => {
@@ -266,8 +300,6 @@ class Player extends React.Component {
         if (!video) return;
 
         const { currentTime, duration, volume, buffered } = video;
-
-        console.log(`[pl] loadedMetadata waiting=${true} play=${this.state.play}`);
 
         this.setState({
                 duration,
@@ -312,7 +344,8 @@ class Player extends React.Component {
     };
 
     handleChangeCommitted = () => {
-        const { draggingTime } = this.state;
+        const { dragging, draggingTime } = this.state;
+        if (!dragging) return;
 
         this.setState({
             dragging: false,
@@ -475,6 +508,7 @@ class Player extends React.Component {
     handlePictureInPicture = () => {
         const video = this.videoRef.current;
         if (!video) return;
+        if (!video.duration) return;
 
         const pictureInPictureElement = document.pictureInPictureElement || document.mozPictureInPictureElement || document.webkitPictureInPictureElement;
         if (pictureInPictureElement) {
@@ -499,6 +533,10 @@ class Player extends React.Component {
 
     handleDoubleClick = event => {
         this.handleFullScreen(event);
+    };
+
+    handleVideoKeyDown = event => {
+        event.preventDefault();
     };
 
     render() {
@@ -548,6 +586,7 @@ class Player extends React.Component {
                         onVolumeChange={this.handleVolumeChange}
                         onProgress={this.handleProgress}
                         onWaiting={this.handleWaiting}
+                        onKeyDown={this.handleVideoKeyDown}
                     >
                         {children}
                     </video>

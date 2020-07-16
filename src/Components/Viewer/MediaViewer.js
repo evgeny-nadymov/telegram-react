@@ -155,23 +155,19 @@ class MediaViewer extends React.Component {
                 this.handleClose();
                 return;
             }
+            case 'ArrowLeft': {
+                this.handlePrevious();
+                return;
+            }
+            case 'ArrowRight': {
+                this.handleNext();
+                return;
+            }
         }
 
         const isVideo = isVideoMessage(chatId, currentMessageId);
         if (isVideo) {
             TdLibController.clientUpdate({ '@type': 'clientUpdateMediaShortcut', event });
-            return;
-        }
-
-        switch (key) {
-            case 'ArrowLeft': {
-                this.handlePrevious();
-                break;
-            }
-            case 'ArrowRight': {
-                this.handleNext();
-                break;
-            }
         }
     };
 

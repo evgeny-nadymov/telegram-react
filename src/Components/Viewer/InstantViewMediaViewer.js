@@ -58,7 +58,7 @@ class InstantViewMediaViewer extends React.Component {
         event.preventDefault();
 
 
-        const { index, blocks, hasNextMedia, hasPreviousMedia } = this.state;
+        const { index, blocks } = this.state;
         if (!blocks) return null;
         if (index === -1) return null;
 
@@ -76,23 +76,19 @@ class InstantViewMediaViewer extends React.Component {
                 this.handleClose();
                 return;
             }
+            case 'ArrowLeft': {
+                this.handlePrevious();
+                return;
+            }
+            case 'ArrowRight': {
+                this.handleNext();
+                return;
+            }
         }
 
         const isVideo = media['@type'] === 'video';
         if (isVideo) {
             TdLibController.clientUpdate({ '@type': 'clientUpdateMediaShortcut', event });
-            return;
-        }
-
-        switch (key) {
-            case 'ArrowLeft': {
-                this.handlePrevious();
-                break;
-            }
-            case 'ArrowRight': {
-                this.handleNext();
-                break;
-            }
         }
     };
 
