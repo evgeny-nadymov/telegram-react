@@ -1,59 +1,40 @@
 {
-  "name": "opus-media-recorder",
-  "version": "0.8.0",
-  "author": "Bumsik Kim",
-  "license": "MIT",
-  "homepage": "https://github.com/kbumsik/opus-media-recorder",
-  "description": "MedialRecorer polyfill for Opus recording using WebAssembly",
-  "main": "OpusMediaRecorder.js",
-  "files": [
-    "OpusMediaRecorder.js",
-    "OpusMediaRecorder.umd.js",
-    "encoderWorker.js",
-    "encoderWorker.umd.js",
-    "OggOpusEncoder.js",
-    "OggOpusEncoder.wasm",
-    "OggOpusEncoder.bin",
-    "WebMOpusEncoder.js",
-    "WebMOpusEncoder.wasm",
-    "WebMOpusEncoder.bin",
-    "WaveEncoder.js",
-    "commonFunctions.js"
+  "_args": [
+    [
+      "opus-media-recorder@0.8.0",
+      "/Users/evgeny/telegram-react"
+    ]
   ],
-  "repository": {
-    "type": "git",
-    "url": "https+git://github.com/kbumsik/opus-media-recorder"
+  "_from": "opus-media-recorder@0.8.0",
+  "_id": "opus-media-recorder@0.8.0",
+  "_inBundle": false,
+  "_integrity": "sha512-AIvJMpnJqZ18dFAU7Amtt5cZZp8oPzDoAOtobdTcLzwVNm/j815+GJmBupBzBZGBa4L940TEulm7Uu4tGOYDGQ==",
+  "_location": "/opus-media-recorder",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "opus-media-recorder@0.8.0",
+    "name": "opus-media-recorder",
+    "escapedName": "opus-media-recorder",
+    "rawSpec": "0.8.0",
+    "saveSpec": null,
+    "fetchSpec": "0.8.0"
   },
-  "keywords": [
-    "MediaRecorder",
-    "MediaStream",
-    "Opus",
-    "Ogg",
-    "WebM",
-    "WebAssembly",
-    "WASM",
-    "PCM",
-    "Decoder",
-    "Stream",
-    "Audio",
-    "Microphone",
-    "Mic",
-    "Recorder",
-    "Recording",
-    "Wav",
-    "Wave"
+  "_requiredBy": [
+    "/"
   ],
-  "scripts": {
-    "build": "make",
-    "build:production": "make PRODUCTION=1",
-    "webpack": "webpack-cli",
-    "serve": "webpack-dev-server",
-    "clean": "make clean"
+  "_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.8.0.tgz",
+  "_spec": "0.8.0",
+  "_where": "/Users/evgeny/telegram-react",
+  "author": {
+    "name": "Bumsik Kim"
   },
   "dependencies": {
     "detect-browser": "^4.1.0",
     "event-target-shim": "^3.0.2"
   },
+  "description": "MedialRecorer polyfill for Opus recording using WebAssembly",
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
@@ -73,9 +54,54 @@
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14",
     "wrapper-webpack-plugin": "^2.1.0"
-  }
-
-,"_resolved": "https://registry.npmjs.org/opus-media-recorder/-/opus-media-recorder-0.8.0.tgz"
-,"_integrity": "sha512-AIvJMpnJqZ18dFAU7Amtt5cZZp8oPzDoAOtobdTcLzwVNm/j815+GJmBupBzBZGBa4L940TEulm7Uu4tGOYDGQ=="
-,"_from": "opus-media-recorder@0.8.0"
+  },
+  "files": [
+    "OpusMediaRecorder.js",
+    "OpusMediaRecorder.umd.js",
+    "encoderWorker.js",
+    "encoderWorker.umd.js",
+    "OggOpusEncoder.js",
+    "OggOpusEncoder.wasm",
+    "OggOpusEncoder.bin",
+    "WebMOpusEncoder.js",
+    "WebMOpusEncoder.wasm",
+    "WebMOpusEncoder.bin",
+    "WaveEncoder.js",
+    "commonFunctions.js"
+  ],
+  "homepage": "https://github.com/kbumsik/opus-media-recorder",
+  "keywords": [
+    "MediaRecorder",
+    "MediaStream",
+    "Opus",
+    "Ogg",
+    "WebM",
+    "WebAssembly",
+    "WASM",
+    "PCM",
+    "Decoder",
+    "Stream",
+    "Audio",
+    "Microphone",
+    "Mic",
+    "Recorder",
+    "Recording",
+    "Wav",
+    "Wave"
+  ],
+  "license": "MIT",
+  "main": "OpusMediaRecorder.js",
+  "name": "opus-media-recorder",
+  "repository": {
+    "type": "git",
+    "url": "https+git://github.com/kbumsik/opus-media-recorder"
+  },
+  "scripts": {
+    "build": "make",
+    "build:production": "make PRODUCTION=1",
+    "clean": "make clean",
+    "serve": "webpack-dev-server",
+    "webpack": "webpack-cli"
+  },
+  "version": "0.8.0"
 }
