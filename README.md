@@ -48,6 +48,18 @@ Define its value to be the string `http://{username}.github.io/{repo-name}`, whe
 ```
 $ npm run deploy
 ```
+
+### Running in a Docker container
+
+In order to run Telegram-React inside a Docker container, you need to provide your Telegram API key as build arguments.
+
+```
+docker build . --build-arg TELEGRAM_API_ID=0000000 --build-arg TELEGRAM_API_HASH=00000000000000000
+```
+Replace these values with your own Telegram API key information, which you can obtain [here](https://my.telegram.org/apps).
+
+The Docker build will perform all the necessary steps to get a working build of Telegram-React.
+
 ### References
 
 1. [Deploying a React App (created using create-react-app) to GitHub Pages](https://github.com/gitname/react-gh-pages)
