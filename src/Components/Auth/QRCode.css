@@ -1,0 +1,52 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+#qr-canvas {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 287px;
+}
+
+@keyframes qr-content-animation {
+    0% { transform: scale(1.5); }
+    100% { transform: scale(1.0); }
+}
+
+.qr-content {
+    margin: 12px auto;
+    position: relative;
+    width: 287px;
+    height: 287px;
+}
+
+.qr-telegram-logo {
+    width: 91px;
+    height: 91px;
+    background: white;
+    position: absolute;
+    left: 98px;
+    top: 98px;
+    box-sizing: border-box;
+}
+
+.telegram-logo {
+    width: 91px;
+    height: 91px;
+    padding: 7px;
+    box-sizing: border-box;
+    fill: var(--color-accent-main);
+    animation: 0.25s ease-out 0.1s both qr-content-animation;
+}
+
+.auth-qr-subtitle {
+    color: var(--text-secondary);
+    min-height: 72px;
+    margin: 12px auto;
+    text-align: left;
+    white-space: pre;
+}

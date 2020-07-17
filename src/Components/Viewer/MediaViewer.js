@@ -145,6 +145,8 @@ class MediaViewer extends React.Component {
         const { chatId } = this.props;
         const { currentMessageId } = this.state;
 
+        const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+
         const { key } = event;
         switch (key) {
             case 'Escape': {
@@ -153,15 +155,27 @@ class MediaViewer extends React.Component {
                 }
 
                 this.handleClose();
+                event.stopPropagation();
+                event.preventDefault();
                 return;
             }
             case 'ArrowLeft': {
-                this.handlePrevious();
-                return;
+                if (!fullscreenElement) {
+                    this.handlePrevious();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+                break;
             }
             case 'ArrowRight': {
-                this.handleNext();
-                return;
+                if (!fullscreenElement) {
+                    this.handleNext();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+                break;
             }
         }
 

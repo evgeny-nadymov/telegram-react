@@ -10,6 +10,7 @@ import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
 // import Lottie from '../Viewer/Lottie';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
+import QRCode from './QRCode';
 
 const Lottie = React.lazy(() => import('../Viewer/Lottie'));
 
@@ -180,7 +181,11 @@ class Caption extends React.Component {
 
         let control = null;
         switch (state['@type']) {
+            case 'authorizationStateWaitOtherDeviceConfirmation': {
+                break;
+            }
             case 'authorizationStateWaitPhoneNumber':
+            case 'authorizationStateWaitRegistration':
             case 'authorizationStateWaitEncryptionKey':
             case 'authorizationStateWaitTdlibParameters':
             case 'authorizationStateWaitTdlib': {
@@ -214,6 +219,7 @@ class Caption extends React.Component {
                 break;
             }
             default:
+                control = <Logo className='auth-caption-telegram-logo' />;
                 break;
         }
 

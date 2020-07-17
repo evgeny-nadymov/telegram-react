@@ -50,6 +50,10 @@ class AuthorizationStore extends EventEmitter {
                 this.current = authorization_state;
                 this.save(authorization_state);
 
+                if (authorization_state['@type'] !== 'authorizationStateReady') {
+                    this.setCountryCode();
+                }
+
                 this.emit(update['@type'], update);
                 break;
             }
@@ -58,8 +62,20 @@ class AuthorizationStore extends EventEmitter {
         }
     };
 
+    setCountryCode = async () => {
+        const { code } = this;
+        if (code) return;
+
+        this.code = await TdLibController.send({ '@type': 'getCountryCode' });
+        TdLibController.clientUpdate({ '@type': 'clientUpdateCountryCode', code: this.code });
+    };
+
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateCountryCode': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMonkeyIdle': {
                 this.emit(update['@type'], update);
                 break;

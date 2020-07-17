@@ -24,7 +24,7 @@
 }
 
 .auth-subtitle {
-    color: #707579;
+    color: var(--text-secondary);
     min-height: 72px;
     margin: 0 auto 14px auto;
     text-align: center;

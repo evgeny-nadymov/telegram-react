@@ -44,6 +44,16 @@
     user-select: none;
 }
 
+@keyframes player-panel-hidden-animation {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.player-panel-hidden {
+    animation: 1s ease-out 1s both player-panel-hidden-animation;
+    pointer-events: none;
+}
+
 .player-button {
     width: 24px;
     height: 24px;
@@ -174,4 +184,16 @@
     bottom: 0;
     left: 0;
     margin: 6px 0;
+}
+
+.player-hint {
+    background: rgba(0, 0, 0, 0.4);
+    position: absolute;
+    transform: translate(-50%, 0);
+    left: 50%;
+    top: 50px;
+    padding: 12px;
+    border-radius: 6px;
+    user-select: none;
+    pointer-events: none;
 }

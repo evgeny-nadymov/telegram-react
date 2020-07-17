@@ -239,8 +239,23 @@ class TelegramApp extends Component {
 
     handleChangePhone = () => {
         this.setState({
-            authorizationState: { '@type': 'authorizationStateWaitPhoneNumber' }
+            changePhone: true
         });
+    };
+
+    handleRequestQRCode = () => {
+        const { changePhone, authorizationState } = this.state;
+
+        if (changePhone
+            && authorizationState
+            && authorizationState['@type'] === 'authorizationStateWaitOtherDeviceConfirmation') {
+            this.setState({ changePhone: false });
+        } else {
+            TdLibController.send({
+                '@type': 'requestQrCodeAuthentication',
+                other_user_ids: []
+            });
+        }
     };
 
     handleDragOver = event => {
@@ -265,26 +280,18 @@ class TelegramApp extends Component {
 
     render() {
         const { t, theme } = this.props;
-        const { inactive, nativeMobile, tdlibDatabaseExists, fatalError } = this.state;
-        let { authorizationState, prevAuthorizationState } = this.state;
-        const state = authorizationState;
-        if (
-            !authorizationState ||
-            authorizationState['@type'] === 'authorizationStateWaitEncryptionKey' ||
-            authorizationState['@type'] === 'authorizationStateWaitTdlibParameters'
+        const { inactive, nativeMobile, fatalError } = this.state;
+        let { authorizationState: state, prevAuthorizationState, changePhone } = this.state;
+        if (changePhone) {
+            state = { '@type': 'authorizationStateWaitPhoneNumber' };
+        } else if (!state ||
+            state['@type'] === 'authorizationStateWaitEncryptionKey' ||
+            state['@type'] === 'authorizationStateWaitTdlibParameters'
         ) {
             if (prevAuthorizationState) {
-                authorizationState = prevAuthorizationState;
-            }
-            // else if (tdlibDatabaseExists) {
-            //     authorizationState = {
-            //         '@type': 'authorizationStateReady'
-            //     }
-            // }
-            else {
-                authorizationState = {
-                    '@type': 'authorizationStateWaitPhoneNumber'
-                };
+                state = prevAuthorizationState;
+            } else {
+                state = { '@type': 'authorizationStateWaitPhoneNumber' };
             }
         }
 
@@ -299,45 +306,28 @@ class TelegramApp extends Component {
             page = <NativeAppPage />;
         } else if (inactive) {
             page = <InactivePage />;
-        } else if (authorizationState) {
-            switch (authorizationState['@type']) {
+        } else if (state) {
+            switch (state['@type']) {
                 case 'authorizationStateClosed':
                 case 'authorizationStateClosing':
                 case 'authorizationStateLoggingOut':
                 case 'authorizationStateReady': {
                     break;
                 }
+                case 'authorizationStateWaitOtherDeviceConfirmation':
                 case 'authorizationStateWaitCode':
+                case 'authorizationStateWaitRegistration':
                 case 'authorizationStateWaitPassword':
                 case 'authorizationStateWaitPhoneNumber':
                 case 'authorizationStateWaitTdlib':
-                    page = <AuthForm authorizationState={authorizationState} onChangePhone={this.handleChangePhone} />;
+                    page = <AuthForm authorizationState={state} onChangePhone={this.handleChangePhone} onRequestQRCode={this.handleRequestQRCode}/>;
                     break;
                 case 'authorizationStateWaitEncryptionKey':
                 case 'authorizationStateWaitTdlibParameters': {
-                    // if (!tdlibDatabaseExists) {
-                    //     page = (
-                    //         <AuthForm
-                    //             authorizationState={authorizationState}
-                    //             onChangePhone={this.handleChangePhone}
-                    //         />
-                    //     );
-                    // }
-
                     break;
                 }
             }
         }
-
-        // console.log(
-        //     'TelegramApp.render',
-        //     state,
-        //     prevAuthorizationState,
-        //     'nativeMobile=' + nativeMobile,
-        //     'inactive=' + inactive,
-        //     'tdlibDb=' + tdlibDatabaseExists,
-        //     page
-        // );
 
         return (
             <div

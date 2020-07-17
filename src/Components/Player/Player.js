@@ -16,8 +16,19 @@ import PictureInPictureIcon from '@material-ui/icons/PictureInPicture';
 import FullScreen from '../../Assets/Icons/FullScreen';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
 import PauseIcon from '../../Assets/Icons/Pause';
+import Hint from './Hint';
 import Progress from './Progress';
 import { clamp, getDurationString } from '../../Utils/Common';
+import {
+    PLAYER_PLAYBACKRATE_MAX,
+    PLAYER_PLAYBACKRATE_MIN,
+    PLAYER_PLAYBACKRATE_STEP,
+    PLAYER_SEEK_STEP_BIG,
+    PLAYER_SEEK_STEP_SMALL,
+    PLAYER_VOLUME_MAX,
+    PLAYER_VOLUME_MIN,
+    PLAYER_VOLUME_STEP
+} from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Player.css';
@@ -37,7 +48,8 @@ class Player extends React.Component {
             play: true,
             dragging: false,
             buffered: null,
-            waiting: true
+            waiting: true,
+            hidden: false
         };
     }
 
@@ -47,44 +59,47 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
+        let handled = false;
         switch (code) {
             case 'ArrowLeft': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    const time = clamp(video.currentTime - 5.0, 0.0, video.duration);
-                    this.handleSeek(time);
+                    this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_SMALL);
+                    handled = true;
                 }
                 break;
             }
             case 'KeyJ': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    const time = clamp(video.currentTime - 10.0, 0.0, video.duration);
-                    this.handleSeek(time);
+                    this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_BIG);
+                    handled = true;
                 }
                 break;
             }
             case 'ArrowRight': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    const time = clamp(video.currentTime + 5.0, 0.0, video.duration);
-                    this.handleSeek(time);
+                    this.handleSeek(video.currentTime + PLAYER_SEEK_STEP_SMALL);
+                    handled = true;
                 }
                 break;
             }
             case 'KeyL': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    const time = clamp(video.currentTime + 10.0, 0.0, video.duration);
-                    this.handleSeek(time);
+                    this.handleSeek(video.currentTime + PLAYER_SEEK_STEP_BIG);
+                    handled = true;
                 }
                 break;
             }
             case 'ArrowUp': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    video.volume = clamp(video.volume + 0.05, 0.0, 1.0);
+                    this.handleVolume(video.volume + PLAYER_VOLUME_STEP);
+                    handled = true;
                 }
                 break;
             }
             case 'ArrowDown': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    video.volume = clamp(video.volume - 0.05, 0.0, 1.0);
+                    this.handleVolume(video.volume - PLAYER_VOLUME_STEP);
+                    handled = true;
                 }
                 break;
             }
@@ -92,24 +107,28 @@ class Player extends React.Component {
             case 'KeyK': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handleClick();
+                    handled = true;
                 }
                 break;
             }
             case 'KeyM': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handleMute();
+                    handled = true;
                 }
                 break;
             }
             case 'KeyF': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handleFullScreen();
+                    handled = true;
                 }
                 break;
             }
             case 'KeyI': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handlePictureInPicture();
+                    handled = true;
                 }
                 break;
             }
@@ -126,43 +145,64 @@ class Player extends React.Component {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     const progress = new Number(key.replace('Digit', '')) / 10.0;
                     this.handleSeekProgress(progress);
+                    handled = true;
                 }
                 break;
             }
             case 'Home': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handleSeek(0);
+                    handled = true;
                 }
                 break;
             }
             case 'End': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
-                    this.handleSeek(clamp(video.duration - 1.0, 0.0, video.duration));
+                    this.handleSeek(video.duration - 1.0);
+                    handled = true;
                 }
                 break;
             }
             case 'Comma': {
                 if (!altKey && !ctrlKey && !metaKey && shiftKey) {
-                    this.handlePlaybackRate(clamp(video.playbackRate - 0.25, 0.25, 1.75));
+                    this.handlePlaybackRate(video.playbackRate - PLAYER_PLAYBACKRATE_STEP);
+                    handled = true;
                 }
                 break;
             }
             case 'Period': {
                 if (!altKey && !ctrlKey && !metaKey && shiftKey) {
-                    this.handlePlaybackRate(clamp(video.playbackRate + 0.25, 0.25, 1.75));
+                    this.handlePlaybackRate(video.playbackRate + PLAYER_PLAYBACKRATE_STEP);
+                    handled = true;
                 }
                 break;
             }
         }
+
+        if (handled) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    };
+
+    handleVolume = volume => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        volume = clamp(volume, PLAYER_VOLUME_MIN, PLAYER_VOLUME_MAX);
+
+        video.volume = volume;
+        this.showMediaHint(`${Math.round(video.volume * 100)}%`);
     };
 
     handlePlaybackRate = rate => {
         const video = this.videoRef.current;
         if (!video) return;
 
-        if (Number.isFinite(rate)) {
-            video.playbackRate = rate;
-        }
+        rate = clamp(rate, PLAYER_PLAYBACKRATE_MIN, PLAYER_PLAYBACKRATE_MAX)
+
+        video.playbackRate = rate;
+        this.showMediaHint(`${rate}x`);
     };
 
     handleSeekProgress = progress => {
@@ -176,12 +216,10 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
-        if (Number.isFinite(currentTime)) {
-            this.setState({ currentTime },
-                () => {
-                    video.currentTime = currentTime;
-                });
-        }
+        currentTime = clamp(currentTime, 0, video.duration || 0);
+
+        video.currentTime = currentTime;
+        this.setState({ currentTime });
     };
 
     componentDidMount() {
@@ -230,10 +268,18 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
-        if (video.paused) {
-            video.play()
+        const { waiting } = this.state;
+        if (waiting) {
+            this.setState({
+                play: !this.state.play,
+                hidden: false
+            });
         } else {
-            video.pause();
+            if (video.paused) {
+                video.play()
+            } else {
+                video.pause();
+            }
         }
     };
 
@@ -241,7 +287,8 @@ class Player extends React.Component {
         const { onPlay } = this.props;
 
         this.setState({
-            play: true
+            play: true,
+            hidden: true
         });
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerPlay' });
@@ -252,7 +299,8 @@ class Player extends React.Component {
         const { onPause } = this.props;
 
         this.setState({
-            play: false
+            play: false,
+            hidden: false
         });
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerPause' });
@@ -302,18 +350,12 @@ class Player extends React.Component {
         const { currentTime, duration, volume, buffered } = video;
 
         this.setState({
-                duration,
-                currentTime: 0,
-                volume,
-                waiting: true,
-                buffered
-            },
-            () => {
-                const { play } = this.state;
-                if (play) {
-                    video.play();
-                }
-            });
+            duration,
+            currentTime: 0,
+            volume,
+            waiting: true,
+            buffered
+        });
 
         return;
         const stream = video.captureStream();
@@ -435,16 +477,35 @@ class Player extends React.Component {
         onVolumeChange && onVolumeChange(event);
     };
 
-    handleVolumeSliderChange = (event, value) => {
+    handleVolumeSliderChange = (event, volume) => {
+        if (volume === this.state.volume) return;
+
         this.setState({
-            volume: value
+            volume
         }, () => {
             const video = this.videoRef.current;
             if (!video) return;
 
-            video.volume = value;
+            video.volume = volume;
         });
     };
+
+    handleVolumeSliderChangeCommitted = event => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        document.activeElement.blur();
+    };
+
+    showMediaHint(text) {
+        const { fileId } = this.props;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaHint',
+            fileId,
+            text
+        });
+    }
 
     handleMute = () => {
         const video = this.videoRef.current;
@@ -502,10 +563,20 @@ class Player extends React.Component {
     handleCanPlay = () => {
         this.setState({
             waiting: false
+        }, () => {
+            const video = this.videoRef.current;
+            if (!video) return;
+
+            const { play } = this.state;
+            if (play) {
+                video.play();
+            } else {
+                video.pause();
+            }
         });
     };
 
-    handlePictureInPicture = () => {
+    handlePictureInPicture = async () => {
         const video = this.videoRef.current;
         if (!video) return;
         if (!video.duration) return;
@@ -516,13 +587,32 @@ class Player extends React.Component {
             return;
         }
 
-        this.requestPictureInPicture(video);
+        try {
+            const pipWindow = await this.requestPictureInPicture(video);
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaViewerContent',
+                content: null
+            });
+            video.onpause = event => {
+                event.target.play();
+                event.target.onpause = null;
+            };
+            video.addEventListener('leavepictureinpicture', this.handleLeavePictureInPicture);
+        } catch (error) { }
     };
 
-    requestPictureInPicture(element) {
-        const method = element.requestPictureInPicture || element.mozRequestPictureInPicture || element.webkitRequestPictureInPicture;
+    handleLeavePictureInPicture = event => {
+        const video = this.videoRef.current;
 
-        method && method.call(element);
+        if (!video) event.target.src = null;
+        event.target.removeEventListener('leavepictureinpicture', this.handleLeavePictureInPicture);
+    };
+
+    async requestPictureInPicture(element) {
+        const method = element.requestPictureInPicture || element.mozRequestPictureInPicture || element.webkitRequestPictureInPicture;
+        if (!method) return null;
+
+        return method.call(element);
     }
 
     exitPictureInPicture() {
@@ -539,9 +629,37 @@ class Player extends React.Component {
         event.preventDefault();
     };
 
+    handlePanelEnter = () => {
+        this.panelEnter = true;
+    };
+
+    handlePanelLeave = () => {
+        this.panelEnter = false;
+    };
+
+    handleMouseOver = event => {
+        const { hidden } = this.state;
+
+        if (hidden) {
+            this.setState({
+                hidden: false
+            });
+        }
+
+        clearTimeout(this.mouseOverTimeout);
+        this.mouseOverTimeout = setTimeout(() => {
+            if (this.panelEnter) return;
+            if (!this.state.play) return;
+
+            this.setState({
+                hidden: true
+            });
+        }, 1000);
+    }
+
     render() {
-        const { children, src, className, style, width, height, poster } = this.props;
-        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered } = this.state;
+        const { children, src, className, style, width, height, poster, fileId } = this.props;
+        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered, hidden } = this.state;
 
         const time = dragging ? draggingTime : currentTime;
         const value = duration > 0 ? time / duration : 0;
@@ -567,7 +685,7 @@ class Player extends React.Component {
                 onClick={this.handleClickRoot}
                 onDoubleClick={this.handleDoubleClick}
                 style={rootStyle}>
-                <div ref={this.contentRef} className='player-content'>
+                <div ref={this.contentRef} className='player-content' onMouseMove={this.handleMouseOver}>
                     <video
                         className='player-video'
                         ref={this.videoRef}
@@ -590,11 +708,14 @@ class Player extends React.Component {
                     >
                         {children}
                     </video>
+                    <Hint fileId={fileId}/>
                     <div
-                        className='player-panel'
+                        className={classNames('player-panel', { 'player-panel-hidden': hidden })}
                         onClick={e => e.stopPropagation()}
                         onMouseDown={e => e.stopPropagation()}
-                        onDoubleClick={e => e.stopPropagation()}>
+                        onDoubleClick={e => e.stopPropagation()}
+                        onMouseEnter={this.handlePanelEnter}
+                        onMouseLeave={this.handlePanelLeave}>
                         <div className='player-slider'>
                             <span className='player-slider-buffer-track' style={{ width: bufferedValue * 100 + '%'}}/>
                             <Slider
@@ -635,6 +756,7 @@ class Player extends React.Component {
                                         active: 'player-volume-active'
                                     }}
                                     onChange={this.handleVolumeSliderChange}
+                                    onChangeCommitted={this.handleVolumeSliderChangeCommitted}
                                 />
                             </div>
                             <button className='player-button' onClick={this.handleMute}>
@@ -643,9 +765,9 @@ class Player extends React.Component {
                             <button className='player-button' disabled={!fullscreenEnabled} onClick={this.handleFullScreen}>
                                 <FullScreen/>
                             </button>
-                            <button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>
-                                <PictureInPictureIcon/>
-                            </button>
+                            {/*<button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>*/}
+                            {/*    <PictureInPictureIcon/>*/}
+                            {/*</button>*/}
                         </div>
                     </div>
                     <Progress waiting={waiting}/>
@@ -655,7 +777,9 @@ class Player extends React.Component {
     }
 }
 
-Player.propTypes = {};
+Player.propTypes = {
+    fileId: PropTypes.number
+};
 
 //export default React.forwardRef((props, ref) => (<Player forwardedRef={ref} {...props}/>));
 

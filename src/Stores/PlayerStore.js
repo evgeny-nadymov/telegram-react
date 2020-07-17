@@ -224,6 +224,10 @@ class PlayerStore extends EventEmitter {
                 this.emit(update['@type'], update);
                 break;
             }
+            case 'clientUpdateMediaHint': {
+                this.emit(update['@type'], update);
+                break;
+            }
             case 'clientUpdateMediaTime': {
                 const { duration, currentTime, timestamp } = update;
 

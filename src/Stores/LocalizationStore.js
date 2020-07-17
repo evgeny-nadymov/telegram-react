@@ -19,9 +19,14 @@ const lng = localStorage.getItem('i18next') || fallbackLng;
 i18n.use(initReactI18next).init({
     ns: [defaultNS, 'local'],
     defaultNS,
-    fallbackNS: ['local', 'emoji', 'settings', 'translation', 'search'],
+    fallbackNS: ['auth', 'local', 'emoji', 'settings', 'translation', 'search'],
     resources: {
         en: {
+            auth: {
+                QRHint: '1. Open Telegram on your phone\n2. Go to Settings > Devices > Scan QR\n3. Scan this image to Log in',
+                LogInByPhone: 'Or log in by using your phone number',
+                LogInViaQR: 'Quick log in using QR code'
+            },
             search: {
                 ChatsAndContacts: 'Chats and contacts',
                 SearchMessagesIn: 'Search messages in'
@@ -109,6 +114,11 @@ i18n.use(initReactI18next).init({
         },
 
         ru: {
+            auth: {
+                QRHint: '1. Open Telegram on your phone\n2. Go to Settings > Devices > Scan QR\n3. Scan this image to Log in',
+                LogInByPhone: 'Or log in by using your phone number',
+                LogInViaQR: 'Quick log in using QR code'
+            },
             search: {
                 ChatsAndContacts: 'Чаты и контакты',
                 SearchMessagesIn: 'Искать сообщения в'
@@ -193,6 +203,11 @@ i18n.use(initReactI18next).init({
         },
 
         it: {
+            auth: {
+                QRHint: '1. Open Telegram on your phone\n2. Go to Settings > Devices > Scan QR\n3. Scan this image to Log in',
+                LogInByPhone: 'Or log in by using your phone number',
+                LogInViaQR: 'Quick log in using QR code'
+            },
             search: {
                 ChatsAndContacts: 'Chat e contatti',
                 SearchMessagesIn: 'Cerca messaggi in'
@@ -276,6 +291,11 @@ i18n.use(initReactI18next).init({
         },
 
         es: {
+            auth: {
+                QRHint: '1. Open Telegram on your phone\n2. Go to Settings > Devices > Scan QR\n3. Scan this image to Log in',
+                LogInByPhone: 'Or log in by using your phone number',
+                LogInViaQR: 'Quick log in using QR code'
+            },
             search: {
                 ChatsAndContacts: 'Chats y contactos',
                 SearchMessagesIn: 'Buscar mensajes en'

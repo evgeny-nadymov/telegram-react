@@ -1,0 +1,15 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+@keyframes player-hint-animation {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.player-hint-animated {
+    animation: 1s ease-out 1s both player-hint-animation;
+}
