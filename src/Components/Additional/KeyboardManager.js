@@ -15,7 +15,7 @@ class KeyboardManager {
     constructor() {
         this.handlers = [];
 
-        document.addEventListener('keydown', this.handleKeyDown);
+        document.addEventListener('keypress', this.handleKeyDown);
     }
 
     handleKeyDown = event => {
