@@ -75,11 +75,18 @@ class TelegramApp extends Component {
         if (!authorizationState) return;
         if (authorizationState['@type'] !== 'authorizationStateReady') return;
         if (this.keyMap.size > 3) return;
-        if (isComposing) return;
+
+        if (modalManager.modals.length > 0) {
+            return;
+        }
+
+        if (event.isComposing) {
+            return;
+        }
 
         switch (key) {
             case 'Escape': {
-                if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
                     // console.log('[keydown] esc', this.editMessageId, this.replyMessageId);
                     if (this.editMessageId) {
                         editMessage(chatId, 0);
@@ -103,7 +110,7 @@ class TelegramApp extends Component {
                 break;
             }
             case '0': {
-                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat) {
                     if (this.editMessageId) return;
                     if (this.replyMessageId) return;
 
@@ -126,7 +133,7 @@ class TelegramApp extends Component {
             case '3':
             case '4':
             case '5': {
-                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat && !modalManager.modals.length) {
+                if (altKey && ctrlKey && !metaKey && !shiftKey && !repeat) {
                     if (this.editMessageId) return;
                     if (this.replyMessageId) return;
 

@@ -54,6 +54,14 @@ class InstantViewMediaViewer extends React.Component {
     }
 
     onKeyDown = event => {
+        if (modalManager.modals.length > 0) {
+            return;
+        }
+
+        if (event.isComposing) {
+            return;
+        }
+
         const { index, blocks } = this.state;
         if (!blocks) return null;
         if (index === -1) return null;
@@ -65,10 +73,6 @@ class InstantViewMediaViewer extends React.Component {
         const { key } = event;
         switch (key) {
             case 'Escape': {
-                if (modalManager.modals.length > 0) {
-                    return;
-                }
-
                 this.handleClose();
                 event.stopPropagation();
                 event.preventDefault();

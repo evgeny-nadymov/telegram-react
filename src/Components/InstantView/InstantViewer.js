@@ -220,19 +220,29 @@ class InstantViewer extends React.Component {
     }
 
     onKeyDown = event => {
-        if (event.keyCode === 27) {
-            if (modalManager.modals.length > 0) {
-                return;
+        if (modalManager.modals.length > 0) {
+            return;
+        }
+
+        if (event.isComposing) {
+            return;
+        }
+
+        switch (event.key) {
+            case 'Escape': {
+                event.stopPropagation();
+                event.preventDefault();
+
+                const { media } = this.state;
+
+                if (media) {
+                    setInstantViewViewerContent(null);
+                    return;
+                }
+
+                this.handleClose();
+                break;
             }
-
-            const { media } = this.state;
-
-            if (media) {
-                setInstantViewViewerContent(null);
-                return;
-            }
-
-            this.handleClose();
         }
     };
 

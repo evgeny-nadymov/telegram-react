@@ -112,19 +112,33 @@ class ProfileMediaViewer extends React.Component {
     }
 
     handleKeyDown = event => {
-        event.preventDefault();
-        event.stopPropagation();
+        if (modalManager.modals.length > 0) {
+            return;
+        }
 
-        if (event.keyCode === 27) {
-            if (modalManager.modals.length > 0) {
+        if (event.isComposing) {
+            return;
+        }
+
+        switch (event.key) {
+            case 'Escape': {
+                this.handleClose();
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
-
-            this.handleClose();
-        } else if (event.keyCode === 39) {
-            this.handlePrevious();
-        } else if (event.keyCode === 37) {
-            this.handleNext();
+            case 'ArrowLeft': {
+                this.handlePrevious();
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            case 'ArrowRight': {
+                this.handleNext();
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
         }
     };
 

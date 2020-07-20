@@ -881,12 +881,10 @@ class InputBox extends Component {
         const { editMessageId, replyToMessageId } = this.state;
 
         // console.log('[input] handleKeyDown', key, keyCode, charCode, altKey, ctrlKey, metaKey, shiftKey, repeat, event, nativeEvent, nativeEvent.isComposing);
-        console.log('[input] handleKeyDown', key, keyCode, charCode, nativeEvent.isComposing);
 
         // fix CJK input
         const { isComposing } = nativeEvent;
         if (isComposing) {
-            event.stopPropagation();
             return;
         }
 

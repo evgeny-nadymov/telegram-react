@@ -20,12 +20,16 @@ class SidebarPage extends React.Component {
     }
 
     handleKeyDown = event => {
+        if (modalManager.modals.length > 0) {
+            return;
+        }
+
+        if (event.isComposing) {
+            return;
+        }
+
         switch (event.key) {
             case 'Escape':
-                if (modalManager.modals.length > 0) {
-                    return;
-                }
-
                 const { onClose } = this.props;
                 if (onClose) {
                     event.preventDefault();
