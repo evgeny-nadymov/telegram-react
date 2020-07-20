@@ -253,6 +253,13 @@ class EditMediaDialog extends React.Component {
     handleKeyDown = event => {
         const { altKey, ctrlKey, key, keyCode, code, metaKey, shiftKey, repeat, nativeEvent } = event;
 
+        // fix CJK input
+        const { isComposing } = nativeEvent;
+        if (isComposing) {
+            event.stopPropagation();
+            return;
+        }
+
         switch (nativeEvent.code) {
             case 'Enter': {
                 // enter+cmd or enter+ctrl

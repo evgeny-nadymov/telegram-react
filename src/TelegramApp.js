@@ -67,7 +67,7 @@ class TelegramApp extends Component {
     }
 
     handleKeyDown = async event => {
-        const { altKey, ctrlKey, keyCode, key, metaKey, repeat, shiftKey } = event;
+        const { altKey, ctrlKey, keyCode, key, metaKey, repeat, shiftKey, isComposing } = event;
 
         this.keyMap.set(key, key);
 
@@ -75,6 +75,7 @@ class TelegramApp extends Component {
         if (!authorizationState) return;
         if (authorizationState['@type'] !== 'authorizationStateReady') return;
         if (this.keyMap.size > 3) return;
+        if (isComposing) return;
 
         switch (key) {
             case 'Escape': {
@@ -91,7 +92,6 @@ class TelegramApp extends Component {
                     else if (!chatId) {
                         // open search if no one dialog opened
                         searchChat(0, null);
-
                         return;
                     }
 
