@@ -16,6 +16,7 @@ import CacheStore from '../../Stores/CacheStore';
 import FilterStore from '../../Stores/FilterStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Filters.css';
+import LocalizationStore from '../../Stores/LocalizationStore';
 
 class Filters extends React.Component {
     constructor(props) {
@@ -43,6 +44,7 @@ class Filters extends React.Component {
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         FilterStore.on('clientUpdateChatList', this.onClientUpdateChatList);
         FilterStore.on('updateChatFilters', this.onUpdateChatFilters);
+        LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
 
         this.setSelection();
     }
@@ -53,7 +55,12 @@ class Filters extends React.Component {
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         FilterStore.off('clientUpdateChatList', this.onClientUpdateChatList);
         FilterStore.off('updateChatFilters', this.onUpdateChatFilters);
+        LocalizationStore.off('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
     }
+
+    onClientUpdateLanguageChange = update => {
+        this.setSelection(false);
+    };
 
     onClientUpdateCacheLoaded = update => {
         const { filters } = this.state;
