@@ -39,7 +39,7 @@ class Filters extends React.Component {
     }
 
     componentDidMount() {
-        window.addEventListener('resize', this.onWindowResize);
+        this.observeResize();
         AppStore.on('clientUpdateCacheLoaded', this.onClientUpdateCacheLoaded);
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         FilterStore.on('clientUpdateChatList', this.onClientUpdateChatList);
@@ -49,8 +49,13 @@ class Filters extends React.Component {
         this.setSelection();
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        this.unobserveResize();
+        this.observeResize();
+    }
+
     componentWillUnmount() {
-        window.removeEventListener('resize', this.onWindowResize);
+        this.unobserveResize();
         AppStore.off('clientUpdateCacheLoaded', this.onClientUpdateCacheLoaded);
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         FilterStore.off('clientUpdateChatList', this.onClientUpdateChatList);
@@ -58,8 +63,34 @@ class Filters extends React.Component {
         LocalizationStore.off('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
     }
 
+    hasObserver = () => {
+        return 'ResizeObserver' in window;
+    };
+
+    observeResize() {
+        if (!this.hasObserver()) return;
+        const filters = this.filtersRef.current;
+        if (!filters) return;
+
+        const observer = new ResizeObserver(this.onWindowResize);
+        observer.observe(filters);
+
+        this.resizeObserver = { observer, filters }
+    }
+
+    unobserveResize() {
+        if (!this.hasObserver()) return;
+        if (!this.resizeObserver) return;
+
+        const { observer, filters } = this.resizeObserver;
+        if (!observer) return;
+        if (!filters) return;
+
+        observer.unobserve(filters);
+    }
+
     onClientUpdateLanguageChange = update => {
-        this.setSelection(false);
+        if (!this.hasObserver()) this.setSelection(false);
     };
 
     onClientUpdateCacheLoaded = update => {
@@ -72,12 +103,12 @@ class Filters extends React.Component {
         this.setState({
             filters: cachedFilters
         }, () => {
-            this.setSelection(false);
+            if (!this.hasObserver()) this.setSelection(false);
         });
     };
 
-    onWindowResize = event => {
-        this.setSelection(false);
+    onWindowResize = () => {
+        this.setSelection(true);
     };
 
     onClientUpdatePageWidth = update => {
@@ -85,11 +116,11 @@ class Filters extends React.Component {
         this.setState({
             isSmallWidth
         }, () => {
-            this.setSelection(false);
+            if (!this.hasObserver()) this.setSelection(false);
         });
     };
 
-    setSelection(transition = true) {
+    setSelection = (transition = true) => {
         const { chatList, filters, isSmallWidth } = this.state;
 
         const scroll = this.filtersRef.current;
@@ -150,7 +181,7 @@ class Filters extends React.Component {
 
             // item.scrollIntoView();
         }
-    }
+    };
 
     onUpdateChatFilters = update => {
         const { chatList } = this.state;
@@ -162,7 +193,7 @@ class Filters extends React.Component {
             if (chatList['@type'] === 'chatListFilter' && filters.findIndex(x => x.id === chatList.chat_filter_id) === -1) {
                 this.handleMainClick();
             } else {
-                this.setSelection();
+                if (!this.hasObserver()) this.setSelection();
             }
         });
     };
@@ -173,7 +204,7 @@ class Filters extends React.Component {
         this.setState({
             chatList
         }, () => {
-            this.setSelection();
+            if (!this.hasObserver()) this.setSelection();
         });
     };
 
@@ -212,8 +243,6 @@ class Filters extends React.Component {
     render() {
         const { t } = this.props;
         const { filters, chatList, isSmallWidth } = this.state;
-
-        // console.log('[cm] filters.render', filters);
 
         if (!filters) return null;
         if (!filters.length) return null;
