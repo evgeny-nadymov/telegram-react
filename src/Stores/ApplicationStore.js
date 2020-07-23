@@ -289,7 +289,7 @@ class ApplicationStore extends EventEmitter {
                 } else {
                     if (
                         this.authorizationState &&
-                        this.authorizationState['@type'] === 'authorizationStateWaitPhoneNumber'
+                        (this.authorizationState['@type'] === 'authorizationStateWaitPhoneNumber' || this.authorizationState['@type'] === 'authorizationStateWaitOtherDeviceConfirmation')
                     ) {
                         this.setPhoneNumber(phone);
                     } else {
