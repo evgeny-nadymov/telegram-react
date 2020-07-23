@@ -183,42 +183,44 @@ export function setFileOptions(url, options) {
     }
 }
 
-navigator.serviceWorker.onmessage = async (e) => {
-    // console.log('[stream] client.onmessage', e.data);
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.onmessage = async (e) => {
+        // console.log('[stream] client.onmessage', e.data);
 
-    switch (e.data['@type']) {
-        case 'getFile': {
-            const { fileId, offset, limit, size } = e.data;
+        switch (e.data['@type']) {
+            case 'getFile': {
+                const { fileId, offset, limit, size } = e.data;
 
-            const l = offset + limit < size ? limit : (size - offset)
+                const l = offset + limit < size ? limit : (size - offset)
 
-            await TdLibController.send({
-                '@type': 'downloadFile',
-                file_id: fileId,
-                priority: 1,
-                offset,
-                limit: l,
-                synchronous: true
-            });
+                await TdLibController.send({
+                    '@type': 'downloadFile',
+                    file_id: fileId,
+                    priority: 1,
+                    offset,
+                    limit: l,
+                    synchronous: true
+                });
 
-            const filePart = await TdLibController.send({
-                '@type': 'readFilePart',
-                file_id: fileId,
-                offset,
-                count: l
-            });
+                const filePart = await TdLibController.send({
+                    '@type': 'readFilePart',
+                    file_id: fileId,
+                    offset,
+                    count: l
+                });
 
-            // const buffer = await getArrayBuffer(filePart.data);
+                // const buffer = await getArrayBuffer(filePart.data);
 
-            // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
-            navigator.serviceWorker.controller.postMessage({
-                '@type': 'getFileResult',
-                fileId,
-                offset,
-                limit,
-                data: filePart.data
-            });
-            break;
+                // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
+                navigator.serviceWorker.controller.postMessage({
+                    '@type': 'getFileResult',
+                    fileId,
+                    offset,
+                    limit,
+                    data: filePart.data
+                });
+                break;
+            }
         }
-    }
-};
+    };
+}
