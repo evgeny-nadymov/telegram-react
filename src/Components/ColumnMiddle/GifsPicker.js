@@ -102,7 +102,7 @@ class GifsPicker extends React.Component {
     };
 
     loadInViewContent = (padding = 0) => {
-        console.log('[gp] loadInViewContent');
+        // console.log('[gp] loadInViewContent');
         const scroll = this.scrollRef.current;
 
         const { savedAnimations } = AnimationStore;
@@ -137,12 +137,12 @@ class GifsPicker extends React.Component {
 
         const { animationsInView } = AnimationStore;
         if (compareMaps(animationsInView, inViewMap)) {
-            console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
+            // console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
             return;
         }
 
 
-        console.log('[gp] inViewItems', inViewIndexes);
+        // console.log('[gp] inViewItems', inViewIndexes);
         TdLibController.clientUpdate({
             '@type': 'clientUpdateAnimationsInView',
             animations: inViewMap

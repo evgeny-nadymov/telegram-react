@@ -261,9 +261,10 @@ class EditMediaDialog extends React.Component {
         }
 
         switch (nativeEvent.code) {
-            case 'Enter': {
-                // enter+cmd or enter+ctrl
-                if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+            case 'Enter':
+            case 'NumpadEnter': {
+                // enter+cmd, enter+ctrl, enter+shift
+                if (!altKey && (ctrlKey || metaKey || shiftKey) && !repeat) {
                     document.execCommand('insertLineBreak');
 
                     event.preventDefault();

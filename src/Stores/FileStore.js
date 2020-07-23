@@ -913,138 +913,138 @@ class FileStore extends EventEmitter {
 
     updatePhotoBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdatePhotoBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateAudioThumbnailBlob = (chatId, messageId, fileId) => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateAudioThumbnailBlob',
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateAudioBlob = (chatId, messageId, fileId) => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateAudioBlob',
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateVoiceNoteBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVoiceNoteBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateVideoNoteThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVideoNoteThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateVideoNoteBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVideoNoteBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateAnimationThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateAnimationThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateAnimationBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateAnimationBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateDocumentBlob = (chatId, messageId, fileId) => {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateDocumentBlob',
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateVideoThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVideoThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateVideoBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateVideoBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateStickerThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateStickerThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateStickerBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateStickerBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateLocationBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateLocationBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateDocumentThumbnailBlob = (chatId, messageId, fileId) => {
         this.emit('clientUpdateDocumentThumbnailBlob', {
-            chatId: chatId,
-            messageId: messageId,
-            fileId: fileId
+            chatId,
+            messageId,
+            fileId
         });
     };
 
     updateUserPhotoBlob(userId, fileId) {
         this.emit('clientUpdateUserBlob', {
-            userId: userId,
-            fileId: fileId
+            userId,
+            fileId
         });
     }
 
     updateChatPhotoBlob(chatId, fileId) {
         this.emit('clientUpdateChatBlob', {
-            chatId: chatId,
-            fileId: fileId
+            chatId,
+            fileId
         });
     }
 }
