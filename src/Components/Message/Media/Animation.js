@@ -181,9 +181,18 @@ class Animation extends React.Component {
     };
 
     handlePlay = () => {
-        this.playing = true;
-        this.forceUpdate();
+        // setTimeout(() => {
+        //     this.playing = true;
+        //     this.forceUpdate();
+        // }, 300);
     };
+
+    handleTimeUpdate = () => {
+        if (!this.playing) {
+            this.playing = true;
+            this.forceUpdate();
+        }
+    }
 
     render() {
         const { displaySize, openMedia, t, title, caption, type, picker, style } = this.props;
@@ -225,7 +234,6 @@ class Animation extends React.Component {
                             <video
                                 ref={this.videoRef}
                                 className='media-viewer-content-animation'
-                                poster={thumbnailSrc || miniSrc}
                                 muted
                                 autoPlay={!picker}
                                 loop
@@ -233,6 +241,7 @@ class Animation extends React.Component {
                                 width={animationStyle.width}
                                 height={animationStyle.height}
                                 onPlay={this.handlePlay}
+                                onTimeUpdate={this.handleTimeUpdate}
                             >
                                 {source}
                             </video>

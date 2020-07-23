@@ -541,7 +541,8 @@ function getChatSubtitle(chatId, showSavedMessages = false) {
     return getChatSubtitleWithoutTyping(chatId);
 }
 
-function getChatLetters(chat, t) {
+function getChatLetters(chatId, t) {
+    const chat = ChatStore.get(chatId);
     if (!chat) return null;
 
     let title = chat.title || t('HiddenName');

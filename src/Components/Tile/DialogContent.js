@@ -12,9 +12,10 @@ import {
     getChatDraft,
     getLastMessageSenderName,
     getLastMessageContent,
-    showChatDraft
+    showChatDraft, isPrivateChat
 } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
+import UserStore from '../../Stores/UserStore';
 import './DialogContent.css';
 
 class DialogContent extends React.Component {
@@ -39,6 +40,7 @@ class DialogContent extends React.Component {
         ChatStore.on('updateChatLastMessage', this.onUpdate);
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateUserChatAction', this.onUpdate);
+        UserStore.on('updateUser', this.onUpdateUser);
     }
 
     componentWillUnmount() {
@@ -60,6 +62,23 @@ class DialogContent extends React.Component {
     };
 
     onFastUpdatingComplete = update => {
+        this.forceUpdate();
+    };
+
+    onUpdateUser = update => {
+        const { chatId } = this.props;
+        const { user } = update;
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+        if (isPrivateChat(chatId)) return;
+
+        const { last_message } = chat;
+        if (!last_message) return;
+
+        const { sender_user_id } = last_message;
+        if (sender_user_id !== user.id) return;
+
         this.forceUpdate();
     };
 

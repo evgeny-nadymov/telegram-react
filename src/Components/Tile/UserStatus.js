@@ -6,24 +6,14 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { getUserStatus, isUserOnline } from '../../Utils/User';
 import UserStore from '../../Stores/UserStore';
 import './UserStatus.css';
 
 class UserStatus extends React.Component {
-    constructor(props) {
-        super(props);
-
-        const { userId } = this.props;
-        const user = UserStore.get(userId);
-
-        this.state = {
-            prevUserId: userId,
-            status: getUserStatus(user),
-            isAccent: isUserOnline(user)
-        };
-    }
+    state = { };
 
     static getDerivedStateFromProps(props, state) {
         if (props.userId !== state.prevUserId) {
@@ -69,11 +59,10 @@ class UserStatus extends React.Component {
 
     onUpdateUserStatus = update => {
         const { userId } = this.props;
-        const user = UserStore.get(userId);
+        if (userId !== update.user_id) return;
 
-        if (userId === update.user_id) {
-            this.setState({ status: getUserStatus(user), isAccent: isUserOnline(user) });
-        }
+        const user = UserStore.get(userId);
+        this.setState({ status: getUserStatus(user), isAccent: isUserOnline(user) });
     };
 
     render() {
@@ -86,5 +75,9 @@ class UserStatus extends React.Component {
         );
     }
 }
+
+UserStatus.propTypes = {
+    userId: PropTypes.number.isRequired
+};
 
 export default UserStatus;

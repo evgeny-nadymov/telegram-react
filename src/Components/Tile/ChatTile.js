@@ -19,23 +19,54 @@ import FileStore from '../../Stores/FileStore';
 import './ChatTile.css';
 
 class ChatTile extends Component {
-    constructor(props) {
-        super(props);
+    state = { };
 
-        this.state = {
-            loaded: false
-        };
+    static getDerivedStateFromProps(props, state) {
+        const { chatId, t } = props;
+
+        if (state.prevChatId !== chatId) {
+            const chat = ChatStore.get(chatId);
+            const file = chat && chat.photo? chat.photo.small : null;
+
+            const fileId = file ? file.id : -1;
+            const src = getSrc(file);
+            const loaded = state.src === src && src !== '' || fileId === -1;
+            const letters = getChatLetters(chatId, t);
+
+            return {
+                prevChatId: chatId,
+
+                fileId,
+                src,
+                loaded,
+                letters
+            };
+        }
+
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId } = this.props;
-        const { loaded } = this.state;
+        const { fileId, src, loaded, letters } = this.state;
 
         if (nextProps.chatId !== chatId) {
             return true;
         }
 
+        if (nextState.fileId !== fileId) {
+            return true;
+        }
+
+        if (nextState.src !== src) {
+            return true;
+        }
+
         if (nextState.loaded !== loaded) {
+            return true;
+        }
+
+        if (nextState.letters !== letters) {
             return true;
         }
 
@@ -62,13 +93,21 @@ class ChatTile extends Component {
 
     onClientUpdateChatBlob = update => {
         const { chatId } = this.props;
+        const { fileId, loaded } = this.state;
 
         if (chatId !== update.chatId) return;
+        if (fileId !== update.fileId) return;
 
-        if (this.state.loaded) {
-            this.setState({ loaded: false });
-        } else {
-            this.forceUpdate();
+        if (!loaded) {
+            const chat = ChatStore.get(chatId);
+            if (!chat) return null;
+
+            const { photo } = chat;
+            const src = getSrc(photo ? photo.small : null);
+
+            this.setState({
+                src
+            });
         }
     };
 
@@ -78,11 +117,18 @@ class ChatTile extends Component {
 
         if (chat_id !== chatId) return;
 
-        if (this.state.loaded) {
-            this.setState({ loaded: false });
-        } else {
-            this.forceUpdate();
-        }
+        const chat = ChatStore.get(chatId);
+        const file = chat && chat.photo? chat.photo.small : null;
+
+        const fileId = file ? file.id : -1;
+        const src = getSrc(file);
+        const loaded = this.state.src === src && src !== '' || fileId === -1;
+
+        this.setState({
+            fileId,
+            src,
+            loaded
+        });
 
         if (photo) {
             const store = FileStore.getStore();
@@ -91,12 +137,14 @@ class ChatTile extends Component {
     };
 
     onUpdateChatTitle = update => {
-        const { chatId } = this.props;
+        const { chatId, t } = this.props;
         const { chat_id } = update;
 
         if (chat_id !== chatId) return;
 
-        this.forceUpdate();
+        const letters = getChatLetters(chatId, t);
+
+        this.setState({ letters });
     };
 
     handleSelect = event => {
@@ -112,8 +160,8 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { chatId, showOnline, showSavedMessages, onSelect, small, dialog, big, size, t } = this.props;
-        const { loaded } = this.state;
+        const { chatId, showOnline, showSavedMessages, onSelect, small, dialog, big, size } = this.props;
+        const { src, loaded, letters } = this.state;
 
         let style = null;
         if (size) {
@@ -166,12 +214,7 @@ class ChatTile extends Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { photo } = chat;
-
-        const letters = getChatLetters(chat, t);
-        const src = getSrc(photo ? photo.small : null);
         const tileLoaded = src && loaded;
-
         const typeId = getChatTypeId(chatId);
         const tileColor = `tile_color_${(Math.abs(typeId) % 7) + 1}`;
 

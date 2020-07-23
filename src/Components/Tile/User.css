@@ -44,13 +44,3 @@
 .user-list-item-checkbox {
     margin: 0 15px 0 -5px;
 }
-
-.user-title {
-    word-wrap: break-word;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-    align-items: center;
-    color: var(--dialog-color);
-}

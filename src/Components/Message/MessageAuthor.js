@@ -12,11 +12,79 @@ import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
 import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
 import { openUser as openUserCommand, openChat as openChatCommand } from '../../Actions/Client';
-import UserStore from '../../Stores/UserStore';
 import ChatStore from '../../Stores/ChatStore';
+import UserStore from '../../Stores/UserStore';
 import './MessageAuthor.css';
 
 class MessageAuthor extends React.Component {
+    state = { };
+
+    static getDerivedStateFromProps(props, state) {
+        const { chatId, userId, t } = props;
+
+        if (state.prevChatId !== chatId || state.prevUserId !== userId) {
+            return {
+                prevChatId: chatId,
+                prevUserId: userId,
+
+                fullName: MessageAuthor.getFullName(userId, chatId, t)
+            };
+        }
+
+        return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { fullName } = this.state;
+
+        return fullName !== nextState.fullName;
+    }
+
+    componentDidMount() {
+        ChatStore.on('updateChatTitle', this.onUpdateChatTitle);
+        UserStore.on('updateUser', this.onUpdateUser);
+    }
+
+    componentWillUnmount() {
+        ChatStore.off('updateChatTitle', this.onUpdateChatTitle);
+        UserStore.off('updateUser', this.onUpdateUser);
+    }
+
+    onUpdateUser = update => {
+        const { chatId, userId, t } = this.props;
+        const { user } = update;
+
+        if (userId !== user.id) return;
+
+        const fullName = MessageAuthor.getFullName(userId, chatId, t);
+        this.setState({ fullName });
+    };
+
+    onUpdateChatTitle = update => {
+        const { chatId, userId, t } = this.props;
+        const { chat_id } = update;
+
+        if (chat_id !== chatId) return;
+        if (userId) return;
+
+        const fullName = MessageAuthor.getFullName(userId, chatId, t);
+        this.setState({ fullName });
+    };
+
+    static getFullName = (userId, chatId, t) => {
+        const user = UserStore.get(userId);
+        if (user) {
+            return getUserFullName(userId, null, t);
+        }
+
+        const chat = ChatStore.get(chatId);
+        if (chat) {
+            return getChatTitle(chatId, false, t);
+        }
+
+        return '';
+    };
+
     handleSelect = event => {
         const { chatId, userId, openUser, openChat } = this.props;
 
@@ -36,7 +104,8 @@ class MessageAuthor extends React.Component {
     };
 
     render() {
-        const { t, chatId, userId, openUser, openChat } = this.props;
+        const { chatId, userId, openUser, openChat } = this.props;
+        const { fullName } = this.state;
 
         const user = UserStore.get(userId);
         if (user) {
@@ -44,8 +113,6 @@ class MessageAuthor extends React.Component {
                 ? 'message-author-color'
                 : `user_color_${(Math.abs(userId) % 8) + 1}`;
             const className = classNames([tileColor], 'message-author');
-
-            const fullName = getUserFullName(userId, null, t);
 
             return openUser ? (
                 <a className={className} onClick={this.handleSelect}>
@@ -59,8 +126,6 @@ class MessageAuthor extends React.Component {
         const chat = ChatStore.get(chatId);
         if (chat) {
             const className = classNames('message-author-color', 'message-author');
-
-            const fullName = getChatTitle(chatId, false, t);
 
             return openChat ? (
                 <a className={className} onClick={this.handleSelect}>

@@ -276,7 +276,7 @@ export function getFirstLetter(str) {
         }
     }
 
-    return '';
+    return [...str].length > 0 ? [...str][0] : '';
 }
 
 function getLetters(title) {
