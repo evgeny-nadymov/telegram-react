@@ -6,8 +6,8 @@
  */
 
 .player {
-    min-width: 320px;
-    min-height: 320px;
+    min-width: 480px;
+    min-height: 480px;
 }
 
 .player-content {
