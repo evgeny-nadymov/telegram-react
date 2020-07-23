@@ -9,6 +9,7 @@ import EventEmitter from './EventEmitter';
 import InputTypingManager from '../Utils/InputTypingManager';
 import { positionListEquals } from '../Utils/Chat';
 import UserStore from './UserStore';
+import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class ChatStore extends EventEmitter {
@@ -183,6 +184,7 @@ class ChatStore extends EventEmitter {
                 }
 
                 this.updateChatChatLists(chat_id);
+                MessageStore.set(last_message);
 
                 this.emitFastUpdate(update);
                 break;

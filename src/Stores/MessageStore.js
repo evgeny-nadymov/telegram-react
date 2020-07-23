@@ -39,10 +39,11 @@ class MessageStore extends EventEmitter {
 
                 break;
             }
-            case 'updateNewMessage':
+            case 'updateNewMessage': {
                 this.set(update.message);
                 this.emit('updateNewMessage', update);
                 break;
+            }
             case 'updateDeleteMessages':
                 this.emit('updateDeleteMessages', update);
                 break;
