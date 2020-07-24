@@ -21,6 +21,7 @@ import PlayerStore from '../../Stores/PlayerStore';
 import Progress from './Progress';
 import TdLibController from '../../Controllers/TdLibController';
 import CloseIcon from '../../Assets/Icons/Close';
+import FileStore from '../../Stores/FileStore';
 
 class PipPlayer extends React.Component {
     state = { };
@@ -136,14 +137,20 @@ class PipPlayer extends React.Component {
         const { target: video } = event;
         if (!video) return;
 
-        const { currentTime, duration, volume, buffered } = video;
+        const { currentTime } = this.state;
+        const { duration, volume, buffered } = video;
+        // const currentTime = this.getCurrentTime();
 
         this.setState({
             duration,
-            currentTime: 0,
+            // currentTime,
             volume,
             waiting: true,
             buffered
+        }, () => {
+            if (!currentTime) return;
+
+            video.currentTime = currentTime;
         });
     };
 
@@ -193,6 +200,9 @@ class PipPlayer extends React.Component {
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerEnded' });
         onEnded && onEnded(event);
+
+        const { video } = this.props;
+        this.setCurrentTime({currentTime: 0, duration: video.duration });
     };
 
     handleTimeUpdate = event => {
@@ -216,7 +226,9 @@ class PipPlayer extends React.Component {
             duration,
             volume,
             buffered
-        })
+        });
+
+        this.setCurrentTime({ currentTime, duration });
     };
 
     handleVolumeChange = event => {
@@ -490,6 +502,40 @@ class PipPlayer extends React.Component {
 
         method && method.call(document);
     }
+
+    getCurrentTime = () => {
+        const { fileId } = this.props;
+
+        const file = FileStore.get(fileId);
+        if (!file) return;
+
+        const { remote } = file;
+        if (!remote) return;
+
+        const { unique_id } = remote;
+        if (!unique_id) return;
+
+        return PlayerStore.getCurrentTime(unique_id);
+    };
+
+    setCurrentTime = currentTime => {
+        const { fileId } = this.props;
+
+        const file = FileStore.get(fileId);
+        if (!file) return;
+
+        const { remote } = file;
+        if (!remote) return;
+
+        const { unique_id } = remote;
+        if (!unique_id) return;
+
+        if (!currentTime) {
+            PlayerStore.clearCurrentTime(unique_id);
+        } else {
+            PlayerStore.setCurrentTime(unique_id, currentTime);
+        }
+    };
 
     render() {
         const { windowDragging, dragging, draggingTime, currentTime, duration, play, waiting, buffered, hidden, volume } = this.state;

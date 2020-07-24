@@ -44,6 +44,7 @@ class PlayerStore extends EventEmitter {
         this.instantView = null;
         this.pageBlock = null;
         this.pipParams = { left: 0, top: 0 };
+        this.times = new Map();
     };
 
     addTdLibListener = () => {
@@ -349,6 +350,18 @@ class PlayerStore extends EventEmitter {
         }
 
         return false;
+    };
+
+    getCurrentTime = (uniqueId) => {
+        return this.times.get(uniqueId) || { currentTime: 0, duration: 0 };
+    };
+
+    setCurrentTime = (uniqueId, currentTime) => {
+        this.times.set(uniqueId, currentTime);
+    };
+
+    clearCurrentTime = (uniqueId) => {
+        this.times.delete(uniqueId);
     };
 
     getPlaylist = async (chatId, messageId) => {

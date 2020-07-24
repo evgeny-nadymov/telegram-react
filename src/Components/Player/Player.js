@@ -29,6 +29,7 @@ import {
     PLAYER_VOLUME_MIN,
     PLAYER_VOLUME_STEP
 } from '../../Constants';
+import FileStore from '../../Stores/FileStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Player.css';
@@ -41,9 +42,13 @@ class Player extends React.Component {
         this.contentRef = React.createRef();
         this.videoRef = React.createRef();
 
+        const { currentTime, duration } = this.getCurrentTime();
+
+        console.log('[p] player.ctor noPoster', currentTime > 0 && duration > 0);
         this.state = {
-            duration: 0,
-            currentTime: 0,
+            noPoster: currentTime > 0 && duration > 0,
+            duration,
+            currentTime,
             volume: PlayerStore.volume,
             play: true,
             dragging: false,
@@ -312,6 +317,9 @@ class Player extends React.Component {
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerEnded' });
         onEnded && onEnded(event);
+
+        const video = this.videoRef.current;
+        this.setCurrentTime({ currentTime: 0, duration: video.duration });
     };
 
     handleTimeUpdate = () => {
@@ -335,7 +343,9 @@ class Player extends React.Component {
             duration,
             volume,
             buffered
-        })
+        });
+
+        this.setCurrentTime({ currentTime, duration });
     };
 
     handleLoadedData = () => {
@@ -347,14 +357,18 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
-        const { currentTime, duration, volume, buffered } = video;
+        const { currentTime } = this.state;
+        const { duration, volume, buffered } = video;
 
         this.setState({
             duration,
-            currentTime: 0,
             volume,
             waiting: true,
             buffered
+        }, () => {
+            if (!currentTime) return;
+
+            video.currentTime = currentTime;
         });
     };
 
@@ -673,11 +687,46 @@ class Player extends React.Component {
                 hidden: true
             });
         }, 1000);
-    }
+    };
+
+    getCurrentTime = () => {
+        const { fileId } = this.props;
+
+        console.log('[pip] getCurrentTime fileId', fileId);
+        const file = FileStore.get(fileId);
+        if (!file) return { currentTime: 0, duration: 0 };
+
+        const { remote } = file;
+        if (!remote) return { currentTime: 0, duration: 0 };
+
+        const { unique_id } = remote;
+        if (!unique_id) return { currentTime: 0, duration: 0 };
+
+        return PlayerStore.getCurrentTime(unique_id);
+    };
+
+    setCurrentTime = currentTime => {
+        const { fileId } = this.props;
+
+        const file = FileStore.get(fileId);
+        if (!file) return;
+
+        const { remote } = file;
+        if (!remote) return;
+
+        const { unique_id } = remote;
+        if (!unique_id) return;
+
+        if (!currentTime) {
+            PlayerStore.clearCurrentTime(unique_id);
+        } else {
+            PlayerStore.setCurrentTime(unique_id, currentTime);
+        }
+    };
 
     render() {
         const { children, src, className, style, width, height, poster, fileId } = this.props;
-        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered, hidden } = this.state;
+        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered, hidden, noPoster } = this.state;
 
         const time = dragging ? draggingTime : currentTime;
         const value = duration > 0 ? time / duration : 0;
@@ -695,6 +744,8 @@ class Player extends React.Component {
         const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
         const pictureInPictureEnabled = document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
 
+        console.log('[p] render', noPoster, poster);
+
         return (
             <div
                 ref={this.rootRef}
@@ -711,7 +762,7 @@ class Player extends React.Component {
                         controls={false}
                         playsInline={true}
                         src={src}
-                        poster={poster}
+                        poster={!noPoster && poster}
                         onLoadedMetadata={this.handleLoadedMetadata}
                         onLoadedData={this.handleLoadedData}
                         onCanPlay={this.handleCanPlay}
