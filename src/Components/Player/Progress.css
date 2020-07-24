@@ -16,6 +16,7 @@
     height: 54px;
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
 }
 
 .player-progress::after{

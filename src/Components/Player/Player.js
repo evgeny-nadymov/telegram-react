@@ -356,21 +356,6 @@ class Player extends React.Component {
             waiting: true,
             buffered
         });
-
-        return;
-        const stream = video.captureStream();
-
-        const v2 = document.getElementById('v2');
-        v2.srcObject = stream;
-    };
-
-    handleChange = (event, value) => {
-        const video = this.videoRef.current;
-        if (!video) return;
-
-        this.setState({
-            draggingTime: value * video.duration
-        });
     };
 
     handleMouseDown = event => {
@@ -382,6 +367,15 @@ class Player extends React.Component {
         this.setState({
             dragging: true,
             draggingTime: video.currentTime
+        });
+    };
+
+    handleChange = (event, value) => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.setState({
+            draggingTime: value * video.duration
         });
     };
 
@@ -445,7 +439,7 @@ class Player extends React.Component {
         event.stopPropagation();
     }
 
-    getVolumeIcon = value => {
+    static getVolumeIcon = value => {
         if (value === 0) {
             return <VolumeOffIcon fontSize='small' />;
         }
@@ -538,7 +532,7 @@ class Player extends React.Component {
         });
     };
 
-    getBufferedTime = (time, buffered) => {
+    static getBufferedTime = (time, buffered) => {
         if (!buffered || !buffered.length) {
             return 0;
         }
@@ -555,16 +549,15 @@ class Player extends React.Component {
     }
 
     handleWaiting = () => {
-        this.setState({
-            waiting: true
-        });
+        this.setState({ waiting: true });
     };
 
-    handleCanPlay = () => {
+    handleCanPlay = event => {
+        const { target: video } = event;
+
         this.setState({
             waiting: false
         }, () => {
-            const video = this.videoRef.current;
             if (!video) return;
 
             const { play } = this.state;
@@ -577,8 +570,33 @@ class Player extends React.Component {
     };
 
     handlePictureInPicture = async () => {
+        const { fileId } = this.props;
+        const { duration, currentTime, volume, play, buffered, waiting } = this.state;
+
         const video = this.videoRef.current;
         if (!video) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePictureInPicture',
+            videoInfo: {
+                fileId,
+                video,
+                duration,
+                currentTime,
+                volume,
+                play,
+                buffered,
+                waiting
+            }
+        });
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaViewerContent',
+            content: null
+        });
+
+        return;
+
         if (!video.duration) return;
 
         const pictureInPictureElement = document.pictureInPictureElement || document.mozPictureInPictureElement || document.webkitPictureInPictureElement;
@@ -663,7 +681,7 @@ class Player extends React.Component {
 
         const time = dragging ? draggingTime : currentTime;
         const value = duration > 0 ? time / duration : 0;
-        const bufferedTime = this.getBufferedTime(time, buffered);
+        const bufferedTime = Player.getBufferedTime(time, buffered);
         const bufferedValue = duration > 0 ? bufferedTime / duration : 0;
 
         const timeString = getDurationString(Math.floor(time) || 0);
@@ -760,14 +778,14 @@ class Player extends React.Component {
                                 />
                             </div>
                             <button className='player-button' onClick={this.handleMute}>
-                                {this.getVolumeIcon(volume)}
+                                {Player.getVolumeIcon(volume)}
                             </button>
                             <button className='player-button' disabled={!fullscreenEnabled} onClick={this.handleFullScreen}>
                                 <FullScreen/>
                             </button>
-                            {/*<button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>*/}
-                            {/*    <PictureInPictureIcon/>*/}
-                            {/*</button>*/}
+                            <button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>
+                                <PictureInPictureIcon/>
+                            </button>
                         </div>
                     </div>
                     <Progress waiting={waiting}/>

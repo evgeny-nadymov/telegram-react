@@ -20,6 +20,7 @@
     width: 100%;
     height: 100%;
     background: black;
+    pointer-events: none;
 }
 
 .player-panel {
@@ -42,6 +43,7 @@
     padding-bottom: 6px;
     background: transparent;
     user-select: none;
+    color: white;
 }
 
 @keyframes player-panel-hidden-animation {
@@ -69,6 +71,12 @@
     cursor: pointer;
 }
 
+.player-button-close {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+}
+
 .player-button:hover{
     background: rgba(255, 255, 255, 0.2);
 }
@@ -91,6 +99,8 @@
     justify-content: left;
     pointer-events: none;
     padding: 0 24px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .player-button svg {

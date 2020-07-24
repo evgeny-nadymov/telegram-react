@@ -43,6 +43,7 @@ export const PHOTO_DISPLAY_SMALL_SIZE = 65;
 export const PHOTO_DISPLAY_EXTRA_SMALL_SIZE = 40;
 export const PHOTO_SIZE = 320;
 export const PHOTO_THUMBNAIL_SIZE = 90;
+export const PIP_PLAYER_BORDER_PRECISION = 10;
 export const PLAYER_VOLUME_NORMAL = 0.25;
 export const PLAYER_STARTTIME = 0.0;
 export const PLAYER_VOLUME_MIN = 0.0;

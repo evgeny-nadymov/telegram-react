@@ -43,6 +43,7 @@ class PlayerStore extends EventEmitter {
         this.videoStream = null;
         this.instantView = null;
         this.pageBlock = null;
+        this.pipParams = { left: 0, top: 0 };
     };
 
     addTdLibListener = () => {
@@ -271,6 +272,10 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaPlaylistNext': {
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdatePictureInPicture': {
                 this.emit(update['@type'], update);
                 break;
             }
