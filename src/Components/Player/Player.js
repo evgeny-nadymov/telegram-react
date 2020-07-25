@@ -44,7 +44,6 @@ class Player extends React.Component {
 
         const { currentTime, duration } = this.getCurrentTime();
 
-        console.log('[p] player.ctor noPoster', currentTime > 0 && duration > 0);
         this.state = {
             noPoster: currentTime > 0 && duration > 0,
             duration,
@@ -744,8 +743,6 @@ class Player extends React.Component {
         const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
         const pictureInPictureEnabled = document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
 
-        console.log('[p] render', noPoster, poster);
-
         return (
             <div
                 ref={this.rootRef}
@@ -831,11 +828,11 @@ class Player extends React.Component {
                             <button className='player-button' onClick={this.handleMute}>
                                 {Player.getVolumeIcon(volume)}
                             </button>
-                            <button className='player-button' disabled={!fullscreenEnabled} onClick={this.handleFullScreen}>
-                                <FullScreen/>
-                            </button>
                             <button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>
                                 <PictureInPictureIcon/>
+                            </button>
+                            <button className='player-button' disabled={!fullscreenEnabled} onClick={this.handleFullScreen}>
+                                <FullScreen/>
                             </button>
                         </div>
                     </div>

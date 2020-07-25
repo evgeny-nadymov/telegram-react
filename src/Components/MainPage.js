@@ -187,8 +187,6 @@ class MainPage extends React.Component {
             isSmallWidth
         } = this.state;
 
-        // console.log('[p] mainPage.render');
-
         return (
             <>
                 <div

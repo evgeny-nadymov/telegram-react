@@ -43,7 +43,7 @@ class PlayerStore extends EventEmitter {
         this.videoStream = null;
         this.instantView = null;
         this.pageBlock = null;
-        this.pipParams = { left: 0, top: 0 };
+        this.pipParams = { left: document.documentElement.clientWidth - 300, top: document.documentElement.clientHeight - 300 };
         this.times = new Map();
     };
 
