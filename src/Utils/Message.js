@@ -15,7 +15,7 @@ import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle, isMeChat } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
-import { download, saveOrDownload } from './File';
+import { download, saveOrDownload, supportsStreaming } from './File';
 import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
@@ -938,15 +938,14 @@ function openAudio(audio, message, fileCancel) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { streaming } = TdLibController;
-    if (fileCancel && file.local.is_downloading_active && !streaming) {
+    if (fileCancel && file.local.is_downloading_active && !supportsStreaming()) {
         FileStore.cancelGetRemoteFile(file.id, message);
         return;
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     } else {
-        if (!streaming) {
+        if (!supportsStreaming()) {
             download(file, message, () => FileStore.updateAudioBlob(chat_id, id, file.id));
         }
     }

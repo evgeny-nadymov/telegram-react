@@ -160,7 +160,7 @@ class NotificationStore extends EventEmitter {
                     const { chat_id, id } = message;
 
                     // dismiss notifications for last visited public channels and groups
-                    if (!isChatMember(chat_id) && AppStore.chatId !== chat_id) {
+                    if (!isChatMember(chat_id)) {
                         break;
                     }
 

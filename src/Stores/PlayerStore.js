@@ -231,12 +231,40 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaTime': {
-                const { duration, currentTime, timestamp } = update;
+                const { chatId, messageId, duration, currentTime, buffered, timestamp } = update;
+
+                if (this.time && this.time.chatId === chatId && this.time.messageId === messageId) {
+                    this.time = {
+                        ...this.time,
+                        currentTime,
+                        duration,
+                        buffered,
+                        timestamp
+                    };
+                }
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaProgress': {
+                const { chatId, messageId, buffered } = update;
+
+                if (this.time && this.time.chatId === chatId && this.time.messageId === messageId) {
+                    this.time = { ...this.time, buffered };
+                }
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaLoadedMetadata': {
+                const { chatId, messageId, duration, videoWidth, videoHeight } = update;
 
                 this.time = {
-                    currentTime: currentTime,
-                    duration: duration,
-                    timestamp: timestamp
+                    chatId,
+                    messageId,
+                    duration,
+                    videoWidth,
+                    videoHeight
                 };
 
                 this.emit(update['@type'], update);

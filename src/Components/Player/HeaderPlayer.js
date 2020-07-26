@@ -19,7 +19,7 @@ import ShuffleButton from '../Player/ShuffleButton';
 import PlaybackRateButton from './PlaybackRateButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
-import { getSrc } from '../../Utils/File';
+import { getSrc, supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
@@ -283,8 +283,6 @@ class HeaderPlayer extends React.Component {
         if (!content) return;
         if (chatId !== chat_id || messageId !== id) return;
 
-        const { streaming } = TdLibController;
-
         switch (content['@type']) {
             case 'messageText': {
                 const { web_page } = content;
@@ -292,7 +290,7 @@ class HeaderPlayer extends React.Component {
                     const { audio, voice_note, video_note } = web_page;
 
                     if (audio) {
-                        if (streaming) return;
+                        if (supportsStreaming()) return;
 
                         const { audio: file } = audio;
                         if (file) {
@@ -320,7 +318,7 @@ class HeaderPlayer extends React.Component {
             case 'messageAudio': {
                 const { audio } = content;
                 if (audio) {
-                    if (streaming) return;
+                    if (supportsStreaming()) return;
 
                     const { audio: file } = audio;
                     if (file) {
@@ -466,7 +464,7 @@ class HeaderPlayer extends React.Component {
                     const { audio: file } = audio;
                     if (file) {
                         let src = getSrc(file);
-                        if (!src && TdLibController.streaming) {
+                        if (!src && supportsStreaming()) {
                             src = `/streaming/file_id=${file.id}`;
                             setFileOptions(src, { fileId: file.id, size: file.size, mimeType: audio.mime_type });
                         }
@@ -525,7 +523,7 @@ class HeaderPlayer extends React.Component {
             '@type': 'clientUpdateMediaEnding',
             chatId: message.chat_id,
             messageId: message.id,
-            moveNext: moveNext
+            moveNext
         });
 
         this.setState(
@@ -539,7 +537,7 @@ class HeaderPlayer extends React.Component {
                     '@type': 'clientUpdateMediaEnd',
                     chatId: message.chat_id,
                     messageId: message.id,
-                    moveNext: moveNext
+                    moveNext
                 });
             }
         );
@@ -557,6 +555,39 @@ class HeaderPlayer extends React.Component {
 
         this.handleEnded(false);
     };
+
+    handleLoadedMetadata = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaLoadedMetadata',
+            chatId: message.chat_id,
+            messageId: message.id,
+            buffered: player.buffered,
+            duration: player.duration,
+            videoWidth: player.videoWidth,
+            videoHeight: player.videoHeight
+        });
+    };
+
+    handleProgress = () => {
+        const { message } = this.state;
+        if (!message) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaProgress',
+            chatId: message.chat_id,
+            messageId: message.id,
+            buffered: player.buffered
+        });
+    }
 
     handleTimeUpdate = () => {
         const { message } = this.state;
@@ -576,6 +607,7 @@ class HeaderPlayer extends React.Component {
             messageId: message.id,
             duration: player.duration,
             currentTime: player.currentTime,
+            buffered: player.buffered,
             timestamp: Date.now()
         });
     };
@@ -760,11 +792,13 @@ class HeaderPlayer extends React.Component {
                     controls={false}
                     width={44}
                     height={44}
+                    onLoadedMetadata={this.handleLoadedMetadata}
                     onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}
-                    onTimeUpdate={this.handleTimeUpdate}
                     onEnded={this.handleVideoEnded}
+                    onTimeUpdate={this.handleTimeUpdate}
+                    onProgress={this.handleProgress}
                 >
                     {source}
                 </video>

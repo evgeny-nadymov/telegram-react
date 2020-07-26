@@ -35,6 +35,12 @@ import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function supportsStreaming() {
+    const { streaming } = TdLibController;
+
+    return streaming && hasServiceWorker();
+}
+
 export function hasServiceWorker() {
     if ('serviceWorker' in navigator) {
         const { controller } = navigator.serviceWorker;
@@ -802,7 +808,7 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
-    if (supports_streaming && TdLibController.streaming && hasServiceWorker()) return;
+    if (supports_streaming && supportsStreaming()) return;
 
     const chatId = message ? message.chat_id : 0;
     const messageId = message ? message.id : 0;
@@ -1498,7 +1504,7 @@ function getViewerFile(media, size) {
             return [50, 50, document.document, document.mime_type, false];
         }
         case 'video': {
-            return [media.width, media.height, media.video, media.mime_type, media.supports_streaming && TdLibController.streaming && hasServiceWorker()];
+            return [media.width, media.height, media.video, media.mime_type, media.supports_streaming && supportsStreaming()];
         }
         default: {
         }
@@ -1579,7 +1585,7 @@ function getMediaFile(chatId, messageId, size) {
 
                 if (video) {
                     const { width, height, video: file, mime_type, supports_streaming } = video;
-                    return [width, height, file, mime_type, supports_streaming && TdLibController.streaming && hasServiceWorker()];
+                    return [width, height, file, mime_type, supports_streaming && supportsStreaming()];
                 }
             }
             break;
@@ -1588,7 +1594,7 @@ function getMediaFile(chatId, messageId, size) {
             const { video } = content;
             if (video) {
                 const { width, height, video: file, mime_type, supports_streaming } = video;
-                return [width, height, file, mime_type, supports_streaming && TdLibController.streaming && hasServiceWorker()];
+                return [width, height, file, mime_type, supports_streaming && supportsStreaming()];
             }
             break;
         }

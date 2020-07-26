@@ -26,11 +26,11 @@ class AudioAction extends React.Component {
         const currentFile = FileStore.get(file.id) || file;
 
         this.state = {
-            active: active,
-            currentTime: currentTime,
+            active,
+            currentTime,
             seekProgress: 0,
             duration: audioDuration,
-            timeString: this.getTimeString(currentTime, duration, active, currentFile, streaming),
+            timeString: AudioAction.getTimeString(currentTime, duration, active, currentFile, streaming),
 
             prevFile: null,
             file: currentFile
@@ -38,12 +38,7 @@ class AudioAction extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme } = this.props;
         const { active, timeString, file, prevFile } = this.state;
-
-        if (nextProps.theme !== theme) {
-            return true;
-        }
 
         if (nextState.timeString !== timeString) {
             return true;
@@ -88,60 +83,64 @@ class AudioAction extends React.Component {
         const { chatId, messageId, duration, streaming } = this.props;
         const { duration: playerDuration, active, file } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const d = playerDuration || duration;
+        if (chatId !== update.chatId) return;
+        if (messageId !== update.messageId) return;
 
-            this.setState({
-                seekProgress: update.value,
-                seeking: true,
-                timeString: this.getTimeString(d * update.value, d, active, file, streaming)
-            });
-        }
+        const d = playerDuration || duration;
+
+        this.setState({
+            seekProgress: update.value,
+            seeking: true,
+            timeString: AudioAction.getTimeString(d * update.value, d, active, file, streaming)
+        });
     };
 
     onClientUpdateMediaSeek = update => {
         const { chatId, messageId, duration, streaming } = this.props;
         const { duration: playerDuration, active, file } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const d = playerDuration || duration;
+        if (chatId !== update.chatId) return;
+        if (messageId !== update.messageId) return;
 
-            this.setState({
-                seekProgress: 0,
-                seeking: false,
-                timeString: this.getTimeString(d * update.value, d, active, file, streaming)
-            });
-        }
+        const d = playerDuration || duration;
+
+        this.setState({
+            seekProgress: 0,
+            seeking: false,
+            timeString: AudioAction.getTimeString(d * update.value, d, active, file, streaming)
+        });
     };
 
     onClientUpdateMediaEnd = update => {
         const { chatId, messageId, duration, streaming } = this.props;
         const { active, file } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
-            this.setState({
-                active: false,
-                currentTime: 0,
-                timeString: this.getTimeString(0, playerDuration, false, file, streaming)
-            });
-        }
+        if (chatId !== update.chatId) return;
+        if (messageId !== update.messageId) return;
+
+        const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+        this.setState({
+            active: false,
+            currentTime: 0,
+            timeString: AudioAction.getTimeString(0, playerDuration, false, file, streaming)
+        });
     };
 
     onClientUpdateMediaTime = update => {
         const { chatId, messageId, duration, streaming } = this.props;
         const { active, file, seekProgress, seeking } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
-            const time = seeking ? seekProgress * playerDuration : update.currentTime;
+        if (chatId !== update.chatId) return;
+        if (messageId !== update.messageId) return;
 
-            this.setState({
-                currentTime: update.currentTime,
-                duration: playerDuration,
-                timeString: this.getTimeString(time, playerDuration, active, file, streaming)
-            });
-        }
+        const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
+        const time = seeking ? seekProgress * playerDuration : update.currentTime;
+
+        this.setState({
+            currentTime: update.currentTime,
+            duration: playerDuration,
+            timeString: AudioAction.getTimeString(time, playerDuration, active, file, streaming)
+        });
     };
 
     onClientUpdateMediaActive = update => {
@@ -152,13 +151,13 @@ class AudioAction extends React.Component {
             this.setState({
                 active: true,
                 currentTime: active ? currentTime : 0,
-                timeString: active ? this.state.timeString : this.getTimeString(0, duration, true, file, streaming)
+                timeString: active ? this.state.timeString : AudioAction.getTimeString(0, duration, true, file, streaming)
             });
         } else if (active) {
             this.setState({
                 active: false,
                 currentTime: 0,
-                timeString: this.getTimeString(0, duration, false, file, streaming)
+                timeString: AudioAction.getTimeString(0, duration, false, file, streaming)
             });
         }
     };
@@ -172,7 +171,7 @@ class AudioAction extends React.Component {
         }
     };
 
-    getTimeString = (currentTime, duration, active, file, streaming) => {
+    static getTimeString(currentTime, duration, active, file, streaming) {
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed || streaming;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
@@ -180,7 +179,7 @@ class AudioAction extends React.Component {
         const currentTimeString = getDurationString(Math.floor(currentTime || 0));
 
         return active && isDownloadingCompleted ? `${currentTimeString} / ${durationString}` : `${durationString}`;
-    };
+    }
 
     render() {
         const { title, meta, streaming } = this.props;

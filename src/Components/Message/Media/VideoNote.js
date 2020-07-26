@@ -17,12 +17,12 @@ import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { clamp, getDurationString } from '../../../Utils/Common';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
-import PlayerStore from '../../../Stores/PlayerStore';
-import FileStore from '../../../Stores/FileStore';
-import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
-import './VideoNote.css';
+import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
+import PlayerStore from '../../../Stores/PlayerStore';
+import MessageStore from '../../../Stores/MessageStore';
+import './VideoNote.css';
 
 const circleStyle = {
     circle: 'video-note-progress-circle'

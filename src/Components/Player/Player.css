@@ -145,7 +145,7 @@
 }
 
 .player-slider-thumb::after {
-    display: none;
+    display: none !important;
 }
 
 .player-volume {

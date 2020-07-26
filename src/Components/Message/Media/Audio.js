@@ -15,8 +15,8 @@ import DocumentTile from '../../Tile/DocumentTile';
 import AudioAction from './AudioAction';
 import VoiceNoteSlider from './VoiceNoteSlider';
 import { getAudioShortTitle, getAudioSubtitle } from '../../../Utils/Media';
+import { supportsStreaming } from '../../../Utils/File';
 import PlayerStore from '../../../Stores/PlayerStore';
-import TdLibController from '../../../Controllers/TdLibController';
 import './Audio.css';
 
 class Audio extends React.Component {
@@ -25,33 +25,23 @@ class Audio extends React.Component {
 
         const { chatId, messageId } = props;
 
-        const { time, message, playing } = PlayerStore;
+        const { message, playing } = PlayerStore;
         const active = message && message.chat_id === chatId && message.id === messageId;
 
         this.state = {
-            active: active,
-            playing: active ? playing : false,
-            currentTime: active && time ? time.currentTime : 0,
-            duration: active && time ? time.duration : 0
+            active,
+            playing: active ? playing : false
         };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { active, playing, currentTime, duration } = this.state;
+        const { active, playing } = this.state;
 
         if (nextState.active !== active) {
             return true;
         }
 
         if (nextState.playing !== playing) {
-            return true;
-        }
-
-        if (nextState.currentTime !== currentTime) {
-            return true;
-        }
-
-        if (nextState.duration !== duration) {
             return true;
         }
 
@@ -78,8 +68,7 @@ class Audio extends React.Component {
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({
                 active: false,
-                playing: false,
-                currentTime: 0
+                playing: false
             });
         }
     };
@@ -109,14 +98,12 @@ class Audio extends React.Component {
             if (!this.state.active) {
                 this.setState({
                     active: true,
-                    currentTime: 0,
                     playing: true
                 });
             }
         } else if (this.state.active) {
             this.setState({
                 active: false,
-                currentTime: 0,
                 playing: false
             });
         }
@@ -131,8 +118,9 @@ class Audio extends React.Component {
 
         const audioTitle = getAudioSubtitle(audio);
         const audioSubtitle = getAudioShortTitle(audio);
-        const { streaming } = TdLibController;
         const completeIcon = playing ? <PauseIcon /> : <PlayArrowIcon />;
+
+        // console.log('[au] audio.render', playing, active);
 
         return (
             <div className={classNames('audio', 'document', { 'media-title': title })}>
@@ -140,8 +128,8 @@ class Audio extends React.Component {
                     thumbnail={album_cover_thumbnail}
                     file={file}
                     openMedia={openMedia}
-                    streaming={streaming}
-                    icon={streaming ? completeIcon : <DownloadIcon />}
+                    streaming={supportsStreaming()}
+                    icon={supportsStreaming() ? completeIcon : <DownloadIcon />}
                     completeIcon={completeIcon}
                 />
                 <div className='audio-content'>
@@ -158,7 +146,7 @@ class Audio extends React.Component {
                         duration={duration}
                         file={file}
                         meta={caption ? null : meta}
-                        streaming={streaming}
+                        streaming={supportsStreaming()}
                     />
                 </div>
             </div>
