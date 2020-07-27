@@ -465,7 +465,7 @@ class HeaderPlayer extends React.Component {
                     if (file) {
                         let src = getSrc(file);
                         if (!src && supportsStreaming()) {
-                            src = `/streaming/file_id=${file.id}`;
+                            src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${audio.mime_type}`;
                             setFileOptions(src, { fileId: file.id, size: file.size, mimeType: audio.mime_type });
                         }
 

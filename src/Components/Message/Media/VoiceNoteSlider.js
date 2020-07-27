@@ -238,12 +238,12 @@ class VoiceNoteSlider extends React.Component {
         const bufferedTime = Player.getBufferedTime(time, buffered);
         const bufferedValue = duration > 0 ? bufferedTime / duration : 0;
 
-        const ranges = [];
-        for (let i = 0; buffered && i < buffered.length; i++) {
-            ranges.push({ start: buffered.start(i), end: buffered.end(i)})
-        }
-
-        console.log('[clientUpdate] render', JSON.stringify(ranges));
+        // const ranges = [];
+        // for (let i = 0; buffered && i < buffered.length; i++) {
+        //     ranges.push({ start: buffered.start(i), end: buffered.end(i)})
+        // }
+        //
+        // console.log('[clientUpdate] render', JSON.stringify(ranges));
 
         return (
             <div className={classNames('voice-note-slider', className)} style={style}>

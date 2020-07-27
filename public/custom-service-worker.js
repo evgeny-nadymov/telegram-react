@@ -13,10 +13,11 @@ const SMALLEST_CHUNK_LIMIT = 1024 * 4;
 const STREAM_CHUNK_UPPER_LIMIT = 256 * 1024;
 const STREAM_CHUNK_BIG_FILE = 700 * 1024 * 1024;
 const STREAM_CHUNK_BIG_FILE_UPPER_LIMIT = 512 * 1024;
+const STREAM_CHUNK_AUDIO_UPPER_LIMIT = 1024 * 1024;
 
 function LOG(message, ...optionalParams) {
     return;
-    // console.log(message, ...optionalParams);
+    console.log(message, ...optionalParams);
 }
 
 self.addEventListener('push', event => {
@@ -72,13 +73,21 @@ function setFileOptions(url, location, options) {
 }
 
 function fetchStreamRequest(url, offset, end, resolve, get) {
-    const info = streams.get(url);
-    if (!info) {
-        resolve(new Response(null, { status: 302, headers: { Location: url } }));
-        return;
-    }
+    // const info = streams.get(url);
+    // if (!info) {
+    //     resolve(new Response(null, { status: 302, headers: { Location: url } }));
+    //     return;
+    // }
 
-    LOG('[stream] fetchStreamRequest', info);
+    const { searchParams } = new URL(url, 'https://telegram.org');
+    const fileId = parseInt(searchParams.get('id'), 10);
+    const size = parseInt(searchParams.get('size'), 10);
+    const mimeType = searchParams.get('mime_type');
+
+    const info = { url, options: { fileId, size, mimeType } };
+    // setFileOptions(url, null, { fileId, size, mimeType });
+
+    LOG('[stream] fetchStreamRequest', url, info);
 
     // safari workaround
     if (offset === 0 && end === 1) {
@@ -96,9 +105,10 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
     }
 
     const isBigFile = info.options.size > STREAM_CHUNK_BIG_FILE;
-    const upperLimit = isBigFile ? STREAM_CHUNK_BIG_FILE_UPPER_LIMIT : STREAM_CHUNK_UPPER_LIMIT;
-    // LOG('[stream] GET', end, isBigFile, upperLimit, info);
-
+    let upperLimit = isBigFile ? STREAM_CHUNK_BIG_FILE_UPPER_LIMIT : STREAM_CHUNK_UPPER_LIMIT;
+    if (info.options.mimeType && info.options.mimeType.startsWith('audio')) {
+        upperLimit = STREAM_CHUNK_AUDIO_UPPER_LIMIT;
+    }
 
     const limit = end && end < upperLimit ? alignLimit(end - offset + 1) : upperLimit;
     const alignedOffset = alignOffset(offset, limit);

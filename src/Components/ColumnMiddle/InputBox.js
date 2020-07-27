@@ -880,12 +880,12 @@ class InputBox extends Component {
         const { altKey, ctrlKey, key, keyCode, charCode, metaKey, shiftKey, repeat, nativeEvent } = event;
         const { editMessageId, replyToMessageId } = this.state;
 
-        console.log('[input] handleKeyDown', key, keyCode, charCode, altKey, ctrlKey, metaKey, shiftKey, repeat, event, nativeEvent, nativeEvent.isComposing);
-
-        setTimeout(() => {
-            const { innerText } = this.newMessageRef.current;
-            console.log('[input] text', innerText.length, [...innerText].map(x => ({ alpha: x, code: x.charCodeAt(0) })));
-        }, 1000);
+        // console.log('[input] handleKeyDown', key, keyCode, charCode, altKey, ctrlKey, metaKey, shiftKey, repeat, event, nativeEvent, nativeEvent.isComposing);
+        //
+        // setTimeout(() => {
+        //     const { innerText } = this.newMessageRef.current;
+        //     console.log('[input] text', innerText.length, [...innerText].map(x => ({ alpha: x, code: x.charCodeAt(0) })));
+        // }, 1000);
 
         // fix CJK input
         const { isComposing } = nativeEvent;

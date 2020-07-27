@@ -45,7 +45,7 @@ class InstantViewMediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = media;
                 if (video) {
-                    src = `/streaming/file_id=${file.id}`;
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
                     setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }

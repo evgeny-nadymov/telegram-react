@@ -49,7 +49,7 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    src = `/streaming/file_id=${file.id}`;
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
                     setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
@@ -153,7 +153,7 @@ class MediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = message.content;
                 if (video) {
-                    src = `/streaming/file_id=${file.id}`;
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
                     setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
