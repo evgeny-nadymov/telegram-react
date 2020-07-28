@@ -16,7 +16,7 @@ const STREAM_CHUNK_BIG_FILE_UPPER_LIMIT = 512 * 1024;
 
 function LOG(message, ...optionalParams) {
     return;
-    console.log(message, ...optionalParams);
+    // console.log(message, ...optionalParams);
 }
 
 self.addEventListener('push', event => {
