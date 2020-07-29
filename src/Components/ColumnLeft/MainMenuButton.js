@@ -31,6 +31,7 @@ import CacheStore from '../../Stores/CacheStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
+import { unregister } from '../../registerServiceWorker';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -153,6 +154,8 @@ class MainMenuButton extends React.Component {
 
     handleHelp = event => {
         this.handleMenuClose();
+
+        unregister();
     };
 
     handleSearch = () => {

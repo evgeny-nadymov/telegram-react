@@ -177,9 +177,7 @@ if ('serviceWorker' in navigator) {
 
         switch (e.data['@type']) {
             case 'getFile': {
-                const { fileId, offset, limit, size } = e.data;
-
-                const l = offset + limit < size ? limit : (size - offset)
+                const { fileId, offset, limit } = e.data;
 
                 try {
                     await TdLibController.send({
@@ -187,7 +185,7 @@ if ('serviceWorker' in navigator) {
                         file_id: fileId,
                         priority: 1,
                         offset,
-                        limit: l,
+                        limit,
                         synchronous: true
                     });
 
@@ -195,9 +193,10 @@ if ('serviceWorker' in navigator) {
                         '@type': 'readFilePart',
                         file_id: fileId,
                         offset,
-                        count: l
+                        count: limit
                     });
 
+                    const { data } = filePart;
                     // const buffer = await getArrayBuffer(filePart.data);
 
                     // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
@@ -206,10 +205,19 @@ if ('serviceWorker' in navigator) {
                         fileId,
                         offset,
                         limit,
-                        data: filePart.data
+                        data
                     });
-                } catch (e) {
-                    console.error('[SW] getFile', fileId, offset, limit, e);
+
+                } catch (error) {
+
+                    console.error('[SW] getFileError', fileId, offset, limit, error);
+                    navigator.serviceWorker.controller.postMessage({
+                        '@type': 'getFileError',
+                        fileId,
+                        offset,
+                        limit,
+                        error
+                    });
                 }
                 break;
             }
