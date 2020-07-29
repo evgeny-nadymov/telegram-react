@@ -55,9 +55,9 @@ function isSafari() {
 function parseRange(header) {
     const [, chunks] = header.split('=');
     const ranges = chunks.split(', ');
-    const [offset, end] = ranges[0].split('-');
+    const [start, end] = ranges[0].split('-');
 
-    return [+offset, +end || 0];
+    return [+start, +end || 0];
 }
 
 function alignLimit(limit) {
@@ -68,16 +68,17 @@ function alignOffset(offset, base = SMALLEST_CHUNK_LIMIT) {
     return offset - (offset % base);
 }
 
-function setFileOptions(url, location, options) {
-    if (!streams.get(url)) streams.set(url, { url, location, options });
+function getOffsetLimit(start, end, chunk, size) {
+    end = end > 0 ? end : start + chunk - 1;
+    end = end > size - 1 ? size - 1 : end;
+
+    const offset = start;
+    const limit = end - start + 1;
+
+    return [ offset, limit ];
 }
 
-function fetchStreamRequest(url, offset, end, resolve, get) {
-    // const info = streams.get(url);
-    // if (!info) {
-    //     resolve(new Response(null, { status: 302, headers: { Location: url } }));
-    //     return;
-    // }
+function fetchStreamRequest(url, start, end, resolve, get) {
 
     const { searchParams } = new URL(url, 'https://telegram.org');
     const fileId = parseInt(searchParams.get('id'), 10);
@@ -85,20 +86,19 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
     const mimeType = searchParams.get('mime_type');
 
     const info = { url, options: { fileId, size, mimeType } };
-    // setFileOptions(url, null, { fileId, size, mimeType });
 
     LOG('[stream] fetchStreamRequest', url, info);
 
     // safari workaround
-    if (offset === 0 && end === 1) {
+    if (start === 0 && end === 1) {
         resolve(new Response(new Uint8Array(2).buffer, {
             status: 206,
             statusText: 'Partial Content',
             headers: {
                 'Accept-Ranges': 'bytes',
-                'Content-Range': `bytes 0-1/${info.options.size || '*'}`,
+                'Content-Range': `bytes 0-1/${size || '*'}`,
                 'Content-Length': '2',
-                'Content-Type': info.options.mime_type || 'video/mp4',
+                'Content-Type': mimeType || 'video/mp4',
             },
         }));
         return;
@@ -110,11 +110,11 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
         upperLimit = STREAM_CHUNK_AUDIO_UPPER_LIMIT;
     }
 
-    const limit = end && end < upperLimit ? alignLimit(end - offset + 1) : upperLimit;
-    const alignedOffset = alignOffset(offset, limit);
+    const limit = end && end < upperLimit ? alignLimit(end - start + 1) : upperLimit;
+    const alignedOffset = alignOffset(start, limit);
 
-    LOG(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
-    get(info.location, alignedOffset, limit, info.options, async (blob, type) => {
+    LOG(`[stream] get alignOffset=${alignedOffset} limit=${limit}`);
+    get(alignedOffset, limit, info.options, async (blob, type) => {
         const headers = {
             'Accept-Ranges': 'bytes',
             'Content-Range': `bytes ${alignedOffset}-${alignedOffset + blob.size - 1}/${info.options.size || '*'}`,
@@ -126,8 +126,8 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
         if (isSafari()) {
             let ab = await getArrayBuffer(blob);
 
-            ab = ab.slice(offset - alignedOffset, end - alignedOffset + 1);
-            headers['Content-Range'] = `bytes ${offset}-${offset + ab.byteLength - 1}/${info.options.size || '*'}`;
+            ab = ab.slice(start - alignedOffset, end - alignedOffset + 1);
+            headers['Content-Range'] = `bytes ${start}-${start + ab.byteLength - 1}/${info.options.size || '*'}`;
             headers['Content-Length'] = `${ab.byteLength}`;
 
             blob = ab;
@@ -141,14 +141,13 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
     });
 }
 
-async function getFilePartRequest(location, offset, limit, options, ready) {
-    const { fileId } = options;
+async function getFilePartRequest(offset, limit, options, ready) {
+    const { fileId, size, mimeType } = options;
 
-    LOG('[stream] getFilePartRequest', offset, limit);
-    const result =
-        await getBufferFromClientAsync(fileId, offset, limit, options);
+    LOG('[stream] getFilePartRequest', fileId, offset, limit);
+    const result = await getBufferFromClientAsync(fileId, offset, limit, size);
 
-    ready(result, options.mimeType);
+    ready(result, mimeType);
 }
 
 self.addEventListener('fetch', event => {
@@ -156,12 +155,12 @@ self.addEventListener('fetch', event => {
 
     switch (scope) {
         case 'streaming': {
-            const [offset, end] = parseRange(event.request.headers.get('Range') || '');
+            const [start, end] = parseRange(event.request.headers.get('Range') || '');
 
-            LOG(`[SW] fetch offset=${offset} end=${end}`, event.request.url, scope);
+            LOG(`[SW] fetch stream start=${start} end=${end}`, event.request.url, scope);
 
             event.respondWith(new Promise((resolve) => {
-                fetchStreamRequest(url, offset, end, resolve, getFilePartRequest);
+                fetchStreamRequest(url, start, end, resolve, getFilePartRequest);
             }));
             break;
         }
@@ -170,7 +169,7 @@ self.addEventListener('fetch', event => {
 
 const queue = new Map();
 
-async function getBufferFromClientAsync(fileId, offset, limit, options) {
+async function getBufferFromClientAsync(fileId, offset, limit, size) {
     return new Promise((resolve, reject) => {
 
         const key = `${fileId}_${offset}_${limit}`;
@@ -183,7 +182,7 @@ async function getBufferFromClientAsync(fileId, offset, limit, options) {
                     fileId,
                     offset,
                     limit,
-                    size: options.size
+                    size
                 });
             });
         })
@@ -199,8 +198,6 @@ async function getArrayBuffer(blob) {
         fr.readAsArrayBuffer(blob);
     })
 }
-
-const streams = new Map();
 
 self.addEventListener('message', async e => {
     LOG('[stream] sw.message', e.data);
@@ -219,13 +216,6 @@ self.addEventListener('message', async e => {
                 LOG('[stream] sw.message resolve', data);
                 resolve(data);
             }
-            break;
-        }
-        case 'file': {
-            const { url, options } = e.data;
-
-            LOG('[stream] set options', url, options);
-            this.setFileOptions(url, null, options);
             break;
         }
     }

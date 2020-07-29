@@ -23,7 +23,6 @@ import { getSrc, supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, hasAudio } from '../../Utils/Message';
-import { setFileOptions } from '../../registerServiceWorker';
 import { PLAYER_PLAYBACKRATE_FAST, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -466,7 +465,6 @@ class HeaderPlayer extends React.Component {
                         let src = getSrc(file);
                         if (!src && supportsStreaming()) {
                             src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${audio.mime_type}`;
-                            setFileOptions(src, { fileId: file.id, size: file.size, mimeType: audio.mime_type });
                         }
 
                         return src;
@@ -562,6 +560,8 @@ class HeaderPlayer extends React.Component {
 
         const player = this.videoRef.current;
         if (!player) return;
+
+        player.play();
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaLoadedMetadata',

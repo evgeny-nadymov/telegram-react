@@ -171,18 +171,6 @@ export async function update() {
     }
 }
 
-export function setFileOptions(url, options) {
-    if ('serviceWorker' in navigator) {
-
-        console.log('[SW] setFileOptions ', navigator.serviceWorker, navigator.serviceWorker.controller);
-        navigator.serviceWorker.controller.postMessage({
-            '@type': 'file',
-            url,
-            options
-        });
-    }
-}
-
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.onmessage = async (e) => {
         // console.log('[stream] client.onmessage', e.data);
@@ -193,32 +181,36 @@ if ('serviceWorker' in navigator) {
 
                 const l = offset + limit < size ? limit : (size - offset)
 
-                await TdLibController.send({
-                    '@type': 'downloadFile',
-                    file_id: fileId,
-                    priority: 1,
-                    offset,
-                    limit: l,
-                    synchronous: true
-                });
+                try {
+                    await TdLibController.send({
+                        '@type': 'downloadFile',
+                        file_id: fileId,
+                        priority: 1,
+                        offset,
+                        limit: l,
+                        synchronous: true
+                    });
 
-                const filePart = await TdLibController.send({
-                    '@type': 'readFilePart',
-                    file_id: fileId,
-                    offset,
-                    count: l
-                });
+                    const filePart = await TdLibController.send({
+                        '@type': 'readFilePart',
+                        file_id: fileId,
+                        offset,
+                        count: l
+                    });
 
-                // const buffer = await getArrayBuffer(filePart.data);
+                    // const buffer = await getArrayBuffer(filePart.data);
 
-                // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
-                navigator.serviceWorker.controller.postMessage({
-                    '@type': 'getFileResult',
-                    fileId,
-                    offset,
-                    limit,
-                    data: filePart.data
-                });
+                    // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
+                    navigator.serviceWorker.controller.postMessage({
+                        '@type': 'getFileResult',
+                        fileId,
+                        offset,
+                        limit,
+                        data: filePart.data
+                    });
+                } catch (e) {
+                    console.error('[SW] getFile', fileId, offset, limit, e);
+                }
                 break;
             }
         }

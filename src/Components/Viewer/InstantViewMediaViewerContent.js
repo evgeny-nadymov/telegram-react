@@ -16,7 +16,6 @@ import Player from '../Player/Player';
 import { getSrc, getViewerFile, getViewerMinithumbnail, getViewerThumbnail } from '../../Utils/File';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import { isEmptyText } from '../../Utils/InstantView';
-import { setFileOptions } from '../../registerServiceWorker';
 import FileStore from '../../Stores/FileStore';
 
 class InstantViewMediaViewerContent extends React.Component {
@@ -46,7 +45,6 @@ class InstantViewMediaViewerContent extends React.Component {
                 const { video } = media;
                 if (video) {
                     src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
 

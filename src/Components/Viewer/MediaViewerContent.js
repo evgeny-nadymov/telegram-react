@@ -15,7 +15,6 @@ import Player from '../Player/Player';
 import { getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
-import { setFileOptions } from '../../registerServiceWorker';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
@@ -50,7 +49,6 @@ class MediaViewerContent extends React.Component {
                 const { video } = message.content;
                 if (video) {
                     src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
 
@@ -154,7 +152,6 @@ class MediaViewerContent extends React.Component {
                 const { video } = message.content;
                 if (video) {
                     src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
                 }
             }
 
