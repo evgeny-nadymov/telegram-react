@@ -741,7 +741,7 @@ class Player extends React.Component {
         }
 
         const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
-        const pictureInPictureEnabled = document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
+        const pictureInPictureEnabled = true;//document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
 
         return (
             <div

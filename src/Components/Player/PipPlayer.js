@@ -479,7 +479,7 @@ class PipPlayer extends React.Component {
     handleFullScreen = event => {
         event && event.stopPropagation();
 
-        const root = document.getElementById('pip-player');
+        const root = document.getElementById('pip-player-wrapper');
         if (!root) return;
 
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
@@ -557,7 +557,7 @@ class PipPlayer extends React.Component {
                 className={classNames('pip-player', { 'pip-player-dragging': windowDragging })}
                 onMouseDown={this.handlePlayerMouseDown}
                 onMouseMove={this.handleMouseOver}>
-                <div className='pip-player-wrapper'>
+                <div id='pip-player-wrapper'>
                     <div id='pip-player-container'/>
 
                     <button onMouseDown={e => e.stopPropagation()} className={classNames('player-button', 'player-button-close', { 'player-panel-hidden': hidden })} onClick={this.handleClose}>
