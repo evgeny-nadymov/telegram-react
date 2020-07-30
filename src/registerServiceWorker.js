@@ -171,35 +171,76 @@ export async function update() {
     }
 }
 
+const requests = [];
+window.requests = requests;
+
+async function processRequest(request) {
+    const { fileId, offset, limit, resolve, reject } = request;
+
+    try {
+        await TdLibController.send({
+            '@type': 'downloadFile',
+            file_id: fileId,
+            priority: 1,
+            offset,
+            limit,
+            synchronous: true
+        });
+
+        const filePart = await TdLibController.send({
+            '@type': 'readFilePart',
+            file_id: fileId,
+            offset,
+            count: limit
+        });
+
+        const { data } = filePart;
+
+        resolve(data);
+    } catch (error) {
+        reject(error)
+    }
+}
+
+async function getFilePart(fileId, offset, limit) {
+    const promise = new Promise(async (resolve, reject) => {
+
+        requests.push({
+            fileId,
+            offset,
+            limit,
+            resolve,
+            reject
+        });
+
+        if (requests.length > 1) {
+            return;
+        }
+
+        while (requests.length > 0) {
+            const request = requests[requests.length - 1];
+
+            await processRequest(request);
+
+            const index = requests.indexOf(request);
+            requests.splice(index, 1);
+        }
+    });
+
+    return await promise;
+}
+
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.onmessage = async (e) => {
         // console.log('[stream] client.onmessage', e.data);
 
         switch (e.data['@type']) {
             case 'getFile': {
-                const { fileId, offset, limit } = e.data;
+                const { fileId, offset, limit, start, end } = e.data;
 
                 try {
-                    await TdLibController.send({
-                        '@type': 'downloadFile',
-                        file_id: fileId,
-                        priority: 1,
-                        offset,
-                        limit,
-                        synchronous: true
-                    });
+                    const data = await getFilePart(fileId, offset, limit);
 
-                    const filePart = await TdLibController.send({
-                        '@type': 'readFilePart',
-                        file_id: fileId,
-                        offset,
-                        count: limit
-                    });
-
-                    const { data } = filePart;
-                    // const buffer = await getArrayBuffer(filePart.data);
-
-                    // console.log('[stream] client.onmessage buffer', fileId, offset, limit, filePart.data);
                     navigator.serviceWorker.controller.postMessage({
                         '@type': 'getFileResult',
                         fileId,
@@ -207,10 +248,8 @@ if ('serviceWorker' in navigator) {
                         limit,
                         data
                     });
-
                 } catch (error) {
 
-                    console.error('[SW] getFileError', fileId, offset, limit, error);
                     navigator.serviceWorker.controller.postMessage({
                         '@type': 'getFileError',
                         fileId,

@@ -792,6 +792,7 @@ class HeaderPlayer extends React.Component {
                     controls={false}
                     width={44}
                     height={44}
+                    disablePictureInPicture={true}
                     onLoadedMetadata={this.handleLoadedMetadata}
                     onCanPlay={this.handleCanPlay}
                     onPlay={this.handleVideoPlay}

@@ -100,7 +100,7 @@ function fetchStreamRequest(url, start, end, resolve, get) {
                 'Accept-Ranges': 'bytes',
                 'Content-Range': `bytes 0-1/${size || '*'}`,
                 'Content-Length': '2',
-                'Content-Type': mimeType,
+                'Content-Type': mimeType
             },
         }));
         return;
@@ -110,7 +110,7 @@ function fetchStreamRequest(url, start, end, resolve, get) {
     const [ offset, limit ] = getOffsetLimit(start, end, chunk, size);
 
     LOG(`[stream] get offset=${offset} limit=${limit}`);
-    get(fileId, offset, limit, async ([blob, error]) => {
+    get(fileId, offset, limit, start, end, async ([blob, error]) => {
         if (error) {
             resolve(new Response(null, {
                 status: 416,
@@ -145,10 +145,10 @@ function fetchStreamRequest(url, start, end, resolve, get) {
     });
 }
 
-async function getFilePartRequest(fileId, offset, limit, ready) {
+async function getFilePartRequest(fileId, offset, limit, start, end, ready) {
 
     LOG('[stream] getFilePartRequest', fileId, offset, limit);
-    const [data, error] = await getBufferFromClientAsync(fileId, offset, limit);
+    const [data, error] = await getBufferFromClientAsync(fileId, offset, limit, start, end);
 
     ready([data, error]);
 }
@@ -172,7 +172,7 @@ self.addEventListener('fetch', event => {
 
 const queue = new Map();
 
-async function getBufferFromClientAsync(fileId, offset, limit) {
+async function getBufferFromClientAsync(fileId, offset, limit, start, end) {
     return new Promise((resolve, reject) => {
 
         const key = `${fileId}_${offset}_${limit}`;
@@ -184,7 +184,9 @@ async function getBufferFromClientAsync(fileId, offset, limit) {
                     '@type': 'getFile',
                     fileId,
                     offset,
-                    limit
+                    limit,
+                    start,
+                    end
                 });
             });
         })
