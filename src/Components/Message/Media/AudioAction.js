@@ -188,7 +188,7 @@ class AudioAction extends React.Component {
 
         const isDownloadingActive = file.local && file.local.is_downloading_active && !streaming;
         const isUploadingActive = file.remote && file.remote.is_uploading_active;
-        const isDownloadingCompleted = file.local && file.local.is_downloading_completed || streaming;
+        const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
 
         const size = getFileSize(file);
@@ -201,9 +201,7 @@ class AudioAction extends React.Component {
         // const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
         const sizeString = progressSize ? `${progressSize}` : `${size}`;
         const strings = [];
-        if (!isDownloadingCompleted) {
-            strings.push(sizeString);
-        } else if (streaming && !active) {
+        if (!isDownloadingCompleted && !active) {
             strings.push(sizeString);
         }
         if (!isDownloadingActive) {
