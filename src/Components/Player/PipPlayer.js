@@ -13,18 +13,33 @@ import CloseIcon from '../../Assets/Icons/Close';
 import PauseIcon from '../../Assets/Icons/Pause';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
 import FullScreen from '../../Assets/Icons/FullScreen';
+import Hint from './Hint';
 import Player from './Player';
 import Progress from './Progress';
 import { clamp, getDurationString } from '../../Utils/Common';
-import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
+import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
+import {
+    PIP_PLAYER_BORDER_PRECISION, PLAYER_PLAYBACKRATE_MAX,
+    PLAYER_PLAYBACKRATE_MIN,
+    PLAYER_PLAYBACKRATE_STEP,
+    PLAYER_SEEK_STEP_BIG,
+    PLAYER_SEEK_STEP_SMALL,
+    PLAYER_VOLUME_MAX,
+    PLAYER_VOLUME_MIN,
+    PLAYER_VOLUME_STEP
+} from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PipPlayer.css';
-import Hint from './Hint';
 
 class PipPlayer extends React.Component {
-    state = { };
+    constructor(props) {
+        super(props);
+
+        this.keyboardHandler = new KeyboardHandler(this.onKeyDown);
+        this.state = { };
+    }
 
     static getDerivedStateFromProps(props, state) {
         const { video, duration, currentTime, volume, play, buffered, waiting } = props;
@@ -58,15 +73,202 @@ class PipPlayer extends React.Component {
         this.disconnectPlayer(video);
         window.removeEventListener('resize', this.onWindowResize);
         document.removeEventListener('fullscreenchange', this.onFullScreenChange);
+        KeyboardManager.remove(this.keyboardHandler);
     }
+
+    onKeyDown = event => {
+        const { key, code, altKey, ctrlKey, metaKey, shiftKey } = event;
+
+        const { video } = this.props;
+        if (!video) return;
+
+        let handled = false;
+        switch (code) {
+            case 'ArrowLeft': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_SMALL);
+                    handled = true;
+                }
+                break;
+            }
+            case 'KeyJ': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_BIG);
+                    handled = true;
+                }
+                break;
+            }
+            case 'ArrowRight': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(video.currentTime + PLAYER_SEEK_STEP_SMALL);
+                    handled = true;
+                }
+                break;
+            }
+            case 'KeyL': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(video.currentTime + PLAYER_SEEK_STEP_BIG);
+                    handled = true;
+                }
+                break;
+            }
+            case 'ArrowUp': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleVolume(video.volume + PLAYER_VOLUME_STEP);
+                    handled = true;
+                }
+                break;
+            }
+            case 'ArrowDown': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleVolume(video.volume - PLAYER_VOLUME_STEP);
+                    handled = true;
+                }
+                break;
+            }
+            case 'Space':
+            case 'KeyK': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleClick();
+                    handled = true;
+                }
+                break;
+            }
+            case 'KeyM': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleMute();
+                    handled = true;
+                }
+                break;
+            }
+            case 'KeyF': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleFullScreen();
+                    handled = true;
+                }
+                break;
+            }
+            case 'KeyI': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    // this.handlePictureInPicture();
+                    handled = true;
+                }
+                break;
+            }
+            case 'Digit0':
+            case 'Digit1':
+            case 'Digit2':
+            case 'Digit3':
+            case 'Digit4':
+            case 'Digit5':
+            case 'Digit6':
+            case 'Digit7':
+            case 'Digit8':
+            case 'Digit9': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    const progress = new Number(key.replace('Digit', '')) / 10.0;
+                    this.handleSeekProgress(progress);
+                    handled = true;
+                }
+                break;
+            }
+            case 'Home': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(0);
+                    handled = true;
+                }
+                break;
+            }
+            case 'End': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleSeek(video.duration - 1.0);
+                    handled = true;
+                }
+                break;
+            }
+            case 'Comma': {
+                if (!altKey && !ctrlKey && !metaKey && shiftKey) {
+                    this.handlePlaybackRate(video.playbackRate - PLAYER_PLAYBACKRATE_STEP);
+                    handled = true;
+                }
+                break;
+            }
+            case 'Period': {
+                if (!altKey && !ctrlKey && !metaKey && shiftKey) {
+                    this.handlePlaybackRate(video.playbackRate + PLAYER_PLAYBACKRATE_STEP);
+                    handled = true;
+                }
+                break;
+            }
+        }
+
+        if (handled) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+    };
+
+    showMediaHint(text) {
+        const { fileId } = this.props;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaHint',
+            fileId,
+            text
+        });
+    }
+
+    handleVolume = volume => {
+        const { video } = this.props;
+        if (!video) return;
+
+        volume = clamp(volume, PLAYER_VOLUME_MIN, PLAYER_VOLUME_MAX);
+
+        video.volume = volume;
+        this.showMediaHint(`${Math.round(video.volume * 100)}%`);
+    };
+
+    handlePlaybackRate = rate => {
+        const { video } = this.props;
+        if (!video) return;
+
+        rate = clamp(rate, PLAYER_PLAYBACKRATE_MIN, PLAYER_PLAYBACKRATE_MAX)
+
+        video.playbackRate = rate;
+        this.showMediaHint(`${rate}x`);
+    };
+
+    handleSeekProgress = progress => {
+        const { video } = this.props;
+        if (!video) return;
+
+        this.handleSeek(progress * video.duration);
+    };
+
+    handleSeek = currentTime => {
+        const { video } = this.props;
+        if (!video) return;
+
+        currentTime = clamp(currentTime, 0, video.duration || 0);
+
+        video.currentTime = currentTime;
+        this.setState({ currentTime });
+    };
 
     onFullScreenChange = () => {
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
 
         const fullscreenPlayer = document.getElementById('pip-player-wrapper');
 
+        const fullscreen = fullscreenElement === fullscreenPlayer;
+        if (fullscreen) {
+            KeyboardManager.add(this.keyboardHandler);
+        } else {
+            KeyboardManager.remove(this.keyboardHandler);
+        }
+
         this.setState({
-            fullscreen: fullscreenElement === fullscreenPlayer
+            fullscreen
         });
     };
 
@@ -558,7 +760,6 @@ class PipPlayer extends React.Component {
     };
 
     handleClickRoot = event => {
-        console.log('[player] handleClick');
         event.stopPropagation();
 
         const { mouseDownRoot } = this;
