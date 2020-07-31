@@ -21,9 +21,8 @@ import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
 import { getSrc, supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
-import { getDurationString } from '../../Utils/Common';
 import { getDate, getDateHint, getMediaTitle, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
-import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_STARTTIME } from '../../Constants';
+import { PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -42,7 +41,7 @@ class HeaderPlayer extends React.Component {
 
         this.state = {
             currentTime,
-            currentTimeString: getDurationString(0),
+            duration,
             message,
             playlist,
             playing: false,
@@ -274,6 +273,7 @@ class HeaderPlayer extends React.Component {
         this.setState(
             {
                 currentTime,
+                duration,
                 message,
                 playlist,
                 playing,
@@ -684,8 +684,7 @@ class HeaderPlayer extends React.Component {
         const { currentTime, buffered, duration } = player;
 
         this.setState({
-            currentTime,
-            currentTimeString: getDurationString(Math.floor(currentTime || 0))
+            currentTime
         });
 
         TdLibController.clientUpdate({
@@ -834,7 +833,7 @@ class HeaderPlayer extends React.Component {
 
     render() {
         const { t } = this.props;
-        const { playing, message, playlist, src, mimeType } = this.state;
+        const { playing, message, duration, playlist, src, mimeType } = this.state;
 
         let audio = false;
         let useAudioRate = false;
@@ -917,8 +916,8 @@ class HeaderPlayer extends React.Component {
                                 )}
                             </div>
                             &nbsp;
-                            <Time />
                         </div>
+                        <Time duration={duration}/>
                         <VolumeButton />
                         {showPlaybackRate && <PlaybackRateButton audio={audio} />}
                         {showRepeat && <RepeatButton />}

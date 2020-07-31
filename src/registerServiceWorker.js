@@ -16,7 +16,7 @@
 // This link also includes instructions on opting out of this behavior.
 
 import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
-import { OPTIMIZATIONS_FIRST_START } from './Constants';
+import { OPTIMIZATIONS_FIRST_START, PLAYER_STREAMING_PRIORITY } from './Constants';
 import ApplicationStore from './Stores/ApplicationStore';
 import NotificationStore from './Stores/NotificationStore';
 import TdLibController from './Controllers/TdLibController';
@@ -181,7 +181,7 @@ async function processRequest(request) {
         await TdLibController.send({
             '@type': 'downloadFile',
             file_id: fileId,
-            priority: 1,
+            priority: PLAYER_STREAMING_PRIORITY,
             offset,
             limit,
             synchronous: true

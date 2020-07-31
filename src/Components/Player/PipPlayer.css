@@ -21,13 +21,21 @@
     height: 100%;
 }
 
+.pip-player-wrapper-hidden {
+    animation: 1s ease-out 1s both player-content-hidden-animation;
+}
+
 #pip-player-container {
     width: 100%;
     height: 100%;
 }
 
 .pip-player {
-    cursor: grab;
+    cursor: pointer;
+}
+
+.pip-player-fullscreen {
+    cursor: pointer;
 }
 
 .pip-player .player-time {
@@ -40,4 +48,14 @@
 
 .pip-player-dragging {
     cursor: grabbing;
+}
+
+.pip-player-fullscreen .player-button-close {
+    display: none;
+}
+
+.player-button-close {
+    position: absolute;
+    right: 6px;
+    top: 6px;
 }

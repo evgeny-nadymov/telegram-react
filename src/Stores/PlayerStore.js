@@ -7,10 +7,11 @@
 
 import EventEmitter from './EventEmitter';
 import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
-import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
+import { getRandomInt } from '../Utils/Common';
+import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_MAX_SIZE, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
+import FileStore from './FileStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
-import { getRandomInt } from '../Utils/Common';
 
 const RepeatEnum = Object.freeze({
     NONE: 'NONE',
@@ -131,7 +132,9 @@ class PlayerStore extends EventEmitter {
                 if (message) {
                     this.message = message;
                     this.emit(update['@type'], update);
-                    this.getPlaylist(chatId, messageId);
+                    this.getPlaylist(chatId, messageId, () => {
+                        // this.preloadNextMedia();
+                    });
 
                     return;
                 } else if (instantView && pageBlock) {
@@ -266,6 +269,17 @@ class PlayerStore extends EventEmitter {
                     };
                 }
 
+                if (buffered && currentTime && duration) {
+                    for (let i = 0; i < buffered.length; i++) {
+                        const start = buffered.start(i);
+                        const end = buffered.end(i);
+                        if (start <= currentTime && currentTime <= end && currentTime + 30 < end) {
+                            this.preloadNextMedia();
+                            break;
+                        }
+                    }
+                }
+
                 this.emit(update['@type'], update);
                 break;
             }
@@ -333,6 +347,63 @@ class PlayerStore extends EventEmitter {
             }
             default:
                 break;
+        }
+    };
+
+    preloadNextMedia = async () => {
+        if (!this.playlist) return;
+        if (!this.message) return;
+        if (this.repeat !== RepeatEnum.NONE) return;
+        if (this.shuffle) return;
+
+        const { chat_id, id } = this.message;
+        const { messages } = this.playlist;
+        if (!messages) return;
+
+        const index = messages.findIndex(x => x.chat_id === chat_id && x.id === id);
+        if (index === -1) return;
+
+        const nextIndex = index - 1;
+        if (nextIndex === -1) return;
+
+        const nextMessage = messages[nextIndex];
+        if (!nextMessage) return;
+
+        const { content } = nextMessage;
+        switch (content['@type']) {
+            case 'messageAudio': {
+                const { audio } = content;
+                if (!audio) return;
+
+                let { audio: file } = audio;
+                if (!file) return;
+
+                file = FileStore.get(file.id) || file;
+
+                const { id, local, expected_size } = file;
+
+                const { is_downloading_active, is_downloading_completed, download_offset, downloaded_prefix_size } = local;
+                if (is_downloading_completed) return;
+                if (is_downloading_active) return;
+
+                const offset = 0;
+                const limit = 3 * 1024 * 1024; //expected_size > PLAYER_PRELOAD_MAX_SIZE ? PLAYER_PRELOAD_MAX_SIZE : 0; //
+                if (download_offset <= offset && limit <= downloaded_prefix_size) return;
+
+                console.log('[cache] preload start', id, limit, expected_size);
+                await TdLibController.send({
+                    '@type': 'downloadFile',
+                    file_id: id,
+                    offset: 0,
+                    limit,
+                    priority: PLAYER_PRELOAD_PRIORITY,
+                    synchronous: true
+                });
+
+                console.log('[cache] preload stop', id, limit, expected_size);
+
+                break;
+            }
         }
     };
 
@@ -408,6 +479,8 @@ class PlayerStore extends EventEmitter {
     };
 
     setCurrentTime = (uniqueId, currentTime) => {
+        if (currentTime < 30) return;
+
         this.times.set(uniqueId, currentTime);
     };
 
@@ -415,12 +488,13 @@ class PlayerStore extends EventEmitter {
         this.times.delete(uniqueId);
     };
 
-    getPlaylist = async (chatId, messageId) => {
+    getPlaylist = async (chatId, messageId, callback) => {
         const { playlist: currentPlaylist } = this;
 
         if (currentPlaylist) {
             const { messages } = currentPlaylist;
             if (messages && messages.findIndex(x => x.chat_id === chatId && x.id === messageId) !== -1) {
+                callback && callback();
                 return;
             }
         }
@@ -474,6 +548,8 @@ class PlayerStore extends EventEmitter {
             '@type': 'clientUpdateMediaPlaylist',
             playlist: this.playlist
         });
+
+        callback && callback();
     };
 }
 

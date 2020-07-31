@@ -376,7 +376,11 @@ function clamp(item, first, last) {
     return item;
 }
 
-function getDurationString(secondsTotal) {
+function getDurationString(secondsTotal, duration, reverse) {
+    if (reverse && duration > 0) {
+        secondsTotal = Math.max(Math.floor(duration) - secondsTotal, 0);
+    }
+
     let hours = Math.floor(secondsTotal / 3600);
     let minutes = Math.floor((secondsTotal - hours * 3600) / 60);
     let seconds = secondsTotal - hours * 3600 - minutes * 60;
@@ -388,7 +392,7 @@ function getDurationString(secondsTotal) {
         seconds = '0' + seconds;
     }
 
-    return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds;
+    return (reverse ? '-': '') + (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds;
 }
 
 export function getRandomInt(min, max) {

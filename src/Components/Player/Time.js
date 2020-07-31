@@ -8,15 +8,22 @@
 import React from 'react';
 import { getDurationString } from '../../Utils/Common';
 import PlayerStore from '../../Stores/PlayerStore';
+import './Time.css';
 
 class Time extends React.Component {
     constructor(props) {
         super(props);
 
+        const { duration } = this.props;
+
+        const currentTime = 0;
+        const reverse = false;
+
         this.state = {
-            currentTime: 0,
-            duration: 0,
-            timeString: this.getTimeString(0, 0)
+            reverse,
+            currentTime,
+            duration,
+            currentTimeString: getDurationString(currentTime, duration, reverse),
         };
     }
 
@@ -29,29 +36,36 @@ class Time extends React.Component {
     }
 
     onClientUpdateMediaTime = update => {
-        const { currentTime } = update;
+        const { currentTime, duration } = update;
+        const { reverse } = this.state;
 
         this.setState({
-            currentTime: currentTime,
-            currentTimeString: getDurationString(Math.floor(currentTime || 0))
+            currentTime,
+            duration,
+            currentTimeString: getDurationString(Math.floor(currentTime || 0), duration, reverse)
         });
     };
 
-    getTimeString = (currentTime, duration) => {
-        const type = 0;
+    handleReverse = event => {
+        event.stopPropagation();
+        event.preventDefault();
 
-        const durationString = getDurationString(Math.floor(duration || 0));
-        const currentTimeString = getDurationString(Math.floor(currentTime || 0));
+        const { currentTime, duration, reverse } = this.state;
 
-        //return type === 0 ? `${currentTimeString}/${durationString}` : `${durationString}`;
-
-        return currentTimeString;
+        this.setState({
+            reverse: !reverse,
+            currentTimeString: getDurationString(Math.floor(currentTime || 0), duration, !reverse)
+        });
     };
 
     render() {
         const { currentTimeString } = this.state;
 
-        return <>{currentTimeString}</>;
+        return (
+            <div className='header-player-time' onClick={this.handleReverse}>
+                {currentTimeString}
+            </div>
+        );
     }
 }
 

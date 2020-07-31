@@ -16,6 +16,14 @@
     height: 100%;
 }
 
+@keyframes player-content-hidden-animation {
+    100% { cursor: none; }
+}
+
+.player-content-hidden {
+    animation: 1s ease-out 1s both player-content-hidden-animation;
+}
+
 .player-video {
     width: 100%;
     height: 100%;
@@ -69,12 +77,6 @@
     color: white;
     outline: none;
     cursor: pointer;
-}
-
-.player-button-close {
-    position: absolute;
-    right: 6px;
-    top: 6px;
 }
 
 .player-button:hover{

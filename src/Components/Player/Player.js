@@ -660,6 +660,11 @@ class Player extends React.Component {
         event.preventDefault();
     };
 
+    handlePanelDoubleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
     handlePanelEnter = () => {
         this.panelEnter = true;
     };
@@ -750,7 +755,7 @@ class Player extends React.Component {
                 onClick={this.handleClickRoot}
                 onDoubleClick={this.handleDoubleClick}
                 style={rootStyle}>
-                <div ref={this.contentRef} className='player-content' onMouseMove={this.handleMouseOver}>
+                <div ref={this.contentRef} className={classNames('player-content', { 'player-content-hidden': hidden })} onMouseMove={this.handleMouseOver}>
                     <video
                         className='player-video'
                         ref={this.videoRef}
@@ -758,7 +763,7 @@ class Player extends React.Component {
                         controls={false}
                         playsInline={true}
                         src={src}
-                        poster={!noPoster && poster}
+                        poster={noPoster ? null : poster}
                         onLoadedMetadata={this.handleLoadedMetadata}
                         onLoadedData={this.handleLoadedData}
                         onCanPlay={this.handleCanPlay}
@@ -778,7 +783,7 @@ class Player extends React.Component {
                         className={classNames('player-panel', { 'player-panel-hidden': hidden })}
                         onClick={e => e.stopPropagation()}
                         onMouseDown={e => e.stopPropagation()}
-                        onDoubleClick={e => e.stopPropagation()}
+                        onDoubleClick={this.handlePanelDoubleClick}
                         onMouseEnter={this.handlePanelEnter}
                         onMouseLeave={this.handlePanelLeave}>
                         <div className='player-slider'>

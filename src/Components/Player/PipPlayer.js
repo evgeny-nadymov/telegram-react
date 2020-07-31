@@ -8,20 +8,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { clamp, getDurationString } from '../../Utils/Common';
-import './PipPlayer.css';
-import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
 import Slider from '@material-ui/core/Slider';
+import CloseIcon from '../../Assets/Icons/Close';
 import PauseIcon from '../../Assets/Icons/Pause';
 import PlayIcon from '../../Assets/Icons/PlayArrow';
 import FullScreen from '../../Assets/Icons/FullScreen';
-import PictureInPictureIcon from '@material-ui/icons/PictureInPicture';
 import Player from './Player';
-import PlayerStore from '../../Stores/PlayerStore';
 import Progress from './Progress';
-import TdLibController from '../../Controllers/TdLibController';
-import CloseIcon from '../../Assets/Icons/Close';
+import { clamp, getDurationString } from '../../Utils/Common';
+import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
+import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
+import './PipPlayer.css';
+import Hint from './Hint';
 
 class PipPlayer extends React.Component {
     state = { };
@@ -38,7 +38,8 @@ class PipPlayer extends React.Component {
                 buffered,
                 waiting,
                 dragging: false,
-                hidden: false
+                hidden: false,
+                fullscreen: false
             }
         }
 
@@ -49,13 +50,25 @@ class PipPlayer extends React.Component {
         const { video } = this.props;
         this.connectPlayer(video);
         window.addEventListener('resize', this.onWindowResize);
+        document.addEventListener('fullscreenchange', this.onFullScreenChange);
     }
 
     componentWillUnmount() {
         const { video } = this.props;
         this.disconnectPlayer(video);
         window.removeEventListener('resize', this.onWindowResize);
+        document.removeEventListener('fullscreenchange', this.onFullScreenChange);
     }
+
+    onFullScreenChange = () => {
+        const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+
+        const fullscreenPlayer = document.getElementById('pip-player-wrapper');
+
+        this.setState({
+            fullscreen: fullscreenElement === fullscreenPlayer
+        });
+    };
 
     onWindowResize = () => {
 
@@ -294,6 +307,7 @@ class PipPlayer extends React.Component {
     };
 
     handlePlayerMouseDown = event => {
+        this.mouseDownRoot = true;
         event.preventDefault();
 
         if (event.nativeEvent.which !== 1) return;
@@ -430,6 +444,7 @@ class PipPlayer extends React.Component {
         this.mouseOverTimeout = setTimeout(() => {
             if (this.panelEnter) return;
             if (!this.state.play) return;
+            if (!this.state.duration) return;
 
             this.setState({
                 hidden: true
@@ -537,8 +552,29 @@ class PipPlayer extends React.Component {
         }
     };
 
+    handlePanelDoubleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
+    handleClickRoot = event => {
+        console.log('[player] handleClick');
+        event.stopPropagation();
+
+        const { mouseDownRoot } = this;
+        if (!mouseDownRoot) return;
+
+        this.mouseDownRoot = false;
+        this.startStopPlayer();
+    }
+
+    handleDoubleClick = event => {
+        this.handleFullScreen(event);
+    };
+
     render() {
-        const { windowDragging, dragging, draggingTime, currentTime, duration, play, waiting, buffered, hidden, volume } = this.state;
+        const { fileId } = this.props;
+        const { windowDragging, dragging, draggingTime, currentTime, duration, play, waiting, buffered, hidden, volume, fullscreen } = this.state;
 
         const time = dragging ? draggingTime : currentTime;
         const value = duration > 0 ? time / duration : 0;
@@ -554,11 +590,14 @@ class PipPlayer extends React.Component {
         return (
             <div
                 id='pip-player'
-                className={classNames('pip-player', { 'pip-player-dragging': windowDragging })}
+                className={classNames('pip-player', { 'pip-player-dragging': windowDragging, 'pip-player-fullscreen': fullscreen })}
                 onMouseDown={this.handlePlayerMouseDown}
-                onMouseMove={this.handleMouseOver}>
-                <div id='pip-player-wrapper'>
+                onMouseMove={this.handleMouseOver}
+                onClick={this.handleClickRoot}
+                onDoubleClick={this.handleDoubleClick}>
+                <div id='pip-player-wrapper' className={classNames({ 'pip-player-wrapper-hidden': hidden })}>
                     <div id='pip-player-container'/>
+                    <Hint fileId={fileId}/>
 
                     <button onMouseDown={e => e.stopPropagation()} className={classNames('player-button', 'player-button-close', { 'player-panel-hidden': hidden })} onClick={this.handleClose}>
                         <CloseIcon/>
@@ -567,7 +606,7 @@ class PipPlayer extends React.Component {
                         className={classNames('player-panel', { 'player-panel-hidden': hidden })}
                         onClick={e => e.stopPropagation()}
                         onMouseDown={e => e.stopPropagation()}
-                        onDoubleClick={e => e.stopPropagation()}
+                        onDoubleClick={this.handlePanelDoubleClick}
                         onMouseEnter={this.handlePanelEnter}
                         onMouseLeave={this.handlePanelLeave}>
                         <div className='player-slider'>
@@ -594,7 +633,7 @@ class PipPlayer extends React.Component {
                                 {play ? <PauseIcon/> : <PlayIcon/>}
                             </button>
                             <div className='player-time'>
-                                {`${timeString}`}
+                                {`${timeString} / ${durationString}`}
                             </div>
                             <div className='player-volume'>
                                 <Slider
