@@ -20,11 +20,12 @@ import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../Constants';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
+import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -753,7 +754,7 @@ function getMediaTitle(message, t = k => k) {
     return getAuthor(message, t);
 }
 
-function hasAudio(chatId, messageId) {
+export function hasVoice(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
@@ -761,9 +762,9 @@ function hasAudio(chatId, messageId) {
     if (!content) return false;
 
     switch (content['@type']) {
-        case 'messageAudio': {
-            const { audio } = content;
-            if (audio) {
+        case 'messageVoiceNote': {
+            const { voice_note } = content;
+            if (voice_note) {
                 return true;
             }
 
@@ -772,8 +773,8 @@ function hasAudio(chatId, messageId) {
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
-                const { audio } = web_page;
-                if (audio) {
+                const { voice_note } = web_page;
+                if (voice_note) {
                     return true;
                 }
             }
@@ -783,6 +784,44 @@ function hasAudio(chatId, messageId) {
     }
 
     return false;
+}
+
+export function useAudioPlaybackRate(chatId, messageId) {
+    const audio = getMessageAudio(chatId, messageId);
+
+    return audio && audio.duration > PLAYER_AUDIO_2X_MIN_DURATION;
+}
+
+export function getMessageAudio(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return null;
+
+    const { content } = message;
+    if (!content) return null;
+
+    switch (content['@type']) {
+        case 'messageAudio': {
+            const { audio } = content;
+
+            return audio;
+        }
+        case 'messageText': {
+            const { web_page } = content;
+            if (web_page) {
+                const { audio } = web_page;
+
+                return audio;
+            }
+
+            break;
+        }
+    }
+
+    return null;
+}
+
+function hasAudio(chatId, messageId) {
+    return Boolean(getMessageAudio(chatId, messageId));
 }
 
 function hasVideoNote(chatId, messageId) {
@@ -956,10 +995,16 @@ function openAudio(audio, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
         chatId: chat_id,
-        messageId: id
+        messageId: id,
+        currentTime,
+        duration
     });
 }
 
@@ -1208,10 +1253,16 @@ function openVideoNote(videoNote, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
         chatId: chat_id,
-        messageId: id
+        messageId: id,
+        currentTime,
+        duration
     });
 }
 
@@ -1241,10 +1292,16 @@ function openVoiceNote(voiceNote, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
         chatId: chat_id,
-        messageId: id
+        messageId: id,
+        currentTime,
+        duration
     });
 }
 

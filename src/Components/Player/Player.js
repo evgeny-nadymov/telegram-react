@@ -691,7 +691,6 @@ class Player extends React.Component {
     getCurrentTime = () => {
         const { fileId } = this.props;
 
-        console.log('[pip] getCurrentTime fileId', fileId);
         const file = FileStore.get(fileId);
         if (!file) return { currentTime: 0, duration: 0 };
 

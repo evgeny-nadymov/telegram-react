@@ -120,8 +120,6 @@ class Audio extends React.Component {
         const audioSubtitle = getAudioShortTitle(audio);
         const completeIcon = playing ? <PauseIcon /> : <PlayArrowIcon />;
 
-        // console.log('[au] audio.render', playing, active);
-
         return (
             <div className={classNames('audio', 'document', { 'media-title': title })}>
                 <DocumentTile

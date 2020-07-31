@@ -162,16 +162,17 @@ class VoiceNoteSlider extends React.Component {
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, waveform } = this.props;
         const { active, currentTime, duration, dragging } = this.state;
+        const { currentTime: prevCurrentTime } = update;
 
         if (chatId === update.chatId && messageId === update.messageId) {
             let { value } = this.state;
             if (!dragging) {
-                value = VoiceNoteSlider.getValue(active ? currentTime : 0, duration, true, waveform, dragging);
+                value = VoiceNoteSlider.getValue(active ? currentTime : prevCurrentTime, duration, true, waveform, dragging);
             }
 
             this.setState({
                 active: true,
-                currentTime: active ? currentTime : 0,
+                currentTime: active ? currentTime : prevCurrentTime,
                 value
             });
         } else if (active) {

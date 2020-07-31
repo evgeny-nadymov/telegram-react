@@ -7,7 +7,7 @@
 
 import EventEmitter from './EventEmitter';
 import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
-import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_NORMAL } from '../Constants';
+import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 import { getRandomInt } from '../Utils/Common';
@@ -24,19 +24,24 @@ class PlayerStore extends EventEmitter {
     constructor() {
         super();
 
-        const { playbackRate, volume } = this.loadPlayerSettings();
-
-        this.playbackRate = playbackRate;
-        this.volume = volume;
-        this.repeat = RepeatEnum.NONE;
-        this.shuffle = false;
+        const { playbackRate, audioPlaybackRate, volume } = this.loadPlayerSettings();
 
         this.reset();
+
+        this.playbackRate = playbackRate;
+        this.audioPlaybackRate = audioPlaybackRate;
+        this.volume = volume;
 
         this.addTdLibListener();
     }
 
     reset = () => {
+        this.playbackRate = PLAYER_PLAYBACKRATE_NORMAL;
+        this.audioPlaybackRate = PLAYER_PLAYBACKRATE_NORMAL;
+        this.volume = PLAYER_VOLUME_NORMAL;
+        this.repeat = RepeatEnum.NONE;
+        this.shuffle = false;
+
         this.playlist = null;
         this.message = null;
         this.time = null;
@@ -84,29 +89,37 @@ class PlayerStore extends EventEmitter {
     };
 
     loadPlayerSettings() {
-        const player = localStorage.getItem('player') || {};
+        const player = JSON.parse(localStorage.getItem('player')) || {};
 
-        let { playbackRate, volume } = player;
+        let { playbackRate, audioPlaybackRate, volume } = player;
+
+        playbackRate = +playbackRate;
+        audioPlaybackRate = +audioPlaybackRate;
+        volume = +volume;
 
         playbackRate =
-            playbackRate && Number(playbackRate) >= 1 && Number(playbackRate) <= 2
-                ? Number(playbackRate)
+            playbackRate >= PLAYER_PLAYBACKRATE_NORMAL && playbackRate <= PLAYER_PLAYBACKRATE_MAX
+                ? playbackRate
                 : PLAYER_PLAYBACKRATE_NORMAL;
-        volume = volume && Number(volume) >= 0 && Number(volume) <= 1 ? Number(volume) : PLAYER_VOLUME_NORMAL;
+        audioPlaybackRate =
+            audioPlaybackRate >= PLAYER_PLAYBACKRATE_NORMAL && audioPlaybackRate <= PLAYER_PLAYBACKRATE_MAX
+                ? audioPlaybackRate
+                : PLAYER_PLAYBACKRATE_NORMAL;
+        volume = volume >= PLAYER_VOLUME_MIN && volume <= PLAYER_VOLUME_MAX ? volume : PLAYER_VOLUME_NORMAL;
 
-        return { playbackRate, volume };
+        return { playbackRate, audioPlaybackRate, volume };
     }
 
     savePlayerSettings() {
-        const { volume, playbackRate } = this;
+        const { volume, playbackRate, audioPlaybackRate } = this;
 
-        localStorage.setItem('player', JSON.stringify({ volume, playbackRate }));
+        localStorage.setItem('player', JSON.stringify({ volume, playbackRate, audioPlaybackRate }));
     }
 
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateMediaClose': {
-                this.reset();
+                // this.reset();
 
                 this.emit(update['@type'], update);
                 break;
@@ -159,6 +172,16 @@ class PlayerStore extends EventEmitter {
                 const { playbackRate } = update;
 
                 this.playbackRate = playbackRate;
+
+                this.savePlayerSettings();
+
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateMediaAudioPlaybackRate': {
+                const { audioPlaybackRate } = update;
+
+                this.audioPlaybackRate = audioPlaybackRate;
 
                 this.savePlayerSettings();
 
