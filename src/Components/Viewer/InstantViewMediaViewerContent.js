@@ -17,6 +17,8 @@ import { getSrc, getViewerFile, getViewerMinithumbnail, getViewerThumbnail } fro
 import { isBlurredThumbnail } from '../../Utils/Media';
 import { isEmptyText } from '../../Utils/InstantView';
 import FileStore from '../../Stores/FileStore';
+import Animation from '../Message/Media/Animation';
+import { ANIMATION_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -190,6 +192,18 @@ class InstantViewMediaViewerContent extends React.Component {
                 break;
             }
             case 'animation': {
+                // content = (
+                //     <Animation
+                //         type='preview'
+                //         stretch={true}
+                //         displaySize={ANIMATION_PREVIEW_DISPLAY_SIZE}
+                //         animation={media}
+                //         onClick={this.handleContentClick}
+                //         showProgress={false}
+                //         style={{ borderRadius: 0 }}
+                //     />
+                // );
+
                 content = (
                     <div className='media-viewer-content-wrapper'>
                         <video

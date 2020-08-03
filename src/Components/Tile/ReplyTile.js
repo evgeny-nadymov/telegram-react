@@ -13,6 +13,7 @@ import { isBlurredThumbnail } from '../../Utils/Media';
 import { hasVideoNote } from '../../Utils/Message';
 import FileStore from '../../Stores/FileStore';
 import './ReplyTile.css';
+import { THUMBNAIL_BLURRED_SIZE_90 } from '../../Constants';
 
 class ReplyTile extends React.Component {
     componentDidMount() {
@@ -56,7 +57,7 @@ class ReplyTile extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const src = getSrc(photo);
-        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize);
+        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize, THUMBNAIL_BLURRED_SIZE_90);
         const isVideoNote = hasVideoNote(chatId, messageId);
         const hasSrc = Boolean(src || miniSrc);
 

@@ -154,6 +154,10 @@ function getSize(sizes, dimension) {
     let diff = Math.abs(dimension - (useWidth ? sizes[0].width : sizes[0].height));
     let index = 0;
     for (let i = 1; i < sizes.length; i++) {
+        if (!sizes[i]) {
+            continue;
+        }
+
         if (sizes[i].type === 'i' && !sizes[i].photo.local.is_downloading_completed) {
             continue;
         }
@@ -168,10 +172,10 @@ function getSize(sizes, dimension) {
     return sizes[index];
 }
 
-function getFitSize(size, max, increaseToMax = true) {
+function getFitSize(size, max, stretch = true) {
     if (!size) return { width: 0, height: 0 };
 
-    if (!increaseToMax) {
+    if (!stretch) {
         if (size.width < max && size.height < max) {
             return size;
         }

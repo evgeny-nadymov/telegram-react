@@ -10,6 +10,7 @@ export const ANIMATION_DURATION_100MS = 100;
 export const ANIMATION_DURATION_200MS = 200;
 export const ANIMATION_DURATION_300MS = 300;
 export const ANIMATION_DURATION_500MS = 500;
+export const ANIMATION_PREVIEW_DISPLAY_SIZE = 480;
 export const APP_NAME = 'Telegram Web';
 export const CHAT_SLICE_LIMIT = 25;
 export const EMOJI_PICKER_TIMEOUT_MS = 100;

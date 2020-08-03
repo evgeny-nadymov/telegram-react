@@ -79,7 +79,7 @@ class SharedVideo extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90) : Boolean(miniSrc);
+        const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
         return (
             <>

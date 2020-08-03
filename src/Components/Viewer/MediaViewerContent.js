@@ -18,6 +18,8 @@ import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
+import Animation from '../Message/Media/Animation';
+import { ANIMATION_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -258,6 +260,20 @@ class MediaViewerContent extends React.Component {
                 </div>
             );
         } else if (isAnimation) {
+            // const message = MessageStore.get(chatId, messageId);
+            //
+            // content = (
+            //     <Animation
+            //         type='preview'
+            //         stretch={true}
+            //         displaySize={ANIMATION_PREVIEW_DISPLAY_SIZE}
+            //         animation={message.content.animation || message.content.web_page.animation}
+            //         onClick={this.handleContentClick}
+            //         showProgress={false}
+            //         style={{ borderRadius: 0 }}
+            //         />
+            // );
+
             content = (
                 <div className='media-viewer-content-wrapper'>
                     <video
@@ -275,25 +291,25 @@ class MediaViewerContent extends React.Component {
                         {source}
                     </video>
                     {!isPlaying &&
-                        ((thumbnailSrc || miniSrc) ? (
-                            <img
-                                className={classNames('media-viewer-content-video-thumbnail', {
-                                    'media-blurred': isBlurred
-                                })}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                                width={videoWidth}
-                                height={videoHeight}
-                            />
-                        ) : (
-                            <div
-                                className='media-viewer-content-video-thumbnail'
-                                style={{
-                                    width: videoWidth,
-                                    height: videoHeight
-                                }}
-                            />
-                        ))}
+                    ((thumbnailSrc || miniSrc) ? (
+                        <img
+                            className={classNames('media-viewer-content-video-thumbnail', {
+                                'media-blurred': isBlurred
+                            })}
+                            src={thumbnailSrc || miniSrc}
+                            alt=''
+                            width={videoWidth}
+                            height={videoHeight}
+                        />
+                    ) : (
+                        <div
+                            className='media-viewer-content-video-thumbnail'
+                            style={{
+                                width: videoWidth,
+                                height: videoHeight
+                            }}
+                        />
+                    ))}
                 </div>
             );
         } else {

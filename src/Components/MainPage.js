@@ -44,12 +44,6 @@ class MainPage extends React.Component {
             instantViewContent: null,
             videoInfo: null
         };
-
-        /*this.store = localForage.createInstance({
-                    name: 'tdlib'
-                });*/
-
-        //this.initDB();
     }
 
     componentDidMount() {

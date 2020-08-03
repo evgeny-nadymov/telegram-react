@@ -66,6 +66,7 @@ class PipPlayer extends React.Component {
         this.connectPlayer(video);
         window.addEventListener('resize', this.onWindowResize);
         document.addEventListener('fullscreenchange', this.onFullScreenChange);
+        PlayerStore.on('clientUpdateMediaShortcut', this.onClientUpdateMediaShortcut);
     }
 
     componentWillUnmount() {
@@ -73,8 +74,17 @@ class PipPlayer extends React.Component {
         this.disconnectPlayer(video);
         window.removeEventListener('resize', this.onWindowResize);
         document.removeEventListener('fullscreenchange', this.onFullScreenChange);
+        PlayerStore.off('clientUpdateMediaShortcut', this.onClientUpdateMediaShortcut);
+
         KeyboardManager.remove(this.keyboardHandler);
     }
+
+    onClientUpdateMediaShortcut = update => {
+        const { event } = update;
+        if (!event) return;
+
+        this.onKeyDown(event);
+    };
 
     onKeyDown = event => {
         const { key, code, altKey, ctrlKey, metaKey, shiftKey } = event;
@@ -84,6 +94,13 @@ class PipPlayer extends React.Component {
 
         let handled = false;
         switch (code) {
+            case 'Escape': {
+                if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
+                    this.handleClose();
+                    handled = true;
+                }
+                break;
+            }
             case 'ArrowLeft': {
                 if (!altKey && !ctrlKey && !metaKey && !shiftKey) {
                     this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_SMALL);
@@ -257,15 +274,8 @@ class PipPlayer extends React.Component {
 
     onFullScreenChange = () => {
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
-
         const fullscreenPlayer = document.getElementById('pip-player-wrapper');
-
         const fullscreen = fullscreenElement === fullscreenPlayer;
-        if (fullscreen) {
-            KeyboardManager.add(this.keyboardHandler);
-        } else {
-            KeyboardManager.remove(this.keyboardHandler);
-        }
 
         this.setState({
             fullscreen
@@ -307,6 +317,9 @@ class PipPlayer extends React.Component {
         const { left, top } = this.normalizePosition(PlayerStore.pipParams.left, PlayerStore.pipParams.top, false);
         pipPlayer.style.left = left + 'px';
         pipPlayer.style.top = top + 'px';
+
+        const pipPlayerWrapper = document.getElementById('pip-player-wrapper');
+        pipPlayerWrapper.focus();
 
         // console.log('[pip] connect', PlayerStore.pipParams, pipPlayer.style.left, pipPlayer.style.top);
 
@@ -509,6 +522,9 @@ class PipPlayer extends React.Component {
     };
 
     handlePlayerMouseDown = event => {
+        const pip = document.getElementById('pip-player-wrapper');
+        if (pip) pip.focus();
+
         this.mouseDownRoot = true;
         event.preventDefault();
 
@@ -634,6 +650,7 @@ class PipPlayer extends React.Component {
     };
 
     handleMouseOver = event => {
+        this.mouseDownRoot = false;
         const { hidden } = this.state;
 
         if (hidden) {
@@ -765,12 +782,25 @@ class PipPlayer extends React.Component {
         const { mouseDownRoot } = this;
         if (!mouseDownRoot) return;
 
-        this.mouseDownRoot = false;
         this.startStopPlayer();
     }
 
     handleDoubleClick = event => {
+        event.stopPropagation();
+
+        const { mouseDownRoot } = this;
+        if (!mouseDownRoot) return;
+
         this.handleFullScreen(event);
+    };
+
+    handleFocus = () => {
+        KeyboardManager.add(this.keyboardHandler);
+
+    };
+
+    handleBlur = () => {
+        KeyboardManager.remove(this.keyboardHandler);
     };
 
     render() {
@@ -796,7 +826,12 @@ class PipPlayer extends React.Component {
                 onMouseMove={this.handleMouseOver}
                 onClick={this.handleClickRoot}
                 onDoubleClick={this.handleDoubleClick}>
-                <div id='pip-player-wrapper' className={classNames({ 'pip-player-wrapper-hidden': hidden })}>
+                <div
+                    id='pip-player-wrapper'
+                    className={classNames({ 'pip-player-wrapper-hidden': hidden })}
+                    onFocus={this.handleFocus}
+                    onBlur={this.handleBlur}
+                    tabIndex={0}>
                     <div id='pip-player-container'/>
                     <Hint fileId={fileId}/>
 

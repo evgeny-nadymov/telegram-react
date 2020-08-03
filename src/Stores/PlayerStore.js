@@ -478,10 +478,10 @@ class PlayerStore extends EventEmitter {
         return this.times.get(uniqueId) || { currentTime: 0, duration: 0 };
     };
 
-    setCurrentTime = (uniqueId, currentTime) => {
-        if (currentTime < 30) return;
+    setCurrentTime = (uniqueId, info) => {
+        if (info.currentTime < 30) return;
 
-        this.times.set(uniqueId, currentTime);
+        this.times.set(uniqueId, info);
     };
 
     clearCurrentTime = (uniqueId) => {

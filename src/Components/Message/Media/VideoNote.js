@@ -321,7 +321,7 @@ class VideoNote extends React.Component {
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
         const src = getSrc(video);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
+        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail, displaySize) : Boolean(miniSrc);
 
         let progress = 0;
         if (videoDuration && currentTime) {

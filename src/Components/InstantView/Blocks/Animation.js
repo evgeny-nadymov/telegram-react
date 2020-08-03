@@ -17,7 +17,7 @@ function Animation(props) {
     return (
         <figure>
             <MediaAnimation
-                iv={true}
+                type='iv'
                 pageBlock={block}
                 animation={animation}
                 displaySize={IV_PHOTO_DISPLAY_SIZE}

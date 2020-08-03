@@ -375,7 +375,7 @@ class Sticker extends React.Component {
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
         const src = getSrc(sticker);
-        const isBlurred = isBlurredThumbnail(thumbnail) || !preview;
+        const isBlurred = isBlurredThumbnail(thumbnail, displaySize) || !preview;
 
         if (hasError) {
             const style = {
@@ -402,7 +402,7 @@ class Sticker extends React.Component {
         }
 
         let content = null;
-        const fitSize = getFitSize({ width: width, height: height }, displaySize);
+        const fitSize = getFitSize({ width, height }, displaySize);
         if (fitSize) {
             content = isAnimated ? (
                 <>

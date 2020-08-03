@@ -137,6 +137,7 @@ class ServiceMessage extends React.Component {
                             chatId={chatId}
                             messageId={messageId}
                             photo={photo}
+                            displaySize={64}
                             style={chatPhotoStyle}
                             openMedia={this.openMedia}
                         />

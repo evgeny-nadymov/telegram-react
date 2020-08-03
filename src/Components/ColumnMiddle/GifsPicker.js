@@ -242,9 +242,9 @@ class GifsPicker extends React.Component {
                 onMouseEnter={this.handleMouseEnter}
                 >
                 <Animation
+                    type='picker'
                     animation={x}
                     openMedia={() => this.openAnimation(x)}
-                    picker={true}
                     style={{ width: 104, height: 104, margin: 2, borderRadius: 0 }}
                 />
             </div>

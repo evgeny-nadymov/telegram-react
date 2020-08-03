@@ -11,10 +11,10 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../../Utils/HOC';
 import FileProgress from '../../Viewer/FileProgress';
-import { getFitSize } from '../../../Utils/Common';
+import { getFitSize, getPhotoSize } from '../../../Utils/Common';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { getFileSize, getSrc, isGifMimeType } from '../../../Utils/File';
-import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
+import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import AnimationStore from '../../../Stores/AnimationStore';
 import AppStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
@@ -195,31 +195,36 @@ class Animation extends React.Component {
     }
 
     render() {
-        const { displaySize, openMedia, t, title, caption, type, picker, style } = this.props;
+        const { displaySize, stretch, openMedia, t, title, caption, type, style, showProgress } = this.props;
         const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
         const { playing } = this;
 
-        const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize, false);
+        const photoSize = getPhotoSize([thumbnail, { width, height }], displaySize);
+        const fitPhotoSize = getFitSize(photoSize, displaySize, stretch);
         if (!fitPhotoSize) return null;
 
         const animationStyle = {
-            width: fitPhotoSize.width,
+            background: 'black',
+            minWidth: stretch ? fitPhotoSize.width : null,
+            width: !stretch ? fitPhotoSize.width : null,
             height: fitPhotoSize.height,
             ...style
         };
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const src = getSrc(animation);
+        const isBlurred = isBlurredThumbnail(thumbnail, displaySize);
 
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
+        const src = getSrc(animation);
         const isGif = isGifMimeType(mime_type);
         const source = src ? <source src={src} type={mime_type}/> : null;
 
         return (
             <div
                 className={classNames('animation', {
-                    'animation-big': type === 'message',
+                    'animation-message': type === 'message',
+                    'animation-picker': type === 'picker',
+                    'animation-iv': type === 'iv',
                     'animation-title': title,
                     'media-title': title,
                     'animation-caption': caption,
@@ -227,15 +232,22 @@ class Animation extends React.Component {
                 })}
                 style={animationStyle}
                 onClick={openMedia}>
+                    {miniSrc && (
+                        <img
+                            className={classNames('video-preview', 'media-mini-blurred')}
+                            src={miniSrc}
+                            alt=''
+                        />
+                    )}
                     {src && (
                         isGif ? (
                             <img className='animation-preview' src={src} alt='' />
                         ) : (
                             <video
                                 ref={this.videoRef}
-                                className='media-viewer-content-animation'
+                                className='animation-player'
                                 muted
-                                autoPlay={!picker}
+                                autoPlay={type !== 'picker'}
                                 loop
                                 playsInline
                                 width={animationStyle.width}
@@ -249,24 +261,25 @@ class Animation extends React.Component {
                     )}
                     { !playing && (
                         <>
-                            <img
-                                className={classNames('animation-preview', {
-                                    'media-blurred': isBlurred,
-                                    'media-mini-blurred': !src && !thumbnailSrc && isBlurred
-                                })}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                            />
-                            {!picker && <div className='animation-meta'>{getFileSize(animation)}</div>}
+                            { thumbnailSrc && (
+                                <img
+                                    className={classNames('animation-thumbnail', { 'media-blurred': isBlurred })}
+                                    src={thumbnailSrc}
+                                    alt=''
+                                />
+                            )}
+                            {type !== 'picker' && type !== 'preview' && <div className='animation-meta'>{getFileSize(animation)}</div>}
                         </>
                     )}
-                <FileProgress
-                    file={animation}
-                    download
-                    upload
-                    cancelButton
-                    icon={<div className='animation-play'>{t('AttachGif')}</div>}
-                />
+                {showProgress && (
+                    <FileProgress
+                        file={animation}
+                        download
+                        upload
+                        cancelButton
+                        icon={<div className='animation-play'>{t('AttachGif')}</div>}
+                    />
+                )}
             </div>
         );
     }
@@ -278,17 +291,16 @@ Animation.propTypes = {
     pageBlock: PropTypes.object,
     animation: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
-    size: PropTypes.number,
     displaySize: PropTypes.number,
-    iv: PropTypes.bool,
-    picker: PropTypes.bool
+    stretch: PropTypes.bool,
+    type: PropTypes.oneOf(['message', 'picker', 'iv', 'preview']),
+    showProgress: PropTypes.bool
 };
 
 Animation.defaultProps = {
-    size: PHOTO_SIZE,
     displaySize: PHOTO_DISPLAY_SIZE,
-    iv: false,
-    picker: false
+    stretch: false,
+    showProgress: true
 };
 
 const enhance = compose(

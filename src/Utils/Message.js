@@ -28,6 +28,7 @@ import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import { isEmptyText } from './InstantView';
 
 export function isMetaBubble(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -1207,7 +1208,7 @@ function openVideo(video, message, fileCancel) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    if (fileCancel && file.local.is_downloading_active) {
+    if (fileCancel && file.local.is_downloading_active && !supportsStreaming()) {
         FileStore.cancelGetRemoteFile(file.id, message);
         return;
     } else if (fileCancel && file.remote.is_uploading_active) {
@@ -2528,41 +2529,60 @@ export function getMessageStyle(chatId, messageId) {
 
     switch (content['@type']) {
         case 'messageAnimation': {
-            const { animation } = content;
+            const { animation, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
             if (!animation) return null;
 
             const { width, height, thumbnail } = animation;
 
-            const size = { width, height } || thumbnail;
+            const size = thumbnail || { width, height };
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };
         }
+        case 'messageGame': {
+            return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
+        }
         case 'messagePhoto': {
-            const { photo } = content;
+            const { photo, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
             if (!photo) return null;
 
             const size = getSize(photo.sizes, PHOTO_SIZE);
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };
         }
+        case 'messageText': {
+            const { web_page } = content;
+            if (!web_page) return null;
+
+            return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
+        }
         case 'messageVideo': {
-            const { video } = content;
+            const { video, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
+
             if (!video) return null;
 
             const { thumbnail, width, height } = video;
 
-            const size = { width, height } || thumbnail;
+            const size = thumbnail || { width, height };
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };

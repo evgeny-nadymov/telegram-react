@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
+import { PHOTO_DISPLAY_SIZE, THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
 import MessageStore from '../Stores/MessageStore';
 import Animation from '../Components/Message/Media/Animation';
 import Audio from '../Components/Message/Media/Audio';
@@ -111,10 +111,11 @@ export function isValidAnimatedSticker(sticker, chatId, messageId) {
     return true;
 }
 
-export function isBlurredThumbnail(thumbnail, blurredSize = THUMBNAIL_BLURRED_SIZE_90) {
+export function isBlurredThumbnail(thumbnail, displaySize = PHOTO_DISPLAY_SIZE, blurredSize = THUMBNAIL_BLURRED_SIZE_90) {
     if (!thumbnail) return false;
+    // if (displaySize <= blurredSize * 2) return false;
 
-    return Math.max(thumbnail.width, thumbnail.height) < blurredSize;
+    return Math.max(thumbnail.width, thumbnail.height) <= blurredSize;
 }
 
 export function getAudioTitle(audio) {
@@ -516,6 +517,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     messageId={id}
                     animation={content.animation}
                     openMedia={openMedia}
+                    stretch={true}
                 />
             );
         case 'messageAudio':
@@ -568,7 +570,17 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                 />
             );
         case 'messageGame':
-            return <Game chatId={chat_id} messageId={id} game={content.game} openMedia={openMedia} />;
+            return (
+                <Game
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    game={content.game}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
         case 'messageLocation':
             return (
                 <Location
@@ -591,6 +603,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     messageId={id}
                     photo={content.photo}
                     openMedia={openMedia}
+                    stretch={true}
                 />
             );
         case 'messagePoll':
@@ -630,6 +643,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     messageId={id}
                     video={content.video}
                     openMedia={openMedia}
+                    stretch={true}
                 />
             );
         case 'messageVideoNote':

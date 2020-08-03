@@ -11,6 +11,7 @@
     overflow: hidden;
     position: relative;
     color: white;
+    user-select: none;
 }
 
 .video-big {
@@ -31,13 +32,18 @@
 }
 
 .video-preview {
-    background: black;
-    object-fit: contain;
+    object-fit: cover;
     width: 100%;
     height: 100%;
-    display: block;
-    /*border-radius: 4px;*/
-    user-select: none;
+}
+
+.video-thumbnail {
+    object-fit: contain;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .media-blurred {
@@ -45,8 +51,8 @@
 }
 
 .media-mini-blurred {
-    filter: blur(4px);
-    /*transform: scale(1.05);*/
+    filter: blur(10px);
+    transform: scale(1.1);
 }
 
 .video-play {
