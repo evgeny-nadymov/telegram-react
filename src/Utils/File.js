@@ -808,7 +808,9 @@ function loadVideoContent(store, video, message, useFileSize = true) {
     const blob = FileStore.getBlob(id);
     if (blob) return;
 
-    if (supports_streaming && supportsStreaming()) return;
+    if (supports_streaming && supportsStreaming()) {
+        return;
+    }
 
     const chatId = message ? message.chat_id : 0;
     const messageId = message ? message.id : 0;
@@ -1574,6 +1576,11 @@ function getMediaFile(chatId, messageId, size) {
                     return [50, 50, file, mime_type, false];
                 }
 
+                if (video) {
+                    const { width, height, video: file, mime_type, supports_streaming } = video;
+                    return [width, height, file, mime_type, supports_streaming && supportsStreaming()];
+                }
+
                 if (photo) {
                     const photoSize = getSize(photo.sizes, size);
                     if (photoSize) {
@@ -1581,11 +1588,6 @@ function getMediaFile(chatId, messageId, size) {
                         return [width, height, file, '', false];
                     }
                     break;
-                }
-
-                if (video) {
-                    const { width, height, video: file, mime_type, supports_streaming } = video;
-                    return [width, height, file, mime_type, supports_streaming && supportsStreaming()];
                 }
             }
             break;

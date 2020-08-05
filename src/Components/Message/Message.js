@@ -372,13 +372,13 @@ class Message extends Component {
                 views={views}
             />
         );
-        const text = getText(message, inlineMeta, t);
+        const webPage = getWebPage(message);
+        const text = getText(message, !!webPage ? null : inlineMeta, t);
         const hasCaption = text !== null && text.length > 0;
         const showForward = showMessageForward(chatId, messageId);
         const showReply = Boolean(reply_to_message_id);
         const suppressTitle = isPrivateChat(chatId);
         const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
-        const webPage = getWebPage(message);
         const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta);
 
         let tile = null;

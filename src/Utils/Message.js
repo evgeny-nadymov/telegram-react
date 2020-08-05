@@ -338,7 +338,7 @@ function getText(message, meta, t = k => k) {
     let result = [];
 
     const { content } = message;
-    if (!content) return [...result, meta];
+    if (!content) return [meta];
 
     const { text, caption } = content;
 
@@ -1386,34 +1386,42 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
                 if (animation) {
                     openAnimation(animation, message, fileCancel);
+                    break;
                 }
 
                 if (audio) {
                     openAudio(audio, message, fileCancel);
+                    break;
                 }
 
                 if (document) {
                     openDocument(document, message, fileCancel);
+                    break;
                 }
 
                 if (sticker) {
                     openSticker(sticker, message, fileCancel);
+                    break;
                 }
 
                 if (video) {
                     openVideo(video, message, fileCancel);
+                    break;
                 }
 
                 if (video_note) {
                     openVideoNote(video_note, message, fileCancel);
+                    break;
                 }
 
                 if (voice_note) {
                     openVoiceNote(voice_note, message, fileCancel);
+                    break;
                 }
 
                 if (photo) {
                     openPhoto(photo, message, fileCancel);
+                    break;
                 }
             }
 

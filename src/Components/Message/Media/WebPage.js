@@ -21,6 +21,7 @@ import VoiceNote from './VoiceNote';
 import { getSize } from '../../../Utils/Common';
 import { getSrc } from '../../../Utils/File';
 import { openInstantView } from '../../../Actions/InstantView';
+import { getFormattedText, getTwitterInstagramEntities } from '../../../Utils/Message';
 import {
     PHOTO_DISPLAY_EXTRA_SMALL_SIZE,
     PHOTO_DISPLAY_SIZE,
@@ -29,7 +30,6 @@ import {
 } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import './WebPage.css';
-import { getEntities, getFormattedText, getText, getTwitterInstagramEntities } from '../../../Utils/Message';
 
 class WebPage extends React.Component {
     getMedia = () => {
@@ -100,14 +100,14 @@ class WebPage extends React.Component {
             if (animationSrc || animation.thumbnail) {
                 return [
                     null,
-                    <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />
+                    <Animation stretch={true} chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />
                 ];
             }
         }
 
         if (video) {
             if (video.thumbnail) {
-                return [null, <Video chatId={chatId} messageId={messageId} video={video} openMedia={openMedia} />];
+                return [null, <Video stretch={true} chatId={chatId} messageId={messageId} video={video} openMedia={openMedia} />];
             }
         }
 
@@ -139,7 +139,7 @@ class WebPage extends React.Component {
                         openMedia={openMedia}
                     />
                 ) : null,
-                !smallPhoto ? <Photo chatId={chatId} messageId={messageId} photo={photo} openMedia={openMedia} /> : null
+                !smallPhoto ? <Photo stretch={true} chatId={chatId} messageId={messageId} photo={photo} openMedia={openMedia} /> : null
             ];
         }
 

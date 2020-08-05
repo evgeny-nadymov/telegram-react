@@ -518,9 +518,14 @@ class HeaderPlayer extends React.Component {
 
                 if (web_page) {
                     if (web_page.audio) {
-                        const file = web_page.audio.audio;
+                        const { audio: file } = web_page.audio;
                         if (file) {
-                            return getSrc(file);
+                            let src = getSrc(file);
+                            if (!src && supportsStreaming()) {
+                                src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${web_page.audio.mime_type}`;
+                            }
+
+                            return src;
                         }
                     }
 

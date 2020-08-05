@@ -18,8 +18,6 @@ import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
-import Animation from '../Message/Media/Animation';
-import { ANIMATION_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -48,9 +46,8 @@ class MediaViewerContent extends React.Component {
             let src = getSrc(file);
             let source = null;
             if (!src && supportsStreaming) {
-                const { video } = message.content;
-                if (video) {
-                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
                 }
             }
 
@@ -113,13 +110,23 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+            let [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+
+            file = FileStore.get(file.id) || file;
+            let src = getSrc(file);
+            let source = null;
+            if (!src && supportsStreaming) {
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
+                }
+            }
 
             this.setState({
                 width,
                 height,
                 file,
-                src: getSrc(file),
+                src,
+                source,
                 supportsStreaming,
                 mimeType
             });
@@ -151,9 +158,8 @@ class MediaViewerContent extends React.Component {
             let src = getSrc(file);
             let source = null;
             if (!src && supportsStreaming) {
-                const { video } = message.content;
-                if (video) {
-                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
                 }
             }
 
@@ -221,6 +227,7 @@ class MediaViewerContent extends React.Component {
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
+
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
