@@ -19,6 +19,8 @@ import { isEmptyText } from '../../Utils/InstantView';
 import FileStore from '../../Stores/FileStore';
 import Animation from '../Message/Media/Animation';
 import { ANIMATION_PREVIEW_DISPLAY_SIZE } from '../../Constants';
+import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -80,6 +82,7 @@ class InstantViewMediaViewerContent extends React.Component {
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
 
     componentWillUnmount() {
@@ -88,7 +91,21 @@ class InstantViewMediaViewerContent extends React.Component {
         FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdatePictureInPicture = update => {
+        const { videoInfo } = update;
+        if (!videoInfo) return;
+
+        const { file } = this.state;
+        if (file.id !== videoInfo.fileId) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateInstantViewViewerContent',
+            content: null
+        });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { src } = this.state;

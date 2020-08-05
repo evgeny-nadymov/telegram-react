@@ -25,6 +25,7 @@ import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerC
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
 import { modalManager } from '../../Utils/Modal';
+import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
 
@@ -45,7 +46,6 @@ class InstantViewMediaViewer extends React.Component {
     componentDidMount() {
         this.loadContent();
 
-        // setTimeout(() => KeyboardManager.add(this.keyboardHandler), 0);
         KeyboardManager.add(this.keyboardHandler);
     }
 

@@ -603,11 +603,6 @@ class Player extends React.Component {
             }
         });
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMediaViewerContent',
-            content: null
-        });
-
         return;
 
         if (!video.duration) return;

@@ -18,6 +18,8 @@ import { isBlurredThumbnail } from '../../Utils/Media';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import './MediaViewerContent.css';
+import TdLibController from '../../Controllers/TdLibController';
+import PlayerStore from '../../Stores/PlayerStore';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -84,6 +86,7 @@ class MediaViewerContent extends React.Component {
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
 
     componentWillUnmount() {
@@ -93,7 +96,21 @@ class MediaViewerContent extends React.Component {
         FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdatePictureInPicture = update => {
+        const { videoInfo } = update;
+        if (!videoInfo) return;
+
+        const { file } = this.state;
+        if (file.id !== videoInfo.fileId) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaViewerContent',
+            content: null
+        });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { src } = this.state;
