@@ -199,7 +199,8 @@ class Animation extends React.Component {
         const { minithumbnail, thumbnail, animation, mime_type, width, height } = this.props.animation;
         const { playing } = this;
 
-        const photoSize = getPhotoSize([thumbnail, { width, height }], displaySize);
+        const sizes = [...(thumbnail ? [thumbnail] : []), { width, height }];
+        const photoSize = getPhotoSize(sizes, displaySize);
         const fitPhotoSize = getFitSize(photoSize, displaySize, stretch);
         if (!fitPhotoSize) return null;
 
