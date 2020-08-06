@@ -51,12 +51,7 @@ class HeaderPlayer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { theme } = this.props;
         const { message, playlist, src, playing } = this.state;
-
-        if (nextProps.theme !== theme) {
-            return true;
-        }
 
         if (nextState.message !== message) {
             return true;
