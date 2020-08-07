@@ -20,6 +20,7 @@ import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
+import { getBlockAudio } from './InstantView';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
@@ -28,7 +29,6 @@ import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import { isEmptyText } from './InstantView';
 
 export function isMetaBubble(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -726,69 +726,62 @@ function isContentOpened(chatId, messageId) {
     }
 }
 
-function getMediaTitle(message, t = k => k) {
-    if (!message) return null;
+export function hasVoice(source) {
+    if (!source) return false;
 
-    const { content } = message;
-    if (!content) return null;
+    switch (source['@type']) {
+        case 'message': {
+            const message = MessageStore.get(source.chat_id, source.id);
+            if (!message) return false;
 
-    switch (content['@type']) {
-        case 'messageAudio': {
-            const { audio } = content;
-            if (audio) {
-                return getAudioTitle(audio);
-            }
-            break;
-        }
-        case 'messageText': {
-            const { web_page } = content;
-            if (web_page) {
-                const { audio } = web_page;
-                if (audio) {
-                    return getAudioTitle(audio);
+            const { content } = message;
+            if (!content) return false;
+
+            switch (content['@type']) {
+                case 'messageVoiceNote': {
+                    const { voice_note } = content;
+                    if (voice_note) {
+                        return true;
+                    }
+
+                    break;
                 }
-                break;
-            }
-        }
-    }
+                case 'messageText': {
+                    const { web_page } = content;
+                    if (web_page) {
+                        const { voice_note } = web_page;
+                        if (voice_note) {
+                            return true;
+                        }
+                    }
 
-    return getAuthor(message, t);
-}
-
-export function hasVoice(chatId, messageId) {
-    const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
-
-    const { content } = message;
-    if (!content) return false;
-
-    switch (content['@type']) {
-        case 'messageVoiceNote': {
-            const { voice_note } = content;
-            if (voice_note) {
-                return true;
-            }
-
-            break;
-        }
-        case 'messageText': {
-            const { web_page } = content;
-            if (web_page) {
-                const { voice_note } = web_page;
-                if (voice_note) {
-                    return true;
+                    break;
                 }
             }
-
             break;
+        }
+        case 'pageBlockVoiceNote': {
+            return true;
         }
     }
 
     return false;
 }
 
-export function useAudioPlaybackRate(chatId, messageId) {
-    const audio = getMessageAudio(chatId, messageId);
+export function useAudioPlaybackRate(source) {
+    if (!source) return false;
+
+    let audio = null;
+    switch (source['@type']) {
+        case 'message': {
+            audio = getMessageAudio(source.chat_id, source.id);
+            break;
+        }
+        case 'pageBlockAudio': {
+            audio = getBlockAudio(source);
+            break;
+        }
+    }
 
     return audio && audio.duration > PLAYER_AUDIO_2X_MIN_DURATION;
 }
@@ -821,8 +814,19 @@ export function getMessageAudio(chatId, messageId) {
     return null;
 }
 
-function hasAudio(chatId, messageId) {
-    return Boolean(getMessageAudio(chatId, messageId));
+function hasAudio(source) {
+    if (!source) return false;
+
+    switch (source['@type']) {
+        case 'message': {
+            return !!getMessageAudio(source.chat_id, source.id);
+        }
+        case 'pageBlockAudio': {
+            return !!getBlockAudio(source);
+        }
+    }
+
+    return false;
 }
 
 function hasVideoNote(chatId, messageId) {
@@ -2622,7 +2626,6 @@ export {
     isLottieMessage,
     getLocationId,
     isContentOpened,
-    getMediaTitle,
     hasAudio,
     hasVideoNote,
     getSearchMessagesFilter,

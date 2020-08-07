@@ -8,10 +8,11 @@
 import EventEmitter from './EventEmitter';
 import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
 import { getRandomInt } from '../Utils/Common';
-import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_MAX_SIZE, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
+import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
 import FileStore from './FileStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
+import { isCurrentSource } from '../Utils/Player';
 
 const RepeatEnum = Object.freeze({
     NONE: 'NONE',
@@ -48,7 +49,7 @@ class PlayerStore extends EventEmitter {
         this.time = null;
         this.videoStream = null;
         this.instantView = null;
-        this.pageBlock = null;
+        this.block = null;
         this.pipParams = { left: document.documentElement.clientWidth - 300, top: document.documentElement.clientHeight - 300 };
         this.times = new Map();
     };
@@ -126,20 +127,18 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaActive': {
-                const { chatId, messageId, instantView, pageBlock } = update;
+                const { chatId, messageId, instantView, block } = update;
 
                 const message = MessageStore.get(chatId, messageId);
                 if (message) {
                     this.message = message;
                     this.emit(update['@type'], update);
-                    this.getPlaylist(chatId, messageId, () => {
-                        // this.preloadNextMedia();
-                    });
+                    this.getPlaylist(chatId, messageId);
 
                     return;
-                } else if (instantView && pageBlock) {
+                } else if (instantView && block) {
                     this.instantView = instantView;
-                    this.pageBlock = pageBlock;
+                    this.block = block;
                     this.emit(update['@type'], update);
                 }
 
@@ -257,16 +256,19 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaTime': {
-                const { chatId, messageId, duration, currentTime, buffered, timestamp } = update;
+                const { source, duration, currentTime, buffered, timestamp } = update;
 
-                if (this.time && this.time.chatId === chatId && this.time.messageId === messageId) {
-                    this.time = {
-                        ...this.time,
-                        currentTime,
-                        duration,
-                        buffered,
-                        timestamp
-                    };
+                if (this.time) {
+                    const { chatId, messageId, block } = this.time;
+                    if (isCurrentSource(chatId, messageId, block, source)) {
+                        this.time = {
+                            ...this.time,
+                            currentTime,
+                            duration,
+                            buffered,
+                            timestamp
+                        };
+                    }
                 }
 
                 if (buffered && currentTime && duration) {
@@ -284,21 +286,26 @@ class PlayerStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateMediaProgress': {
-                const { chatId, messageId, buffered } = update;
+                const { source, buffered } = update;
 
-                if (this.time && this.time.chatId === chatId && this.time.messageId === messageId) {
-                    this.time = { ...this.time, buffered };
+                if (this.time) {
+                    const { chatId, messageId, block } = this.time;
+                    if (isCurrentSource(chatId, messageId, block, source)) {
+                        this.time = { ...this.time, buffered };
+                    }
                 }
 
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateMediaLoadedMetadata': {
-                const { chatId, messageId, duration, videoWidth, videoHeight } = update;
+                const { source, duration, videoWidth, videoHeight } = update;
+                const { message, block } = source;
 
                 this.time = {
-                    chatId,
-                    messageId,
+                    chatId: message ? message.chat_id : 0,
+                    messageId: message ? message.id : 0,
+                    block,
                     duration,
                     videoWidth,
                     videoHeight

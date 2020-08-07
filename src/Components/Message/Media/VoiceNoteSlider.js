@@ -11,7 +11,9 @@ import classNames from 'classnames';
 import Slider from '@material-ui/core/Slider';
 import Player from '../../Player/Player';
 import Waveform from './Waveform';
+import { isCurrentSource } from '../../../Utils/Player';
 import { PLAYER_PROGRESS_TIMEOUT_MS } from '../../../Constants';
+import MessageStore from '../../../Stores/MessageStore';
 import PlayerStore from '../../../Stores/PlayerStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './VoiceNoteSlider.css';
@@ -20,13 +22,13 @@ class VoiceNoteSlider extends React.Component {
     state = { };
 
     static getDerivedStateFromProps(props, state) {
-        const { chatId, messageId, duration, waveform } = props;
+        const { chatId, messageId, block, duration, waveform } = props;
 
-        if (state.prevChatId !== chatId || state.prevMessageId !== messageId) {
+        if (state.prevChatId !== chatId || state.prevMessageId !== messageId || state.prevBlock !== block) {
 
-            const { message, time } = PlayerStore;
+            const { message, block: currentBlock, time } = PlayerStore;
 
-            const active = message && message.chat_id === chatId && message.id === messageId;
+            const active = message && message.chat_id === chatId && message.id === messageId || block === currentBlock;
             const currentTime = active && time ? time.currentTime : 0;
             const audioDuration = active && time && time.duration ? time.duration : duration;
             const buffered = active && time ? time.buffered : null;
@@ -35,6 +37,7 @@ class VoiceNoteSlider extends React.Component {
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
+                prevBlock: block,
                 active,
                 currentTime,
                 duration: audioDuration,
@@ -110,20 +113,19 @@ class VoiceNoteSlider extends React.Component {
     }
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         this.reset();
     };
 
     onClientUpdateMediaLoadedMetadata = update => {
-        const { chatId, messageId } = this.props;
-        const { duration, buffered } = update;
+        const { chatId, messageId, block } = this.props;
+        const { source, duration, buffered } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         this.setState({
             duration,
@@ -132,11 +134,10 @@ class VoiceNoteSlider extends React.Component {
     };
 
     onClientUpdateMediaProgress = update => {
-        const { chatId, messageId } = this.props;
-        const { buffered } = update;
+        const { chatId, messageId, block } = this.props;
+        const { source, buffered } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         this.setState({
             buffered
@@ -144,13 +145,11 @@ class VoiceNoteSlider extends React.Component {
     };
 
     onClientUpdateMediaTime = update => {
-        const { chatId, messageId, waveform } = this.props;
+        const { chatId, messageId, block, waveform } = this.props;
         const { active, duration, dragging, value } = this.state;
+        const { source, currentTime, buffered } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
-
-        const { currentTime, buffered } = update;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         this.setState({
             currentTime,
@@ -160,11 +159,11 @@ class VoiceNoteSlider extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId, waveform } = this.props;
+        const { chatId, messageId, block, waveform } = this.props;
         const { active, currentTime, duration, dragging } = this.state;
         const { currentTime: prevCurrentTime } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
             let { value } = this.state;
             if (!dragging) {
                 value = VoiceNoteSlider.getValue(active ? currentTime : prevCurrentTime, duration, true, waveform, dragging);
@@ -197,15 +196,16 @@ class VoiceNoteSlider extends React.Component {
     };
 
     handleChange = (event, value) => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
         const { active, dragging } = this.state;
         if (!active) return;
+
+        const source = MessageStore.get(chatId, messageId) || { '@type': 'instantViewSource', block};
 
         if (dragging) {
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateMediaSeeking',
-                chatId,
-                messageId,
+                source,
                 value
             });
         }
@@ -216,13 +216,14 @@ class VoiceNoteSlider extends React.Component {
     };
 
     handleChangeCommitted = () => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
         const { value } = this.state;
+
+        const source = MessageStore.get(chatId, messageId) || { '@type': 'instantViewSource', block};
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaSeek',
-            chatId,
-            messageId,
+            source,
             value
         });
 
@@ -274,6 +275,8 @@ class VoiceNoteSlider extends React.Component {
 VoiceNoteSlider.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
+    block: PropTypes.object,
+
     audio: PropTypes.bool,
     duration: PropTypes.number.isRequired,
     waveform: PropTypes.string

@@ -1,7 +1,7 @@
 {
   "homepage": "http://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.689",
+  "version": "0.0.690",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.7",

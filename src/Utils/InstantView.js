@@ -58,6 +58,13 @@ import { setInstantViewViewerContent } from '../Actions/Client';
 import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function getBlockAudio(block) {
+    if (!block) return null;
+    if (block['@type'] !== 'pageBlockAudio') return null;
+
+    return block.audio;
+}
+
 export function openInstantViewMedia(media, caption, block, instantView, fileCancel) {
     // console.log('[IV] openIVMedia', media);
 
@@ -171,6 +178,7 @@ export function getPageBlock(block, iv, key = undefined) {
         case 'pageBlockAudio': {
             element = (
                 <Audio
+                    block={block}
                     caption={block.caption}
                     audio={block.audio}
                     openMedia={() => openInstantViewMedia(block.audio, block.caption, block, iv, true)}
@@ -349,6 +357,7 @@ export function getPageBlock(block, iv, key = undefined) {
         case 'pageBlockVideo': {
             element = (
                 <Video
+                    block={block}
                     caption={block.caption}
                     video={block.video}
                     needAutoplay={block.need_autoplay}

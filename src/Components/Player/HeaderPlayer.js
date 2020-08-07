@@ -19,9 +19,10 @@ import ShuffleButton from '../Player/ShuffleButton';
 import PlaybackRateButton from './PlaybackRateButton';
 import Time from '../Player/Time';
 import Playlist from '../Player/Playlist';
-import { getSrc, supportsStreaming } from '../../Utils/File';
+import { supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
-import { getDate, getDateHint, getMediaTitle, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
+import { getDate, getDateHint, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
+import { getCurrentTime, getMediaTitle, getMediaMimeType, getMediaSrc, isCurrentSource } from '../../Utils/Player';
 import { PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -36,22 +37,28 @@ class HeaderPlayer extends React.Component {
 
         this.videoRef = React.createRef();
 
-        const { message, playlist } = PlayerStore;
-        const { currentTime, duration } = this.getCurrentTime(message);
+        const { message, block, instantView, playlist } = PlayerStore;
+        const { currentTime, duration } = getCurrentTime(message);
 
         this.state = {
             currentTime,
             duration,
             message,
+            block,
+            instantView,
             playlist,
             playing: false,
-            src: this.getMediaSrc(message),
-            mimeType: this.getMediaMimeType(message)
+            src: getMediaSrc(message),
+            mimeType: getMediaMimeType(message)
         };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { message, playlist, src, playing } = this.state;
+        const { message, block, playlist, src, playing } = this.state;
+
+        if (nextState.block !== block) {
+            return true;
+        }
 
         if (nextState.message !== message) {
             return true;
@@ -173,11 +180,10 @@ class HeaderPlayer extends React.Component {
     onClientUpdateMediaPlaybackRate = update => {
         const { playbackRate } = update;
 
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block } = this.state;
+        if (!message && !block) return;
 
-        const { chat_id, id } = message;
-        const audio = hasAudio(chat_id, id);
+        const audio = hasAudio(message || block);
         if (audio) return;
 
         const player = this.videoRef.current;
@@ -189,13 +195,11 @@ class HeaderPlayer extends React.Component {
     onClientUpdateMediaAudioPlaybackRate = update => {
         const { audioPlaybackRate } = update;
 
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block } = this.state;
+        if (!message && !block) return;
 
-        const { chat_id, id } = message;
-        const audio = hasAudio(chat_id, id);
-        if (!audio) return;
-        if (!useAudioPlaybackRate(chat_id, id)) return;
+        if (!hasAudio(message || block)) return;
+        if (!useAudioPlaybackRate(message || block)) return;
 
         const player = this.videoRef.current;
         if (!player) return;
@@ -213,14 +217,10 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaSeek = update => {
-        const { chatId, messageId, value } = update;
-        const { message } = this.state;
+        const { source, value } = update;
+        const { message, block } = this.state;
 
-        if (!message) return;
-
-        const { chat_id, id, content } = message;
-        if (!content) return;
-        if (chatId !== chat_id || messageId !== id) return;
+        if (!isCurrentSource(message? message.chat_id : 0, message? message.id : 0, block, source)) return;
 
         const player = this.videoRef.current;
         if (!player) return;
@@ -253,26 +253,29 @@ class HeaderPlayer extends React.Component {
         player.pause();
     };
 
-    startPlayingFile = message => {
-        const { chat_id, id } = message;
+    startPlayingFile = source => {
+        if (!source) return;
 
+        const { playlist } = PlayerStore;
         const { src: prevSrc } = this.state;
 
-        const src = this.getMediaSrc(message);
-        const mimeType = this.getMediaMimeType(message);
+        const src = getMediaSrc(source);
+        const mimeType = getMediaMimeType(source);
+        const { currentTime, duration } = getCurrentTime(source);
         const playing = Boolean(src);
-        const { playlist } = PlayerStore;
 
-        const { currentTime, duration } = this.getCurrentTime(message);
+        const srcSource = source['@type'] === 'message'
+            ? { message: source }
+            : { block: source.block, instantView: source.instantView };
 
         this.setState(
             {
                 currentTime,
                 duration,
-                message,
                 playlist,
                 playing,
                 src,
+                ...srcSource,
                 mimeType
             },
             () => {
@@ -288,8 +291,7 @@ class HeaderPlayer extends React.Component {
 
                     TdLibController.clientUpdate({
                         '@type': 'clientUpdateMediaPause',
-                        chatId: chat_id,
-                        messageId: id
+                        source
                     });
                 } else if (player.paused) {
                     player.play();
@@ -391,6 +393,8 @@ class HeaderPlayer extends React.Component {
     onClientUpdateMediaClose = update => {
         this.setState({
             message: null,
+            block: null,
+            instantView: null,
             playlist: null,
             playing: false,
             src: null,
@@ -399,10 +403,14 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = update;
-        const { message, src } = this.state;
+        const { chatId, messageId, instantView, block } = update;
+        const { message, block: currentBlock, src } = this.state;
 
-        if (message && message.chat_id === chatId && message.id === messageId) {
+        const currentMedia =
+            message && message.chat_id === chatId && message.id === messageId
+            || block && block === currentBlock;
+
+        if (currentMedia) {
             if (!src) return;
 
             const player = this.videoRef.current;
@@ -415,7 +423,7 @@ class HeaderPlayer extends React.Component {
                 player.pause();
             }
         } else {
-            this.startPlayingFile(PlayerStore.message);
+            this.startPlayingFile(PlayerStore.message || { '@type': 'instantViewSource', block, instantView });
         }
     };
 
@@ -426,13 +434,13 @@ class HeaderPlayer extends React.Component {
     };
 
     handlePlay = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaActive',
-            chatId: message.chat_id,
-            messageId: message.id
+            ...(message ? { chatId: message.chat_id, messageId: message.id } : { }),
+            ...(block ? { block, instantView } : { })
         });
     };
 
@@ -442,116 +450,15 @@ class HeaderPlayer extends React.Component {
         });
     };
 
-    getMediaMimeType = message => {
-        if (message) {
-            const { content } = message;
-            if (content) {
-                const { audio, voice_note, video_note, web_page } = content;
-
-                if (audio) {
-                    return audio.mime_type;
-                }
-
-                if (voice_note) {
-                    return voice_note.mime_type;
-                }
-
-                if (video_note) {
-                    return 'video/mp4';
-                }
-
-                if (web_page) {
-                    if (web_page.audio) {
-                        return web_page.audio.mime_type;
-                    }
-
-                    if (web_page.voice_note) {
-                        return web_page.voice_note.mime_type;
-                    }
-
-                    if (web_page.video_note) {
-                        return 'video/mp4';
-                    }
-                }
-            }
-        }
-
-        return '';
-    };
-
-    getMediaSrc = message => {
-        if (message) {
-            const { content } = message;
-            if (content) {
-                const { audio, voice_note, video_note, web_page } = content;
-
-                if (audio) {
-                    const { audio: file } = audio;
-                    if (file) {
-                        let src = getSrc(file);
-                        if (!src && supportsStreaming()) {
-                            src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${audio.mime_type}`;
-                        }
-
-                        return src;
-                    }
-                }
-
-                if (voice_note) {
-                    const { voice } = voice_note;
-                    if (voice) {
-                        return getSrc(voice);
-                    }
-                }
-
-                if (video_note) {
-                    const { video } = video_note;
-                    if (video) {
-                        return getSrc(video);
-                    }
-                }
-
-                if (web_page) {
-                    if (web_page.audio) {
-                        const { audio: file } = web_page.audio;
-                        if (file) {
-                            let src = getSrc(file);
-                            if (!src && supportsStreaming()) {
-                                src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${web_page.audio.mime_type}`;
-                            }
-
-                            return src;
-                        }
-                    }
-
-                    if (web_page.voice_note) {
-                        const { voice } = web_page.voice_note;
-                        if (voice) {
-                            return getSrc(voice);
-                        }
-                    }
-
-                    if (web_page.video_note) {
-                        const { video } = web_page.video_note;
-                        if (video) {
-                            return getSrc(video);
-                        }
-                    }
-                }
-            }
-        }
-
-        return '';
-    };
-
     handleEnded = (moveNext = true) => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
+
+        const source = message || { '@type': 'instantViewSource', block, instantView };
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaEnding',
-            chatId: message.chat_id,
-            messageId: message.id,
+            source,
             moveNext
         });
 
@@ -564,8 +471,7 @@ class HeaderPlayer extends React.Component {
             () => {
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateMediaEnd',
-                    chatId: message.chat_id,
-                    messageId: message.id,
+                    source,
                     moveNext
                 });
             }
@@ -589,22 +495,21 @@ class HeaderPlayer extends React.Component {
     };
 
     handleLoadedMetadata = () => {
-        let { message, currentTime } = this.state;
-        if (!message) return;
+        let { message, block, instantView, currentTime } = this.state;
+        if (!message && !block) return;
 
         const player = this.videoRef.current;
         if (!player) return;
 
         const { audioPlaybackRate, playbackRate, volume } = PlayerStore;
 
-        const { chat_id, id } = message;
-        const audio = hasAudio(chat_id, id);
-        const voiceNote = hasVoice(chat_id, id);
+        const audio = hasAudio(message || block);
+        const voiceNote = hasVoice(message || block);
 
         let rate = PLAYER_PLAYBACKRATE_NORMAL;
         if (voiceNote) {
             rate = playbackRate;
-        } else if (audio && useAudioPlaybackRate(chat_id, id)) {
+        } else if (audio && useAudioPlaybackRate(message || block)) {
             rate = audioPlaybackRate;
         }
 
@@ -621,11 +526,11 @@ class HeaderPlayer extends React.Component {
         player.play();
 
         const { buffered, duration, videoWidth, videoHeight } = player;
+        const source = message || { '@type': 'instantViewSource', block, instantView };
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaLoadedMetadata',
-            chatId: message.chat_id,
-            messageId: message.id,
+            source,
             buffered,
             duration,
             videoWidth,
@@ -659,38 +564,39 @@ class HeaderPlayer extends React.Component {
     };
 
     handleProgress = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
 
         const player = this.videoRef.current;
         if (!player) return;
 
+        const { buffered } = player;
+
+        const source = message || { '@type': 'instantViewSource', block, instantView };
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaProgress',
-            chatId: message.chat_id,
-            messageId: message.id,
-            buffered: player.buffered
+            source,
+            buffered
         });
     }
 
     handleTimeUpdate = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
 
         const player = this.videoRef.current;
         if (!player) return;
 
-        const { chat_id: chatId, id: messageId } = message;
         const { currentTime, buffered, duration } = player;
 
-        this.setState({
-            currentTime
-        });
+        this.setState({ currentTime });
+
+        const source = message || { '@type': 'instantViewSource', block, instantView };
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaTime',
-            chatId,
-            messageId,
+            source,
             duration,
             currentTime,
             buffered,
@@ -705,29 +611,30 @@ class HeaderPlayer extends React.Component {
     };
 
     handleVideoPlay = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
 
-        this.setState({
-            playing: true
-        });
+        this.setState({ playing: true });
 
         const player = this.videoRef.current;
         if (!player) return;
 
+        const { currentTime, duration } = player;
+
+        const source = message || { '@type': 'instantViewSource', block, instantView };
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaPlay',
-            chatId: message.chat_id,
-            messageId: message.id,
-            currentTime: player.currentTime,
-            duration: player.duration,
+            source,
+            currentTime,
+            duration,
             timestamp: Date.now()
         });
     };
 
     handleVideoPause = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (!message && !block) return;
 
         this.setState({
             playing: false
@@ -736,10 +643,11 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
 
+        const source = message || { '@type': 'instantViewSource', block, instantView };
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaPause',
-            chatId: message.chat_id,
-            messageId: message.id
+            source
         });
     };
 
@@ -788,29 +696,11 @@ class HeaderPlayer extends React.Component {
         openChat(message.chat_id, message.id);
     };
 
-    getCurrentTime = message => {
-        if (!message) return { currentTime: 0, duration: 0 };
-
-        const audio = getMessageAudio(message.chat_id, message.id);
-        if (!audio) return { currentTime: 0, duration: 0 };
-
-        const { audio: file } = audio;
-        if (!file) return { currentTime: 0, duration: 0 };
-
-        const { remote } = file;
-        if (!remote) return { currentTime: 0, duration: 0 };
-
-        const { unique_id } = remote;
-        if (!unique_id) return { currentTime: 0, duration: 0 };
-
-        return PlayerStore.getCurrentTime(unique_id);
-    };
-
     setCurrentTime = currentTime => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block } = this.state;
+        if (!message && !block) return;
 
-        if (!useAudioPlaybackRate(message.chat_id, message.id)) return;
+        if (!useAudioPlaybackRate(message || block)) return;
 
         const audio = getMessageAudio(message.chat_id, message.id);
         if (!audio) return;
@@ -833,19 +723,14 @@ class HeaderPlayer extends React.Component {
 
     render() {
         const { t } = this.props;
-        const { playing, message, duration, playlist, src, mimeType } = this.state;
+        const { playing, message, block, duration, playlist, src, mimeType } = this.state;
 
-        let audio = false;
-        let useAudioRate = false;
-        if (message) {
-            const { chat_id, id } = message;
-            audio = hasAudio(chat_id, id);
-            useAudioRate = useAudioPlaybackRate(chat_id, id);
-        }
+        const audio = hasAudio(message || block);
+        const useAudioRate = useAudioPlaybackRate(message || block);
 
         const date = message ? message.date : null;
 
-        const title = getMediaTitle(message, t);
+        const title = getMediaTitle(message || block, t);
         const dateHintStr = getDateHint(date);
         const dateStr = getDate(date);
         const showDate = !audio;
@@ -877,7 +762,7 @@ class HeaderPlayer extends React.Component {
                 >
                     {source}
                 </video>
-                {message && (
+                {(message || block) && (
                     <div className='header-player'>
                         <IconButton
                             disabled={!hasPrev}

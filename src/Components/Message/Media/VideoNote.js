@@ -23,6 +23,7 @@ import InstantViewStore from '../../../Stores/InstantViewStore';
 import PlayerStore from '../../../Stores/PlayerStore';
 import MessageStore from '../../../Stores/MessageStore';
 import './VideoNote.css';
+import { isCurrentSource } from '../../../Utils/Player';
 
 const circleStyle = {
     circle: 'video-note-progress-circle'
@@ -196,40 +197,43 @@ class VideoNote extends React.Component {
     };
 
     onClientUpdateMediaTime = update => {
-        const { chatId, messageId } = this.props;
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const player = this.videoRef.current;
-            if (player) {
-                this.setState({
-                    currentTime: update.currentTime,
-                    videoDuration: update.duration
-                });
-            }
-        }
+        const { chatId, messageId, block } = this.props;
+        const { currentTime, duration: videoDuration, source } = update;
+
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        this.setState({
+            currentTime,
+            videoDuration
+        });
     };
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState(
-                {
-                    active: false,
-                    srcObject: null,
-                    currentTime: 0
-                },
-                () => {
-                    const player = this.videoRef.current;
-                    if (!player) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
-                    this.updateVideoSrc();
+        this.setState(
+            {
+                active: false,
+                srcObject: null,
+                currentTime: 0
+            },
+            () => {
+                const player = this.videoRef.current;
+                if (!player) return;
 
-                    if (!window.hasFocus) {
-                        player.pause();
-                    }
+                this.updateVideoSrc();
+
+                if (!window.hasFocus) {
+                    player.pause();
                 }
-            );
-        }
+            }
+        );
     };
 
     onClientUpdateMediaActive = update => {
@@ -398,8 +402,10 @@ class VideoNote extends React.Component {
 }
 
 VideoNote.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
+    block: PropTypes.object,
+
     videoNote: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
     size: PropTypes.number,

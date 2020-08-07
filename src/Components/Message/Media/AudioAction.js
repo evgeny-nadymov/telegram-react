@@ -12,6 +12,7 @@ import { getDurationString } from '../../../Utils/Common';
 import FileStore from '../../../Stores/FileStore';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './AudioAction.css';
+import { isCurrentSource } from '../../../Utils/Player';
 
 class AudioAction extends React.Component {
     constructor(props) {
@@ -80,43 +81,43 @@ class AudioAction extends React.Component {
     }
 
     onClientUpdateMediaSeeking = update => {
-        const { chatId, messageId, duration, streaming } = this.props;
+        const { chatId, messageId, block, duration, streaming } = this.props;
         const { duration: playerDuration, active, file } = this.state;
+        const { source, value } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         const d = playerDuration || duration;
 
         this.setState({
-            seekProgress: update.value,
+            seekProgress: value,
             seeking: true,
-            timeString: AudioAction.getTimeString(d * update.value, d, active, file, streaming)
+            timeString: AudioAction.getTimeString(d * value, d, active, file, streaming)
         });
     };
 
     onClientUpdateMediaSeek = update => {
-        const { chatId, messageId, duration, streaming } = this.props;
+        const { chatId, messageId, block, duration, streaming } = this.props;
         const { duration: playerDuration, active, file } = this.state;
+        const { source, value } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         const d = playerDuration || duration;
 
         this.setState({
             seekProgress: 0,
             seeking: false,
-            timeString: AudioAction.getTimeString(d * update.value, d, active, file, streaming)
+            timeString: AudioAction.getTimeString(d * value, d, active, file, streaming)
         });
     };
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId, duration, streaming } = this.props;
+        const { chatId, messageId, block, duration, streaming } = this.props;
         const { active, file } = this.state;
+        const { source } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
         this.setState({
@@ -127,11 +128,11 @@ class AudioAction extends React.Component {
     };
 
     onClientUpdateMediaTime = update => {
-        const { chatId, messageId, duration, streaming } = this.props;
+        const { chatId, messageId, block, duration, streaming } = this.props;
         const { active, file, seekProgress, seeking } = this.state;
+        const { source } = update;
 
-        if (chatId !== update.chatId) return;
-        if (messageId !== update.messageId) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
         const playerDuration = update.duration >= 0 && update.duration < Infinity ? update.duration : duration;
         const time = seeking ? seekProgress * playerDuration : update.currentTime;
@@ -144,10 +145,10 @@ class AudioAction extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId, duration, streaming } = this.props;
+        const { chatId, messageId, block, duration, streaming } = this.props;
         const { active, currentTime, file } = this.state;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
             this.setState({
                 active: true,
                 currentTime: active ? currentTime : 0,
@@ -225,6 +226,8 @@ AudioAction.defaultProps = {
 AudioAction.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
+    block: PropTypes.object,
+
     duration: PropTypes.number.isRequired,
     file: PropTypes.object.isRequired,
 

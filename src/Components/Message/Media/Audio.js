@@ -18,6 +18,7 @@ import { getAudioShortTitle, getAudioSubtitle } from '../../../Utils/Media';
 import { supportsStreaming } from '../../../Utils/File';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './Audio.css';
+import { isCurrentSource } from '../../../Utils/Player';
 
 class Audio extends React.Component {
     constructor(props) {
@@ -63,38 +64,37 @@ class Audio extends React.Component {
     }
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({
-                active: false,
-                playing: false
-            });
-        }
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        this.setState({
+            active: false,
+            playing: false
+        });
     };
 
     onClientUpdateMediaPlay = update => {
-        const { chatId, messageId, playing } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({ playing: true });
-        } else {
-            this.setState({ playing: false });
-        }
+        this.setState({ playing: isCurrentSource(chatId, messageId, block, source) });
     };
 
     onClientUpdateMediaPause = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({ playing: false });
-        }
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        this.setState({ playing: false });
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
             if (!this.state.active) {
                 this.setState({
                     active: true,
@@ -110,7 +110,7 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, audio, openMedia, title, meta, caption } = this.props;
+        const { chatId, messageId, block, audio, openMedia, title, meta, caption } = this.props;
         const { playing, active } = this.state;
         if (!audio) return null;
 
@@ -137,10 +137,11 @@ class Audio extends React.Component {
                         </a>
                     </div>
                     <div className='audio-action' style={{ opacity: active ? 0 : 1 }}>{audioSubtitle}</div>
-                    <VoiceNoteSlider audio className='audio-slider' chatId={chatId} messageId={messageId} duration={duration} style={{ opacity: active ? 1 : 0 }}/>
+                    <VoiceNoteSlider audio className='audio-slider' chatId={chatId} messageId={messageId} block={block} duration={duration} style={{ opacity: active ? 1 : 0 }}/>
                     <AudioAction
                         chatId={chatId}
                         messageId={messageId}
+                        block={block}
                         duration={duration}
                         file={file}
                         meta={caption ? null : meta}
@@ -155,6 +156,7 @@ class Audio extends React.Component {
 Audio.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
+    block: PropTypes.object,
     audio: PropTypes.object,
     openMedia: PropTypes.func
 };
