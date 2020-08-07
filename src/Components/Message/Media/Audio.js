@@ -16,18 +16,18 @@ import AudioAction from './AudioAction';
 import VoiceNoteSlider from './VoiceNoteSlider';
 import { getAudioShortTitle, getAudioSubtitle } from '../../../Utils/Media';
 import { supportsStreaming } from '../../../Utils/File';
+import { isCurrentSource } from '../../../Utils/Player';
 import PlayerStore from '../../../Stores/PlayerStore';
 import './Audio.css';
-import { isCurrentSource } from '../../../Utils/Player';
 
 class Audio extends React.Component {
     constructor(props) {
         super(props);
 
-        const { chatId, messageId } = props;
+        const { chatId, messageId, block } = props;
 
-        const { message, playing } = PlayerStore;
-        const active = message && message.chat_id === chatId && message.id === messageId;
+        const { message, block: playerBlock, playing } = PlayerStore;
+        const active = message && message.chat_id === chatId && message.id === messageId || block === playerBlock;
 
         this.state = {
             active,
@@ -93,8 +93,9 @@ class Audio extends React.Component {
 
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             if (!this.state.active) {
                 this.setState({
                     active: true,

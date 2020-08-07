@@ -1006,8 +1006,7 @@ function openAudio(audio, message, fileCancel) {
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id,
+        source: MessageStore.get(chat_id, id),
         currentTime,
         duration
     });
@@ -1264,8 +1263,7 @@ function openVideoNote(videoNote, message, fileCancel) {
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id,
+        source: MessageStore.get(chat_id, id),
         currentTime,
         duration
     });
@@ -1303,8 +1301,7 @@ function openVoiceNote(voiceNote, message, fileCancel) {
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id,
+        source: MessageStore.get(chat_id, id),
         currentTime,
         duration
     });

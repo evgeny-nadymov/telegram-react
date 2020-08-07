@@ -161,9 +161,9 @@ class VoiceNoteSlider extends React.Component {
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, block, waveform } = this.props;
         const { active, currentTime, duration, dragging } = this.state;
-        const { currentTime: prevCurrentTime } = update;
+        const { source, currentTime: prevCurrentTime } = update;
 
-        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             let { value } = this.state;
             if (!dragging) {
                 value = VoiceNoteSlider.getValue(active ? currentTime : prevCurrentTime, duration, true, waveform, dragging);
@@ -216,7 +216,7 @@ class VoiceNoteSlider extends React.Component {
     };
 
     handleChangeCommitted = () => {
-        const { chatId, messageId, block } = this.props;
+        const { chatId, messageId, block, duration } = this.props;
         const { value } = this.state;
 
         const source = MessageStore.get(chatId, messageId) || { '@type': 'instantViewSource', block};
@@ -224,7 +224,8 @@ class VoiceNoteSlider extends React.Component {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaSeek',
             source,
-            value
+            value,
+            duration
         });
 
         this.setState({

@@ -23,6 +23,7 @@ import { supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDate, getDateHint, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
 import { getCurrentTime, getMediaTitle, getMediaMimeType, getMediaSrc, isCurrentSource } from '../../Utils/Player';
+import { openMediaInstantView } from '../../Actions/InstantView';
 import { PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -217,7 +218,7 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaSeek = update => {
-        const { source, value } = update;
+        const { source, value, duration } = update;
         const { message, block } = this.state;
 
         if (!isCurrentSource(message? message.chat_id : 0, message? message.id : 0, block, source)) return;
@@ -225,7 +226,7 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
         if (!player.duration) {
-            this.currentValue = value;
+            this.currentValue = { value, duration };
             return;
         }
 
@@ -264,9 +265,9 @@ class HeaderPlayer extends React.Component {
         const { currentTime, duration } = getCurrentTime(source);
         const playing = Boolean(src);
 
-        const srcSource = source['@type'] === 'message'
-            ? { message: source }
-            : { block: source.block, instantView: source.instantView };
+        const srcSource = source['@type'] === 'instantViewSource'
+            ? { message: null, block: source.block, instantView: source.instantView }
+            : { message: source, block: null, instantView: null };
 
         this.setState(
             {
@@ -284,8 +285,14 @@ class HeaderPlayer extends React.Component {
 
                 if (prevSrc !== src) {
                     player.load();
-                    player.currentTime = currentTime;
+                    if (this.currentValue) {
+                        player.currentTime = this.currentValue.value * this.currentValue.duration;
+                        this.currentValue = null;
+                    } else {
+                        player.currentTime = currentTime;
+                    }
                 }
+
                 if (this.playingMediaViewer) {
                     player.pause();
 
@@ -403,14 +410,10 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId, instantView, block } = update;
-        const { message, block: currentBlock, src } = this.state;
+        const { source } = update;
+        const { message, block, src } = this.state;
 
-        const currentMedia =
-            message && message.chat_id === chatId && message.id === messageId
-            || block && block === currentBlock;
-
-        if (currentMedia) {
+        if (isCurrentSource(message ? message.chat_id : 0, message ? message.id : 0, block, source)) {
             if (!src) return;
 
             const player = this.videoRef.current;
@@ -423,7 +426,7 @@ class HeaderPlayer extends React.Component {
                 player.pause();
             }
         } else {
-            this.startPlayingFile(PlayerStore.message || { '@type': 'instantViewSource', block, instantView });
+            this.startPlayingFile(source);
         }
     };
 
@@ -437,10 +440,11 @@ class HeaderPlayer extends React.Component {
         const { message, block, instantView } = this.state;
         if (!message && !block) return;
 
+        const source = message || { '@type': 'instantViewSource', block, instantView };
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaActive',
-            ...(message ? { chatId: message.chat_id, messageId: message.id } : { }),
-            ...(block ? { block, instantView } : { })
+            source
         });
     };
 
@@ -517,7 +521,7 @@ class HeaderPlayer extends React.Component {
         player.volume = volume;
         player.muted = false;
         if (this.currentValue) {
-            player.currentTime = player.duration * this.currentValue;
+            player.currentTime = player.duration * this.currentValue.value;
             this.currentValue = null;
         } else {
             player.currentTime = currentTime;
@@ -690,10 +694,16 @@ class HeaderPlayer extends React.Component {
     };
 
     handleTitleClick = () => {
-        const { message } = this.state;
-        if (!message) return;
+        const { message, block, instantView } = this.state;
+        if (message) {
+            openChat(message.chat_id, message.id);
+            return;
+        }
 
-        openChat(message.chat_id, message.id);
+        if (block && instantView) {
+            openMediaInstantView(instantView, block);
+            return;
+        }
     };
 
     setCurrentTime = currentTime => {

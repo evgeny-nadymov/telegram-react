@@ -18,10 +18,10 @@ class AudioAction extends React.Component {
     constructor(props) {
         super(props);
 
-        const { message, time } = PlayerStore;
-        const { chatId, messageId, duration, file, streaming } = this.props;
+        const { chatId, messageId, block, duration, file, streaming } = this.props;
+        const { message, block: playerBlock, time } = PlayerStore;
 
-        const active = message && message.chat_id === chatId && message.id === messageId;
+        const active = message && message.chat_id === chatId && message.id === messageId || block === playerBlock;
         const currentTime = active && time ? time.currentTime : 0;
         const audioDuration = active && time && time.duration ? time.duration : duration;
         const currentFile = FileStore.get(file.id) || file;
@@ -147,8 +147,9 @@ class AudioAction extends React.Component {
     onClientUpdateMediaActive = update => {
         const { chatId, messageId, block, duration, streaming } = this.props;
         const { active, currentTime, file } = this.state;
+        const { source } = update;
 
-        if (chatId && messageId && chatId === update.chatId && messageId === update.messageId || block === update.block) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             this.setState({
                 active: true,
                 currentTime: active ? currentTime : 0,
@@ -187,7 +188,7 @@ class AudioAction extends React.Component {
         const { active, file, timeString } = this.state;
         if (!file) return null;
 
-        const isDownloadingActive = file.local && file.local.is_downloading_active && !streaming;
+        const isDownloadingActive = file.local && file.local.is_downloading_active;
         const isUploadingActive = file.remote && file.remote.is_uploading_active;
         const isDownloadingCompleted = file.local && file.local.is_downloading_completed;
         const isUploadingCompleted = file.remote && file.remote.is_uploading_completed;
@@ -199,14 +200,22 @@ class AudioAction extends React.Component {
         } else if (isUploadingActive) {
             progressSize = getUploadedSize(file);
         }
-        // const sizeString = progressSize ? `${progressSize} / ${size}` : `${size}`;
-        const sizeString = progressSize ? `${progressSize}` : `${size}`;
+
         const strings = [];
-        if (!isDownloadingCompleted && !active) {
-            strings.push(sizeString);
-        }
-        if (!isDownloadingActive) {
+        if (streaming) {
+            const sizeString = `${size}`;
+            if (!isDownloadingCompleted && !active) {
+                strings.push(sizeString);
+            }
             strings.push(timeString);
+        } else {
+            const sizeString = progressSize ? `${progressSize}` : `${size}`;
+            if (!isDownloadingCompleted) {
+                strings.push(sizeString);
+            }
+            if (!isDownloadingActive) {
+                strings.push(timeString);
+            }
         }
 
         return (

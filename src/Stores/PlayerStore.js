@@ -8,11 +8,12 @@
 import EventEmitter from './EventEmitter';
 import { getSearchMessagesFilter, openMedia } from '../Utils/Message';
 import { getRandomInt } from '../Utils/Common';
+import { isCurrentSource } from '../Utils/Player';
+import { supportsStreaming } from '../Utils/File';
 import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
 import FileStore from './FileStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
-import { isCurrentSource } from '../Utils/Player';
 
 const RepeatEnum = Object.freeze({
     NONE: 'NONE',
@@ -44,15 +45,20 @@ class PlayerStore extends EventEmitter {
         this.repeat = RepeatEnum.NONE;
         this.shuffle = false;
 
+        this.pipParams = { left: document.documentElement.clientWidth - 300, top: document.documentElement.clientHeight - 300 };
+        this.times = new Map();
+
+        this.closeInternal();
+    };
+
+    closeInternal = () => {
         this.playlist = null;
         this.message = null;
         this.time = null;
         this.videoStream = null;
         this.instantView = null;
         this.block = null;
-        this.pipParams = { left: document.documentElement.clientWidth - 300, top: document.documentElement.clientHeight - 300 };
-        this.times = new Map();
-    };
+    }
 
     addTdLibListener = () => {
         TdLibController.on('update', this.onUpdate);
@@ -121,25 +127,28 @@ class PlayerStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateMediaClose': {
-                // this.reset();
+                this.closeInternal();
 
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateMediaActive': {
-                const { chatId, messageId, instantView, block } = update;
+                const { source } = update;
 
-                const message = MessageStore.get(chatId, messageId);
-                if (message) {
-                    this.message = message;
-                    this.emit(update['@type'], update);
-                    this.getPlaylist(chatId, messageId);
-
-                    return;
-                } else if (instantView && block) {
-                    this.instantView = instantView;
-                    this.block = block;
-                    this.emit(update['@type'], update);
+                switch (source['@type']) {
+                    case 'message': {
+                        this.message = source;
+                        this.emit(update['@type'], update);
+                        this.getPlaylist(source.chat_id, source.id);
+                        break;
+                    }
+                    case 'instantViewSource': {
+                        const { block, instantView } = source;
+                        this.instantView = instantView;
+                        this.block = block;
+                        this.emit(update['@type'], update);
+                        break;
+                    }
                 }
 
                 break;
@@ -271,7 +280,7 @@ class PlayerStore extends EventEmitter {
                     }
                 }
 
-                if (buffered && currentTime && duration) {
+                if (buffered && currentTime && duration && supportsStreaming()) {
                     for (let i = 0; i < buffered.length; i++) {
                         const start = buffered.start(i);
                         const end = buffered.end(i);

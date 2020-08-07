@@ -237,10 +237,10 @@ class VideoNote extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = this.props;
-        const { video } = this.props.videoNote;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             if (this.state.active) {
             } else {
                 this.setState({

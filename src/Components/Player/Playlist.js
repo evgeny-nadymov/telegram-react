@@ -30,7 +30,7 @@ class Playlist extends React.Component {
             open: false,
             titleMouseOver: false,
             playlistMouseOver: false,
-            playlist: playlist
+            playlist
         };
     }
 
@@ -97,10 +97,23 @@ class Playlist extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = update;
+        const { source } = update;
 
-        this.chatId = chatId;
-        this.messageId = messageId;
+        switch (source['@type']) {
+            case 'message': {
+                const { chat_id, id } = source;
+
+                this.chatId = chat_id;
+                this.messageId = id;
+                break;
+            }
+            case 'instantViewSource': {
+
+                this.chatId = 0;
+                this.messageId = 0;
+                break;
+            }
+        }
     };
 
     onClientUpdateMediaPlaylistLoading = update => {

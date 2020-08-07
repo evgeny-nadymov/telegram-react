@@ -7,10 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import ReactDOM from 'react-dom';
 import { withTranslation } from 'react-i18next';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import CloseIcon from '../../Assets/Icons/Close';
 import Article from './Article';
+import { articleRefs } from './Article';
 import InstantViewMediaViewer from '../Viewer/InstantViewMediaViewer';
 import IVContext from './IVContext';
 import MediaViewerButton from '../Viewer/MediaViewerButton';
@@ -88,6 +90,7 @@ class InstantViewer extends React.Component {
     componentDidMount() {
         this.mounted = true;
         this.handleScroll();
+        this.scrollToBlock(this.props.block, 'smooth');
 
         KeyboardManager.add(this.keyboardHandler);
         InstantViewStore.on('clientUpdateInstantViewUrl', this.onClientUpdateInstantViewUrl);
@@ -116,7 +119,6 @@ class InstantViewer extends React.Component {
     };
 
     onClientUpdateInstantViewUrl = async update => {
-        console.log('[IV] clientUpdateInstantViewUrl', update);
         const { url } = update;
         const active = InstantViewStore.getCurrent();
         const { instantView, url: oldUrl } = this.props;
@@ -130,6 +132,7 @@ class InstantViewer extends React.Component {
 
                 return;
             } else if (hash && this.scrollToHash(hash, 'smooth')) {
+
                 return;
             }
         }
@@ -137,38 +140,53 @@ class InstantViewer extends React.Component {
         openInstantView(url);
     };
 
+    scrollToBlock(block, behavior) {
+        if (!block) return false;
+
+        if (!articleRefs) return false;
+
+        const ref = articleRefs.get(block);
+        if (!ref) return false;
+
+        const element = ReactDOM.findDOMNode(ref);
+        return this.scrollToElement(element, behavior);
+    }
+
+    scrollToElement(element, behavior) {
+        if (!element) return false;
+
+        const details = [];
+        let finished = false;
+        let currentElement = element;
+        do {
+            currentElement = currentElement.parentNode;
+            if (currentElement) {
+                if (currentElement.nodeName === 'DETAILS') {
+                    details.push(currentElement);
+                } else if (currentElement.nodeName === 'ARTICLE') {
+                    finished = true;
+                }
+            } else {
+                finished = true;
+            }
+        } while (!finished);
+
+        details.forEach(x => (x.open = true));
+
+        element.scrollIntoView({
+            block: 'center',
+            behavior
+        });
+
+        return true;
+    }
+
     scrollToHash(hash, behavior) {
         if (!hash) return false;
 
-        const hiddenElement = document.getElementById(hash.substr(1));
-        if (hiddenElement) {
-            const details = [];
-            let finished = false;
-            let currentElement = hiddenElement;
-            do {
-                currentElement = currentElement.parentNode;
-                if (currentElement) {
-                    if (currentElement.nodeName === 'DETAILS') {
-                        details.push(currentElement);
-                    } else if (currentElement.nodeName === 'ARTICLE') {
-                        finished = true;
-                    }
-                } else {
-                    finished = true;
-                }
-            } while (!finished);
+        const element = document.getElementById(hash.substr(1));
 
-            details.forEach(x => (x.open = true));
-
-            hiddenElement.scrollIntoView({
-                block: 'center',
-                behavior
-            });
-
-            return true;
-        }
-
-        return false;
+        return this.scrollToElement(element, behavior);
     }
 
     scrollTop(behavior) {
@@ -189,28 +207,23 @@ class InstantViewer extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { instantView, url } = this.props;
-        console.log('[IV] componentDidUpdate', url, url === prevProps.url);
+        const { instantView, block, url } = this.props;
+        console.log('[iv] compDidUpdate', prevProps, this.props);
 
         const hash = new URL(url).hash;
         if (prevProps.instantView !== instantView) {
             if (prevProps.url !== url) {
                 if (url.indexOf('#') === url.length - 1) {
-                    console.log('[IV] componentDidUpdate scrollTop auto');
                     this.scrollTop('auto');
                 } else if (hash) {
-                    console.log('[IV] componentDidUpdate scrollToHash', hash);
                     this.scrollToHash(hash, 'auto');
                 } else {
-                    console.log('[IV] componentDidUpdate scrollTop auto');
                     this.scrollTop('auto');
                 }
             } else {
                 if (hash) {
-                    console.log('[IV] componentDidUpdate scrollToHash', hash);
                     this.scrollToHash(hash, 'auto');
                 } else {
-                    console.log('[IV] componentDidUpdate scrollTop smooth');
                     this.scrollTop('smooth');
                 }
             }

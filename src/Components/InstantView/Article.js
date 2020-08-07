@@ -13,6 +13,8 @@ import { withIV } from './IVContext';
 import { getPageBlock } from '../../Utils/InstantView';
 import './Article.css';
 
+const articleRefs = new Map();
+
 class Article extends React.PureComponent {
     render() {
         const { forwardedRef, iv } = this.props;
@@ -21,7 +23,8 @@ class Article extends React.PureComponent {
         const { page_blocks, is_rtl } = iv;
         if (!page_blocks) return;
 
-        const blocks = page_blocks.map((x, index) => getPageBlock(x, iv, index));
+        articleRefs.clear();
+        const blocks = page_blocks.map((x, index) => getPageBlock(x, iv, index, ref => { articleRefs.set(x, ref) }));
 
         return (
             <article ref={forwardedRef} dir={is_rtl ? 'rtl' : 'ltr'}>
@@ -40,5 +43,7 @@ const enhance = compose(
     withSaveRef(),
     withIV
 );
+
+export { articleRefs };
 
 export default enhance(Article);

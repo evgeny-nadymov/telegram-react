@@ -114,8 +114,11 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
 
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateMediaActive',
-                instantView,
-                block
+                source: {
+                    '@type': 'instantViewSource',
+                    instantView,
+                    block
+                }
             });
             break;
         }
@@ -154,7 +157,7 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
     }
 }
 
-export function getPageBlock(block, iv, key = undefined) {
+export function getPageBlock(block, iv, key = undefined, ref = null) {
     if (!block) return null;
 
     let element = null;
@@ -367,13 +370,13 @@ export function getPageBlock(block, iv, key = undefined) {
             );
             break;
         }
+        default: {
+            element = <div>{`[${block['@type']}]`}</div>;
+            break;
+        }
     }
 
-    if (element) {
-        return <ErrorHandler key={key}>{element}</ErrorHandler>;
-    }
-
-    return <div>{`[${block['@type']}]`}</div>;
+    return <ErrorHandler key={key} ref={ref}>{element}</ErrorHandler>;
 }
 
 export function getRichText(richText) {
