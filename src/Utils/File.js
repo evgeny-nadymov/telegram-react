@@ -2359,6 +2359,13 @@ function loadPageBlockContent(store, b) {
             loadPageBlockContent(store, caption);
             break;
         }
+        case 'pageBlockVoiceNote': {
+            const { voice_note, caption } = b;
+
+            loadVoiceNoteContent(store, voice_note, null);
+            loadPageBlockContent(store, caption);
+            break;
+        }
     }
 }
 

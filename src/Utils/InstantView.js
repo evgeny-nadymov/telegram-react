@@ -53,7 +53,8 @@ import Map from '../Components/InstantView/Blocks/Map';
 import Audio from '../Components/InstantView/Blocks/Audio';
 import ChatLink from '../Components/InstantView/Blocks/ChatLink';
 import Video from '../Components/InstantView/Blocks/Video';
-import { download } from './File';
+import VoiceNote from '../Components/InstantView/Blocks/VoiceNote';
+import { download, supportsStreaming } from './File';
 import { setInstantViewViewerContent } from '../Actions/Client';
 import FileStore from '../Stores/FileStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -86,7 +87,7 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
                 FileStore.cancelUploadFile(file.id, media);
                 return;
             } else {
-                download(file, media, FileStore.updateAnimationBlob(chatId, messageId, file.id));
+                download(file, media, () => FileStore.updateAnimationBlob(chatId, messageId, file.id));
             }
 
             setInstantViewViewerContent({
@@ -102,14 +103,16 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
             if (!file) return;
 
             file = FileStore.get(file.id) || file;
-            if (fileCancel && file.local.is_downloading_active) {
+            if (fileCancel && file.local.is_downloading_active && !supportsStreaming()) {
                 FileStore.cancelGetRemoteFile(file.id, media);
                 return;
             } else if (fileCancel && file.remote.is_uploading_active) {
                 FileStore.cancelUploadFile(file.id, media);
                 return;
             } else {
-                download(file, media, FileStore.updateAudioBlob(chatId, messageId, file.id));
+                if (!supportsStreaming()) {
+                    download(file, media, () => FileStore.updateAudioBlob(chatId, messageId, file.id));
+                }
             }
 
             TdLibController.clientUpdate({
@@ -143,7 +146,7 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
                 FileStore.cancelUploadFile(file.id, media);
                 return;
             } else {
-                download(file, media, FileStore.updateVideoBlob(chatId, messageId, file.id));
+                download(file, media, () => FileStore.updateVideoBlob(chatId, messageId, file.id));
             }
 
             setInstantViewViewerContent({
@@ -151,6 +154,31 @@ export function openInstantViewMedia(media, caption, block, instantView, fileCan
                 caption,
                 block,
                 instantView
+            });
+            break;
+        }
+        case 'voiceNote': {
+            let { voice: file } = media;
+            if (!file) return;
+
+            file = FileStore.get(file.id) || file;
+            if (fileCancel && file.local.is_downloading_active) {
+                FileStore.cancelGetRemoteFile(file.id, media);
+                return;
+            } else if (fileCancel && file.remote.is_uploading_active) {
+                FileStore.cancelUploadFile(file.id, media);
+                return;
+            } else {
+                download(file, media, () => FileStore.updateVoiceNoteBlob(chatId, messageId, file.id));
+            }
+
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateMediaActive',
+                source: {
+                    '@type': 'instantViewSource',
+                    instantView,
+                    block
+                }
             });
             break;
         }
@@ -366,6 +394,17 @@ export function getPageBlock(block, iv, key = undefined, ref = null) {
                     needAutoplay={block.need_autoplay}
                     isLooped={block.is_looped}
                     openMedia={() => openInstantViewMedia(block.video, block.caption, block, iv, true)}
+                />
+            );
+            break;
+        }
+        case 'pageBlockVoiceNote': {
+            element = (
+                <VoiceNote
+                    block={block}
+                    caption={block.caption}
+                    voiceNote={block.voice_note}
+                    openMedia={() => openInstantViewMedia(block.voice_note, block.caption, block, iv, true)}
                 />
             );
             break;

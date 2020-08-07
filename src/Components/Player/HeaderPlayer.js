@@ -308,81 +308,135 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaBlob = update => {
-        const { chatId, messageId } = update;
-        const { message } = this.state;
+        const { chatId, messageId, fileId } = update;
+        const { message, block, instantView } = this.state;
 
-        if (!message) return;
+        if (message) {
+            const { chat_id, id, content } = message;
+            if (!content) return;
+            if (chatId !== chat_id || messageId !== id) return;
 
-        const { chat_id, id, content } = message;
-        if (!content) return;
-        if (chatId !== chat_id || messageId !== id) return;
+            let startPlaying = false;
+            switch (content['@type']) {
+                case 'messageText': {
+                    const { web_page } = content;
+                    if (web_page) {
+                        const { audio, voice_note, video_note } = web_page;
 
-        switch (content['@type']) {
-            case 'messageText': {
-                const { web_page } = content;
-                if (web_page) {
-                    const { audio, voice_note, video_note } = web_page;
+                        if (audio) {
+                            if (supportsStreaming()) return;
 
+                            const { audio: file } = audio;
+                            if (file) {
+                                startPlaying = true;
+                                break;
+                            }
+                        }
+
+                        if (voice_note) {
+                            const { voice } = voice_note;
+                            if (voice) {
+                                startPlaying = true;
+                                break;
+                            }
+                        }
+
+                        if (video_note) {
+                            const { video } = video_note;
+                            if (video) {
+                                startPlaying = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                case 'messageAudio': {
+                    const { audio } = content;
                     if (audio) {
                         if (supportsStreaming()) return;
 
                         const { audio: file } = audio;
                         if (file) {
-                            this.startPlayingFile(message);
+                            startPlaying = true;
+                            break;
                         }
                     }
 
+                    break;
+                }
+                case 'messageVoiceNote': {
+                    const { voice_note } = content;
                     if (voice_note) {
                         const { voice } = voice_note;
                         if (voice) {
-                            this.startPlayingFile(message);
+                            startPlaying = true;
+                            break;
                         }
                     }
 
+                    break;
+                }
+                case 'messageVideoNote': {
+                    const { video_note } = content;
                     if (video_note) {
                         const { video } = video_note;
                         if (video) {
-                            this.startPlayingFile(message);
+                            startPlaying = true;
+                            break;
                         }
                     }
-                }
 
-                break;
+                    break;
+                }
             }
-            case 'messageAudio': {
-                const { audio } = content;
-                if (audio) {
-                    if (supportsStreaming()) return;
 
-                    const { audio: file } = audio;
-                    if (file) {
-                        this.startPlayingFile(message);
-                    }
-                }
-
-                break;
+            if (startPlaying) {
+                this.startPlayingFile(message);
             }
-            case 'messageVoiceNote': {
-                const { voice_note } = content;
-                if (voice_note) {
-                    const { voice } = voice_note;
-                    if (voice) {
-                        this.startPlayingFile(message);
-                    }
-                }
+        } else if (block) {
+            let startPlaying = false;
+            switch (block['@type']) {
+                case 'pageBlockAudio': {
+                    const { audio } = block;
+                    if (audio) {
+                        if (supportsStreaming()) return;
 
-                break;
+                        const { audio: file } = audio;
+                        if (file && file.id === fileId) {
+                            startPlaying = true;
+                        }
+                    }
+
+                    break;
+                }
+                case 'pageBlockVoiceNote': {
+                    const { voice_note } = block;
+                    if (voice_note) {
+                        const { voice: file } = voice_note;
+                        if (file && file.id === fileId) {
+                            startPlaying = true;
+                        }
+                    }
+
+                    break;
+                }
+                case 'pageBlockVideoNote': {
+                    const { video_note } = block;
+                    if (video_note) {
+                        const { video: file } = video_note;
+                        if (file && file.id === fileId) {
+                            startPlaying = true;
+                        }
+                    }
+
+                    break;
+                }
             }
-            case 'messageVideoNote': {
-                const { video_note } = content;
-                if (video_note) {
-                    const { video } = video_note;
-                    if (video) {
-                        this.startPlayingFile(message);
-                    }
-                }
 
-                break;
+            if (startPlaying) {
+                this.startPlayingFile({ '@type': 'instantViewSource', block, instantView });
             }
         }
     };
