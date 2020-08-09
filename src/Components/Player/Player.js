@@ -20,6 +20,7 @@ import Hint from './Hint';
 import Progress from './Progress';
 import { clamp, getDurationString } from '../../Utils/Common';
 import {
+    PLAYER_LOOP_MAX_DURATION,
     PLAYER_PLAYBACKRATE_MAX,
     PLAYER_PLAYBACKRATE_MIN,
     PLAYER_PLAYBACKRATE_STEP,
@@ -759,6 +760,7 @@ class Player extends React.Component {
                         playsInline={true}
                         src={src}
                         poster={noPoster ? null : poster}
+                        loop={duration <= PLAYER_LOOP_MAX_DURATION}
                         onLoadedMetadata={this.handleLoadedMetadata}
                         onLoadedData={this.handleLoadedData}
                         onCanPlay={this.handleCanPlay}

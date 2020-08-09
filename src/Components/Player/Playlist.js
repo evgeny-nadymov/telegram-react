@@ -132,7 +132,7 @@ class Playlist extends React.Component {
 
         if (chatId === playlist.chatId && messageId === playlist.messageId) {
             this.setState({
-                playlist: playlist
+                playlist
             });
         }
     };

@@ -114,7 +114,7 @@ class WebPage extends React.Component {
         if (photo) {
             const photoSize = getSize(photo.sizes, size);
             const smallPhoto =
-                (type === 'article' || type === 'photo') &&
+                (type === 'article' || type === 'photo' || type === 'telegram_megagroup' || type === 'telegram_channel') &&
                 (site_name || title || description) &&
                 photoSize &&
                 photoSize.width === photoSize.height;

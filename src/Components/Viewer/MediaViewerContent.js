@@ -53,6 +53,9 @@ class MediaViewerContent extends React.Component {
                 }
             }
 
+            const { content } = message;
+            const { web_page: webPage } = content;
+
             return {
                 prevChatId: chatId,
                 prevMessageId: messageId,
@@ -72,7 +75,8 @@ class MediaViewerContent extends React.Component {
                 thumbnail,
                 minithumbnailWidth,
                 minithumbnailHeight,
-                minithumbnail
+                minithumbnail,
+                webPage
             };
         }
 
@@ -222,6 +226,7 @@ class MediaViewerContent extends React.Component {
             thumbnailHeight,
             minithumbnail,
             thumbnail,
+            webPage,
             isPlaying
         } = this.state;
 
@@ -245,6 +250,11 @@ class MediaViewerContent extends React.Component {
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
 
+        // if (webPage && webPage.embed_url) {
+        //     content = (
+        //         <iframe src={webPage.embed_url} width={webPage.embed_width} height={webPage.embed_height} frameBorder={0}/>
+        //     );
+        // } else
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>

@@ -251,7 +251,7 @@ class HeaderPlayer extends React.Component {
         const player = this.videoRef.current;
         if (!player) return;
 
-        player.pause();
+        this.fadeOutVolume(250);
     };
 
     startPlayingFile = source => {
@@ -447,7 +447,7 @@ class HeaderPlayer extends React.Component {
         const { message } = this.state;
 
         if (message && message.chat_id === chatId && message.id === messageId) {
-            this.setState({ playlist: playlist });
+            this.setState({ playlist });
         }
     };
 
@@ -797,7 +797,7 @@ class HeaderPlayer extends React.Component {
         const title = getMediaTitle(message || block, t);
         const dateHintStr = getDateHint(date);
         const dateStr = getDate(date);
-        const showDate = !audio;
+        const showDate = false; //!audio;
         const showPlaybackRate = !audio || useAudioRate;
         const showRepeat = audio;
         const showShuffle = audio;

@@ -170,8 +170,8 @@ function getFormattedText(formattedText, t = k => k) {
 
     const { text, entities } = formattedText;
     if (!text) return null;
-    if (!entities) return text;
-    if (!entities.length) return text;
+    if (!entities) return [text];
+    if (!entities.length) return [text];
 
     let deleteLineBreakAfterPre = false;
     let result = [];

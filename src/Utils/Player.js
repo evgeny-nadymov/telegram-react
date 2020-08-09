@@ -8,8 +8,8 @@
 import { getAuthor, getMessageAudio } from './Message';
 import { getBlockAudio } from './InstantView';
 import { getSrc, supportsStreaming } from './File';
-import PlayerStore from '../Stores/PlayerStore';
 import { getAudioTitle } from './Media';
+import PlayerStore from '../Stores/PlayerStore';
 
 export function getMediaTitle(source, t = k => k) {
     if (!source) return null;
@@ -34,8 +34,8 @@ export function getMediaTitle(source, t = k => k) {
                         if (audio) {
                             return getAudioTitle(audio);
                         }
-                        break;
                     }
+                    break;
                 }
             }
 
@@ -48,6 +48,10 @@ export function getMediaTitle(source, t = k => k) {
             }
 
             return null;
+        }
+        case 'pageBlockVoiceNote': {
+
+            return t('AttachAudio');
         }
     }
 

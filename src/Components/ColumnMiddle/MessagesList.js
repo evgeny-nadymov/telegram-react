@@ -1264,7 +1264,7 @@ class MessagesList extends React.Component {
                   if (isServiceMessage(x)) {
                       m = (
                           <ServiceMessage
-                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                              key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
                               ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}
@@ -1279,7 +1279,7 @@ class MessagesList extends React.Component {
 
                       m = (
                           <Message
-                              key={`chat_id=${x.chat_id} message_id=${x.id}`}
+                              key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
                               ref={el => this.itemsMap.set(i, el)}
                               chatId={x.chat_id}
                               messageId={x.id}

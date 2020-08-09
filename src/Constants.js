@@ -46,6 +46,7 @@ export const PHOTO_SIZE = 320;
 export const PHOTO_THUMBNAIL_SIZE = 90;
 export const PIP_PLAYER_BORDER_PRECISION = 10;
 export const PLAYER_AUDIO_2X_MIN_DURATION = 10 * 60;
+export const PLAYER_LOOP_MAX_DURATION = 20;
 export const PLAYER_VOLUME_NORMAL = 0.25;
 export const PLAYER_VOLUME_MIN = 0.0;
 export const PLAYER_VOLUME_MAX = 1.0;

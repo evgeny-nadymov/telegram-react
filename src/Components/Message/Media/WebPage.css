@@ -46,6 +46,7 @@
 }
 
 .web-page-description {
+    white-space: pre-wrap;
 }
 
 .web-page-photo {

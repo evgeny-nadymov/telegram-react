@@ -758,6 +758,10 @@ class MediaViewer extends React.Component {
         }
     };
 
+    handleWrapperMouseDown = event => {
+        this.mouseDownTarget = event.currentTarget;
+    }
+
     handleWrapperClick = event => {
         const { mouseDownTarget } = this;
         this.mouseDownTarget = null;
@@ -766,10 +770,6 @@ class MediaViewer extends React.Component {
 
         this.handleClose();
     };
-
-    handleWrapperMouseDown = event => {
-        this.mouseDownTarget = event.currentTarget;
-    }
 
     render() {
         const { chatId, t } = this.props;

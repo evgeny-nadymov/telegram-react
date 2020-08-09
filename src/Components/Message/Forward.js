@@ -69,7 +69,7 @@ class Forward extends React.Component {
         return (
             <div className={classNames('message-author', 'forward')}>
                 <div>{t('ForwardedMessage')}</div>
-                <div>
+                <div className='forward-subtitle'>
                     {t('From') + ' '}
                     <Tooltip
                         title={tooltip}

@@ -25,7 +25,6 @@ import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerC
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
 import { modalManager } from '../../Utils/Modal';
-import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
 
@@ -79,13 +78,13 @@ class InstantViewMediaViewer extends React.Component {
                 return;
             }
             case 'ArrowLeft': {
-                this.handlePrevious();
+                this.handleNext();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
             case 'ArrowRight': {
-                this.handleNext();
+                this.handlePrevious();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -196,6 +195,19 @@ class InstantViewMediaViewer extends React.Component {
         saveMedia(media, null);
     };
 
+    handleWrapperMouseDown = event => {
+        this.mouseDownTarget = event.currentTarget;
+    }
+
+    handleWrapperClick = event => {
+        const { mouseDownTarget } = this;
+        this.mouseDownTarget = null;
+
+        if (event.currentTarget !== mouseDownTarget) return;
+
+        this.handleClose();
+    };
+
     render() {
         const { size, t } = this.props;
         const { index, blocks, hasNextMedia, hasPreviousMedia } = this.state;
@@ -236,7 +248,7 @@ class InstantViewMediaViewer extends React.Component {
                         <CloseIcon />
                     </MediaViewerFooterButton>
                 </div>
-                <div className='media-viewer-wrapper'>
+                <div className='media-viewer-wrapper' onMouseDown={this.handleWrapperMouseDown} onClick={this.handleWrapperClick}>
                     <div className='media-viewer-left-column'>
                         <MediaViewerButton disabled={!hasNextMedia} grow onClick={this.handleNext}>
                             <NavigateBeforeIcon />

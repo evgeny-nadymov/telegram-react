@@ -146,6 +146,12 @@ class PlayerStore extends EventEmitter {
                         const { block, instantView } = source;
                         this.instantView = instantView;
                         this.block = block;
+                        this.playlist = null;
+                        TdLibController.clientUpdate({
+                            '@type': 'clientUpdateMediaPlaylistLoading',
+                            chatId: 0,
+                            messageId: 0
+                        });
                         this.emit(update['@type'], update);
                         break;
                     }
@@ -495,7 +501,9 @@ class PlayerStore extends EventEmitter {
     };
 
     setCurrentTime = (uniqueId, info) => {
-        if (info.currentTime < 30) return;
+        if (info.currentTime < 30 || info.currentTime > info.duration - 10) {
+            info.currentTime = 0;
+        }
 
         this.times.set(uniqueId, info);
     };
@@ -517,15 +525,15 @@ class PlayerStore extends EventEmitter {
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMediaPlaylistLoading',
-            chatId: chatId,
-            messageId: messageId
+            chatId,
+            messageId
         });
 
         const filter = getSearchMessagesFilter(chatId, messageId);
         if (!filter) {
             this.playlist = {
-                chatId: chatId,
-                messageId: messageId,
+                chatId,
+                messageId,
                 totalCount: 1,
                 messages: [MessageStore.get(chatId, messageId)]
             };
@@ -546,7 +554,7 @@ class PlayerStore extends EventEmitter {
             from_message_id: messageId,
             offset: -50,
             limit: 100,
-            filter: filter
+            filter
         });
 
         MessageStore.setItems(result.messages);
@@ -554,10 +562,10 @@ class PlayerStore extends EventEmitter {
         const { total_count, messages } = result;
 
         this.playlist = {
-            chatId: chatId,
-            messageId: messageId,
+            chatId,
+            messageId,
             totalCount: total_count,
-            messages: messages
+            messages
         };
 
         TdLibController.clientUpdate({
