@@ -22,7 +22,7 @@ import Playlist from '../Player/Playlist';
 import { supportsStreaming } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
 import { getDate, getDateHint, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
-import { getCurrentTime, getMediaTitle, getMediaMimeType, getMediaSrc, isCurrentSource } from '../../Utils/Player';
+import { getCurrentTime, getMediaTitle, getMediaMimeType, getMediaSrc, isCurrentSource, playlistItemEquals } from '../../Utils/Player';
 import { openMediaInstantView } from '../../Actions/InstantView';
 import { PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -442,11 +442,13 @@ class HeaderPlayer extends React.Component {
     };
 
     onClientUpdateMediaPlaylist = update => {
-        const { playlist } = update;
-        const { chatId, messageId } = playlist;
-        const { message } = this.state;
+        const { playlist, source } = update;
+        const { message, block } = this.state;
 
-        if (message && message.chat_id === chatId && message.id === messageId) {
+        const chatId = message ? message.chat_id : 0;
+        const messageId = message ? message.id : 0;
+
+        if (isCurrentSource(chatId, messageId, block, source)) {
             this.setState({ playlist });
         }
     };
@@ -709,25 +711,21 @@ class HeaderPlayer extends React.Component {
         });
     };
 
-    hasPrev = (message, playlist) => {
-        if (!message) return false;
-        if (!playlist || !playlist.messages.length) return false;
+    hasPrev = (item, playlist) => {
+        if (!item) return false;
+        if (!playlist || !playlist.items.length) return false;
 
-        const { chat_id, id } = message;
-
-        const index = playlist.messages.findIndex(x => x.chat_id === chat_id && x.id === id);
+        const index = playlist.items.findIndex(x => playlistItemEquals(x, item));
         if (index === -1) return false;
 
-        return index + 1 < playlist.messages.length;
+        return index + 1 < playlist.items.length;
     };
 
-    hasNext = (message, playlist) => {
-        if (!message) return false;
-        if (!playlist || !playlist.messages.length) return false;
+    hasNext = (item, playlist) => {
+        if (!item) return false;
+        if (!playlist || !playlist.items.length) return false;
 
-        const { chat_id, id } = message;
-
-        const index = playlist.messages.findIndex(x => x.chat_id === chat_id && x.id === id);
+        const index = playlist.items.findIndex(x => playlistItemEquals(x, item));
         if (index === -1) return false;
 
         return index - 1 >= 0;
@@ -801,8 +799,8 @@ class HeaderPlayer extends React.Component {
         const showPlaybackRate = !audio || useAudioRate;
         const showRepeat = audio;
         const showShuffle = audio;
-        const hasPrev = this.hasPrev(message, playlist);
-        const hasNext = this.hasNext(message, playlist);
+        const hasPrev = this.hasPrev(message || block, playlist);
+        const hasNext = this.hasNext(message || block, playlist);
 
         const source = src ? <source src={src} type={mimeType}/> : null;
 

@@ -16,4 +16,5 @@
 .header-chat-content {
     margin-left: 16px;
     overflow: hidden;
+    user-select: none;
 }

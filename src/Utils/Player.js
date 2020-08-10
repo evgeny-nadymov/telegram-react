@@ -11,6 +11,20 @@ import { getSrc, supportsStreaming } from './File';
 import { getAudioTitle } from './Media';
 import PlayerStore from '../Stores/PlayerStore';
 
+export function playlistItemEquals(item1, item2) {
+    if (!item1) return false;
+    if (!item2) return false;
+    if (item1['@type'] !== item2['@type']) return false;
+
+    switch (item1['@type']) {
+        case 'message': {
+            return item1.chat_id === item2.chat_id && item1.id === item2.id;
+        }
+    }
+
+    return item1 === item2;
+}
+
 export function getMediaTitle(source, t = k => k) {
     if (!source) return null;
 

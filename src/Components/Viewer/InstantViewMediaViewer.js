@@ -20,7 +20,7 @@ import MediaViewerButton from './MediaViewerButton';
 import MediaViewerFooterText from './MediaViewerFooterText';
 import MediaViewerFooterButton from './MediaViewerFooterButton';
 import MediaViewerDownloadButton from './MediaViewerDownloadButton';
-import { getBlockCaption, getBlockMedia, getBlockUrl, getValidMediaBlocks } from '../../Utils/InstantView';
+import { getBlockCaption, getBlockMedia, getBlockUrl, getValidBlocks, isValidMediaBlock } from '../../Utils/InstantView';
 import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerContent, saveMedia } from '../../Utils/File';
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
@@ -100,7 +100,7 @@ class InstantViewMediaViewer extends React.Component {
     loadContent() {
         const { iv, media } = this.props;
 
-        const blocks = getValidMediaBlocks(iv);
+        const blocks = getValidBlocks(iv, isValidMediaBlock);
         const index = blocks.findIndex(x => getBlockMedia(x) === media);
 
         this.setState({

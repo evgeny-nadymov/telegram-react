@@ -806,7 +806,19 @@ export function isValidMediaBlock(block) {
     return false;
 }
 
-export function getValidMediaBlocks(iv) {
+export function isValidAudioBlock(block) {
+    if (!block) return false;
+
+    return block['@type'] === 'pageBlockAudio';
+}
+
+export function isValidVoiceNoteBlock(block) {
+    if (!block) return false;
+
+    return block['@type'] === 'pageBlockVoiceNote';
+}
+
+export function getValidBlocks(iv, func) {
     if (!iv) return [];
 
     const { page_blocks } = iv;
@@ -820,5 +832,5 @@ export function getValidMediaBlocks(iv) {
         });
     });
 
-    return blocks.filter(isValidMediaBlock);
+    return blocks.filter(func);
 }

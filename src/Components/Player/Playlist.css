@@ -9,7 +9,7 @@
     position: relative;
     top: 22px;
     box-sizing: border-box;
-    z-index: 2;
+    z-index: 1;
 }
 
 .playlist-wrapper {

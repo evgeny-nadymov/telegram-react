@@ -8,7 +8,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import MediaAudio from '../../Message/Media/Audio';
-import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import Caption from './Caption';
 
 function Audio(props) {
@@ -16,7 +15,7 @@ function Audio(props) {
 
     return (
         <figure>
-            <MediaAudio block={block} audio={audio} displaySize={PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
+            <MediaAudio block={block} audio={audio} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </figure>
     );
