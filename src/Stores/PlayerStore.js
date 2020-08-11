@@ -11,7 +11,7 @@ import { getRandomInt } from '../Utils/Common';
 import { isCurrentSource, playlistItemEquals } from '../Utils/Player';
 import { supportsStreaming } from '../Utils/File';
 import { getValidBlocks, isValidAudioBlock, isValidVoiceNoteBlock, openInstantViewMedia } from '../Utils/InstantView';
-import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
+import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_MAX_SIZE, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
 import FileStore from './FileStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -393,79 +393,60 @@ class PlayerStore extends EventEmitter {
         const nextItem = items[nextIndex];
         if (!nextItem) return;
 
+        let audio = null;
         switch (nextItem['@type']) {
             case 'pageBlockAudio': {
-                const { audio } = nextItem;
-                if (!audio) return;
-
-                let { audio: file } = audio;
-                if (!file) return;
-
-                file = FileStore.get(file.id) || file;
-
-                const { id, local, expected_size } = file;
-
-                const { is_downloading_active, is_downloading_completed, download_offset, downloaded_prefix_size } = local;
-                if (is_downloading_completed) return;
-                if (is_downloading_active) return;
-
-                const offset = 0;
-                const limit = 3 * 1024 * 1024; //expected_size > PLAYER_PRELOAD_MAX_SIZE ? PLAYER_PRELOAD_MAX_SIZE : 0; //
-                if (download_offset <= offset && limit <= downloaded_prefix_size) return;
-
-                console.log('[cache] preload start', id, limit, expected_size);
-                await TdLibController.send({
-                    '@type': 'downloadFile',
-                    file_id: id,
-                    offset: 0,
-                    limit,
-                    priority: PLAYER_PRELOAD_PRIORITY,
-                    synchronous: true
-                });
-
-                console.log('[cache] preload stop', id, limit, expected_size);
-
+                audio = nextItem.audio;
                 break;
             }
             case 'message': {
                 const { content } = nextItem;
                 switch (content['@type']) {
                     case 'messageAudio': {
-                        const { audio } = content;
-                        if (!audio) return;
-
-                        let { audio: file } = audio;
-                        if (!file) return;
-
-                        file = FileStore.get(file.id) || file;
-
-                        const { id, local, expected_size } = file;
-
-                        const { is_downloading_active, is_downloading_completed, download_offset, downloaded_prefix_size } = local;
-                        if (is_downloading_completed) return;
-                        if (is_downloading_active) return;
-
-                        const offset = 0;
-                        const limit = 3 * 1024 * 1024; //expected_size > PLAYER_PRELOAD_MAX_SIZE ? PLAYER_PRELOAD_MAX_SIZE : 0; //
-                        if (download_offset <= offset && limit <= downloaded_prefix_size) return;
-
-                        console.log('[cache] preload start', id, limit, expected_size);
-                        await TdLibController.send({
-                            '@type': 'downloadFile',
-                            file_id: id,
-                            offset: 0,
-                            limit,
-                            priority: PLAYER_PRELOAD_PRIORITY,
-                            synchronous: true
-                        });
-
-                        console.log('[cache] preload stop', id, limit, expected_size);
-
+                        audio = content.audio;
                         break;
                     }
                 }
             }
         }
+
+        if (!audio) return;
+
+        let { audio: file } = audio;
+        if (!file) return;
+        file = FileStore.get(file.id) || file;
+
+        const { id, local, expected_size } = file;
+
+        const offset = 0;
+        const limit = expected_size > PLAYER_PRELOAD_MAX_SIZE ? PLAYER_PRELOAD_MAX_SIZE : 0;
+
+        const { is_downloading_active, is_downloading_completed, download_offset, downloaded_prefix_size } = local;
+        if (is_downloading_completed) {
+            // console.log('[cache] preload cancel completed', id, [offset, limit], [download_offset, downloaded_prefix_size]);
+            return;
+        }
+        if (is_downloading_active) {
+            // console.log('[cache] preload cancel active', id, [offset, limit], [download_offset, downloaded_prefix_size]);
+            return;
+        }
+
+        if (download_offset <= offset && limit > 0 && limit <= downloaded_prefix_size) {
+            // console.log('[cache] preload cancel size', id, [offset, limit], [download_offset, downloaded_prefix_size]);
+            return;
+        }
+
+        // console.log('[cache] preload start', id, [offset, limit], [download_offset, downloaded_prefix_size], file);
+        const result = await TdLibController.send({
+            '@type': 'downloadFile',
+            file_id: id,
+            offset,
+            limit,
+            priority: PLAYER_PRELOAD_PRIORITY,
+            synchronous: true
+        });
+
+        // console.log('[cache] preload stop', id, [offset, limit], [download_offset, downloaded_prefix_size], result);
     };
 
     openPlaylistItem(item) {

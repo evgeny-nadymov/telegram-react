@@ -186,10 +186,10 @@ async function processRequest(request) {
                 const { local } = file;
                 if (local) {
                     const { download_offset, downloaded_prefix_size } = local;
-                    // console.log('[down] checkFile', fileId, offset, limit, download_offset, downloaded_prefix_size);
+                    // console.log('[cache] checkFile', fileId, [offset, limit], [download_offset, downloaded_prefix_size]);
                     if (download_offset <= offset && offset + limit <= download_offset + downloaded_prefix_size) {
 
-                        // console.log('[down] readExistingFile');
+                        // console.log('[cache] readExistingFile', fileId);
                         filePart = await TdLibController.send({
                             '@type': 'readFilePart',
                             file_id: fileId,
@@ -204,7 +204,7 @@ async function processRequest(request) {
         }
 
         if (!filePart) {
-            // console.log('[down] downloadFile', fileId, offset, limit, file);
+            // console.log('[cache] downloadFile', fileId, [offset, limit]);
             await TdLibController.send({
                 '@type': 'downloadFile',
                 file_id: fileId,
@@ -214,6 +214,7 @@ async function processRequest(request) {
                 synchronous: true
             });
 
+            // console.log('[cache] readFilePart', fileId, [offset, limit]);
             filePart = await TdLibController.send({
                 '@type': 'readFilePart',
                 file_id: fileId,

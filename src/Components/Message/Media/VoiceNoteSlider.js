@@ -50,6 +50,7 @@ class VoiceNoteSlider extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
+        const { style } = this.props;
         const { active, value, buffered } = this.state;
 
         if (nextState.value !== value) {
@@ -61,6 +62,10 @@ class VoiceNoteSlider extends React.Component {
         }
 
         if (nextState.buffered !== buffered) {
+            return true;
+        }
+
+        if (nextProps.style !== style) {
             return true;
         }
 

@@ -24,7 +24,8 @@ import { openChat } from '../../Actions/Client';
 import { getDate, getDateHint, getMessageAudio, hasAudio, hasVoice, useAudioPlaybackRate } from '../../Utils/Message';
 import { getCurrentTime, getMediaTitle, getMediaMimeType, getMediaSrc, isCurrentSource, playlistItemEquals } from '../../Utils/Player';
 import { openMediaInstantView } from '../../Actions/InstantView';
-import { PLAYER_PLAYBACKRATE_NORMAL } from '../../Constants';
+import { clamp } from '../../Utils/Common';
+import { PLAYER_PLAYBACKRATE_NORMAL, PLAYER_SEEK_STEP_BIG } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -81,6 +82,8 @@ class HeaderPlayer extends React.Component {
     }
 
     componentDidMount() {
+        this.addMediaSessionHandlers();
+
         AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         FileStore.on('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoNoteBlob', this.onClientUpdateMediaBlob);
@@ -100,6 +103,7 @@ class HeaderPlayer extends React.Component {
     }
 
     componentWillUnmount() {
+        this.removeMediaSessionHandlers();
 
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         FileStore.off('clientUpdateVoiceNoteBlob', this.onClientUpdateMediaBlob);
@@ -117,6 +121,66 @@ class HeaderPlayer extends React.Component {
         PlayerStore.off('clientUpdateMediaPlaybackRate', this.onClientUpdateMediaPlaybackRate);
         PlayerStore.off('clientUpdateMediaAudioPlaybackRate', this.onClientUpdateMediaAudioPlaybackRate);
         PlayerStore.off('clientUpdateMediaSeek', this.onClientUpdateMediaSeek);
+    }
+
+    addMediaSessionHandlers() {
+        const { mediaSession } = navigator;
+        if (!mediaSession) return;
+
+        try {
+            mediaSession.setActionHandler('nexttrack', this.handleNext);
+            mediaSession.setActionHandler('previoustrack', this.handlePrev);
+            mediaSession.setActionHandler('seekforward', this.handleSeekForward);
+            mediaSession.setActionHandler('seekbackward', this.handleSeekBackward);
+            mediaSession.setActionHandler('seekto', this.handleSeekTo);
+        } catch {
+
+        }
+    }
+
+    handleSeekForward = () => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.handleSeek(video.currentTime + PLAYER_SEEK_STEP_BIG);
+    };
+
+    handleSeekBackward = () => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.handleSeek(video.currentTime - PLAYER_SEEK_STEP_BIG);
+    };
+
+    handleSeekTo = event => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.handleSeek(event.seekTime);
+    };
+
+    handleSeek = currentTime => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        currentTime = clamp(currentTime, 0, video.duration || 0);
+
+        video.currentTime = currentTime;
+    };
+
+    removeMediaSessionHandlers() {
+        const { mediaSession } = navigator;
+        if (!mediaSession) return;
+
+        try{
+            mediaSession.setActionHandler('nexttrack', null);
+            mediaSession.setActionHandler('previoustrack', null);
+            mediaSession.setActionHandler('seekforward', null);
+            mediaSession.setActionHandler('seekbackward', null);
+            mediaSession.setActionHandler('seekto', null);
+        }catch {
+
+        }
     }
 
     fadeOutVolume(duration) {
@@ -462,6 +526,11 @@ class HeaderPlayer extends React.Component {
             playing: false,
             src: null,
             mimeType: null
+        }, () => {
+            const player = this.videoRef.current;
+            if (!player) return;
+
+            player.load();
         });
     };
 
