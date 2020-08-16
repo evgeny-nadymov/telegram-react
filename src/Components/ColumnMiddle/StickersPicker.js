@@ -8,6 +8,7 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
@@ -449,7 +450,7 @@ class StickersPicker extends React.Component {
         return (
             <div className='stickers-picker' style={style}>
                 <StickersPickerHeader onSelect={this.handleSelectSet} stickers={headerStickers} />
-                <div ref={this.scrollRef} className='stickers-picker-scroll' onScroll={this.handleScroll}>
+                <div ref={this.scrollRef} className={classNames('stickers-picker-scroll', 'scrollbars-hidden')} onScroll={this.handleScroll}>
                     {Boolean(recentInfo) && (
                         <StickerSet
                             info={recentInfo}

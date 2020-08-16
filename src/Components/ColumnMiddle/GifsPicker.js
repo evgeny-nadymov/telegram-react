@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import Animation from '../Message/Media/Animation';
@@ -252,7 +253,7 @@ class GifsPicker extends React.Component {
 
         return (
             <div className='gifs-picker' style={style}>
-                <div ref={this.scrollRef} className='gifs-picker-scroll' onScroll={this.handleScroll}>
+                <div ref={this.scrollRef} className={classNames('gifs-picker-scroll', 'scrollbars-hidden')} onScroll={this.handleScroll}>
                     {items}
                 </div>
             </div>

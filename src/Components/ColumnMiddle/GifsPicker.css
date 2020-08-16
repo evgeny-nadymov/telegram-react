@@ -15,8 +15,7 @@
 
 .gifs-picker-scroll {
     background: transparent;
-    margin-right: -15px;
-    padding: 6px 21px 6px 6px;
+    padding: 6px;
     height: 356px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;

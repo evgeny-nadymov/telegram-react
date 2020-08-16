@@ -98,3 +98,12 @@ mark {
 .notification-close-button {
     padding: 4px;
 }
+
+.scrollbars-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbars-hidden::-webkit-scrollbar {
+    display: none;
+}

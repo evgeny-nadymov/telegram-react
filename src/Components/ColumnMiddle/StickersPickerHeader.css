@@ -18,8 +18,6 @@
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     overflow-y: hidden;
-    padding-bottom: 16px;
-    margin-bottom: -16px;
     position: relative;
     background: transparent;
 }
@@ -43,7 +41,7 @@
     width: 48px;
     will-change: transform;
     position: absolute;
-    bottom: 16px;
+    bottom: 0;
     transition: transform 500ms ease-out;
     background: var(--color-accent-dark);
 }

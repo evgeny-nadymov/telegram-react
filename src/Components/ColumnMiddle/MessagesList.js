@@ -268,7 +268,7 @@ class MessagesList extends React.Component {
         if (list['@type'] !== 'chatListMain') return;
 
         const { history } = this.state;
-        if (history) return;
+        if (history && history.length > 0) return;
 
         await FileStore.initDB(async () => {
             const { chatId, messageId } = this.props;

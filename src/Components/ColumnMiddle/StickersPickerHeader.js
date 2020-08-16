@@ -8,6 +8,7 @@
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import Animator from '../../Utils/Animatior';
 import Sticker from './../Message/Media/Sticker';
 import { StickerSourceEnum } from '../Message/Media/Sticker';
@@ -123,7 +124,7 @@ class StickersPickerHeader extends React.Component {
 
         return (
             <div className='stickers-picker-header'>
-                <div ref={this.scrollRef} className='stickers-picker-header-scroll' onWheel={this.handleWheel}>
+                <div ref={this.scrollRef} className={classNames('stickers-picker-header-scroll', 'scrollbars-hidden')} onWheel={this.handleWheel}>
                     <div className='stickers-picker-header-items'>{items}</div>
                     <div ref={this.anchorRef} className='stickers-picker-header-anchor' />
                 </div>
