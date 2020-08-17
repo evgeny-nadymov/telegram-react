@@ -91,6 +91,7 @@
 .emoji-mart-scroll {
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
     height: 270px;
     margin-right: -15px;
     padding: 0 6px 6px 6px;
