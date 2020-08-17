@@ -250,7 +250,7 @@ class DialogsList extends React.Component {
         if (!chats) return;
 
         const { loading } = this;
-        if (loading) return;
+        if (loading && !chats.length) return;
 
         const { chat_id } = update;
 
@@ -369,7 +369,7 @@ class DialogsList extends React.Component {
             }
         }
 
-        if (type === 'chatListMain') console.log('[p] GETCHATS start', offsetOrder, offsetChatId);
+        if (type === 'chatListMain') console.log('[p] GETCHATS start', type, offsetOrder, offsetChatId);
         this.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -379,11 +379,11 @@ class DialogsList extends React.Component {
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
-            if (type === 'chatListMain') console.log('[p] GETCHATS stop');
             if (replace) {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady', list: chatList });
             }
         });
+        if (type === 'chatListMain') console.log('[p] GETCHATS stop', replace, type, result);
 
         if (result.chat_ids.length > 0 && result.chat_ids[0] === offsetChatId) {
             result.chat_ids.shift();

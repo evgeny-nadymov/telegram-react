@@ -361,6 +361,27 @@ function getWebPage(message) {
     return message.content.web_page;
 }
 
+export function getViews(views) {
+    if (views < 1000) {
+        return views
+    }
+
+
+    if (views < 1000000) {
+        views = Math.trunc(views / 100);
+        const fractionDigits = views % 10 < 1 ? 0 : 1;
+
+        return (views / 10).toFixed(fractionDigits) + 'K';
+    }
+
+    views = Math.trunc(views / 100000);
+    const fractionDigits = views % 10 < 1 ? 0 : 1;
+
+    return (views / 10).toFixed(fractionDigits) + 'M';
+}
+
+window.getViews = getViews;
+
 function getDate(date) {
     if (!date) return null;
 
@@ -678,6 +699,57 @@ function isLottieMessage(chatId, messageId) {
             const { file_name } = document;
 
             return file_name && file_name.toLowerCase().endsWith('.json');
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
+export function isEmbedMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageText': {
+            const { web_page } = content;
+            if (!web_page) return false;
+
+            const { embed_url, site_name } = web_page;
+            if (!embed_url) return false;
+            if (!site_name) return false;
+
+            switch (site_name) {
+                case 'Coub': {
+                    return true;
+                }
+                case 'SoundCloud': {
+                    return true;
+                }
+                case 'Spotify': {
+                    return true;
+                }
+                case 'Twitch': {
+                    return true;
+                }
+                case 'YouTube': {
+                    return true;
+                }
+                case 'Vimeo': {
+                    return true;
+                }
+                case 'КиноПоиск': {
+                    return true;
+                }
+                case 'Яндекс.Музыка': {
+                    return true;
+                }
+            }
+
+            return false;
         }
         default: {
             return false;

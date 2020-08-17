@@ -19,7 +19,7 @@
 }
 
 .chat-details-list {
-    overflow-y: scroll;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex-grow: 1;
     flex-shrink: 1;

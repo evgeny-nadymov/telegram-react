@@ -343,7 +343,7 @@ class StickerSetDialog extends React.Component {
                 </DialogTitle>
                 <DialogContent
                     ref={this.contentRef}
-                    classes={{ root: 'sticker-set-dialog-content-root' }}
+                    classes={{ root: classNames('sticker-set-dialog-content-root', 'scrollbars-hidden') }}
                     onMouseOver={this.handleMouseOver}
                     onMouseOut={this.handleMouseOut}
                     onScroll={this.handleScroll}>

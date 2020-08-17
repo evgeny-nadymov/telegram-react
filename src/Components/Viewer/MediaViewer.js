@@ -40,6 +40,7 @@ import {
     canMessageBeDeleted,
     filterDuplicateMessages,
     isAnimationMessage,
+    isEmbedMessage,
     isMediaContent,
     isVideoMessage
 } from '../../Utils/Message';
@@ -839,7 +840,9 @@ class MediaViewer extends React.Component {
 
         const fileId = file ? file.id : 0;
         let title = t('AttachPhoto');
-        if (isVideoMessage(chatId, currentMessageId)) {
+        if (isEmbedMessage(chatId, currentMessageId)) {
+            title = '';
+        } else if (isVideoMessage(chatId, currentMessageId)) {
             title = t('AttachVideo');
         } else if (isAnimationMessage(chatId, currentMessageId)) {
             title = t('AttachGif');
@@ -853,7 +856,7 @@ class MediaViewer extends React.Component {
                         title={title}
                         subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
                     />
-                    <MediaViewerDownloadButton title={t('Save')} fileId={fileId} onClick={this.handleSave} />
+                    <MediaViewerDownloadButton title={t('Save')} fileId={fileId} disabled={isEmbedMessage(chatId, currentMessageId)} onClick={this.handleSave} />
                     <MediaViewerFooterButton
                         title={t('Forward')}
                         disabled={!canBeForwarded}

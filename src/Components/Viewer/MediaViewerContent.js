@@ -13,13 +13,14 @@ import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import Player from '../Player/Player';
 import { getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
-import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
+import { getText, isAnimationMessage, isEmbedMessage, isVideoMessage } from '../../Utils/Message';
 import { isBlurredThumbnail } from '../../Utils/Media';
+import { MEDIA_VIEWER_VIDEO_MAX_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
-import './MediaViewerContent.css';
-import TdLibController from '../../Controllers/TdLibController';
 import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
+import './MediaViewerContent.css';
 
 class MediaViewerContent extends React.Component {
     constructor(props) {
@@ -236,25 +237,21 @@ class MediaViewerContent extends React.Component {
         const thumbnailSrc = getSrc(thumbnail);
         const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight }) : Boolean(miniSrc);
 
+        const isEmbed = isEmbedMessage(chatId, messageId);
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
 
         let videoWidth = width;
         let videoHeight = height;
-        if (Math.max(videoWidth, videoHeight) > 640) {
-            const scale = 640 / Math.max(videoWidth, videoHeight);
-            videoWidth = videoWidth > videoHeight ? 640 : Math.floor(videoWidth * scale);
-            videoHeight = videoHeight > videoWidth ? 640 : Math.floor(videoHeight * scale);
-        }
+        const scale = MEDIA_VIEWER_VIDEO_MAX_SIZE / Math.max(videoWidth, videoHeight);
+        const w = videoWidth > videoHeight ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoWidth * scale);
+        const h = videoHeight > videoWidth ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoHeight * scale);
+        videoWidth = w;
+        videoHeight = h;
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
 
-        // if (webPage && webPage.embed_url) {
-        //     content = (
-        //         <iframe src={webPage.embed_url} width={webPage.embed_width} height={webPage.embed_height} frameBorder={0}/>
-        //     );
-        // } else
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
@@ -346,6 +343,44 @@ class MediaViewerContent extends React.Component {
                     ))}
                 </div>
             );
+        } else if (webPage && webPage.embed_url) {
+            let { embed_url: url } = webPage;
+
+            switch (webPage.site_name) {
+                case 'Coub': {
+                    break;
+                }
+                case 'SoundCloud': {
+                    break;
+                }
+                case 'Spotify': {
+                    break;
+                }
+                case 'Twitch': {
+                    url += `&parent=${window.location.hostname}`;
+                    break;
+                }
+                case 'YouTube': {
+                    url += '?iv_load_policy=3&controls=2&playsinline=1&rel=0&modestbranding=0&autoplay=1&enablejsapi=0&widgetid=1&showinfo=0';
+                    break;
+                }
+                case 'Vimeo': {
+                    url += '?playsinline=true&autoplay=true&dnt=true&title=false';
+                    break;
+                }
+                case 'КиноПоиск': {
+                    break;
+                }
+                case 'Яндекс.Музыка': {
+                    break;
+                }
+            }
+
+            content = (
+                <div className='media-viewer-content-wrapper'>
+                    <iframe src={url} width={videoWidth} height={videoHeight} frameBorder={0} allowFullScreen={true} scrolling='no' style={{ background: 'black' }}/>
+                </div>
+            );
         } else {
             content = (
                 <img className='media-viewer-content-image' src={src} alt='' onClick={this.handleContentClick} />
@@ -356,7 +391,7 @@ class MediaViewerContent extends React.Component {
             <div className='media-viewer-content'>
                 {content}
                 {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
-                {text && text.length > 0 && <MediaCaption text={text} />}
+                {text && text.length > 0 && !isVideo && !isEmbed && <MediaCaption text={text} />}
             </div>
         );
     }

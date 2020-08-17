@@ -125,11 +125,11 @@ class MediaViewerDownloadButton extends React.Component {
     };
 
     render() {
-        const { title, children } = this.props;
+        const { title, children, disabled: propsDisabled } = this.props;
         const { disabled } = this.state;
 
         return (
-            <MediaViewerFooterButton disabled={disabled} title={title} onClick={this.handleClick}>
+            <MediaViewerFooterButton disabled={disabled || propsDisabled} title={title} onClick={this.handleClick}>
                 {children || <SaveIcon />}
             </MediaViewerFooterButton>
         );
@@ -139,7 +139,8 @@ class MediaViewerDownloadButton extends React.Component {
 MediaViewerDownloadButton.propTypes = {
     fileId: PropTypes.number.isRequired,
     onClick: PropTypes.func.isRequired,
-    title: PropTypes.string
+    title: PropTypes.string,
+    disabled: PropTypes.bool
 };
 
 export default MediaViewerDownloadButton;

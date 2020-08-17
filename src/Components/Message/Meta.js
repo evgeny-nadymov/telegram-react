@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import Status from './Status';
-import { getDate, getDateHint } from '../../Utils/Message';
+import { getDate, getDateHint, getViews } from '../../Utils/Message';
 import MessageStore from '../../Stores/MessageStore';
 import './Meta.css';
 
@@ -26,6 +26,7 @@ class Meta extends React.Component {
 
         const dateStr = getDate(date);
         const dateHintStr = getDateHint(date);
+        const viewsStr = getViews(views);
 
         return (
             <div className={classNames('meta', className)} style={style}>
@@ -33,9 +34,9 @@ class Meta extends React.Component {
                 {views > 0 && (
                     <>
                         <VisibilityIcon className='meta-views-icon' />
-                        <span className='meta-views'>
+                        <span className='meta-views' title={views}>
                             &nbsp;
-                            {views}
+                            {viewsStr}
                             &nbsp; &nbsp;
                         </span>
                     </>

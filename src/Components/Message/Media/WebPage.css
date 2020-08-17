@@ -47,6 +47,10 @@
 
 .web-page-description {
     white-space: pre-wrap;
+    -webkit-line-clamp: 5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .web-page-photo {

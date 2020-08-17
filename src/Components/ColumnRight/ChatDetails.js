@@ -336,7 +336,7 @@ class ChatDetails extends React.Component {
             return (
                 <div className='chat-details'>
                     <ChatDetailsHeader onClose={onClose} />
-                    <div ref={this.chatDetailsListRef} className='chat-details-list' />
+                    <div ref={this.chatDetailsListRef} className={classNames('chat-details-list', 'scrollbars-hidden')} />
                 </div>
             );
         }
@@ -390,7 +390,7 @@ class ChatDetails extends React.Component {
                     onClose={onClose}
                     onClick={this.handleHeaderClick}
                 />
-                <div ref={this.chatDetailsListRef} className='chat-details-list'>
+                <div ref={this.chatDetailsListRef} className={classNames('chat-details-list', 'scrollbars-hidden')}>
                     <div className='chat-details-info'>
                         <Chat
                             chatId={chatId}

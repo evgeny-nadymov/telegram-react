@@ -16,9 +16,8 @@ import Player from '../Player/Player';
 import { getSrc, getViewerFile, getViewerMinithumbnail, getViewerThumbnail } from '../../Utils/File';
 import { isBlurredThumbnail } from '../../Utils/Media';
 import { isEmptyText } from '../../Utils/InstantView';
+import { MEDIA_VIEWER_VIDEO_MAX_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
-import Animation from '../Message/Media/Animation';
-import { ANIMATION_PREVIEW_DISPLAY_SIZE } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 
@@ -159,11 +158,11 @@ class InstantViewMediaViewerContent extends React.Component {
 
         let videoWidth = width;
         let videoHeight = height;
-        if (Math.max(videoWidth, videoHeight) > 640) {
-            const scale = 640 / Math.max(videoWidth, videoHeight);
-            videoWidth = videoWidth > videoHeight ? 640 : Math.floor(videoWidth * scale);
-            videoHeight = videoHeight > videoWidth ? 640 : Math.floor(videoHeight * scale);
-        }
+        const scale = MEDIA_VIEWER_VIDEO_MAX_SIZE / Math.max(videoWidth, videoHeight);
+        const w = videoWidth > videoHeight ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoWidth * scale);
+        const h = videoHeight > videoWidth ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoHeight * scale);
+        videoWidth = w;
+        videoHeight = h;
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
