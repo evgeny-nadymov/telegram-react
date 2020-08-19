@@ -32,6 +32,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
+import StubMessage from '../Message/StubMessage';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -710,6 +711,7 @@ class MessagesList extends React.Component {
 
         this.loading = true;
         const sessionId = this.sessionId;
+        console.log('[p] getChatHistory', fromMessageId);
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: chatId,
@@ -719,6 +721,7 @@ class MessagesList extends React.Component {
         }).finally(() => {
             this.loading = false;
         });
+        console.log('[p] getChatHistory result', fromMessageId, result);
 
         if (sessionId !== this.sessionId) {
             return;
@@ -1278,6 +1281,18 @@ class MessagesList extends React.Component {
                       const showTail = !nextMessage || isServiceMessage(nextMessage) || nextShowTitle;
 
                       m = (
+                          // <StubMessage
+                          //     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                          //     ref={el => this.itemsMap.set(i, el)}
+                          //     chatId={x.chat_id}
+                          //     messageId={x.id}
+                          //     sendingState={x.sending_state}
+                          //     showTitle={showTitle}
+                          //     showTail={showTail}
+                          //     showUnreadSeparator={separatorMessageId === x.id}
+                          //     showDate={showDate}
+                          // />
+
                           <Message
                               key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
                               ref={el => this.itemsMap.set(i, el)}

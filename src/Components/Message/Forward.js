@@ -71,22 +71,22 @@ class Forward extends React.Component {
                 <div>{t('ForwardedMessage')}</div>
                 <div className='forward-subtitle'>
                     {t('From') + ' '}
-                    <Tooltip
-                        title={tooltip}
-                        classes={{ popper: 'forward-arrow-popper', tooltip: 'forward-tooltip' }}
-                        PopperProps={{
-                            popperOptions: {
-                                modifiers: {
-                                    arrow: {
-                                        enabled: Boolean(arrowRef),
-                                        element: arrowRef
-                                    }
-                                }
-                            }
-                        }}
-                        placement='top'>
+                    {/*<Tooltip*/}
+                    {/*    title={tooltip}*/}
+                    {/*    classes={{ popper: 'forward-arrow-popper', tooltip: 'forward-tooltip' }}*/}
+                    {/*    PopperProps={{*/}
+                    {/*        popperOptions: {*/}
+                    {/*            modifiers: {*/}
+                    {/*                arrow: {*/}
+                    {/*                    enabled: Boolean(arrowRef),*/}
+                    {/*                    element: arrowRef*/}
+                    {/*                }*/}
+                    {/*            }*/}
+                    {/*        }*/}
+                    {/*    }}*/}
+                    {/*    placement='top'>*/}
                         <a onClick={this.openForward}>{title}</a>
-                    </Tooltip>
+                    {/*</Tooltip>*/}
                 </div>
             </div>
         );

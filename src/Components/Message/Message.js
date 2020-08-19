@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
+import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import CheckMarkIcon from '@material-ui/icons/Check';
 import DayMeta from './DayMeta';
 import Reply from './Reply';
@@ -36,12 +37,13 @@ import {
     openUser,
     openChat,
     selectMessage,
-    openReply, replyMessage, forwardMessages
+    openReply,
+    replyMessage,
+    forwardMessages
 } from '../../Actions/Client';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import MessageStore from '../../Stores/MessageStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './Message.css';
+import StubMessage from './StubMessage';
 
 class Message extends Component {
     constructor(props) {
@@ -131,8 +133,6 @@ class Message extends Component {
         MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
-        MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.on('updateMessageViews', this.onUpdateMessageViews);
     }
 
     componentWillUnmount() {
@@ -141,8 +141,6 @@ class Message extends Component {
         MessageStore.off('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
-        MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.off('updateMessageViews', this.onUpdateMessageViews);
     }
 
     onClientUpdateClearSelection = update => {
@@ -195,24 +193,6 @@ class Message extends Component {
 
         if (chatId === update.chatId && messageId === update.messageId) {
             this.setState({ selected, highlighted: false });
-        }
-    };
-
-    onUpdateMessageEdited = update => {
-        const { chat_id, message_id } = update;
-        const { chatId, messageId } = this.props;
-
-        if (chatId === chat_id && messageId === message_id) {
-            this.forceUpdate();
-        }
-    };
-
-    onUpdateMessageViews = update => {
-        const { chat_id, message_id } = update;
-        const { chatId, messageId } = this.props;
-
-        if (chatId === chat_id && messageId === message_id) {
-            this.forceUpdate();
         }
     };
 
@@ -393,6 +373,21 @@ class Message extends Component {
         const style = getMessageStyle(chatId, messageId);
         const withBubble =
             message.content['@type'] !== 'messageSticker' && message.content['@type'] !== 'messageVideoNote';
+
+        // console.log('[p] m.render id=' + message.id);
+
+        // return (
+        //     <StubMessage>
+        //         {text}
+        //         {media}
+        //         <WebPage
+        //             chatId={chatId}
+        //             messageId={messageId}
+        //             openMedia={this.openMedia}
+        //             meta={inlineMeta}
+        //         />
+        //     </StubMessage>
+        // );
 
         return (
             <div>

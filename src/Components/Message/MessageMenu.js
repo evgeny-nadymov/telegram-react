@@ -44,7 +44,6 @@ import AppStore from '../../Stores/ApplicationStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
-import { getArrayBuffer } from '../../Utils/File';
 
 class MessageMenu extends React.PureComponent {
     state = {
@@ -196,88 +195,10 @@ class MessageMenu extends React.PureComponent {
         deleteMessages(chatId, [messageId]);
     };
 
-    handleDownload = async event => {
-        const { chatId, messageId, onClose } = this.props;
-
-        onClose(event);
-
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
-
-        const { content } = message;
-        if (!content) return;
-
-        const { audio } = content;
-        if (!audio) return;
-
-        const { audio: file } = audio;
-        if (!file) return;
-
-        const { id: file_id } = file;
-
-        const result = await TdLibController.send({
-            '@type': 'downloadFile',
-            file_id,
-            priority: 1,
-            offset: 10 * 1024,
-            limit: 1024,
-            synchronous: true
-        });
-
-        const blob = await TdLibController.send({
-            '@type': 'readFilePart',
-            file_id,
-            offset: 10 * 1024,
-            count: 1024
-        });
-
-        console.log('[file] result', result, blob);
-    };
-
-    handleTest = async () => {
-        const { chatId, messageId } = this.props;
-        const message = MessageStore.get(chatId, messageId);
-        if (!message) return;
-
-        const { content } = message;
-        if (!content) return;
-
-        const { video } = content;
-        if (!video) return;
-
-        const { video: file } = video;
-        if (!file) return;
-
-        const { size } = file;
-
-        const chunk = 512 * 1024;
-        const count = size / chunk;
-
-        for (let i = 0; i < count; i++) {
-            console.log('[d] filePart', file.id, chunk * i);
-            await TdLibController.send({
-                '@type': 'downloadFile',
-                file_id: file.id,
-                priority: 1,
-                offset: chunk * i,
-                limit: chunk,
-                synchronous: true
-            });
-
-            const filePart = await TdLibController.send({
-                '@type': 'readFilePart',
-                file_id: file.id,
-                offset: chunk * i,
-                count: chunk
-            });
-
-            const buffer = await getArrayBuffer(filePart.data);
-        }
-    };
-
     render() {
         const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
+        if (!confirmStopPoll && !open) return null;
 
         const isPinned = isMessagePinned(chatId, messageId);
         const canBeUnvoted = canMessageBeUnvoted(chatId, messageId);
@@ -308,12 +229,6 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
-                        {/*<MenuItem onClick={this.handleTest}>*/}
-                        {/*    <ListItemIcon>*/}
-                        {/*        <CopyIcon />*/}
-                        {/*    </ListItemIcon>*/}
-                        {/*    <ListItemText primary='Test' />*/}
-                        {/*</MenuItem>*/}
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>

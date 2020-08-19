@@ -245,6 +245,7 @@ class WebPage extends React.Component {
 WebPage.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
+
     size: PropTypes.number,
     displaySize: PropTypes.number,
     displaySmallSize: PropTypes.number,
