@@ -81,7 +81,6 @@ function getChunk(mimeType, size) {
 }
 
 function fetchStreamRequest(url, start, end, resolve, get) {
-
     const { searchParams } = new URL(url, 'https://telegram.org');
     const fileId = parseInt(searchParams.get('id'), 10);
     const size = parseInt(searchParams.get('size'), 10);
@@ -119,23 +118,12 @@ function fetchStreamRequest(url, start, end, resolve, get) {
             return;
         }
 
-
         const headers = {
             'Accept-Ranges': 'bytes',
             'Content-Range': `bytes ${offset}-${offset + blob.size - 1}/${size || '*'}`,
             'Content-Length': `${blob.size}`,
             'Content-Type': mimeType
         };
-
-        // if (isSafari()) {
-        //     let ab = await getArrayBuffer(blob);
-        //     ab = ab.slice(start - offset, end - offset + 1);
-        //
-        //     headers['Content-Range'] = `bytes ${start}-${start + ab.byteLength - 1}/${size || '*'}`;
-        //     headers['Content-Length'] = `${ab.byteLength}`;
-        //
-        //     blob = ab;
-        // }
 
         resolve(new Response(blob, {
             status: 206,
