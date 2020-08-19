@@ -21,7 +21,7 @@ import MediaViewerFooterButton from './MediaViewerFooterButton';
 import ProfileMediaViewerContent from './ProfileMediaViewerContent';
 import ProfileMediaInfo from '../Tile/ProfileMediaInfo';
 import { forward, setProfileMediaViewerContent } from '../../Actions/Client';
-import { getPhotoFromChat, getChatUserId, isPrivateChat } from '../../Utils/Chat';
+import { getPhotoFromChat, getChatUserId, isPrivateChat, isMeChat } from '../../Utils/Chat';
 import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
 import { modalManager } from '../../Utils/Modal';
@@ -127,13 +127,13 @@ class ProfileMediaViewer extends React.Component {
                 return;
             }
             case 'ArrowLeft': {
-                this.handlePrevious();
+                this.handleNext();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
             case 'ArrowRight': {
-                this.handleNext();
+                this.handlePrevious();
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -141,7 +141,7 @@ class ProfileMediaViewer extends React.Component {
         }
     };
 
-    loadHistory = async photo => {
+    loadHistory = async () => {
         const { chatId } = this.props;
 
         if (!isPrivateChat(chatId)) return;
@@ -255,26 +255,59 @@ class ProfileMediaViewer extends React.Component {
         forward(inputMessageContent);
     };
 
-    handleDelete = () => {
-        const { chatId, messageId } = this.props;
-        const { currentIndex, totalCount } = this.state;
+    handleDelete = async () => {
+        const { chatId } = this.props;
+        const {
+            currentIndex,
+            totalCount,
+            hasNextMedia,
+            hasPreviousMedia
+        } = this.state;
 
         let index = -1;
         if (totalCount) {
             index = currentIndex;
         }
 
-        const photo =
-            index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+        const photo = index > 0 && index < this.history.length ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+        if (!photo) return;
 
-        if (photo) {
-            let file = photo.big;
-            file = FileStore.get(file.id) || file;
-            if (file) {
-                const store = FileStore.getReadWriteStore();
+        const { id } = photo;
+        if (!id) return;
 
-                FileStore.deleteLocalFile(store, file);
-            }
+        await TdLibController.send({
+            '@type': 'deleteProfilePhoto',
+            profile_photo_id: id
+        });
+
+        this.history.splice(index, 1);
+        if (!this.history.length) {
+            this.handleClose();
+            return;
+        }
+
+        this.setState({
+            totalCount: totalCount - 1
+        });
+
+        if (hasNextMedia) {
+            const nextIndex = currentIndex - 1;
+
+            return this.loadMedia(nextIndex, { totalCount: totalCount - 1 }, () => {
+                if (nextIndex === 0) {
+                    this.loadNext();
+                }
+            });
+        }
+
+        if (hasPreviousMedia) {
+            const nextIndex = currentIndex;
+
+            return this.loadMedia(nextIndex, { totalCount: totalCount - 1 }, () => {
+                if (nextIndex === this.history.length - 1) {
+                    this.loadPrevious();
+                }
+            });
         }
     };
 
@@ -293,7 +326,7 @@ class ProfileMediaViewer extends React.Component {
         const { currentIndex } = this.state;
         const nextIndex = currentIndex + 1;
 
-        return this.loadMedia(nextIndex, () => {
+        return this.loadMedia(nextIndex, { }, () => {
             if (nextIndex === this.history.length - 1) {
                 this.loadPrevious();
             }
@@ -319,7 +352,7 @@ class ProfileMediaViewer extends React.Component {
         const { currentIndex } = this.state;
         const nextIndex = currentIndex - 1;
 
-        return this.loadMedia(nextIndex, () => {
+        return this.loadMedia(nextIndex, { }, () => {
             if (nextIndex === 0) {
                 this.loadNext();
             }
@@ -330,13 +363,14 @@ class ProfileMediaViewer extends React.Component {
         return;
     };
 
-    loadMedia = (index, callback) => {
+    loadMedia = (index, obj, callback) => {
         if (index < 0) return false;
         if (index >= this.history.length) return false;
 
         this.setState(
             {
                 currentIndex: index,
+                ...obj,
                 hasNextMedia: this.hasNextMedia(index),
                 hasPreviousMedia: this.hasPreviousMedia(index)
             },
@@ -355,10 +389,7 @@ class ProfileMediaViewer extends React.Component {
             currentIndex,
             hasNextMedia,
             hasPreviousMedia,
-            firstSliceLoaded,
             totalCount,
-            deleteConfirmationOpened,
-            deleteForAll
         } = this.state;
 
         let index = -1;
@@ -366,11 +397,14 @@ class ProfileMediaViewer extends React.Component {
             index = currentIndex;
         }
 
-        const deleteConfirmation = null;
         const inHistory = index >= 0 && index < this.history.length;
-        const photo = inHistory && index !== 0 ? getProfilePhoto(this.history[index]) : getPhotoFromChat(chatId);
+        const profilePhoto = inHistory ? getProfilePhoto(this.history[index]) : null;
+        const profilePhotoBig = profilePhoto ? profilePhoto.big : null;
+        const profilePhotoBlob = profilePhotoBig ? profilePhotoBig.blob || FileStore.getBlob(profilePhotoBig.id) : null;
+        const photo = profilePhotoBlob ? profilePhoto : getPhotoFromChat(chatId);
         const userProfilePhoto = inHistory ? this.history[index] : null;
         const { big: file } = photo;
+        const isMe = isMeChat(chatId);
 
         return (
             <div className={classNames('media-viewer', 'media-viewer-default')}>
@@ -384,9 +418,11 @@ class ProfileMediaViewer extends React.Component {
                     <MediaViewerDownloadButton title={t('Forward')} fileId={file.id} onClick={this.handleForward}>
                         <ReplyIcon />
                     </MediaViewerDownloadButton>
-                    <MediaViewerFooterButton title={t('Delete')} disabled onClick={this.handleDelete}>
-                        <DeleteIcon />
-                    </MediaViewerFooterButton>
+                    {isMe && (
+                        <MediaViewerFooterButton title={t('Delete')} onClick={this.handleDelete}>
+                            <DeleteIcon />
+                        </MediaViewerFooterButton>
+                    )}
                     <MediaViewerFooterButton title={t('Close')} onClick={this.handleClose}>
                         <CloseIcon />
                     </MediaViewerFooterButton>
@@ -408,7 +444,6 @@ class ProfileMediaViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                 </div>
-                {deleteConfirmation}
             </div>
         );
     }

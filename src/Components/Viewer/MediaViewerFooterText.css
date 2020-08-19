@@ -7,6 +7,9 @@
 
 .media-viewer-footer-text-wrapper {
     opacity: 0.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .media-viewer-footer-text {
@@ -17,4 +20,5 @@
     justify-content: center;
     pointer-events: none;
     user-select: none;
+    overflow: hidden;
 }

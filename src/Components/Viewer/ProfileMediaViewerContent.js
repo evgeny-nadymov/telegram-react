@@ -63,7 +63,7 @@ class ProfileMediaViewerContent extends React.Component {
         if (chatId === update.chatId && photo.big.id === update.fileId) {
             const file = FileStore.get(update.fileId) || this.state.file;
             this.setState({
-                file: file
+                file
             });
         }
     };
@@ -75,7 +75,7 @@ class ProfileMediaViewerContent extends React.Component {
         if (userId === update.userId && photo.big.id === update.fileId) {
             const file = FileStore.get(update.fileId) || this.state.file;
             this.setState({
-                file: file
+                file
             });
         }
     };

@@ -13,6 +13,7 @@
     color: var(--message-in-meta-color);
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .meta-text {
