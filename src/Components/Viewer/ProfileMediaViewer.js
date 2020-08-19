@@ -26,10 +26,9 @@ import { getProfilePhotoDateHint, getProfilePhoto } from '../../Utils/User';
 import { loadProfileMediaViewerContent, preloadProfileMediaViewerContent, saveOrDownload } from '../../Utils/File';
 import { modalManager } from '../../Utils/Modal';
 import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
-import FileStore from '../../Stores/FileStore';
 import ChatStore from '../../Stores/ChatStore';
+import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
-import './MediaViewer.css';
 import './ProfileMediaViewer.css';
 
 class ProfileMediaViewer extends React.Component {
@@ -400,7 +399,7 @@ class ProfileMediaViewer extends React.Component {
                     </div>
 
                     <div className='media-viewer-content-column'>
-                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClick={this.handlePrevious} />
+                        <ProfileMediaViewerContent chatId={chatId} photo={photo} onClose={this.handleClose} onPrevious={this.handlePrevious}/>
                     </div>
 
                     <div className='media-viewer-right-column'>

@@ -1590,6 +1590,7 @@ class InputBox extends Component {
                             <div className='inputbox-middle-column'>
                                 <div
                                     id='inputbox-message'
+                                    className='scrollbars-hidden'
                                     ref={this.newMessageRef}
                                     placeholder={isMediaEditing ? t('Caption') : t('Message')}
                                     contentEditable

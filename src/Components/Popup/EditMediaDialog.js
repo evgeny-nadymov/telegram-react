@@ -607,6 +607,7 @@ class EditMediaDialog extends React.Component {
                 <div
                     ref={this.captionRef}
                     id='edit-media-dialog-caption'
+                    className='scrollbars-hidden'
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Caption')}

@@ -464,6 +464,7 @@ class ForwardDialog extends React.Component {
                 <div
                     ref={this.searchRef}
                     id='forward-dialog-search'
+                    className='scrollbars-hidden'
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Search')}
