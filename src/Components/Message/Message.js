@@ -29,7 +29,7 @@ import {
     showMessageForward,
     isMetaBubble,
     canMessageBeForwarded,
-    getMessageStyle
+    getMessageStyle, isMediaContent
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
 import { canSendMessages, isChannelChat, isPrivateChat } from '../../Utils/Chat';
@@ -44,6 +44,7 @@ import {
 import MessageStore from '../../Stores/MessageStore';
 import './Message.css';
 import StubMessage from './StubMessage';
+import EmptyTile from '../Tile/EmptyTile';
 
 class Message extends Component {
     constructor(props) {
@@ -321,7 +322,8 @@ class Message extends Component {
     };
 
     render() {
-        const { t, chatId, messageId, showUnreadSeparator, showTail, showTitle, showDate } = this.props;
+        let { showTail } = this.props;
+        const { t, chatId, messageId, showUnreadSeparator, showTitle, showDate } = this.props;
         const {
             emojiMatches,
             selected,
@@ -360,14 +362,26 @@ class Message extends Component {
         const suppressTitle = isPrivateChat(chatId);
         const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
         const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta);
+        const isChannel = isChannelChat(chatId);
+        const isPrivate = isPrivateChat(chatId);
+
+        // if (showTail && isMediaContent() && !hasCaption) {
+        //     showTail = false;
+        // }
 
         let tile = null;
         if (showTail) {
-            tile = sender_user_id ? (
-                <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />
-            ) : (
-                <ChatTile small chatId={chatId} onSelect={this.handleSelectChat} />
-            );
+            if (isPrivate) {
+                tile = <EmptyTile small />
+            } else if (isChannel) {
+                tile = <EmptyTile small />
+            } else if (is_outgoing) {
+                tile = <EmptyTile small />
+            } else if (sender_user_id) {
+                tile = <UserTile small userId={sender_user_id} onSelect={this.handleSelectUser} />
+            } else {
+                tile = <ChatTile small chatId={chatId} onSelect={this.handleSelectChat} />
+            }
         }
 
         const style = getMessageStyle(chatId, messageId);
@@ -398,9 +412,9 @@ class Message extends Component {
                         'message-out': isOutgoing,
                         'message-selected': selected,
                         'message-highlighted': highlighted && !selected,
-                        'message-top': showTitle && !showTail,
-                        'message-bottom': !showTitle && showTail,
-                        'message-middle': !showTitle && !showTail,
+                        'message-group-title': showTitle && !showTail,
+                        'message-group': !showTitle && !showTail,
+                        'message-group-tail': !showTitle && showTail,
                         'message-bubble-hidden': !withBubble
                     })}
                     onMouseOver={this.handleMouseOver}

@@ -1209,7 +1209,7 @@ class MessagesList extends React.Component {
     showMessageTitle(message, prevMessage, isFirst) {
         if (!message) return false;
 
-        const { chat_id, date, sender_user_id, content } = message;
+        const { chat_id, date, is_outgoing, sender_user_id, content } = message;
 
         if (isFirst) {
             return true;
@@ -1222,7 +1222,10 @@ class MessagesList extends React.Component {
         return (
             prevMessage &&
             (isServiceMessage(prevMessage) ||
+                prevMessage.content['@type'] === 'messageSticker' ||
+                prevMessage.content['@type'] === 'messageVideoNote' ||
                 sender_user_id !== prevMessage.sender_user_id ||
+                is_outgoing !== prevMessage.is_outgoing ||
                 date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S)
         );
     }
@@ -1258,56 +1261,70 @@ class MessagesList extends React.Component {
         this.messages = clearHistory
             ? null
             : history.map((x, i) => {
-                  const prevMessage = i > 0 ? history[i - 1] : null;
-                  const nextMessage = i < history.length - 1 ? history[i + 1] : null;
+                /// message id=5 prev
+                /// message id=6 current
+                /// message id=7 next
+                /// ...
+                /// message id=10
 
-                  const showDate = this.showMessageDate(x, prevMessage, i === 0);
+                const prevMessage = i > 0 ? history[i - 1] : null;
+                const nextMessage = i < history.length - 1 ? history[i + 1] : null;
 
-                  let m = null;
-                  if (isServiceMessage(x)) {
-                      m = (
-                          <ServiceMessage
-                              key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                              ref={el => this.itemsMap.set(i, el)}
-                              chatId={x.chat_id}
-                              messageId={x.id}
-                              showUnreadSeparator={separatorMessageId === x.id}
-                          />
-                      );
-                  } else {
-                      const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
-                      const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+                const showDate = this.showMessageDate(x, prevMessage, i === 0);
 
-                      const showTail = !nextMessage || isServiceMessage(nextMessage) || nextShowTitle;
+                let m = null;
+                if (isServiceMessage(x)) {
+                    m = (
+                        <ServiceMessage
+                            key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                            ref={el => this.itemsMap.set(i, el)}
+                            chatId={x.chat_id}
+                            messageId={x.id}
+                            showUnreadSeparator={separatorMessageId === x.id}
+                        />
+                    );
+                } else {
+                    const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
+                    const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
 
-                      m = (
-                          // <StubMessage
-                          //     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                          //     ref={el => this.itemsMap.set(i, el)}
-                          //     chatId={x.chat_id}
-                          //     messageId={x.id}
-                          //     sendingState={x.sending_state}
-                          //     showTitle={showTitle}
-                          //     showTail={showTail}
-                          //     showUnreadSeparator={separatorMessageId === x.id}
-                          //     showDate={showDate}
-                          // />
+                    const showTail = !nextMessage
+                        || isServiceMessage(nextMessage)
+                        || nextMessage.content['@type'] === 'messageSticker'
+                        || nextMessage.content['@type'] === 'messageVideoNote'
+                        || x.sender_user_id !== nextMessage.sender_user_id
+                        || x.is_outgoing !== nextMessage.is_outgoing
+                        || nextShowTitle;
 
-                          <Message
-                              key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                              ref={el => this.itemsMap.set(i, el)}
-                              chatId={x.chat_id}
-                              messageId={x.id}
-                              sendingState={x.sending_state}
-                              showTitle={showTitle}
-                              showTail={showTail}
-                              showUnreadSeparator={separatorMessageId === x.id}
-                              showDate={showDate}
-                          />
-                      );
-                  }
+                    m = (
+                        // <StubMessage
+                        //     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                        //     ref={el => this.itemsMap.set(i, el)}
+                        //     chatId={x.chat_id}
+                        //     messageId={x.id}
+                        //     sendingState={x.sending_state}
+                        //     showTitle={showTitle}
+                        //     showTail={showTail}
+                        //     showUnreadSeparator={separatorMessageId === x.id}
+                        //     showDate={showDate}
+                        // />
 
-                  return m;
+                        <Message
+                            key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                            ref={el => this.itemsMap.set(i, el)}
+                            chatId={x.chat_id}
+                            messageId={x.id}
+                            sendingState={x.sending_state}
+                            showTitle={showTitle}
+                            showTail={showTail}
+                            showUnreadSeparator={separatorMessageId === x.id}
+                            showDate={showDate}
+                        />
+                    );
+                }
+
+                return m;
+
+
               });
         // console.log('[p] messagesList.render');
 

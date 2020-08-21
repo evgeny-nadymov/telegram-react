@@ -30,7 +30,7 @@ export const LOCATION_ZOOM = 16;
 export const MAX_SNACK = 10;
 export const MEDIA_SLICE_LIMIT = 20;
 export const MEDIA_VIEWER_VIDEO_MAX_SIZE = 800;
-export const MESSAGE_SLICE_LIMIT = 15;
+export const MESSAGE_SLICE_LIMIT = 30;
 export const MESSAGE_SPLIT_MAX_TIME_S = 600;
 export const MUTED_VALUE_MAX = 2147483647; // int32.max = 2^32 - 1
 export const MUTED_VALUE_MIN = 0;
@@ -82,7 +82,7 @@ export const PRELOAD_VIDEO_SIZE = 10 * 1024 * 1024;
 export const PRELOAD_VIDEONOTE_SIZE = 200 * 1024; //10 * 1024 * 1024;
 export const PROFILE_PHOTO_BIG_SIZE = 640;
 export const PROFILE_PHOTO_SMALL_SIZE = 160;
-export const SCROLL_PRECISION = 400;
+export const SCROLL_PRECISION = 800;
 export const SCROLL_CHATS_PRECISION = 400;
 export const SERVICE_NOTIFICATIONS_USER_ID = 777000;
 export const SHARED_MESSAGE_SLICE_LIMIT = 30;
