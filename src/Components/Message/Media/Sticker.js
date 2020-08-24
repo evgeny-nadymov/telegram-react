@@ -10,10 +10,11 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 // import Lottie from '../../Viewer/Lottie';
 import { isBlurredThumbnail, isValidAnimatedSticker } from '../../../Utils/Media';
-import { getFitSize } from '../../../Utils/Common';
-import { getBlob, getSrc } from '../../../Utils/File';
+import { getFitSize, isWebpSupported } from '../../../Utils/Common';
+import { getBlob, getPngSrc, getSrc } from '../../../Utils/File';
 import { inflateBlob } from '../../../Workers/BlobInflator';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
+import WebpManager from '../../../Stores/WebpManager';
 import ApplicationStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
@@ -76,7 +77,7 @@ class Sticker extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { chatId, messageId, sticker, blur, displaySize } = this.props;
-        const { animationData, loaded } = this.state;
+        const { animationData, loaded, pngUrl } = this.state;
 
         if (animationData !== nextState.animationData) {
             return true;
@@ -106,6 +107,10 @@ class Sticker extends React.Component {
             return true;
         }
 
+        if (pngUrl !== nextState.pngUrl) {
+            return true;
+        }
+
         return false;
     }
 
@@ -124,7 +129,9 @@ class Sticker extends React.Component {
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
+        FileStore.on('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        FileStore.on('clientUpdateStickerPngBlob', this.onClientUpdateStickerPngBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.on('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.on('clientUpdateStickerSet', this.onClientUpdateStickerSet);
@@ -137,7 +144,9 @@ class Sticker extends React.Component {
         ApplicationStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.off('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
+        FileStore.off('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
         FileStore.off('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        FileStore.off('clientUpdateStickerPngBlob', this.onClientUpdateStickerPngBlob);
         MessageStore.off('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.off('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.off('clientUpdateStickerSet', this.onClientUpdateStickerSet);
@@ -244,31 +253,59 @@ class Sticker extends React.Component {
         this.paused = player.pause();
     }
 
-    onClientUpdateStickerBlob = update => {
+    onClientUpdateStickerBlob = async update => {
         const { sticker, is_animated } = this.props.sticker;
         const { fileId } = update;
 
         if (!sticker) return;
+        if (sticker.id !== fileId) return;
 
-        if (sticker.id === fileId) {
-            if (is_animated) {
-                this.loadContent();
-            } else {
-                this.forceUpdate();
-            }
+        if (is_animated) {
+            this.loadContent();
+        } else {
+            if (!await isWebpSupported()) return;
+
+            this.forceUpdate();
+            // FileStore.convertWebpToPng(fileId);
         }
     };
 
-    onClientUpdateStickerThumbnailBlob = update => {
+    onClientUpdateStickerPngBlob = update => {
+        const { sticker, is_animated } = this.props.sticker;
+        const { fileId } = update;
+
+        if (!sticker) return;
+        if (sticker.id !== fileId) return;
+        if (is_animated) return;
+
+        this.forceUpdate();
+    }
+
+    onClientUpdateStickerThumbnailBlob = async update => {
         const { thumbnail } = this.props.sticker;
         if (!thumbnail) return;
 
         const { fileId } = update;
 
         const { file } = thumbnail;
-        if (file && file.id === fileId) {
-            this.forceUpdate();
-        }
+        if (!file) return;
+        if (file.id !== fileId) return;
+        if (!await isWebpSupported()) return;
+
+        this.forceUpdate();
+    };
+
+    onClientUpdateStickerThumbnailPngBlob = update => {
+        const { thumbnail } = this.props.sticker;
+        if (!thumbnail) return;
+
+        const { fileId } = update;
+
+        const { file } = thumbnail;
+        if (!file) return;
+        if (file.id !== fileId) return;
+
+        this.forceUpdate();
     };
 
     loadContent = async () => {
@@ -373,8 +410,14 @@ class Sticker extends React.Component {
 
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const src = getSrc(sticker);
+        const thumbnailSrc =
+            WebpManager.isWebpSupported()
+                ? getSrc(thumbnail ? thumbnail.file : null)
+                : getPngSrc(thumbnail ? thumbnail.file : null);
+        const src =
+            WebpManager.isWebpSupported() || isAnimated
+                ? getSrc(sticker)
+                : getPngSrc(sticker);
         const isBlurred = isBlurredThumbnail(thumbnail, displaySize) || !preview;
 
         if (hasError) {

@@ -41,7 +41,7 @@ class Lottie extends React.Component {
         this.registerEvents(eventListeners);
     }
 
-    componentWillUpdate(nextProps, nextState, nextContext) {
+    UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
         /* Recreate the animation handle if the data is changed */
         if (
             this.options.animationData !== nextProps.options.animationData ||

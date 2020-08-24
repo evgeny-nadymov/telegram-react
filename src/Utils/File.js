@@ -2103,8 +2103,18 @@ function getSrc(file) {
     return FileStore.getBlobUrl(blob) || '';
 }
 
+export function getPngSrc(file) {
+    const blob = getPngBlob(file);
+
+    return FileStore.getBlobUrl(blob) || '';
+}
+
 function getBlob(file) {
     return file ? FileStore.getBlob(file.id) || file.blob : null;
+}
+
+function getPngBlob(file) {
+    return file ? FileStore.getPngBlob(file.id) || file.blob : null;
 }
 
 function getDownloadedSize(file) {

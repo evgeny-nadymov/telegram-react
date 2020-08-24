@@ -18,12 +18,12 @@
 
 .service-message-content {
     font-size: 15px;
-    line-height: normal;
+    /*line-height: normal;*/
     border-radius: 12px;
     text-align: center;
     color: var(--message-service-color);
     background: var(--message-service-background);
-    padding: 0 6px 4px;
+    padding: 0 6px;
     min-height: 24px;
     box-sizing: border-box;
 }

@@ -8,6 +8,7 @@
 import EventEmitter from './EventEmitter';
 import { getLocationId } from '../Utils/Message';
 import { FILE_PRIORITY, IV_LOCATION_HEIGHT, IV_LOCATION_WIDTH, THUMBNAIL_PRIORITY } from '../Constants';
+import WebpManager from './WebpManager';
 import TdLibController from '../Controllers/TdLibController';
 
 const useReadFile = true;
@@ -33,6 +34,7 @@ class FileStore extends EventEmitter {
         this.dataUrls = new Map();
         this.items = new Map();
         this.blobItems = new Map();
+        this.pngBlobItems = new Map();
         this.locationItems = new Map();
 
         this.downloads = new Map();
@@ -100,10 +102,28 @@ class FileStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateStickerBlob': {
+
+                WebpManager.decode(update.fileId, false);
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateStickerPngBlob': {
+                const { fileId, blob } = update;
+
+                this.setPngBlob(fileId, blob);
                 this.emit(update['@type'], update);
                 break;
             }
             case 'clientUpdateStickerThumbnailBlob': {
+
+                WebpManager.decode(update.fileId, true);
+                this.emit(update['@type'], update);
+                break;
+            }
+            case 'clientUpdateStickerThumbnailPngBlob': {
+                const { fileId, blob } = update;
+
+                this.setPngBlob(fileId, blob);
                 this.emit(update['@type'], update);
                 break;
             }
@@ -909,6 +929,14 @@ class FileStore extends EventEmitter {
     setBlob = (fileId, blob) => {
         this.blobItems.set(fileId, blob);
     };
+
+    getPngBlob = fileId => {
+        return this.pngBlobItems.get(fileId);
+    };
+
+    setPngBlob = (fileId, blob) => {
+        this.pngBlobItems.set(fileId, blob);
+    }
 
     deleteBlob = fileId => {
         this.blobItems.delete(fileId);

@@ -28,6 +28,7 @@
     flex-direction: row;
     align-items: center;
     padding: 8px 14px;
+    height: 65px;
 }
 
 .sticker-set-dialog-title-typography {

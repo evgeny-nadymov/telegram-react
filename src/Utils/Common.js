@@ -7,6 +7,35 @@
 
 import { PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE } from '../Constants';
 
+let webpSupported = undefined;
+
+export async function isWebpSupported() {
+    // return false;
+
+    if (webpSupported !== undefined) {
+        return webpSupported;
+    }
+
+    const promise = new Promise(resolve => {
+        const image = new Image();
+        image.onload = function () {
+            resolve(image.width === 2 && image.height === 1);
+        }
+        image.onerror = function () {
+            resolve(false);
+        }
+        image.src = 'data:image/webp;base64,UklGRjIAAABXRUJQVlA4ICYAAACyAgCdASoCAAEALmk0mk0iIiIiIgBoSygABc6zbAAA/v56QAAAAA==';
+    });
+
+    return webpSupported = await promise;
+}
+
+export function isSafari() {
+    return /(Safari|iPhone|iPad|iPod)/.test(navigator.userAgent)
+        && !/Chrome/.test(navigator.userAgent)
+        && !/BlackBerry/.test(navigator.platform);
+}
+
 export function compareMaps(map1, map2) {
     if (!map1 || !map2) return false;
 
