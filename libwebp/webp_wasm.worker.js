@@ -52,8 +52,11 @@ self.onmessage = event => {
         const decode = Module.cwrap('decode', 'number', ['number', 'number']);
 
         const resultPtr = decode(thisPtr, size);
-        const resultBuffer = Module.HEAPU8.buffer.slice(resultPtr, resultPtr + width * height * 4);
-        const resultView = new Uint8Array(resultBuffer, 0, width * height * 4);
+        // const result = Module.HEAPU8.buffer.slice(resultPtr, resultPtr + width * height * 4);
+        // const resultView = new Uint8Array(resultBuffer, 0, width * height * 4);
+        // const result = new Uint8ClampedArray(resultView);
+
+        const resultView = new Uint8Array(Module.HEAPU8.buffer, resultPtr, width * height * 4);
         const result = new Uint8ClampedArray(resultView);
         Module._free(resultPtr);
         Module._free(thisPtr);
