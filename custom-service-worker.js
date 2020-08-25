@@ -10,8 +10,10 @@
 // importScripts('./subworkers.js');
 
 const STREAM_CHUNK_BIG_LIMIT = 700 * 1024 * 1024;
+const STREAM_CHUNK_SUPERBIG_LIMIT = 1024 * 1024 * 1024;
 const STREAM_CHUNK_VIDEO = 256 * 1024;
 const STREAM_CHUNK_VIDEO_BIG = 512 * 1024;
+const STREAM_CHUNK_VIDEO_SUPERBIG = 1024 * 1024;
 const STREAM_CHUNK_AUDIO = 1024 * 1024;
 
 function LOG(message, ...optionalParams) {
@@ -64,10 +66,15 @@ function getOffsetLimit(start, end, chunk, size) {
 
 function getChunk(mimeType, size) {
     const isBigFile = size > STREAM_CHUNK_BIG_LIMIT;
+    const isSuperbigFile = size > STREAM_CHUNK_SUPERBIG_LIMIT;
 
-    let chunk = isBigFile ? STREAM_CHUNK_VIDEO_BIG : STREAM_CHUNK_VIDEO;
+    let chunk = STREAM_CHUNK_VIDEO;
     if (mimeType && mimeType.startsWith('audio')) {
         chunk = STREAM_CHUNK_AUDIO;
+    } else if (isSuperbigFile) {
+        chunk = STREAM_CHUNK_VIDEO_SUPERBIG;
+    } else if (isBigFile) {
+        chunk = STREAM_CHUNK_VIDEO_BIG;
     }
 
     return chunk;
