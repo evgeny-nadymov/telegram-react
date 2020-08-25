@@ -404,9 +404,9 @@ class EmojiPickerButton extends React.Component {
                             {t('AttachGif')}
                         </Button>
                     </div>
-                    {Boolean(sticker) && <StickerPreview sticker={sticker} />}
-                    {Boolean(animation) && <AnimationPreview animation={animation} />}
                 </div>
+                {Boolean(sticker) && <StickerPreview sticker={sticker} />}
+                {Boolean(animation) && <AnimationPreview animation={animation} />}
             </>
         );
     }
