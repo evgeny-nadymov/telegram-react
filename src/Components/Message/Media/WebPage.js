@@ -115,10 +115,10 @@ class WebPage extends React.Component {
             const photoSize = getSize(photo.sizes, size);
             const smallPhoto =
                 (type === 'article' || type === 'photo' || type === 'telegram_megagroup' || type === 'telegram_channel') &&
-                (site_name || title || description) &&
+                (site_name || title || description && description.text.length > 0) &&
                 photoSize &&
                 (photoSize.width === photoSize.height || Math.max(photoSize.width, photoSize.height) < PHOTO_DISPLAY_SIZE );
-            const extraSmallPhoto = smallPhoto && (!description || description.length < 50);
+            const extraSmallPhoto = smallPhoto && (!description || description.text.length < 50);
 
             const style =
                 smallPhoto || extraSmallPhoto
