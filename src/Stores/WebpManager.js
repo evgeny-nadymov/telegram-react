@@ -52,7 +52,12 @@ class WebpManager {
         this.decodeInternal(fileId, blob, thumbnail);
     }
 
-    init = () => {
+    init = async () => {
+        this.isSupported = await isWebpSupported()
+        if (this.isSupported) {
+            return;
+        }
+
         let { worker } = this;
         if (!worker) {
             const w = new Worker('libwebp/webp_wasm.worker.js');

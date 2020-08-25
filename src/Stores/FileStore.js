@@ -22,6 +22,7 @@ class FileStore extends EventEmitter {
 
         this.addTdLibListener();
 
+        WebpManager.init();
         // this.suppressUpdateFile = true;
     }
 
