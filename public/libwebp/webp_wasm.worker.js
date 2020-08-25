@@ -16,7 +16,7 @@ const now = new Date();
 importScripts('webp_wasm.js');
 
 Module.onRuntimeInitialized = async () => {
-    console.log(`[webp] finish init time=${new Date() - now}`);
+    console.log(`[webp] finish init time=${new Date() - now}`, self.Module);
     self.postMessage({ '@type': 'ready' });
 };
 
@@ -52,9 +52,6 @@ self.onmessage = event => {
         const decode = Module.cwrap('decode', 'number', ['number', 'number']);
 
         const resultPtr = decode(thisPtr, size);
-        // const result = Module.HEAPU8.buffer.slice(resultPtr, resultPtr + width * height * 4);
-        // const resultView = new Uint8Array(resultBuffer, 0, width * height * 4);
-        // const result = new Uint8ClampedArray(resultView);
 
         const resultView = new Uint8Array(Module.HEAPU8.buffer, resultPtr, width * height * 4);
         const result = new Uint8ClampedArray(resultView);
