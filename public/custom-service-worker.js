@@ -44,13 +44,6 @@ self.addEventListener('push', event => {
     );
 });
 
-function isSafari() {
-    const is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    LOG('[stream] isSafari', is_safari);
-    return is_safari;
-
-}
-
 function parseRange(header) {
     const [, chunks] = header.split('=');
     const ranges = chunks.split(', ');

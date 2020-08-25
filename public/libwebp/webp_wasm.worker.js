@@ -5,18 +5,24 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+function LOG(message, ...optionalParams) {
+    return;
+    console.log(message, ...optionalParams);
+}
+
+console.log('[webp] start init');
+const now = new Date();
+
 importScripts('webp_wasm.js');
 
-console.log('[worker]', Module);
-
 Module.onRuntimeInitialized = async () => {
-    console.log('[worker] wasm finish init');
+    console.log(`[webp] finish init time=${new Date() - now}`);
     self.postMessage({ '@type': 'ready' });
 };
 
 self.onmessage = event => {
     const { id, blob} = event.data;
-    console.log('[worker] decode', id);
+    LOG('[webp] decode', id);
 
     const reader = new FileReader();
 
@@ -34,25 +40,28 @@ self.onmessage = event => {
         if (!success) {
             Module._free(ptr);
             Module._free(thisPtr);
-            self.postMessage({ id, width: 0, height: 0, result: null });
+            LOG('[webp] decode', id, [0, 0]);
+            self.postMessage({ '@type': 'result', id, width: 0, height: 0, result: null });
+            return;
         }
         const width = Module.getValue(ptr + 4, 'i32');
         const height = Module.getValue(ptr + 8, 'i32');
 
         Module._free(ptr);
 
-        // console.log('[worker] getInfo');
-
         const decode = Module.cwrap('decode', 'number', ['number', 'number']);
 
         const resultPtr = decode(thisPtr, size);
-        const resultBuffer = Module.HEAPU8.buffer.slice(resultPtr, resultPtr + width * height * 4);
-        const resultView = new Uint8Array(resultBuffer, 0, width * height * 4);
+        // const result = Module.HEAPU8.buffer.slice(resultPtr, resultPtr + width * height * 4);
+        // const resultView = new Uint8Array(resultBuffer, 0, width * height * 4);
+        // const result = new Uint8ClampedArray(resultView);
+
+        const resultView = new Uint8Array(Module.HEAPU8.buffer, resultPtr, width * height * 4);
         const result = new Uint8ClampedArray(resultView);
         Module._free(resultPtr);
         Module._free(thisPtr);
 
-        console.log('[worker] decode', [width, height]);
+        LOG('[webp] decode', id, [width, height]);
         self.postMessage({ '@type': 'result', id, width, height, result });
     });
 

@@ -743,7 +743,7 @@ function loadStickerContent(store, sticker, message, useFileSize = true) {
         store,
         file,
         null,
-        () => FileStore.updateStickerBlob(chatId, messageId, id),
+        () => FileStore.updateStickerBlob(chatId, messageId, id, sticker),
         () => {
             if (!useFileSize || (size && size < PRELOAD_STICKER_SIZE)) {
                 FileStore.getRemoteFile(id, FILE_PRIORITY, message || sticker);
@@ -774,7 +774,7 @@ function loadStickerThumbnailContent(store, sticker, message) {
         store,
         file,
         null,
-        () => FileStore.updateStickerThumbnailBlob(chatId, messageId, id),
+        () => FileStore.updateStickerThumbnailBlob(chatId, messageId, id, sticker),
         () => FileStore.getRemoteFile(id, THUMBNAIL_PRIORITY, message || sticker)
     );
 
