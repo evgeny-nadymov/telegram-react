@@ -5,8 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-importScripts('webp_wasm.js');
-
 function LOG(message, ...optionalParams) {
     return;
     console.log(message, ...optionalParams);
@@ -14,6 +12,8 @@ function LOG(message, ...optionalParams) {
 
 console.log('[webp] start init');
 const now = new Date();
+
+importScripts('webp_wasm.js');
 
 Module.onRuntimeInitialized = async () => {
     console.log(`[webp] finish init time=${new Date() - now}`);
