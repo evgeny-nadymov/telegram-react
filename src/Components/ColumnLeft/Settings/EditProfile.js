@@ -19,7 +19,7 @@ import FileStore from '../../../Stores/FileStore';
 import UserStore from '../../../Stores/UserStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditProfile.css';
-import { getBoldItalicEntities, getFormattedText } from '../../../Utils/Message';
+import { getSimpleMarkupEntities, getFormattedText } from '../../../Utils/Message';
 
 class EditProfile extends React.Component {
     constructor(props) {
@@ -176,7 +176,7 @@ class EditProfile extends React.Component {
 
         const src = getSrc(photo ? photo.small : null);
         const entities = [];
-        const text = getBoldItalicEntities(t('UsernameHelp'), entities);
+        const text = getSimpleMarkupEntities(t('UsernameHelp'), entities);
         const formattedText = getFormattedText({ '@type': 'formattedText', text, entities });
 
         return (
