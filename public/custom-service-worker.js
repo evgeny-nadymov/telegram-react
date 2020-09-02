@@ -9,9 +9,13 @@
 // importScripts('./tdweb.js');
 // importScripts('./subworkers.js');
 
-const STREAM_CHUNK_BIG_LIMIT = 700 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO_512_LIMIT = 512 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1024_LIMIT = 1024 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1536_LIMIT = 1536 * 1024 * 1024;
 const STREAM_CHUNK_VIDEO = 256 * 1024;
-const STREAM_CHUNK_VIDEO_BIG = 512 * 1024;
+const STREAM_CHUNK_VIDEO_512 = 512 * 1024;
+const STREAM_CHUNK_VIDEO_1024 = 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1536 = 1536 * 1024;
 const STREAM_CHUNK_AUDIO = 1024 * 1024;
 
 function LOG(message, ...optionalParams) {
@@ -63,11 +67,17 @@ function getOffsetLimit(start, end, chunk, size) {
 }
 
 function getChunk(mimeType, size) {
-    const isBigFile = size > STREAM_CHUNK_BIG_LIMIT;
-
-    let chunk = isBigFile ? STREAM_CHUNK_VIDEO_BIG : STREAM_CHUNK_VIDEO;
     if (mimeType && mimeType.startsWith('audio')) {
-        chunk = STREAM_CHUNK_AUDIO;
+        return STREAM_CHUNK_AUDIO;
+    }
+
+    let chunk = STREAM_CHUNK_VIDEO;
+    if (size > STREAM_CHUNK_VIDEO_1536_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_1536;
+    } else if (size > STREAM_CHUNK_VIDEO_1024_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_1024;
+    } else if (size > STREAM_CHUNK_VIDEO_512_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_512;
     }
 
     return chunk;
