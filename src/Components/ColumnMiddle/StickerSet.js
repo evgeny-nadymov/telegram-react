@@ -15,11 +15,7 @@ import './StickerSet.css';
 
 class StickerSet extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { info, theme } = this.props;
-
-        if (theme !== nextProps.theme) {
-            return true;
-        }
+        const { info } = this.props;
 
         if (info !== nextProps.info) {
             return true;

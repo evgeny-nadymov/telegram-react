@@ -237,6 +237,16 @@ class StickersPicker extends React.Component {
     };
 
     handleScroll = async () => {
+        this.scrolling = true;
+        const now = new Date();
+        this.lastScrollTime = now;
+        if (this.scrollTimer) clearTimeout(this.scrollTimer);
+        this.scrollTimer = setTimeout(() => {
+            if (now !== this.lastScrollTime) return;
+
+            this.scrolling = false;
+        }, 250);
+
         // console.log('[sp] handleScroll');
         //this.loadInViewContentOnScroll();
         this.loadInViewContentOnScrollEnd();

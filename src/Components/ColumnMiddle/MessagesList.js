@@ -9,18 +9,18 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import ActionBar from './ActionBar';
-import DayMeta from '../Message/DayMeta';
 import FilesDropTarget from './FilesDropTarget';
+import StubMessage from '../Message/StubMessage';
 import Message from '../Message/Message';
+import ServiceMessage from '../Message/ServiceMessage';
 import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
-import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
 import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendMediaMessages, getChatFullInfo, getSupergroupId, isChannelChat, isPrivateChat } from '../../Utils/Chat';
+import { canSendMediaMessages, getChatFullInfo, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
 import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -32,7 +32,6 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
-import StubMessage from '../Message/StubMessage';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -46,9 +45,6 @@ class MessagesList extends React.Component {
     constructor(props) {
         super(props);
 
-        // console.log(`MessagesList.ctor chat_id=${props.chatId} message_id=${props.messageId}`);
-
-        // console.log('MessagesList.newSessionId ctor');
         this.sessionId = Date.now();
         this.state = {
             prevChatId: 0,
@@ -99,7 +95,6 @@ class MessagesList extends React.Component {
             offsetHeight
         };
 
-        // console.log('[ml] getSnapshotBeforeUpdate', snapshot);
         this.snapshot = snapshot;
         return snapshot;
     }
@@ -530,6 +525,7 @@ class MessagesList extends React.Component {
         this.sessionId = Date.now();
         this.loading = false;
         this.completed = false;
+        this.lastCompleted = false;
         this.loadMigratedHistory = false;
         this.defferedActions = [];
 
@@ -709,9 +705,11 @@ class MessagesList extends React.Component {
 
         const fromMessageId = history && history.length > 0 ? history[0].id : 0;
 
+        // if (this.lastCompleted) return;
+
+        console.log('[p] getChatHistory', [fromMessageId]);
         this.loading = true;
         const sessionId = this.sessionId;
-        console.log('[p] getChatHistory', fromMessageId);
         let result = await TdLibController.send({
             '@type': 'getChatHistory',
             chat_id: chatId,
@@ -736,6 +734,7 @@ class MessagesList extends React.Component {
         this.insertNext(filterMessages(result.messages), () => {
             if (!result.messages.length) {
                 this.onLoadMigratedHistory();
+                // this.lastCompleted = true;
             }
         });
 
@@ -806,6 +805,8 @@ class MessagesList extends React.Component {
 
         const chat = ChatStore.get(chatId);
 
+        console.log('[p] onLoadPrevious', [this.loading, this.completed]);
+
         if (!chat) return;
         if (this.loading) return;
         if (this.completed) return;
@@ -874,7 +875,7 @@ class MessagesList extends React.Component {
 
     insertNext(history, callback) {
         if (history.length === 0) {
-            if (callback) callback();
+            callback && callback();
             return;
         }
 
@@ -916,7 +917,9 @@ class MessagesList extends React.Component {
 
         if (list.scrollTop <= SCROLL_PRECISION) {
             this.onLoadNext();
-        } else if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
+        }
+
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             this.onLoadPrevious();
         }
 
