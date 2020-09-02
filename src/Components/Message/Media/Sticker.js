@@ -48,7 +48,7 @@ class Sticker extends React.Component {
         this.dialogChatId = ApplicationStore.dialogChatId;
 
         this.state = {
-            animationDate: null,
+            animationData: null,
             loaded: false,
             hasError: false
         };
@@ -138,6 +138,8 @@ class Sticker extends React.Component {
     }
 
     componentWillUnmount() {
+        this.removeContent();
+
         ApplicationStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
         ApplicationStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
@@ -344,6 +346,15 @@ class Sticker extends React.Component {
         }
     };
 
+    removeContent = () => {
+        const { animationData } = this.state;
+        if (!animationData) return;
+
+        this.setState({
+            animationData: null
+        });
+    };
+
     handleMouseEnter = event => {
         const { animationData } = this;
         // console.log('[Sticker] handleMouseEnter', animationData);
@@ -454,7 +465,7 @@ class Sticker extends React.Component {
                             <Lottie
                                 ref={this.lottieRef}
                                 options={{
-                                    autoplay: autoplay,
+                                    autoplay,
                                     loop: true,
                                     animationData,
                                     renderer: 'svg',
