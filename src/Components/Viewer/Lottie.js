@@ -41,58 +41,27 @@ class Lottie extends React.Component {
         this.registerEvents(eventListeners);
     }
 
-    UNSAFE_componentWillUpdate(nextProps, nextState, nextContext) {
-        /* Recreate the animation handle if the data is changed */
-        if (
-            this.options.animationData !== nextProps.options.animationData ||
-            this.options.path !== nextProps.options.path
-        ) {
-            this.unregisterEvents(this.props.eventListeners);
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { options, eventListeners } = this.props;
+        const { options: prevOptions, eventListeners: prevEventListeners } = prevProps
+
+        if (options.animationData !== prevOptions.animationData || options.path !== prevOptions.path) {
+            this.unregisterEvents(prevEventListeners);
+
             this.destroy();
-            this.options = { ...this.options, ...nextProps.options };
+            this.options = { ...this.options, ...options };
             this.anim = lottie.loadAnimation(this.options);
-            this.registerEvents(nextProps.eventListeners);
+
+            this.registerEvents(eventListeners);
         }
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        // console.log('Lottie.componentDidUpdate', this.props.eventListeners, this.props);
-        // if (this.props.isStopped) {
-        //     this.stop();
-        // } else if (this.props.segments) {
-        //     this.playSegments();
-        // } else {
-        //     this.play();
-        // }
-
-        //this.pause();
-        this.setSpeed();
-        this.setDirection();
-    }
-
     componentWillUnmount() {
-        // console.log('Lottie.componentWillUnmount', this.props.eventListeners, this.props);
         this.unregisterEvents(this.props.eventListeners);
         this.destroy();
         this.options.animationData = null;
         this.options.path = null;
         this.anim = null;
-    }
-
-    getCurrentRawFrame() {
-        return this.anim.currentRawFrame;
-    }
-
-    getCurrentFrame() {
-        return this.anim.currentFrame;
-    }
-
-    setSpeed() {
-        this.anim.setSpeed(this.props.speed);
-    }
-
-    setDirection() {
-        this.anim.setDirection(this.props.direction);
     }
 
     play() {
@@ -179,9 +148,7 @@ class Lottie extends React.Component {
             // Bug with eslint rules https://github.com/airbnb/javascript/issues/1374
             // eslint-disable-next-line jsx-a11y/no-static-element-interactions
             <div
-                ref={c => {
-                    this.el = c;
-                }}
+                ref={c => { this.el = c; }}
                 style={lottieStyles}
                 title={title}
                 role={ariaRole}
@@ -198,20 +165,19 @@ class Lottie extends React.Component {
 Lottie.propTypes = {
     eventListeners: PropTypes.arrayOf(PropTypes.object),
     options: PropTypes.object.isRequired,
+
     height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    speed: PropTypes.number,
-    segments: PropTypes.arrayOf(PropTypes.number),
-    direction: PropTypes.number,
+
     ariaRole: PropTypes.string,
     ariaLabel: PropTypes.string,
     title: PropTypes.string,
+
     style: PropTypes.string
 };
 
 Lottie.defaultProps = {
     eventListeners: [],
-    speed: 1,
     ariaRole: 'button',
     ariaLabel: 'animation',
     title: ''

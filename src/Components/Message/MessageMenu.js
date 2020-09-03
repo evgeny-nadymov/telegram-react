@@ -39,8 +39,10 @@ import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
 import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
 import { pinMessage, unpinMessage } from '../../Actions/Message';
+import { saveBlob } from '../../Utils/File';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
+import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessageMenu.css';
@@ -195,6 +197,26 @@ class MessageMenu extends React.PureComponent {
         deleteMessages(chatId, [messageId]);
     };
 
+    handleDownload = event => {
+        const { chatId, messageId } = this.props;
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        const { content } = message;
+        if (!content) return;
+
+        const { sticker } = content;
+        if (!sticker) return;
+
+        const { sticker: file } = sticker;
+        if (!file) return;
+
+        const blob = FileStore.getBlob(file.id);
+        if (!blob) return;
+
+        saveBlob(blob, 'sticker.tgs');
+    };
+
     render() {
         const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
@@ -229,6 +251,12 @@ class MessageMenu extends React.PureComponent {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
+                        {/*<MenuItem onClick={this.handleDownload}>*/}
+                        {/*    <ListItemIcon>*/}
+                        {/*        <CopyIcon />*/}
+                        {/*    </ListItemIcon>*/}
+                        {/*    <ListItemText primary={t('Download')} />*/}
+                        {/*</MenuItem>*/}
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>
