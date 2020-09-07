@@ -130,10 +130,9 @@ class CreateFilter extends React.Component {
     handleAnimationClick = () => {
         const lottie = this.lottieRef.current;
         if (!lottie) return;
-        if (!lottie.anim) return;
-        if (!lottie.anim.isPaused) return;
+        if (!lottie.isPaused) return;
 
-        lottie.anim.goToAndPlay(0);
+        lottie.goToAndPlay(0);
     };
 
     handleDeleteIncludeContacts = () => {

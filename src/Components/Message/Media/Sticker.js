@@ -23,6 +23,7 @@ import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
 
 const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../../Viewer/RLottie'));
 
 export const StickerSourceEnum = Object.freeze({
     HINTS: 'HINTS',
@@ -52,6 +53,7 @@ class Sticker extends React.Component {
             loaded: false,
             hasError: false
         };
+        console.log('[Sticker] ctor');
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -322,25 +324,22 @@ class Sticker extends React.Component {
         const blob = getBlob(sticker);
         if (!blob) return;
 
-        let animationData = null;
-        try {
-            // animationData = StickerStore.getAnimationData(blob);
-            // if (animationData) {
-            //     this.setState({ animationData });
-            //     return;
-            // }
-            const result = await inflateBlob(blob);
-            if (!result) return;
-
-            animationData = JSON.parse(result);
-            // StickerStore.setAnimationData(blob, animationData);
-        } catch (err) {
-            console.log('[Sticker] loadContent error', err);
-        }
+        const animationData = blob;
+        // let animationData = null;
+        // try {
+        //     const result = await inflateBlob(blob);
+        //     if (!result) return;
+        //
+        //     animationData = JSON.parse(result);
+        //     // StickerStore.setAnimationData(blob, animationData);
+        // } catch (err) {
+        //     console.log('[Sticker] loadContent error', err);
+        // }
         if (!animationData) return;
 
+        console.log('[Sticker] loadContent', [autoplay, animationData]);
         if (autoplay) {
-            this.setState({ animationData });
+            this.setState({ fileId: sticker.id, animationData });
         } else {
             this.animationData = animationData;
         }
@@ -417,7 +416,7 @@ class Sticker extends React.Component {
             preview
         } = this.props;
         const { thumbnail, sticker, width, height } = source;
-        const { animationData, loaded, hasError } = this.state;
+        const { fileId, animationData, loaded, hasError } = this.state;
 
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
@@ -458,15 +457,19 @@ class Sticker extends React.Component {
         let content = null;
         const fitSize = getFitSize({ width, height }, displaySize);
         if (fitSize) {
+            // console.log('[Sticker] render', [animationData, fitSize]);
             content = isAnimated ? (
                 <>
-                    {animationData ? (
+                    {animationData && (
                         <React.Suspense fallback={null}>
-                            <Lottie
+                            <RLottie
                                 ref={this.lottieRef}
                                 options={{
+                                    width: displaySize,
+                                    height: displaySize,
                                     autoplay,
                                     loop: true,
+                                    fileId,
                                     animationData,
                                     renderer: 'svg',
                                     rendererSettings: {
@@ -486,18 +489,20 @@ class Sticker extends React.Component {
                                 onMouseOut={this.handleAnimationMouseOut}
                             />
                         </React.Suspense>
-                    ) : (
-                        <>
-                            {thumbnailSrc && (
-                                <img
-                                    className={classNames('sticker-image', { 'media-blurred': isBlurred })}
-                                    draggable={false}
-                                    src={thumbnailSrc}
-                                    alt=''
-                                />
-                            )}
-                        </>
-                    )}
+                    )
+                    //     : (
+                    //     <>
+                    //         {thumbnailSrc && (
+                    //             <img
+                    //                 className={classNames('sticker-image', { 'media-blurred': isBlurred })}
+                    //                 draggable={false}
+                    //                 src={thumbnailSrc}
+                    //                 alt=''
+                    //             />
+                    //         )}
+                    //     </>
+                    // )
+                    }
                 </>
             ) : (
                 <>

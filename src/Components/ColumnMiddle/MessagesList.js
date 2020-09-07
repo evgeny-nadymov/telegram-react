@@ -805,7 +805,7 @@ class MessagesList extends React.Component {
 
         const chat = ChatStore.get(chatId);
 
-        console.log('[p] onLoadPrevious', [this.loading, this.completed]);
+        // console.log('[p] onLoadPrevious', [this.loading, this.completed]);
 
         if (!chat) return;
         if (this.loading) return;

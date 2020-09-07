@@ -106,7 +106,7 @@ class Caption extends React.Component {
                 const { current } = this.lottieRef;
                 if (!current) return;
 
-                current.anim.playSegments([0, 180], true);
+                current.playSegments([0, 180], true);
             }
         );
     };
@@ -127,7 +127,7 @@ class Caption extends React.Component {
                 const { current } = this.lottieRef;
                 if (!current) return;
 
-                current.anim.playSegments([from, to], true);
+                current.playSegments([from, to], true);
             }
         );
     };
@@ -144,7 +144,7 @@ class Caption extends React.Component {
                 const { current } = this.lottieRef;
                 if (!current) return;
 
-                current.anim.playSegments([0, 49], true);
+                current.playSegments([0, 49], true);
             }
         );
     };
@@ -167,9 +167,9 @@ class Caption extends React.Component {
                 if (!current) return;
 
                 if (peek) {
-                    current.anim.playSegments([0, 15], true);
+                    current.playSegments([0, 15], true);
                 } else {
-                    current.anim.playSegments([15, 33], true);
+                    current.playSegments([15, 33], true);
                 }
             }
         );

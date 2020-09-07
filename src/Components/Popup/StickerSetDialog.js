@@ -304,7 +304,7 @@ class StickerSetDialog extends React.Component {
                     key={x.sticker.id}
                     className='sticker-set-dialog-item-sticker'
                     sticker={x}
-                    autoplay={false}
+                    autoplay={true}
                     blur={false}
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     preview

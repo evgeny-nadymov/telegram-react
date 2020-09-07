@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import lottie from 'lottie-web/build/player/lottie_light.min';
 import './Lottie.css';
+import { AnimationSegment } from 'lottie-web';
 
 class Lottie extends React.Component {
     componentDidMount() {
@@ -19,19 +20,17 @@ class Lottie extends React.Component {
             loop,
             autoplay,
             animationData,
-            //path,
             rendererSettings,
             segments
         } = options;
 
         this.options = {
             container: this.el,
-            renderer: 'svg',
             loop: Boolean(loop),
             autoplay: Boolean(autoplay),
             segments: Boolean(segments),
             animationData,
-            //path,
+            renderer: 'svg',
             rendererSettings
         };
 
@@ -45,7 +44,7 @@ class Lottie extends React.Component {
         const { options, eventListeners } = this.props;
         const { options: prevOptions, eventListeners: prevEventListeners } = prevProps
 
-        if (options.animationData !== prevOptions.animationData || options.path !== prevOptions.path) {
+        if (options.animationData !== prevOptions.animationData) {
             this.unregisterEvents(prevEventListeners);
 
             this.destroy();
@@ -62,6 +61,14 @@ class Lottie extends React.Component {
         this.options.animationData = null;
         this.options.path = null;
         this.anim = null;
+    }
+
+    get isPaused() {
+        return this.anim.isPaused;
+    }
+
+    goToAndPlay(value, isFrame) {
+        this.anim.goToAndPlay(value, isFrame);
     }
 
     play() {
