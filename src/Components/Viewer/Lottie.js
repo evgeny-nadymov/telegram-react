@@ -67,10 +67,6 @@ class Lottie extends React.Component {
         return this.anim.isPaused;
     }
 
-    goToAndPlay(value, isFrame) {
-        this.anim.goToAndPlay(value, isFrame);
-    }
-
     play() {
         this.anim.play();
     }

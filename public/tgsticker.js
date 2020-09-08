@@ -90,7 +90,6 @@ window.RLottie = (function () {
         }
 
         const delay = now - lastRenderDate < 100 ? 16 : 500;
-        // console.log('[rlottie] mainLoop next', delay);
         if (delay < 20 && isRAF) {
             mainLoopTO = requestAnimationFrame(mainLoop)
         } else {
@@ -169,7 +168,7 @@ window.RLottie = (function () {
         options = options || {};
         const rlPlayer = {};
         let url = null;
-        if (options.animationData && options.fileId) {
+        if (options.fileId && (options.animationData || options.stringData)) {
             url = options.fileId;
         }
 
@@ -182,6 +181,9 @@ window.RLottie = (function () {
         if (!pic_width || !pic_height) {
             pic_width = pic_height = 256;
         }
+        rlPlayer.autoplay = options.autoplay || false;
+        rlPlayer.paused = !rlPlayer.autoplay;
+        rlPlayer.loop = options.loop || false;
         rlPlayer.playWithoutFocus = options.playWithoutFocus;
 
         const curDeviceRatio = options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
@@ -203,8 +205,6 @@ window.RLottie = (function () {
         rlPlayer.context = rlPlayer.canvas.getContext('2d');
         rlPlayer.forceRender = true;
 
-        // el.rlPlayer = rlPlayer;
-
         const dataKey = `${rlPlayer.url}_${rlPlayer.width}_${rlPlayer.height}`;
         const data = rlottie.frames.get(dataKey);
         if (!data) {
@@ -224,29 +224,42 @@ window.RLottie = (function () {
                 height: rlPlayer.height
             });
 
-            // console.log('[rlottie] load', options.animationData);
-            if (options.animationData) {
+            // console.log('[rlottie] initPlayer', options);
+            if (options.stringData) {
+                rWorker.sendQuery('loadFromJson', rlPlayer.reqId, options.stringData, rlPlayer.width, rlPlayer.height);
+            } else if (options.animationData) {
                 rWorker.sendQuery('loadFromBlob', rlPlayer.reqId, options.animationData, rlPlayer.width, rlPlayer.height);
             } else {
                 rWorker.sendQuery('loadFromData', rlPlayer.reqId, url, rlPlayer.width, rlPlayer.height);
             }
         } else {
-            // console.log('[rlottie] skip load');
-
             let activePlayer = null;
             for (let key in rlottie.players) {
                 const pl = rlottie.players[key];
-                if (pl && pl.url === url && rlPlayer !== pl) {
+                if (pl && pl.url === url && pl.width === rlPlayer.width && pl.height === rlPlayer.height && rlPlayer !== pl) {
                     activePlayer = pl;
                     break;
                 }
             }
 
             if (!activePlayer && data.frameCount && data.fps){
-                // console.log('[rlottie] activePlayer', [data.reqId, data.frameCount, data.fps]);
+                if (data.frames[0]) {
+                    doRender(rlPlayer, data.frames[0]);
+                }
+
+                data.frameQueue = null;
                 onLoaded(data.reqId, data.frameCount, data.fps);
-                // setupMainLoop();
-                // requestFrame(data.reqId, 0);
+            }
+            else if (activePlayer) {
+                rlPlayer.context.drawImage(activePlayer.canvas, 0, 0);
+
+                if (!rlPlayer.firstFrame) {
+                    rlPlayer.firstFrame = true;
+                    const rlEvents = rlottie.events[rlPlayer.reqId];
+                    if (rlEvents) {
+                        rlEvents['firstFrame'] && rlEvents['firstFrame']();
+                    }
+                }
             }
         }
 
@@ -274,10 +287,17 @@ window.RLottie = (function () {
         }
 
         if (!rlPlayer.forceRender) {
+            // not focused
             if (!rlPlayer.playWithoutFocus && !document.hasFocus() || !data.frameCount) {
-                // console.log('[rlottie] render false 2');
                 return false;
             }
+
+            // paused
+            if (rlPlayer.paused) {
+                return false;
+            }
+
+            // not in viewport
             let isInViewport = rlPlayer.isInViewport;
             if (isInViewport === undefined || checkViewport) {
                 const rect = rlPlayer.el.getBoundingClientRect();
@@ -292,7 +312,6 @@ window.RLottie = (function () {
                 rlPlayer.isInViewport = isInViewport;
             }
             if (!isInViewport) {
-                // console.log('[rlottie] render false 3');
                 return false;
             }
         }
@@ -307,6 +326,10 @@ window.RLottie = (function () {
             doRender(rlPlayer, frame);
 
             if (data.frameCount - 1 === frameNo) {
+                if (!rlPlayer.loop) {
+                    rlPlayer.paused = true;
+                }
+
                 const rlEvents = rlottie.events[rlPlayer.reqId];
                 if (rlEvents) {
                     rlEvents['loopComplete'] && rlEvents['loopComplete']();
@@ -329,6 +352,7 @@ window.RLottie = (function () {
     }
 
     function doRender(rlPlayer, frame) {
+        // console.log('[rlottie] doRender');
         rlPlayer.forceRender = false;
         rlPlayer.imageData.data.set(frame);
         rlPlayer.context.putImageData(rlPlayer.imageData, 0, 0);
@@ -336,6 +360,14 @@ window.RLottie = (function () {
         if (rlPlayer.thumb) {
             rlPlayer.el.removeChild(rlPlayer.thumb);
             delete rlPlayer.thumb;
+        }
+
+        if (!rlPlayer.firstFrame) {
+            rlPlayer.firstFrame = true;
+            const rlEvents = rlottie.events[rlPlayer.reqId];
+            if (rlEvents) {
+                rlEvents['firstFrame'] && rlEvents['firstFrame']();
+            }
         }
     }
 
@@ -362,6 +394,7 @@ window.RLottie = (function () {
         const dataKey = `${url}_${width}_${height}`;
         const data = rlottie.frames.get(dataKey);
 
+        // console.log('[rlottie] onFrame');
         if (data.cachingModulo &&
             !data.frames[frameNo] &&
             (!frameNo || ((reqId + frameNo) % data.cachingModulo))) {
@@ -369,6 +402,11 @@ window.RLottie = (function () {
         }
         if (data && data.reqId === reqId) {
             data.frameQueue.push({ frameNo, frame });
+        }
+
+        const rlPlayer = rlottie.players[reqId];
+        if (rlPlayer && rlPlayer.forceRender && frameNo === 0) {
+            doRender(rlPlayer, frame);
         }
 
         let nextFrameNo = ++frameNo;
@@ -387,17 +425,18 @@ window.RLottie = (function () {
         const dataKey = `${url}_${width}_${height}`;
         const data = rlottie.frames.get(dataKey);
 
-        // console.log('[rlottie] onLoaded', reqId, frameCount, fps);
         if (data && !data.frameQueue) {
             data.fps = fps;
             data.frameThen = Date.now();
             data.frameInterval = 1000 / fps;
             data.frameCount = frameCount;
             data.frameQueue = new FrameQueue(fps / 4);
+            data.nextFrameNo = false;
         }
 
+        // console.log('[rlottie] onLoaded');
         setupMainLoop();
-        requestFrame(reqId, data.nextFrameNo || 0);
+        requestFrame(reqId, 0);
     }
 
     rlottie.init = function(el, options) {
@@ -438,6 +477,14 @@ window.RLottie = (function () {
         destroyWorkers();
     }
 
+    rlottie.hasFirstFrame = function (reqId) {
+        const { url, width, height } = rlottie.urls[reqId];
+        const dataKey = `${url}_${width}_${height}`;
+        const data = rlottie.frames.get(dataKey);
+
+        return data && Boolean(data.frames[0]);
+    }
+
     rlottie.loadAnimation = function (options, callback) {
         // console.log('[rlottie] loadAnimation', reqId);
         return loadAnimation(options, callback);
@@ -476,6 +523,27 @@ window.RLottie = (function () {
         if (!Object.keys(rlottie.events[reqId]).length) {
             delete rlottie.events[reqId];
         }
+    }
+
+    rlottie.isPaused = function (reqId) {
+        const rlPlayer = rlottie.players[reqId];
+        if (!rlPlayer) return false;
+
+        return rlPlayer.paused;
+    }
+
+    rlottie.pause = function (reqId) {
+        const rlPlayer = rlottie.players[reqId];
+        if (!rlPlayer) return;
+
+        rlPlayer.paused = true;
+    }
+
+    rlottie.play = function (reqId) {
+        const rlPlayer = rlottie.players[reqId];
+        if (!rlPlayer) return;
+
+        rlPlayer.paused = false;
     }
 
     return rlottie;

@@ -5,13 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
-.sticker picture {
+.dev_page_tgsticker {
     width: 100%;
     height: 100%;
-}
-
-.dev_page_tgsticker {
     position: relative;
     display: block;
     max-width: 256px;

@@ -614,8 +614,8 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     chatId={chat_id}
                     messageId={id}
                     sticker={content.sticker}
-                    source={StickerSourceEnum.MESSAGE}
                     openMedia={openMedia}
+                    source={StickerSourceEnum.MESSAGE}
                 />
             );
         case 'messageText':

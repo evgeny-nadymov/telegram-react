@@ -16,6 +16,7 @@ class RLottie extends React.Component {
             loop,
             autoplay,
             animationData,
+            stringData,
             rendererSettings,
             segments
         } = options;
@@ -27,6 +28,7 @@ class RLottie extends React.Component {
             autoplay: Boolean(autoplay),
             segments: Boolean(segments),
             animationData,
+            stringData,
             rendererSettings
         };
 
@@ -42,6 +44,15 @@ class RLottie extends React.Component {
             // } else {
             //     window.RLottie.destroy(anim);
             // }
+            if (window.RLottie.hasFirstFrame(this.anim)) {
+                if (!eventListeners) return;
+
+                eventListeners.forEach(({ eventName, callback }) => {
+                    if (eventName === 'firstFrame') {
+                        callback && callback();
+                    }
+                });
+            }
         });
         this.registerEvents(eventListeners);
     }
@@ -70,6 +81,13 @@ class RLottie extends React.Component {
                 // } else {
                 //     window.RLottie.destroy(anim);
                 // }
+                if (!eventListeners) return;
+
+                eventListeners.forEach(({ eventName, callback }) => {
+                    if (eventName === 'firstFrame') {
+                        callback && callback();
+                    }
+                });
             });
             this.registerEvents(eventListeners);
         }
@@ -85,6 +103,8 @@ class RLottie extends React.Component {
     }
 
     play() {
+        console.log('[Rlottie] play');
+        window.RLottie.play(this.anim);
         // this.anim.play();
     }
 
@@ -92,15 +112,19 @@ class RLottie extends React.Component {
         // this.anim.playSegments(segments, forceFlag);
     }
 
-    stop() {
-        // this.anim.stop();
+    get isPaused() {
+        if (!this.anim) {
+            return false;
+        }
+
+        return window.RLottie.isPaused(this.anim);
     }
 
     pause() {
-        // if (!this.anim.isPaused) {
-        //     this.anim.pause();
-        //     return true;
-        // }
+        if (!window.RLottie.isPaused(this.anim)) {
+            window.RLottie.pause(this.anim);
+            return true;
+        }
 
         return false;
     }
@@ -140,6 +164,7 @@ class RLottie extends React.Component {
             ariaRole,
             ariaLabel,
             title,
+            onClick,
             onMouseEnter,
             onMouseOut
         } = this.props;
@@ -160,6 +185,7 @@ class RLottie extends React.Component {
                 role={ariaRole}
                 aria-label={ariaLabel}
                 tabIndex='0'
+                onClick={onClick}
                 onMouseEnter={onMouseEnter}
                 onMouseOut={onMouseOut}
             >

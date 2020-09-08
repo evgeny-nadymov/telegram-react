@@ -135,6 +135,17 @@ const queryableFunctions = {
         };
         reader.readAsArrayBuffer(blob);
     },
+    loadFromJson: function(reqId, json, width, height) {
+        try {
+            const json_parsed = JSON.parse(json);
+            if (!json_parsed.tgs) {
+                throw new Error('Invalid file');
+            }
+            items[reqId] = new RLottieItem(reqId, json, width, height, json_parsed.fr);
+        } catch (e) {
+            return console.warn('Invalid file ' + url);
+        }
+    },
     destroy: function(reqId) {
         items[reqId].destroy();
         delete items[reqId];

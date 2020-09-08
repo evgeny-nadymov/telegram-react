@@ -50,6 +50,10 @@
     filter: blur(2px);
 }
 
+.media-loaded {
+    opacity: 0;
+}
+
 .media-mini-blurred {
     filter: blur(10px);
     transform: scale(1.1);

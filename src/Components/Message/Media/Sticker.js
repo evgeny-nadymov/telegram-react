@@ -15,7 +15,7 @@ import { getBlob, getPngSrc, getSrc } from '../../../Utils/File';
 import { inflateBlob } from '../../../Workers/BlobInflator';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
 import WebpManager from '../../../Stores/WebpManager';
-import ApplicationStore from '../../../Stores/ApplicationStore';
+import AppStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -43,23 +43,24 @@ class Sticker extends React.Component {
         this.windowFocused = window.hasFocus;
         this.inView = false;
         this.stickerPreview = StickerStore.stickerPreview;
-        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
-        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+        this.openMediaViewer = Boolean(AppStore.mediaViewerContent);
+        this.openProfileMediaViewer = Boolean(AppStore.profileMediaViewerContent);
         this.openIV = Boolean(InstantViewStore.getCurrent());
-        this.dialogChatId = ApplicationStore.dialogChatId;
+        this.dialogChatId = AppStore.dialogChatId;
+        this.openedStickerSet = StickerStore.stickerSet;
 
         this.state = {
             animationData: null,
             loaded: false,
             hasError: false
         };
-        console.log('[Sticker] ctor');
     }
 
     static getDerivedStateFromProps(props, state) {
         const { sticker } = props;
+        const { prevSticker } = state;
 
-        if (state.prevSticker !== sticker) {
+        if (prevSticker && sticker && prevSticker !== sticker && prevSticker.sticker.id !== sticker.sticker.id) {
             return {
                 prevSticker: sticker,
                 loaded: false,
@@ -125,10 +126,10 @@ class Sticker extends React.Component {
     componentDidMount() {
         this.loadContent();
 
-        ApplicationStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
-        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        AppStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.on('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
@@ -142,10 +143,10 @@ class Sticker extends React.Component {
     componentWillUnmount() {
         this.removeContent();
 
-        ApplicationStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
-        ApplicationStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        AppStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.off('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
         FileStore.off('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
@@ -163,19 +164,19 @@ class Sticker extends React.Component {
     };
 
     onClientUpdateDialogChatId = update => {
-        this.dialogChatId = ApplicationStore.dialogChatId;
+        this.dialogChatId = AppStore.dialogChatId;
 
         this.startStopAnimation();
     };
 
     onClientUpdateMediaViewerContent = update => {
-        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
+        this.openMediaViewer = Boolean(AppStore.mediaViewerContent);
 
         this.startStopAnimation();
     };
 
     onClientUpdateProfileMediaViewerContent = update => {
-        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+        this.openProfileMediaViewer = Boolean(AppStore.profileMediaViewerContent);
 
         this.startStopAnimation();
     };
@@ -235,7 +236,6 @@ class Sticker extends React.Component {
                 return;
             }
 
-            // console.log('[Sticker] startStopAnimation', this.openedStickerSet);
             if (!this.openedStickerSet) {
                 if (this.paused) {
                     // console.log('[Sticker] play 2');
@@ -250,10 +250,17 @@ class Sticker extends React.Component {
                     this.paused = false;
                     return;
                 }
+            } else {
+                if (this.props.source === StickerSourceEnum.STICKER_SET) {
+                    if (autoplay) {
+                        player.play();
+                        this.paused = false;
+                        return;
+                    }
+                }
             }
         }
 
-        // console.log('[Sticker] pause');
         this.paused = player.pause();
     }
 
@@ -337,10 +344,10 @@ class Sticker extends React.Component {
         // }
         if (!animationData) return;
 
-        console.log('[Sticker] loadContent', [autoplay, animationData]);
         if (autoplay) {
             this.setState({ fileId: sticker.id, animationData });
         } else {
+            this.fileId = sticker.id;
             this.animationData = animationData;
         }
     };
@@ -354,11 +361,11 @@ class Sticker extends React.Component {
         });
     };
 
-    handleMouseEnter = event => {
-        const { animationData } = this;
-        // console.log('[Sticker] handleMouseEnter', animationData);
+    handleMouseEnter = () => {
+        const { animationData, fileId } = this;
+
         if (animationData) {
-            this.setState({ animationData }, () => {
+            this.setState({ animationData, fileId }, () => {
                 this.handleAnimationMouseEnter();
             });
         }
@@ -388,7 +395,7 @@ class Sticker extends React.Component {
         if (this.loopCount > 2) {
             const { animationData } = this.state;
             if (animationData) {
-                this.setState({ animationData: null });
+                this.setState({ loaded: false, animationData: null });
             }
         }
     };
@@ -484,36 +491,19 @@ class Sticker extends React.Component {
                                     {
                                         eventName: 'loopComplete',
                                         callback: this.handleAnimationLoopComplete
+                                    },
+                                    {
+                                        eventName: 'firstFrame',
+                                        callback: this.handleLoad
                                     }
                                 ]}
                                 onMouseOut={this.handleAnimationMouseOut}
                             />
                         </React.Suspense>
-                    )
-                    //     : (
-                    //     <>
-                    //         {thumbnailSrc && (
-                    //             <img
-                    //                 className={classNames('sticker-image', { 'media-blurred': isBlurred })}
-                    //                 draggable={false}
-                    //                 src={thumbnailSrc}
-                    //                 alt=''
-                    //             />
-                    //         )}
-                    //     </>
-                    // )
-                    }
+                    )}
                 </>
             ) : (
                 <>
-                    { thumbnailSrc && !loaded && (
-                        <img
-                            className={classNames('sticker-image', { 'media-blurred': isBlurred })}
-                            draggable={false}
-                            src={thumbnailSrc}
-                            alt=''
-                        />
-                    )}
                     { src && !preview && <img key={sticker.id} className='sticker-image' src={src} draggable={false} alt='' onLoad={this.handleLoad} /> }
                 </>
             );
@@ -531,6 +521,14 @@ class Sticker extends React.Component {
                 style={stickerStyle}
                 onClick={openMedia}
                 onMouseEnter={this.handleMouseEnter}>
+                { thumbnailSrc && (
+                    <img
+                        className={classNames('sticker-image', { 'media-blurred': isBlurred, 'media-loaded': loaded })}
+                        draggable={false}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                )}
                 {content}
             </div>
         );
