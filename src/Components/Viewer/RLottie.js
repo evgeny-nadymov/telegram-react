@@ -109,6 +109,7 @@ class RLottie extends React.Component {
     }
 
     playSegments(segments, forceFlag) {
+        window.RLottie.playSegments(this.anim, segments, forceFlag);
         // this.anim.playSegments(segments, forceFlag);
     }
 

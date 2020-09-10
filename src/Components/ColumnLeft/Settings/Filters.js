@@ -253,7 +253,7 @@ class Filters extends React.Component {
                                         options={{
                                             width: 80,
                                             height: 80,
-                                            autoplay: true,
+                                            autoplay: false,
                                             loop: false,
                                             fileId: 'filters',
                                             stringData: data,

@@ -172,6 +172,8 @@ window.RLottie = (function () {
             url = options.fileId;
         }
 
+        options.maxDeviceRatio = 1.5;
+
         if (!url) {
             console.warn('url not found');
             return;
@@ -334,6 +336,8 @@ window.RLottie = (function () {
                 if (rlEvents) {
                     rlEvents['loopComplete'] && rlEvents['loopComplete']();
                 }
+            } else if (frameNo === rlPlayer.to) {
+                rlPlayer.paused = true;
             }
 
             if (shift) {
@@ -376,6 +380,8 @@ window.RLottie = (function () {
         const dataKey = `${url}_${width}_${height}`;
         const data = rlottie.frames.get(dataKey);
 
+        // console.log('[rlottie] requestFrame', frameNo);
+
         const frame = data.frames[frameNo];
         if (frame) {
             onFrame(reqId, frameNo, frame)
@@ -409,10 +415,20 @@ window.RLottie = (function () {
             doRender(rlPlayer, frame);
         }
 
-        let nextFrameNo = ++frameNo;
-        if (nextFrameNo >= data.frameCount) {
-            nextFrameNo = 0;
+        let nextFrameNo;
+        // if (rlPlayer && rlPlayer.segments && rlPlayer.from > rlPlayer.to) {
+        //     nextFrameNo = frameNo--;
+        //     if (nextFrameNo < 0) {
+        //         nextFrameNo = data.frameCount - 1;
+        //     }
+        // } else
+            {
+            nextFrameNo = ++frameNo;
+            if (nextFrameNo >= data.frameCount) {
+                nextFrameNo = 0;
+            }
         }
+
         if (data.frameQueue.needsMore())  {
             requestFrame(reqId, nextFrameNo)
         } else {
@@ -425,6 +441,7 @@ window.RLottie = (function () {
         const dataKey = `${url}_${width}_${height}`;
         const data = rlottie.frames.get(dataKey);
 
+        let frameNo = 0;
         if (data && !data.frameQueue) {
             data.fps = fps;
             data.frameThen = Date.now();
@@ -432,11 +449,16 @@ window.RLottie = (function () {
             data.frameCount = frameCount;
             data.frameQueue = new FrameQueue(fps / 4);
             data.nextFrameNo = false;
+
+            const rlPlayer = rlottie.players[reqId];
+            if (rlPlayer && rlPlayer.from) {
+                frameNo = rlPlayer.from;
+                data.nextFrameNo = frameNo;
+            }
         }
 
-        // console.log('[rlottie] onLoaded');
         setupMainLoop();
-        requestFrame(reqId, 0);
+        requestFrame(reqId, frameNo);
     }
 
     rlottie.init = function(el, options) {
@@ -543,7 +565,30 @@ window.RLottie = (function () {
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return;
 
+        console.log('[rlottie] play');
         rlPlayer.paused = false;
+    }
+
+    rlottie.playSegments = function (reqId, segments, forceFlag) {
+        const rlPlayer = rlottie.players[reqId];
+        if (!rlPlayer) return;
+
+        if (!segments || segments.length < 2) return;
+
+        console.log('[rlottie] playSegments', segments);
+        rlPlayer.from = segments[0];
+        rlPlayer.to = segments[1];
+        rlPlayer.segments = segments;
+        rlPlayer.paused = false;
+
+        const { url, width, height } = rlPlayer;
+        const dataKey = `${url}_${width}_${height}`;
+        const data = rlottie.frames.get(dataKey);
+        if (data.frameQueue) {
+            data.nextFrameNo = rlPlayer.segments[0];
+            data.frameQueue = new FrameQueue(data.fps / 4);
+            requestFrame(data.reqId, data.nextFrameNo);
+        }
     }
 
     return rlottie;
