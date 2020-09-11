@@ -103,7 +103,7 @@ class RLottie extends React.Component {
     }
 
     play() {
-        console.log('[Rlottie] play');
+        // console.log('[Rlottie] play');
         window.RLottie.play(this.anim);
         // this.anim.play();
     }

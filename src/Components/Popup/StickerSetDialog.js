@@ -286,6 +286,28 @@ class StickerSetDialog extends React.Component {
         });
     }
 
+    handleInViewport = (fileId, elementRect) => {
+        const { current } = this.contentRef;
+        if (!current) return false;
+
+        const contentRect = current.getBoundingClientRect();
+        const top = elementRect.top - contentRect.top;
+        const bottom = elementRect.bottom - contentRect.bottom;
+        // below bottom edge
+        if (top > contentRect.height) {
+            // console.log('[rlottie] handleInViewport', [fileId, false]);
+            return false;
+        }
+        // upper top edge
+        if (bottom < - contentRect.height) {
+            // console.log('[rlottie] handleInViewport', [fileId, false]);
+            return false;
+        }
+
+        // console.log('[rlottie] handleInViewport', [fileId, true]);
+        return true;
+    };
+
     render() {
         const { t } = this.props;
         const { stickerSet, sticker, scroll, scrollTop, scrollBottom } = this.state;
@@ -309,6 +331,7 @@ class StickerSetDialog extends React.Component {
                     displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     preview
                     source={StickerSourceEnum.STICKER_SET}
+                    inViewportFunc={this.handleInViewport}
                 />
                 <div className='sticker-set-dialog-item-emoji'>{x.emoji}</div>
             </div>

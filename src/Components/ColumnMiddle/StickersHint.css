@@ -6,7 +6,12 @@
  */
 
 .stickers-hint {
-    border-top: 1px solid var(--border);
+    max-width: 695px;
+    margin: 0 auto;
+    border-radius: 12px;
+    /* overflow: hidden; */
+    width: calc(100% - 22px);
+    /*border-top: 1px solid var(--border);*/
     background: var(--panel-background);
     position: absolute;
     left: 0;

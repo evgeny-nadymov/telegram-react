@@ -187,6 +187,7 @@ window.RLottie = (function () {
         rlPlayer.paused = !rlPlayer.autoplay;
         rlPlayer.loop = options.loop || false;
         rlPlayer.playWithoutFocus = options.playWithoutFocus;
+        rlPlayer.inViewportFunc = options.inViewportFunc;
 
         const curDeviceRatio = options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
 
@@ -300,16 +301,20 @@ window.RLottie = (function () {
             }
 
             // not in viewport
-            let isInViewport = rlPlayer.isInViewport;
+            let { isInViewport, inViewportFunc } = rlPlayer;
             if (isInViewport === undefined || checkViewport) {
                 const rect = rlPlayer.el.getBoundingClientRect();
-                if (rect.bottom < 0 ||
-                    rect.right < 0 ||
-                    rect.top > (window.innerHeight || document.documentElement.clientHeight) ||
-                    rect.left > (window.innerWidth || document.documentElement.clientWidth)) {
-                    isInViewport = false;
+                if (inViewportFunc) {
+                    isInViewport = inViewportFunc(rlPlayer.url, rect);
                 } else {
-                    isInViewport = true;
+                    if (rect.bottom < 0 ||
+                        rect.right < 0 ||
+                        rect.top > (window.innerHeight || document.documentElement.clientHeight) ||
+                        rect.left > (window.innerWidth || document.documentElement.clientWidth)) {
+                        isInViewport = false;
+                    } else {
+                        isInViewport = true;
+                    }
                 }
                 rlPlayer.isInViewport = isInViewport;
             }
@@ -565,7 +570,7 @@ window.RLottie = (function () {
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return;
 
-        console.log('[rlottie] play');
+        // console.log('[rlottie] play');
         rlPlayer.paused = false;
     }
 
