@@ -229,43 +229,44 @@ class Sticker extends React.Component {
         } = this;
 
         if (!windowFocused) {
+            // console.log('[sticker] stop focused', [source]);
             player.pause();
             return;
         }
 
         if (chatPopupOpened) {
+            // console.log('[sticker] stop chatPopupOpened', [source]);
             player.pause();
             return;
         }
 
         if (mediaViewerOpened) {
+            // console.log('[sticker] stop mediaViewerOpened', [source]);
             player.pause();
             return;
         }
 
         if (profileMediaViewerOpened) {
+            // console.log('[sticker] stop profileMediaViewerOpened', [source]);
             player.pause();
             return;
         }
 
         if (ivOpened) {
-            player.pause();
-            return;
-        }
-
-        if (stickerPreviewOpened) {
+            // console.log('[sticker] stop ivOpened', [source]);
             player.pause();
             return;
         }
 
         if (!autoplay && !mouseEntered) {
+            // console.log('[sticker] stop !autoplay && !mouseEntered', [source]);
             player.pause();
             return;
         }
 
         switch (source) {
             case StickerSourceEnum.HINTS: {
-                const playing = !stickerSetOpened;
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
 
                 if (playing) {
                     player.play();
@@ -274,7 +275,7 @@ class Sticker extends React.Component {
                 break;
             }
             case StickerSourceEnum.MESSAGE: {
-                const playing = !stickerSetOpened && messageInView;
+                const playing = !stickerSetOpened && messageInView && !stickerPreviewOpened;
 
                 if (playing) {
                     player.play();
@@ -283,7 +284,7 @@ class Sticker extends React.Component {
                 break;
             }
             case StickerSourceEnum.PICKER: {
-                const playing = !stickerSetOpened;
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
 
                 if (playing) {
                     player.play();
@@ -292,7 +293,7 @@ class Sticker extends React.Component {
                 break;
             }
             case StickerSourceEnum.PICKER_HEADER: {
-                const playing = !stickerSetOpened;
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
 
                 if (playing) {
                     player.play();
@@ -310,7 +311,7 @@ class Sticker extends React.Component {
                 break;
             }
             case StickerSourceEnum.STICKER_SET: {
-                const playing = stickerSetOpened;
+                const playing = stickerSetOpened && !stickerPreviewOpened;
 
                 if (playing) {
                     player.play();
@@ -323,6 +324,7 @@ class Sticker extends React.Component {
             }
         }
 
+        // console.log('[sticker] stop', [source]);
         player.pause();
     }
 

@@ -47,7 +47,7 @@ class StickerSet extends React.Component {
                     sticker={x}
                     autoplay={false}
                     blur={false}
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     preview
                     source={StickerSourceEnum.PICKER}
                 />

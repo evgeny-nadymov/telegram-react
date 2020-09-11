@@ -19,6 +19,7 @@ import PhotoIcon from '../../Assets/Icons/SharedMedia';
 import PollIcon from '@material-ui/icons/PollOutlined';
 import { canSendMediaMessages, canSendPolls, isPrivateChat } from '../../Utils/Chat';
 import { ANIMATION_DURATION_300MS } from '../../Constants';
+import './AttachButton.css';
 
 class AttachButton extends React.Component {
     state = {
@@ -87,6 +88,9 @@ class AttachButton extends React.Component {
                     transformOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right'
+                    }}
+                    classes={{
+                        paper: 'attach-button-paper'
                     }}
                     onClose={this.handleMenuClose}>
                     <MenuItem onClick={this.handleAttachPhoto} disabled={!canSendMediaMessages(chatId)}>
