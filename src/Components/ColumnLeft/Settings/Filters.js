@@ -73,7 +73,7 @@ class Filters extends React.Component {
 
         const { filters: filterInfo } = FilterStore;
         const promises = [];
-        for (let i = 0; i < filterInfo.length; i++) {
+        for (let i = 0; filterInfo && i < filterInfo.length; i++) {
             promises.push(TdLibController.send({
                 '@type': 'getChatFilter',
                 chat_filter_id: filterInfo[i].id
@@ -81,18 +81,14 @@ class Filters extends React.Component {
         }
         const filters = await Promise.all(promises);
 
-        // console.log('[f] filters', filters);
-
         const filtersMap = new Map();
-        for (let i = 0; i < filterInfo.length; i++) {
+        for (let i = 0; filterInfo && i < filterInfo.length; i++) {
             filtersMap.set(filterInfo[i].id, filters[i]);
         }
 
         const recommendedFilters = await TdLibController.send({
             '@type': 'getRecommendedChatFilters'
         });
-
-        // console.log('[f] recommended', recommendedFilters);
 
         this.setState({
             chats,
