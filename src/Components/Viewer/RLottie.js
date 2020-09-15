@@ -38,12 +38,8 @@ class RLottie extends React.Component {
         // console.log('[RLottie] ctor loadAnimation start', [fileId, data]);
         window.RLottie.loadAnimation(this.options, anim => {
             this.anim = anim;
-            // console.log('[RLottie] ctor loadAnimation stop', anim, [fileId, data]);
-            // if (this.props.options.url === url) {
-            //     this.anim = anim;
-            // } else {
-            //     window.RLottie.destroy(anim);
-            // }
+
+            // console.log('[Rlottie] ctor loadAnimation', [this.anim, window.RLottie.hasFirstFrame(this.anim)])
             if (window.RLottie.hasFirstFrame(this.anim)) {
                 if (!eventListeners) return;
 
@@ -139,6 +135,8 @@ class RLottie extends React.Component {
     }
 
     registerEvents(eventListeners) {
+        // console.log('[Rlottie] registerEvents', [this.anim, eventListeners]);
+
         if (!this.anim) return;
 
         if (!eventListeners) return;
