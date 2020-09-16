@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
-// import Lottie from '../Viewer/Lottie';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
-import QRCode from './QRCode';
 
-const Lottie = React.lazy(() => import('../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../Viewer/RLottie'));
 
 class Caption extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            fileId: null,
             data: null,
             lastUpdate: null
         };
@@ -40,7 +39,7 @@ class Caption extends React.Component {
 
             const results = await Promise.all(requests);
 
-            const [closeData, idleData, peekData, trackingData] = await Promise.all(results.map(x => x.json()));
+            const [closeData, idleData, peekData, trackingData] = await Promise.all(results.map(x => x.text()));
 
             this.setState(
                 {
@@ -99,6 +98,7 @@ class Caption extends React.Component {
 
         this.setState(
             {
+                fileId: 'idle',
                 data: idleData,
                 lastUpdate: update
             },
@@ -106,7 +106,7 @@ class Caption extends React.Component {
                 const { current } = this.lottieRef;
                 if (!current) return;
 
-                current.playSegments([0, 180], true);
+                current.playSegments([0, 179], true);
             }
         );
     };
@@ -115,11 +115,16 @@ class Caption extends React.Component {
         const { code, prevCode } = update;
         const { trackingData } = this.state;
 
-        const from = Math.min(15 * prevCode.length, 180);
-        const to = Math.min(15 * code.length, 180);
+        const from = Math.min(20 * prevCode.length, 179);
+        const to = Math.min(20 * code.length, 179);
+
+        if (from === 179 && to === 179) {
+            return;
+        }
 
         this.setState(
             {
+                fileId: 'tracking',
                 data: trackingData,
                 lastUpdate: update
             },
@@ -137,6 +142,7 @@ class Caption extends React.Component {
 
         this.setState(
             {
+                fileId: 'close',
                 data: closeData,
                 lastUpdate: update
             },
@@ -159,6 +165,7 @@ class Caption extends React.Component {
 
         this.setState(
             {
+                fileId: 'peek',
                 data: peekData,
                 lastUpdate: update
             },
@@ -177,7 +184,7 @@ class Caption extends React.Component {
 
     render() {
         const { state } = this.props;
-        const { data } = this.state;
+        const { fileId, data } = this.state;
 
         let control = null;
         switch (state['@type']) {
@@ -196,24 +203,29 @@ class Caption extends React.Component {
             case 'authorizationStateWaitPassword': {
                 control = (
                     <div className='auth-caption-telegram-logo'>
-                        <React.Suspense fallback={null}>
-                            <Lottie
-                                ref={this.lottieRef}
-                                options={{
-                                    autoplay: false,
-                                    loop: false,
-                                    animationData: data,
-                                    renderer: 'svg',
-                                    rendererSettings: {
-                                        preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                        clearCanvas: false,
-                                        progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                        hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                        className: 'auth-caption-lottie'
-                                    }
-                                }}
-                            />
-                        </React.Suspense>
+                        { data && (
+                            <React.Suspense fallback={null}>
+                                <RLottie
+                                    ref={this.lottieRef}
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId,
+                                        stringData: data,
+                                        renderer: 'svg',
+                                        rendererSettings: {
+                                            preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
+                                            clearCanvas: false,
+                                            progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
+                                            hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
+                                            className: 'auth-caption-lottie'
+                                        }
+                                    }}
+                                />
+                            </React.Suspense>
+                        )}
                     </div>
                 );
                 break;

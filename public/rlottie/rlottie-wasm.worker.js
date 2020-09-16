@@ -39,7 +39,7 @@ RLottieItem.prototype.init = function(jsString) {
     }
 };
 
-RLottieItem.prototype.render = function(frameNo, clamped) {
+RLottieItem.prototype.render = function(frameNo, segmentId, clamped) {
     if(this.dead) return;
 
     if(this.frameCount < frameNo || frameNo < 0) {
@@ -58,7 +58,7 @@ RLottieItem.prototype.render = function(frameNo, clamped) {
             clamped.set(data);
         }
 
-        reply('frame', this.reqId, frameNo, clamped);
+        reply('frame', this.reqId, frameNo, clamped, segmentId);
     } catch(e) {
         console.error('Render error:', e);
         this.dead = true;
@@ -150,8 +150,8 @@ const queryableFunctions = {
         items[reqId].destroy();
         delete items[reqId];
     },
-    renderFrame: function(reqId, frameNo, clamped) {
-        items[reqId].render(frameNo, clamped);
+    renderFrame: function(reqId, frameNo, segmentId, clamped) {
+        items[reqId].render(frameNo, segmentId, clamped);
     }
 };
 
@@ -192,8 +192,12 @@ function reply() {
     if(isSafari(self)) {
         postMessage({ 'queryMethodListener': arguments[0], 'queryMethodArguments': args });
     } else {
-        var transfer = [];
-        for(var i = 0; i < args.length; i++) {
+        let transfer = [];
+        for(let i = 0; i < args.length; i++) {
+            if (args[i] === undefined) {
+                continue;
+            }
+
             if(args[i] instanceof ArrayBuffer) {
                 transfer.push(args[i]);
             }
