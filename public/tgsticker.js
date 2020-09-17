@@ -317,12 +317,12 @@ window.RLottie = (function () {
             }
         }
 
-        const frameData = shift && renderPlayer ?
+        const frameData = shift?
             data.frameQueue.shift() :
             (data.frameQueue.queue.length > 0 ? data.frameQueue.queue[0] : null);
 
         if (frameData !== null) {
-            const { frameNo, frame, segmentId } = frameData;
+            const { frameNo, frame } = frameData;
 
             if (renderPlayer) {
                 doRender(rlPlayer, frame, frameNo);
@@ -342,7 +342,7 @@ window.RLottie = (function () {
                 }
             }
 
-            if (shift && renderPlayer) {
+            if (shift) {
                 const now = +(new Date());
                 data.frameThen = now - (now % data.frameInterval);
 
@@ -589,14 +589,13 @@ window.RLottie = (function () {
     }
 
     rlottie.playSegments = function (reqId, segments, forceFlag) {
-        console.log('[rlottie] playSegments', [segments[0], segments[1]]);
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return;
 
         if (!segments || segments.length < 2) return;
 
         rlPlayer.segmentId = ++segmentId;
-        rlPlayer.from = segments[0];
+        rlPlayer.from = forceFlag ? segments[0] : rlPlayer.frameNo;
         rlPlayer.to = segments[1];
         rlPlayer.paused = false;
 

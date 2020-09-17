@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
+import './RLottie.css';
 
 class RLottie extends React.Component {
     componentDidMount() {

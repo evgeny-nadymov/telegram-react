@@ -93,6 +93,21 @@ class Caption extends React.Component {
         AuthStore.off('clientUpdateMonkeyPeek', this.onClientUpdateMonkeyPeek);
     }
 
+    playSegments = (segments, forceFlag) => {
+        const { current } = this.lottieRef;
+        if (!current) {
+            setTimeout(() => {
+                const { current } = this.lottieRef;
+                if (!current) return;
+
+                current.playSegments(segments, forceFlag);
+            }, 100);
+            return;
+        }
+
+        current.playSegments(segments, forceFlag);
+    };
+
     onClientUpdateMonkeyIdle = update => {
         const { idleData } = this.state;
 
@@ -103,22 +118,41 @@ class Caption extends React.Component {
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.playSegments([0, 179], true);
+                this.playSegments([0, 179], true);
             }
         );
+    };
+
+    getFrame = (length, paddingFrames, letterFrames, framesCount) => {
+        if (!length) {
+            return 0;
+        }
+
+        const lastAnimatedLetter = (framesCount - 2 * paddingFrames) / letterFrames;
+
+        let frames = paddingFrames + (length - 1) * letterFrames;
+        if (length > lastAnimatedLetter + 1) {
+            frames += paddingFrames;
+        }
+
+        return Math.min(frames, framesCount - 1);
     };
 
     onClientUpdateMonkeyTracking = update => {
         const { code, prevCode } = update;
         const { trackingData } = this.state;
 
-        const from = Math.min(20 * prevCode.length, 179);
-        const to = Math.min(20 * code.length, 179);
+        const FRAMES_COUNT = 180;
+        const LETTER_FRAMES = 10;
+        const PADDING_FRAMES = 20;
 
-        if (from === 179 && to === 179) {
+        const from = this.getFrame(prevCode.length, PADDING_FRAMES, LETTER_FRAMES, FRAMES_COUNT);
+        const to = this.getFrame(code.length, PADDING_FRAMES, LETTER_FRAMES, FRAMES_COUNT);
+
+        const isLastFrom = from === 0 || from === 179;
+        const isLastTo = to === 0 || to === 179;
+
+        if (isLastFrom && isLastTo) {
             return;
         }
 
@@ -129,10 +163,7 @@ class Caption extends React.Component {
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.playSegments([from, to], true);
+                this.playSegments([from, to], true);
             }
         );
     };
@@ -147,10 +178,7 @@ class Caption extends React.Component {
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.playSegments([0, 49], true);
+                this.playSegments([0, 49], true);
             }
         );
     };
@@ -170,13 +198,10 @@ class Caption extends React.Component {
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
                 if (peek) {
-                    current.playSegments([0, 15], true);
+                    this.playSegments([0, 15], true);
                 } else {
-                    current.playSegments([15, 33], true);
+                    this.playSegments([15, 33], true);
                 }
             }
         );
