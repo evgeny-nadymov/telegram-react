@@ -1273,82 +1273,64 @@ function download(file, obj, callback) {
 }
 
 export function getViewerMinithumbnail(media) {
-    if (!media) return [0, 0, null];
+    if (!media) return null;
 
     switch (media['@type']) {
         case 'animation': {
-            const { minithumbnail } = media;
-            if (minithumbnail) {
-                return [minithumbnail.width, minithumbnail.height, minithumbnail];
-            }
-            break;
+            return media.minithumbnail;
         }
         case 'document': {
-            const { minithumbnail } = media;
-            if (minithumbnail) {
-                return [minithumbnail.width, minithumbnail.height, minithumbnail];
-            }
-            break;
+            return media.minithumbnail;
         }
         case 'photo': {
-            const { minithumbnail } = media;
-            if (minithumbnail) {
-                return [minithumbnail.width, minithumbnail.height, minithumbnail];
-            }
-            break;
+            return media.minithumbnail;
         }
         case 'video': {
-            const { minithumbnail } = media;
-            if (minithumbnail) {
-                return [minithumbnail.width, minithumbnail.height, minithumbnail];
-            }
-            break;
+            return media.minithumbnail;
+        }
+        case 'videoNote': {
+            return media.minithumbnail;
         }
         default: {
-            return [0, 0, null];
+            return null;
         }
     }
-
-    return [0, 0, null];
 }
 
 function getViewerThumbnail(media) {
-    if (!media) return [0, 0, null];
+    if (!media) return null;
 
     switch (media['@type']) {
         case 'animation': {
-            const { thumbnail } = media;
-            if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.file];
-            }
-            break;
+            return media.thumbnail;
+        }
+        case 'audio': {
+            return media.album_cover_thumbnail;
         }
         case 'document': {
-            const { thumbnail } = media;
-            if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.file];
-            }
-            break;
+            return media.thumbnail;
         }
         case 'photo': {
-            return getViewerFile(media, PHOTO_SIZE);
+            const [width, height, file] = getViewerFile(media, PHOTO_SIZE);
+
+            return { '@type': 'thumbnail', format: { '@type': 'thumbnailFormatJpeg' }, file, width, height };
+        }
+        case 'sticker': {
+            return media.thumbnail;
         }
         case 'video': {
-            const { thumbnail } = media;
-            if (thumbnail) {
-                return [thumbnail.width, thumbnail.height, thumbnail.file];
-            }
-            break;
+            return media.thumbnail;
+        }
+        case 'videoNote': {
+            return media.thumbnail;
         }
         default: {
-            return [0, 0, null];
+            return null;
         }
     }
-
-    return [0, 0, null];
 }
 
-export function getMediaMiniPreview(chatId, messageId) {
+export function getMediaMinithumbnail(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return [0, 0, null];
 
@@ -1422,33 +1404,37 @@ export function getMediaMiniPreview(chatId, messageId) {
     return [0, 0, null];
 }
 
-function getMediaPreviewFile(chatId, messageId) {
+export function getMediaThumbnail(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
-    if (!message) return [0, 0, null];
+    if (!message) return null;
 
     const { content } = message;
-    if (!content) return [0, 0, null];
+    if (!content) return null;
 
     switch (content['@type']) {
         case 'messageAnimation': {
             const { animation } = content;
             if (animation && animation.thumbnail) {
-                return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.file];
+                return animation.thumbnail;
             }
             break;
         }
         case 'messageChatChangePhoto': {
-            return getMediaFile(chatId, messageId, PHOTO_SIZE);
+            const [width, height, file] = getMediaFile(chatId, messageId, PHOTO_SIZE);
+
+            return { '@type': 'thumbnail', format: 'thumbnailFormatJpeg', file, width, height };
         }
         case 'messageDocument': {
             const { document } = content;
-            if (document) {
-                return [50, 50, document.document];
+            if (document.thumbnail) {
+                return document.thumbnail;
             }
             break;
         }
         case 'messagePhoto': {
-            return getMediaFile(chatId, messageId, PHOTO_SIZE);
+            const [width, height, file] = getMediaFile(chatId, messageId, PHOTO_SIZE);
+
+            return { '@type': 'thumbnail', format: 'thumbnailFormatJpeg', file, width, height };
         }
         case 'messageText': {
             const { web_page } = content;
@@ -1456,19 +1442,21 @@ function getMediaPreviewFile(chatId, messageId) {
                 const { animation, document, video, photo } = web_page;
 
                 if (animation && animation.thumbnail) {
-                    return [animation.thumbnail.width, animation.thumbnail.height, animation.thumbnail.file];
+                    return animation.thumbnail;
                 }
 
-                if (document) {
-                    return [50, 50, document.document];
+                if (document && document.thumbnail) {
+                    return document.thumbnail;
                 }
 
                 if (video && video.thumbnail) {
-                    return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.file];
+                    return video.thumbnail;
                 }
 
                 if (photo) {
-                    return getMediaFile(chatId, messageId, PHOTO_SIZE);
+                    const [width, height, file] = getMediaFile(chatId, messageId, PHOTO_SIZE);
+
+                    return { '@type': 'thumbnail', format: 'thumbnailFormatJpeg', file, width, height };
                 }
             }
             break;
@@ -1476,16 +1464,16 @@ function getMediaPreviewFile(chatId, messageId) {
         case 'messageVideo': {
             const { video } = content;
             if (video && video.thumbnail) {
-                return [video.thumbnail.width, video.thumbnail.height, video.thumbnail.file];
+                return video.thumbnail;
             }
             break;
         }
         default: {
-            return [0, 0, null];
+            return null;
         }
     }
 
-    return [0, 0, null];
+    return null;
 }
 
 function getViewerFile(media, size) {
@@ -2523,7 +2511,6 @@ export {
     saveOrDownload,
     download,
     getMediaFile,
-    getMediaPreviewFile,
     isGifMimeType,
     getSrc,
     getBlob,

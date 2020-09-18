@@ -214,6 +214,7 @@ class Animation extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
+        const isVideoThumbnail = thumbnail && thumbnail.format['@type'] === 'thumbnailFormatMpeg4';
         const isBlurred = isBlurredThumbnail(thumbnail, displaySize);
 
         const src = getSrc(animation);
@@ -263,11 +264,22 @@ class Animation extends React.Component {
                     { !playing && (
                         <>
                             { thumbnailSrc && (
-                                <img
-                                    className={classNames('animation-thumbnail', { 'media-blurred': isBlurred })}
-                                    src={thumbnailSrc}
-                                    alt=''
-                                />
+                                <>
+                                    { isVideoThumbnail ? (
+                                        <video
+                                            className={classNames('animation-thumbnail', { 'media-blurred': isBlurred })}
+                                            autoPlay={false}
+                                        >
+                                            <source src={thumbnailSrc} type='video/mp4'/>
+                                        </video>
+                                    ) : (
+                                        <img
+                                            className={classNames('animation-thumbnail', { 'media-blurred': isBlurred })}
+                                            src={thumbnailSrc}
+                                            alt=''
+                                        />
+                                    ) }
+                                </>
                             )}
                             {type !== 'picker' && type !== 'preview' && <div className='animation-meta'>{getFileSize(animation)}</div>}
                         </>

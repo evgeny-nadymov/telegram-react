@@ -7,14 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import Player from '../Player/Player';
-import { getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
+import { getMediaFile, getMediaMinithumbnail, getMediaThumbnail, getSrc } from '../../Utils/File';
 import { getText, isAnimationMessage, isEmbedMessage, isVideoMessage } from '../../Utils/Message';
-import { isBlurredThumbnail } from '../../Utils/Media';
+import { getThumb } from '../../Utils/Media';
 import { MEDIA_VIEWER_VIDEO_MAX_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -35,11 +34,8 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size, t } = props;
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
-            let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
-            if (thumbnail){
-                thumbnail = FileStore.get(thumbnail.id) || thumbnail;
-            }
-            const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getMediaMiniPreview(chatId, messageId);
+            const thumbnail = getMediaThumbnail(chatId, messageId);
+            const minithumbnail = getMediaMinithumbnail(chatId, messageId);
 
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
@@ -71,11 +67,7 @@ class MediaViewerContent extends React.Component {
                 supportsStreaming,
                 mimeType,
                 text,
-                thumbnailWidth,
-                thumbnailHeight,
                 thumbnail,
-                minithumbnailWidth,
-                minithumbnailHeight,
                 minithumbnail,
                 webPage
             };
@@ -159,11 +151,9 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file] = getMediaPreviewFile(chatId, messageId);
+            const thumbnail = getMediaThumbnail(chatId, messageId);
             this.setState({
-                thumbnailWidth: width,
-                thumbnailHeight: height,
-                thumbnail: file
+                thumbnail
             });
         }
     };
@@ -213,6 +203,8 @@ class MediaViewerContent extends React.Component {
         source.loadNextBuffer();
     };
 
+
+
     render() {
         const { chatId, messageId } = this.props;
         const {
@@ -223,8 +215,6 @@ class MediaViewerContent extends React.Component {
             supportsStreaming,
             mimeType,
             text,
-            thumbnailWidth,
-            thumbnailHeight,
             minithumbnail,
             thumbnail,
             webPage,
@@ -234,8 +224,7 @@ class MediaViewerContent extends React.Component {
         if (!file) return null;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight }) : Boolean(miniSrc);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
 
         const isEmbed = isEmbedMessage(chatId, messageId);
         const isVideo = isVideoMessage(chatId, messageId);
@@ -251,6 +240,7 @@ class MediaViewerContent extends React.Component {
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
+        const thumb = getThumb(thumbnail, minithumbnail, videoWidth, videoHeight);
 
         if (isVideo) {
             content = (
@@ -268,26 +258,7 @@ class MediaViewerContent extends React.Component {
                     >
                         {source}
                     </Player>
-                    {!isPlaying && !supportsStreaming &&
-                        ((thumbnailSrc || miniSrc) ? (
-                            <img
-                                className={classNames('media-viewer-content-video-thumbnail', {
-                                    'media-blurred': isBlurred
-                                })}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                                width={videoWidth}
-                                height={videoHeight}
-                            />
-                        ) : (
-                            <div
-                                className='media-viewer-content-video-thumbnail'
-                                style={{
-                                    width: videoWidth,
-                                    height: videoHeight
-                                }}
-                            />
-                        ))}
+                    {!isPlaying && !supportsStreaming && thumb}
                 </div>
             );
         } else if (isAnimation) {
@@ -321,26 +292,7 @@ class MediaViewerContent extends React.Component {
                     >
                         {source}
                     </video>
-                    {!isPlaying &&
-                    ((thumbnailSrc || miniSrc) ? (
-                        <img
-                            className={classNames('media-viewer-content-video-thumbnail', {
-                                'media-blurred': isBlurred
-                            })}
-                            src={thumbnailSrc || miniSrc}
-                            alt=''
-                            width={videoWidth}
-                            height={videoHeight}
-                        />
-                    ) : (
-                        <div
-                            className='media-viewer-content-video-thumbnail'
-                            style={{
-                                width: videoWidth,
-                                height: videoHeight
-                            }}
-                        />
-                    ))}
+                    {!isPlaying && thumb}
                 </div>
             );
         } else if (webPage && webPage.embed_url) {

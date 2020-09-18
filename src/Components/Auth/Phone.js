@@ -222,6 +222,9 @@ class Phone extends React.Component {
         if (!code) return;
 
         const [phone, country] = this.getPhoneCountry(code);
+        if (this.state.phone) {
+            return;
+        }
 
         this.setState({ phone, country });
     };

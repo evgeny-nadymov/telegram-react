@@ -18,6 +18,7 @@ class AnimationPreview extends React.Component {
         return (
             <div className='sticker-preview'>
                 <Animation
+                    type='preview'
                     stretch={true}
                     animation={animation}
                     style={{ borderRadius: 0 }}

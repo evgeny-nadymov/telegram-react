@@ -5,8 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { PHOTO_DISPLAY_SIZE, THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
-import MessageStore from '../Stores/MessageStore';
+import React from 'react';
 import Animation from '../Components/Message/Media/Animation';
 import Audio from '../Components/Message/Media/Audio';
 import Call from '../Components/Message/Media/Call';
@@ -21,10 +20,13 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
-import React from 'react';
-import { getRandomInt, readImageSize } from './Common';
-import FileStore from '../Stores/FileStore';
 import { ID3Parser } from '../Components/Player/Steaming/MP3/ID3Parser';
+import { getRandomInt, readImageSize } from './Common';
+import { PHOTO_DISPLAY_SIZE, THUMBNAIL_BLURRED_SIZE_90 } from '../Constants';
+import FileStore from '../Stores/FileStore';
+import MessageStore from '../Stores/MessageStore';
+import { getSrc } from './File';
+import classNames from 'classnames';
 
 const waveformCache = new Map();
 
@@ -51,6 +53,91 @@ export function getNormalizedWaveform(data) {
     waveformCache.set(data, waveform);
 
     return waveform;
+}
+
+export function getThumb(thumbnail, minithumbnail, width, height) {
+    const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
+    const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
+    const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnail.width, height: thumbnail.height }) : Boolean(miniSrc);
+
+    let thumb;
+    if (thumbnailSrc) {
+        switch (thumbnail.format['@type']) {
+            case 'thumbnailFormatJpeg':
+            case 'thumbnailFormatPng':
+            case 'thumbnailFormatWebp':
+            case 'thumbnailFormatGif': {
+                thumb = (
+                    <img
+                        className={classNames('media-viewer-content-video-thumbnail', {
+                            'media-blurred': isBlurred
+                        })}
+                        src={thumbnailSrc}
+                        alt=''
+                        width={width}
+                        height={height}
+                    />
+                );
+                break;
+            }
+            case 'thumbnailFormatTgs': {
+                thumb = (
+                    <div
+                        className='media-viewer-content-video-thumbnail'
+                        style={{ width, height }}
+                    />
+                );
+                break;
+            }
+            case 'thumbnailFormatMpeg4': {
+                thumb = (
+                    <video
+                        className={classNames('media-viewer-content-video-thumbnail', {
+                            'media-blurred': isBlurred
+                        })}
+                        src={thumbnailSrc}
+                        autoPlay={false}
+                        loop
+                        playsInline
+                        width={width}
+                        height={height}
+                    >
+                        <source src={thumbnailSrc} type='video/mp4'/>
+                    </video>
+                );
+                break;
+            }
+            default: {
+                thumb = (
+                    <div
+                        className='media-viewer-content-video-thumbnail'
+                        style={{ width, height }}
+                    />
+                );
+            }
+        }
+    } else if (miniSrc) {
+        thumb = (
+            <img
+                className={classNames('media-viewer-content-video-thumbnail', {
+                    'media-blurred': isBlurred
+                })}
+                src={miniSrc}
+                alt=''
+                width={width}
+                height={height}
+            />
+        );
+    } else {
+        thumb = (
+            <div
+                className='media-viewer-content-video-thumbnail'
+                style={{ width, height }}
+            />
+        );
+    }
+
+    return thumb;
 }
 
 export function getCallTitle(chatId, messageId) {

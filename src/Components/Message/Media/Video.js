@@ -80,7 +80,7 @@ class Video extends React.Component {
                         className={classNames('video-thumbnail', { 'media-blurred': isBlurred })}
                         src={thumbnailSrc}
                         alt=''
-                        />
+                    />
                 )}
                 <div className='video-play'>
                     <PlayArrowIcon />

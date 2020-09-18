@@ -40,7 +40,7 @@ Define its value to be the string `http://{username}.github.io/{repo-name}`, whe
     
 ```js
 //...
-"homepage": "http://evgeny-nadymov.github.io/telegram-react"
+"homepage": "https://evgeny-nadymov.github.io/telegram-react"
 ```
     
 2. **Generate a *production build* of your app and deploy it to GitHub Pages.**
