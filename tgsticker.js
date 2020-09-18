@@ -592,8 +592,6 @@ window.RLottie = (function () {
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return;
 
-        console.log('[rlottie] playSegments', [reqId, segments[0], segments[1], forceFlag]);
-
         if (!segments || segments.length < 2) return;
 
         rlPlayer.segmentId = ++segmentId;
