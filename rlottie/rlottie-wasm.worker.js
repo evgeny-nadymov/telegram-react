@@ -110,9 +110,9 @@ const queryableFunctions = {
             try {
                 const json = pako.inflate(data, {to: 'string'});
                 const json_parsed = JSON.parse(json);
-                if (!json_parsed.tgs) {
-                    throw new Error('Invalid file');
-                }
+                // if (!json_parsed.tgs) {
+                //     throw new Error('Invalid file');
+                // }
                 items[reqId] = new RLottieItem(reqId, json, width, height, json_parsed.fr);
             } catch (e) {
                 return console.warn('Invalid file ' + url);
@@ -125,9 +125,9 @@ const queryableFunctions = {
             try {
                 const json = pako.inflate(e.target.result, { to: 'string' });
                 const json_parsed = JSON.parse(json);
-                if (!json_parsed.tgs) {
-                    throw new Error('Invalid file');
-                }
+                // if (!json_parsed.tgs) {
+                //     throw new Error('Invalid file');
+                // }
                 items[reqId] = new RLottieItem(reqId, json, width, height, json_parsed.fr);
             } catch (e) {
                 return console.warn('Invalid blob ' + reqId);
@@ -138,9 +138,9 @@ const queryableFunctions = {
     loadFromJson: function(reqId, json, width, height) {
         try {
             const json_parsed = JSON.parse(json);
-            if (!json_parsed.tgs) {
-                throw new Error('Invalid file');
-            }
+            // if (!json_parsed.tgs) {
+            //     throw new Error('Invalid file');
+            // }
             items[reqId] = new RLottieItem(reqId, json, width, height, json_parsed.fr);
         } catch (e) {
             return console.warn('Invalid file ' + url);
