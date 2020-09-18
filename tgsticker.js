@@ -317,12 +317,13 @@ window.RLottie = (function () {
             }
         }
 
-        const frameData = shift?
+        const frameData = shift && renderPlayer?
             data.frameQueue.shift() :
             (data.frameQueue.queue.length > 0 ? data.frameQueue.queue[0] : null);
 
         if (frameData !== null) {
             const { frameNo, frame } = frameData;
+            // console.log('[rlottie] dorender', [frameNo, renderPlayer]);
 
             if (renderPlayer) {
                 doRender(rlPlayer, frame, frameNo);
