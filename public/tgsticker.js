@@ -164,15 +164,15 @@ window.RLottie = (function () {
     function initPlayer(el, options) {
         options = options || {};
         const rlPlayer = {};
-        let url = null;
+        let fileId = null;
         if (options.fileId && (options.animationData || options.stringData)) {
-            url = options.fileId;
+            fileId = options.fileId;
         }
 
         options.maxDeviceRatio = 1.5;
 
-        if (!url) {
-            console.warn('url not found');
+        if (!fileId) {
+            console.warn('fileId not found');
             return;
         }
         let pic_width = options.width;
@@ -188,7 +188,7 @@ window.RLottie = (function () {
 
         const curDeviceRatio = options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
 
-        rlPlayer.url = url;
+        rlPlayer.fileId = fileId;
         rlPlayer.reqId = ++reqId;
         rlPlayer.el = el;
         rlPlayer.width = pic_width * curDeviceRatio;
@@ -228,13 +228,13 @@ window.RLottie = (function () {
             } else if (options.animationData) {
                 rWorker.sendQuery('loadFromBlob', rlPlayer.reqId, options.animationData, rlPlayer.width, rlPlayer.height);
             } else {
-                rWorker.sendQuery('loadFromData', rlPlayer.reqId, url, rlPlayer.width, rlPlayer.height);
+                rWorker.sendQuery('loadFromData', rlPlayer.reqId, fileId, rlPlayer.width, rlPlayer.height);
             }
         } else {
             let activePlayer = null;
             for (let key in rlottie.players) {
                 const pl = rlottie.players[key];
-                if (pl && pl.url === url && pl.width === rlPlayer.width && pl.height === rlPlayer.height && rlPlayer !== pl) {
+                if (pl && pl.fileId === fileId && pl.width === rlPlayer.width && pl.height === rlPlayer.height && rlPlayer !== pl) {
                     activePlayer = pl;
                     break;
                 }
@@ -274,9 +274,9 @@ window.RLottie = (function () {
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return null;
 
-        const { url, width, height } = rlPlayer;
+        const { fileId, width, height } = rlPlayer;
 
-        return `${reqId}_${url}_${width}_${height}`;
+        return `${reqId}_${fileId}_${width}_${height}`;
     }
 
     function render(rlPlayer, checkViewport, shift) {
@@ -304,7 +304,7 @@ window.RLottie = (function () {
             if (isInViewport === undefined || checkViewport) {
                 const rect = rlPlayer.el.getBoundingClientRect();
                 if (inViewportFunc) {
-                    isInViewport = inViewportFunc(rlPlayer.url, rect);
+                    isInViewport = inViewportFunc(rlPlayer.fileId, rect);
                 } else {
                     if (rect.bottom < 0 ||
                         rect.right < 0 ||
@@ -433,7 +433,7 @@ window.RLottie = (function () {
             for (let key in rlottie.players) {
                 const rlPlayer = rlottie.players[key];
                 if (rlPlayer && rlPlayer.forceRender) {
-                    const dataKey2 = `${rlPlayer.url}_${rlPlayer.width}_${rlPlayer.height}`;
+                    const dataKey2 = `${rlPlayer.fileId}_${rlPlayer.width}_${rlPlayer.height}`;
                     if (dataKey === dataKey2) {
                         doRender(rlPlayer, frame, frameNo);
                     }
