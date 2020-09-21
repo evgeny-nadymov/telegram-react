@@ -17,7 +17,6 @@ window.RLottie = (function () {
 
     rlottie.Api = {};
     rlottie.players = Object.create(null);
-    rlottie.urls = Object.create(null);
     rlottie.events = Object.create(null);
     rlottie.frames = new Map();
     rlottie.WORKERS_LIMIT = 4;
@@ -66,16 +65,15 @@ window.RLottie = (function () {
         const checkViewport = !checkViewportDate || (now - checkViewportDate) > 1000;
 
         const shiftPlayer = new Map();
-        for (let key in rlottie.players) {
-            const rlPlayer = rlottie.players[key];
-            const dataKey = `${rlPlayer.url}_${rlPlayer.width}_${rlPlayer.height}`
-            shiftPlayer.set(dataKey, key);
+        for (let reqId in rlottie.players) {
+            const dataKey = getDataKey(reqId);
+            shiftPlayer.set(dataKey, reqId);
         }
+
         for (let key in rlottie.players) {
             const rlPlayer = rlottie.players[key];
             if (rlPlayer) {
-                const { url, width, height } = rlPlayer;
-                const dataKey = `${url}_${width}_${height}`;
+                const dataKey = getDataKey(key);
                 const data = rlottie.frames.get(dataKey);
                 if (data && data.frameCount) {
                     delta = now - data.frameThen;
@@ -105,8 +103,7 @@ window.RLottie = (function () {
         for (const key in rlottie.players) {
             const rlPlayer = rlottie.players[key];
             if (rlPlayer) {
-                const { url, width, height } = rlPlayer;
-                const dataKey = `${url}_${width}_${height}`;
+                const dataKey = getDataKey(key);
                 const data = rlottie.frames.get(dataKey);
                 if (data && data.frameCount) {
                     isEmpty = false;
@@ -198,7 +195,6 @@ window.RLottie = (function () {
         rlPlayer.height = pic_height * curDeviceRatio;
         rlPlayer.imageData = new ImageData(rlPlayer.width, rlPlayer.height);
         rlottie.players[reqId] = rlPlayer;
-        rlottie.urls[reqId] = { url: rlPlayer.url, width: rlPlayer.width, height: rlPlayer.height };
 
         rlPlayer.canvas = document.createElement('canvas');
         rlPlayer.canvas.width = pic_width * curDeviceRatio;
@@ -208,7 +204,7 @@ window.RLottie = (function () {
         rlPlayer.context = rlPlayer.canvas.getContext('2d');
         rlPlayer.forceRender = true;
 
-        const dataKey = `${rlPlayer.url}_${rlPlayer.width}_${rlPlayer.height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
         if (!data) {
             const rWorker = rlottieWorkers[curWorkerNum++];
@@ -274,8 +270,17 @@ window.RLottie = (function () {
         rlottieWorkers = [];
     }
 
+    function getDataKey(reqId) {
+        const rlPlayer = rlottie.players[reqId];
+        if (!rlPlayer) return null;
+
+        const { url, width, height } = rlPlayer;
+
+        return `${reqId}_${url}_${width}_${height}`;
+    }
+
     function render(rlPlayer, checkViewport, shift) {
-        const dataKey = `${rlPlayer.url}_${rlPlayer.width}_${rlPlayer.height}`;
+        const dataKey = getDataKey(rlPlayer.reqId);
         const data = rlottie.frames.get(dataKey);
 
         let renderPlayer = true;
@@ -317,12 +322,13 @@ window.RLottie = (function () {
             }
         }
 
-        const frameData = shift?
+        const frameData = shift && renderPlayer?
             data.frameQueue.shift() :
             (data.frameQueue.queue.length > 0 ? data.frameQueue.queue[0] : null);
 
         if (frameData !== null) {
             const { frameNo, frame } = frameData;
+            // console.log('[rlottie] dorender', [frameNo, renderPlayer]);
 
             if (renderPlayer) {
                 doRender(rlPlayer, frame, frameNo);
@@ -389,8 +395,7 @@ window.RLottie = (function () {
     }
 
     function requestFrame(reqId, frameNo, segmentId) {
-        const { url, width, height } = rlottie.urls[reqId];
-        const dataKey = `${url}_${width}_${height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
 
         const frame = data.frames[frameNo];
@@ -407,8 +412,7 @@ window.RLottie = (function () {
     }
 
     function onFrame(reqId, frameNo, frame, segmentId) {
-        const { url, width, height } = rlottie.urls[reqId];
-        const dataKey = `${url}_${width}_${height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
 
         if (data.segmentId !== segmentId) {
@@ -467,8 +471,7 @@ window.RLottie = (function () {
     }
 
     function onLoaded(reqId, frameCount, fps) {
-        const { url, width, height } = rlottie.urls[reqId];
-        const dataKey = `${url}_${width}_${height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
 
         let frameNo = 0;
@@ -522,8 +525,7 @@ window.RLottie = (function () {
     }
 
     rlottie.hasFirstFrame = function (reqId) {
-        const { url, width, height } = rlottie.urls[reqId];
-        const dataKey = `${url}_${width}_${height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
 
         return data && Boolean(data.frames[0]);
@@ -599,8 +601,7 @@ window.RLottie = (function () {
         rlPlayer.to = segments[1];
         rlPlayer.paused = false;
 
-        const { url, width, height } = rlPlayer;
-        const dataKey = `${url}_${width}_${height}`;
+        const dataKey = getDataKey(reqId);
         const data = rlottie.frames.get(dataKey);
         if (data.fps) {
             data.frameQueue = new FrameQueue(data.fps / 4);

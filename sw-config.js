@@ -13,7 +13,8 @@ module.exports = {
     navigateFallbackWhitelist: [ /^(?!\/__).*/ ],
     staticFileGlobsIgnorePatterns: [ /\.map$/, /asset-manifest\.json$/ ],
     staticFileGlobs:
-        [   './build/libwebp/*.*',
+        [   './build/rlottie/*.*',
+            './build/libwebp/*.*',
             './build/**/**.html',
             './build/static/js/*.js',
             './build/static/css/*.css',
