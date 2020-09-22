@@ -209,7 +209,7 @@ class Caption extends React.Component {
 
     render() {
         const { state } = this.props;
-        const { fileId, data } = this.state;
+        const { fileId, data, trackingData, closeData, peekData, idleData } = this.state;
 
         let control = null;
         switch (state['@type']) {
@@ -238,16 +238,52 @@ class Caption extends React.Component {
                                         autoplay: false,
                                         loop: false,
                                         fileId,
-                                        stringData: data,
-                                        renderer: 'svg',
-                                        rendererSettings: {
-                                            preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                            clearCanvas: false,
-                                            progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                            hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                            className: 'auth-caption-lottie'
-                                        }
+                                        stringData: data
                                     }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'tracking',
+                                        stringData: trackingData
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'close',
+                                        stringData: closeData
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'peek',
+                                        stringData: peekData
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'idle',
+                                        stringData: idleData
+                                    }}
+                                    style={{ display: 'none' }}
                                 />
                             </React.Suspense>
                         )}

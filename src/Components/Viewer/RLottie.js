@@ -166,7 +166,8 @@ class RLottie extends React.Component {
             title,
             onClick,
             onMouseEnter,
-            onMouseOut
+            onMouseOut,
+            style
         } = this.props;
 
         const lottieStyles = {
@@ -175,7 +176,7 @@ class RLottie extends React.Component {
             overflow: 'hidden',
             // margin: '0 auto',
             outline: 'none',
-            ...this.props.style
+            ...style
         };
 
         return (

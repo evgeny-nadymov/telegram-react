@@ -252,14 +252,7 @@ class Filters extends React.Component {
                                             autoplay: true,
                                             loop: false,
                                             fileId: 'filters',
-                                            stringData: data,
-                                            renderer: 'svg',
-                                            rendererSettings: {
-                                                preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                                clearCanvas: false,
-                                                progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                                hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                            }
+                                            stringData: data
                                         }}
                                         onClick={this.handleAnimationClick}
                                     />
