@@ -248,7 +248,8 @@ class Caption extends React.Component {
                                         autoplay: false,
                                         loop: false,
                                         fileId: 'tracking',
-                                        stringData: trackingData
+                                        stringData: trackingData,
+                                        queueLength: 1
                                     }}
                                     style={{ display: 'none' }}
                                 />
@@ -259,7 +260,8 @@ class Caption extends React.Component {
                                         autoplay: false,
                                         loop: false,
                                         fileId: 'close',
-                                        stringData: closeData
+                                        stringData: closeData,
+                                        queueLength: 1
                                     }}
                                     style={{ display: 'none' }}
                                 />
@@ -270,7 +272,8 @@ class Caption extends React.Component {
                                         autoplay: false,
                                         loop: false,
                                         fileId: 'peek',
-                                        stringData: peekData
+                                        stringData: peekData,
+                                        queueLength: 1
                                     }}
                                     style={{ display: 'none' }}
                                 />
@@ -281,7 +284,8 @@ class Caption extends React.Component {
                                         autoplay: false,
                                         loop: false,
                                         fileId: 'idle',
-                                        stringData: idleData
+                                        stringData: idleData,
+                                        queueLength: 1
                                     }}
                                     style={{ display: 'none' }}
                                 />

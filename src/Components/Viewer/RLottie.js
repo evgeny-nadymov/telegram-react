@@ -13,34 +13,26 @@ class RLottie extends React.Component {
         const { options, eventListeners } = this.props;
 
         const {
-            url,
             loop,
             autoplay,
             animationData,
             stringData,
-            rendererSettings,
-            segments
+            queueLength
         } = options;
 
         this.options = {
             container: this.el,
-            renderer: 'canvas',
             loop: Boolean(loop),
             autoplay: Boolean(autoplay),
-            segments: Boolean(segments),
             animationData,
             stringData,
-            rendererSettings
+            queueLength
         };
 
         this.options = { ...this.options, ...options };
-        const data = this.options.animationData;
-        const fileId = this.options.fileId;
-        // console.log('[RLottie] ctor loadAnimation start', [fileId, data]);
         window.RLottie.loadAnimation(this.options, anim => {
             this.anim = anim;
 
-            // console.log('[Rlottie] ctor loadAnimation', [this.anim, window.RLottie.hasFirstFrame(this.anim)])
             if (window.RLottie.hasFirstFrame(this.anim)) {
                 if (!eventListeners) return;
 
