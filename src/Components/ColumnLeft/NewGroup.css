@@ -31,4 +31,5 @@
     align-items: center;
     justify-content: center;
     transform: scaleX(-1);
+    z-index: 1;
 }
