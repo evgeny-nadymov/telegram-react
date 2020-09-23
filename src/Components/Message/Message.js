@@ -19,6 +19,7 @@ import MessageAuthor from './MessageAuthor';
 import MessageMenu from './MessageMenu';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
+import EmptyTile from '../Tile/EmptyTile';
 import UnreadSeparator from './UnreadSeparator';
 import WebPage from './Media/WebPage';
 import {
@@ -29,7 +30,7 @@ import {
     showMessageForward,
     isMetaBubble,
     canMessageBeForwarded,
-    getMessageStyle, isMediaContent
+    getMessageStyle
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
 import { canSendMessages, isChannelChat, isPrivateChat } from '../../Utils/Chat';
@@ -43,8 +44,6 @@ import {
 } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './Message.css';
-import StubMessage from './StubMessage';
-import EmptyTile from '../Tile/EmptyTile';
 
 class Message extends Component {
     constructor(props) {
@@ -468,19 +467,17 @@ class Message extends Component {
                                         meta={inlineMeta}
                                     />
                                 )}
-                                {withBubble && (
-                                    <Meta
-                                        className={classNames('meta-text', {
-                                            'meta-bubble': isMetaBubble(chatId, messageId)
-                                        })}
-                                        chatId={chatId}
-                                        messageId={messageId}
-                                        date={date}
-                                        editDate={edit_date}
-                                        views={views}
-                                        onDateClick={this.handleDateClick}
-                                    />
-                                )}
+                                <Meta
+                                    className={classNames('meta-text', {
+                                        'meta-bubble': isMetaBubble(chatId, messageId)
+                                    })}
+                                    chatId={chatId}
+                                    messageId={messageId}
+                                    date={date}
+                                    editDate={edit_date}
+                                    views={views}
+                                    onDateClick={this.handleDateClick}
+                                />
                             </div>
                             <div className='message-tile-padding' />
                         </div>
