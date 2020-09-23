@@ -329,9 +329,11 @@ class Dialogs extends Component {
                 openSearch: true,
                 searchChatId: chatId,
                 searchText: null,
+                openArchive: false,
+                openContacts: false,
                 openSettings: false,
-                openActiveSessions: false,
-                openContacts: false
+                openNewGroup: false,
+                openNewChannel: false,
             },
             () => {
                 if (header) {
