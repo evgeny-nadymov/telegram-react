@@ -21,7 +21,6 @@
     /*border-color: var(--border);*/
     padding: 4px 0 25px;
     width: calc(100% - 22px);
-    max-width: 695px;
     margin: 0 auto;
 }
 
