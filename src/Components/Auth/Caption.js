@@ -201,7 +201,7 @@ class Caption extends React.Component {
                 if (peek) {
                     this.playSegments([0, 15], true);
                 } else {
-                    this.playSegments([15, 33], true);
+                    this.playSegments([15, 0], true);
                 }
             }
         );

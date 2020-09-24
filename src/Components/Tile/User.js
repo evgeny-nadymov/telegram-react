@@ -37,6 +37,11 @@ class User extends React.Component {
         const { userId, showStatus } = this.props;
 
         const user = UserStore.get(userId);
+        if (!user) {
+            console.error('[user] can\'t find', userId);
+            return null;
+        }
+
         const { is_contact, username } = user;
 
         return (

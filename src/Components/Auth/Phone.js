@@ -446,7 +446,7 @@ class Phone extends React.Component {
                     debug={false}
                     id='country-select'
                     noOptionsText={t('NoResult')}
-                    options={data}
+                    options={data || []}
                     disabled={loading}
                     autoHighlight
                     getOptionLabel={option => option.name}
