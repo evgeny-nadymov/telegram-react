@@ -18,6 +18,7 @@ import { openChat } from '../../Actions/Client';
 import { modalManager } from '../../Utils/Modal';
 import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
 import MessageStore from '../../Stores/MessageStore';
+import OptionStore from '../../Stores/OptionStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './SafeLink.css';
 
@@ -84,7 +85,30 @@ class SafeLink extends React.Component {
             .replace('https://', '')
             .replace('http://', '');
 
-        return lowerCaseUrl.startsWith('t.me') || lowerCaseUrl.startsWith('tg://');
+        const tMeUrl = OptionStore.get('t_me_url')
+            .value
+            .toLowerCase()
+            .replace('https://', '')
+            .replace('http://', '');
+
+        return lowerCaseUrl.startsWith('t.me/') || lowerCaseUrl.startsWith('tg://') || lowerCaseUrl.startsWith(tMeUrl);
+    }
+
+    isAddStickersLink(url) {
+        if (!url) return false;
+
+        const lowerCaseUrl = url
+            .toLowerCase()
+            .replace('https://', '')
+            .replace('http://', '');
+
+        const tMeUrl = OptionStore.get('t_me_url')
+            .value
+            .toLowerCase()
+            .replace('https://', '')
+            .replace('http://', '');
+
+        return lowerCaseUrl.startsWith('t.me/addstickers/') || lowerCaseUrl.startsWith(tMeUrl + 'addstickers/');
     }
 
     handleSafeClick = async event => {
@@ -92,7 +116,31 @@ class SafeLink extends React.Component {
 
         const { onClick, url: href } = this.props;
 
-        if (this.isTelegramLink(href)) {
+        if (this.isAddStickersLink(href)) {
+            event.preventDefault();
+            try {
+                const nameIndex = href.toLowerCase().indexOf('/addstickers/') + '/addstickers/'.length;
+                if (nameIndex !== -1) {
+                    const name = href.substr(nameIndex);
+
+                    const stickerSet = await TdLibController.send({
+                        '@type': 'searchStickerSet',
+                        name
+                    });
+
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateStickerSet',
+                        stickerSet
+                    });
+                }
+            } catch (error) {
+                console.log('[safeLink] messageLinkInfo error', error);
+            }
+
+            if (onClick) {
+                onClick(event);
+            }
+        } else if (this.isTelegramLink(href)) {
             event.preventDefault();
             try {
                 const messageLinkInfo = await TdLibController.send({
