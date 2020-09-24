@@ -23,26 +23,6 @@ import AppStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Password.css';
 
-function debounce(func, wait, immediate) {
-    let timeout;
-    return function() {
-        let context = this,
-            args = arguments;
-        let later = function() {
-            timeout = null;
-            if (!immediate) {
-                func.apply(context, args);
-            }
-        };
-        let callNow = immediate && !timeout;
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-        if (callNow) {
-            func.apply(context, args);
-        }
-    };
-}
-
 class Password extends React.Component {
     constructor(props) {
         super(props);
@@ -55,7 +35,6 @@ class Password extends React.Component {
         };
 
         this.inputRef = React.createRef();
-        this.sendMonkeyPeek = debounce(this.sendMonkeyPeek, 200, false);
     }
 
     componentDidMount() {
@@ -120,15 +99,17 @@ class Password extends React.Component {
     };
 
     handleClickShowPassword = () => {
-        this.setState({ showPassword: !this.state.showPassword });
+        const { showPassword } = this.state;
 
-        this.sendMonkeyPeek();
+        this.setState({ showPassword: !showPassword });
+
+        this.sendMonkeyPeek(!showPassword);
     };
 
-    sendMonkeyPeek() {
+    sendMonkeyPeek(peek) {
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMonkeyPeek',
-            peek: this.state.showPassword
+            peek
         });
     }
 

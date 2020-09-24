@@ -346,6 +346,7 @@ window.RLottie = (function () {
     }
 
     function doRender(rlPlayer, frame, frameNo) {
+        // console.log('[rlottie] doRender', frameNo);
         rlPlayer.frameNo = frameNo;
         rlPlayer.forceRender = false;
         rlPlayer.imageData.data.set(frame);
@@ -580,6 +581,7 @@ window.RLottie = (function () {
     }
 
     rlottie.playSegments = function (reqId, segments, forceFlag) {
+        // console.log('[rlottie] playSegments', segments);
         const rlPlayer = rlottie.players[reqId];
         if (!rlPlayer) return;
 
