@@ -17,6 +17,7 @@
 
 .shared-photos-list {
     padding: 6px;
+    box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;

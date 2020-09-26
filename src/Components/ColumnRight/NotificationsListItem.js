@@ -7,13 +7,10 @@
 
 import React from 'react';
 import { withTranslation } from 'react-i18next';
+import Checkbox from '@material-ui/core/Checkbox';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
-import Switch from '@material-ui/core/Switch';
 import Typography from '@material-ui/core/Typography';
 import Notifications from '../ColumnMiddle/Notifications';
 
@@ -23,18 +20,25 @@ class NotificationsListItem extends Notifications {
         const { isMuted } = this.state;
 
         return (
-            <ListItem button className='list-item' onClick={this.handleSetChatNotifications}>
-                <ListItemIcon>{!isMuted ? <NotificationsActiveIcon /> : <NotificationsIcon />}</ListItemIcon>
+            <ListItem button className='list-item-rounded' onClick={this.handleSetChatNotifications}>
+                <ListItemIcon>
+                    <Checkbox
+                        edge='start'
+                        checked={!isMuted}
+                        color='primary'
+                        tabIndex={-1}
+                        disableRipple
+                        onChange={this.handleSetChatNotifications}
+                    />
+                </ListItemIcon>
                 <ListItemText
                     primary={
                         <Typography variant='inherit' noWrap>
                             {t('Notifications')}
                         </Typography>
                     }
+                    secondary={!isMuted ? t('PopupEnabled') : t('PopupDisabled')}
                 />
-                <ListItemSecondaryAction>
-                    <Switch color='primary' onChange={this.handleSetChatNotifications} checked={!isMuted} />
-                </ListItemSecondaryAction>
             </ListItem>
         );
     }

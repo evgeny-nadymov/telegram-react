@@ -36,6 +36,7 @@ class StickersPickerHeader extends React.Component {
     onClientUpdateStickerSetPosition = update => {
         const { position } = update;
 
+        // console.log('[header] setPosition', position);
         this.setState({ position });
     };
 
@@ -100,6 +101,7 @@ class StickersPickerHeader extends React.Component {
     handleSelect = sticker => {
         const { stickers, onSelect } = this.props;
 
+        // console.log('[header] handleSelect', stickers.indexOf(sticker));
         onSelect(stickers.indexOf(sticker));
     };
 

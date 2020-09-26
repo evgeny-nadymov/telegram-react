@@ -49,7 +49,7 @@ class DialogListItem extends React.Component {
             return true;
         }
 
-        // console.log('[vl] UserListItem.shouldUpdate false');
+        // console.log('[vl] UserListItem.shouldUpdate false', nextProps, this.props);
         return false;
     }
 
@@ -287,7 +287,12 @@ class DialogsList extends React.Component {
             }
         } else {
             if (currentIndex === -1) {
-                newChatIds.push(chat_id);
+                if (this.loading) {
+                    console.error('[vl] skip add while getChats', update);
+                    // TODO: check and add if within loaded part
+                } else {
+                    newChatIds.push(chat_id);
+                }
             }
         }
 
@@ -488,6 +493,8 @@ class DialogsList extends React.Component {
                 dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
             }
         }
+
+        console.log('[vl] render', this.source);
 
         return (
             <VirtualizedList

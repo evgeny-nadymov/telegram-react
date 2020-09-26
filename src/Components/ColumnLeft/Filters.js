@@ -14,9 +14,9 @@ import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import FilterStore from '../../Stores/FilterStore';
+import LocalizationStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Filters.css';
-import LocalizationStore from '../../Stores/LocalizationStore';
 
 class Filters extends React.Component {
     constructor(props) {
@@ -121,6 +121,7 @@ class Filters extends React.Component {
     };
 
     setSelection = (transition = true) => {
+        // console.trace('[media] setSelection')
         const { chatList, filters, isSmallWidth } = this.state;
 
         const scroll = this.filtersRef.current;

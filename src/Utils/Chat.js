@@ -18,6 +18,7 @@ import { getChannelStatus } from './Channel';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
+import MessageStore from '../Stores/MessageStore';
 import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
@@ -996,6 +997,81 @@ function getGroupChatMembers(chatId) {
     }
 
     return fallbackValue;
+}
+
+export async function getChatMedia(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+
+    console.log('[media] getChatMedia start', chatId);
+    const promises = [];
+
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit: 40,
+        filter: { '@type': 'searchMessagesFilterPhotoAndVideo' }
+    }));
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit: 40,
+        filter: { '@type': 'searchMessagesFilterDocument' }
+    }));
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit: 40,
+        filter: { '@type': 'searchMessagesFilterAudio' }
+    }));
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit: 40,
+        filter: { '@type': 'searchMessagesFilterUrl' }
+    }));
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit: 40,
+        filter: { '@type': 'searchMessagesFilterVoiceNote' }
+    }));
+
+    const [photoAndVideo, document, audio, url, voiceNote] = await Promise.all(promises);
+    const media = {
+        photoAndVideo: photoAndVideo.messages,
+        document: document.messages,
+        audio: audio.messages,
+        url: url.messages,
+        voiceNote: voiceNote.messages,
+    }
+    console.log('[media] getChatMedia stop', chatId, media);
+
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateChatMedia',
+        chatId,
+        media
+    });
 }
 
 async function getChatFullInfo(chatId) {

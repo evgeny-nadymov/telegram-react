@@ -1,0 +1,23 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.shared-media-tabs {
+    position: sticky;
+    top: 0;
+    background: var(--panel-background);
+    border-bottom: 1px solid var(--border);
+    z-index: 1;
+    overflow: hidden;
+}
+
+.shared-media-tabs-container {
+    justify-content: space-around;
+}
+
+.filter span {
+    /*margin: 0 19px;*/
+}

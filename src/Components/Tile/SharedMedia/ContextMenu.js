@@ -11,6 +11,11 @@ import { withTranslation } from 'react-i18next';
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import Popover from '@material-ui/core/Popover';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import ChatBubbleOutlineOutlinedIcon from '@material-ui/icons/ChatBubbleOutlineOutlined';
+import DeleteIcon from '../../../Assets/Icons/Delete';
+import ShareIcon from '../../../Assets/Icons/Share';
 import { deleteMessages, forwardMessages, openChat } from '../../../Actions/Client';
 import MessageStore from '../../../Stores/MessageStore';
 import './ContextMenu.css';
@@ -65,10 +70,29 @@ class ContextMenu extends React.Component {
                 onMouseDown={e => e.stopPropagation()}
                 onClick={e => e.stopPropagation()}>
                 <MenuList>
-                    {showOpenMessage && <MenuItem onClick={this.handleOpenMessage}>{t('GoToMessage')}</MenuItem>}
-                    {can_be_forwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
+                    {showOpenMessage && (
+                        <MenuItem onClick={this.handleOpenMessage}>
+                            <ListItemIcon>
+                                <ChatBubbleOutlineOutlinedIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('GoToMessage')} />
+                        </MenuItem>
+                    )}
+                    {can_be_forwarded && (
+                        <MenuItem onClick={this.handleForward}>
+                            <ListItemIcon>
+                                <ShareIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('Forward')} />
+                        </MenuItem>
+                    )}
                     {(can_be_deleted_only_for_self || can_be_deleted_for_all_users) && (
-                        <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>
+                        <MenuItem color='secondary' onClick={this.handleDelete}>
+                            <ListItemIcon>
+                                <DeleteIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('Delete')} />
+                        </MenuItem>
                     )}
                 </MenuList>
             </Popover>

@@ -438,6 +438,12 @@ window.RLottie = (function () {
         const data = rlottie.frames.get(dataKey);
         const rlPlayer = rlottie.players[reqId];
 
+        let frameNo = 0;
+        if (data) {
+            data.fps = fps;
+            data.frameCount = frameCount;
+        }
+
         if (rlPlayer) {
             const queueLength = rlPlayer.queueLength || fps / 4;
 
@@ -447,16 +453,10 @@ window.RLottie = (function () {
             rlPlayer.frameInterval = 1000 / fps;
             rlPlayer.frameQueue = new FrameQueue(queueLength);
             rlPlayer.nextFrameNo = false;
-        }
 
-        let frameNo = 0;
-        if (data) {
-            data.fps = fps;
-            data.frameCount = frameCount;
+            setupMainLoop();
+            requestFrame(reqId, frameNo, rlPlayer.segmentId);
         }
-
-        setupMainLoop();
-        requestFrame(reqId, frameNo, rlPlayer.segmentId);
     }
 
     rlottie.init = function(el, options) {
