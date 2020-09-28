@@ -293,6 +293,10 @@ function getFormattedText(formattedText, t = k => k) {
                 deleteLineBreakAfterPre = true;
                 break;
             }
+            case 'textEntityTypeStrikethrough': {
+                result.push(<strike key={entityKey}>{entityText}</strike>);
+                break;
+            }
             case 'textEntityTypeTextUrl': {
                 const url = type.url ? type.url : entityText;
 
@@ -309,6 +313,10 @@ function getFormattedText(formattedText, t = k => k) {
                         {entityText}
                     </SafeLink>
                 );
+                break;
+            }
+            case 'textEntityTypeUnderline': {
+                result.push(<u key={entityKey}>{entityText}</u>);
                 break;
             }
             default:
@@ -1985,6 +1993,12 @@ export function getNodes(text, entities, t = k => k) {
                     nodes.push(node);
                     break;
                 }
+                case 'textEntityTypeStrikethrough': {
+                    const node = document.createElement('strike');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
+                    break;
+                }
                 case 'textEntityTypeTextUrl': {
                     try {
                         const { url } = x.type;
@@ -2003,6 +2017,12 @@ export function getNodes(text, entities, t = k => k) {
                 }
                 case 'textEntityTypeUrl': {
                     addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeUnderline': {
+                    const node = document.createElement('u');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
                     break;
                 }
                 default: {
@@ -2040,8 +2060,8 @@ export function getEntities(text) {
     // 1 looking for ``` and ` in order to find mono and pre entities
     text = getMonoPreEntities(text, entities);
 
-    // 2 looking for bold, italic entities
-    text = getBoldItalicEntities(text, entities);
+    // 2 looking for bold, italic, etc. entities
+    text = getSimpleMarkupEntities(text, entities);
 
     return { text, entities };
 }
@@ -2284,6 +2304,31 @@ export function getHTMLEntities(text, entities) {
                 offset += length;
                 break;
             }
+            case 'DEL':
+            case 'S':
+            case 'STRIKE': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeStrikethrough' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'INS':
+            case 'U': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeUnderline' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
             default: {
                 offset += length;
                 break;
@@ -2458,10 +2503,12 @@ export function getMonoPreEntities(text, entities) {
     return text;
 }
 
-export function getBoldItalicEntities(text, entities) {
-    const bold = '**';
-    const italic = '__';
-
+export function getSimpleMarkupEntities(text, entities) {
+    const entityTypes = {
+        '*': 'textEntityTypeBold',
+        '_': 'textEntityTypeItalic',
+        '~': 'textEntityTypeStrikethrough'
+    };
 
     let index = -1;     // first index of end tag
     let lastIndex = 0;  // first index after end tag
@@ -2469,11 +2516,10 @@ export function getBoldItalicEntities(text, entities) {
 
     let offset = 0, length = 0;
 
-    for (let c = 0; c < 2; c++) {
+    Object.entries(entityTypes).forEach(([checkChar, type]) => {
+        const checkString = checkChar + checkChar;
         lastIndex = 0;
         start = -1;
-        const checkString = c === 0 ? bold : italic;
-        const checkChar = c === 0 ? '*' : '_';
         while ((index = text.indexOf(checkString, lastIndex)) !== -1) {
             if (start === -1) {
                 const prevChar = index === 0 ? ' ' : text[index - 1];
@@ -2510,7 +2556,7 @@ export function getBoldItalicEntities(text, entities) {
                         offset,
                         length,
                         language: '',
-                        type: { '@type': c === 0 ? 'textEntityTypeBold' : 'textEntityTypeItalic' },
+                        type: { '@type': type },
                         textContent: text.substring(offset, offset + length)
                     };
                     removeOffsetAfter(offset + length, 4, entities);
@@ -2520,7 +2566,7 @@ export function getBoldItalicEntities(text, entities) {
                 start = -1;
             }
         }
-    }
+    })
 
     return text;
 }
