@@ -214,36 +214,12 @@ class SharedMediaTabs extends React.Component {
     }
 
     onClientUpdateChatMedia = update => {
+        const { chatId: currentChatId } = this.props;
+        const { selectedIndex } = this.state;
         const { chatId, media } = update;
-        if (chatId !== this.props.chatId) return;
+        if (chatId !== currentChatId) return;
 
-        const photoAndVideo = media ? media.photoAndVideo : [];
-        const document = media ? media.document : [];
-        const audio = media ? media.audio : [];
-        const url = media ? media.url : [];
-        const voiceNote = media ? media.voiceNote : [];
-
-        let selectedIndex = -1;
-        if (photoAndVideo.length > 0) {
-            selectedIndex = 1;
-        } else if (document.length > 0) {
-            selectedIndex = 2;
-        } else if (audio.length > 0) {
-            selectedIndex = 3;
-        } else if (url.length > 0) {
-            selectedIndex = 4;
-        } else if (voiceNote.length > 0) {
-            selectedIndex = 5;
-        }
-
-        this.setState({
-            selectedIndex,
-            photoAndVideo,
-            document,
-            audio,
-            url,
-            voiceNote
-        });
+        this.setMediaState(media, selectedIndex);
     };
 
     onClientUpdateMediaTab = update => {
@@ -370,7 +346,7 @@ class SharedMediaTabs extends React.Component {
                     {photoAndVideo.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('photoAndVideo', r)}
-                            className={classNames('filter', { 'item-selected': selectedIndex === 1})}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 1})}
                             onMouseDown={e => this.handleFilterClick(e, 1)}>
                             <span>{t('SharedMediaTab2')}</span>
                         </div>
@@ -378,7 +354,7 @@ class SharedMediaTabs extends React.Component {
                     {document.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('document', r)}
-                            className={classNames('filter', { 'item-selected': selectedIndex === 2})}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 2})}
                             onMouseDown={e => this.handleFilterClick(e, 2)}>
                             <span>{t('SharedFilesTab2')}</span>
                         </div>
@@ -386,7 +362,7 @@ class SharedMediaTabs extends React.Component {
                     {audio.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('audio', r)}
-                            className={classNames('filter', { 'item-selected': selectedIndex === 3})}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 3})}
                             onMouseDown={e => this.handleFilterClick(e, 3)}>
                             <span>{t('SharedMusicTab2')}</span>
                         </div>
@@ -394,7 +370,7 @@ class SharedMediaTabs extends React.Component {
                     {url.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('url', r)}
-                            className={classNames('filter', { 'item-selected': selectedIndex === 4})}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 4})}
                             onMouseDown={e => this.handleFilterClick(e, 4)}>
                             <span>{t('SharedLinksTab2')}</span>
                         </div>
@@ -402,7 +378,7 @@ class SharedMediaTabs extends React.Component {
                     {voiceNote.length > 0 && (
                         <div
                             ref={r => this.filterRef.set('voiceNote', r)}
-                            className={classNames('filter', { 'item-selected': selectedIndex === 5})}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 5})}
                             onMouseDown={e => this.handleFilterClick(e, 5)}>
                             <span>{t('SharedVoiceTab2')}</span>
                         </div>

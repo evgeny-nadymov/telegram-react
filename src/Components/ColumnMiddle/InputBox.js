@@ -1130,9 +1130,8 @@ class InputBox extends Component {
 
         const { photo: file } = size;
         if (!file) return;
-        if (file.blob) return;
 
-        file.blob = blob;
+        FileStore.setBlob(file.id, blob);
         FileStore.updatePhotoBlob(chat_id, id, file.id);
     };
 

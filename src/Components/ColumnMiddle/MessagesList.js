@@ -611,11 +611,10 @@ class MessagesList extends React.Component {
 
             this.loadIncompleteHistory(result);
 
-            // load full info
-            getChatFullInfo(chat.id);
-
-            // load media
-            getChatMedia(chat.id);
+            if (previousChatId !== chatId) {
+                getChatFullInfo(chatId);
+                getChatMedia(chatId);
+            }
         } else {
             this.loading = true;
             this.replace(0, [], () => {

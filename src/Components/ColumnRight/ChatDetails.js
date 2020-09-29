@@ -604,12 +604,12 @@ class ChatDetails extends React.Component {
                             {/*</List>*/}
                         </>
                     )}
-                    {items.length > 0 && (
-                        <>
-                            <Divider />
-                            <List>{items}</List>
-                        </>
-                    )}
+                    {/*{items.length > 0 && (*/}
+                    {/*    <>*/}
+                    {/*        <Divider />*/}
+                    {/*        <List>{items}</List>*/}
+                    {/*    </>*/}
+                    {/*)}*/}
                 </div>
             </>
         );

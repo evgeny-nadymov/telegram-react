@@ -15,7 +15,11 @@
 }
 
 .shared-media-tabs-container {
-    justify-content: space-around;
+    justify-content: flex-start;
+}
+
+.shared-media-tab {
+    flex: 1 1 auto;
 }
 
 .filter span {

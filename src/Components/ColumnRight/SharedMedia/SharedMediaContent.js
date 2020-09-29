@@ -271,46 +271,13 @@ class SharedMediaContent extends React.Component {
 
     onClientUpdateChatMedia = update => {
         const { chatId: currentChatId } = this.props;
+        const { selectedIndex } = this.state;
 
         const { chatId } = update;
         if (chatId !== currentChatId) return;
 
         const media = MessageStore.getMedia(chatId);
-
-        const photoAndVideo = media ? media.photoAndVideo : [];
-        const document = media ? media.document : [];
-        const audio = media ? media.audio : [];
-        const url = media ? media.url : [];
-        const voiceNote = media ? media.voiceNote : [];
-
-        let source = [];
-        let selectedIndex = -1;
-        if (photoAndVideo.length > 0) {
-            source = photoAndVideo.filter(x => SharedMediaContent.isValidPhotoAndVideoContent(x.content));
-            selectedIndex = 1;
-        } else if (document.length > 0) {
-            source = document.filter(x => SharedMediaContent.isValidDocumentContent(x.content));
-            selectedIndex = 2;
-        } else if (audio.length > 0) {
-            source = audio.filter(x => SharedMediaContent.isValidAudioContent(x.content));
-            selectedIndex = 3;
-        } else if (url.length > 0) {
-            source = url.filter(x => SharedMediaContent.isValidUrlContent(x.content));
-            selectedIndex = 4;
-        } else if (voiceNote.length > 0) {
-            source = voiceNote.filter(x => SharedMediaContent.isValidVoiceNoteContent(x.content));
-            selectedIndex = 5;
-        }
-
-        this.setState({
-            selectedIndex,
-            items: source.slice(0, 40),
-            photoAndVideo,
-            document,
-            audio,
-            url,
-            voiceNote
-        });
+        this.setMediaState(media, selectedIndex);
     };
 
     getItemTemplate = (selectedIndex, message) => {
