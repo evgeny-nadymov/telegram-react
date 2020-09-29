@@ -132,11 +132,10 @@ function getServiceMessageContent(message, openUser = false) {
     if (!message) return null;
     if (!message.content) return null;
 
-    const isOutgoing = message.sender_user_id === UserStore.getMyId();
     const chat = ChatStore.get(message.chat_id);
     const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
 
-    const { ttl, sender_user_id, content } = message;
+    const { ttl, sender_user_id, content, is_outgoing: isOutgoing } = message;
     if (ttl > 0) {
         switch (content['@type']) {
             case 'messagePhoto': {
