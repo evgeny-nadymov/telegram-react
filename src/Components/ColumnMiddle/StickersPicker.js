@@ -207,23 +207,38 @@ class StickersPicker extends React.Component {
     updatePosition = () => {
         const scroll = this.scrollRef.current;
 
-        const { sets } = this.state;
+        const { recent, sets } = this.state;
         let minDiff = scroll.scrollHeight;
         let position = 0;
-        let firstOffsetTop = 0;
-        sets.forEach((x, pos) => {
-            const element = this.itemsMap.get(x.id);
+        let startPosition = 0;
+        if (recent && recent.stickers.length > 0) {
+            startPosition = 1;
+            const element = this.itemsMap.get('recent');
             if (element) {
                 const node = ReactDOM.findDOMNode(element);
-                if (node) {
-                    firstOffsetTop = pos === 0 ? node.offsetTop : firstOffsetTop;
-
-                    const offsetTop = node.offsetTop - firstOffsetTop;
+                if (node && node.offsetTop <= scroll.scrollTop) {
+                    const offsetTop = node.offsetTop;
                     if (node && offsetTop <= scroll.scrollTop) {
                         const diff = Math.abs(scroll.scrollTop - offsetTop);
                         if (diff <= minDiff) {
                             minDiff = diff;
-                            position = pos;
+                            position = 0;
+                        }
+                    }
+                }
+            }
+        }
+        sets.forEach((x, pos) => {
+            const element = this.itemsMap.get(x.id);
+            if (element) {
+                const node = ReactDOM.findDOMNode(element);
+                if (node && node.offsetTop <= scroll.scrollTop) {
+                    const offsetTop = node.offsetTop;
+                    if (node) {
+                        const diff = Math.abs(scroll.scrollTop - offsetTop);
+                        if (diff <= minDiff) {
+                            minDiff = diff;
+                            position = startPosition + pos;
                         }
                     }
                 }
@@ -377,7 +392,10 @@ class StickersPicker extends React.Component {
         const { sets, stickerSets } = this.state;
         const { scrollRef } = this;
 
-        if (position < sets.length) {
+        if (position === -1) {
+            const scroll = scrollRef.current;
+            scroll.scrollTop = 0;
+        } else if (position < sets.length) {
             const element = this.itemsMap.get(sets[position].id);
             if (element) {
                 const node = ReactDOM.findDOMNode(element);
@@ -459,10 +477,14 @@ class StickersPicker extends React.Component {
 
         return (
             <div className='stickers-picker' style={style}>
-                <StickersPickerHeader onSelect={this.handleSelectSet} stickers={headerStickers} />
+                <StickersPickerHeader
+                    recent={recentInfo}
+                    stickers={headerStickers}
+                    onSelect={this.handleSelectSet} />
                 <div ref={this.scrollRef} className={classNames('stickers-picker-scroll', 'scrollbars-hidden')} onScroll={this.handleScroll}>
                     {Boolean(recentInfo) && (
                         <StickerSet
+                            ref={el => this.itemsMap.set('recent', el)}
                             info={recentInfo}
                             onSelect={this.handleStickerSelect}
                             onMouseDown={this.handleMouseDown}

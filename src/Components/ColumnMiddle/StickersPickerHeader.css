@@ -33,6 +33,22 @@
     min-width: 36px;
     margin: 6px;
     cursor: pointer;
+    width: 36px;
+    height: 36px;
+}
+
+.stickers-picker-header-recent {
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 36px;
+    margin: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
 }
 
 .stickers-picker-header-anchor {

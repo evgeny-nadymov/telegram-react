@@ -9,6 +9,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import AccessTimeIcon from '@material-ui/icons/AccessTime';
 import Animator from '../../Utils/Animatior';
 import Sticker from './../Message/Media/Sticker';
 import { StickerSourceEnum } from '../Message/Media/Sticker';
@@ -106,13 +107,20 @@ class StickersPickerHeader extends React.Component {
     };
 
     render() {
-        const { stickers } = this.props;
+        const { recent, stickers } = this.props;
+
+        const recentItem = recent ?
+            <div
+                className='stickers-picker-header-recent'
+                onClick={() => this.handleSelect('recent')}>
+                <AccessTimeIcon/>
+            </div> :
+            null;
 
         const items = stickers.map(x => (
             <Sticker
                 key={x.sticker.id}
                 className='stickers-picker-header-sticker'
-                style={{ width: 36, height: 36 }}
                 sticker={x}
                 play={false}
                 autoplay={false}
@@ -127,7 +135,10 @@ class StickersPickerHeader extends React.Component {
         return (
             <div className='stickers-picker-header'>
                 <div ref={this.scrollRef} className={classNames('stickers-picker-header-scroll', 'scrollbars-hidden')} onWheel={this.handleWheel}>
-                    <div className='stickers-picker-header-items'>{items}</div>
+                    <div className='stickers-picker-header-items'>
+                        {recentItem}
+                        {items}
+                    </div>
                     <div ref={this.anchorRef} className='stickers-picker-header-anchor' />
                 </div>
             </div>
@@ -136,6 +147,7 @@ class StickersPickerHeader extends React.Component {
 }
 
 StickersPickerHeader.propTypes = {
+    recent: PropTypes.object,
     stickers: PropTypes.array.isRequired,
     onSelect: PropTypes.func.isRequired
 };
