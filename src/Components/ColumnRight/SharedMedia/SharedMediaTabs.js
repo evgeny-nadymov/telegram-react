@@ -237,38 +237,40 @@ class SharedMediaTabs extends React.Component {
         const { selectedIndex, isSmallWidth } = this.state;
         if (selectedIndex === -1) return;
 
+        const padding = 3;
+
         const scroll = this.filtersRef.current;
 
         let item = null;
         let left = 0;
         const photoAndVideoFilter = this.filterRef.get('photoAndVideo');
         if (selectedIndex === 1 && photoAndVideoFilter) {
-            item = photoAndVideoFilter;
-            left = photoAndVideoFilter.offsetLeft + 7;
+            item = photoAndVideoFilter.firstChild;
+            left = item.offsetLeft;
         }
 
         const documentFilter = this.filterRef.get('document');
         if (selectedIndex === 2 && documentFilter) {
-            item = documentFilter;
-            left = documentFilter.offsetLeft + 7;
+            item = documentFilter.firstChild;
+            left = item.offsetLeft;
         }
 
         const audioFilter = this.filterRef.get('audio');
         if (selectedIndex === 3 && audioFilter) {
-            item = audioFilter;
-            left = audioFilter.offsetLeft + 7;
+            item = audioFilter.firstChild;
+            left = item.offsetLeft;
         }
 
         const urlFilter = this.filterRef.get('url');
         if (selectedIndex === 4 && urlFilter) {
-            item = urlFilter;
-            left = urlFilter.offsetLeft + 7;
+            item = urlFilter.firstChild;
+            left = item.offsetLeft;
         }
 
         const voiceNoteFilter = this.filterRef.get('voiceNote');
         if (selectedIndex === 5 && voiceNoteFilter) {
-            item = voiceNoteFilter;
-            left = voiceNoteFilter.offsetLeft + 7;
+            item = voiceNoteFilter.firstChild;
+            left = item.offsetLeft;
         }
 
         if (!item) return;
@@ -276,7 +278,7 @@ class SharedMediaTabs extends React.Component {
         const filterSelection = this.filterSelectionRef.current;
         if (filterSelection) {
             const transitionStyle = transition ? 'transition: left 0.25s ease, width 0.25s ease' : null;
-            filterSelection.style.cssText = `left: ${left}px; width: ${item.scrollWidth - 14}px; ${transitionStyle}`;
+            filterSelection.style.cssText = `left: ${left - padding}px; width: ${item.scrollWidth + 2 * padding}px; ${transitionStyle}`;
         }
 
         if (item && transition){
@@ -342,6 +344,7 @@ class SharedMediaTabs extends React.Component {
         this.filterRef = new Map();
         return (
             <div className='shared-media-tabs'>
+                <div className='shared-media-tabs-bottom-border'/>
                 <div ref={this.filtersRef} className={classNames('filters', {'shared-media-tabs-container': tabsCount > 1})}>
                     {photoAndVideo.length > 0 && (
                         <div
