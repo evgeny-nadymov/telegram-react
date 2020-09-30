@@ -11,11 +11,15 @@
     line-height: 19px;
     color: var(--message-in-subtle-color);
     user-select: none;
+    overflow: hidden;
+    display: flex;
+}
+
+.audio-action span {
     word-wrap: break-word;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: flex;
 }
 
 .message-out .audio-action {

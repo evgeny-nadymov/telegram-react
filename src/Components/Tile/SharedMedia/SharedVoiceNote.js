@@ -82,7 +82,7 @@ class SharedVoiceNote extends React.Component {
                 <div className='shared-voice-note' onContextMenu={this.handleOpenContextMenu}>
                     <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                     <div className='voice-note-content'>
-                        <MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} />
+                        <div className='document-title'><MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} /></div>
                         <div className='voice-note-meta'>
                             <AudioAction
                                 chatId={chatId}

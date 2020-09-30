@@ -220,9 +220,11 @@ class AudioAction extends React.Component {
 
         return (
             <div className='audio-action'>
-                {!active && <span>{title}</span>}
-                {<span>{strings.join(', ')}</span>}
-                {meta}
+                <span>
+                    {!active && title}
+                    {strings.join(', ')}
+                    {meta}
+                </span>
             </div>
         );
     }

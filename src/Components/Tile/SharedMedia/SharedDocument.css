@@ -10,3 +10,14 @@
     background: transparent;
     padding: 10px;
 }
+
+.shared-document .document {
+    max-width: unset;
+    min-width: unset;
+}
+
+.shared-document .audio-content {
+    min-width: unset;
+}
+
+
