@@ -339,7 +339,7 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
+        const { content, is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender_user_id } = message;
 
         const isOutgoing = is_outgoing && !isChannelChat(chatId);
         const inlineMeta = (
@@ -353,6 +353,20 @@ class Message extends Component {
                 views={views}
             />
         );
+        const meta = (
+            <Meta
+                className={classNames('meta-text', {
+                    'meta-bubble': isMetaBubble(chatId, messageId)
+                })}
+                chatId={chatId}
+                messageId={messageId}
+                date={date}
+                editDate={edit_date}
+                views={views}
+                onDateClick={this.handleDateClick}
+            />
+        );
+
         const webPage = getWebPage(message);
         const text = getText(message, !!webPage ? null : inlineMeta, t);
         const hasCaption = text !== null && text.length > 0;
@@ -360,7 +374,7 @@ class Message extends Component {
         const showReply = Boolean(reply_to_message_id);
         const suppressTitle = isPrivateChat(chatId);
         const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
-        const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta);
+        const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta, meta);
         const isChannel = isChannelChat(chatId);
         const isPrivate = isPrivateChat(chatId);
 
@@ -384,8 +398,7 @@ class Message extends Component {
         }
 
         const style = getMessageStyle(chatId, messageId);
-        const withBubble =
-            message.content['@type'] !== 'messageSticker' && message.content['@type'] !== 'messageVideoNote';
+        const withBubble = content['@type'] !== 'messageSticker' && content['@type'] !== 'messageVideoNote';
 
         // console.log('[p] m.render id=' + message.id);
 
@@ -467,17 +480,7 @@ class Message extends Component {
                                         meta={inlineMeta}
                                     />
                                 )}
-                                <Meta
-                                    className={classNames('meta-text', {
-                                        'meta-bubble': isMetaBubble(chatId, messageId)
-                                    })}
-                                    chatId={chatId}
-                                    messageId={messageId}
-                                    date={date}
-                                    editDate={edit_date}
-                                    views={views}
-                                    onDateClick={this.handleDateClick}
-                                />
+                                {withBubble && meta}
                             </div>
                             <div className='message-tile-padding' />
                         </div>

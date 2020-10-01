@@ -587,7 +587,7 @@ export function getInputMediaContent(media, text) {
     return null;
 }
 
-export function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inlineMeta = null) {
+export function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inlineMeta = null, meta) {
     if (!message) return null;
 
     const { chat_id, id, content } = message;
@@ -703,6 +703,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     sticker={content.sticker}
                     openMedia={openMedia}
                     source={StickerSourceEnum.MESSAGE}
+                    meta={meta}
                 />
             );
         case 'messageText':
@@ -743,6 +744,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     messageId={id}
                     videoNote={content.video_note}
                     openMedia={openMedia}
+                    meta={meta}
                 />
             );
         case 'messageVoiceNote':

@@ -484,6 +484,7 @@ class Sticker extends React.Component {
             openMedia,
             preview,
             inViewportFunc,
+            meta
         } = this.props;
         const { thumbnail, sticker, width, height } = source;
         const { fileId, animationData, loaded, hasError } = this.state;
@@ -585,6 +586,7 @@ class Sticker extends React.Component {
                     />
                 )}
                 {content}
+                {meta}
             </div>
         );
     }

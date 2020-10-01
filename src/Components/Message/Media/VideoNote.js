@@ -312,7 +312,7 @@ class VideoNote extends React.Component {
     };
 
     render() {
-        const { displaySize, chatId, messageId, openMedia } = this.props;
+        const { displaySize, chatId, messageId, openMedia, meta } = this.props;
         const { active, currentTime, videoDuration } = this.state;
         const { minithumbnail, thumbnail, video, duration } = this.props.videoNote;
 
@@ -400,6 +400,7 @@ class VideoNote extends React.Component {
                     </>
                 )}
                 <FileProgress file={video} download upload cancelButton icon={<DownloadIcon />} />
+                {meta}
             </div>
         );
     }
