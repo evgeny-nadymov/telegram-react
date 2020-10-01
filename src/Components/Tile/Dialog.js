@@ -35,7 +35,7 @@ import {
     isChatMuted,
     isChatPinned,
     isChatSecret,
-    isChatUnread,
+    isChatUnread, isMeChat,
     isPrivateChat
 } from '../../Utils/Chat';
 import {
@@ -153,6 +153,7 @@ class Dialog extends Component {
             const isPinned = isChatPinned(chatId, chatList);
             const canTogglePin = (await this.canPinChats(chatId)) || isPinned;
             const canToggleArchive = canAddChatToList(chatId);
+            const canMute = !isMeChat(chatId);
 
             if (Dialog.contextMenuId !== contextMenuId) {
                 return;
@@ -162,6 +163,7 @@ class Dialog extends Component {
                 contextMenu: true,
                 canTogglePin,
                 canToggleArchive,
+                canMute,
                 left,
                 top
             });
@@ -287,9 +289,8 @@ class Dialog extends Component {
 
     render() {
         const { chatId, chatList, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
-        const { contextMenu, left, top, canToggleArchive, canTogglePin } = this.state;
+        const { contextMenu, left, top, canToggleArchive, canTogglePin, canMute } = this.state;
 
-        const chat = ChatStore.get(chatId);
         const isPinned = isChatPinned(chatId, chatList);
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
@@ -386,23 +387,25 @@ class Dialog extends Component {
                                 </>
                             )}
                         </MenuItem>
-                        <MenuItem onClick={this.handleMute}>
-                            {isMuted ? (
-                                <>
-                                    <ListItemIcon>
-                                        <UnmuteIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary={t('ChatsUnmute')} />
-                                </>
-                            ) : (
-                                <>
-                                    <ListItemIcon>
-                                        <MuteIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary={t('ChatsMute')} />
-                                </>
-                            )}
-                        </MenuItem>
+                        { canMute && (
+                            <MenuItem onClick={this.handleMute}>
+                                {isMuted ? (
+                                    <>
+                                        <ListItemIcon>
+                                            <UnmuteIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('ChatsUnmute')} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <ListItemIcon>
+                                            <MuteIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={t('ChatsMute')} />
+                                    </>
+                                )}
+                            </MenuItem>
+                        )}
                         <MenuItem onClick={this.handleRead}>
                             {isUnread ? (
                                 <>
