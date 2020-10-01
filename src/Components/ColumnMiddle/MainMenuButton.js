@@ -358,7 +358,7 @@ class MainMenuButton extends React.Component {
                     <MenuItem onClick={this.handleChatInfo}>{t('ChatInfo')}</MenuItem>
                     {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
                     {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
-                    {unpinMessage && <MenuItem onClick={this.handleUnpin}>{t('Unpin')}</MenuItem>}
+                    {unpinMessage && <MenuItem onClick={this.handleUnpin}>{t('UnpinMessageAlertTitle')}</MenuItem>}
                 </Menu>
                 <EnhancedLeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
                 <EnhancedClearHistoryDialog
