@@ -23,7 +23,7 @@
 }
 
 .stickers-picker-header-items {
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
 }
 

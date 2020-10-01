@@ -40,6 +40,11 @@
     color: var(--text-secondary);
 }
 
+.filters::after {
+    content: '';
+    flex: 0 0 8px;
+}
+
 .page-small .filter {
     padding: 0 9px;
 }
