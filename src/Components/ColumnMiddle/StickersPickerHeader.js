@@ -125,7 +125,7 @@ class StickersPickerHeader extends React.Component {
                 play={false}
                 autoplay={false}
                 blur={false}
-                displaySize={32}
+                displaySize={36}
                 preview
                 source={StickerSourceEnum.PICKER_HEADER}
                 openMedia={() => this.handleSelect(x)}
