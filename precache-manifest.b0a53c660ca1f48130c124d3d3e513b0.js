@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "eecd5f02da39796fab4264074809ce31",
+    "revision": "f6085d87a192b9c1dc73fb24434ed331",
     "url": "/telegram-react/index.html"
   },
   {
@@ -8,8 +8,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.52c23fd6.chunk.css"
   },
   {
-    "revision": "e5611a73814d1159f4a1",
-    "url": "/telegram-react/static/css/3.24bbf903.chunk.css"
+    "revision": "33be35f52d713254dbb5",
+    "url": "/telegram-react/static/css/3.263a6ae7.chunk.css"
   },
   {
     "revision": "d7b1542a4cc579b33998",
@@ -20,16 +20,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/7.335d4a08.chunk.css"
   },
   {
-    "revision": "bb7d13cf244daf917e58",
-    "url": "/telegram-react/static/css/main.af7f1a20.chunk.css"
+    "revision": "37dfd9c5b93c11ad7659",
+    "url": "/telegram-react/static/css/main.bb56e980.chunk.css"
   },
   {
     "revision": "34be3bf2ffcdb2ef52b8",
     "url": "/telegram-react/static/js/0.8b203cf2.chunk.js"
   },
   {
-    "revision": "e5611a73814d1159f4a1",
-    "url": "/telegram-react/static/js/3.23f2d331.chunk.js"
+    "revision": "33be35f52d713254dbb5",
+    "url": "/telegram-react/static/js/3.49aa0490.chunk.js"
   },
   {
     "revision": "004167008817507761c5",
@@ -48,12 +48,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/7.32f6b2d2.chunk.js"
   },
   {
-    "revision": "bb7d13cf244daf917e58",
-    "url": "/telegram-react/static/js/main.b6a5a38b.chunk.js"
+    "revision": "37dfd9c5b93c11ad7659",
+    "url": "/telegram-react/static/js/main.fa3403bc.chunk.js"
   },
   {
-    "revision": "b01c563bca9eb561964c",
-    "url": "/telegram-react/static/js/runtime~main.611e4f0b.js"
+    "revision": "2efeac7afbe13cb776af",
+    "url": "/telegram-react/static/js/runtime~main.99224ccd.js"
   },
   {
     "revision": "9b7ea631ddb3103beee05cec006af20e",
