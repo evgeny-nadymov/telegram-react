@@ -89,7 +89,7 @@ class SharedVoiceNote extends React.Component {
                                 messageId={messageId}
                                 duration={duration}
                                 file={file}
-                                title={`${dateString}, `}
+                                date={dateString}
                             />
                             <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
                         </div>

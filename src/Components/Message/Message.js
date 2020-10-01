@@ -374,7 +374,7 @@ class Message extends Component {
         const showReply = Boolean(reply_to_message_id);
         const suppressTitle = isPrivateChat(chatId);
         const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
-        const media = getMedia(message, this.openMedia, hasTitle, hasCaption, inlineMeta, meta);
+        const media = getMedia(message, this.openMedia, { hasTitle, hasCaption, inlineMeta, meta });
         const isChannel = isChannelChat(chatId);
         const isPrivate = isPrivateChat(chatId);
 

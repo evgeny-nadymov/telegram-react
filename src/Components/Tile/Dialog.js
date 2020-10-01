@@ -31,11 +31,13 @@ import MessageIcon from '../../Assets/Icons/Message';
 import UnreadIcon from '../../Assets/Icons/Unread';
 import {
     canAddChatToList,
+    getViewInfoTitle,
     isChatArchived,
     isChatMuted,
     isChatPinned,
     isChatSecret,
-    isChatUnread, isMeChat,
+    isChatUnread,
+    isMeChat,
     isPrivateChat
 } from '../../Utils/Chat';
 import {
@@ -234,30 +236,6 @@ class Dialog extends Component {
         addChatToList(chatId, { '@type': isChatArchived(chatId) ? 'chatListMain' : 'chatListArchive' });
     };
 
-    getViewInfoTitle = () => {
-        const { chatId, t } = this.props;
-        const chat = ChatStore.get(chatId);
-        if (!chat) return;
-
-        const { type } = chat;
-        switch (type['@type']) {
-            case 'chatTypeBasicGroup': {
-                return t('ViewGroupInfo');
-            }
-            case 'chatTypePrivate':
-            case 'chatTypeSecret': {
-                return t('ViewProfile');
-            }
-            case 'chatTypeSupergroup': {
-                if (type.is_channel) {
-                    return t('ViewChannelInfo');
-                }
-
-                return t('ViewGroupInfo');
-            }
-        }
-    };
-
     handleViewInfo = event => {
         this.handleCloseContextMenu(event);
 
@@ -371,21 +349,10 @@ class Dialog extends Component {
                             </MenuItem>
                         )}
                         <MenuItem onClick={this.handleViewInfo}>
-                            {isPrivateChat(chatId) ? (
-                                <>
-                                    <ListItemIcon>
-                                        <UserIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary={this.getViewInfoTitle()} />
-                                </>
-                            ) : (
-                                <>
-                                    <ListItemIcon>
-                                        <GroupIcon />
-                                    </ListItemIcon>
-                                    <ListItemText primary={this.getViewInfoTitle()} />
-                                </>
-                            )}
+                            <ListItemIcon>
+                                {isPrivateChat(chatId) ? <UserIcon /> : <GroupIcon />}
+                            </ListItemIcon>
+                            <ListItemText primary={getViewInfoTitle(chatId, t)} />
                         </MenuItem>
                         { canMute && (
                             <MenuItem onClick={this.handleMute}>

@@ -9,26 +9,33 @@ import React from 'react';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import { withSnackbar } from 'notistack';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
-import MoreVertIcon from '../../Assets/Icons/More';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
+import DeleteIcon from '../../Assets/Icons/Delete';
+import MoreVertIcon from '../../Assets/Icons/More';
+import UnpinIcon from '../../Assets/Icons/Pin2';
 import ChatTile from '../Tile/ChatTile';
 import NotificationTimer from '../Additional/NotificationTimer';
-import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, isCreator, isPrivateChat, isSupergroup } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, canUnpinMessage, getChatShortTitle, getViewInfoTitle, isCreator, isPrivateChat, isSupergroup } from '../../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
-import ApplicationStore from '../../Stores/ApplicationStore';
+import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
+import LogOutIcon from '../../Assets/Icons/LogOut';
+import UserIcon from '../../Assets/Icons/User';
+import GroupIcon from '../../Assets/Icons/Group';
 
 class LeaveChatDialog extends React.Component {
     getDeleteDialogText = (chatId, t) => {
@@ -163,7 +170,7 @@ class MainMenuButton extends React.Component {
 
         if (!result) return;
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const message = t('HistoryClearedUndo');
         const request = {
             '@type': 'deleteChatHistory',
@@ -185,7 +192,7 @@ class MainMenuButton extends React.Component {
 
         if (!result) return;
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const message = this.getLeaveChatNotification(chatId);
         let request = isPrivateChat(chatId)
             ? { '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true }
@@ -312,7 +319,7 @@ class MainMenuButton extends React.Component {
     handleUnpin = () => {
         this.handleMenuClose();
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         TdLibController.clientUpdate({
             '@type': 'clientUpdateUnpin',
             chatId
@@ -323,7 +330,7 @@ class MainMenuButton extends React.Component {
         const { t } = this.props;
         const { anchorEl, openDelete, openClearHistory } = this.state;
 
-        const chatId = ApplicationStore.getChatId();
+        const chatId = AppStore.getChatId();
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const leaveChatTitle = this.getLeaveChatTitle(chatId, t);
@@ -355,10 +362,36 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
-                    <MenuItem onClick={this.handleChatInfo}>{t('ChatInfo')}</MenuItem>
-                    {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
-                    {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
-                    {unpinMessage && <MenuItem onClick={this.handleUnpin}>{t('UnpinMessageAlertTitle')}</MenuItem>}
+                    <MenuItem onClick={this.handleChatInfo}>
+                        <ListItemIcon>
+                            {isPrivateChat(chatId) ? <UserIcon /> : <GroupIcon />}
+                        </ListItemIcon>
+                        <ListItemText primary={getViewInfoTitle(chatId, t)} />
+                    </MenuItem>
+                    {clearHistory && (
+                        <MenuItem onClick={this.handleClearHistory}>
+                            <ListItemIcon>
+                                <DeleteIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('ClearHistory')} />
+                        </MenuItem>
+                    )}
+                    {deleteChat && leaveChatTitle && (
+                        <MenuItem onClick={this.handleLeave}>
+                            <ListItemIcon>
+                                <LogOutIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={leaveChatTitle} />
+                        </MenuItem>
+                    )}
+                    {unpinMessage && (
+                        <MenuItem onClick={this.handleUnpin}>
+                            <ListItemIcon>
+                                <UnpinIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('UnpinMessageAlertTitle')} />
+                        </MenuItem>
+                    )}
                 </Menu>
                 <EnhancedLeaveChatDialog chatId={chatId} open={openDelete} onClose={this.handleLeaveContinue} />
                 <EnhancedClearHistoryDialog

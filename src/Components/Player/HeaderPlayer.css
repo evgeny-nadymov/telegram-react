@@ -6,7 +6,7 @@
  */
 
 .header-player {
-    min-height: 45px;
+    min-height: 43px;
     display: flex;
     align-items: center;
     /*overflow: hidden;*/

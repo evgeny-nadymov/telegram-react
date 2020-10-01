@@ -24,6 +24,31 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+
+
+export function getViewInfoTitle(chatId, t = x => x) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return;
+
+    const { type } = chat;
+    switch (type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return t('ViewGroupInfo');
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return t('ViewProfile');
+        }
+        case 'chatTypeSupergroup': {
+            if (type.is_channel) {
+                return t('ViewChannelInfo');
+            }
+
+            return t('ViewGroupInfo');
+        }
+    }
+}
+
 export function getChatPosition(chatId, chatList = { '@type': 'chatListMain'}) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;

@@ -587,8 +587,10 @@ export function getInputMediaContent(media, text) {
     return null;
 }
 
-export function getMedia(message, openMedia, hasTitle = false, hasCaption = false, inlineMeta = null, meta) {
+export function getMedia(message, openMedia, options = {}) {
     if (!message) return null;
+
+    const { hasTitle = false, hasCaption = false, inlineMeta = null, meta = null, date = null } = options;
 
     const { chat_id, id, content } = message;
     if (!content) return null;
@@ -617,6 +619,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     audio={content.audio}
                     openMedia={openMedia}
                     meta={inlineMeta}
+                    date={date}
                 />
             );
         case 'messageCall':
@@ -654,6 +657,7 @@ export function getMedia(message, openMedia, hasTitle = false, hasCaption = fals
                     document={content.document}
                     openMedia={openMedia}
                     meta={inlineMeta}
+                    date={date}
                 />
             );
         case 'messageGame':

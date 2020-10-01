@@ -111,7 +111,7 @@ class Audio extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, block, audio, openMedia, title, meta, caption } = this.props;
+        const { chatId, messageId, block, audio, openMedia, title, meta, caption, date } = this.props;
         const { playing, active } = this.state;
         if (!audio) return null;
 
@@ -147,6 +147,7 @@ class Audio extends React.Component {
                         file={file}
                         meta={caption ? null : meta}
                         streaming={supportsStreaming()}
+                        date={date}
                     />
                 </div>
             </div>
@@ -159,7 +160,8 @@ Audio.propTypes = {
     messageId: PropTypes.number,
     block: PropTypes.object,
     audio: PropTypes.object,
-    openMedia: PropTypes.func
+    openMedia: PropTypes.func,
+    date: PropTypes.string
 };
 
 export default Audio;

@@ -12,6 +12,7 @@ import { openMedia } from '../../../Utils/Message';
 import { getMedia } from '../../../Utils/Media';
 import MessageStore from '../../../Stores/MessageStore';
 import './SharedDocument.css';
+import { withTranslation } from 'react-i18next';
 
 class SharedDocument extends React.Component {
     state = {
@@ -50,16 +51,27 @@ class SharedDocument extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, showOpenMessage } = this.props;
+        const { chatId, messageId, showOpenMessage, i18n } = this.props;
         const { contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
+        const { date } = message;
+
+        const dateString = new Date(date * 1000).toLocaleDateString([i18n.language], {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false
+        });
+
         return (
             <>
                 <div className='shared-document' onContextMenu={this.handleOpenContextMenu}>
-                    {getMedia(message, () => openMedia(chatId, messageId, true))}
+                    {getMedia(message, () => openMedia(chatId, messageId, true), { date: dateString })}
                 </div>
                 <ContextMenu
                     chatId={chatId}
@@ -80,4 +92,4 @@ SharedDocument.propTypes = {
     showOpenMessage: PropTypes.bool.isRequired
 };
 
-export default SharedDocument;
+export default withTranslation()(SharedDocument);
