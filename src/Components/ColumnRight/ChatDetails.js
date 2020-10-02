@@ -52,7 +52,7 @@ import { loadUsersContent, loadChatsContent } from '../../Utils/File';
 import { formatPhoneNumber } from '../../Utils/Phone';
 import { openChat, openUser, setProfileMediaViewerContent } from '../../Actions/Client';
 import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
-import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
+import { NOTIFICATION_AUTO_HIDE_DURATION_MS, SCROLL_PRECISION } from '../../Constants';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -68,8 +68,9 @@ class ChatDetails extends React.Component {
     constructor(props) {
         super(props);
 
-        this.chatDetailsListRef = React.createRef();
+        this.listRef = React.createRef();
         this.dividerRef = React.createRef();
+        this.mediaRef = React.createRef();
 
         const { chatId } = this.props;
 
@@ -92,7 +93,7 @@ class ChatDetails extends React.Component {
     getSnapshotBeforeUpdate(prevProps, prevState) {
         const { chatId } = this.props;
 
-        const list = this.chatDetailsListRef.current;
+        const { current: list } = this.listRef;
         const { scrollTop, scrollHeight, offsetHeight } = list;
         const snapshot = {
             scrollTop,
@@ -135,7 +136,7 @@ class ChatDetails extends React.Component {
             this.loadContent();
         }
 
-        const list = this.chatDetailsListRef.current;
+        const { current: list } = this.listRef;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot;
         if (prevProps.chatId === chatId) {
             list.scrollTop = scrollTop;
@@ -274,7 +275,7 @@ class ChatDetails extends React.Component {
     };
 
     handleHeaderClick = () => {
-        this.chatDetailsListRef.current.scrollTop = 0;
+        this.listRef.current.scrollTop = 0;
     };
 
     handleOpenViewer = () => {
@@ -311,13 +312,13 @@ class ChatDetails extends React.Component {
     };
 
     getContentHeight = () => {
-        if (!this.chatDetailsListRef) return 0;
+        if (!this.listRef) return 0;
 
-        return this.chatDetailsListRef.current.clientHeight;
+        return this.listRef.current.clientHeight;
     };
 
     handleTabClick = event => {
-        const { current: list } = this.chatDetailsListRef;
+        const { current: list } = this.listRef;
         if (!list) return;
 
         const { current: divider } = this.dividerRef;
@@ -327,6 +328,21 @@ class ChatDetails extends React.Component {
             top: divider.offsetTop,
             behavior: 'smooth'
         });
+    };
+
+    handleScroll = event => {
+        if (!this.listRef) return;
+        if (!this.mediaRef) return;
+
+        const { current: list } = this.listRef;
+        if (!list) return;
+
+        const { current: media } = this.mediaRef;
+        if (!media) return;
+
+        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
+            media.handleScroll(event);
+        }
     };
 
     render() {
@@ -360,7 +376,7 @@ class ChatDetails extends React.Component {
             return (
                 <div className='chat-details'>
                     <ChatDetailsHeader onClose={onClose} />
-                    <div ref={this.chatDetailsListRef} className={classNames('chat-details-list', 'scrollbars-hidden')} />
+                    <div ref={this.listRef} className={classNames('chat-details-list', 'scrollbars-hidden')} />
                 </div>
             );
         }
@@ -414,7 +430,10 @@ class ChatDetails extends React.Component {
                     onClose={onClose}
                     onClick={this.handleHeaderClick}
                 />
-                <div ref={this.chatDetailsListRef} className={classNames('chat-details-list', 'scrollbars-hidden')}>
+                <div
+                    ref={this.listRef}
+                    className={classNames('chat-details-list', 'scrollbars-hidden')}
+                    onScroll={this.handleScroll}>
                     <div className='chat-details-info'>
                         <Chat
                             chatId={chatId}
@@ -488,15 +507,15 @@ class ChatDetails extends React.Component {
 
                     <div ref={this.dividerRef}/>
                     <SharedMediaTabs chatId={chatId} onClick={this.handleTabClick}/>
-                    <SharedMediaContent chatId={chatId}/>
-                    {(photoCount > 0 ||
-                        videoCount > 0 ||
-                        documentCount > 0 ||
-                        audioCount > 0 ||
-                        urlCount > 0 ||
-                        voiceAndVideoNoteCount > 0 ||
-                        groupInCommonCount > 0) && (
-                        <>
+                    <SharedMediaContent ref={this.mediaRef} chatId={chatId}/>
+                    {/*{(photoCount > 0 ||*/}
+                    {/*    videoCount > 0 ||*/}
+                    {/*    documentCount > 0 ||*/}
+                    {/*    audioCount > 0 ||*/}
+                    {/*    urlCount > 0 ||*/}
+                    {/*    voiceAndVideoNoteCount > 0 ||*/}
+                    {/*    groupInCommonCount > 0) && (*/}
+                    {/*    <>*/}
                             {/*<Divider />*/}
                             {/*<List className='shared-media-list'>*/}
                             {/*    {photoCount > 0 && (*/}
@@ -602,8 +621,8 @@ class ChatDetails extends React.Component {
                             {/*        </ListItem>*/}
                             {/*    )}*/}
                             {/*</List>*/}
-                        </>
-                    )}
+                    {/*    </>*/}
+                    {/*)}*/}
                     {/*{items.length > 0 && (*/}
                     {/*    <>*/}
                     {/*        <Divider />*/}

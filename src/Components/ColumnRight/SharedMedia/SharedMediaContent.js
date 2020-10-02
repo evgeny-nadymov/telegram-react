@@ -8,18 +8,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { throttle } from '../../../Utils/Common';
-import './SharedMediaContent.css';
-import MessageStore from '../../../Stores/MessageStore';
-import { openMedia } from '../../../Utils/Message';
 import SharedPhoto from '../../Tile/SharedMedia/SharedPhoto';
 import SharedDocument from '../../Tile/SharedMedia/SharedDocument';
 import SharedLink from '../../Tile/SharedMedia/SharedLink';
 import SharedVoiceNote from '../../Tile/SharedMedia/SharedVoiceNote';
 import SharedVideo from '../../Tile/SharedMedia/SharedVideo';
-import FileStore from '../../../Stores/FileStore';
 import { loadMessageContents } from '../../../Utils/File';
+import { openMedia } from '../../../Utils/Message';
+import { SHARED_MESSAGE_SLICE_LIMIT } from '../../../Constants';
+import FileStore from '../../../Stores/FileStore';
+import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
+import './SharedMediaContent.css';
 
 class SharedMediaContent extends React.Component {
     constructor(props) {
@@ -32,6 +32,34 @@ class SharedMediaContent extends React.Component {
         this.state = { }
 
         // this.onWindowResize = throttle(this.onWindowResize, 250);
+    }
+
+    static isValidMessage(selectedIndex, message) {
+        if (!message) return false;
+
+        return SharedMediaContent.isValidContent(selectedIndex, message.content);
+    };
+
+    static isValidContent(selectedIndex, content) {
+        switch (selectedIndex) {
+            case 1: {
+                return SharedMediaContent.isValidPhotoAndVideoContent(content);
+            }
+            case 2: {
+                return SharedMediaContent.isValidDocumentContent(content);
+            }
+            case 3: {
+                return SharedMediaContent.isValidAudioContent(content);
+            }
+            case 4: {
+                return SharedMediaContent.isValidUrlContent(content);
+            }
+            case 5: {
+                return SharedMediaContent.isValidVoiceNoteContent(content);
+            }
+        }
+
+        return false;
     }
 
     static isValidPhotoAndVideoContent(content) {
@@ -68,6 +96,28 @@ class SharedMediaContent extends React.Component {
         return content && content['@type'] === 'messageVoiceNote';
     }
 
+    static getFilter(selectedIndex) {
+        switch (selectedIndex) {
+            case 1: {
+                return { '@type': 'searchMessagesFilterPhotoAndVideo' }
+            }
+            case 2: {
+                return { '@type': 'searchMessagesFilterDocument' }
+            }
+            case 3: {
+                return { '@type': 'searchMessagesFilterAudio' }
+            }
+            case 4: {
+                return { '@type': 'searchMessagesFilterUrl' }
+            }
+            case 5: {
+                return { '@type': 'searchMessagesFilterVoiceNote' }
+            }
+        }
+
+        return null;
+    }
+
     static getDerivedStateFromProps(props, state) {
         const { chatId } = props;
 
@@ -83,32 +133,34 @@ class SharedMediaContent extends React.Component {
             let source = [];
             let selectedIndex = -1;
             if (photoAndVideo.length > 0) {
-                source = photoAndVideo.filter(x => SharedMediaContent.isValidPhotoAndVideoContent(x.content));
                 selectedIndex = 1;
             } else if (document.length > 0) {
-                source = document.filter(x => SharedMediaContent.isValidDocumentContent(x.content));
                 selectedIndex = 2;
             } else if (audio.length > 0) {
-                source = audio.filter(x => SharedMediaContent.isValidAudioContent(x.content));
                 selectedIndex = 3;
             } else if (url.length > 0) {
-                source = url.filter(x => SharedMediaContent.isValidUrlContent(x.content));
                 selectedIndex = 4;
             } else if (voiceNote.length > 0) {
-                source = voiceNote.filter(x => SharedMediaContent.isValidVoiceNoteContent(x.content));
                 selectedIndex = 5;
             }
+            source = photoAndVideo.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
             return {
                 prevChatId: props.chatId,
                 selectedIndex,
-                items: source.slice(0, 40),
+                items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
                 photoAndVideo,
                 document,
                 audio,
                 url,
                 voiceNote,
-                isSmallWidth: false
+                isSmallWidth: false,
+                params: {
+                    loading: false,
+                    completed: false,
+                    migrateCompleted: false,
+                    filter: SharedMediaContent.getFilter(selectedIndex)
+                }
             }
         }
 
@@ -123,11 +175,6 @@ class SharedMediaContent extends React.Component {
         // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSend);
-    }
-
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        this.unobserveResize();
-        this.observeResize();
     }
 
     componentWillUnmount() {
@@ -212,20 +259,27 @@ class SharedMediaContent extends React.Component {
 
         let source = [];
         if (selectedIndex === 1) {
-            source = photoAndVideo.filter(x => SharedMediaContent.isValidPhotoAndVideoContent(x.content));
+            source = photoAndVideo;
         } else if (selectedIndex === 2) {
-            source = document.filter(x => SharedMediaContent.isValidDocumentContent(x.content));
+            source = document;
         } else if (selectedIndex === 3) {
-            source = audio.filter(x => SharedMediaContent.isValidAudioContent(x.content));
+            source = audio;
         } else if (selectedIndex === 4) {
-            source = url.filter(x => SharedMediaContent.isValidUrlContent(x.content));
+            source = url;
         } else if (selectedIndex === 5) {
-            source = voiceNote.filter(x => SharedMediaContent.isValidVoiceNoteContent(x.content));
+            source = voiceNote;
         }
+        source = source.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
         this.setState({
             selectedIndex,
-            items: source.slice(0, 40),
+            items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
+            params: {
+                loading: false,
+                completed: false,
+                migrateCompleted: false,
+                filter: SharedMediaContent.getFilter(selectedIndex)
+            },
             photoAndVideo,
             document,
             audio,
@@ -241,6 +295,9 @@ class SharedMediaContent extends React.Component {
             const store = FileStore.getStore();
             loadMessageContents(store, items);
         }
+
+        // this.unobserveResize();
+        // this.observeResize();
     }
 
     onClientUpdateMediaTab = update => {
@@ -252,20 +309,27 @@ class SharedMediaContent extends React.Component {
 
         let source = [];
         if (selectedIndex === 1) {
-            source = photoAndVideo.filter(x => SharedMediaContent.isValidPhotoAndVideoContent(x.content));
+            source = photoAndVideo;
         } else if (selectedIndex === 2) {
-            source = document.filter(x => SharedMediaContent.isValidDocumentContent(x.content));
+            source = document;
         } else if (selectedIndex === 3) {
-            source = audio.filter(x => SharedMediaContent.isValidAudioContent(x.content));
+            source = audio;
         } else if (selectedIndex === 4) {
-            source = url.filter(x => SharedMediaContent.isValidUrlContent(x.content));
+            source = url;
         } else if (selectedIndex === 5) {
-            source = voiceNote.filter(x => SharedMediaContent.isValidVoiceNoteContent(x.content));
+            source = voiceNote;
         }
+        source = source.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
         this.setState({
             selectedIndex,
-            items: source.slice(0, 40)
+            items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
+            params: {
+                loading: false,
+                completed: false,
+                migrateCompleted: false,
+                filter: SharedMediaContent.getFilter(selectedIndex)
+            }
         });
     };
 
@@ -357,6 +421,70 @@ class SharedMediaContent extends React.Component {
         }
 
         return null;
+    };
+
+    handleScroll = event => {
+        const { params } = this.state;
+
+        if (params && !params.completed) {
+            this.onLoadNext(params);
+        } else {
+            // this.onLoadMigratedNext(params);
+        }
+    };
+
+    onLoadNext = async (params, loadIncomplete = true) => {
+        const { chatId } = this.props;
+        const { items, selectedIndex } = this.state;
+        const { completed, filter, loading } = params;
+
+        // console.log('SharedMediaBase.onLoadNext', completed, loading);
+        if (!filter) return;
+        if (loading) return;
+        if (completed) return;
+
+        const fromMessageId = items.length > 0 ? items[items.length - 1].id : 0;
+        params.loading = true;
+        const result = await TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: fromMessageId,
+            offset: 0,
+            limit: SHARED_MESSAGE_SLICE_LIMIT,
+            filter
+        }).finally(() => {
+            params.loading = false;
+        });
+
+        TdLibController.send({
+            '@type': 'searchChatMessages',
+            chat_id: chatId,
+            query: '',
+            sender_user_id: 0,
+            from_message_id: fromMessageId,
+            offset: 0,
+            limit: SHARED_MESSAGE_SLICE_LIMIT * 2,
+            filter
+        });
+
+        const { messages } = result;
+        params.completed = messages.length === 0 || messages.total_count === 0;
+        params.items = items.concat(messages.filter(x => SharedMediaContent.isValidMessage(selectedIndex, x)));
+        const incompleteResults = loadIncomplete && messages.length > 0 && messages.length < SHARED_MESSAGE_SLICE_LIMIT;
+
+        MessageStore.setItems(result.messages);
+        const store = FileStore.getStore();
+        loadMessageContents(store, result.messages);
+
+        this.setState({ items: params.items });
+
+        if (params.completed) {
+            // this.onLoadMigratedNext(params, true);
+        } else if (incompleteResults) {
+            this.onLoadNext(params, false);
+        }
     };
 
     render() {
