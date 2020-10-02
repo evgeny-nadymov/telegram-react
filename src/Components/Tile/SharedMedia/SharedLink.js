@@ -24,6 +24,45 @@ class SharedLink extends React.Component {
         top: 0
     };
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, webPage, caption, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (webPage !== nextProps.webPage) {
+            return true;
+        }
+
+        if (caption !== nextProps.caption) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
+    }
+
     handleOpenContextMenu = async event => {
         if (event) {
             event.preventDefault();
@@ -80,7 +119,7 @@ class SharedLink extends React.Component {
     }
 
     render() {
-        const { chatId, messageId, webPage, showOpenMessage } = this.props;
+        const { chatId, messageId, webPage, caption, showOpenMessage } = this.props;
         const { contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
@@ -102,7 +141,8 @@ class SharedLink extends React.Component {
                 </SafeLink>
             );
         } else {
-            const { text } = message.content;
+            let { text, caption } = message.content;
+            text = text || caption;
             if (text) {
                 const { entities } = text;
                 if (entities && entities.length > 0) {
@@ -181,8 +221,9 @@ SharedLink.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     webPage: PropTypes.object,
-
-    openMedia: PropTypes.func
+    caption: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
+    openMedia: PropTypes.func,
 };
 
 export default SharedLink;

@@ -152,7 +152,6 @@ class ChatDetails extends React.Component {
         UserStore.on('updateUserFullInfo', this.onUpdateUserFullInfo);
         BasicGroupStore.on('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.on('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
-        MessageStore.on('clientUpdateMediaTab', this.onClientUpdateMediaTab);
     }
 
     componentWillUnmount() {
@@ -160,12 +159,7 @@ class ChatDetails extends React.Component {
         UserStore.off('updateUserFullInfo', this.onUpdateUserFullInfo);
         BasicGroupStore.off('updateBasicGroupFullInfo', this.onUpdateBasicGroupFullInfo);
         SupergroupStore.off('updateSupergroupFullInfo', this.onUpdateSupergroupFullInfo);
-        MessageStore.off('clientUpdateMediaTab', this.onClientUpdateMediaTab);
     }
-
-    onClientUpdateMediaTab = update => {
-
-    };
 
     onUpdateBasicGroupFullInfo = update => {
         const chat = ChatStore.get(this.props.chatId);
@@ -323,11 +317,28 @@ class ChatDetails extends React.Component {
 
         const { current: divider } = this.dividerRef;
         if (!divider) return;
+        if (divider.offsetTop === list.scrollTop) return;
 
-        list.scrollTo({
-            top: divider.offsetTop,
-            behavior: 'smooth'
-        });
+        if (list.scrollTop < divider.offsetTop) {
+            list.scrollTo({
+                top: divider.offsetTop,
+                behavior: 'smooth'
+            });
+        } else {
+            list.scrollTop = divider.offsetTop + 70;
+            setTimeout(() => {
+                list.scrollTo({
+                    top: divider.offsetTop,
+                    behavior: 'smooth'
+                });
+            }, 0);
+        }
+        // requestAnimationFrame(() => {
+        //     list.scrollTo({
+        //         top: divider.offsetTop,
+        //         behavior: 'smooth'
+        //     });
+        // });
     };
 
     handleScroll = event => {
@@ -343,6 +354,8 @@ class ChatDetails extends React.Component {
         if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             media.handleScroll(event);
         }
+
+        media.handleVirtScroll(event);
     };
 
     render() {

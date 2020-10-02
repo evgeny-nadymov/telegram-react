@@ -15,7 +15,7 @@ import { getContent, isMessageUnread } from './Message';
 import { isServiceMessage } from './ServiceMessage';
 import { formatPhoneNumber } from './Phone';
 import { getChannelStatus } from './Channel';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
+import { SERVICE_NOTIFICATIONS_USER_ID, SHARED_MESSAGE_SLICE_LIMIT } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
 import MessageStore from '../Stores/MessageStore';
@@ -1031,6 +1031,7 @@ export async function getChatMedia(chatId) {
     console.log('[media] getChatMedia start', chatId);
     const promises = [];
 
+    const limit = 100;
     promises.push(TdLibController.send({
         '@type': 'searchChatMessages',
         chat_id: chatId,
@@ -1038,7 +1039,7 @@ export async function getChatMedia(chatId) {
         sender_user_id: 0,
         from_message_id: 0,
         offset: 0,
-        limit: 40,
+        limit,
         filter: { '@type': 'searchMessagesFilterPhotoAndVideo' }
     }));
     promises.push(TdLibController.send({
@@ -1048,7 +1049,7 @@ export async function getChatMedia(chatId) {
         sender_user_id: 0,
         from_message_id: 0,
         offset: 0,
-        limit: 40,
+        limit,
         filter: { '@type': 'searchMessagesFilterDocument' }
     }));
     promises.push(TdLibController.send({
@@ -1058,7 +1059,7 @@ export async function getChatMedia(chatId) {
         sender_user_id: 0,
         from_message_id: 0,
         offset: 0,
-        limit: 40,
+        limit,
         filter: { '@type': 'searchMessagesFilterAudio' }
     }));
     promises.push(TdLibController.send({
@@ -1068,7 +1069,7 @@ export async function getChatMedia(chatId) {
         sender_user_id: 0,
         from_message_id: 0,
         offset: 0,
-        limit: 40,
+        limit,
         filter: { '@type': 'searchMessagesFilterUrl' }
     }));
     promises.push(TdLibController.send({
@@ -1078,7 +1079,7 @@ export async function getChatMedia(chatId) {
         sender_user_id: 0,
         from_message_id: 0,
         offset: 0,
-        limit: 40,
+        limit,
         filter: { '@type': 'searchMessagesFilterVoiceNote' }
     }));
 

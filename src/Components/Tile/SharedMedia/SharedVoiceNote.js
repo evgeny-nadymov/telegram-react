@@ -17,14 +17,45 @@ import MessageStore from '../../../Stores/MessageStore';
 import './SharedVoiceNote.css';
 
 class SharedVoiceNote extends React.Component {
-    constructor(props) {
-        super(props);
+    state = {
+        contextMenu: false,
+        left: 0,
+        top: 0
+    };
 
-        this.state = {
-            contextMenu: false,
-            left: 0,
-            top: 0
-        };
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, voiceNote, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (voiceNote !== nextProps.voiceNote) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
     }
 
     handleOpenContextMenu = async event => {
@@ -112,8 +143,8 @@ class SharedVoiceNote extends React.Component {
 SharedVoiceNote.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    voiceNote: PropTypes.object.isRequired,
-
+    voiceNote: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
     openMedia: PropTypes.func
 };
 

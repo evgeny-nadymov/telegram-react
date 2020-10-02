@@ -494,7 +494,7 @@ class DialogsList extends React.Component {
             }
         }
 
-        console.log('[vl] render', this.source);
+        // console.log('[vl] render', this.source);
 
         return (
             <VirtualizedList

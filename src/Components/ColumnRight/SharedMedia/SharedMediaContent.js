@@ -21,18 +21,124 @@ import MessageStore from '../../../Stores/MessageStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './SharedMediaContent.css';
 
+const overScanCount = 5;
+let offsetTop = 0;
+let viewportHeight = 1024;
+
 class SharedMediaContent extends React.Component {
     constructor(props) {
         super(props);
 
-        this.filterRef = new Map();
-        this.filtersRef = React.createRef();
-        this.filterSelectionRef = React.createRef();
+        this.listRef = React.createRef();
 
-        this.state = { }
+        this.state = {
+            scrollTop: 0
+        }
 
         // this.onWindowResize = throttle(this.onWindowResize, 250);
     }
+
+    static getRowHeight(selectedIndex) {
+        switch (selectedIndex) {
+            case 1: {
+                return undefined;
+            }
+            case 2: {
+                return 78;
+            }
+            case 3: {
+                return 94;
+            }
+            case 4: {
+                return undefined;
+            }
+            case 5: {
+                return 74;
+            }
+        }
+
+        return undefined;
+    }
+
+    static getItemTemplate = (selectedIndex, message) => {
+        const { chat_id, id, content } = message;
+        const migratedChatId = -1;
+
+        switch (selectedIndex) {
+            case 1: {
+                if (content['@type'] === 'messageVideo') {
+                    return (
+                        <SharedVideo
+                            key={`chat_id=${chat_id}_message_id=${id}`}
+                            chatId={chat_id}
+                            messageId={id}
+                            video={content.video}
+                            openMedia={() => openMedia(chat_id, id, false)}
+                            showOpenMessage={chat_id !== migratedChatId}
+                        />
+                    );
+                }
+
+                return (
+                    <SharedPhoto
+                        key={`chat_id=${chat_id}_message_id=${id}`}
+                        chatId={chat_id}
+                        messageId={id}
+                        photo={content.photo}
+                        openMedia={() => openMedia(chat_id, id, false)}
+                        showOpenMessage={chat_id !== migratedChatId}
+                    />
+                );
+            }
+            case 2: {
+                return (
+                    <SharedDocument
+                        key={`chat_id=${chat_id}_message_id=${id}`}
+                        chatId={chat_id}
+                        messageId={id}
+                        showOpenMessage={chat_id !== migratedChatId}
+                    />
+                );
+            }
+            case 3: {
+                return (
+                    <SharedDocument
+                        key={`chat_id=${chat_id}_message_id=${id}`}
+                        chatId={chat_id}
+                        messageId={id}
+                        showOpenMessage={chat_id !== migratedChatId}
+                    />
+                );
+            }
+            case 4: {
+                return (
+                    <SharedLink
+                        key={`chat_id=${chat_id}_message_id=${id}`}
+                        chatId={chat_id}
+                        messageId={id}
+                        webPage={content.web_page}
+                        caption={content.caption}
+                        openMedia={() => openMedia(chat_id, id, false)}
+                        showOpenMessage={chat_id !== migratedChatId}
+                    />
+                );
+            }
+            case 5: {
+                return (
+                    <SharedVoiceNote
+                        key={`chat_id=${chat_id}_message_id=${id}`}
+                        chatId={chat_id}
+                        messageId={id}
+                        voiceNote={content.voice_note}
+                        openMedia={() => openMedia(chat_id, id, false)}
+                        showOpenMessage={chat_id !== migratedChatId}
+                    />
+                );
+            }
+        }
+
+        return null;
+    };
 
     static isValidMessage(selectedIndex, message) {
         if (!message) return false;
@@ -77,11 +183,11 @@ class SharedMediaContent extends React.Component {
     static isValidUrlContent(content) {
         if (!content) return false;
 
-        const { web_page, text } = content;
+        const { web_page, text, caption } = content;
         if (web_page) return true;
-        if (!text) return false;
+        if (!text && !caption) return false;
 
-        const { entities } = text;
+        const { entities } = text || caption;
         if (!entities) return false;
 
         return entities.find(
@@ -99,23 +205,49 @@ class SharedMediaContent extends React.Component {
     static getFilter(selectedIndex) {
         switch (selectedIndex) {
             case 1: {
-                return { '@type': 'searchMessagesFilterPhotoAndVideo' }
+                return { '@type': 'searchMessagesFilterPhotoAndVideo' };
             }
             case 2: {
-                return { '@type': 'searchMessagesFilterDocument' }
+                return { '@type': 'searchMessagesFilterDocument' };
             }
             case 3: {
-                return { '@type': 'searchMessagesFilterAudio' }
+                return { '@type': 'searchMessagesFilterAudio' };
             }
             case 4: {
-                return { '@type': 'searchMessagesFilterUrl' }
+                return { '@type': 'searchMessagesFilterUrl' };
             }
             case 5: {
-                return { '@type': 'searchMessagesFilterVoiceNote' }
+                return { '@type': 'searchMessagesFilterVoiceNote' };
             }
         }
 
         return null;
+    }
+
+    static getSource(selectedIndex, media) {
+        if (!media) {
+            return [];
+        }
+
+        switch (selectedIndex) {
+            case 1: {
+                return media.photoAndVideo || [];
+            }
+            case 2: {
+                return media.document || [];
+            }
+            case 3: {
+                return media.audio || [];
+            }
+            case 4: {
+                return media.url || [];
+            }
+            case 5: {
+                return media.voiceNote || [];
+            }
+        }
+
+        return [];
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -130,7 +262,6 @@ class SharedMediaContent extends React.Component {
             const url = media ? media.url : [];
             const voiceNote = media ? media.voiceNote : [];
 
-            let source = [];
             let selectedIndex = -1;
             if (photoAndVideo.length > 0) {
                 selectedIndex = 1;
@@ -143,11 +274,13 @@ class SharedMediaContent extends React.Component {
             } else if (voiceNote.length > 0) {
                 selectedIndex = 5;
             }
-            source = photoAndVideo.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
+            const source = SharedMediaContent.getSource(selectedIndex, media).filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
             return {
                 prevChatId: props.chatId,
                 selectedIndex,
+                renderIds: new Map(),
+                rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
                 items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
                 photoAndVideo,
                 document,
@@ -257,22 +390,12 @@ class SharedMediaContent extends React.Component {
             }
         }
 
-        let source = [];
-        if (selectedIndex === 1) {
-            source = photoAndVideo;
-        } else if (selectedIndex === 2) {
-            source = document;
-        } else if (selectedIndex === 3) {
-            source = audio;
-        } else if (selectedIndex === 4) {
-            source = url;
-        } else if (selectedIndex === 5) {
-            source = voiceNote;
-        }
-        source = source.filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
+        const source = SharedMediaContent.getSource(selectedIndex, media).filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
 
         this.setState({
             selectedIndex,
+            renderIds: new Map(),
+            rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
             items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
             params: {
                 loading: false,
@@ -323,6 +446,8 @@ class SharedMediaContent extends React.Component {
 
         this.setState({
             selectedIndex,
+            renderIds: new Map(),
+            rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
             items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
             params: {
                 loading: false,
@@ -344,85 +469,6 @@ class SharedMediaContent extends React.Component {
         this.setMediaState(media, selectedIndex);
     };
 
-    getItemTemplate = (selectedIndex, message) => {
-        const { chat_id, id, content } = message;
-        const migratedChatId = -1;
-
-        switch (selectedIndex) {
-            case 1: {
-                if (content['@type'] === 'messageVideo') {
-                    return (
-                        <SharedVideo
-                            key={`chat_id=${chat_id}_message_id=${id}`}
-                            chatId={chat_id}
-                            messageId={id}
-                            video={content.video}
-                            openMedia={() => openMedia(chat_id, id, false)}
-                            showOpenMessage={chat_id !== migratedChatId}
-                        />
-                    );
-                }
-
-                return (
-                    <SharedPhoto
-                        key={`chat_id=${chat_id}_message_id=${id}`}
-                        chatId={chat_id}
-                        messageId={id}
-                        photo={content.photo}
-                        openMedia={() => openMedia(chat_id, id, false)}
-                        showOpenMessage={chat_id !== migratedChatId}
-                    />
-                );
-            }
-            case 2: {
-                return (
-                    <SharedDocument
-                        key={`chat_id=${chat_id}_message_id=${id}`}
-                        chatId={chat_id}
-                        messageId={id}
-                        showOpenMessage={chat_id !== migratedChatId}
-                    />
-                );
-            }
-            case 3: {
-                return (
-                    <SharedDocument
-                        key={`chat_id=${chat_id}_message_id=${id}`}
-                        chatId={chat_id}
-                        messageId={id}
-                        showOpenMessage={chat_id !== migratedChatId}
-                    />
-                );
-            }
-            case 4: {
-                return (
-                    <SharedLink
-                        key={`chat_id=${chat_id}_message_id=${id}`}
-                        chatId={chat_id}
-                        messageId={id}
-                        webPage={content.web_page}
-                        openMedia={() => openMedia(chat_id, id, false)}
-                        showOpenMessage={chat_id !== migratedChatId}
-                    />
-                );
-            }
-            case 5: {
-                return (
-                    <SharedVoiceNote
-                        key={`chat_id=${chat_id}_message_id=${id}`}
-                        chatId={chat_id}
-                        messageId={id}
-                        voiceNote={content.voice_note}
-                        openMedia={() => openMedia(chat_id, id, false)}
-                        showOpenMessage={chat_id !== migratedChatId}
-                    />
-                );
-            }
-        }
-
-        return null;
-    };
-
     handleScroll = event => {
         const { params } = this.state;
 
@@ -433,18 +479,75 @@ class SharedMediaContent extends React.Component {
         }
     };
 
+    handleVirtScroll = event => {
+        const { current: list } = this.listRef;
+        if (!list) return;
+        // if (list) {
+        //     console.log('[vlist] onScroll', [list.offsetTop, list.offsetParent, list.offsetParent.offsetHeight]);
+        // }
+
+        offsetTop = list.offsetTop;
+        viewportHeight = list.offsetParent.offsetHeight;
+        this.setScrollPosition(event);
+    };
+
+    isVisibleItem = (index, viewportHeight, scrollTop) => {
+        const { rowHeight } = this.state;
+
+        const itemTop = index * rowHeight;
+        const itemBottom = (index + 1) * rowHeight;
+
+        return (
+            itemTop > scrollTop - overScanCount * rowHeight &&
+            itemBottom < scrollTop + viewportHeight + overScanCount * rowHeight
+        );
+    };
+
+    getRenderIds(source, viewportHeight, scrollTop) {
+        const renderIds = new Map();
+        const renderIdsList = [];
+        source.forEach((item, index) => {
+            if (this.isVisibleItem(index, viewportHeight, scrollTop)) {
+                renderIds.set(index, index);
+                renderIdsList.push(index);
+            }
+        });
+
+        return { renderIds, renderIdsList };
+    }
+
+    setScrollPosition = event => {
+        const { items, scrollTop, rowHeight } = this.state;
+
+        if (Math.abs(event.target.scrollTop - scrollTop) >= rowHeight) {
+            const renderIds = this.getRenderIds(items, viewportHeight, event.target.scrollTop - offsetTop);
+
+            this.setState({
+                scrollTop: event.target.scrollTop,
+                ...renderIds
+            });
+        }
+    };
+
     onLoadNext = async (params, loadIncomplete = true) => {
         const { chatId } = this.props;
         const { items, selectedIndex } = this.state;
-        const { completed, filter, loading } = params;
+        const { completed, filter, loading, messages: lastMessages } = params;
 
         // console.log('SharedMediaBase.onLoadNext', completed, loading);
         if (!filter) return;
         if (loading) return;
         if (completed) return;
 
-        const fromMessageId = items.length > 0 ? items[items.length - 1].id : 0;
+        let fromMessageId = items.length > 0 ? items[items.length - 1].id : 0;
+        if (lastMessages) {
+            fromMessageId = lastMessages.length > 0 ? lastMessages[lastMessages.length - 1].id : 0;
+        }
         params.loading = true;
+
+        this.requestId = new Date();
+        const requestId = this.requestId;
+
         const result = await TdLibController.send({
             '@type': 'searchChatMessages',
             chat_id: chatId,
@@ -469,7 +572,12 @@ class SharedMediaContent extends React.Component {
             filter
         });
 
+        if (this.requestId !== requestId) {
+            return;
+        }
+
         const { messages } = result;
+        params.messages = messages;
         params.completed = messages.length === 0 || messages.total_count === 0;
         params.items = items.concat(messages.filter(x => SharedMediaContent.isValidMessage(selectedIndex, x)));
         const incompleteResults = loadIncomplete && messages.length > 0 && messages.length < SHARED_MESSAGE_SLICE_LIMIT;
@@ -488,14 +596,28 @@ class SharedMediaContent extends React.Component {
     };
 
     render() {
-        const { selectedIndex, items } = this.state;
-        if (!items || !items.length) {
-            return null;
+        const { selectedIndex, rowHeight, items = [], renderIds } = this.state;
+
+        // console.log('[vlist] render', [selectedIndex, items, renderIds]);
+        if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
+            return (
+                <div ref={this.listRef} className='shared-media-virt-content' style={{ height: items.length * rowHeight }}>
+                    {items.map((x, index) => {
+                        const { chat_id, id } = x;
+
+                        return ((!renderIds.size || renderIds.has(index)) && (
+                            <div key={`chat_id=${chat_id}_message_id=${id}`} className='shared-media-virt-item' style={{ top: index * rowHeight }}>
+                                {SharedMediaContent.getItemTemplate(selectedIndex, x)}
+                            </div>
+                        ));
+                    })}
+                </div>
+            );
         }
 
         return (
-            <div className={classNames('shared-media-content', { 'shared-photos-list': selectedIndex === 1 })}>
-                {items.map(x => this.getItemTemplate(selectedIndex, x))}
+            <div ref={this.listRef} className={classNames('shared-media-content', { 'shared-photos-list': selectedIndex === 1 })}>
+                {items.map(x => SharedMediaContent.getItemTemplate(selectedIndex, x))}
             </div>
         );
     }

@@ -32,6 +32,41 @@ class SharedPhoto extends React.Component {
         };
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, photo, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (photo !== nextProps.photo) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount() {
         FileStore.on('clientUpdatePhotoBlob', this.onClientUpdatePhotoBlob);
     }
@@ -116,8 +151,8 @@ class SharedPhoto extends React.Component {
 SharedPhoto.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    photo: PropTypes.object.isRequired,
-    showOpenMessage: PropTypes.bool.isRequired,
+    photo: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
     openMedia: PropTypes.func,
 
     size: PropTypes.number,

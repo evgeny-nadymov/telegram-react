@@ -11,3 +11,16 @@
     padding: 0 14px;
     min-height: calc(100% - 44px);
 }
+
+.shared-media-virt-content {
+    transform: translateZ(0);
+    will-change: transform;
+    position: relative;
+    min-height: calc(100% - 44px);
+}
+
+.shared-media-virt-item {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+}
