@@ -503,7 +503,7 @@ class ChatDetails extends React.Component {
                                 )}
                                 <NotificationsListItem chatId={chatId} />
                                 {popup && !isGroup && (
-                                    <ListItem button className='list-item-rounded' onClick={this.handleOpenChat}>
+                                    <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handleOpenChat}>
                                         <ListItemText
                                             primary={
                                                 <Typography color='primary' variant='inherit' noWrap>

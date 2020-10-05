@@ -51,6 +51,7 @@ class CacheStore extends EventEmitter {
                 switch (authorization_state['@type']) {
                     case 'authorizationStateClosed': {
                         this.reset();
+                        this.clear();
                         break;
                     }
                     case 'authorizationStateLoggingOut':
@@ -77,7 +78,7 @@ class CacheStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateDialogsReady': {
-                this.clear();
+                this.clearDataUrls();
             }
             default:
                 break;
@@ -303,10 +304,21 @@ class CacheStore extends EventEmitter {
     }
 
     clear() {
+        const promises = [];
+        promises.push(CacheManager.remove('cache').catch(error => null));
+        promises.push(CacheManager.remove('files').catch(error => null));
+        promises.push(CacheManager.remove('filters').catch(error => null));
+        promises.push(CacheManager.remove('contacts').catch(error => null));
+        promises.push(CacheManager.remove('register').catch(error => null));
+
+        Promise.all(promises)
+    }
+
+    clearDataUrls() {
         if (this.cache) {
             const { files } = this.cache;
 
-            files.filter(x => Boolean(x)).forEach(({ id, url }) => {
+            files.forEach(({ id, url }) => {
                 FileStore.deleteDataUrl(id);
             });
         }

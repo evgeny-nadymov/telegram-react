@@ -16,7 +16,7 @@ import { getChatTitle, isMeChat } from './Chat';
 import { openUser } from './../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload, supportsStreaming } from './File';
-import { getAudioTitle } from './Media';
+import { getAudioSubtitle, getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
@@ -506,7 +506,10 @@ function getContent(message, t = key => key) {
             return t('AttachGif') + caption;
         }
         case 'messageAudio': {
-            return t('AttachMusic') + caption;
+            const { audio } = content;
+            const title = getAudioTitle(audio) || t('AttachMusic');
+
+            return title + caption;
         }
         case 'messageBasicGroupChatCreate': {
             return getServiceMessageContent(message);
