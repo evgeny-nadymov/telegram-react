@@ -76,7 +76,6 @@ class DialogsList extends React.Component {
 
         this.state = {
             authorizationState,
-            offset: 0,
             chats: null,
             fistSliceLoaded: false,
             chatList: props.type === 'chatListMain' ? { '@type': 'chatListMain' } : { '@type': 'chatListArchive' }
@@ -85,7 +84,7 @@ class DialogsList extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, open, showArchive, archiveTitle, items, cacheItems } = this.props;
-        const { chats, offset, chatList } = this.state;
+        const { chats, chatList } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -111,10 +110,6 @@ class DialogsList extends React.Component {
             return true;
         }
 
-        if (nextState.offset !== offset) {
-            return true;
-        }
-
         if (nextState.chats !== chats) {
             return true;
         }
@@ -134,15 +129,7 @@ class DialogsList extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        const { current: list } = this.listRef;
-        if (!list) return;
 
-        const { scrollTop } = snapshot;
-
-        // if (prevState.offset > this.state.offset) {
-        //     list.scrollTop += ( - this.state.offset + prevState.offset) * 72;
-        // }
-        // list.scrollTop = scrollTop;
     }
 
     componentDidMount() {
@@ -344,21 +331,12 @@ class DialogsList extends React.Component {
     };
 
     onLoadPrev() {
-        this.setState({
-            offset: Math.max(this.state.offset - CHAT_SLICE_LIMIT, 0)
-        });
+
     }
 
     async onLoadNext(replace = false) {
         const { type } = this.props;
-        const { offset, chats, chatList } = this.state;
-
-        if (chats && offset + 2 * CHAT_SLICE_LIMIT < chats.length) {
-            this.setState({
-                offset: offset + CHAT_SLICE_LIMIT
-            });
-            return;
-        }
+        const { chats, chatList } = this.state;
 
         if (this.loading) {
             return;
@@ -430,11 +408,11 @@ class DialogsList extends React.Component {
         const { chats } = this.state;
 
         const newChats = (chats || []).concat(chatIds);
-        this.setState({ chats: newChats, offset: newChats.length - 2 * CHAT_SLICE_LIMIT }, callback);
+        this.setState({ chats: newChats }, callback);
     }
 
     replaceChats(chats, callback) {
-        this.setState({ chats, offset: 0 }, callback);
+        this.setState({ chats }, callback);
     }
 
     scrollToTop() {
@@ -454,7 +432,7 @@ class DialogsList extends React.Component {
 
     render() {
         const { open, cacheItems, showArchive, archiveTitle } = this.props;
-        const { chats, offset, chatList } = this.state;
+        const { chats, chatList } = this.state;
 
         // console.log('[dl] render', type, open, chats, cacheChats);
         if (!open) return null;
@@ -469,9 +447,6 @@ class DialogsList extends React.Component {
                 }
             });
             this.source = chats;
-            // dialogs = chats.slice(offset, offset + 2 * CHAT_SLICE_LIMIT).map(x => (
-            //     <Dialog key={x} chatId={x} isLastPinned={x === lastPinnedId} hidden={this.hiddenChats.has(x)} />
-            // ));
         } else if (cacheItems) {
             let lastPinnedId = 0;
             cacheItems.forEach(x => {
