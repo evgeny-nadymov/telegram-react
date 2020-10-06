@@ -179,8 +179,8 @@ window.RLottie = (function () {
         rlPlayer.fileId = fileId;
         rlPlayer.reqId = ++reqId;
         rlPlayer.el = el;
-        rlPlayer.width = pic_width * curDeviceRatio;
-        rlPlayer.height = pic_height * curDeviceRatio;
+        rlPlayer.width = Math.trunc(pic_width * curDeviceRatio);
+        rlPlayer.height = Math.trunc(pic_height * curDeviceRatio);
         rlPlayer.imageData = new ImageData(rlPlayer.width, rlPlayer.height);
         rlottie.players[reqId] = rlPlayer;
 
@@ -346,7 +346,6 @@ window.RLottie = (function () {
     }
 
     function doRender(rlPlayer, frame, frameNo) {
-        // console.log('[rlottie] doRender', frameNo);
         rlPlayer.frameNo = frameNo;
         rlPlayer.forceRender = false;
         rlPlayer.imageData.data.set(frame);
