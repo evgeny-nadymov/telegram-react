@@ -209,6 +209,7 @@ class DialogsList extends React.Component {
         const { authorizationState } = this.state;
         if (!isAuthorizationReady(authorizationState)) return;
 
+        this.loaded = false;
         await FileStore.initDB(() => this.onLoadNext(true));
     };
 
@@ -334,11 +335,19 @@ class DialogsList extends React.Component {
 
     }
 
-    async onLoadNext(replace = false) {
+    async onLoadNext(replace = false, limit = CHAT_SLICE_LIMIT) {
         const { type } = this.props;
         const { chats, chatList } = this.state;
 
+        // console.log('[folders] onLoadNext', chatList, limit);
+
         if (this.loading) {
+            // console.log('[folders] onLoadNext cancel loading', chatList);
+            return;
+        }
+
+        if (this.loaded) {
+            // console.log('[folders] onLoadNext cancel loaded', chatList);
             return;
         }
 
@@ -352,7 +361,9 @@ class DialogsList extends React.Component {
             }
         }
 
-        if (type === 'chatListMain') console.log('[p] GETCHATS start', type, offsetOrder, offsetChatId);
+        const reqId = new Date();
+        this.reqId = reqId;
+        // if (type === 'chatListMain') console.log('[folders] GETCHATS start', type, offsetOrder, offsetChatId);
         this.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -366,11 +377,18 @@ class DialogsList extends React.Component {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady', list: chatList });
             }
         });
-        if (type === 'chatListMain') console.log('[p] GETCHATS stop', replace, type, result);
+        // if (type === 'chatListMain') console.log('[folders] GETCHATS stop', replace, type, result);
+
+        if (reqId !== this.reqId) {
+            // console.log('[folders] onLoadNext cancel reqId', chatList);
+            return;
+        }
 
         if (result.chat_ids.length > 0 && result.chat_ids[0] === offsetChatId) {
             result.chat_ids.shift();
         }
+
+        this.loaded = !result.chat_ids.length;
 
         if (replace) {
             this.replaceChats(result.chat_ids, () => {
@@ -378,7 +396,7 @@ class DialogsList extends React.Component {
                 this.saveCache();
 
                 if (result.chat_ids.length < CHAT_SLICE_LIMIT) {
-                    this.onLoadNext();
+                    this.onLoadNext(false, CHAT_SLICE_LIMIT - result.chat_ids.length);
                 }
 
                 const list = this.listRef.current.getListRef().current;
@@ -390,6 +408,10 @@ class DialogsList extends React.Component {
             this.appendChats(result.chat_ids, () => {
                 // console.log('DialogsList.onLoadNext setState stop', offsetChatId, offsetOrder);
                 this.loadChatContents(result.chat_ids);
+
+                if (result.chat_ids.length && result.chat_ids.length < limit) {
+                    this.onLoadNext(false, limit - result.chat_ids.length);
+                }
             });
         }
     }
