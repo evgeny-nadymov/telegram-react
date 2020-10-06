@@ -182,6 +182,7 @@ window.RLottie = (function () {
         rlPlayer.width = pic_width * curDeviceRatio;
         rlPlayer.height = pic_height * curDeviceRatio;
         rlPlayer.imageData = new ImageData(rlPlayer.width, rlPlayer.height);
+        console.log('[rlottie] imageData', rlPlayer.width, rlPlayer.height, rlPlayer.imageData);
         rlottie.players[reqId] = rlPlayer;
 
         rlPlayer.canvas = document.createElement('canvas');
@@ -346,11 +347,15 @@ window.RLottie = (function () {
     }
 
     function doRender(rlPlayer, frame, frameNo) {
-        // console.log('[rlottie] doRender', frameNo);
         rlPlayer.frameNo = frameNo;
         rlPlayer.forceRender = false;
-        rlPlayer.imageData.data.set(frame);
-        rlPlayer.context.putImageData(rlPlayer.imageData, 0, 0);
+        try {
+            rlPlayer.imageData.data.set(frame);
+            rlPlayer.context.putImageData(rlPlayer.imageData, 0, 0);
+        } catch (e) {
+            console.log('[rlottie] doRender error', frameNo, rlPlayer.imageData, frame);
+            console.log('[rlottie] doRender 2 error', frameNo, rlPlayer.imageData.data, frame);
+        }
 
         fireFirstFrameEvent(rlPlayer);
     }
