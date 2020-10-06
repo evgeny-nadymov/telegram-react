@@ -55,6 +55,9 @@ class SharedMediaContent extends React.Component {
             case 'messageAudio': {
                 return 94;
             }
+            case 'messageVoiceNote': {
+                return 74;
+            }
             default: {
                 return undefined;
             }
@@ -621,7 +624,7 @@ class SharedMediaContent extends React.Component {
     render() {
         const { selectedIndex, items = [], renderIds } = this.state;
 
-        // console.log('[vlist] render', [selectedIndex, items, renderIds]);
+        console.log('[vlist] render', [selectedIndex, items, renderIds]);
         if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
             let contentHeight = 0;
             const controls = items.map((x, index) => {
