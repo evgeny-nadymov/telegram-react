@@ -38,6 +38,29 @@ class SharedMediaContent extends React.Component {
         // this.onWindowResize = throttle(this.onWindowResize, 250);
     }
 
+    static getItemHeight(message) {
+        if (!message) return undefined;
+
+        const { content } = message;
+        switch (content['@type']) {
+            case 'messagePhoto': {
+                return undefined;
+            }
+            case 'messageVideo': {
+                return undefined;
+            }
+            case 'messageDocument': {
+                return 78;
+            }
+            case 'messageAudio': {
+                return 94;
+            }
+            default: {
+                return undefined;
+            }
+        }
+    }
+
     static getRowHeight(selectedIndex) {
         switch (selectedIndex) {
             case 1: {
@@ -177,7 +200,7 @@ class SharedMediaContent extends React.Component {
     }
 
     static isValidDocumentContent(content) {
-        return content && content['@type'] === 'messageDocument';
+        return content && (content['@type'] === 'messageDocument' || content['@type'] === 'messageAudio');
     }
 
     static isValidUrlContent(content) {
@@ -596,21 +619,29 @@ class SharedMediaContent extends React.Component {
     };
 
     render() {
-        const { selectedIndex, rowHeight, items = [], renderIds } = this.state;
+        const { selectedIndex, items = [], renderIds } = this.state;
 
         // console.log('[vlist] render', [selectedIndex, items, renderIds]);
         if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
-            return (
-                <div ref={this.listRef} className='shared-media-virt-content' style={{ height: items.length * rowHeight }}>
-                    {items.map((x, index) => {
-                        const { chat_id, id } = x;
+            let contentHeight = 0;
+            const controls = items.map((x, index) => {
+                const { chat_id, id } = x;
+                const itemHeight = SharedMediaContent.getItemHeight(x);
+                if (!itemHeight) {
+                    return null;
+                }
+                contentHeight += itemHeight;
 
-                        return ((!renderIds.size || renderIds.has(index)) && (
-                            <div key={`chat_id=${chat_id}_message_id=${id}`} className='shared-media-virt-item' style={{ top: index * rowHeight }}>
-                                {SharedMediaContent.getItemTemplate(selectedIndex, x)}
-                            </div>
-                        ));
-                    })}
+                return ((!renderIds.size || renderIds.has(index)) && (
+                    <div key={`chat_id=${chat_id}_message_id=${id}`} className='shared-media-virt-item' style={{ top: contentHeight - itemHeight }}>
+                        {SharedMediaContent.getItemTemplate(selectedIndex, x)}
+                    </div>
+                ));
+            });
+
+            return (
+                <div ref={this.listRef} className='shared-media-virt-content' style={{ height: contentHeight }}>
+                    {controls}
                 </div>
             );
         }
