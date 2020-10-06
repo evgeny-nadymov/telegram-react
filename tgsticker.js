@@ -174,7 +174,7 @@ window.RLottie = (function () {
         rlPlayer.inViewportFunc = options.inViewportFunc;
         rlPlayer.queueLength = options.queueLength;
 
-        const curDeviceRatio = 1.090909;//options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
+        const curDeviceRatio = options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
 
         rlPlayer.fileId = fileId;
         rlPlayer.reqId = ++reqId;
