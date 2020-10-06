@@ -13,6 +13,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography';
 import Notifications from '../ColumnMiddle/Notifications';
+import './NotificationsListItem.css';
 
 class NotificationsListItem extends Notifications {
     render() {
@@ -20,9 +21,10 @@ class NotificationsListItem extends Notifications {
         const { isMuted } = this.state;
 
         return (
-            <ListItem button className='list-item-rounded' onClick={this.handleSetChatNotifications}>
+            <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handleSetChatNotifications}>
                 <ListItemIcon>
                     <Checkbox
+                        className='notifications-checkbox'
                         edge='start'
                         checked={!isMuted}
                         color='primary'
