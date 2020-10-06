@@ -174,15 +174,14 @@ window.RLottie = (function () {
         rlPlayer.inViewportFunc = options.inViewportFunc;
         rlPlayer.queueLength = options.queueLength;
 
-        const curDeviceRatio = options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
+        const curDeviceRatio = 1.090909;//options.maxDeviceRatio ? Math.min(options.maxDeviceRatio, deviceRatio) : deviceRatio;
 
         rlPlayer.fileId = fileId;
         rlPlayer.reqId = ++reqId;
         rlPlayer.el = el;
-        rlPlayer.width = pic_width * curDeviceRatio;
-        rlPlayer.height = pic_height * curDeviceRatio;
+        rlPlayer.width = Math.trunc(pic_width * curDeviceRatio);
+        rlPlayer.height = Math.trunc(pic_height * curDeviceRatio);
         rlPlayer.imageData = new ImageData(rlPlayer.width, rlPlayer.height);
-        console.log('[rlottie] imageData', rlPlayer.width, rlPlayer.height, rlPlayer.imageData);
         rlottie.players[reqId] = rlPlayer;
 
         rlPlayer.canvas = document.createElement('canvas');
@@ -349,13 +348,8 @@ window.RLottie = (function () {
     function doRender(rlPlayer, frame, frameNo) {
         rlPlayer.frameNo = frameNo;
         rlPlayer.forceRender = false;
-        try {
-            rlPlayer.imageData.data.set(frame);
-            rlPlayer.context.putImageData(rlPlayer.imageData, 0, 0);
-        } catch (e) {
-            console.log('[rlottie] doRender error', frameNo, rlPlayer.imageData, frame);
-            console.log('[rlottie] doRender 2 error', frameNo, rlPlayer.imageData.data, frame);
-        }
+        rlPlayer.imageData.data.set(frame);
+        rlPlayer.context.putImageData(rlPlayer.imageData, 0, 0);
 
         fireFirstFrameEvent(rlPlayer);
     }
