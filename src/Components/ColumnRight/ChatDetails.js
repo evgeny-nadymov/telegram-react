@@ -355,7 +355,7 @@ class ChatDetails extends React.Component {
             media.handleScroll(event);
         }
 
-        media.handleVirtScroll(event);
+        media.handleVirtScroll(event, list);
     };
 
     render() {

@@ -500,10 +500,12 @@ class Message extends Component {
     }
 }
 
-const enhance = compose(
-    withSaveRef(),
-    withTranslation(),
-    withRestoreRef()
-);
+// const enhance = compose(
+//     withSaveRef(),
+//     withTranslation(),
+//     withRestoreRef()
+// );
 
-export default enhance(Message);
+const message = withTranslation(['translation', 'local'], { withRef: true })(Message);
+
+export default message;
