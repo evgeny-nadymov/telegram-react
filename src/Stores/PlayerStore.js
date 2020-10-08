@@ -11,7 +11,7 @@ import { getRandomInt } from '../Utils/Common';
 import { isCurrentSource, playlistItemEquals } from '../Utils/Player';
 import { supportsStreaming } from '../Utils/File';
 import { getValidBlocks, isValidAudioBlock, isValidVoiceNoteBlock, openInstantViewMedia } from '../Utils/InstantView';
-import { PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_MAX_SIZE, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
+import { AUDIO_MIN_BUFFERED_TIME_S, PLAYER_PLAYBACKRATE_MAX, PLAYER_PLAYBACKRATE_NORMAL, PLAYER_PRELOAD_MAX_SIZE, PLAYER_PRELOAD_PRIORITY, PLAYER_VOLUME_MAX, PLAYER_VOLUME_MIN, PLAYER_VOLUME_NORMAL } from '../Constants';
 import FileStore from './FileStore';
 import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -291,7 +291,7 @@ class PlayerStore extends EventEmitter {
                     for (let i = 0; i < buffered.length; i++) {
                         const start = buffered.start(i);
                         const end = buffered.end(i);
-                        if (start <= currentTime && currentTime <= end && currentTime + 30 < end) {
+                        if (start <= currentTime && currentTime <= end && (currentTime + AUDIO_MIN_BUFFERED_TIME_S < end || end === duration)) {
                             this.preloadNextMedia();
                             break;
                         }
