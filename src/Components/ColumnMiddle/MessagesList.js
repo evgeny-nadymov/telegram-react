@@ -116,10 +116,6 @@ class MessagesList extends React.Component {
 
         if (prevProps.chatId !== chatId || prevProps.messageId !== messageId) {
             this.handleSelectChat(chatId, prevProps.chatId, messageId, prevProps.messageId);
-        } else {
-            if (!this.scrollBehaviorNone) {
-                this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, snapshot);
-            }
         }
     }
 
@@ -706,10 +702,10 @@ class MessagesList extends React.Component {
         }
 
         const fromMessageId = history && history.length > 0 ? history[0].id : 0;
-
+        const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
         // if (this.lastCompleted) return;
 
-        console.log('[p] getChatHistory', [fromMessageId]);
+        // console.log('[p] getChatHistory', [fromMessageId]);
         this.loading = true;
         const sessionId = this.sessionId;
         let result = await TdLibController.send({
@@ -717,11 +713,11 @@ class MessagesList extends React.Component {
             chat_id: chatId,
             from_message_id: fromMessageId,
             offset: 0,
-            limit: MESSAGE_SLICE_LIMIT
+            limit
         }).finally(() => {
             this.loading = false;
         });
-        console.log('[p] getChatHistory result', fromMessageId, result);
+        // console.log('[p] getChatHistory result', fromMessageId, limit, result);
 
         if (sessionId !== this.sessionId) {
             return;
@@ -733,18 +729,33 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertNext(filterMessages(result.messages), () => {
-            if (!result.messages.length) {
-                this.onLoadMigratedHistory();
-                // this.lastCompleted = true;
-            }
+        this.loading = true;
+        requestAnimationFrame(() => {
+            this.loading = false;
+            this.insertNext(filterMessages(result.messages), state => {
+                if (filterMessages(result.messages).length > 0) {
+                    this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
+                    setTimeout(() => {
+                        const { history: currentHistory } = this.state;
+                        if (currentHistory.length >= MESSAGE_SLICE_LIMIT * 3) {
+                            this.setState({
+                                history: currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3)
+                            });
+                        }
+                    }, 100);
+                }
+                if (!result.messages.length) {
+                    this.onLoadMigratedHistory();
+                    // this.lastCompleted = true;
+                }
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, result.messages);
+            this.viewMessages(result.messages);
+
+            return result;
         });
-
-        const store = FileStore.getStore();
-        loadMessageContents(store, result.messages);
-        this.viewMessages(result.messages);
-
-        return result;
     };
 
     onLoadMigratedHistory = async () => {
@@ -779,7 +790,7 @@ class MessagesList extends React.Component {
             chat_id: basicGroupChat.id,
             from_message_id: fromMessageId,
             offset: 0,
-            limit: MESSAGE_SLICE_LIMIT
+            limit: fromMessageId === 0? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT
         }).finally(() => {
             this.loading = false;
         });
@@ -794,7 +805,11 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
-        this.insertNext(filterMessages(result.messages));
+        this.insertNext(filterMessages(result.messages), state => {
+            if (filterMessages(result.messages).length > 0) {
+                this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
+            }
+        });
 
         const store = FileStore.getStore();
         loadMessageContents(store, result.messages);
@@ -811,9 +826,10 @@ class MessagesList extends React.Component {
 
         if (!chat) return;
         if (this.loading) return;
-        if (this.completed) return;
+        // if (this.completed) return;
 
         const fromMessageId = history && history.length > 0 ? history[history.length - 1].id : 0;
+        const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
         this.loading = true;
         const sessionId = this.sessionId;
@@ -821,8 +837,8 @@ class MessagesList extends React.Component {
             '@type': 'getChatHistory',
             chat_id: chatId,
             from_message_id: fromMessageId,
-            offset: -MESSAGE_SLICE_LIMIT - 1,
-            limit: MESSAGE_SLICE_LIMIT + 1
+            offset: -limit - 1,
+            limit: limit + 1
         }).finally(() => {
             this.loading = false;
         });
@@ -848,6 +864,18 @@ class MessagesList extends React.Component {
         this.scrollBehaviorNone = true;
         this.insertPrevious(filterMessages(result.messages), {}, () => {
             this.scrollBehaviorNone = false;
+            if (filterMessages(result.messages).length > 0) {
+                setTimeout(() => {
+                    const { history: currentHistory } = this.state;
+                    if (currentHistory.length > MESSAGE_SLICE_LIMIT * 3) {
+                        this.setState({
+                            history: currentHistory.slice(currentHistory.length - MESSAGE_SLICE_LIMIT * 3)
+                        }, () => {
+                            this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
+                        });
+                    }
+                }, 0);
+            }
         });
 
         const store = FileStore.getStore();
@@ -881,7 +909,9 @@ class MessagesList extends React.Component {
             return;
         }
 
-        this.setState({ history: history.concat(this.state.history) }, callback);
+        this.setState({
+            history: history.concat(this.state.history)//.slice(0, 100)
+        }, callback);
     }
 
     insertPrevious(history, newState, callback) {
@@ -890,7 +920,10 @@ class MessagesList extends React.Component {
             return;
         }
 
-        this.setState({ history: this.state.history.concat(history), ...newState }, callback);
+        this.setState({
+            history: this.state.history.concat(history),
+            ...newState
+        }, callback);
     }
 
     deleteHistory(message_ids, callback) {
@@ -994,8 +1027,11 @@ class MessagesList extends React.Component {
         // console.log(
         //     `[ml] keepScrollPosition before
         //     list.scrollTop=${list.scrollTop}
+        //     list.scrollHeight=${list.scrollHeight}
         //     list.offsetHeight=${list.offsetHeight}
-        //     list.scrollHeight=${list.scrollHeight}`
+        //     snapshot.scrollTop=${snapshot.scrollTop}
+        //     snapshot.scrollHeight=${snapshot.scrollHeight}
+        //     snapshot.offsetHeight=${snapshot.offsetHeight}`
         // );
 
         list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
@@ -1003,8 +1039,8 @@ class MessagesList extends React.Component {
         // console.log(
         //     `[ml] keepScrollPosition after
         //     list.scrollTop=${list.scrollTop}
-        //     list.offsetHeight=${list.offsetHeight}
-        //     list.scrollHeight=${list.scrollHeight}`
+        //     list.scrollHeight=${list.scrollHeight}
+        //     list.offsetHeight=${list.offsetHeight}`
         // );
     };
 
