@@ -557,6 +557,12 @@ class MessagesList extends React.Component {
                 from_message_id: fromMessageId,
                 offset: offset,
                 limit: limit
+            }).catch(error => {
+                return {
+                    '@type': 'messages',
+                    messages: [],
+                    total_count: 0
+                };
             }).finally(() => {
                 this.loading = false;
             });
@@ -565,6 +571,7 @@ class MessagesList extends React.Component {
                 return;
             }
 
+            console.log('[m] onResult', result);
             MessageStore.setItems(result.messages);
             result.messages.reverse();
 
