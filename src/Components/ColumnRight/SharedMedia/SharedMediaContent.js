@@ -22,8 +22,6 @@ import TdLibController from '../../../Controllers/TdLibController';
 import './SharedMediaContent.css';
 
 const overScanCount = 5;
-let offsetTop = 0;
-let viewportHeight = 1024;
 
 class SharedMediaContent extends React.Component {
     constructor(props) {
@@ -327,6 +325,8 @@ class SharedMediaContent extends React.Component {
     }
 
     componentDidMount() {
+        window.addEventListener('resize', this.onWindowResize);
+
         MessageStore.on('clientUpdateMediaTab', this.onClientUpdateMediaTab);
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
@@ -337,6 +337,8 @@ class SharedMediaContent extends React.Component {
     }
 
     componentWillUnmount() {
+        window.removeEventListener('resize', this.onWindowResize);
+
         MessageStore.off('clientUpdateMediaTab', this.onClientUpdateMediaTab);
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
@@ -345,6 +347,20 @@ class SharedMediaContent extends React.Component {
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSend);
     }
+
+    onWindowResize = event => {
+        const { items, scrollTop } = this.state;
+
+        const { current: list } = this.listRef;
+        if (!list) return;
+
+        const offsetTop = list.offsetTop;
+        const viewportHeight = list.offsetParent.offsetHeight;
+
+        const renderIds = this.getRenderIds(items, viewportHeight, scrollTop - offsetTop);
+
+        this.setState({ ...renderIds });
+    };
 
     onUpdateMessageSend = update => {
         const { chatId } = this.props;
@@ -383,6 +399,8 @@ class SharedMediaContent extends React.Component {
     };
 
     setMediaState = (media, selectedIndex) => {
+        const { scrollTop } = this.state;
+
         const photoAndVideo = media ? media.photoAndVideo : [];
         const document = media ? media.document : [];
         const audio = media ? media.audio : [];
@@ -417,12 +435,19 @@ class SharedMediaContent extends React.Component {
         }
 
         const source = SharedMediaContent.getSource(selectedIndex, media).filter(x => SharedMediaContent.isValidContent(selectedIndex, x.content));
+        const items = source.slice(0, SHARED_MESSAGE_SLICE_LIMIT);
+
+        const { current: list } = this.listRef;
+        if (!list) return;
+
+        const offsetTop = list.offsetTop;
+        const viewportHeight = list.offsetParent.offsetHeight;
 
         this.setState({
             selectedIndex,
-            renderIds: new Map(),
+            renderIds: this.getRenderIds(items, viewportHeight, scrollTop - offsetTop),
             rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
-            items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
+            items,
             params: {
                 loading: false,
                 completed: false,
@@ -495,7 +520,7 @@ class SharedMediaContent extends React.Component {
         this.setMediaState(media, selectedIndex);
     };
 
-    handleScroll = event => {
+    handleScroll = (event, container) => {
         const { params } = this.state;
 
         if (params && !params.completed) {
@@ -505,16 +530,11 @@ class SharedMediaContent extends React.Component {
         }
     };
 
-    handleVirtScroll = event => {
+    handleVirtScroll = (event, container) => {
         const { current: list } = this.listRef;
         if (!list) return;
-        // if (list) {
-        //     console.log('[vlist] onScroll', [list.offsetTop, list.offsetParent, list.offsetParent.offsetHeight]);
-        // }
 
-        offsetTop = list.offsetTop;
-        viewportHeight = list.offsetParent.offsetHeight;
-        this.setScrollPosition(event);
+        this.setScrollPosition(container.scrollTop);
     };
 
     isVisibleItem = (index, viewportHeight, scrollTop) => {
@@ -542,14 +562,20 @@ class SharedMediaContent extends React.Component {
         return { renderIds, renderIdsList };
     }
 
-    setScrollPosition = event => {
-        const { items, scrollTop, rowHeight } = this.state;
+    setScrollPosition = scrollTop => {
+        const { items, scrollTop: prevScrollTop, rowHeight } = this.state;
 
-        if (Math.abs(event.target.scrollTop - scrollTop) >= rowHeight) {
-            const renderIds = this.getRenderIds(items, viewportHeight, event.target.scrollTop - offsetTop);
+        const { current: list } = this.listRef;
+        if (!list) return;
+
+        const offsetTop = list.offsetTop;
+        const viewportHeight = list.offsetParent.offsetHeight;
+
+        if (Math.abs(scrollTop - prevScrollTop) >= rowHeight) {
+            const renderIds = this.getRenderIds(items, viewportHeight, scrollTop - offsetTop);
 
             this.setState({
-                scrollTop: event.target.scrollTop,
+                scrollTop,
                 ...renderIds
             });
         }
@@ -560,7 +586,6 @@ class SharedMediaContent extends React.Component {
         const { items, selectedIndex } = this.state;
         const { completed, filter, loading, messages: lastMessages } = params;
 
-        // console.log('SharedMediaBase.onLoadNext', completed, loading);
         if (!filter) return;
         if (loading) return;
         if (completed) return;
@@ -570,9 +595,7 @@ class SharedMediaContent extends React.Component {
             fromMessageId = lastMessages.length > 0 ? lastMessages[lastMessages.length - 1].id : 0;
         }
         params.loading = true;
-
-        this.requestId = new Date();
-        const requestId = this.requestId;
+        params.requestId = new Date();
 
         const result = await TdLibController.send({
             '@type': 'searchChatMessages',
@@ -598,7 +621,8 @@ class SharedMediaContent extends React.Component {
             filter
         });
 
-        if (this.requestId !== requestId) {
+        const { params: currentParams } = this.state;
+        if (!currentParams || currentParams.requestId !== params.requestId) {
             return;
         }
 
@@ -615,16 +639,39 @@ class SharedMediaContent extends React.Component {
         this.setState({ items: params.items });
 
         if (params.completed) {
-            // this.onLoadMigratedNext(params, true);
+            this.onLoadMigratedNext(params, true);
         } else if (incompleteResults) {
             this.onLoadNext(params, false);
         }
     };
 
+    onLoadMigratedNext(params, loadIncomplete) {
+
+    }
+
     render() {
-        const { selectedIndex, items = [], renderIds } = this.state;
+        const {
+            selectedIndex,
+            items = [],
+            renderIds,
+            photoAndVideo,
+            document,
+            audio,
+            url,
+            voiceNote
+        } = this.state;
 
         console.log('[vlist] render', [selectedIndex, items, renderIds]);
+
+        const hasItems = photoAndVideo && photoAndVideo.length > 0
+            || document && document.length > 0
+            || audio && audio.length > 0
+            || url && url.length > 0
+            || voiceNote && voiceNote.length > 0;
+        if (!hasItems) {
+            return null;
+        }
+
         if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
             let contentHeight = 0;
             const controls = items.map((x, index) => {
