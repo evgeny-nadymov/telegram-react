@@ -1354,6 +1354,7 @@ function canClearHistory(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
     if (!chat.type) return false;
+    if (!chat.last_message) return false;
 
     switch (chat.type['@type']) {
         case 'chatTypeBasicGroup': {
@@ -1377,7 +1378,23 @@ function canClearHistory(chatId) {
 }
 
 function canDeleteChat(chatId) {
-    return !isMeChat(chatId);
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return isChatMember(chatId);
+        }
+        case 'chatTypeSupergroup': {
+            return isChatMember(chatId);
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return !isMeChat(chatId);
+        }
+    }
+
+    return false;
 }
 
 function canSendPolls(chatId) {

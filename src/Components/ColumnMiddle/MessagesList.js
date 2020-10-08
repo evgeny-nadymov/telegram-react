@@ -571,7 +571,6 @@ class MessagesList extends React.Component {
                 return;
             }
 
-            console.log('[m] onResult', result);
             MessageStore.setItems(result.messages);
             result.messages.reverse();
 

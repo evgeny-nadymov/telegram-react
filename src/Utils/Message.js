@@ -1773,6 +1773,8 @@ function getReplyPhotoSize(chatId, messageId) {
 }
 
 function getEmojiMatches(chatId, messageId) {
+    return 0;
+
     const message = MessageStore.get(chatId, messageId);
     if (!message) return 0;
 
