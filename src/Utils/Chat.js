@@ -24,7 +24,31 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function getDeleteChatTitle(chatId, t = x => x) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
 
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return t('DeleteChat');
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+            if (supergroup) {
+                return supergroup.is_channel ? t('LeaveChannel') : t('LeaveMegaMenu');
+            }
+
+            return null;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return t('DeleteChatUser');
+        }
+    }
+
+    return null;
+}
 
 export function getViewInfoTitle(chatId, t = x => x) {
     const chat = ChatStore.get(chatId);

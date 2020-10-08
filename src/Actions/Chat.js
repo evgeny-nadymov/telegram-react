@@ -5,9 +5,23 @@
  * LICENSE file in the root directory of this source tree.
  */
 import TdLibController from '../Controllers/TdLibController';
-import ChatStore from '../Stores/ChatStore';
 import { isChatMuted, isChatPinned } from '../Utils/Chat';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
+import ChatStore from '../Stores/ChatStore';
+
+export function clearHistory(chatId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateRequestClearHistory',
+        chatId
+    });
+}
+
+export function leaveChat(chatId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateRequestLeaveChat',
+        chatId
+    });
+}
 
 export function changeChatDetailsVisibility(visibility) {
     TdLibController.clientUpdate({

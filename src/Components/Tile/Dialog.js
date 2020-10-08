@@ -20,6 +20,8 @@ import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
 import ArchiveIcon from '../../Assets/Icons/Archive';
+import BroomIcon from '../../Assets/Icons/Broom';
+import DeleteIcon from '../../Assets/Icons/Delete';
 import UnarchiveIcon from '../../Assets/Icons/Unarchive';
 import PinIcon from '../../Assets/Icons/Pin2';
 import UnpinIcon from '../../Assets/Icons/Pin2';
@@ -30,7 +32,9 @@ import GroupIcon from '../../Assets/Icons/Group';
 import MessageIcon from '../../Assets/Icons/Message';
 import UnreadIcon from '../../Assets/Icons/Unread';
 import {
-    canAddChatToList,
+    canAddChatToList, canClearHistory,
+    canDeleteChat,
+    getDeleteChatTitle,
     getViewInfoTitle,
     isChatArchived,
     isChatMuted,
@@ -42,6 +46,7 @@ import {
 } from '../../Utils/Chat';
 import {
     addChatToList,
+    leaveChat,
     toggleChatIsMarkedAsUnread,
     toggleChatIsPinned,
     toggleChatNotificationSettings
@@ -265,9 +270,21 @@ class Dialog extends Component {
         }
     };
 
+    handleDeleteChat = event => {
+        this.handleCloseContextMenu(event);
+
+        const { chatId } = this.props;
+
+        leaveChat(chatId)
+    };
+
     render() {
         const { chatId, chatList, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin, canMute } = this.state;
+
+        const clearHistory = canClearHistory(chatId);
+        const deleteChat = canDeleteChat(chatId);
+        const deleteChatTitle = getDeleteChatTitle(chatId, t);
 
         const isPinned = isChatPinned(chatId, chatList);
         const currentChatId = ApplicationStore.getChatId();
@@ -390,6 +407,22 @@ class Dialog extends Component {
                                 </>
                             )}
                         </MenuItem>
+                        {/*{clearHistory && (*/}
+                        {/*    <MenuItem onClick={this.handleClearHistory}>*/}
+                        {/*        <ListItemIcon>*/}
+                        {/*            <BroomIcon />*/}
+                        {/*        </ListItemIcon>*/}
+                        {/*        <ListItemText primary={t('ClearHistory')} />*/}
+                        {/*    </MenuItem>*/}
+                        {/*)}*/}
+                        {deleteChat && deleteChatTitle && (
+                            <MenuItem onClick={this.handleDeleteChat}>
+                                <ListItemIcon>
+                                    <DeleteIcon />
+                                </ListItemIcon>
+                                <ListItemText primary={deleteChatTitle} />
+                            </MenuItem>
+                        )}
                     </MenuList>
                 </Popover>
             </div>

@@ -26,6 +26,7 @@ import UserStore from '../Stores/UserStore';
 import PlayerStore from '../Stores/PlayerStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
+import Actions from './Actions';
 
 class MainPage extends React.Component {
     constructor(props) {
@@ -192,6 +193,7 @@ class MainPage extends React.Component {
                     <DialogDetails ref={this.dialogDetailsRef} />
                     {isChatDetailsVisible && <ChatInfo />}
                 </div>
+                <Actions/>
                 {instantViewContent && <InstantViewer {...instantViewContent} />}
                 {mediaViewerContent && <MediaViewer {...mediaViewerContent} />}
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}

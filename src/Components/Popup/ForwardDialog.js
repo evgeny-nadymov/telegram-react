@@ -453,7 +453,7 @@ class ForwardDialog extends React.Component {
 
         return (
             <Dialog
-                open
+                open={true}
                 manager={modalManager}
                 transitionDuration={0}
                 onClose={this.handleClose}
