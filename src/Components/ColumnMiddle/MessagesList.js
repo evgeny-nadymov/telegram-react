@@ -16,7 +16,7 @@ import ServiceMessage from '../Message/ServiceMessage';
 import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import StickersHint from './StickersHint';
-import { throttle, getPhotoSize, itemsInView, historyEquals } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
@@ -37,6 +37,7 @@ const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
     SCROLL_TO_UNREAD: 'SCROLL_TO_UNREAD',
     SCROLL_TO_MESSAGE: 'SCROLL_TO_MESSAGE',
+    SCROLL_TO_POSITION: 'SCROLL_TO_POSITION',
     KEEP_SCROLL_POSITION: 'KEEP_SCROLL_POSITION',
     NONE: 'NONE'
 });
@@ -498,7 +499,7 @@ class MessagesList extends React.Component {
 
         TdLibController.clientUpdate({
             '@type': 'clientUpdateMessagesInView',
-            messages: messages
+            messages
         });
         return;
 
@@ -536,18 +537,25 @@ class MessagesList extends React.Component {
         this.loadMigratedHistory = false;
         this.defferedActions = [];
 
+        const scrollPosition = null; //ChatStore.getScrollPosition(chatId);
+
         if (chat) {
             TdLibController.send({
                 '@type': 'openChat',
                 chat_id: chat.id
             });
 
-            const unread = !messageId && chat.unread_count > 0;
-            const fromMessageId =
-                unread && chat.unread_count > 1 ? chat.last_read_inbox_message_id : messageId ? messageId : 0;
-            const offset = (unread && chat.unread_count > 1) || messageId ? -1 - MESSAGE_SLICE_LIMIT : 0;
-            const limit =
-                (unread && chat.unread_count > 1) || messageId ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
+            const unread = !messageId && chat.unread_count > 1;
+            let fromMessageId = 0;
+            if (unread && chat.last_read_inbox_message_id) {
+                fromMessageId = chat.last_read_inbox_message_id;
+            } else if (messageId) {
+                fromMessageId = messageId;
+            } else if (scrollPosition) {
+                fromMessageId = scrollPosition.messageId;
+            }
+            const offset = unread || messageId || scrollPosition ? -1 - MESSAGE_SLICE_LIMIT : 0;
+            const limit = unread || messageId || scrollPosition ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
             this.loading = true;
             const sessionId = this.sessionId;
@@ -555,8 +563,8 @@ class MessagesList extends React.Component {
                 '@type': 'getChatHistory',
                 chat_id: chat.id,
                 from_message_id: fromMessageId,
-                offset: offset,
-                limit: limit
+                offset,
+                limit
             }).catch(error => {
                 return {
                     '@type': 'messages',
@@ -599,10 +607,12 @@ class MessagesList extends React.Component {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_MESSAGE;
             } else if (unread && separatorMessageId) {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_UNREAD;
+            } else if (scrollPosition) {
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_POSITION;
             }
 
             this.replace(separatorMessageId, result.messages, () => {
-                this.handleScrollBehavior(scrollBehavior, this.snapshot);
+                this.handleScrollBehavior(scrollBehavior, this.snapshot, scrollPosition);
                 if (messageId) {
                     highlightMessage(chatId, messageId);
                 }
@@ -629,11 +639,22 @@ class MessagesList extends React.Component {
             });
         }
 
-        if (previousChat && previousChatId !== chatId) {
-            TdLibController.send({
-                '@type': 'closeChat',
-                chat_id: previousChatId
-            });
+        if (previousChatId !== chatId) {
+            if (previousChat) {
+                TdLibController.send({
+                    '@type': 'closeChat',
+                    chat_id: previousChatId
+                });
+
+                const scrollMessage = getScrollMessage(this.snapshot, this.itemsRef);
+                console.log('[scroll] start setScrollPosition', [previousChatId, previousChat, this.snapshot, scrollMessage]);
+                const message = this.messages[scrollMessage.index];
+                if (message) {
+                    const { chatId, messageId } = message.props;
+                    console.log('[scroll] stop setScrollPosition', [previousChatId, previousChat], { chatId, messageId, offset: scrollMessage.offset });
+                    ChatStore.setScrollPosition(previousChatId, { chatId, messageId, offset: scrollMessage.offset });
+                }
+            }
         }
     }
 
@@ -984,7 +1005,7 @@ class MessagesList extends React.Component {
         this.prevHistory = history;
     };
 
-    handleScrollBehavior = (scrollBehavior, snapshot) => {
+    handleScrollBehavior = (scrollBehavior, snapshot, position) => {
         const { chatId, messageId } = this.props;
         const { scrollTop, scrollHeight, offsetHeight } = snapshot || {
             scrollTop: 0,
@@ -1011,6 +1032,10 @@ class MessagesList extends React.Component {
             }
             case ScrollBehaviorEnum.SCROLL_TO_UNREAD: {
                 this.scrollToUnread();
+                break;
+            }
+            case ScrollBehaviorEnum.SCROLL_TO_POSITION: {
+                this.scrollToPosition(position);
                 break;
             }
             case ScrollBehaviorEnum.KEEP_SCROLL_POSITION: {
@@ -1089,6 +1114,26 @@ class MessagesList extends React.Component {
         }
     };
 
+    scrollToPosition = position => {
+        console.log('[scroll] scrollToPosition', this.props.chatId, position);
+        const { messageId, offset } = position;
+        const { history } = this.state;
+        const list = this.listRef.current;
+
+        let scrolled = false;
+        for (let i = 0; i < history.length; i++) {
+            const itemComponent = this.itemsMap.get(i);
+            const node = ReactDOM.findDOMNode(itemComponent);
+            if (node) {
+                if (itemComponent.props.messageId === messageId) {
+                    list.scrollTop = node.offsetTop - offset;
+                    scrolled = true;
+                    break;
+                }
+            }
+        }
+    };
+
     scrollToMessage = () => {
         const { chatId, messageId } = this.props;
         const { history } = this.state;
@@ -1109,7 +1154,13 @@ class MessagesList extends React.Component {
             const node = ReactDOM.findDOMNode(itemComponent);
             if (node) {
                 if (itemComponent.props.messageId === messageId) {
-                    list.scrollTop = node.offsetTop - list.offsetHeight / 2.0;
+                    if (list.offsetHeight < node.offsetHeight) {
+                        // scroll to the message top
+                        list.scrollTop = node.offsetTop;
+                    } else {
+                        // scroll message to the center of screen
+                        list.scrollTop = node.offsetTop - list.offsetHeight / 2.0 + node.offsetHeight / 2.0;
+                    }
                     scrolled = true;
                     break;
                 }

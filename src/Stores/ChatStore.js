@@ -23,6 +23,7 @@ class ChatStore extends EventEmitter {
     }
 
     reset = () => {
+        this.scrollPositions = new Map();
         this.items = new Map();
         this.typingManagers = new Map();
         this.onlineMemberCount = new Map();
@@ -486,6 +487,14 @@ class ChatStore extends EventEmitter {
 
     setTypingManager(chatId, typingManager) {
         return this.typingManagers.set(chatId, typingManager);
+    }
+
+    setScrollPosition(chatId, position) {
+        this.scrollPositions.set(chatId, position);
+    }
+
+    getScrollPosition(chatId) {
+        return this.scrollPositions.get(chatId);
     }
 }
 

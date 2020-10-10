@@ -218,12 +218,12 @@ function getFitSize(size, max, stretch = true) {
 }
 
 function itemsInView(scrollContainerRef, itemsContainerRef) {
-    let scrollContainer = scrollContainerRef.current;
-    let itemsContainer = itemsContainerRef ? itemsContainerRef.current : scrollContainer;
+    const scrollContainer = scrollContainerRef.current;
+    const itemsContainer = itemsContainerRef ? itemsContainerRef.current : scrollContainer;
 
     const items = [];
     for (let i = 0; i < itemsContainer.children.length; i++) {
-        let child = itemsContainer.children[i];
+        const child = itemsContainer.children[i];
         if (
             child.offsetTop + child.offsetHeight >= scrollContainer.scrollTop &&
             child.offsetTop <= scrollContainer.scrollTop + scrollContainer.offsetHeight
@@ -233,6 +233,26 @@ function itemsInView(scrollContainerRef, itemsContainerRef) {
     }
 
     return items;
+}
+
+export function getScrollMessage(snapshot, itemsContainerRef) {
+    if (!snapshot) return { index: -1, offset: 0 };
+
+    const { current: itemsContainer } = itemsContainerRef;
+
+    for (let i = 0; i < itemsContainer.children.length; i++) {
+        const child = itemsContainer.children[i];
+        const offsetTop = child.offsetTop;
+        const scrollTop = snapshot.scrollTop;
+        const offsetHeight = snapshot.offsetHeight;
+        // console.log('[scroll] child', [i, offsetTop, child.offsetHeight, scrollTop]);
+
+        if (offsetTop >= scrollTop && offsetTop <= scrollTop + offsetHeight) {
+            return { index: i, offset: offsetTop - scrollTop, offsetTop, scrollTop };
+        }
+    }
+
+    return { index: -1, offset: 0 };
 }
 
 // Returns a function, that, when invoked, will only be triggered at most once
