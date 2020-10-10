@@ -476,10 +476,16 @@ class SharedMediaContent extends React.Component {
 
     onClientUpdateMediaTab = update => {
         const { chatId: currentChatId } = this.props;
-        const { photoAndVideo, document, audio, url, voiceNote } = this.state;
-
         const { chatId, index: selectedIndex } = update;
         if (chatId !== currentChatId) return;
+
+        const media = MessageStore.getMedia(currentChatId);
+
+        const photoAndVideo = media ? media.photoAndVideo : [];
+        const document = media ? media.document : [];
+        const audio = media ? media.audio : [];
+        const url = media ? media.url : [];
+        const voiceNote = media ? media.voiceNote : [];
 
         let source = [];
         if (selectedIndex === 1) {
@@ -500,6 +506,11 @@ class SharedMediaContent extends React.Component {
             renderIds: new Map(),
             rowHeight: SharedMediaContent.getRowHeight(selectedIndex),
             items: source.slice(0, SHARED_MESSAGE_SLICE_LIMIT),
+            photoAndVideo,
+            document,
+            audio,
+            url,
+            voiceNote,
             params: {
                 loading: false,
                 completed: false,
