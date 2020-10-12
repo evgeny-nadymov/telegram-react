@@ -146,7 +146,7 @@ class SharedLink extends React.Component {
             if (text) {
                 const { entities } = text;
                 if (entities && entities.length > 0) {
-                    content = entities.filter(this.isValidEntityType).map(x => {
+                    content = entities.filter(this.isValidEntityType).map((x, i) => {
                         const entityText = substring(text.text, x.offset, x.offset + x.length);
                         let url = entityText;
                         let mail = false;
@@ -170,7 +170,7 @@ class SharedLink extends React.Component {
                         title = title || this.getTitleFromUrl(url) || ' ';
 
                         return (
-                            <SafeLink className='shared-link-url' url={url} mail={mail}>
+                            <SafeLink key={i} className='shared-link-url' url={url} mail={mail}>
                                 {entityText}
                             </SafeLink>
                         );
