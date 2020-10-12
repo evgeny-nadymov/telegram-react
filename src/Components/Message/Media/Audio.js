@@ -95,19 +95,12 @@ class Audio extends React.Component {
         const { chatId, messageId, block } = this.props;
         const { source } = update;
 
-        if (isCurrentSource(chatId, messageId, block, source)) {
-            if (!this.state.active) {
-                this.setState({
-                    active: true,
-                    playing: true
-                });
-            }
-        } else if (this.state.active) {
-            this.setState({
-                active: false,
-                playing: false
-            });
-        }
+        const isCurrentAudio = isCurrentSource(chatId, messageId, block, source);
+
+        this.setState({
+            active: isCurrentAudio,
+            playing: isCurrentAudio
+        });
     };
 
     render() {
