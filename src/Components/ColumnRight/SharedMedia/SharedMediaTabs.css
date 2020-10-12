@@ -14,6 +14,10 @@
     overflow: hidden;
 }
 
+.chat-info-dialog-paper .shared-media-tabs {
+    background: var(--background-paper);
+}
+
 .shared-media-tabs-container {
     justify-content: flex-start;
 }
