@@ -251,7 +251,6 @@ class VoiceNoteSlider extends React.Component {
         //     ranges.push({ start: buffered.start(i), end: buffered.end(i)})
         // }
         //
-        // console.log('[clientUpdate] render', JSON.stringify(ranges));
 
         return (
             <div className={classNames('voice-note-slider', className)} style={style}>

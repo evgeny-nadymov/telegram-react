@@ -316,11 +316,11 @@ class PlayerStore extends EventEmitter {
             }
             case 'clientUpdateMediaLoadedMetadata': {
                 const { source, duration, videoWidth, videoHeight } = update;
-                const { message, block } = source;
+                const { block } = source;
 
                 this.time = {
-                    chatId: message ? message.chat_id : 0,
-                    messageId: message ? message.id : 0,
+                    chatId: source['@type'] === 'message' ? source.chat_id : 0,
+                    messageId: source['@type'] === 'message' ? source.id : 0,
                     block,
                     duration,
                     videoWidth,
