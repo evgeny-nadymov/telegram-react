@@ -23,6 +23,7 @@ import GroupIcon from '../../Assets/Icons/Group';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
 import { canClearHistory, canDeleteChat, canUnpinMessage, getViewInfoTitle, isPrivateChat, getDeleteChatTitle } from '../../Utils/Chat';
 import AppStore from '../../Stores/ApplicationStore';
+import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
 
@@ -31,8 +32,14 @@ class MainMenuButton extends React.Component {
         anchorEl: null
     };
 
-    handleButtonClick = event => {
-        this.setState({ anchorEl: event.currentTarget });
+    handleButtonClick = async event => {
+        const { currentTarget: anchorEl } = event;
+
+        const chatId = AppStore.getChatId();
+        const chat = await TdLibController.send({ '@type': 'getChat', chat_id: chatId });
+        ChatStore.set(chat);
+
+        this.setState({ anchorEl });
     };
 
     handleMenuClose = () => {

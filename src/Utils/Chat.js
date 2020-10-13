@@ -1377,28 +1377,8 @@ function getGroupChatMembersCount(chatId) {
 function canClearHistory(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
-    if (!chat.type) return false;
-    if (!chat.last_message) return false;
 
-    switch (chat.type['@type']) {
-        case 'chatTypeBasicGroup': {
-            return true;
-        }
-        case 'chatTypeSupergroup': {
-            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
-            if (supergroup) {
-                return !Boolean(supergroup.username);
-            }
-
-            return true;
-        }
-        case 'chatTypePrivate':
-        case 'chatTypeSecret': {
-            return true;
-        }
-    }
-
-    return false;
+    return chat.can_be_deleted_only_for_self || chat.can_be_deleted_for_all_users;
 }
 
 function canDeleteChat(chatId) {

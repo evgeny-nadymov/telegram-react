@@ -282,7 +282,6 @@ class Dialog extends Component {
         const { chatId, chatList, showSavedMessages, hidden, t, isLastPinned, style } = this.props;
         const { contextMenu, left, top, canToggleArchive, canTogglePin, canMute } = this.state;
 
-        const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
 
