@@ -78,7 +78,11 @@ class DialogsList extends React.Component {
             authorizationState,
             chats: null,
             fistSliceLoaded: false,
-            chatList: props.type === 'chatListMain' ? { '@type': 'chatListMain' } : { '@type': 'chatListArchive' }
+            chatList: props.type === 'chatListMain' ? { '@type': 'chatListMain' } : { '@type': 'chatListArchive' },
+            params: {
+                loading: false,
+                completed: false
+            }
         };
     }
 
@@ -166,7 +170,11 @@ class DialogsList extends React.Component {
         const { chatList } = update;
 
         this.setState({
-            chatList
+            chatList,
+            params: {
+                loading: false,
+                completed: false
+            }
         }, () => {
             this.loadFirstSlice();
         });
@@ -202,14 +210,12 @@ class DialogsList extends React.Component {
 
     onFastUpdatingComplete = update => {
         this.onLoadNext(true);
-        // this.setState({ chats: [] }, () => this.onLoadNext(true));
     };
 
     loadFirstSlice = async () => {
         const { authorizationState } = this.state;
         if (!isAuthorizationReady(authorizationState)) return;
 
-        this.loaded = false;
         await FileStore.initDB(() => this.onLoadNext(true));
     };
 
@@ -234,10 +240,10 @@ class DialogsList extends React.Component {
     };
 
     onUpdateChatOrder = update => {
-        const { chats, chatList } = this.state;
+        const { chats, chatList, params } = this.state;
         if (!chats) return;
 
-        const { loading } = this;
+        const { loading } = params;
         if (loading && !chats.length) return;
 
         const { chat_id } = update;
@@ -275,7 +281,7 @@ class DialogsList extends React.Component {
             }
         } else {
             if (currentIndex === -1) {
-                if (this.loading) {
+                if (loading) {
                     console.error('[vl] skip add while getChats', update);
                     // TODO: check and add if within loaded part
                 } else {
@@ -337,16 +343,15 @@ class DialogsList extends React.Component {
 
     async onLoadNext(replace = false, limit = CHAT_SLICE_LIMIT) {
         const { type } = this.props;
-        const { chats, chatList } = this.state;
+        const { chats, chatList, params } = this.state;
 
         // console.log('[folders] onLoadNext', chatList, limit);
-
-        if (this.loading) {
+        if (params.loading) {
             // console.log('[folders] onLoadNext cancel loading', chatList);
             return;
         }
 
-        if (this.loaded) {
+        if (params.completed) {
             // console.log('[folders] onLoadNext cancel loaded', chatList);
             return;
         }
@@ -361,10 +366,8 @@ class DialogsList extends React.Component {
             }
         }
 
-        const reqId = new Date();
-        this.reqId = reqId;
         // if (type === 'chatListMain') console.log('[folders] GETCHATS start', type, offsetOrder, offsetChatId);
-        this.loading = true;
+        params.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
             chat_list: chatList,
@@ -372,15 +375,15 @@ class DialogsList extends React.Component {
             offset_order: offsetOrder,
             limit: CHAT_SLICE_LIMIT
         }).finally(() => {
-            this.loading = false;
+            params.loading = false;
             if (replace) {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady', list: chatList });
             }
         });
         // if (type === 'chatListMain') console.log('[folders] GETCHATS stop', replace, type, result);
 
-        if (reqId !== this.reqId) {
-            // console.log('[folders] onLoadNext cancel reqId', chatList);
+        if (params !== this.state.params) {
+            // console.log('[folders] onLoadNext cancel', chatList);
             return;
         }
 
@@ -388,7 +391,7 @@ class DialogsList extends React.Component {
             result.chat_ids.shift();
         }
 
-        this.loaded = !result.chat_ids.length;
+        params.completed = !result.chat_ids.length;
 
         if (replace) {
             this.replaceChats(result.chat_ids, () => {
