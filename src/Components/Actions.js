@@ -14,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import NotificationTimer from './Additional/NotificationTimer';
-import { isCreator, isPrivateChat, isSupergroup } from '../Utils/Chat';
+import { isChatMember, isCreator, isMeChat, isPrivateChat, isSupergroup } from '../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import UserStore from '../Stores/UserStore';
@@ -68,7 +68,7 @@ class Actions extends React.PureComponent {
             remove_from_chat_list: false
         };
 
-        this.handleScheduledAction(chatId, 'clientUpdateClearHistory', message, request);
+        this.handleScheduledAction(chatId, 'clientUpdateClearHistory', message, [request]);
     };
 
     handleLeaveContinue = result => {
@@ -76,29 +76,44 @@ class Actions extends React.PureComponent {
         if (!leaveChat) return;
 
         const { chatId } = leaveChat;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
 
         this.setState({ leaveChat: null });
 
         if (!result) return;
 
         const message = this.getLeaveChatNotification(chatId);
-        let request = isPrivateChat(chatId)
-            ? { '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true }
-            : { '@type': 'leaveChat', chat_id: chatId };
-
-        if (isSupergroup(chatId) && isCreator(chatId)) {
-            request = {
-                '@type': 'setChatMemberStatus',
-                chat_id: chatId,
-                user_id: UserStore.getMyId(),
-                status: {
-                    '@type': 'chatMemberStatusCreator',
-                    is_member: false
+        const requests = [];
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup': {
+                if (isChatMember(chatId)) {
+                    requests.push({ '@type': 'leaveChat', chat_id: chatId });
                 }
-            };
+                requests.push({ '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true });
+            }
+            case 'chatTypeSupergroup': {
+                if (isCreator(chatId)) {
+                    requests.push({
+                        '@type': 'setChatMemberStatus',
+                        chat_id: chatId,
+                        user_id: UserStore.getMyId(),
+                        status: {
+                            '@type': 'chatMemberStatusCreator',
+                            is_member: false
+                        }
+                    });
+                } else if (isChatMember(chatId)) {
+                    requests.push({ '@type': 'leaveChat', chat_id: chatId });
+                }
+            }
+            case 'chatTypePrivate':
+            case 'chatTypeSecret': {
+                requests.push({ '@type': 'deleteChatHistory', chat_id: chatId, remove_from_chat_list: true });
+            }
         }
 
-        this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, request);
+        this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, requests);
     };
 
     getLeaveChatNotification = chatId => {
@@ -129,14 +144,16 @@ class Actions extends React.PureComponent {
         return t('ChatDeletedUndo');
     };
 
-    handleScheduledAction = (chatId, clientUpdateType, message, request) => {
+    handleScheduledAction = (chatId, clientUpdateType, message, requests) => {
         const { t } = this.props;
         if (!clientUpdateType) return;
 
         const key = `${clientUpdateType} chatId=${chatId}`;
         const action = async () => {
             try {
-                await TdLibController.send(request);
+                for (let i = 0; i < requests.length; i++) {
+                    await TdLibController.send(requests[i]);
+                }
             } finally {
                 TdLibController.clientUpdate({ '@type': clientUpdateType, chatId, inProgress: false });
             }

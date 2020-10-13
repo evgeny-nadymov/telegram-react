@@ -1407,7 +1407,7 @@ function canDeleteChat(chatId) {
 
     switch (chat.type['@type']) {
         case 'chatTypeBasicGroup': {
-            return isChatMember(chatId);
+            return true;
         }
         case 'chatTypeSupergroup': {
             return isChatMember(chatId);
