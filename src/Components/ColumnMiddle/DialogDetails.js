@@ -217,9 +217,11 @@ class DialogDetails extends Component {
 
         return (
             <div className='dialog-details' style={style}>
+                <div className='dialog-background'/>
                 <HeaderPlayer />
                 <Header chatId={chatId} />
                 <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
+                {/*<div className='dialog-background2'/>*/}
                 <Footer chatId={chatId} />
                 <StickerSetDialog />
                 <ChatInfoDialog />

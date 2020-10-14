@@ -235,6 +235,7 @@ class CacheStore extends EventEmitter {
         });
 
         return {
+            date: new Date(),
             meChat,
             chats,
             archiveChats,

@@ -768,7 +768,9 @@ class MessagesList extends React.Component {
                     this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
                     setTimeout(() => {
                         const { history: currentHistory } = this.state;
+                        // console.log('[h] check', currentHistory.length);
                         if (currentHistory.length >= MESSAGE_SLICE_LIMIT * 3) {
+                            // console.log('[h] trunk', currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3).length);
                             this.setState({
                                 history: currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3)
                             });

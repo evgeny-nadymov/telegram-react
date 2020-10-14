@@ -12,6 +12,7 @@
     box-sizing: border-box;
     border-top: 1px solid var(--border);
     background: var(--panel-background);
+    z-index: 1;
 }
 
 .footer-command-actions {

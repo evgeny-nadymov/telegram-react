@@ -24,6 +24,7 @@ import { openChat } from '../../Actions/Client';
 import { getArchiveTitle } from '../../Utils/Archive';
 import { loadChatsContent } from '../../Utils/File';
 import { duration } from '@material-ui/core/styles/transitions';
+import { CHAT_SLICE_LIMIT } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -173,7 +174,7 @@ class Dialogs extends Component {
     }
 
     onUpdateChatFilters = update => {
-        this.saveCache();
+        this.handleSaveCache();
     };
 
     onClientUpdatePageWidth = update => {
@@ -218,17 +219,27 @@ class Dialogs extends Component {
         });
     }
 
-    saveCache() {
-        const { current: archiveCurrent } = this.archiveListRef;
-        const archiveChatIds =
-            archiveCurrent && archiveCurrent.state.chats ? archiveCurrent.state.chats.slice(0, 25) : [];
-
-        const { current: mainCurrent } = this.dialogListRef;
-        const mainChatIds = mainCurrent && mainCurrent.state.chats ? mainCurrent.state.chats.slice(0, 25) : [];
+    async saveCache() {
+        const promises = [];
+        promises.push(TdLibController.send({
+            '@type': 'getChats',
+            chat_list: { '@type': 'chatListMain' },
+            offset_order: '9223372036854775807',
+            offset_chat_id: 0,
+            limit: CHAT_SLICE_LIMIT
+        }));
+        promises.push(TdLibController.send({
+            '@type': 'getChats',
+            chat_list: { '@type': 'chatListArchive' },
+            offset_order: '9223372036854775807',
+            offset_chat_id: 0,
+            limit: CHAT_SLICE_LIMIT
+        }));
+        const [mainChats, archiveChats] = await Promise.all(promises);
 
         const { filters } = FilterStore;
 
-        CacheStore.save(filters, mainChatIds, archiveChatIds);
+        CacheStore.save(filters, mainChats.chat_ids, archiveChats.chat_ids);
     }
 
     onUpdateChatOrder = update => {

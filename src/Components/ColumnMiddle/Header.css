@@ -25,6 +25,7 @@
     background: var(--panel-background);
     border-color: var(--border);
     padding: 0 8px;
+    z-index: 1;
 }
 
 .header-title {

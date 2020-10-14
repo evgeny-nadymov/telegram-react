@@ -60,8 +60,8 @@
     display: block;
     position: absolute;
     top: 0;
-    left: -42px;
-    right: -9px;
+    left: -34px;
+    right: 0;
     /* height: 50%; */
     box-shadow: 0 0 0.5rem 0.5rem var(--shadow-color);
     background: var(--shadow-color);
