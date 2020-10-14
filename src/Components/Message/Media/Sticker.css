@@ -28,7 +28,8 @@
     user-select: none;
     background: transparent;
     position: relative;
-    /*transform: translateZ(0);*/
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .sticker-image {
