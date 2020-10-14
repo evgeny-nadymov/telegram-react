@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "84d951cae9c1a8ee019db02f43397951",
+    "revision": "897ffc1e3218f80a52d4ce797d225092",
     "url": "/telegram-react/index.html"
   },
   {
@@ -8,8 +8,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.52c23fd6.chunk.css"
   },
   {
-    "revision": "c9a5230d973b3a86691e",
-    "url": "/telegram-react/static/css/3.caaba747.chunk.css"
+    "revision": "040a3522a6b8f067cdec",
+    "url": "/telegram-react/static/css/3.f09e8e98.chunk.css"
   },
   {
     "revision": "a447e205681f7eee0eb0",
@@ -20,16 +20,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/7.792a87e0.chunk.css"
   },
   {
-    "revision": "edf28eb79d83e50e2eca",
-    "url": "/telegram-react/static/css/main.cce3768b.chunk.css"
+    "revision": "b85bc30cf93ae8699d83",
+    "url": "/telegram-react/static/css/main.9ffcb591.chunk.css"
   },
   {
     "revision": "f6361c625a80cca42379",
     "url": "/telegram-react/static/js/0.97c3ee9b.chunk.js"
   },
   {
-    "revision": "c9a5230d973b3a86691e",
-    "url": "/telegram-react/static/js/3.766286d5.chunk.js"
+    "revision": "040a3522a6b8f067cdec",
+    "url": "/telegram-react/static/js/3.24f00011.chunk.js"
   },
   {
     "revision": "4c305680abe7e67db5f5",
@@ -48,12 +48,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/7.23364b1e.chunk.js"
   },
   {
-    "revision": "edf28eb79d83e50e2eca",
-    "url": "/telegram-react/static/js/main.e711931a.chunk.js"
+    "revision": "b85bc30cf93ae8699d83",
+    "url": "/telegram-react/static/js/main.aa42f9bd.chunk.js"
   },
   {
-    "revision": "aa85752c90c64a80b822",
-    "url": "/telegram-react/static/js/runtime~main.a34ddb43.js"
+    "revision": "88a4aa648a63eb7f8f33",
+    "url": "/telegram-react/static/js/runtime~main.d8349609.js"
   },
   {
     "revision": "cbb4eead04871188de6ce488808e4237",
