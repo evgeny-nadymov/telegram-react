@@ -96,7 +96,6 @@ mark {
     height: 100%;
     display: flex;
     flex-direction: row;
-    max-width: 1680px;
     /*min-width: 300px;*/
     margin: 0 auto;
     border-style: solid;
@@ -108,7 +107,6 @@ mark {
 }
 
 .page-third-column {
-    max-width: 1680px;
 }
 
 .item-selected {
