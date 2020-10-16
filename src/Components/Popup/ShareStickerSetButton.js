@@ -124,11 +124,12 @@ class ShareStickerSetButton extends React.Component {
                     <MoreIcon />
                 </IconButton>
                 <Menu
-                    id='attach-menu'
+                    id='sticker-set-menu'
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     getContentAnchorEl={null}
                     disableAutoFocusItem
+                    disableEnforceFocus={true}
                     disableRestoreFocus={true}
                     anchorOrigin={{
                         vertical: 'bottom',
