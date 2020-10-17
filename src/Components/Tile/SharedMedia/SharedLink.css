@@ -13,6 +13,15 @@
     flex-direction: row;
 }
 
+.shared-link-text {
+    -webkit-line-clamp: 3;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
 .shared-link-photo {
     position: relative;
     width: 48px;
@@ -48,7 +57,7 @@
 }
 
 .shared-link-content .web-page-description {
-    max-height: 60px;
+    -webkit-line-clamp: 3;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: pre-wrap;
@@ -62,4 +71,8 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.shared-link .photo-thumbnail {
+    object-fit: cover;
 }
