@@ -42,12 +42,17 @@ Define its value to be the string `http://{username}.github.io/{repo-name}`, whe
 //...
 "homepage": "https://evgeny-nadymov.github.io/telegram-react"
 ```
-    
-2. **Generate a *production build* of your app and deploy it to GitHub Pages.**
+
+2. **Obtain api_id & api_hash**
+Go to https://github.com/telegramdesktop/tdesktop/blob/dev/docs/api_credentials.md
+
+3. **Generate a *production build* of your app and deploy it to GitHub Pages.**
 
 ```
-$ npm run deploy
+$ REACT_APP_TELEGRAM_API_ID=... REACT_APP_TELEGRAM_API_HASH=... npm run deploy
 ```
+
+
 ### References
 
 1. [Deploying a React App (created using create-react-app) to GitHub Pages](https://github.com/gitname/react-gh-pages)
