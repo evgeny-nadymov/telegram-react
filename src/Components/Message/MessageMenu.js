@@ -22,6 +22,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
+import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
 import CloseIcon from '../../Assets/Icons/Close';
 import CopyIcon from '../../Assets/Icons/Copy';
 import DeleteIcon from '../../Assets/Icons/Delete';
@@ -217,6 +218,17 @@ class MessageMenu extends React.PureComponent {
         saveBlob(blob, 'sticker.tgs');
     };
 
+    handleSelection = event => {
+        const { chatId, messageId, onClose } = this.props;
+        onClose(event);
+
+        const selection = window.getSelection().toString();
+        if (selection) return;
+
+        const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
+        selectMessage(chatId, messageId, selected);
+    };
+
     render() {
         const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
         const { confirmStopPoll } = this.state;
@@ -237,7 +249,7 @@ class MessageMenu extends React.PureComponent {
         return (
             <>
                 <Popover
-                    open={open}
+                    open={true}
                     onClose={onClose}
                     anchorReference='anchorPosition'
                     anchorPosition={anchorPosition}
@@ -257,6 +269,12 @@ class MessageMenu extends React.PureComponent {
                         {/*    </ListItemIcon>*/}
                         {/*    <ListItemText primary={t('Download')} />*/}
                         {/*</MenuItem>*/}
+                        <MenuItem onClick={this.handleSelection}>
+                            <ListItemIcon>
+                                <CheckBoxOutlinedIcon />
+                            </ListItemIcon>
+                            <ListItemText primary={t('Select')} />
+                        </MenuItem>
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>

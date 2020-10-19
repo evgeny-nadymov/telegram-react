@@ -165,7 +165,7 @@ function searchCurrentChat(event, text) {
     searchChat(chatId, text);
 }
 
-function getFormattedText(formattedText, t = k => k) {
+function getFormattedText(formattedText, t = k => k, options = { }) {
     if (formattedText['@type'] !== 'formattedText') return null;
 
     const { text, entities } = formattedText;
@@ -173,8 +173,10 @@ function getFormattedText(formattedText, t = k => k) {
     if (!entities) return [text];
     if (!entities.length) return [text];
 
+    const isValidEntity = options.isValidEntity || (() => true);
     let deleteLineBreakAfterPre = false;
     let result = [];
+
     let index = 0;
     for (let i = 0; i < entities.length; i++) {
         const entity = entities[i];
@@ -204,124 +206,129 @@ function getFormattedText(formattedText, t = k => k) {
             deleteLineBreakAfterPre = false;
         }
 
-        switch (type['@type']) {
-            case 'textEntityTypeBold': {
-                result.push(<strong key={entityKey}>{entityText}</strong>);
-                break;
-            }
-            case 'textEntityTypeBotCommand': {
-                const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
-                result.push(
-                    <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeCashtag': {
-                result.push(
-                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeCode': {
-                result.push(<code key={entityKey}>{entityText}</code>);
-                break;
-            }
-            case 'textEntityTypeEmailAddress': {
-                result.push(
-                    <a
-                        key={entityKey}
-                        href={`mailto:${entityText}`}
-                        onClick={stopPropagation}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeHashtag': {
-                result.push(
-                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeItalic': {
-                result.push(<em key={entityKey}>{entityText}</em>);
-                break;
-            }
-            case 'textEntityTypeMentionName': {
-                result.push(
-                    <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
-                        {entityText}
-                    </MentionLink>
-                );
-                break;
-            }
-            case 'textEntityTypeMention': {
-                result.push(
-                    <MentionLink key={entityKey} username={entityText}>
-                        {entityText}
-                    </MentionLink>
-                );
-                break;
-            }
-            case 'textEntityTypePhoneNumber': {
-                result.push(
-                    <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypePre': {
-                result.push(<pre key={entityKey}>{entityText}</pre>);
-                deleteLineBreakAfterPre = true;
-                break;
-            }
-            case 'textEntityTypePreCode': {
-                result.push(
-                    <pre key={entityKey}>
+        if (!isValidEntity(entity)) {
+            result.push(entityText);
+        } else {
+
+            switch (type['@type']) {
+                case 'textEntityTypeBold': {
+                    result.push(<strong key={entityKey}>{entityText}</strong>);
+                    break;
+                }
+                case 'textEntityTypeBotCommand': {
+                    const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
+                    result.push(
+                        <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeCashtag': {
+                    result.push(
+                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeCode': {
+                    result.push(<code key={entityKey}>{entityText}</code>);
+                    break;
+                }
+                case 'textEntityTypeEmailAddress': {
+                    result.push(
+                        <a
+                            key={entityKey}
+                            href={`mailto:${entityText}`}
+                            onClick={stopPropagation}
+                            target='_blank'
+                            rel='noopener noreferrer'>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeHashtag': {
+                    result.push(
+                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeItalic': {
+                    result.push(<em key={entityKey}>{entityText}</em>);
+                    break;
+                }
+                case 'textEntityTypeMentionName': {
+                    result.push(
+                        <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
+                            {entityText}
+                        </MentionLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeMention': {
+                    result.push(
+                        <MentionLink key={entityKey} username={entityText}>
+                            {entityText}
+                        </MentionLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypePhoneNumber': {
+                    result.push(
+                        <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypePre': {
+                    result.push(<pre key={entityKey}>{entityText}</pre>);
+                    deleteLineBreakAfterPre = true;
+                    break;
+                }
+                case 'textEntityTypePreCode': {
+                    result.push(
+                        <pre key={entityKey}>
                         <code>{entityText}</code>
                     </pre>
-                );
-                deleteLineBreakAfterPre = true;
-                break;
-            }
-            case 'textEntityTypeStrikethrough': {
-                result.push(<strike key={entityKey}>{entityText}</strike>);
-                break;
-            }
-            case 'textEntityTypeTextUrl': {
-                const url = type.url ? type.url : entityText;
+                    );
+                    deleteLineBreakAfterPre = true;
+                    break;
+                }
+                case 'textEntityTypeStrikethrough': {
+                    result.push(<strike key={entityKey}>{entityText}</strike>);
+                    break;
+                }
+                case 'textEntityTypeTextUrl': {
+                    const url = type.url ? type.url : entityText;
 
-                result.push(
-                    <SafeLink key={entityKey} url={url}>
-                        {entityText}
-                    </SafeLink>
-                );
-                break;
+                    result.push(
+                        <SafeLink key={entityKey} url={url}>
+                            {entityText}
+                        </SafeLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeUrl': {
+                    result.push(
+                        <SafeLink key={entityKey} url={entityText}>
+                            {entityText}
+                        </SafeLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeUnderline': {
+                    result.push(<u key={entityKey}>{entityText}</u>);
+                    break;
+                }
+                default:
+                    result.push(entityText);
+                    break;
             }
-            case 'textEntityTypeUrl': {
-                result.push(
-                    <SafeLink key={entityKey} url={entityText}>
-                        {entityText}
-                    </SafeLink>
-                );
-                break;
-            }
-            case 'textEntityTypeUnderline': {
-                result.push(<u key={entityKey}>{entityText}</u>);
-                break;
-            }
-            default:
-                result.push(entityText);
-                break;
         }
 
         index += textBeforeLength + entity.length;

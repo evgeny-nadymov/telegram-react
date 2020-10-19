@@ -6,6 +6,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
@@ -399,6 +400,7 @@ class Message extends Component {
 
         const style = getMessageStyle(chatId, messageId);
         const withBubble = content['@type'] !== 'messageSticker' && content['@type'] !== 'messageVideoNote';
+        const tailRounded = !hasCaption && (content['@type'] === 'messageAnimation' || content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto');
 
         // console.log('[p] m.render id=' + message.id);
 
@@ -420,13 +422,15 @@ class Message extends Component {
                 {showDate && <DayMeta date={date} />}
                 <div
                     className={classNames('message', {
+                        'message-rounded': showTitle && showTail && tailRounded,
                         'message-short': !tile,
                         'message-out': isOutgoing,
                         'message-selected': selected,
                         'message-highlighted': highlighted && !selected,
                         'message-group-title': showTitle && !showTail,
                         'message-group': !showTitle && !showTail,
-                        'message-group-tail': !showTitle && showTail,
+                        'message-group-tail': !showTitle && showTail && !tailRounded,
+                        'message-group-tail-rounded': !showTitle && showTail && tailRounded,
                         'message-bubble-hidden': !withBubble
                     })}
                     onMouseOver={this.handleMouseOver}
@@ -498,6 +502,24 @@ class Message extends Component {
             </div>
         );
     }
+}
+
+Message.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    sendingState: PropTypes.object,
+    showTitle: PropTypes.bool,
+    showTail: PropTypes.bool,
+    showUnreadSeparator: PropTypes.bool,
+    showDate: PropTypes.bool
+}
+
+Message.defaultProps = {
+    sendingState: null,
+    showTitle: false,
+    showTail: false,
+    showUnreadSeparator: false,
+    showDate: false
 }
 
 // const enhance = compose(

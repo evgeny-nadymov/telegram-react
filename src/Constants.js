@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+export const ALBUM_MESSAGES_LIMIT = 10;
 export const ANIMATION_FRAME_DURATION_MS = 40;
 export const ANIMATION_DURATION_100MS = 100;
 export const ANIMATION_DURATION_200MS = 200;
@@ -41,7 +42,7 @@ export const NOTIFICATION_DEBOUNCE_DELAY_MS = 500;
 export const OPTIMIZATIONS_FIRST_START = true;
 export const PAGE_WIDTH_SMALL = 960;
 export const PHOTO_BIG_SIZE = 1280;
-export const PHOTO_DISPLAY_SIZE = 320;
+export const PHOTO_DISPLAY_SIZE = 400;
 export const PHOTO_DISPLAY_SMALL_SIZE = 90;
 export const PHOTO_DISPLAY_EXTRA_SMALL_SIZE = 45;
 export const PHOTO_SIZE = 320;

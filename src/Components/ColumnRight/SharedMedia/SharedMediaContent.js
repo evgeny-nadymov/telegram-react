@@ -672,7 +672,7 @@ class SharedMediaContent extends React.Component {
             voiceNote
         } = this.state;
 
-        console.log('[vlist] render', [selectedIndex, items, renderIds]);
+        console.log('[vlist] render', [selectedIndex, url, items, renderIds]);
 
         const hasItems = photoAndVideo && photoAndVideo.length > 0
             || document && document.length > 0

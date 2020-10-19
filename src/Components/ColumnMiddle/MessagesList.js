@@ -9,6 +9,7 @@ import React from 'react';
 import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import ActionBar from './ActionBar';
+import Album from '../Message/Album/Album';
 import FilesDropTarget from './FilesDropTarget';
 import StubMessage from '../Message/StubMessage';
 import Message from '../Message/Message';
@@ -22,7 +23,7 @@ import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat } from '../../Utils/Chat';
 import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
-import { MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
+import { ALBUM_MESSAGES_LIMIT, MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
@@ -190,7 +191,6 @@ class MessagesList extends React.Component {
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ChatStore.on('updateChatLastMessage', this.onUpdateChatLastMessage);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
@@ -208,7 +208,6 @@ class MessagesList extends React.Component {
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.off('clientUpdateClearHistory', this.onClientUpdateClearHistory);
-        ChatStore.off('updateChatLastMessage', this.onUpdateChatLastMessage);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateOpenReply', this.onClientUpdateOpenReply);
@@ -399,11 +398,6 @@ class MessagesList extends React.Component {
             const store = FileStore.getStore();
             loadMessageContents(store, [message]);
         }
-    };
-
-    onUpdateChatLastMessage = update => {
-        const { chatId } = this.props;
-        if (chatId !== update.chat_id) return;
     };
 
     onUpdateMessageSendSucceeded = update => {
@@ -1346,17 +1340,15 @@ class MessagesList extends React.Component {
 
         // console.log('[ml] render ', history);
 
-        // const isChannel = isChannelChat(chatId);
-
         this.itemsMap.clear();
         this.messages = clearHistory
             ? null
             : history.map((x, i) => {
-                /// message id=5 prev
-                /// message id=6 current
-                /// message id=7 next
+                /// history[4] id=5 prev
+                /// history[5] id=6 current
+                /// history[6] id=7 next
                 /// ...
-                /// message id=10
+                /// history[9] id=10
 
                 const prevMessage = i > 0 ? history[i - 1] : null;
                 const nextMessage = i < history.length - 1 ? history[i + 1] : null;
@@ -1387,18 +1379,6 @@ class MessagesList extends React.Component {
                         || nextShowTitle;
 
                     m = (
-                        // <StubMessage
-                        //     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                        //     ref={el => this.itemsMap.set(i, el)}
-                        //     chatId={x.chat_id}
-                        //     messageId={x.id}
-                        //     sendingState={x.sending_state}
-                        //     showTitle={showTitle}
-                        //     showTail={showTail}
-                        //     showUnreadSeparator={separatorMessageId === x.id}
-                        //     showDate={showDate}
-                        // />
-
                         <Message
                             key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
                             ref={el => this.itemsMap.set(i, el)}
@@ -1414,10 +1394,113 @@ class MessagesList extends React.Component {
                 }
 
                 return m;
-
-
               });
-        // console.log('[p] messagesList.render');
+        // console.log('[p] messagesList.render', history);
+        if (clearHistory) {
+            this.messages = null;
+        } else {
+            this.messages = [];
+            for (let i = 0; i < history.length; i++) {
+                const message = history[i];
+                const { chat_id, media_album_id, ttl } = message;
+                let albumAdded = false;
+                if (media_album_id !== '0' && !ttl) {
+                    const album = [message];
+                    for (let j = i + 1; j < i + ALBUM_MESSAGES_LIMIT && j < history.length; j++) {
+                        if (history[j].media_album_id === media_album_id) {
+                            album.push(history[j]);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (album.length > 1) {
+                        const x = message;
+                        const prevMessage = i > 0 ? history[i - 1] : null;
+                        const nextMessage = i + album.length < history.length - 1 ? history[i + album.length] : null;
+
+                        const showDate = this.showMessageDate(x, prevMessage, i === 0);
+
+                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
+                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+
+                        const showTail = !nextMessage
+                            || isServiceMessage(nextMessage)
+                            || nextMessage.content['@type'] === 'messageSticker'
+                            || nextMessage.content['@type'] === 'messageVideoNote'
+                            || x.sender_user_id !== nextMessage.sender_user_id
+                            || x.is_outgoing !== nextMessage.is_outgoing
+                            || nextShowTitle;
+
+                        this.messages.push((
+                            <Album
+                                key={`chat_id=${chat_id} media_album_id=${media_album_id}`}
+                                chatId={chat_id}
+                                messageIds={album.map(x => x.id)}
+                                showTitle={showTitle}
+                                showTail={showTail}
+                            />));
+                        i += (album.length - 1);
+                        albumAdded = true;
+                    }
+                }
+
+
+                if (!albumAdded) {
+                    /// history[4] id=5 prev
+                    /// history[5] id=6 current
+                    /// history[6] id=7 next
+                    /// ...
+                    /// history[9] id=10
+
+                    const x = message;
+                    const prevMessage = i > 0 ? history[i - 1] : null;
+                    const nextMessage = i < history.length - 1 ? history[i + 1] : null;
+
+                    const showDate = this.showMessageDate(x, prevMessage, i === 0);
+
+                    let m = null;
+                    if (isServiceMessage(x)) {
+                        m = (
+                            <ServiceMessage
+                                key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                                ref={el => this.itemsMap.set(i, el)}
+                                chatId={x.chat_id}
+                                messageId={x.id}
+                                showUnreadSeparator={separatorMessageId === x.id}
+                            />
+                        );
+                    } else {
+                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
+                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+
+                        const showTail = !nextMessage
+                            || isServiceMessage(nextMessage)
+                            || nextMessage.content['@type'] === 'messageSticker'
+                            || nextMessage.content['@type'] === 'messageVideoNote'
+                            || x.sender_user_id !== nextMessage.sender_user_id
+                            || x.is_outgoing !== nextMessage.is_outgoing
+                            || nextShowTitle;
+
+                        m = (
+                            <Message
+                                key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                                ref={el => this.itemsMap.set(i, el)}
+                                chatId={x.chat_id}
+                                messageId={x.id}
+                                sendingState={x.sending_state}
+                                showTitle={showTitle}
+                                showTail={showTail}
+                                showUnreadSeparator={separatorMessageId === x.id}
+                                showDate={showDate}
+                            />
+                        );
+                    }
+
+                    this.messages.push(m);
+                }
+            }
+        }
 
         return (
             <div

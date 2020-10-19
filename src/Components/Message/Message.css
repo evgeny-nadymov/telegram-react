@@ -178,6 +178,14 @@ pre code {
     padding: 3px 6px 5px;
 }
 
+.message-group-tail-rounded .message-wrapper {
+    padding: 3px 6px 5px;
+}
+
+.message-rounded .message-wrapper {
+    padding: 3px 6px 5px;
+}
+
 .message-content {
     position: relative;
     margin-left: 5px;
@@ -225,6 +233,14 @@ pre code {
     border-radius: 6px 12px 12px 0;
 }
 
+.message-group-tail-rounded .message-bubble:not(.message-bubble-out) {
+    border-radius: 6px 12px 12px 12px;
+}
+
+.message-rounded .message-bubble:not(.message-bubble-out) {
+    border-radius: 12px 12px 12px 12px;
+}
+
 .message-group-title .message-bubble.message-bubble-out {
     border-radius: 12px 12px 6px 12px;
 }
@@ -237,8 +253,16 @@ pre code {
     border-radius: 12px 6px 0 12px;
 }
 
-.message:not(.message-out):not(.message-bubble-hidden) .user-tile::before,
-.message:not(.message-out):not(.message-bubble-hidden) .chat-tile::before {
+.message-group-tail-rounded .message-bubble.message-bubble-out {
+    border-radius: 12px 6px 12px 12px;
+}
+
+.message-rounded .message-bubble.message-bubble-out{
+    border-radius: 12px 12px 12px 12px;
+}
+
+.message:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::before,
+.message:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--message-in-background);
     position: absolute;
     right: 0;
@@ -250,8 +274,8 @@ pre code {
     transform: translate(7px, -2px);
 }
 
-.message.message-out:not(.message-bubble-hidden) .user-tile:not(.tile-poll)::before,
-.message.message-out:not(.message-bubble-hidden) .chat-tile::before {
+.message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
+.message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--message-out-background);
     position: absolute;
     left: 0;
@@ -325,10 +349,12 @@ pre code {
     opacity: 0;
     align-self: center;
     color: white;
+    border: 1px solid #ffffff;
     background: var(--color-accent-main);
 }
 
-.messages-list-selection-active .message-wrapper {
+.messages-list-selection-active .message:not(.message-album) .message-wrapper,
+.messages-list-selection-active .message.message-album .album-item-wrapper {
     pointer-events: none;
 }
 

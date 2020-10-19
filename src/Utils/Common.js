@@ -464,6 +464,23 @@ function historyEquals(first, second) {
     return first === second;
 }
 
+export function albumHistoryEquals(first, second) {
+    if (first === second) return true;
+    if (!first && second) return false;
+    if (first && !second) return false;
+
+    if (first.length === 0 && second.length === 0) return true;
+    if (first.length !== second.length) return false;
+
+    for (let i = 0; i < first.length; i++) {
+        if (first[i] !== second[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function insertByOrder(array, element, comparator) {
     let i = 0;
     for (; i < array.length && comparator(array[i], element) < 0; i++) {}
