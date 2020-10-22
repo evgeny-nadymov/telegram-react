@@ -331,7 +331,7 @@ class SharedMediaContent extends React.Component {
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
-        // MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSend);
     }
@@ -343,10 +343,23 @@ class SharedMediaContent extends React.Component {
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
-        // MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSend);
         MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSend);
     }
+
+    onUpdateMessageContent = update => {
+        const { chat_id, message_id } = update;
+        const { chatId } = this.props;
+
+        if (chatId !== chat_id) return;
+
+        const { items, selectedIndex } = this.state;
+        if (!items.some(x => x.id === message_id)) return;
+
+        const media = MessageStore.getMedia(chatId);
+        this.setMediaState(media, selectedIndex);
+    };
 
     onWindowResize = event => {
         const { items, scrollTop } = this.state;
@@ -442,6 +455,8 @@ class SharedMediaContent extends React.Component {
 
         const offsetTop = list.offsetTop;
         const viewportHeight = list.offsetParent.offsetHeight;
+
+        console.log('[vl] setMediaState', [items, photoAndVideo]);
 
         this.setState({
             selectedIndex,
@@ -672,7 +687,7 @@ class SharedMediaContent extends React.Component {
             voiceNote
         } = this.state;
 
-        console.log('[vlist] render', [selectedIndex, url, items, renderIds]);
+        console.log('[vlist] render', [selectedIndex, items, renderIds]);
 
         const hasItems = photoAndVideo && photoAndVideo.length > 0
             || document && document.length > 0

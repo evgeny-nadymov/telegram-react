@@ -16,20 +16,26 @@ import FileStore from '../../../Stores/FileStore';
 import './SharedPhoto.css';
 
 class SharedPhoto extends React.Component {
-    constructor(props) {
-        super(props);
+    state = { };
 
+    static getDerivedStateFromProps(props, state) {
         const { photo, size, thumbnailSize } = props;
+        const { prevPhoto } = state;
+        if (photo !== prevPhoto) {
+            return {
+                prevPhoto: photo,
 
-        this.state = {
-            contextMenu: false,
-            left: 0,
-            top: 0,
+                contextMenu: false,
+                left: 0,
+                top: 0,
 
-            photoSize: getSize(photo.sizes, size),
-            thumbSize: getSize(photo.sizes, thumbnailSize),
-            minithumbnail: photo.minithumbnail
-        };
+                photoSize: getSize(photo.sizes, size),
+                thumbSize: getSize(photo.sizes, thumbnailSize),
+                minithumbnail: photo.minithumbnail
+            };
+        }
+
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
