@@ -12,6 +12,7 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
+import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import NotificationTimer from './Additional/NotificationTimer';
 import { isChatMember, isCreator } from '../Utils/Chat';
@@ -21,22 +22,38 @@ import ChatStore from '../Stores/ChatStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import MessageStore from '../Stores/MessageStore';
+import { clearSelection } from '../Actions/Client';
 
 class Actions extends React.PureComponent {
     state = {
         leaveChat: null,
-        clearHistory: null
+        clearHistory: null,
+        deleteMessages: null
     }
 
     componentDidMount() {
         AppStore.on('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.on('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
+        AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.off('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
+        AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
     }
+
+    onClientUpdateDeleteMessages = update => {
+        const { chatId, messageIds } = update;
+
+        this.setState({
+            deleteMessages: {
+                chatId,
+                messageIds
+            }
+        });
+    };
 
     onClientUpdateLeaveChat = update => {
         const { chatId } = update;
@@ -50,7 +67,7 @@ class Actions extends React.PureComponent {
         this.setState({ clearHistory : { chatId } });
     };
 
-    handleClearHistoryContinue = result => {
+    handleClearHistoryContinue = (result, revoke) => {
         const { t } = this.props;
 
         const { clearHistory } = this.state;
@@ -65,7 +82,8 @@ class Actions extends React.PureComponent {
         const request = {
             '@type': 'deleteChatHistory',
             chat_id: chatId,
-            remove_from_chat_list: false
+            remove_from_chat_list: false,
+            revoke
         };
 
         this.handleScheduledAction(chatId, 'clientUpdateClearHistory', message, [request]);
@@ -114,6 +132,25 @@ class Actions extends React.PureComponent {
         }
 
         this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, requests);
+    };
+
+    handleDeleteMessagesContinue = (result, revoke) => {
+        const { deleteMessages } = this.state;
+        if (!deleteMessages) return;
+
+        const { chatId, messageIds } = deleteMessages;
+
+        clearSelection();
+        this.setState({ deleteMessages: null });
+
+        if (!result) return;
+
+        TdLibController.send({
+            '@type': 'deleteMessages',
+            chat_id: chatId,
+            message_ids: messageIds,
+            revoke
+        });
     };
 
     getLeaveChatNotification = chatId => {
@@ -196,15 +233,32 @@ class Actions extends React.PureComponent {
     };
 
     render() {
-        const { leaveChat, clearHistory } = this.state;
+        const { leaveChat, clearHistory, deleteMessages } = this.state;
         if (leaveChat) {
             const { chatId } = leaveChat;
 
-            return <LeaveChatDialog chatId={chatId} onClose={this.handleLeaveContinue} />
+            return (
+                <LeaveChatDialog
+                    chatId={chatId}
+                    onClose={this.handleLeaveContinue} />
+                );
         } else if (clearHistory) {
             const { chatId } = clearHistory;
 
-            return <ClearHistoryDialog chatId={chatId} onClose={this.handleClearHistoryContinue} />;
+            return (
+                <ClearHistoryDialog
+                    chatId={chatId}
+                    onClose={this.handleClearHistoryContinue} />
+                );
+        } else if (deleteMessages) {
+            const { chatId, messageIds } = deleteMessages;
+
+            return (
+                <DeleteMessagesDialog
+                    chatId={chatId}
+                    messageIds={messageIds}
+                    onClose={this.handleDeleteMessagesContinue} />
+                );
         }
 
         return null;

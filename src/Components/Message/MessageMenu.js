@@ -270,12 +270,6 @@ class MessageMenu extends React.PureComponent {
                                 <ListItemText primary={t('Select')} />
                             </MenuItem>
                         )}
-                        <MenuItem onClick={this.handleSelection}>
-                            <ListItemIcon>
-                                <CheckBoxOutlinedIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={t('Select')} />
-                        </MenuItem>
                         {canCopyPublicMessageLink && (
                             <MenuItem onClick={this.handleCopyPublicMessageLink}>
                                 <ListItemIcon>
