@@ -1291,12 +1291,16 @@ class MessagesList extends React.Component {
         }
     };
 
-    showMessageTitle(message, prevMessage, isFirst) {
+    showMessageTitle(message, prevMessage, isFirst, isFirstUnread) {
         if (!message) return false;
 
         const { chat_id, date, is_outgoing, sender_user_id, content } = message;
 
         if (isFirst) {
+            return true;
+        }
+
+        if (isFirstUnread) {
             return true;
         }
 
@@ -1341,61 +1345,63 @@ class MessagesList extends React.Component {
         // console.log('[ml] render ', history);
 
         this.itemsMap.clear();
-        this.messages = clearHistory
-            ? null
-            : history.map((x, i) => {
-                /// history[4] id=5 prev
-                /// history[5] id=6 current
-                /// history[6] id=7 next
-                /// ...
-                /// history[9] id=10
+        // this.messages = clearHistory
+        //     ? null
+        //     : history.map((x, i) => {
+        //         /// history[4] id=5 prev
+        //         /// history[5] id=6 current
+        //         /// history[6] id=7 next
+        //         /// ...
+        //         /// history[9] id=10
+        //
+        //         const prevMessage = i > 0 ? history[i - 1] : null;
+        //         const nextMessage = i < history.length - 1 ? history[i + 1] : null;
+        //
+        //         const showDate = this.showMessageDate(x, prevMessage, i === 0);
+        //
+        //         let m = null;
+        //         if (isServiceMessage(x)) {
+        //             m = (
+        //                 <ServiceMessage
+        //                     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+        //                     ref={el => this.itemsMap.set(i, el)}
+        //                     chatId={x.chat_id}
+        //                     messageId={x.id}
+        //                     showUnreadSeparator={separatorMessageId === x.id}
+        //                 />
+        //             );
+        //         } else {
+        //             const isFirstUnread = separatorMessageId === x.id;
+        //             const isNextFirstUnread = nextMessage && separatorMessageId === nextMessage.id;
+        //             const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
+        //             const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
+        //
+        //             const showTail = !nextMessage
+        //                 || isServiceMessage(nextMessage)
+        //                 || nextMessage.content['@type'] === 'messageSticker'
+        //                 || nextMessage.content['@type'] === 'messageVideoNote'
+        //                 || x.sender_user_id !== nextMessage.sender_user_id
+        //                 || x.is_outgoing !== nextMessage.is_outgoing
+        //                 || nextShowTitle;
+        //
+        //             m = (
+        //                 <Message
+        //                     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+        //                     ref={el => this.itemsMap.set(i, el)}
+        //                     chatId={x.chat_id}
+        //                     messageId={x.id}
+        //                     sendingState={x.sending_state}
+        //                     showTitle={showTitle}
+        //                     showTail={showTail}
+        //                     showUnreadSeparator={separatorMessageId === x.id}
+        //                     showDate={showDate}
+        //                 />
+        //             );
+        //         }
+        //
+        //         return m;
+        //       });
 
-                const prevMessage = i > 0 ? history[i - 1] : null;
-                const nextMessage = i < history.length - 1 ? history[i + 1] : null;
-
-                const showDate = this.showMessageDate(x, prevMessage, i === 0);
-
-                let m = null;
-                if (isServiceMessage(x)) {
-                    m = (
-                        <ServiceMessage
-                            key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                            ref={el => this.itemsMap.set(i, el)}
-                            chatId={x.chat_id}
-                            messageId={x.id}
-                            showUnreadSeparator={separatorMessageId === x.id}
-                        />
-                    );
-                } else {
-                    const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
-                    const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
-
-                    const showTail = !nextMessage
-                        || isServiceMessage(nextMessage)
-                        || nextMessage.content['@type'] === 'messageSticker'
-                        || nextMessage.content['@type'] === 'messageVideoNote'
-                        || x.sender_user_id !== nextMessage.sender_user_id
-                        || x.is_outgoing !== nextMessage.is_outgoing
-                        || nextShowTitle;
-
-                    m = (
-                        <Message
-                            key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-                            ref={el => this.itemsMap.set(i, el)}
-                            chatId={x.chat_id}
-                            messageId={x.id}
-                            sendingState={x.sending_state}
-                            showTitle={showTitle}
-                            showTail={showTail}
-                            showUnreadSeparator={separatorMessageId === x.id}
-                            showDate={showDate}
-                        />
-                    );
-                }
-
-                return m;
-              });
-        // console.log('[p] messagesList.render', history);
         if (clearHistory) {
             this.messages = null;
         } else {
@@ -1421,8 +1427,10 @@ class MessagesList extends React.Component {
 
                         const showDate = this.showMessageDate(x, prevMessage, i === 0);
 
-                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
-                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+                        const isFirstUnread = separatorMessageId === x.id;
+                        const isNextFirstUnread = nextMessage ? separatorMessageId === nextMessage.id : false;
+                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
+                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
 
                         const showTail = !nextMessage
                             || isServiceMessage(nextMessage)
@@ -1439,6 +1447,8 @@ class MessagesList extends React.Component {
                                 messageIds={album.map(x => x.id)}
                                 showTitle={showTitle}
                                 showTail={showTail}
+                                showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
+                                showDate={showDate}
                             />));
                         i += (album.length - 1);
                         albumAdded = true;
@@ -1471,8 +1481,10 @@ class MessagesList extends React.Component {
                             />
                         );
                     } else {
-                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0);
-                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false);
+                        const isFirstUnread = separatorMessageId === x.id;
+                        const isNextFirstUnread = nextMessage && separatorMessageId === nextMessage.id;
+                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
+                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
 
                         const showTail = !nextMessage
                             || isServiceMessage(nextMessage)
