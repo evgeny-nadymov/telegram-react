@@ -101,17 +101,20 @@ class Album extends React.Component {
 
     onUpdateMessageContent = update => {
         const { chat_id, message_id } = update;
-        const { chatId, messageIds } = this.props;
+        const { chatId, messageIds, displaySize } = this.props;
         const { emojiMatches: oldEmojiMatches } = this.state;
 
         if (chatId !== chat_id) return;
         if (!messageIds.some(x => x === message_id)) return;
 
+        const grouped = new GroupedMessages();
+        grouped.calculate(messageIds.map(x => MessageStore.get(chatId, x)), displaySize);
+
         const emojiMatches = null; //getEmojiMatches(chatId, messageId);
         if (emojiMatches !== oldEmojiMatches) {
-            this.setState({ emojiMatches });
+            this.setState({ emojiMatches, grouped });
         } else {
-            this.forceUpdate();
+            this.setState({ grouped });
         }
     };
 

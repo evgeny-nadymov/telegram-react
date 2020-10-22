@@ -96,6 +96,7 @@ class MessageStore extends EventEmitter {
                                 if (!oldSize) break;
 
                                 const newSize = newPhoto.sizes.find(x => x.type === 'i');
+                                if (!newSize) break;
                                 if (newSize.photo.id === oldSize.photo.id) break;
 
                                 const oldBlob = getBlob(oldSize.photo);

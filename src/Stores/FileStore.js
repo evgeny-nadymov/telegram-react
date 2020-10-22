@@ -821,7 +821,9 @@ class FileStore extends EventEmitter {
                 });
 
                 // console.log(`[fs] readFile result file_id=${file.id}`, file, response);
-                this.setBlob(file.id, response.data);
+                if (!this.getBlob(file.id)) {
+                    this.setBlob(file.id, response.data);
+                }
             })(file).then(callback, faultCallback);
 
             return;

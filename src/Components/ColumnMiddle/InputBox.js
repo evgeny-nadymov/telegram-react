@@ -1135,7 +1135,7 @@ class InputBox extends Component {
         FileStore.updatePhotoBlob(chat_id, id, file.id);
     };
 
-    editMessageMedia(content) {
+    async editMessageMedia(content) {
         const { chatId, editMessageId } = this.state;
         // console.log('[em] editMessageMedia start', chatId, editMessageId, content);
 
@@ -1143,7 +1143,7 @@ class InputBox extends Component {
         if (!editMessageId) return;
         if (!content) return;
 
-        TdLibController.send({
+        return TdLibController.send({
             '@type': 'editMessageMedia',
             chat_id: chatId,
             message_id: editMessageId,
@@ -1383,9 +1383,33 @@ class InputBox extends Component {
         this.closeEditMediaDialog();
     };
 
-    handleEditMedia = (caption, content) => {
+    handleEditMedia = async (caption, content) => {
         if (content) {
-            this.editMessageMedia(content);
+            const message = await this.editMessageMedia(content);
+            if (message) {
+                const { content: editContent } = message;
+                switch (editContent['@type']) {
+                    case 'messagePhoto': {
+                        const { photo: sendPhoto } = content;
+                        if (!sendPhoto) break;
+
+                        const { data: blob } = sendPhoto;
+                        if (!blob) break;
+
+                        const { photo } = editContent;
+                        if (!photo) break;
+
+                        const iSize = photo.sizes.find(x => x.type === 'i');
+                        if (!iSize) break;
+
+                        const { photo: file } = iSize;
+                        if (file) {
+                            FileStore.setBlob(file.id, blob);
+                        }
+                        break;
+                    }
+                }
+            }
             return;
         }
 

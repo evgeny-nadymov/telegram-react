@@ -892,6 +892,7 @@ class MediaViewer extends React.Component {
                         </MediaViewerButton>
                     </div>
                 </div>
+                <div className='media-viewer-footer'/>
                 {deleteConfirmation}
             </div>
         );
