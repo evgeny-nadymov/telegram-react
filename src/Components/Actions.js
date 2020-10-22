@@ -14,13 +14,13 @@ import IconButton from '@material-ui/core/IconButton';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import NotificationTimer from './Additional/NotificationTimer';
-import { isChatMember, isCreator, isMeChat, isPrivateChat, isSupergroup } from '../Utils/Chat';
+import { isChatMember, isCreator } from '../Utils/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
-import UserStore from '../Stores/UserStore';
-import TdLibController from '../Controllers/TdLibController';
 import ChatStore from '../Stores/ChatStore';
 import SupergroupStore from '../Stores/SupergroupStore';
+import UserStore from '../Stores/UserStore';
+import TdLibController from '../Controllers/TdLibController';
 
 class Actions extends React.PureComponent {
     state = {

@@ -566,7 +566,7 @@ class EditMediaDialog extends React.Component {
         } else if (newItem) {
             media = getMedia({ content: newItem.media });
         }
-        const doneLabel = isEditing ? t('Edit') : t('Send');
+        const doneLabel = isEditing ? t('Save') : t('Send');
 
         return (
             <Dialog
