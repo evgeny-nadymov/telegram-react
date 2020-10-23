@@ -7,13 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import ContextMenu from './ContextMenu';
-import Photo from '../../Message/Media/Photo';
 import SafeLink from '../../Additional/SafeLink';
-import { getFirstLetter } from '../../../Utils/Common';
-import { getFormattedText, openMedia, substring } from '../../../Utils/Message';
+import SharedLinkTile from './SharedLinkTile';
+import { getFirstLetter, getPhotoSize } from '../../../Utils/Common';
+import { getFormattedText, substring } from '../../../Utils/Message';
 import punycode from '../../../Utils/Punycode';
+import { PHOTO_SIZE } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import './SharedLink.css';
 
@@ -128,8 +128,10 @@ class SharedLink extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
+        let thumbnail = null;
+        let minithumbnail = null;
         let content = null;
-        let { display_url, description, photo, title, url } = webPage || {
+        let { display_url, description, photo, title, url, animation, audio, document, sticker, video, video_note: videoNote } = webPage || {
             title: '',
             description: {
                 '@type': 'formattedText',
@@ -137,8 +139,39 @@ class SharedLink extends React.Component {
                 entities: []
             },
             photo: null,
+            animation: null,
+            audio: null,
+            document: null,
+            sticker: null,
+            video: null,
+            video_note: null,
             url: ''
         };
+
+        if (animation) {
+            minithumbnail = animation.minithumbnail;
+            thumbnail = animation.thumbnail;
+        } else if (audio) {
+            minithumbnail = audio.album_cover_minithumbnail;
+            thumbnail = audio.album_cover_thumbnail;
+        } else if (document) {
+            minithumbnail = document.minithumbnail;
+            thumbnail = document.thumbnail;
+        } else if (sticker) {
+            minithumbnail = sticker.minithumbnail;
+            thumbnail = sticker.thumbnail;
+        } else if (video) {
+            minithumbnail = video.minithumbnail;
+            thumbnail = video.thumbnail;
+        } else if (videoNote) {
+            minithumbnail = videoNote.minithumbnail;
+            thumbnail = videoNote.thumbnail;
+        }
+
+        if (!thumbnail && !minithumbnail && photo) {
+            minithumbnail = photo.minithumbnail;
+            thumbnail = getPhotoSize(photo.sizes, PHOTO_SIZE);
+        }
 
         let { text, caption } = message.content;
         text = text || caption;
@@ -205,26 +238,14 @@ class SharedLink extends React.Component {
             }
         }
 
-
-        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 7) + 1}`;
-
         return (
             <>
                 <div className='shared-link' onContextMenu={this.handleOpenContextMenu}>
-                    <div className={classNames('shared-link-photo', tileColor)}>
-                        {getFirstLetter(this.getTitleFromUrl(url))}
-                        {photo && (
-                            <Photo
-                                displaySize={90}
-                                chatId={chatId}
-                                messageId={messageId}
-                                photo={photo}
-                                openMedia={openMedia}
-                                showProgress={false}
-                                style={{ width: 48, height: 48, position: 'absolute', top: 0, left: 0 }}
-                            />
-                        )}
-                    </div>
+                    <SharedLinkTile
+                        minithumbnail={minithumbnail}
+                        thumbnail={thumbnail}
+                        title={getFirstLetter(this.getTitleFromUrl(url))}
+                    />
                     <div className='shared-link-content'>
                         {title && <div className='web-page-title'>{title}</div>}
                         {content}

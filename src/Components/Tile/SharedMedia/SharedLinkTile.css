@@ -5,17 +5,22 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.reply-tile {
+.shared-link-tile {
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 48px;
+    font-size: 19px;
     margin-left: 4px;
-    width: 32px;
-    height: 32px;
-    min-height: 32px;
-    min-width: 32px;
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    min-width: 48px;
     border-radius: 5px;
     overflow: hidden;
 }
 
-.reply-tile-photo {
+.shared-link-tile-photo {
     user-select: none;
     display: block;
     width: 100%;
@@ -25,6 +30,6 @@
     border-radius: 5px;
 }
 
-.reply-tile-photo-round {
+.shared-link-tile-photo-round {
     border-radius: 50%;
 }

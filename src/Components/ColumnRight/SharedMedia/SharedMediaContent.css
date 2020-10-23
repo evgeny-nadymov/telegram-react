@@ -9,14 +9,14 @@
     transform: translateZ(0);
     will-change: transform;
     padding: 8px;
-    min-height: calc(100% - 44px);
+    min-height: calc(100% - 44px - 2 * 8px);
 }
 
 .shared-media-virt-content {
     transform: translateZ(0);
     will-change: transform;
     position: relative;
-    min-height: calc(100% - 44px);
+    min-height: calc(100% - 44px - 2 * 8px);
     margin: 8px 0;
 }
 

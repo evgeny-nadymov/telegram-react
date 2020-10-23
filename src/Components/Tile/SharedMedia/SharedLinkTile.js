@@ -8,14 +8,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { getSrc } from '../../Utils/File';
-import { isBlurredThumbnail } from '../../Utils/Media';
-import { hasVideoNote } from '../../Utils/Message';
-import { THUMBNAIL_BLURRED_SIZE_90 } from '../../Constants';
-import FileStore from '../../Stores/FileStore';
-import './ReplyTile.css';
+import { getSrc } from '../../../Utils/File';
+import { isBlurredThumbnail } from '../../../Utils/Media';
+import { hasVideoNote } from '../../../Utils/Message';
+import { THUMBNAIL_BLURRED_SIZE_90 } from '../../../Constants';
+import FileStore from '../../../Stores/FileStore';
+import './SharedLinkTile.css';
 
-class ReplyTile extends React.Component {
+class SharedLinkTile extends React.Component {
     componentDidMount() {
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdatePhotoBlob);
         FileStore.on('clientUpdateAudioThumbnailBlob', this.onClientUpdatePhotoBlob);
@@ -37,37 +37,35 @@ class ReplyTile extends React.Component {
     }
 
     onClientUpdatePhotoBlob = update => {
-        const { chatId, messageId, photoSize } = this.props;
-        if (!photoSize) return;
+        const { thumbnail } = this.props;
+        if (!thumbnail) return;
 
-        const photo = photoSize.photo || photoSize.file;
-        if (!photo) return;
+        const file = thumbnail.file || thumbnail.photo;
+        if (!file) return;
 
-        if (update.chatId === chatId && update.messageId === messageId && update.fileId === photo.id) {
+        if (update.fileId === file.id) {
             this.forceUpdate();
         }
     };
 
     render() {
-        const { chatId, messageId, photoSize, minithumbnail } = this.props;
-        if (!photoSize) return null;
-
-        const photo = photoSize.photo || photoSize.file;
-        if (!photo) return null;
+        const { chatId, messageId, thumbnail, minithumbnail, title } = this.props;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const src = getSrc(photo);
-        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize, THUMBNAIL_BLURRED_SIZE_90);
+        const src = getSrc(thumbnail ? thumbnail.file || thumbnail.photo : null);
+        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90);
         const isVideoNote = hasVideoNote(chatId, messageId);
         const hasSrc = Boolean(src || miniSrc);
 
+        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 7) + 1}`;
+
         return (
-            <div className='reply-tile'>
-                {hasSrc && (
+            <div className={classNames('shared-link-tile', { [tileColor]: !hasSrc })}>
+                {hasSrc? (
                     <img
                         className={classNames(
-                            'reply-tile-photo',
-                            { 'reply-tile-photo-round': isVideoNote },
+                            'shared-link-tile-photo',
+                            { 'shared-link-tile-photo-round': isVideoNote },
                             { 'media-blurred': src && isBlurred },
                             { 'media-mini-blurred': !src && miniSrc && isBlurred }
                         )}
@@ -75,17 +73,20 @@ class ReplyTile extends React.Component {
                         src={src || miniSrc}
                         alt=''
                     />
+                ) : (
+                    <span>{title}</span>
                 )}
             </div>
         );
     }
 }
 
-ReplyTile.propTypes = {
+SharedLinkTile.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    photoSize: PropTypes.object,
-    minithumbnail: PropTypes.object
+    minithumbnail: PropTypes.object,
+    thumbnail: PropTypes.object,
+    title: PropTypes.string
 };
 
-export default ReplyTile;
+export default SharedLinkTile;

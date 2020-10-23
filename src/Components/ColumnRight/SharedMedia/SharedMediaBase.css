@@ -23,6 +23,7 @@
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
+    min-height: calc(100% - 44px);
 }
 
 .shared-media-search-list {

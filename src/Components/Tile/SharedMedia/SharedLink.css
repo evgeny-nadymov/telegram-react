@@ -22,19 +22,6 @@
     word-break: break-word;
 }
 
-.shared-link-photo {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    line-height: 48px;
-    font-size: 19px;
-    text-align: center;
-    text-transform: uppercase;
-    color: #ffffff;
-    border-radius: 4px;
-}
-
 .shared-link-content {
     flex-grow: 1;
     flex-shrink: 1;
