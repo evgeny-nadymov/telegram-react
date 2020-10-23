@@ -39,6 +39,7 @@ class SharedMediaTabs extends React.Component {
             const audio = media ? media.audio : [];
             const url = media ? media.url : [];
             const voiceNote = media ? media.voiceNote : [];
+            const groupsInCommon = media ? media.groupsInCommon : [];
 
             let selectedIndex = -1;
             if (photoAndVideo.length > 0) {
@@ -51,6 +52,8 @@ class SharedMediaTabs extends React.Component {
                 selectedIndex = 4;
             } else if (voiceNote.length > 0) {
                 selectedIndex = 5;
+            } else if (groupsInCommon.length > 0) {
+                selectedIndex = 6;
             }
 
             return {
@@ -61,6 +64,7 @@ class SharedMediaTabs extends React.Component {
                 audio,
                 url,
                 voiceNote,
+                groupsInCommon,
                 isSmallWidth: false
             }
         }
@@ -167,12 +171,14 @@ class SharedMediaTabs extends React.Component {
         const audio = media ? media.audio : [];
         const url = media ? media.url : [];
         const voiceNote = media ? media.voiceNote : [];
+        const groupsInCommon = media ? media.groupsInCommon : [];
 
         const hasPhotoAndVideo = photoAndVideo.length > 0;
         const hasDocument = document.length > 0;
         const hasAudio = audio.length > 0;
         const hasUrl = url.length > 0;
         const hasVoiceNote = voiceNote.length > 0;
+        const hasGroupsInCommon = groupsInCommon.length > 0;
 
         const replaceSelectedIndex =
             selectedIndex === -1
@@ -180,7 +186,8 @@ class SharedMediaTabs extends React.Component {
             || selectedIndex === 2 && !hasDocument
             || selectedIndex === 3 && !hasAudio
             || selectedIndex === 4 && !hasUrl
-            || selectedIndex === 5 && !hasVoiceNote;
+            || selectedIndex === 5 && !hasVoiceNote
+            || selectedIndex === 6 && !hasGroupsInCommon;
         if (replaceSelectedIndex) {
             if (hasPhotoAndVideo) {
                 selectedIndex = 1;
@@ -192,6 +199,8 @@ class SharedMediaTabs extends React.Component {
                 selectedIndex = 4;
             } else if (hasVoiceNote) {
                 selectedIndex = 5;
+            } else if (hasGroupsInCommon) {
+                selectedIndex = 6;
             }
 
             TdLibController.clientUpdate({
@@ -207,7 +216,8 @@ class SharedMediaTabs extends React.Component {
             document,
             audio,
             url,
-            voiceNote
+            voiceNote,
+            groupsInCommon
         }, () => {
             if (!this.hasObserver()) this.setSelection();
         });
@@ -273,6 +283,12 @@ class SharedMediaTabs extends React.Component {
             left = item.offsetLeft;
         }
 
+        const groupsInCommonFilter = this.filterRef.get('groupsInCommon');
+        if (selectedIndex === 6 && groupsInCommonFilter) {
+            item = groupsInCommonFilter.firstChild;
+            left = item.offsetLeft;
+        }
+
         if (!item) return;
 
         const filterSelection = this.filterSelectionRef.current;
@@ -322,20 +338,22 @@ class SharedMediaTabs extends React.Component {
 
     render() {
         const { t } = this.props;
-        const { selectedIndex, photoAndVideo, document, audio, url, voiceNote } = this.state;
+        const { selectedIndex, photoAndVideo, document, audio, url, voiceNote, groupsInCommon } = this.state;
 
         const tabsCount =
             (photoAndVideo.length > 0 ? 1 : 0) +
             (document.length > 0 ? 1 : 0) +
             (audio.length > 0 ? 1 : 0) +
             (url.length > 0 ? 1 : 0) +
-            (voiceNote.length > 0 ? 1 : 0);
+            (voiceNote.length > 0 ? 1 : 0) +
+            (groupsInCommon.length > 0 ? 1 : 0);
 
         const hasSharedMedia = photoAndVideo.length > 0
             || document.length > 0
             || audio.length > 0
             || url.length > 0
-            || voiceNote.length > 0;
+            || voiceNote.length > 0
+            || groupsInCommon.length > 0;
 
         if (!hasSharedMedia) {
             return null;
@@ -384,6 +402,14 @@ class SharedMediaTabs extends React.Component {
                             className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 5})}
                             onMouseDown={e => this.handleFilterClick(e, 5)}>
                             <span>{t('SharedVoiceTab2')}</span>
+                        </div>
+                    )}
+                    {groupsInCommon.length > 0 && (
+                        <div
+                            ref={r => this.filterRef.set('groupsInCommon', r)}
+                            className={classNames('filter', {'shared-media-tab': tabsCount > 1}, { 'item-selected': selectedIndex === 6})}
+                            onMouseDown={e => this.handleFilterClick(e, 6)}>
+                            <span>{t('SharedGroupsTab2')}</span>
                         </div>
                     )}
                     <div ref={this.filterSelectionRef} className='filter-selection'/>

@@ -1106,14 +1106,25 @@ export async function getChatMedia(chatId) {
         limit,
         filter: { '@type': 'searchMessagesFilterVoiceNote' }
     }));
+    if (isPrivateChat(chatId)) {
+        const userId = getChatUserId(chatId);
 
-    const [photoAndVideo, document, audio, url, voiceNote] = await Promise.all(promises);
+        promises.push(TdLibController.send({
+            '@type': 'getGroupsInCommon',
+            user_id: userId,
+            offset_chat_id: 0,
+            limit
+        }));
+    }
+
+    const [photoAndVideo, document, audio, url, voiceNote, groupsInCommon] = await Promise.all(promises);
     const media = {
         photoAndVideo: photoAndVideo.messages,
         document: document.messages,
         audio: audio.messages,
         url: url.messages,
         voiceNote: voiceNote.messages,
+        groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : []
     }
     console.log('[media] getChatMedia stop', chatId, media);
 

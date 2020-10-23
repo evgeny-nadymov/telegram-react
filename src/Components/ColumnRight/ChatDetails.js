@@ -364,14 +364,6 @@ class ChatDetails extends React.Component {
             className,
             chatId,
             onClose,
-            onOpenGroupInCommon,
-            onOpenSharedAudios,
-            onOpenSharedDocuments,
-            onOpenSharedLinks,
-            onOpenSharedMedia,
-            onOpenSharedPhotos,
-            onOpenSharedVideos,
-            onOpenSharedVoiceNotes,
             popup,
             t
         } = this.props;
@@ -520,7 +512,7 @@ class ChatDetails extends React.Component {
 
                     <div ref={this.dividerRef}/>
                     <SharedMediaTabs chatId={chatId} onClick={this.handleTabClick}/>
-                    <SharedMediaContent ref={this.mediaRef} chatId={chatId}/>
+                    <SharedMediaContent ref={this.mediaRef} chatId={chatId} popup={popup}/>
                     {/*{(photoCount > 0 ||*/}
                     {/*    videoCount > 0 ||*/}
                     {/*    documentCount > 0 ||*/}
