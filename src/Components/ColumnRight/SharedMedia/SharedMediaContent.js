@@ -778,7 +778,7 @@ class SharedMediaContent extends React.Component {
             groupsInCommon
         } = this.state;
 
-        console.log('[vlist] render', [selectedIndex, items, renderIds]);
+        // console.log('[vlist] render', [selectedIndex, items, renderIds]);
 
         const hasItems = photoAndVideo && photoAndVideo.length > 0
             || document && document.length > 0
@@ -787,7 +787,7 @@ class SharedMediaContent extends React.Component {
             || voiceNote && voiceNote.length > 0
             || groupsInCommon && groupsInCommon.length > 0;
         if (!hasItems) {
-            return null;
+            return (<div ref={this.listRef}/>);
         }
 
         if (selectedIndex === 2 || selectedIndex === 3 || selectedIndex === 5) {
