@@ -9,6 +9,7 @@
     box-sizing: border-box;
     padding: 0;
     border-radius: 10px;
+    margin-bottom: 4px;
 }
 
 .found-message.item-selected .dialog-wrapper {
