@@ -19,9 +19,9 @@ import ScrollDownButton from './ScrollDownButton';
 import StickersHint from './StickersHint';
 import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
-import { canMessageBeEdited, filterDuplicateMessages, filterMessages } from '../../Utils/Message';
+import { canMessageBeEdited, filterDuplicateMessages, filterMessages, forwardInfoEquals } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat } from '../../Utils/Chat';
+import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat, isMeChat } from '../../Utils/Chat';
 import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
 import { ALBUM_MESSAGES_LIMIT, MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -1295,7 +1295,7 @@ class MessagesList extends React.Component {
     showMessageTitle(message, prevMessage, isFirst, isFirstUnread) {
         if (!message) return false;
 
-        const { chat_id, date, is_outgoing, sender_user_id, content } = message;
+        const { chat_id, date, is_outgoing, sender_user_id, content, forward_info } = message;
 
         if (isFirst) {
             return true;
@@ -1316,6 +1316,7 @@ class MessagesList extends React.Component {
                 prevMessage.content['@type'] === 'messageVideoNote' ||
                 sender_user_id !== prevMessage.sender_user_id ||
                 is_outgoing !== prevMessage.is_outgoing ||
+                (isMeChat(chat_id) && !forwardInfoEquals(forward_info, prevMessage.forward_info)) ||
                 date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S)
         );
     }
@@ -1438,6 +1439,7 @@ class MessagesList extends React.Component {
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
                             || x.sender_user_id !== nextMessage.sender_user_id
+                            || (isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info))
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;
 
@@ -1535,6 +1537,7 @@ class MessagesList extends React.Component {
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
                             || x.sender_user_id !== nextMessage.sender_user_id
+                            || isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info)
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;
 

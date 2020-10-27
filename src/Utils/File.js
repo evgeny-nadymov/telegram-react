@@ -962,6 +962,7 @@ function loadVoiceNoteContent(store, voiceNote, message, useFileSize = true) {
 
 function loadMessageContents(store, messages) {
     const users = new Map();
+    const chats = new Map();
     let chatId = 0;
     const replies = new Map();
 
@@ -971,10 +972,27 @@ function loadMessageContents(store, messages) {
             continue;
         }
 
-        const { chat_id, content, sender_user_id, reply_to_message_id } = message;
+        const { chat_id, content, sender_user_id, reply_to_message_id, forward_info } = message;
 
         if (sender_user_id) {
             users.set(sender_user_id, sender_user_id);
+        }
+
+        if (forward_info) {
+            const { origin } = forward_info;
+            switch (origin['@type']) {
+                case 'messageForwardOriginChannel': {
+                    chats.set(origin.chat_id, origin.chat_id);
+                    break;
+                }
+                case 'messageForwardOriginHiddenUser': {
+                    break;
+                }
+                case 'messageForwardOriginUser': {
+                    users.set(origin.sender_user_id, origin.sender_user_id);
+                    break;
+                }
+            }
         }
 
         if (reply_to_message_id) {
@@ -1131,6 +1149,7 @@ function loadMessageContents(store, messages) {
     }
 
     loadUsersContent(store, [...users.keys()]);
+    loadChatsContent(store, [...chats.keys()]);
     loadReplies(store, chatId, [...replies.keys()]);
 }
 

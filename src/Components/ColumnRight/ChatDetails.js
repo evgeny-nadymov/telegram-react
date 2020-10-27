@@ -427,6 +427,13 @@ class ChatDetails extends React.Component {
             }
         }
 
+        let openChatTitle = t('SendMessage');
+        if (isChannelChat(chatId)) {
+            openChatTitle = t('OpenChannel');
+        } else if (isGroupChat(chatId)) {
+            openChatTitle = t('OpenGroup');
+        }
+
         const content = (
             <>
                 <ChatDetailsHeader
@@ -494,12 +501,12 @@ class ChatDetails extends React.Component {
                                     </>
                                 )}
                                 <NotificationsListItem chatId={chatId} />
-                                {popup && !isGroup && (
+                                {popup && (
                                     <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handleOpenChat}>
                                         <ListItemText
                                             primary={
                                                 <Typography color='primary' variant='inherit' noWrap>
-                                                    {t('SendMessage').toUpperCase()}
+                                                    {openChatTitle.toUpperCase()}
                                                 </Typography>
                                             }
                                             style={{ paddingLeft: 40 }}

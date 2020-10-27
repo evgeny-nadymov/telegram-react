@@ -27,35 +27,31 @@
     color: var(--message-out-author);
 }
 
-a.user_color_1,
-a.user_color_1:hover {
-    color: #8365ab;
-}
-a.user_color_2,
-a.user_color_2:hover {
-    color: #539e4f;
-}
 a.user_color_3,
 a.user_color_3:hover {
-    color: #ae9661;
+    color: #8365ab;
 }
 a.user_color_4,
 a.user_color_4:hover {
-    color: #4979a3;
-}
-a.user_color_5,
-a.user_color_5:hover {
-    color: #b7635d;
+    color: #539e4f;
 }
 a.user_color_6,
 a.user_color_6:hover {
-    color: #b3577a;
+    color: #4979a3;
+}
+a.user_color_1,
+a.user_color_1:hover {
+    color: #b7635d;
 }
 a.user_color_7,
 a.user_color_7:hover {
+    color: #b3577a;
+}
+a.user_color_5,
+a.user_color_5:hover {
     color: #5397b4;
 }
-a.user_color_8,
-a.user_color_8:hover {
+a.user_color_2,
+a.user_color_2:hover {
     color: #c07844;
 }

@@ -155,7 +155,7 @@ function isUserBlocked(userId) {
     return false;
 }
 
-function getUserLetters(userId, firstName, lastName, t) {
+function getUserLetters(userId, firstName = '', lastName = '', t = x => x) {
     const user = UserStore.get(userId);
     if (!user && !(firstName || lastName)) return null;
 

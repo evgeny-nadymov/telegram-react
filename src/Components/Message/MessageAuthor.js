@@ -10,11 +10,13 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import { getUserFullName } from '../../Utils/User';
-import { getChatTitle, isPrivateChat } from '../../Utils/Chat';
+import { getChatTitle, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { openUser as openUserCommand, openChat as openChatCommand } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import UserStore from '../../Stores/UserStore';
 import './MessageAuthor.css';
+import UserTile from '../Tile/UserTile';
+import ChatTile from '../Tile/ChatTile';
 
 class MessageAuthor extends React.Component {
     state = { };
@@ -86,32 +88,78 @@ class MessageAuthor extends React.Component {
     };
 
     handleSelect = event => {
-        const { chatId, userId, openUser, openChat } = this.props;
+        let { chatId, userId, openUser, openChat, forwardInfo } = this.props;
+
+        if (isMeChat(chatId) && forwardInfo) {
+            switch (forwardInfo.origin['@type']) {
+                case 'messageForwardOriginHiddenUser': {
+                    userId = 0;
+                    chatId = 0;
+                    break;
+                }
+                case 'messageForwardOriginUser': {
+                    userId = forwardInfo.origin.sender_user_id;
+                    chatId = 0;
+                    break;
+                }
+                case 'messageForwardOriginChannel': {
+                    chatId = forwardInfo.origin.chat_id;
+                    userId = 0;
+                    break;
+                }
+            }
+        }
+
+        event.stopPropagation();
 
         if (openUser && userId) {
-            event.stopPropagation();
-
             openUserCommand(userId, true);
             return;
         }
 
         if (openChat && chatId) {
-            event.stopPropagation();
-
             openChatCommand(chatId, null, true);
             return;
         }
     };
 
     render() {
-        const { chatId, userId, openUser, openChat } = this.props;
-        const { fullName } = this.state;
+        let { chatId, userId, openUser, openChat, forwardInfo, t } = this.props;
+        let { fullName } = this.state;
 
-        const user = UserStore.get(userId);
-        if (user) {
+        // console.log('[MessageAuthor] render', chatId, userId, forwardInfo);
+
+        if (isMeChat(chatId) && forwardInfo) {
+            switch (forwardInfo.origin['@type']) {
+                case 'messageForwardOriginHiddenUser': {
+                    userId = 0;
+                    chatId = 0;
+                    fullName = forwardInfo.origin.sender_name;
+                    break;
+                }
+                case 'messageForwardOriginUser': {
+                    userId = forwardInfo.origin.sender_user_id;
+                    chatId = 0;
+                    fullName = MessageAuthor.getFullName(userId, chatId, t);
+                    break;
+                }
+                case 'messageForwardOriginChannel': {
+                    userId = 0;
+                    chatId = forwardInfo.origin.chat_id;
+                    fullName = MessageAuthor.getFullName(userId, chatId, t);
+                    break;
+                }
+            }
+        }
+
+        if (!userId && !chatId && !fullName) {
+            return null;
+        }
+
+        if (!chatId) {
             const tileColor = isPrivateChat(chatId)
                 ? 'message-author-color'
-                : `user_color_${(Math.abs(userId) % 8) + 1}`;
+                : `user_color_${(Math.abs(userId || fullName.charCodeAt(0)) % 7) + 1}`;
             const className = classNames([tileColor], 'message-author');
 
             return openUser ? (
@@ -123,20 +171,14 @@ class MessageAuthor extends React.Component {
             );
         }
 
-        const chat = ChatStore.get(chatId);
-        if (chat) {
-            const className = classNames('message-author-color', 'message-author');
-
-            return openChat ? (
-                <a className={className} onClick={this.handleSelect}>
-                    {fullName}
-                </a>
-            ) : (
-                <>{fullName}</>
-            );
-        }
-
-        return null;
+        const className = classNames('message-author-color', 'message-author');
+        return openChat ? (
+            <a className={className} onClick={this.handleSelect}>
+                {fullName}
+            </a>
+        ) : (
+            <>{fullName}</>
+        );
     }
 }
 
@@ -144,7 +186,8 @@ MessageAuthor.propTypes = {
     chatId: PropTypes.number,
     userId: PropTypes.number,
     openUser: PropTypes.bool,
-    openChat: PropTypes.bool
+    openChat: PropTypes.bool,
+    forwardInfo: PropTypes.object
 };
 
 MessageAuthor.defaultProps = {

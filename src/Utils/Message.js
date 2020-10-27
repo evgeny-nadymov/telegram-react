@@ -13,10 +13,10 @@ import SafeLink from '../Components/Additional/SafeLink';
 import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle, isMeChat } from './Chat';
-import { openUser } from './../Actions/Client';
+import { openUser } from '../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
 import { download, saveOrDownload, supportsStreaming } from './File';
-import { getAudioSubtitle, getAudioTitle } from './Media';
+import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
@@ -29,6 +29,26 @@ import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+
+export function forwardInfoEquals(info1, info2) {
+    if (!info1 && !info2) return true;
+    if (!info1 && info2) return false;
+    if (info1 && !info2) return false;
+
+    switch (info1.origin['@type']) {
+        case 'messageForwardOriginChannel': {
+            return info1.origin.chat_id === info2.origin.chat_id;
+        }
+        case 'messageForwardOriginHiddenUser': {
+            return info1.origin.sender_name === info2.origin.sender_name;
+        }
+        case 'messageForwardOriginUser': {
+            return info1.origin.sender_user_id === info2.origin.sender_user_id;
+        }
+    }
+
+    return false;
+}
 
 export function isMetaBubble(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -2582,6 +2602,8 @@ export function canMessageBeEdited(chatId, messageId) {
 export function showMessageForward(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
+
+    if (isMeChat(chatId)) return false;
 
     const { forward_info, content } = message;
 
