@@ -8,14 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Document from '../Media/Document';
 import Photo from '../Media/Photo';
 import Video from '../Media/Video';
 import './AlbumItem.css';
 import MessageMenu from '../MessageMenu';
 import MessageStore from '../../../Stores/MessageStore';
-import { openMedia } from '../../../Utils/Message';
+import { getText, getWebPage, openMedia } from '../../../Utils/Message';
 import { selectMessage } from '../../../Actions/Client';
 import CheckMarkIcon from '@material-ui/icons/Check';
+import Meta from '../Meta';
 
 class AlbumItem extends React.Component {
 
@@ -24,7 +26,7 @@ class AlbumItem extends React.Component {
     };
 
     getAlbumItem = (message, displaySize) => {
-        const { chat_id, id, content } = message;
+        const { chat_id, id, content, date, edit_date, views } = message;
 
         switch (content['@type']) {
             case 'messagePhoto': {
@@ -49,6 +51,40 @@ class AlbumItem extends React.Component {
                         displaySize={displaySize}
                         style={{ width: '100%', height: '100%' }}
                         openMedia={this.openMedia}/>
+                );
+            }
+            case 'messageDocument': {
+                const inlineMeta = (
+                    <Meta
+                        className='meta-hidden'
+                        key={`${chat_id}_${id}_meta`}
+                        chatId={chat_id}
+                        messageId={id}
+                        date={date}
+                        editDate={edit_date}
+                        views={views}
+                    />
+                );
+
+                const webPage = getWebPage(message);
+                const text = getText(message, !!webPage ? null : inlineMeta, x => x);
+
+                return (
+                    <>
+                        <Document
+                            type='message'
+                            chatId={chat_id}
+                            messageId={id}
+                            document={content.document}
+                            displaySize={displaySize}
+                            style={{ width: '100%', height: '100%' }}
+                            openMedia={this.openMedia}/>
+                        { text && text.length > 0 && (
+                            <div className={'message-text'}>
+                                {text}
+                            </div>
+                        )}
+                    </>
                 );
             }
         }
@@ -164,22 +200,27 @@ class AlbumItem extends React.Component {
         const { message, position, displaySize } = this.props;
         const { contextMenu, copyLink, top, left, selected } = this.state;
 
-        const { chat_id, id, content } = message;
-
-        const { width, height } = position;
+        const { chat_id, id } = message;
 
         // const r = Math.floor(Math.random() * 256);
         // const g = Math.floor(Math.random() * 256);
         // const b = Math.floor(Math.random() * 256);
         // const background = null; //`rgb(${r},${g},${b})`;
 
+        let style = {};
+        let className = 'album-document-item';
+        if (position) {
+            style = { width: position.width, height: position.height * displaySize };
+            className = 'album-item'
+        }
+
         return (
             <>
                 <div
-                    className={classNames('album-item', { 'item-selected': selected })}
+                    className={classNames(className, { 'item-selected': selected })}
                     onClick={this.handleSelection}
                     onContextMenu={this.handleOpenContextMenu}
-                    style={{ width, height: height * displaySize }}>
+                    style={style}>
                     <div className='album-item-wrapper'>{this.getAlbumItem(message, displaySize)}</div>
                     {selected && (
                         <div className='album-item-selection'>

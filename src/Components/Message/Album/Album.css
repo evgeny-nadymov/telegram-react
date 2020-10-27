@@ -10,13 +10,30 @@
     overflow: hidden;
 }
 
+.document-album {
+
+}
+
 .album-wrapper {
     display: block;
     margin: -2px;
-    font-size: 8px;
+    /*font-size: 8px;*/
     white-space: pre;
     color: black;
     overflow: hidden;
+}
+
+.document-album .album-wrapper {
+    margin: 0;
+}
+
+.document-album .document {
+    margin: 0;
+    padding: 6px 9px;
+}
+
+.document-album .message-text {
+    padding: 0 9px 6px;
 }
 
 .album-caption {

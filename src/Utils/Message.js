@@ -1176,20 +1176,7 @@ function openDocument(document, message, fileCancel) {
         message_id: id
     });
 
-    if (isLottieMessage(chat_id, id)) {
-        TdLibController.send({
-            '@type': 'openMessageContent',
-            chat_id: chat_id,
-            message_id: id
-        });
-
-        setMediaViewerContent({
-            chatId: chat_id,
-            messageId: id
-        });
-    } else {
-        saveOrDownload(file, document.file_name, message);
-    }
+    saveOrDownload(file, document.file_name, message);
 }
 
 function openGame(game, message, fileCancel) {

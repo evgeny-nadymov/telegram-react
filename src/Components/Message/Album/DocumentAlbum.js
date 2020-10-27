@@ -20,15 +20,16 @@ import Meta from '../Meta';
 import ChatTile from '../../Tile/ChatTile';
 import EmptyTile from '../../Tile/EmptyTile';
 import UserTile from '../../Tile/UserTile';
+import { getMedia } from '../../../Utils/Media';
 import { albumHistoryEquals } from '../../../Utils/Common';
 import { selectMessage } from '../../../Actions/Client';
 import { getText, getWebPage, showMessageForward } from '../../../Utils/Message';
 import { isChannelChat, isPrivateChat } from '../../../Utils/Chat';
 import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
-import './Album.css';
+import './DocumentAlbum.css';
 
-class Album extends React.Component {
+class DocumentAlbum extends React.Component {
     state = { };
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -53,11 +54,8 @@ class Album extends React.Component {
         const { displaySize, chatId, messageIds } = props;
 
         if (messageIds !== state.prevMessageIds) {
-            const grouped = new GroupedMessages();
-            grouped.calculate(messageIds.map(x => MessageStore.get(chatId, x)), displaySize);
 
             return {
-                grouped,
                 prevMessageIds: messageIds
             }
         }
@@ -66,7 +64,7 @@ class Album extends React.Component {
     }
 
     componentDidMount() {
-        // MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
@@ -74,40 +72,43 @@ class Album extends React.Component {
     }
 
     componentWillUnmount() {
-        // MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.off('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
     }
 
-    // onClientUpdateMessageHighlighted = update => {
-    //     const { chatId, messageIds } = this.props;
-    //     const { selected, highlighted } = this.state;
-    //
-    //     if (selected) return;
-    //
-    //     if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
-    //         if (highlighted) {
-    //             this.setState({ highlighted: false }, () => {
-    //                 setTimeout(() => {
-    //                     this.setState({ highlighted: true });
-    //                 }, 0);
-    //             });
-    //         } else {
-    //             this.setState({ highlighted: true });
-    //         }
-    //     } else if (highlighted) {
-    //         this.setState({ highlighted: false });
-    //     }
-    // };
+    onClientUpdateMessageHighlighted = update => {
+        const { chatId, messageIds } = this.props;
+        const { selected, highlighted } = this.state;
+
+        if (selected) return;
+
+        if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
+            if (highlighted) {
+                this.setState({ highlighted: false }, () => {
+                    setTimeout(() => {
+                        this.setState({ highlighted: true });
+                    }, 0);
+                });
+            } else {
+                this.setState({ highlighted: true });
+            }
+        } else if (highlighted) {
+            this.setState({ highlighted: false });
+        }
+    };
 
     onClientUpdateMessageSelected = update => {
         const { chatId, messageIds } = this.props;
         const { selected } = update;
 
         if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
-            this.setState({ selected: messageIds.every(x => MessageStore.hasSelectedMessage(chatId, x)) });
+            this.setState({
+                selected: messageIds.every(x => MessageStore.hasSelectedMessage(chatId, x)),
+                lastSelected: messageIds.length > 0 && MessageStore.hasSelectedMessage(chatId, messageIds[messageIds.length - 1])
+            });
         }
     };
 
@@ -125,14 +126,11 @@ class Album extends React.Component {
         if (chatId !== chat_id) return;
         if (!messageIds.some(x => x === message_id)) return;
 
-        const grouped = new GroupedMessages();
-        grouped.calculate(messageIds.map(x => MessageStore.get(chatId, x)), displaySize);
-
         const emojiMatches = null; //getEmojiMatches(chatId, messageId);
         if (emojiMatches !== oldEmojiMatches) {
-            this.setState({ emojiMatches, grouped });
+            this.setState({ emojiMatches });
         } else {
-            this.setState({ grouped });
+            this.forceUpdate();
         }
     };
 
@@ -162,6 +160,7 @@ class Album extends React.Component {
         const {
             emojiMatches,
             selected,
+            lastSelected,
             highlighted,
             shook,
             copyLink,
@@ -169,10 +168,6 @@ class Album extends React.Component {
             left,
             top
         } = this.state;
-        const { grouped } = this.state;
-        if (!grouped) {
-            return null;
-        }
 
         if (!messageIds.length) {
             return null;
@@ -216,7 +211,7 @@ class Album extends React.Component {
         const meta = (
             <Meta
                 className={classNames('meta-text', {
-                    'meta-bubble': !hasCaption
+                    'meta-bubble': false
                 })}
                 chatId={chatId}
                 messageId={messageId}
@@ -254,15 +249,15 @@ class Album extends React.Component {
             }
         }
 
-        const style = { width: grouped.totalWidth - 2 - 2 };
+        const style = {  };
         const withBubble = content['@type'] !== 'messageSticker' && content['@type'] !== 'messageVideoNote';
         const tailRounded = !hasCaption && (content['@type'] === 'messageAnimation' || content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto');
 
-        const items = grouped.messages.map(x => (
+        const items = messageIds.map(x => MessageStore.get(chatId, x)).map(m => (
             <AlbumItem
-                key={x.id}
-                message={x}
-                position={grouped.positions.get(x)}
+                key={m.id}
+                message={m}
+                position={null}
                 displaySize={displaySize}
             />));
 
@@ -275,6 +270,7 @@ class Album extends React.Component {
                         'message-short': !tile,
                         'message-out': isOutgoing,
                         'message-selected': selected,
+                        'message-album-last-selected': lastSelected,
                         'message-highlighted': highlighted && !selected,
                         'message-group-title': showTitle && !showTail,
                         'message-group': !showTitle && !showTail,
@@ -298,9 +294,9 @@ class Album extends React.Component {
                             <div
                                 className={classNames(
                                     'message-content', {
-                                    'message-bubble': withBubble,
-                                    'message-bubble-out': withBubble && isOutgoing
-                                })}
+                                        'message-bubble': withBubble,
+                                        'message-bubble-out': withBubble && isOutgoing
+                                    })}
                                 style={style}>
                                 {withBubble && ((showTitle && !suppressTitle) || showForward) && (
                                     <div className='message-title'>
@@ -319,21 +315,22 @@ class Album extends React.Component {
                                 )}
                                 <div className={classNames(
                                     'album',
-                                    { 'album-caption': hasCaption },
+                                    'document-album',
+                                    { 'album-caption': false },
                                     { 'album-title': hasTitle }
-                                    )}>
-                                    <div className='album-wrapper' style={{ width: grouped.totalWidth }}>
+                                )}>
+                                    <div className='album-wrapper'>
                                         {items}
                                     </div>
                                 </div>
-                                <div
-                                    className={classNames('message-text', {
-                                        'message-text-1emoji': emojiMatches === 1,
-                                        'message-text-2emoji': emojiMatches === 2,
-                                        'message-text-3emoji': emojiMatches === 3
-                                    })}>
-                                    {text}
-                                </div>
+                                {/*<div*/}
+                                {/*    className={classNames('message-text', {*/}
+                                {/*        'message-text-1emoji': emojiMatches === 1,*/}
+                                {/*        'message-text-2emoji': emojiMatches === 2,*/}
+                                {/*        'message-text-3emoji': emojiMatches === 3*/}
+                                {/*    })}>*/}
+                                {/*    {text}*/}
+                                {/*</div>*/}
                                 {withBubble && meta}
                             </div>
                             <div className='message-tile-padding' />
@@ -346,7 +343,7 @@ class Album extends React.Component {
     }
 }
 
-Album.propTypes = {
+DocumentAlbum.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageIds: PropTypes.arrayOf(PropTypes.number).isRequired,
     displaySize: PropTypes.number,
@@ -356,7 +353,7 @@ Album.propTypes = {
     showDate: PropTypes.bool
 };
 
-Album.defaultProps = {
+DocumentAlbum.defaultProps = {
     displaySize: PHOTO_DISPLAY_SIZE,
     showTitle: false,
     showTail: false,
@@ -364,4 +361,4 @@ Album.defaultProps = {
     showData: false
 };
 
-export default Album;
+export default DocumentAlbum;

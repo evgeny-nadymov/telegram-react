@@ -179,7 +179,8 @@ class ChatStore extends EventEmitter {
                 const chat = this.get(chat_id);
                 if (chat) {
                     this.assign(chat, {
-                        positions: !positions.length ? chat.positions : positions,
+                        positions, // leave channel
+                        // positions: !positions.length ? chat.positions : positions,
                         last_message,
                     });
                 }

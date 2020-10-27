@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.shared-media-tabs {
+.tabs.shared-media-tabs {
     position: sticky;
     top: 0;
     background: var(--panel-background);
@@ -30,7 +30,7 @@
     /*margin: 0 19px;*/
 }
 
-.shared-media-tabs-bottom-border {
+.tabs-bottom-border {
     position: absolute;
     top: 43px;
     height: 1px;

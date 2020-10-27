@@ -361,8 +361,8 @@ class SharedMediaTabs extends React.Component {
 
         this.filterRef = new Map();
         return (
-            <div className='shared-media-tabs'>
-                <div className='shared-media-tabs-bottom-border'/>
+            <div className={classNames('tabs', 'shared-media-tabs')}>
+                <div className='tabs-bottom-border'/>
                 <div ref={this.filtersRef} className={classNames('filters', {'shared-media-tabs-container': tabsCount > 1})}>
                     {photoAndVideo.length > 0 && (
                         <div

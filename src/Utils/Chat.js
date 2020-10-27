@@ -1106,7 +1106,7 @@ export async function getChatMedia(chatId) {
         limit,
         filter: { '@type': 'searchMessagesFilterVoiceNote' }
     }));
-    if (isPrivateChat(chatId)) {
+    if (isPrivateChat(chatId) && !isMeChat(chatId)) {
         const userId = getChatUserId(chatId);
 
         promises.push(TdLibController.send({

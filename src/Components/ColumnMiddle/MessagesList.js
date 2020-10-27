@@ -33,6 +33,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
+import DocumentAlbum from '../Message/Album/DocumentAlbum';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -1408,7 +1409,7 @@ class MessagesList extends React.Component {
             this.messages = [];
             for (let i = 0; i < history.length; i++) {
                 const message = history[i];
-                const { chat_id, media_album_id, ttl } = message;
+                const { chat_id, media_album_id, ttl, content, is_outgoing } = message;
                 let albumAdded = false;
                 if (media_album_id !== '0' && !ttl) {
                     const album = [message];
@@ -1423,7 +1424,7 @@ class MessagesList extends React.Component {
                     if (album.length > 1) {
                         const x = message;
                         const prevMessage = i > 0 ? history[i - 1] : null;
-                        const nextMessage = i + album.length < history.length - 1 ? history[i + album.length] : null;
+                        const nextMessage = i + album.length < history.length ? history[i + album.length] : null;
 
                         const showDate = this.showMessageDate(x, prevMessage, i === 0);
 
@@ -1442,7 +1443,7 @@ class MessagesList extends React.Component {
 
                         this.messages.push((
                             <Album
-                                key={`chat_id=${chat_id} media_album_id=${media_album_id}`}
+                                key={`chat_id=${chat_id} media_album_id=${media_album_id} date=${showDate} title=${showTitle} tail=${showTail}`}
                                 chatId={chat_id}
                                 messageIds={album.map(x => x.id)}
                                 showTitle={showTitle}
@@ -1454,7 +1455,50 @@ class MessagesList extends React.Component {
                         albumAdded = true;
                     }
                 }
-
+                // else if (content['@type'] === 'messageDocument' && !ttl) {
+                //     const album = [message];
+                //     for (let j = i + 1; j < i + ALBUM_MESSAGES_LIMIT && j < history.length; j++) {
+                //         if (history[j].content['@type'] === content['@type'] && history[j].is_outgoing === is_outgoing) {
+                //             album.push(history[j]);
+                //         } else {
+                //             break;
+                //         }
+                //     }
+                //
+                //     if (album.length > 1) {
+                //         const x = message;
+                //         const prevMessage = i > 0 ? history[i - 1] : null;
+                //         const nextMessage = i + album.length < history.length ? history[i + album.length] : null;
+                //
+                //         const showDate = this.showMessageDate(x, prevMessage, i === 0);
+                //
+                //         const isFirstUnread = separatorMessageId === x.id;
+                //         const isNextFirstUnread = nextMessage ? separatorMessageId === nextMessage.id : false;
+                //         const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
+                //         const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
+                //
+                //         const showTail = !nextMessage
+                //             || isServiceMessage(nextMessage)
+                //             || nextMessage.content['@type'] === 'messageSticker'
+                //             || nextMessage.content['@type'] === 'messageVideoNote'
+                //             || x.sender_user_id !== nextMessage.sender_user_id
+                //             || x.is_outgoing !== nextMessage.is_outgoing
+                //             || nextShowTitle;
+                //
+                //         this.messages.push((
+                //             <DocumentAlbum
+                //                 key={`chat_id=${chat_id} media_album_id=${album.map(x => x.id).join('_')} date=${showDate} title=${showTitle} tail=${showTail}`}
+                //                 chatId={chat_id}
+                //                 messageIds={album.map(x => x.id)}
+                //                 showTitle={showTitle}
+                //                 showTail={showTail}
+                //                 showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
+                //                 showDate={showDate}
+                //             />));
+                //         i += (album.length - 1);
+                //         albumAdded = true;
+                //     }
+                // }
 
                 if (!albumAdded) {
                     /// history[4] id=5 prev
@@ -1473,7 +1517,7 @@ class MessagesList extends React.Component {
                     if (isServiceMessage(x)) {
                         m = (
                             <ServiceMessage
-                                key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                                key={`chat_id=${x.chat_id} id=${x.id} date=${showDate}`}
                                 ref={el => this.itemsMap.set(i, el)}
                                 chatId={x.chat_id}
                                 messageId={x.id}
@@ -1496,7 +1540,7 @@ class MessagesList extends React.Component {
 
                         m = (
                             <Message
-                                key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
+                                key={`chat_id=${x.chat_id} id=${x.id} date=${showDate} title=${showTitle} tail=${showTail}`}
                                 ref={el => this.itemsMap.set(i, el)}
                                 chatId={x.chat_id}
                                 messageId={x.id}

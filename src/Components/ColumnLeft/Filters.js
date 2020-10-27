@@ -244,24 +244,27 @@ class Filters extends React.Component {
 
         this.filterRef = new Map();
         return (
-            <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
-                <div
-                    ref={r => this.filterRef.set('chatListMain', r)}
-                    className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
-                    onMouseDown={this.handleMainClick}
-                    title={isSmallWidth ? t('FilterAllChats') : null}>
-                    <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
-                </div>
-                {filters.map(x => (
+            <div className='tabs'>
+                <div className='tabs-bottom-border'/>
+                <div ref={this.filtersRef} className='filters' onWheel={this.handleWheel}>
                     <div
-                        key={x.id}
-                        ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)}
-                        className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})}
-                        onMouseDown={e => this.handleFilterClick(e, x.id)}
-                        title={isSmallWidth ? x.title : null}>
-                        <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
-                    </div>))}
-                <div ref={this.filterSelectionRef} className='filter-selection'/>
+                        ref={r => this.filterRef.set('chatListMain', r)}
+                        className={classNames('filter', { 'item-selected': chatList['@type'] === 'chatListMain'})}
+                        onMouseDown={this.handleMainClick}
+                        title={isSmallWidth ? t('FilterAllChats') : null}>
+                        <span>{isSmallWidth ? getFirstLetter(t('FilterAllChats')) : t('FilterAllChats')}</span>
+                    </div>
+                    {filters.map(x => (
+                        <div
+                            key={x.id}
+                            ref={r => this.filterRef.set('chatListFilter_id=' + x.id, r)}
+                            className={classNames('filter', { 'item-selected': chatList.chat_filter_id === x.id})}
+                            onMouseDown={e => this.handleFilterClick(e, x.id)}
+                            title={isSmallWidth ? x.title : null}>
+                            <span>{isSmallWidth ? getFirstLetter(x.title) : x.title}</span>
+                        </div>))}
+                    <div ref={this.filterSelectionRef} className='filter-selection'/>
+                </div>
             </div>
         );
     }
