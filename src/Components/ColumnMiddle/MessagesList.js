@@ -402,8 +402,6 @@ class MessagesList extends React.Component {
     };
 
     onUpdateMessageSendSucceeded = update => {
-        if (!this.hasLastMessage()) return;
-
         const { message, old_message_id } = update;
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
@@ -921,7 +919,7 @@ class MessagesList extends React.Component {
         if (index !== -1) {
             history.splice(index, 1, message);
         } else {
-            history = history.concat([message]);
+            history = this.state.history;
         }
 
         this.setState({ history }, callback);
