@@ -401,18 +401,34 @@ function getMessageSenderName(message, t = k => k) {
     if (!message) return null;
     if (isServiceMessage(message)) return null;
 
-    const chat = ChatStore.get(message.chat_id);
-    if (chat && chat.type['@type'] !== 'chatTypeBasicGroup' && chat.type['@type'] !== 'chatTypeSupergroup') {
-        return null;
-    }
+    const { chat_id, sender } = message;
 
-    switch (message.sender['@type']) {
-        case 'messageSenderUser': {
-            return getUserShortName(message.sender.user_id, t);
+    const chat = ChatStore.get(chat_id);
+    if (!chat) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return null;
+        }
+        case 'chatTypeBasicGroup':
+        case 'chatTypeSupergroup': {
+            if (isChannelChat(chat_id)) {
+                return null;
+            }
+
+            switch (sender['@type']) {
+                case 'messageSenderUser': {
+                    return getUserShortName(sender.user_id, t);
+                }
+                case 'messageSenderChat': {
+                    return getChatTitle(sender.chat_id, false, t);
+                }
+            }
         }
     }
 
-    return getChatTitle(message.chat_id, false, t);
+    return null;
 }
 
 function getLastMessageSenderName(chat, t = k => k) {

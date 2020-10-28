@@ -63,6 +63,12 @@
     right: 9px;
     top: 9px;
     position: absolute;
+    z-index: 1;
+}
+
+.document-album .album-item-select-tick {
+    left: 42px;
+    right: unset;
 }
 
 .album-item.item-selected .album-item-selection,

@@ -280,7 +280,7 @@ class DocumentAlbum extends React.Component {
             <div>
                 {showDate && <DayMeta date={date} />}
                 <div
-                    className={classNames('message', 'message-album', {
+                    className={classNames('message', 'message-album', 'message-document-album', {
                         'message-rounded': showTitle && showTail && tailRounded,
                         'message-short': !tile,
                         'message-out': isOutgoing,
