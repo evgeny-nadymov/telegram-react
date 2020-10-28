@@ -33,7 +33,8 @@ class DocumentAlbum extends React.Component {
     state = { };
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { messageIds, emojiMatches, selected } = this.props;
+        const { messageIds } = this.props;
+        const { emojiMatches, lastSelected, selected } = this.state;
 
         if (!albumHistoryEquals(nextProps.messageIds, messageIds)) {
             return true;
@@ -44,6 +45,10 @@ class DocumentAlbum extends React.Component {
         }
 
         if (nextState.selected !== selected) {
+            return true;
+        }
+
+        if (nextState.lastSelected !== lastSelected) {
             return true;
         }
 
@@ -113,9 +118,7 @@ class DocumentAlbum extends React.Component {
     };
 
     onClientUpdateClearSelection = update => {
-        if (!this.state.selected) return;
-
-        this.setState({ selected: false });
+        this.setState({ selected: false, lastSelected: false });
     };
 
     onUpdateMessageContent = update => {

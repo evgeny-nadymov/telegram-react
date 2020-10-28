@@ -81,7 +81,7 @@ class MessagesList extends React.Component {
         const { last_message } = chat;
         if (!last_message) return true;
 
-        return history.length > 0 && history[history.length - 1].id === last_message.id;
+        return history.length > 0 && history[history.length - 1].id >= last_message.id;
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -916,12 +916,15 @@ class MessagesList extends React.Component {
             return;
         }
 
-        this.setState(
-            {
-                history: this.state.history.filter(x => x.id !== oldMessageId).concat([message])
-            },
-            callback
-        );
+        let history = [...this.state.history];
+        const index = history.findIndex(x => x.id === oldMessageId);
+        if (index !== -1) {
+            history.splice(index, 1, message);
+        } else {
+            history = history.concat([message]);
+        }
+
+        this.setState({ history }, callback);
     }
 
     insertNext(history, callback) {
