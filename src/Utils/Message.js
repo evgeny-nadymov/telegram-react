@@ -30,20 +30,37 @@ import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
-export function forwardInfoEquals(info1, info2) {
-    if (!info1 && !info2) return true;
-    if (!info1 && info2) return false;
-    if (info1 && !info2) return false;
+export function senderEquals(lhs, rhs) {
+    if (!lhs && !rhs) return true;
+    if (!lhs && rhs) return false;
+    if (lhs && !rhs) return false;
 
-    switch (info1.origin['@type']) {
+    switch (lhs['@type']) {
+        case 'messageSenderUser': {
+            return lhs.user_id === rhs.user_id;
+        }
+        case 'messageSenderChat': {
+            return lhs.chat_id === rhs.chat_id;
+        }
+    }
+
+    return false;
+}
+
+export function forwardInfoEquals(lhs, rhs) {
+    if (!lhs && !rhs) return true;
+    if (!lhs && rhs) return false;
+    if (lhs && !rhs) return false;
+
+    switch (lhs.origin['@type']) {
         case 'messageForwardOriginChannel': {
-            return info1.origin.chat_id === info2.origin.chat_id;
+            return lhs.origin.chat_id === rhs.origin.chat_id;
         }
         case 'messageForwardOriginHiddenUser': {
-            return info1.origin.sender_name === info2.origin.sender_name;
+            return lhs.origin.sender_name === rhs.origin.sender_name;
         }
         case 'messageForwardOriginUser': {
-            return info1.origin.sender_user_id === info2.origin.sender_user_id;
+            return lhs.origin.sender_user_id === rhs.origin.sender_user_id;
         }
     }
 
@@ -144,12 +161,16 @@ function getAuthor(message, t = k => k) {
 function getTitle(message, t = k => k) {
     if (!message) return null;
 
-    const { sender_user_id, chat_id } = message;
+    const { sender, chat_id } = message;
 
-    if (sender_user_id) {
-        const user = UserStore.get(sender_user_id);
+    if (!sender) {
+        return null;
+    }
+
+    if (sender.user_id) {
+        const user = UserStore.get(sender.user_id);
         if (user) {
-            return getUserFullName(sender_user_id, null, t);
+            return getUserFullName(sender.user_id, null, t);
         }
     }
 
@@ -489,12 +510,6 @@ function getUnread(message) {
     if (!chat) return false;
 
     return chat.last_read_outbox_message_id < message.id;
-}
-
-function getSenderUserId(message) {
-    if (!message) return null;
-
-    return message.sender_user_id;
 }
 
 function filterDuplicateMessages(result, history) {
@@ -2752,7 +2767,6 @@ export {
     isForwardOriginHidden,
     getForwardTitle,
     getUnread,
-    getSenderUserId,
     filterDuplicateMessages,
     filterMessages,
     isMediaContent,

@@ -98,7 +98,7 @@ class MessageGroup extends Component {
         let messages = this.props.messages;
         if (!messages) return <div>[empty group]</div>;
 
-        let user = UserStore.get(this.props.messages[0].sender_user_id);
+        let user = UserStore.get(this.props.messages[0].sender.user_id);
 
         const groupContent = this.props.messages.map(x => (
             <Message
@@ -114,7 +114,7 @@ class MessageGroup extends Component {
                 {user && (
                     <div className='group-sender'>
                         <div className='group-tile'>
-                            <UserTile userId={this.props.messages[0].sender_user_id} />
+                            <UserTile userId={this.props.messages[0].sender.user_id} />
                         </div>
                     </div>
                 )}

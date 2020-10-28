@@ -116,10 +116,10 @@ function getPassportElementTypeString(type) {
 function getMessageAuthor(message, openUser) {
     if (!message) return null;
 
-    const { chat_id, sender_user_id } = message;
+    const { chat_id, sender } = message;
 
-    if (sender_user_id !== 0) {
-        return <MessageAuthor userId={sender_user_id} openUser={openUser} />;
+    if (sender) {
+        return <MessageAuthor sender={sender} openUser={openUser} />;
     }
 
     const chat = ChatStore.get(chat_id);
@@ -135,7 +135,7 @@ function getServiceMessageContent(message, openUser = false) {
     const chat = ChatStore.get(message.chat_id);
     const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
 
-    const { ttl, sender_user_id, content, is_outgoing: isOutgoing } = message;
+    const { ttl, sender, content, is_outgoing: isOutgoing } = message;
     if (ttl > 0) {
         switch (content['@type']) {
             case 'messagePhoto': {
@@ -145,7 +145,7 @@ function getServiceMessageContent(message, openUser = false) {
 
                 return (
                     <>
-                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                        <MessageAuthor sender={sender} openUser={openUser} />
                         {' sent a self-destructing photo. Please view it on your mobile'}
                     </>
                 );
@@ -157,7 +157,7 @@ function getServiceMessageContent(message, openUser = false) {
 
                 return (
                     <>
-                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                        <MessageAuthor sender={sender} openUser={openUser} />
                         {' sent a self-destructing video. Please view it on your mobile'}
                     </>
                 );
@@ -169,7 +169,7 @@ function getServiceMessageContent(message, openUser = false) {
 
                 return (
                     <>
-                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                        <MessageAuthor sender={sender} openUser={openUser} />
                         {' sent a self-destructing message. Please view it on your mobile'}
                     </>
                 );
@@ -187,14 +187,14 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` created group «${title}»`}
                 </>
             );
         }
         case 'messageChatAddMembers': {
             const members = content.member_user_ids
-                .map(x => <MessageAuthor key={x} userId={x} openUser={openUser} />)
+                .map(x => <MessageAuthor key={x} sender={{ '@type': 'messageSenderUser', user_id: x }} openUser={openUser} />)
                 .reduce((accumulator, current, index, array) => {
                     const separator = index === array.length - 1 ? ' and ' : ', ';
                     return accumulator === null ? [current] : [...accumulator, separator, current];
@@ -211,14 +211,14 @@ function getServiceMessageContent(message, openUser = false) {
                 );
             }
 
-            return content.member_user_ids.length === 1 && content.member_user_ids[0] === message.sender_user_id ? (
+            return content.member_user_ids.length === 1 && content.member_user_ids[0] === message.sender.user_id ? (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' joined the group'}
                 </>
             ) : (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' added '}
                     {members}
                 </>
@@ -235,7 +235,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` updated group photo`}
                 </>
             );
@@ -253,7 +253,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` changed group name to «${title}»`}
                 </>
             );
@@ -265,21 +265,21 @@ function getServiceMessageContent(message, openUser = false) {
                 ) : (
                     <>
                         {'You removed '}
-                        <MessageAuthor userId={content.user_id} openUser={openUser} />
+                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />
                     </>
                 );
             }
 
-            return content.user_id === sender_user_id ? (
+            return content.user_id === sender.user_id ? (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={{sender}} openUser={openUser} />
                     {' left the group'}
                 </>
             ) : (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' removed '}
-                    <MessageAuthor userId={content.user_id} openUser={openUser} />
+                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />
                 </>
             );
         }
@@ -294,7 +294,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' removed group photo'}
                 </>
             );
@@ -306,7 +306,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' joined the group via invite link'}
                 </>
             );
@@ -322,7 +322,7 @@ function getServiceMessageContent(message, openUser = false) {
 
                 return (
                     <>
-                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                        <MessageAuthor sender={sender} openUser={openUser} />
                         {' disabled the self-destruct timer'}
                     </>
                 );
@@ -334,7 +334,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` set the self-destruct timer to ${ttlString}`}
                 </>
             );
@@ -348,7 +348,7 @@ function getServiceMessageContent(message, openUser = false) {
         case 'messageContactRegistered': {
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' just joined Telegram'}
                 </>
             );
@@ -372,7 +372,7 @@ function getServiceMessageContent(message, openUser = false) {
 
                 return (
                     <>
-                        <MessageAuthor userId={messageGame.sender_user_id} openUser={openUser} />
+                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: messageGame.sender_user_id }} openUser={openUser} />
                         {` scored ${content.score} in «${game.title}»`}
                     </>
                 );
@@ -384,7 +384,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` scored ${content.score}`}
                 </>
             );
@@ -403,7 +403,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={chat.type.user_id} openUser={openUser} />
+                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
                     {' received the following documents: '}
                     {passportElementTypes}
                 </>
@@ -427,7 +427,7 @@ function getServiceMessageContent(message, openUser = false) {
                             content.total_amount,
                             content.currency
                         )} to `}
-                        <MessageAuthor userId={chat.type.user_id} openUser={openUser} />
+                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
                         {` for ${invoice.title}`}
                     </>
                 );
@@ -439,7 +439,7 @@ function getServiceMessageContent(message, openUser = false) {
                         content.total_amount,
                         content.currency
                     )} to `}
-                    <MessageAuthor userId={chat.type.user_id} openUser={openUser} />
+                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
                 </>
             );
         }
@@ -563,7 +563,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' took a screenshot!'}
                 </>
             );
@@ -581,7 +581,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {` created group «${title}»`}
                 </>
             );

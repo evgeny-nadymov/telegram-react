@@ -19,7 +19,7 @@ import ScrollDownButton from './ScrollDownButton';
 import StickersHint from './StickersHint';
 import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
-import { canMessageBeEdited, filterDuplicateMessages, filterMessages, forwardInfoEquals } from '../../Utils/Message';
+import { canMessageBeEdited, filterDuplicateMessages, filterMessages, forwardInfoEquals, senderEquals } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat, isMeChat } from '../../Utils/Chat';
 import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
@@ -1295,7 +1295,7 @@ class MessagesList extends React.Component {
     showMessageTitle(message, prevMessage, isFirst, isFirstUnread) {
         if (!message) return false;
 
-        const { chat_id, date, is_outgoing, sender_user_id, content, forward_info } = message;
+        const { chat_id, date, is_outgoing, sender, content, forward_info } = message;
 
         if (isFirst) {
             return true;
@@ -1314,7 +1314,7 @@ class MessagesList extends React.Component {
             (isServiceMessage(prevMessage) ||
                 prevMessage.content['@type'] === 'messageSticker' ||
                 prevMessage.content['@type'] === 'messageVideoNote' ||
-                sender_user_id !== prevMessage.sender_user_id ||
+                !senderEquals(sender, prevMessage.sender) ||
                 is_outgoing !== prevMessage.is_outgoing ||
                 (isMeChat(chat_id) && !forwardInfoEquals(forward_info, prevMessage.forward_info)) ||
                 date - prevMessage.date > MESSAGE_SPLIT_MAX_TIME_S)
@@ -1412,7 +1412,7 @@ class MessagesList extends React.Component {
                 const message = history[i];
                 const { chat_id, media_album_id, ttl, content, is_outgoing } = message;
                 let albumAdded = false;
-                if (media_album_id !== '0' && !ttl) {
+                if (media_album_id !== '0' && !ttl && (content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto')) {
                     const album = [message];
                     for (let j = i + 1; j < i + ALBUM_MESSAGES_LIMIT && j < history.length; j++) {
                         if (history[j].media_album_id === media_album_id) {
@@ -1438,7 +1438,7 @@ class MessagesList extends React.Component {
                             || isServiceMessage(nextMessage)
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
-                            || x.sender_user_id !== nextMessage.sender_user_id
+                            || !senderEquals(x.sender, nextMessage.sender)
                             || (isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info))
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;
@@ -1456,51 +1456,51 @@ class MessagesList extends React.Component {
                         i += (album.length - 1);
                         albumAdded = true;
                     }
+                } else if (media_album_id !== '0' && !ttl && (content['@type'] === 'messageDocument' || content['@type'] === 'messageAudio')) {
+                    const album = [message];
+                    for (let j = i + 1; j < i + ALBUM_MESSAGES_LIMIT && j < history.length; j++) {
+                        if (history[j].media_album_id === media_album_id) {
+                            album.push(history[j]);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (album.length > 1) {
+                        const x = message;
+                        const prevMessage = i > 0 ? history[i - 1] : null;
+                        const nextMessage = i + album.length < history.length ? history[i + album.length] : null;
+
+                        const showDate = this.showMessageDate(x, prevMessage, i === 0);
+
+                        const isFirstUnread = separatorMessageId === x.id;
+                        const isNextFirstUnread = nextMessage ? separatorMessageId === nextMessage.id : false;
+                        const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
+                        const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
+
+                        const showTail = !nextMessage
+                            || isServiceMessage(nextMessage)
+                            || nextMessage.content['@type'] === 'messageSticker'
+                            || nextMessage.content['@type'] === 'messageVideoNote'
+                            || !senderEquals(x.sender, nextMessage.sender)
+                            || (isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info))
+                            || x.is_outgoing !== nextMessage.is_outgoing
+                            || nextShowTitle;
+
+                        this.messages.push((
+                            <DocumentAlbum
+                                key={`chat_id=${chat_id} media_album_id=${media_album_id} date=${showDate} title=${showTitle} tail=${showTail}`}
+                                chatId={chat_id}
+                                messageIds={album.map(x => x.id)}
+                                showTitle={showTitle}
+                                showTail={showTail}
+                                showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
+                                showDate={showDate}
+                            />));
+                        i += (album.length - 1);
+                        albumAdded = true;
+                    }
                 }
-                // else if (content['@type'] === 'messageDocument' && !ttl) {
-                //     const album = [message];
-                //     for (let j = i + 1; j < i + ALBUM_MESSAGES_LIMIT && j < history.length; j++) {
-                //         if (history[j].content['@type'] === content['@type'] && history[j].is_outgoing === is_outgoing) {
-                //             album.push(history[j]);
-                //         } else {
-                //             break;
-                //         }
-                //     }
-                //
-                //     if (album.length > 1) {
-                //         const x = message;
-                //         const prevMessage = i > 0 ? history[i - 1] : null;
-                //         const nextMessage = i + album.length < history.length ? history[i + album.length] : null;
-                //
-                //         const showDate = this.showMessageDate(x, prevMessage, i === 0);
-                //
-                //         const isFirstUnread = separatorMessageId === x.id;
-                //         const isNextFirstUnread = nextMessage ? separatorMessageId === nextMessage.id : false;
-                //         const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
-                //         const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
-                //
-                //         const showTail = !nextMessage
-                //             || isServiceMessage(nextMessage)
-                //             || nextMessage.content['@type'] === 'messageSticker'
-                //             || nextMessage.content['@type'] === 'messageVideoNote'
-                //             || x.sender_user_id !== nextMessage.sender_user_id
-                //             || x.is_outgoing !== nextMessage.is_outgoing
-                //             || nextShowTitle;
-                //
-                //         this.messages.push((
-                //             <DocumentAlbum
-                //                 key={`chat_id=${chat_id} media_album_id=${album.map(x => x.id).join('_')} date=${showDate} title=${showTitle} tail=${showTail}`}
-                //                 chatId={chat_id}
-                //                 messageIds={album.map(x => x.id)}
-                //                 showTitle={showTitle}
-                //                 showTail={showTail}
-                //                 showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
-                //                 showDate={showDate}
-                //             />));
-                //         i += (album.length - 1);
-                //         albumAdded = true;
-                //     }
-                // }
 
                 if (!albumAdded) {
                     /// history[4] id=5 prev
@@ -1536,7 +1536,7 @@ class MessagesList extends React.Component {
                             || isServiceMessage(nextMessage)
                             || nextMessage.content['@type'] === 'messageSticker'
                             || nextMessage.content['@type'] === 'messageVideoNote'
-                            || x.sender_user_id !== nextMessage.sender_user_id
+                            || !senderEquals(x.sender, nextMessage.sender)
                             || isMeChat(x.chat_id) && !forwardInfoEquals(x.forward_info, nextMessage.forward_info)
                             || x.is_outgoing !== nextMessage.is_outgoing
                             || nextShowTitle;

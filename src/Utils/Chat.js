@@ -386,9 +386,15 @@ function getChatTypingString(chatId) {
 function getMessageSenderFullName(message, t = k => k) {
     if (!message) return null;
     if (isServiceMessage(message)) return null;
-    if (!message.sender_user_id) return null;
+    if (!message.sender) return null;
 
-    return getUserFullName(message.sender_user_id, null, t);
+    switch (message.sender['@type']) {
+        case 'messageSenderUser': {
+            return getUserFullName(message.sender.user_id, null, t);
+        }
+    }
+
+    return getChatTitle(message.sender.chat_id, false, t);
 }
 
 function getMessageSenderName(message, t = k => k) {
@@ -400,7 +406,13 @@ function getMessageSenderName(message, t = k => k) {
         return null;
     }
 
-    return getUserShortName(message.sender_user_id, t);
+    switch (message.sender['@type']) {
+        case 'messageSenderUser': {
+            return getUserShortName(message.sender.user_id, t);
+        }
+    }
+
+    return getChatTitle(message.chat_id, false, t);
 }
 
 function getLastMessageSenderName(chat, t = k => k) {

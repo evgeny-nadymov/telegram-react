@@ -17,19 +17,19 @@ import UserStore from '../../Stores/UserStore';
 import './MessageAuthor.css';
 import UserTile from '../Tile/UserTile';
 import ChatTile from '../Tile/ChatTile';
+import { senderEquals } from '../../Utils/Message';
 
 class MessageAuthor extends React.Component {
     state = { };
 
     static getDerivedStateFromProps(props, state) {
-        const { chatId, userId, t } = props;
+        const { sender, t } = props;
 
-        if (state.prevChatId !== chatId || state.prevUserId !== userId) {
+        if (!senderEquals(state.prevSender, sender)) {
             return {
-                prevChatId: chatId,
-                prevUserId: userId,
+                prevSender: sender,
 
-                fullName: MessageAuthor.getFullName(userId, chatId, t)
+                fullName: MessageAuthor.getFullName(sender, t)
             };
         }
 
@@ -53,42 +53,44 @@ class MessageAuthor extends React.Component {
     }
 
     onUpdateUser = update => {
-        const { chatId, userId, t } = this.props;
+        const { sender, t } = this.props;
         const { user } = update;
 
-        if (userId !== user.id) return;
+        if (sender && sender.user_id !== user.id) return;
 
-        const fullName = MessageAuthor.getFullName(userId, chatId, t);
+        const fullName = MessageAuthor.getFullName(sender, t);
         this.setState({ fullName });
     };
 
     onUpdateChatTitle = update => {
-        const { chatId, userId, t } = this.props;
+        const { sender, t } = this.props;
         const { chat_id } = update;
 
-        if (chat_id !== chatId) return;
-        if (userId) return;
+        if (sender && sender.chat_id !== chat_id) return;
 
-        const fullName = MessageAuthor.getFullName(userId, chatId, t);
+        const fullName = MessageAuthor.getFullName(sender, t);
         this.setState({ fullName });
     };
 
-    static getFullName = (userId, chatId, t) => {
-        const user = UserStore.get(userId);
-        if (user) {
-            return getUserFullName(userId, null, t);
-        }
+    static getFullName = (sender, t) => {
+        if (!sender) return '';
 
-        const chat = ChatStore.get(chatId);
-        if (chat) {
-            return getChatTitle(chatId, false, t);
+        switch (sender['@type']) {
+            case 'messageSenderUser': {
+                return getUserFullName(sender.user_id, null, t);
+            }
+            case 'messageSenderChat': {
+                return getChatTitle(sender.chat_id, false, t);
+            }
         }
 
         return '';
     };
 
     handleSelect = event => {
-        let { chatId, userId, openUser, openChat, forwardInfo } = this.props;
+        const { sender, openUser, openChat, forwardInfo } = this.props;
+
+        let { user_id: userId, chat_id: chatId } = sender;
 
         if (isMeChat(chatId) && forwardInfo) {
             switch (forwardInfo.origin['@type']) {
@@ -124,12 +126,12 @@ class MessageAuthor extends React.Component {
     };
 
     render() {
-        let { chatId, userId, openUser, openChat, forwardInfo, t } = this.props;
+        const { sender, openUser, openChat, forwardInfo, t } = this.props;
         let { fullName } = this.state;
 
-        // console.log('[MessageAuthor] render', chatId, userId, forwardInfo);
+        let { chat_id: chatId, user_id: userId } = sender;
 
-        if (isMeChat(chatId) && forwardInfo) {
+        if (UserStore.getMyId() === sender.user_id && forwardInfo) {
             switch (forwardInfo.origin['@type']) {
                 case 'messageForwardOriginHiddenUser': {
                     userId = 0;
@@ -140,13 +142,13 @@ class MessageAuthor extends React.Component {
                 case 'messageForwardOriginUser': {
                     userId = forwardInfo.origin.sender_user_id;
                     chatId = 0;
-                    fullName = MessageAuthor.getFullName(userId, chatId, t);
+                    fullName = MessageAuthor.getFullName({ '@type': 'messageSenderUser', user_id: userId }, t);
                     break;
                 }
                 case 'messageForwardOriginChannel': {
                     userId = 0;
                     chatId = forwardInfo.origin.chat_id;
-                    fullName = MessageAuthor.getFullName(userId, chatId, t);
+                    fullName = MessageAuthor.getFullName({ '@type': 'messageSenderChat', chat_id: chatId }, t);
                     break;
                 }
             }
@@ -183,11 +185,10 @@ class MessageAuthor extends React.Component {
 }
 
 MessageAuthor.propTypes = {
-    chatId: PropTypes.number,
-    userId: PropTypes.number,
+    sender: PropTypes.object,
+    forwardInfo: PropTypes.object,
     openUser: PropTypes.bool,
-    openChat: PropTypes.bool,
-    forwardInfo: PropTypes.object
+    openChat: PropTypes.bool
 };
 
 MessageAuthor.defaultProps = {

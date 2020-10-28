@@ -25,7 +25,7 @@ class ProfileMediaInfo extends React.Component {
                     <ChatTile chatId={chatId} showSavedMessages={false} />
                     <div className='media-info-content'>
                         <div className='media-info-row'>
-                            <MessageAuthor chatId={chatId} />
+                            <MessageAuthor sender={{ '@type': 'messageSenderChat', chat_id: chatId }} />
                         </div>
                         {date && (
                             <div className='media-info-row meta'>

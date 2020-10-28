@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { getDateHint, getSenderUserId } from '../../Utils/Message';
+import { getDateHint } from '../../Utils/Message';
 import UserTile from './UserTile';
 import ChatTile from './ChatTile';
 import MessageAuthor from '../Message/MessageAuthor';
@@ -25,12 +25,11 @@ class MediaInfo extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
-        const { date } = message;
+        const { date, sender } = message;
 
-        const userId = getSenderUserId(message);
         const dateHint = getDateHint(date);
 
-        const tileControl = userId ? <UserTile userId={userId} /> : <ChatTile chatId={chatId} />;
+        const tileControl = sender.user_id ? <UserTile userId={sender.user_id} /> : <ChatTile chatId={chatId} />;
 
         return (
             <div className='media-info'>
@@ -38,7 +37,7 @@ class MediaInfo extends React.Component {
                     {tileControl}
                     <div className='media-info-content'>
                         <div className='media-info-row'>
-                            <MessageAuthor chatId={chatId} userId={userId} />
+                            <MessageAuthor sender={sender} />
                         </div>
                         <div className='media-info-row meta'>
                             <span>{dateHint}</span>

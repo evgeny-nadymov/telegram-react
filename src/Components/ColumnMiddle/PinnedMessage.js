@@ -138,6 +138,7 @@ class PinnedMessage extends React.Component {
                         '@type': 'deletedMessage',
                         chat_id: chatId,
                         id: messageId,
+                        sender: { },
                         content: null
                     };
 
