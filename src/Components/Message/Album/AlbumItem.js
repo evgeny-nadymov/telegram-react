@@ -8,16 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import CheckMarkIcon from '@material-ui/icons/Check';
 import Document from '../Media/Document';
+import MessageMenu from '../MessageMenu';
+import Meta from '../Meta';
 import Photo from '../Media/Photo';
 import Video from '../Media/Video';
-import './AlbumItem.css';
-import MessageMenu from '../MessageMenu';
-import MessageStore from '../../../Stores/MessageStore';
 import { getText, getWebPage, openMedia } from '../../../Utils/Message';
 import { selectMessage } from '../../../Actions/Client';
-import CheckMarkIcon from '@material-ui/icons/Check';
-import Meta from '../Meta';
+import MessageStore from '../../../Stores/MessageStore';
+import './AlbumItem.css';
 
 class AlbumItem extends React.Component {
 
@@ -93,18 +93,39 @@ class AlbumItem extends React.Component {
     }
 
     componentDidMount() {
-        // MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
     }
 
     componentWillUnmount() {
-        // MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.off('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
     }
+
+    onClientUpdateMessageHighlighted = update => {
+        const { message } = this.props;
+        const { selected, highlighted } = this.state;
+
+        if (selected) return;
+
+        if (message.chat_id === update.chatId && message.id === update.messageId) {
+            if (highlighted) {
+                this.setState({ highlighted: false }, () => {
+                    setTimeout(() => {
+                        this.setState({ highlighted: true });
+                    }, 0);
+                });
+            } else {
+                this.setState({ highlighted: true });
+            }
+        } else if (highlighted) {
+            this.setState({ highlighted: false });
+        }
+    };
 
     onClientUpdateClearSelection = update => {
         if (!this.state.selected) return;
@@ -134,11 +155,6 @@ class AlbumItem extends React.Component {
         if (contextMenu) {
             this.setState({ contextMenu: false });
         } else {
-            console.log('[cm] handleOpenContextMenu');
-            // if (MessageStore.selectedItems.size > 1) {
-            //     return;
-            // }
-
             const left = event.clientX;
             const top = event.clientY;
             const copyLink =
@@ -198,14 +214,9 @@ class AlbumItem extends React.Component {
 
     render() {
         const { message, position, displaySize } = this.props;
-        const { contextMenu, copyLink, top, left, selected } = this.state;
+        const { contextMenu, copyLink, top, left, selected, highlighted } = this.state;
 
         const { chat_id, id } = message;
-
-        // const r = Math.floor(Math.random() * 256);
-        // const g = Math.floor(Math.random() * 256);
-        // const b = Math.floor(Math.random() * 256);
-        // const background = null; //`rgb(${r},${g},${b})`;
 
         let style = {};
         let className = 'album-document-item';
@@ -217,15 +228,15 @@ class AlbumItem extends React.Component {
         return (
             <>
                 <div
-                    className={classNames(className, { 'item-selected': selected })}
+                    className={classNames(className, { 'album-item-highlighted': highlighted && !selected}, { 'item-selected': selected })}
                     onClick={this.handleSelection}
                     onContextMenu={this.handleOpenContextMenu}
                     style={style}>
                     <div className='album-item-wrapper'>{this.getAlbumItem(message, displaySize)}</div>
-                    {selected && (
+                    {(selected || highlighted) && (
                         <div className='album-item-selection'>
                             <div className='album-item-selection-mark'>
-                                <CheckMarkIcon className='album-item-select-tick' />
+                                { selected && <CheckMarkIcon className='album-item-select-tick' /> }
                             </div>
                         </div>
                     )}

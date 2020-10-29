@@ -32,7 +32,8 @@ class Album extends React.Component {
     state = { };
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { messageIds, emojiMatches, selected } = this.props;
+        const { messageIds } = this.props;
+        const { emojiMatches, selected, highlighted } = this.state;
 
         if (!albumHistoryEquals(nextProps.messageIds, messageIds)) {
             return true;
@@ -43,6 +44,10 @@ class Album extends React.Component {
         }
 
         if (nextState.selected !== selected) {
+            return true;
+        }
+
+        if (nextState.highlighted !== highlighted) {
             return true;
         }
 
@@ -66,7 +71,7 @@ class Album extends React.Component {
     }
 
     componentDidMount() {
-        // MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.on('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.on('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateClearSelection);
@@ -74,33 +79,33 @@ class Album extends React.Component {
     }
 
     componentWillUnmount() {
-        // MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
+        MessageStore.off('clientUpdateMessageHighlighted', this.onClientUpdateMessageHighlighted);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         // MessageStore.off('clientUpdateMessageShake', this.onClientUpdateMessageShake);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateClearSelection);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
     }
 
-    // onClientUpdateMessageHighlighted = update => {
-    //     const { chatId, messageIds } = this.props;
-    //     const { selected, highlighted } = this.state;
-    //
-    //     if (selected) return;
-    //
-    //     if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
-    //         if (highlighted) {
-    //             this.setState({ highlighted: false }, () => {
-    //                 setTimeout(() => {
-    //                     this.setState({ highlighted: true });
-    //                 }, 0);
-    //             });
-    //         } else {
-    //             this.setState({ highlighted: true });
-    //         }
-    //     } else if (highlighted) {
-    //         this.setState({ highlighted: false });
-    //     }
-    // };
+    onClientUpdateMessageHighlighted = update => {
+        const { chatId, messageIds } = this.props;
+        const { selected, highlighted } = this.state;
+
+        if (selected) return;
+
+        if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
+            if (highlighted) {
+                this.setState({ highlighted: false, lastHighlighted: false }, () => {
+                    setTimeout(() => {
+                        this.setState({ highlighted: true, lastHighlighted: messageIds.length > 0 && messageIds[messageIds.length - 1] === update.messageId });
+                    }, 0);
+                });
+            } else {
+                this.setState({ highlighted: true, lastHighlighted: messageIds.length > 0 && messageIds[messageIds.length - 1] === update.messageId });
+            }
+        } else if (highlighted) {
+            this.setState({ highlighted: false, lastHighlighted: false });
+        }
+    };
 
     onClientUpdateMessageSelected = update => {
         const { chatId, messageIds } = this.props;

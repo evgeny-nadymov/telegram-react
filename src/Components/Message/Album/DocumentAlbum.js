@@ -34,7 +34,7 @@ class DocumentAlbum extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { messageIds } = this.props;
-        const { emojiMatches, lastSelected, selected } = this.state;
+        const { emojiMatches, lastSelected, selected, lastHighlighted, highlighted } = this.state;
 
         if (!albumHistoryEquals(nextProps.messageIds, messageIds)) {
             return true;
@@ -49,6 +49,14 @@ class DocumentAlbum extends React.Component {
         }
 
         if (nextState.lastSelected !== lastSelected) {
+            return true;
+        }
+
+        if (nextState.highlighted !== highlighted) {
+            return true;
+        }
+
+        if (nextState.lastHighlighted !== lastHighlighted) {
             return true;
         }
 
@@ -92,16 +100,16 @@ class DocumentAlbum extends React.Component {
 
         if (chatId === update.chatId && messageIds.some(x => x === update.messageId)) {
             if (highlighted) {
-                this.setState({ highlighted: false }, () => {
+                this.setState({ highlighted: false, lastHighlighted: false }, () => {
                     setTimeout(() => {
-                        this.setState({ highlighted: true });
+                        this.setState({ highlighted: true, lastHighlighted: messageIds.length > 0 && messageIds[messageIds.length - 1] === update.messageId });
                     }, 0);
                 });
             } else {
-                this.setState({ highlighted: true });
+                this.setState({ highlighted: true, lastHighlighted: messageIds.length > 0 && messageIds[messageIds.length - 1] === update.messageId });
             }
         } else if (highlighted) {
-            this.setState({ highlighted: false });
+            this.setState({ highlighted: false, lastHighlighted: false });
         }
     };
 
@@ -165,6 +173,7 @@ class DocumentAlbum extends React.Component {
             selected,
             lastSelected,
             highlighted,
+            lastHighlighted,
             shook,
             copyLink,
             contextMenu,
@@ -290,6 +299,7 @@ class DocumentAlbum extends React.Component {
                         'message-selected': selected,
                         'message-album-last-selected': lastSelected,
                         'message-highlighted': highlighted && !selected,
+                        'message-album-last-highlighted': lastHighlighted && !selected,
                         'message-group-title': showTitle && !showTail,
                         'message-group': !showTitle && !showTail,
                         'message-group-tail': !showTitle && showTail && !tailRounded,

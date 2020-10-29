@@ -13,6 +13,10 @@
     position: relative;
 }
 
+.album-item-highlighted .album-item-selection {
+    animation: highlighted-animation 4s ease-out;
+}
+
 .album-document-item {
     padding: 0;
     box-sizing: border-box;

@@ -10,6 +10,7 @@ import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import ActionBar from './ActionBar';
 import Album from '../Message/Album/Album';
+import DocumentAlbum from '../Message/Album/DocumentAlbum';
 import FilesDropTarget from './FilesDropTarget';
 import StubMessage from '../Message/StubMessage';
 import Message from '../Message/Message';
@@ -33,7 +34,6 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
-import DocumentAlbum from '../Message/Album/DocumentAlbum';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -200,6 +200,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
+        MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSendSucceeded);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
@@ -217,6 +218,7 @@ class MessagesList extends React.Component {
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
+        MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSendSucceeded);
         PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
@@ -1113,7 +1115,7 @@ class MessagesList extends React.Component {
     };
 
     scrollToPosition = position => {
-        console.log('[scroll] scrollToPosition', this.props.chatId, position);
+        // console.log('[scroll] scrollToPosition', this.props.chatId, position);
         const { messageId, offset } = position;
         const { history } = this.state;
         const list = this.listRef.current;
@@ -1151,7 +1153,8 @@ class MessagesList extends React.Component {
             const itemComponent = this.itemsMap.get(i);
             const node = ReactDOM.findDOMNode(itemComponent);
             if (node) {
-                if (itemComponent.props.messageId === messageId) {
+                if (itemComponent.props.messageId === messageId
+                    || itemComponent.props.messageIds && itemComponent.props.messageIds.indexOf(messageId) !== -1) {
                     if (list.offsetHeight < node.offsetHeight) {
                         // scroll to the message top
                         list.scrollTop = node.offsetTop;
@@ -1447,6 +1450,7 @@ class MessagesList extends React.Component {
                         this.messages.push((
                             <Album
                                 key={`chat_id=${chat_id} media_album_id=${media_album_id} date=${showDate} title=${showTitle} tail=${showTail}`}
+                                ref={el => album.forEach((x, index) => { this.itemsMap.set(i + index, el) })}
                                 chatId={chat_id}
                                 messageIds={album.map(x => x.id)}
                                 showTitle={showTitle}
@@ -1491,6 +1495,7 @@ class MessagesList extends React.Component {
                         this.messages.push((
                             <DocumentAlbum
                                 key={`chat_id=${chat_id} media_album_id=${media_album_id} date=${showDate} title=${showTitle} tail=${showTail}`}
+                                ref={el => album.forEach((x, index) => { this.itemsMap.set(i + index, el) })}
                                 chatId={chat_id}
                                 messageIds={album.map(x => x.id)}
                                 showTitle={showTitle}

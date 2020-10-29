@@ -94,17 +94,13 @@ pre code {
     opacity: 1;
 }
 
-@keyframes message-highlighted-animation {
-    0% {
-        background: var(--color-accent-main22);
-    }
-    100% {
-        background: transparent;
-    }
+@keyframes highlighted-animation {
+    0% { background: var(--color-accent-main22); }
+    100% { background: transparent; }
 }
 
 .message-highlighted {
-    animation: message-highlighted-animation 4s ease-out;
+    animation: highlighted-animation 4s ease-out;
 }
 
 .message-padding {
@@ -287,6 +283,19 @@ pre code {
     transform: translate(7px, -2px);
 }
 
+.message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
+.message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
+    animation: highlighted-animation 4s ease-out;
+    position: absolute;
+    right: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(7px, -2px);
+}
+
 .message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
 .message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--message-out-background);
@@ -303,6 +312,19 @@ pre code {
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--color-accent-main22);
+    position: absolute;
+    left: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(-7px, -2px) scaleX(-1);
+}
+
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
+    animation: highlighted-animation 4s ease-out;
     position: absolute;
     left: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
