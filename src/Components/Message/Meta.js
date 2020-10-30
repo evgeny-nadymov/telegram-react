@@ -78,7 +78,7 @@ class Meta extends React.Component {
 
     onUpdateMessageEdited = update => {
         const { chat_id, message_id, edit_date: editDate } = update;
-        const { message } = this.props;
+        const { message } = this.state;
 
         if (!message) return;
         if (message.chat_id !== chat_id) return;
