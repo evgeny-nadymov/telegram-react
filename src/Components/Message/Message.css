@@ -309,8 +309,8 @@ pre code {
     transform: translate(-7px, -2px) scaleX(-1);
 }
 
-.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
-.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
+.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
+.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
     background: var(--color-accent-main22);
     position: absolute;
     left: 0;
@@ -322,8 +322,8 @@ pre code {
     transform: translate(-7px, -2px) scaleX(-1);
 }
 
-.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
-.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
     animation: highlighted-animation 2s ease-out;
     position: absolute;
     left: 0;
