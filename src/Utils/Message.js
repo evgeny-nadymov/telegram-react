@@ -2635,10 +2635,9 @@ export function isTextMessage(chatId, messageId) {
 }
 
 export function isMessagePinned(chatId, messageId) {
-    const chat = ChatStore.get(chatId);
-    if (!chat) return false;
+    const message = MessageStore.get(chatId, messageId);
 
-    return chat.pinned_message_id === messageId;
+    return message && message.is_pinned;
 }
 
 export function canMessageBeUnvoted(chatId, messageId) {

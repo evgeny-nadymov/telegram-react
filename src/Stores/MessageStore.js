@@ -42,14 +42,15 @@ class MessageStore extends EventEmitter {
             }
             case 'updateNewMessage': {
                 this.set(update.message);
-
                 this.addMediaMessage(update.message);
 
                 this.emit('updateNewMessage', update);
                 break;
             }
             case 'updateDeleteMessages':
-                if (update.is_permanent) this.removeMediaMessages(update.chat_id, update.message_ids);
+                if (update.is_permanent) {
+                    this.removeMediaMessages(update.chat_id, update.message_ids);
+                }
                 this.emit('updateDeleteMessages', update);
                 break;
             case 'updateMessageEdited': {
@@ -57,11 +58,37 @@ class MessageStore extends EventEmitter {
                 if (chat) {
                     const message = chat.get(update.message_id);
                     if (message) {
-                        message.reply_markup = update.reply_markup;
-                        message.edit_date = update.edit_date;
+                        const newMessage = {
+                            ...message,
+                            ...{
+                                reply_markup: update.reply_markup,
+                                edit_date: update.edit_date
+                            }
+                        };
+
+                        this.set(newMessage);
                     }
                 }
                 this.emit('updateMessageEdited', update);
+                break;
+            }
+            case 'updateMessageIsPinned': {
+                const chat = this.items.get(update.chat_id);
+                if (chat) {
+                    const message = chat.get(update.message_id);
+                    if (message && update.is_pinned !== message.is_pinned) {
+                        const newMessage = {
+                            ...message,
+                            ...{
+                                is_pinned: update.is_pinned
+                            }
+                        };
+
+                        this.set(newMessage);
+                        this.updateMediaMessage(newMessage);
+                    }
+                }
+                this.emit('updateMessageIsPinned', update);
                 break;
             }
             case 'updateMessageViews': {
@@ -69,7 +96,14 @@ class MessageStore extends EventEmitter {
                 if (chat) {
                     const message = chat.get(update.message_id);
                     if (message && update.views > message.views) {
-                        message.views = update.views;
+                        const newMessage = {
+                            ...message,
+                            ...{
+                                views: update.views
+                            }
+                        };
+
+                        this.set(newMessage);
                     }
                 }
                 this.emit('updateMessageViews', update);
@@ -338,12 +372,13 @@ class MessageStore extends EventEmitter {
     }
 
     setMedia(chatId, media) {
-        const { photoAndVideo, document, audio, url, voiceNote } = media;
+        const { photoAndVideo, document, audio, url, voiceNote, pinned } = media;
         this.setItems(photoAndVideo);
         this.setItems(document);
         this.setItems(audio);
         this.setItems(url);
         this.setItems(voiceNote);
+        this.setItems(pinned);
 
         return this.media.set(chatId, media);
     }
@@ -371,6 +406,9 @@ class MessageStore extends EventEmitter {
 
         const voiceNote = media.voiceNote.filter(x => !map.has(x.id));
         media.voiceNote = voiceNote.length !== media.voiceNote.length ? voiceNote : media.voiceNote;
+
+        const pinned = media.pinned.filter(x => !map.has(x.id));
+        media.pinned = pinned.length !== media.pinned.length ? pinned : media.pinned;
     }
 
     addMediaMessage(message) {
@@ -379,6 +417,13 @@ class MessageStore extends EventEmitter {
         const { chat_id, content } = message;
         const media = this.getMedia(chat_id);
         if (!media) return;
+
+        if (message.is_pinned) {
+            const { pinned } = media;
+            if (pinned) {
+                media.pinned = this.insertMessage(message, pinned);
+            }
+        }
 
         switch (content['@type']) {
             case 'messageAudio': {

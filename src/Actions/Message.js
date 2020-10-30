@@ -25,9 +25,10 @@ export function pinMessage(chatId, messageId, disableNotification = false) {
     });
 }
 
-export function unpinMessage(chatId) {
+export function unpinMessage(chatId, messageId) {
     TdLibController.send({
         '@type': 'unpinChatMessage',
-        chat_id: chatId
+        chat_id: chatId,
+        message_id: messageId,
     });
 }

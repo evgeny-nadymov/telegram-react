@@ -100,7 +100,7 @@ pre code {
 }
 
 .message-highlighted {
-    animation: highlighted-animation 4s ease-out;
+    animation: highlighted-animation 2s ease-out;
 }
 
 .message-padding {
@@ -285,7 +285,7 @@ pre code {
 
 .message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
 .message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
-    animation: highlighted-animation 4s ease-out;
+    animation: highlighted-animation 2s ease-out;
     position: absolute;
     right: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
@@ -324,7 +324,7 @@ pre code {
 
 .message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
 .message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
-    animation: highlighted-animation 4s ease-out;
+    animation: highlighted-animation 2s ease-out;
     position: absolute;
     left: 0;
     mask: url(../../Assets/bubble-tail-left.svg);

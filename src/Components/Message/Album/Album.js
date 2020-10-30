@@ -187,7 +187,7 @@ class Album extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { content, is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender } = message;
+        const { content, is_outgoing, date, reply_to_message_id, forward_info, sender } = message;
 
         const isOutgoing = is_outgoing && !isChannelChat(chatId);
 
@@ -196,10 +196,7 @@ class Album extends React.Component {
                 className='meta-hidden'
                 key={`${chatId}_${messageId}_meta`}
                 chatId={chatId}
-                messageId={messageId}
-                date={date}
-                editDate={edit_date}
-                views={views}
+                messageIds={messageIds}
             />
         );
         const webPage = getWebPage(message);
@@ -224,10 +221,7 @@ class Album extends React.Component {
                     'meta-bubble': !hasCaption
                 })}
                 chatId={chatId}
-                messageId={messageId}
-                date={date}
-                editDate={edit_date}
-                views={views}
+                messageIds={messageIds}
                 onDateClick={this.handleDateClick}
             />
         );

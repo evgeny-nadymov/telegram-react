@@ -163,7 +163,7 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         if (isMessagePinned(chatId, messageId)) {
-            unpinMessage(chatId);
+            unpinMessage(chatId, messageId);
         } else {
             pinMessage(chatId, messageId);
         }
@@ -301,14 +301,14 @@ class MessageMenu extends React.PureComponent {
                                         <ListItemIcon>
                                             <UnpinIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('UnpinFromTop')} />
+                                        <ListItemText primary={t('UnpinMessage')} />
                                     </>
                                 ) : (
                                     <>
                                         <ListItemIcon>
                                             <PinIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={t('PinToTop')} />
+                                        <ListItemText primary={t('PinMessage')} />
                                     </>
                                 )}
                             </MenuItem>

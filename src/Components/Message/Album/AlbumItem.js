@@ -26,7 +26,7 @@ class AlbumItem extends React.Component {
     };
 
     getAlbumItem = (message, displaySize) => {
-        const { chat_id, id, content, date, edit_date, views } = message;
+        const { chat_id, id, content } = message;
 
         switch (content['@type']) {
             case 'messagePhoto': {
@@ -60,9 +60,6 @@ class AlbumItem extends React.Component {
                         key={`${chat_id}_${id}_meta`}
                         chatId={chat_id}
                         messageId={id}
-                        date={date}
-                        editDate={edit_date}
-                        views={views}
                     />
                 );
 

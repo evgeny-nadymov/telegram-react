@@ -13,8 +13,9 @@
     overflow: hidden;
     box-sizing: border-box;
     background: var(--panel-background);
-    max-width: 191px;
-    margin-right: 19px;
+    width: 250px;
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
 .pinned-message-content {
@@ -22,7 +23,8 @@
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
-    pointer-events: none;
+    user-select: none;
+    background: transparent;
 }
 
 .pinned-message-title {

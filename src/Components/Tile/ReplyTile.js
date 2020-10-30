@@ -49,7 +49,7 @@ class ReplyTile extends React.Component {
     };
 
     render() {
-        const { chatId, messageId, photoSize, minithumbnail } = this.props;
+        const { chatId, messageId, photoSize, minithumbnail, onClick } = this.props;
         if (!photoSize) return null;
 
         const photo = photoSize.photo || photoSize.file;
@@ -57,22 +57,32 @@ class ReplyTile extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const src = getSrc(photo);
-        const isBlurred = (!src && miniSrc) || isBlurredThumbnail(photoSize, THUMBNAIL_BLURRED_SIZE_90);
+        const isBlurred = isBlurredThumbnail(photoSize, THUMBNAIL_BLURRED_SIZE_90);
         const isVideoNote = hasVideoNote(chatId, messageId);
-        const hasSrc = Boolean(src || miniSrc);
 
         return (
-            <div className='reply-tile'>
-                {hasSrc && (
+            <div className='reply-tile' onClick={onClick}>
+                {miniSrc && (
                     <img
                         className={classNames(
                             'reply-tile-photo',
                             { 'reply-tile-photo-round': isVideoNote },
-                            { 'media-blurred': src && isBlurred },
-                            { 'media-mini-blurred': !src && miniSrc && isBlurred }
+                            { 'media-mini-blurred': true }
                         )}
                         draggable={false}
-                        src={src || miniSrc}
+                        src={miniSrc}
+                        alt=''
+                    />
+                )}
+                {src && (
+                    <img
+                        className={classNames(
+                            'reply-tile-photo',
+                            { 'reply-tile-photo-round': isVideoNote },
+                            { 'media-blurred': src && isBlurred }
+                        )}
+                        draggable={false}
+                        src={src}
                         alt=''
                     />
                 )}
@@ -85,7 +95,8 @@ ReplyTile.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     photoSize: PropTypes.object,
-    minithumbnail: PropTypes.object
+    minithumbnail: PropTypes.object,
+    onClick: PropTypes.func
 };
 
 export default ReplyTile;

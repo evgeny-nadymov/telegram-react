@@ -1134,6 +1134,17 @@ export async function getChatMedia(chatId) {
         limit,
         filter: { '@type': 'searchMessagesFilterVoiceNote' }
     }));
+    promises.push(TdLibController.send({
+        '@type': 'searchChatMessages',
+        chat_id: chatId,
+        query: '',
+        sender_user_id: 0,
+        from_message_id: 0,
+        offset: 0,
+        limit,
+        filter: { '@type': 'searchMessagesFilterPinned' }
+    }));
+
     if (isPrivateChat(chatId) && !isMeChat(chatId)) {
         const userId = getChatUserId(chatId);
 
@@ -1145,14 +1156,15 @@ export async function getChatMedia(chatId) {
         }));
     }
 
-    const [photoAndVideo, document, audio, url, voiceNote, groupsInCommon] = await Promise.all(promises);
+    const [photoAndVideo, document, audio, url, voiceNote, pinned, groupsInCommon] = await Promise.all(promises);
     const media = {
         photoAndVideo: photoAndVideo.messages,
         document: document.messages,
         audio: audio.messages,
         url: url.messages,
         voiceNote: voiceNote.messages,
-        groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : []
+        pinned: pinned.messages,
+        groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : [],
     }
     console.log('[media] getChatMedia stop', chatId, media);
 

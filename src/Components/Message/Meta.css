@@ -63,3 +63,8 @@
     font-size: 14px;
     /*transform: translateY(2px);*/
 }
+
+.meta-pin-icon {
+    font-size: 12px;
+    transform: rotate(45deg) translateY(2px);
+}

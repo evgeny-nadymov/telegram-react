@@ -340,7 +340,7 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { content, is_outgoing, views, date, edit_date, reply_to_message_id, forward_info, sender } = message;
+        const { content, is_outgoing, date, reply_to_message_id, forward_info, sender } = message;
 
         const isOutgoing = is_outgoing && !isChannelChat(chatId);
         const inlineMeta = (
@@ -349,9 +349,6 @@ class Message extends Component {
                 key={`${chatId}_${messageId}_meta`}
                 chatId={chatId}
                 messageId={messageId}
-                date={date}
-                editDate={edit_date}
-                views={views}
             />
         );
         const meta = (
@@ -361,9 +358,6 @@ class Message extends Component {
                 })}
                 chatId={chatId}
                 messageId={messageId}
-                date={date}
-                editDate={edit_date}
-                views={views}
                 onDateClick={this.handleDateClick}
             />
         );
