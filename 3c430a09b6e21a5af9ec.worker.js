@@ -1,10 +1,3 @@
-/*
- *  Copyright (c) 2018-present, Evgeny Nadymov
- *
- * This source code is licensed under the GPL v.3.0 license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	this["webpackChunktdweb"] = function webpackChunkCallback(chunkIds, moreModules) {
 /******/ 		for(var moduleId in moreModules) {
