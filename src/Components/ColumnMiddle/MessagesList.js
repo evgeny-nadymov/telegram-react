@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import ActionBar from './ActionBar';
@@ -189,6 +190,9 @@ class MessagesList extends React.Component {
     }
 
     componentDidMount() {
+        const { chatId, messageId } = this.props;
+        this.handleSelectChat(chatId, null, messageId, null);
+
         AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.on('clientUpdateDialogsReady', this.onClientUpdateDialogsReady);
         ChatStore.on('clientUpdateClearHistory', this.onClientUpdateClearHistory);
@@ -448,7 +452,7 @@ class MessagesList extends React.Component {
 
         const list = this.listRef.current;
 
-        let scrollBehavior = message.is_outgoing ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
+        let scrollBehavior = message.is_outgoing && !isServiceMessage(message) ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
         if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
             scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
         }
@@ -554,13 +558,8 @@ class MessagesList extends React.Component {
 
             this.loading = true;
             const sessionId = this.sessionId;
-            const result = await TdLibController.send({
-                '@type': 'getChatHistory',
-                chat_id: chat.id,
-                from_message_id: fromMessageId,
-                offset,
-                limit
-            }).catch(error => {
+            const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
+            .catch(error => {
                 return {
                     '@type': 'messages',
                     messages: [],
@@ -623,7 +622,7 @@ class MessagesList extends React.Component {
 
             this.loadIncompleteHistory(result);
 
-            if (previousChatId !== chatId) {
+            if (previousChatId !== chatId && !this.props.filter) {
                 getChatFullInfo(chatId);
                 getChatMedia(chatId);
             }
@@ -642,11 +641,11 @@ class MessagesList extends React.Component {
                 });
 
                 const scrollMessage = getScrollMessage(this.snapshot, this.itemsRef);
-                console.log('[scroll] start setScrollPosition', [previousChatId, previousChat, this.snapshot, scrollMessage]);
+                // console.log('[scroll] start setScrollPosition', [previousChatId, previousChat, this.snapshot, scrollMessage]);
                 const message = this.messages[scrollMessage.index];
                 if (message) {
                     const { chatId, messageId } = message.props;
-                    console.log('[scroll] stop setScrollPosition', [previousChatId, previousChat], { chatId, messageId, offset: scrollMessage.offset });
+                    // console.log('[scroll] stop setScrollPosition', [previousChatId, previousChat], { chatId, messageId, offset: scrollMessage.offset });
                     ChatStore.setScrollPosition(previousChatId, { chatId, messageId, offset: scrollMessage.offset });
                 }
             }
@@ -731,19 +730,12 @@ class MessagesList extends React.Component {
         const fromMessageId = history && history.length > 0 ? history[0].id : 0;
         const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
-        // console.log('[p] getChatHistory', [fromMessageId]);
         this.loading = true;
         const sessionId = this.sessionId;
-        let result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chatId,
-            from_message_id: fromMessageId,
-            offset: 0,
-            limit
-        }).finally(() => {
+        let result = await this.getRequest(chatId, fromMessageId, 0, limit)
+        .finally(() => {
             this.loading = false;
         });
-        // console.log('[p] getChatHistory result', fromMessageId, limit, result);
 
         if (sessionId !== this.sessionId) {
             return;
@@ -812,13 +804,8 @@ class MessagesList extends React.Component {
 
         this.loading = true;
         const sessionId = this.sessionId;
-        const result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: basicGroupChat.id,
-            from_message_id: fromMessageId,
-            offset: 0,
-            limit: fromMessageId === 0? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT
-        }).finally(() => {
+        const result = await this.getRequest(basicGroupChat.id, fromMessageId, 0, fromMessageId === 0? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT)
+        .finally(() => {
             this.loading = false;
         });
 
@@ -860,13 +847,8 @@ class MessagesList extends React.Component {
 
         this.loading = true;
         const sessionId = this.sessionId;
-        let result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chatId,
-            from_message_id: fromMessageId,
-            offset: -limit - 1,
-            limit: limit + 1
-        }).finally(() => {
+        let result = await this.getRequest(chatId, fromMessageId, -limit - 1, limit + 1)
+        .finally(() => {
             this.loading = false;
         });
 
@@ -1215,6 +1197,42 @@ class MessagesList extends React.Component {
         }
     };
 
+    getRequest = (chatId, fromMessageId, offset, limit) => {
+        const { filter } = this.props;
+
+        // console.log('[filter] filter', filter, chatId, fromMessageId, offset, limit);
+        if (filter) {
+            // if (offset === 0 && limit === MESSAGE_SLICE_LIMIT) {
+            //     const media = MessageStore.getMedia(chatId);
+            //     if (media && media.pinned && media.pinned.length > 0) {
+            //         return Promise.resolve({
+            //             '@type': 'messages',
+            //             messages: media.pinned
+            //         });
+            //     }
+            // }
+
+            return TdLibController.send({
+                '@type': 'searchChatMessages',
+                chat_id: chatId,
+                from_message_id: fromMessageId,
+                offset,
+                limit,
+                filter,
+                sender_user_id: null,
+                query: null
+            });
+        }
+
+        return TdLibController.send({
+            '@type': 'getChatHistory',
+            chat_id: chatId,
+            from_message_id: fromMessageId,
+            offset,
+            limit
+        });
+    };
+
     scrollToStart = async () => {
         const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
@@ -1230,13 +1248,8 @@ class MessagesList extends React.Component {
 
         this.loading = true;
         const sessionId = this.sessionId;
-        const result = await TdLibController.send({
-            '@type': 'getChatHistory',
-            chat_id: chat.id,
-            from_message_id: fromMessageId,
-            offset: offset,
-            limit: limit
-        }).finally(() => {
+        const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
+            .finally(() => {
             this.loading = false;
         });
 
@@ -1345,7 +1358,7 @@ class MessagesList extends React.Component {
     }
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, filter } = this.props;
         const { history, separatorMessageId, clearHistory, selectionActive, scrollDownVisible } = this.state;
 
         // console.log('[ml] render ', history);
@@ -1457,6 +1470,7 @@ class MessagesList extends React.Component {
                                 showTail={showTail}
                                 showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
                                 showDate={showDate}
+                                source={filter ? 'pinned' : 'chat'}
                             />));
                         i += (album.length - 1);
                         albumAdded = true;
@@ -1502,6 +1516,7 @@ class MessagesList extends React.Component {
                                 showTail={showTail}
                                 showUnreadSeparator={album.map(x => x.id).some(x => x.id === separatorMessageId)}
                                 showDate={showDate}
+                                source={filter ? 'pinned' : 'chat'}
                             />));
                         i += (album.length - 1);
                         albumAdded = true;
@@ -1530,6 +1545,7 @@ class MessagesList extends React.Component {
                                 chatId={x.chat_id}
                                 messageId={x.id}
                                 showUnreadSeparator={separatorMessageId === x.id}
+                                source={filter ? 'pinned' : 'chat'}
                             />
                         );
                     } else {
@@ -1558,6 +1574,7 @@ class MessagesList extends React.Component {
                                 showTail={showTail}
                                 showUnreadSeparator={separatorMessageId === x.id}
                                 showDate={showDate}
+                                source={filter ? 'pinned' : 'chat'}
                             />
                         );
                     }
@@ -1590,5 +1607,11 @@ class MessagesList extends React.Component {
         );
     }
 }
+
+MessagesList.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number,
+    filter: PropTypes.object
+};
 
 export default MessagesList;

@@ -22,7 +22,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
-import CheckBoxOutlinedIcon from '@material-ui/icons/CheckBoxOutlined';
 import CloseIcon from '../../Assets/Icons/Close';
 import CopyIcon from '../../Assets/Icons/Copy';
 import DeleteIcon from '../../Assets/Icons/Delete';
@@ -38,8 +37,7 @@ import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessage
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
-import { clearSelection, deleteMessages, editMessage, forwardMessages, replyMessage, selectMessage } from '../../Actions/Client';
-import { pinMessage, unpinMessage } from '../../Actions/Message';
+import { clearSelection, deleteMessages, editMessage, forwardMessages, requestPinMessage, requestUnpinMessage, replyMessage, selectMessage } from '../../Actions/Client';
 import { saveBlob } from '../../Utils/File';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
@@ -163,9 +161,9 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         if (isMessagePinned(chatId, messageId)) {
-            unpinMessage(chatId, messageId);
+            requestUnpinMessage(chatId, messageId);
         } else {
-            pinMessage(chatId, messageId);
+            requestPinMessage(chatId, messageId);
         }
     };
 
@@ -223,18 +221,18 @@ class MessageMenu extends React.PureComponent {
     };
 
     render() {
-        const { t, chatId, messageId, anchorPosition, copyLink, open, onClose } = this.props;
+        const { t, chatId, messageId, anchorPosition, copyLink, open, onClose, source } = this.props;
         const { confirmStopPoll } = this.state;
         if (!confirmStopPoll && !open) return null;
 
         const isPinned = isMessagePinned(chatId, messageId);
-        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId);
-        const canBeClosed = canMessageBeClosed(chatId, messageId);
-        const canBeReplied = canSendMessages(chatId);
+        const canBeUnvoted = canMessageBeUnvoted(chatId, messageId) && source === 'chat';
+        const canBeClosed = canMessageBeClosed(chatId, messageId) && source === 'chat';
+        const canBeReplied = canSendMessages(chatId) && source === 'chat';
         const canBePinned = canPinMessages(chatId);
         const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         const canBeDeleted = canMessageBeDeleted(chatId, messageId);
-        const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording;
+        const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording && source === 'chat';
         const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
         const canCopyLink = Boolean(copyLink);
         const canCopyPublicMessageLink = isPublicSupergroup(chatId);

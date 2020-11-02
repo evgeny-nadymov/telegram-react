@@ -15,9 +15,11 @@ import { getContent, isMessageUnread } from './Message';
 import { isServiceMessage } from './ServiceMessage';
 import { formatPhoneNumber } from './Phone';
 import { getChannelStatus } from './Channel';
-import { SERVICE_NOTIFICATIONS_USER_ID, SHARED_MESSAGE_SLICE_LIMIT } from '../Constants';
+import { loadMessageContents } from './File';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
+import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
 import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
@@ -150,12 +152,13 @@ export function positionListEquals(p1, p2) {
 }
 
 export function canUnpinMessage(chatId) {
-    const chat = ChatStore.get(chatId);
-    if (!chat) return false;
+    const media = MessageStore.getMedia(chatId);
+    if (!media) return false;
 
-    const { pinned_message_id } = chat;
+    const { pinned } = media;
+    if (!pinned) return false;
 
-    return pinned_message_id > 0;
+    return pinned.length > 0;
 }
 
 export function isChatArchived(chatId) {
@@ -1167,6 +1170,9 @@ export async function getChatMedia(chatId) {
         groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : [],
     }
     console.log('[media] getChatMedia stop', chatId, media);
+
+    const store = FileStore.getStore();
+    loadMessageContents(store, pinned.messages);
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateChatMedia',

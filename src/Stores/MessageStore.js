@@ -236,6 +236,10 @@ class MessageStore extends EventEmitter {
                 this.emit('clientUpdateClearSelection', update);
                 break;
             }
+            case 'clientUpdateClosePinned': {
+                this.emit('clientUpdateClosePinned', update);
+                break;
+            }
             case 'clientUpdateEditMessage': {
                 this.emit('clientUpdateEditMessage', update);
                 break;
@@ -267,6 +271,10 @@ class MessageStore extends EventEmitter {
             }
             case 'clientUpdateMessagesInView': {
                 this.emit('clientUpdateMessagesInView', update);
+                break;
+            }
+            case 'clientUpdateOpenPinned': {
+                this.emit('clientUpdateOpenPinned', update);
                 break;
             }
             case 'clientUpdateOpenReply': {

@@ -41,8 +41,6 @@ class Chat extends React.Component {
 
         const isSavedMessages = isMeChat(chatId);
 
-        console.log('[chat] render', ChatStore.get(chatId), isSavedMessages);
-
         return (
             <div className={classNames('chat', { 'chat-big': big })} onClick={this.handleClick}>
                 <div className='chat-wrapper'>

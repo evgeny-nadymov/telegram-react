@@ -253,6 +253,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdatePageWidth', update);
                 break;
             }
+            case 'clientUpdatePinMessage': {
+                this.emit('clientUpdatePinMessage', update);
+                break;
+            }
             case 'clientUpdateProfileMediaViewerContent': {
                 const { content } = update;
                 this.profileMediaViewerContent = content;
@@ -314,6 +318,10 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateSetPhoneError': {
                 this.emit('clientUpdateSetPhoneError', update);
+                break;
+            }
+            case 'clientUpdateUnpinMessage': {
+                this.emit('clientUpdateUnpinMessage', update);
                 break;
             }
             case 'clientUpdateDialogChatId': {

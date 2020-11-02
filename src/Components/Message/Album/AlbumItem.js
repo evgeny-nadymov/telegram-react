@@ -210,7 +210,7 @@ class AlbumItem extends React.Component {
     };
 
     render() {
-        const { message, position, displaySize } = this.props;
+        const { message, position, displaySize, source } = this.props;
         const { contextMenu, copyLink, top, left, selected, highlighted } = this.state;
 
         const { chat_id, id } = message;
@@ -245,6 +245,7 @@ class AlbumItem extends React.Component {
                     open={contextMenu}
                     onClose={this.handleCloseContextMenu}
                     copyLink={copyLink}
+                    source={source}
                 />
             </>
         );

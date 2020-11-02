@@ -6,12 +6,12 @@
  */
 
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import ChatInfoDialog from '../Popup/ChatInfoDialog';
 import Footer from './Footer';
 import Header from './Header';
 import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
+import PinnedMessages from './PinnedMessages';
 import StickerSetDialog from '../Popup/StickerSetDialog';
 import { getSrc } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
@@ -218,11 +218,13 @@ class DialogDetails extends Component {
         return (
             <div className='dialog-details' style={style}>
                 <div className='dialog-background'/>
-                <HeaderPlayer />
-                <Header chatId={chatId} />
-                <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
-                {/*<div className='dialog-background2'/>*/}
-                <Footer chatId={chatId} />
+                <div className='dialog-details-wrapper'>
+                    <HeaderPlayer />
+                    <Header chatId={chatId} />
+                    <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
+                    <Footer chatId={chatId} />
+                </div>
+                <PinnedMessages chatId={chatId}/>
                 <StickerSetDialog />
                 <ChatInfoDialog />
                 {/*<Footer />*/}

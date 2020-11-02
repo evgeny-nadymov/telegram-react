@@ -8,9 +8,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import { withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import CheckMarkIcon from '@material-ui/icons/Check';
 import DayMeta from './DayMeta';
 import Reply from './Reply';
@@ -323,7 +321,7 @@ class Message extends Component {
 
     render() {
         let { showTail } = this.props;
-        const { t, chatId, messageId, showUnreadSeparator, showTitle, showDate } = this.props;
+        const { t, chatId, messageId, showUnreadSeparator, showTitle, showDate, source } = this.props;
         const {
             emojiMatches,
             selected,
@@ -507,6 +505,7 @@ class Message extends Component {
                     open={contextMenu}
                     onClose={this.handleCloseContextMenu}
                     copyLink={copyLink}
+                    source={source}
                 />
             </div>
         );

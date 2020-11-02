@@ -19,11 +19,11 @@
 }
 
 .message-album:not(.message-document-album) .album-item-highlighted .album-item-selection {
-    animation: media-highlighted-animation 2s ease-out;
+    animation: media-highlighted-animation 1s ease-out;
 }
 
 .message-album.message-document-album .album-item-highlighted .album-item-selection {
-    animation: highlighted-animation 2s ease-out;
+    animation: highlighted-animation 1s ease-out;
 }
 
 .album-document-item {

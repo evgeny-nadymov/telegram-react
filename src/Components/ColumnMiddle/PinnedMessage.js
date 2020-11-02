@@ -15,6 +15,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import IconButton from '@material-ui/core/IconButton';
+import ListItem from '@material-ui/core/ListItem';
 import ReplyTile from '../Tile/ReplyTile';
 import PlaylistEditIcon from '../../Assets/Icons/PlaylistEdit';
 import { canPinMessages } from '../../Utils/Chat';
@@ -64,7 +65,6 @@ class PinnedMessage extends React.Component {
     componentDidMount() {
         ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
         ChatStore.on('clientUpdateUnpin', this.onClientUpdateUnpin);
-        ChatStore.on('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -75,7 +75,6 @@ class PinnedMessage extends React.Component {
     componentWillUnmount() {
         ChatStore.off('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
         ChatStore.off('clientUpdateUnpin', this.onClientUpdateUnpin);
-        ChatStore.off('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -182,15 +181,6 @@ class PinnedMessage extends React.Component {
         if (this.props.chatId !== chatId) return;
 
         this.setState({ clientData });
-    };
-
-    onUpdateChatPinnedMessage = update => {
-        const { chat_id, pinned_message_id: messageId } = update;
-        const { chatId } = this.props;
-
-        if (chatId !== chat_id) return;
-
-        this.setState({ messageId });
     };
 
     loadContent = () => {
@@ -328,7 +318,12 @@ class PinnedMessage extends React.Component {
     };
 
     handleEditClick = event => {
+        const { chatId } = this.props;
 
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenPinned',
+            chatId
+        })
     };
 
     render() {
@@ -363,7 +358,7 @@ class PinnedMessage extends React.Component {
 
         return (
             <>
-                <div className='pinned-message' onMouseDown={this.handleClick}>
+                <ListItem button className='pinned-message' onMouseDown={this.handleClick}>
                     <div className='border reply-border' />
                     {photoSize && (
                         <ReplyTile
@@ -379,14 +374,14 @@ class PinnedMessage extends React.Component {
                     </div>
                     { pinned.length > 1 && (
                         <IconButton
-                            className='header-right-second-button'
+                            className='pinned-message-edit-button'
                             aria-label='Edit'
                             onClick={this.handleEditClick}
                             onMouseDown={this.handleMouseDown}>
                             <PlaylistEditIcon />
                         </IconButton>
                     )}
-                </div>
+                </ListItem>
                 {confirm && (
                     <Dialog
                         manager={modalManager}

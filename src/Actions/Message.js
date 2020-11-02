@@ -16,19 +16,27 @@ export function viewMessages(chatId, messageIds, forceRead) {
     });
 }
 
-export function pinMessage(chatId, messageId, disableNotification = false) {
+export function pinMessage(chatId, messageId, disableNotification = false, onlyForSelf = false) {
     TdLibController.send({
         '@type': 'pinChatMessage',
         chat_id: chatId,
         message_id: messageId,
-        disable_notification: disableNotification
+        disable_notification: disableNotification,
+        only_for_self: onlyForSelf
     });
 }
 
 export function unpinMessage(chatId, messageId) {
-    TdLibController.send({
+    return TdLibController.send({
         '@type': 'unpinChatMessage',
         chat_id: chatId,
         message_id: messageId,
+    });
+}
+
+export function unpinAllMessages(chatId) {
+    return TdLibController.send({
+        '@type': 'unpinAllChatMessages',
+        chat_id: chatId
     });
 }

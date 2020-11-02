@@ -16,6 +16,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import ChatTile from '../Tile/ChatTile';
 import { getChatShortTitle } from '../../Utils/Chat';
+import { modalManager } from '../../Utils/Modal';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 
@@ -53,6 +54,7 @@ class LeaveChatDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 open={true}
                 transitionDuration={0}
                 onClose={() => onClose(false)}

@@ -117,6 +117,10 @@ export function clearSelection() {
     TdLibController.clientUpdate({ '@type': 'clientUpdateClearSelection' });
 }
 
+export function closePinned() {
+    TdLibController.clientUpdate({ '@type': 'clientUpdateClosePinned' });
+}
+
 export function setInstantViewViewerContent(content) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateInstantViewViewerContent',
@@ -150,5 +154,21 @@ export function searchChat(chatId, query = null) {
         '@type': 'clientUpdateSearchChat',
         chatId,
         query
+    });
+}
+
+export function requestUnpinMessage(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateUnpinMessage',
+        chatId,
+        messageId
+    });
+}
+
+export function requestPinMessage(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdatePinMessage',
+        chatId,
+        messageId
     });
 }

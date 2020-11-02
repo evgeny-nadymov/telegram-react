@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
+import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -20,7 +21,6 @@ import DialogBadge from './DialogBadge';
 import DialogTitle from './DialogTitle';
 import DialogMeta from './DialogMeta';
 import ArchiveIcon from '../../Assets/Icons/Archive';
-import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import UnarchiveIcon from '../../Assets/Icons/Unarchive';
 import PinIcon from '../../Assets/Icons/Pin2';
@@ -32,7 +32,7 @@ import GroupIcon from '../../Assets/Icons/Group';
 import MessageIcon from '../../Assets/Icons/Message';
 import UnreadIcon from '../../Assets/Icons/Unread';
 import {
-    canAddChatToList, canClearHistory,
+    canAddChatToList,
     canDeleteChat,
     getDeleteChatTitle,
     getViewInfoTitle,
@@ -58,7 +58,6 @@ import ChatStore from '../../Stores/ChatStore';
 import OptionStore from '../../Stores/OptionStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Dialog.css';
-import ListItem from '@material-ui/core/ListItem';
 
 class Dialog extends Component {
     static contextMenuId;

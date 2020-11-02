@@ -9,16 +9,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import ChatTile from '../Tile/ChatTile';
 import { getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { modalManager } from '../../Utils/Modal';
 import ChatStore from '../../Stores/ChatStore';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 
 class ClearHistoryDialog extends React.Component {
     state = { };
@@ -54,6 +55,7 @@ class ClearHistoryDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 open={true}
                 transitionDuration={0}
                 onClose={() => onClose(false, revoke)}

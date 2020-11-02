@@ -17,6 +17,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { getChatShortTitle, isChannelChat, isPrivateChat, isSupergroup } from '../../Utils/Chat';
+import { modalManager } from '../../Utils/Modal';
 import MessageStore from '../../Stores/MessageStore';
 
 class DeleteMessagesDialog extends React.Component {
@@ -65,6 +66,7 @@ class DeleteMessagesDialog extends React.Component {
 
         return (
             <Dialog
+                manager={modalManager}
                 transitionDuration={0}
                 open={true}
                 onClose={() => onClose(false, revoke)}

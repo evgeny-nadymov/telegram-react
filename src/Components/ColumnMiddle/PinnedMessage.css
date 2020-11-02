@@ -16,6 +16,13 @@
     width: 250px;
     flex-shrink: 0;
     flex-grow: 0;
+    padding: 0 6px;
+    border-radius: 6px;
+}
+
+.pinned-message-edit-button {
+    margin: 6px 0 6px 6px;
+    padding: 6px;
 }
 
 .pinned-message-content {

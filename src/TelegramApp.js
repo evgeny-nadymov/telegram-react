@@ -28,7 +28,7 @@ import { loadData } from './Utils/Phone';
 import KeyboardManager, { KeyboardHandler } from './Components/Additional/KeyboardManager';
 import { openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
-import { editMessage, replyMessage, searchChat } from './Actions/Client';
+import { clearSelection, editMessage, replyMessage, searchChat } from './Actions/Client';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
@@ -96,7 +96,10 @@ class TelegramApp extends Component {
                         replyMessage(chatId, 0);
                         return;
                     }
-                    else if (!chatId) {
+                    else if (MessageStore.selectedItems.size > 0) {
+                        clearSelection();
+                        return;
+                    } else if (!chatId) {
                         // open search if no one dialog opened
                         searchChat(0, null);
                         return;

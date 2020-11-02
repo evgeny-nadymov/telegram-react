@@ -28,6 +28,28 @@
     z-index: 1;
 }
 
+.header-details-content {
+    display: flex;
+    flex-direction: column;
+    height: 120px;
+    width: 100%;
+    align-self: flex-end;
+    will-change: transform;
+    transition: transform 0.25s ease-in-out;
+    transform: translateY(0);
+}
+
+.header-details-selection .header-details-content {
+    transform: translateY(60px);
+}
+
+.header-details-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 60px;
+}
+
 .header-title {
     padding: 15px 19px 15px;
 }
@@ -39,7 +61,7 @@
     background: transparent;
     overflow: hidden;
     display: flex;
-    align-items: baseline;
+    align-items: center;
 }
 
 .header-status-content {

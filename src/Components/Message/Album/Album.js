@@ -162,7 +162,7 @@ class Album extends React.Component {
     };
 
     render() {
-        let { showTail } = this.props;
+        let { showTail, source } = this.props;
         const { chatId, messageIds, displaySize, showUnreadSeparator, showTitle, showDate, t = x => x } = this.props;
         const {
             emojiMatches,
@@ -278,6 +278,7 @@ class Album extends React.Component {
                 message={x}
                 position={grouped.positions.get(x)}
                 displaySize={displaySize}
+                source={source}
             />));
 
         return (

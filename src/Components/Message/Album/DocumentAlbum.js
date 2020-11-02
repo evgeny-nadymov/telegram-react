@@ -12,7 +12,6 @@ import CheckMarkIcon from '@material-ui/icons/Check';
 import AlbumItem from './AlbumItem';
 import DayMeta from '../DayMeta';
 import Forward from '../Forward';
-import GroupedMessages from './GroupedMessages';
 import UnreadSeparator from '../UnreadSeparator';
 import MessageAuthor from '../MessageAuthor';
 import Reply from '../Reply';
@@ -20,7 +19,6 @@ import Meta from '../Meta';
 import ChatTile from '../../Tile/ChatTile';
 import EmptyTile from '../../Tile/EmptyTile';
 import UserTile from '../../Tile/UserTile';
-import { getMedia } from '../../../Utils/Media';
 import { albumHistoryEquals } from '../../../Utils/Common';
 import { selectMessage } from '../../../Actions/Client';
 import { getText, getWebPage, showMessageForward } from '../../../Utils/Message';
@@ -166,7 +164,7 @@ class DocumentAlbum extends React.Component {
     };
 
     render() {
-        let { showTail } = this.props;
+        let { showTail, source } = this.props;
         const { chatId, messageIds, displaySize, showUnreadSeparator, showTitle, showDate, t = x => x } = this.props;
         const {
             emojiMatches,
@@ -280,6 +278,7 @@ class DocumentAlbum extends React.Component {
                 message={m}
                 position={null}
                 displaySize={displaySize}
+                source={source}
             />));
 
         return (

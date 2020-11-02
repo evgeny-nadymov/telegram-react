@@ -12,9 +12,6 @@
     flex-direction: row;
     align-items: center;
     overflow: hidden;
-    border-bottom: 1px solid var(--border);
-    background: var(--panel-background);
-    z-index: 1;
 }
 
 .header-command-button {

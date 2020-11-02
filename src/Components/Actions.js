@@ -14,35 +14,82 @@ import IconButton from '@material-ui/core/IconButton';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
 import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
+import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
-import { isChatMember, isCreator } from '../Utils/Chat';
+import { isChatMember, isCreator, isMeChat } from '../Utils/Chat';
+import { pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
+import { clearSelection, closePinned } from '../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
+import MessageStore from '../Stores/MessageStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import MessageStore from '../Stores/MessageStore';
-import { clearSelection } from '../Actions/Client';
+import UnpinMessageDialog from './Popup/UnpinMessageDialog';
 
 class Actions extends React.PureComponent {
     state = {
         leaveChat: null,
         clearHistory: null,
-        deleteMessages: null
+        deleteMessages: null,
+        pinMessage: null,
+        unpinMessage: null
     }
 
     componentDidMount() {
         AppStore.on('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.on('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
         AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.on('clientUpdatePinMessage', this.onClientUpdatePinMessage);
+        AppStore.on('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
     }
 
     componentWillUnmount() {
         AppStore.off('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.off('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
         AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
+        AppStore.off('clientUpdatePinMessage', this.onClientUpdatePinMessage);
+        AppStore.off('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
     }
+
+    onClientUpdateUnpinMessage = update => {
+        const { chatId, messageId } = update;
+
+        if (isMeChat(chatId)) {
+            this.unpinMessage = {
+                chatId,
+                messageId
+            };
+            this.handleUnpinMessageContinue(true, false);
+        } else {
+            this.setState({
+                unpinMessage: {
+                    chatId,
+                    messageId
+                }
+            });
+        }
+    };
+
+    onClientUpdatePinMessage = update => {
+        const { chatId, messageId } = update;
+
+        if (isMeChat(chatId)) {
+            this.pinMessage = {
+                chatId,
+                messageId
+            };
+            this.handlePinMessageContinue(true, false);
+        } else {
+            this.setState({
+                pinMessage: {
+                    chatId,
+                    messageId
+                }
+            });
+        }
+    };
 
     onClientUpdateDeleteMessages = update => {
         const { chatId, messageIds } = update;
@@ -232,8 +279,49 @@ class Actions extends React.PureComponent {
         });
     };
 
+    handlePinMessageContinue = (result, revoke) => {
+        let { pinMessage } = this.state;
+        pinMessage = pinMessage || this.pinMessage;
+        if (!pinMessage) return;
+
+        const { chatId, messageId } = pinMessage;
+
+        clearSelection();
+        this.setState({ pinMessage: null });
+        this.pinMessage = null;
+
+        if (!result) return;
+
+        pinMessageAction(chatId, messageId, false, !revoke);
+    };
+
+    handleUnpinMessageContinue = async result => {
+        let { unpinMessage } = this.state;
+        unpinMessage = unpinMessage || this.unpinMessage;
+        if (!unpinMessage) return;
+
+        const { chatId, messageId } = unpinMessage;
+
+        clearSelection();
+        this.setState({ unpinMessage: null });
+        this.unpinMessage = null;
+
+        if (!result) return;
+
+        if (messageId) {
+            await unpinMessageAction(chatId, messageId);
+        } else {
+            await unpinAllMessages(chatId);
+        }
+
+        const media = MessageStore.getMedia(chatId);
+        if (media && !media.pinned.length) {
+            closePinned();
+        }
+    };
+
     render() {
-        const { leaveChat, clearHistory, deleteMessages } = this.state;
+        const { leaveChat, clearHistory, deleteMessages, pinMessage, unpinMessage } = this.state;
         if (leaveChat) {
             const { chatId } = leaveChat;
 
@@ -259,6 +347,24 @@ class Actions extends React.PureComponent {
                     messageIds={messageIds}
                     onClose={this.handleDeleteMessagesContinue} />
                 );
+        } else if (pinMessage) {
+            const { chatId, messageId } = pinMessage;
+
+            return (
+                <PinMessageDialog
+                    chatId={chatId}
+                    messageId={messageId}
+                    onClose={this.handlePinMessageContinue} />
+            );
+        } else if (unpinMessage) {
+            const { chatId, messageId } = unpinMessage;
+
+            return (
+                <UnpinMessageDialog
+                    chatId={chatId}
+                    messageId={messageId}
+                    onClose={this.handleUnpinMessageContinue} />
+            );
         }
 
         return null;

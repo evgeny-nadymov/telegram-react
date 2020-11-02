@@ -26,7 +26,7 @@ class Game extends React.Component {
         if (animation) {
             const animationSrc = getSrc(animation.animation);
             if (animationSrc || animation.thumbnail) {
-                return <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
+                return <Animation stretch={true} chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
             }
         }
 

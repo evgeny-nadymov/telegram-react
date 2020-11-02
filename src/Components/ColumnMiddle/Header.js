@@ -105,11 +105,6 @@ class Header extends Component {
             selectionCount,
         } = this.state;
 
-        let control = null;
-        if (selectionCount) {
-            control = <HeaderCommand count={selectionCount} />;
-        }
-
         const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
 
@@ -179,43 +174,45 @@ class Header extends Component {
             showProgressAnimation = true;
         }
 
-        control = control || (
-            <div className='header-details'>
-                {showProgressAnimation ? (
-                    <div
-                        className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
-                        onClick={this.openChatDetails}>
-                        <span className='header-status-content'>{title}</span>
-                        <HeaderProgress />
-                        <span
-                            className={classNames('header-status-title', { 'header-status-accent': isAccentSubtitle })}>
-                            {subtitle}
-                        </span>
-                        <span className='header-status-tail' />
+        return (
+            <div className={classNames('header-details', { 'header-details-selection': selectionCount > 0 })}>
+                <div className='header-details-content'>
+                    <HeaderCommand count={selectionCount} />
+                    <div className='header-details-row'>
+                        {showProgressAnimation ? (
+                            <div
+                                className={classNames('header-status', 'grow', chat ? 'cursor-pointer' : 'cursor-default')}
+                                onClick={this.openChatDetails}>
+                                <span className='header-status-content'>{title}</span>
+                                <HeaderProgress />
+                                <span className={classNames('header-status-title', { 'header-status-accent': isAccentSubtitle })}>
+                                    {subtitle}
+                                </span>
+                                <span className='header-status-tail' />
+                            </div>
+                        ) : (
+                            <HeaderChat
+                                className={classNames('grow', 'cursor-pointer')}
+                                chatId={chatId}
+                                onClick={this.openChatDetails}
+                            />
+                        )}
+                        <PinnedMessage chatId={chatId} />
+                        {chat && (
+                            <>
+                                <IconButton
+                                    className='header-right-second-button'
+                                    aria-label='Search'
+                                    onClick={this.handleSearchChat}>
+                                    <SearchIcon />
+                                </IconButton>
+                                <MainMenuButton openChatDetails={this.openChatDetails} />
+                            </>
+                        )}
                     </div>
-                ) : (
-                    <HeaderChat
-                        className={classNames('grow', 'cursor-pointer')}
-                        chatId={chatId}
-                        onClick={this.openChatDetails}
-                    />
-                )}
-                <PinnedMessage chatId={chatId} />
-                {chat && (
-                    <>
-                        <IconButton
-                            className='header-right-second-button'
-                            aria-label='Search'
-                            onClick={this.handleSearchChat}>
-                            <SearchIcon />
-                        </IconButton>
-                        <MainMenuButton openChatDetails={this.openChatDetails} />
-                    </>
-                )}
+                </div>
             </div>
         );
-
-        return control;
     }
 }
 
