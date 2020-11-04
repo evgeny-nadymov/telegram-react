@@ -96,6 +96,7 @@ pre code {
 
 @keyframes highlighted-animation {
     0% { background: var(--color-accent-main22); }
+    77% { background: var(--color-accent-main22); }
     100% { background: transparent; }
 }
 

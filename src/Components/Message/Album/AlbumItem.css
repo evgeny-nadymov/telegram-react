@@ -15,6 +15,7 @@
 
 @keyframes media-highlighted-animation {
     0% { background: #ffffff88; }
+    77% { background: #ffffff88; }
     100% { background: transparent; }
 }
 

@@ -290,7 +290,7 @@ class Album extends React.Component {
                         'message-short': !tile,
                         'message-out': isOutgoing,
                         'message-selected': selected,
-                        'message-highlighted': highlighted && !selected,
+                        // 'message-highlighted': highlighted && !selected,
                         'message-group-title': showTitle && !showTail,
                         'message-group': !showTitle && !showTail,
                         'message-group-tail': !showTitle && showTail && !tailRounded,

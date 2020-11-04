@@ -291,7 +291,7 @@ class DocumentAlbum extends React.Component {
                         'message-out': isOutgoing,
                         'message-selected': selected,
                         'message-album-last-selected': lastSelected,
-                        'message-highlighted': highlighted && !selected,
+                        // 'message-highlighted': highlighted && !selected,
                         'message-album-last-highlighted': lastHighlighted && !selected,
                         'message-group-title': showTitle && !showTail,
                         'message-group': !showTitle && !showTail,
