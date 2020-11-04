@@ -49,7 +49,13 @@ class MessagesList extends React.Component {
     constructor(props) {
         super(props);
 
-        this.sessionId = Date.now();
+        this.lastRequests = new Map();
+        this.sessionId = {
+            loading: false,
+            completed: false,
+            loadMigratedHistory: false
+        };
+
         this.state = {
             prevChatId: 0,
             prevMessageId: null,
@@ -564,21 +570,25 @@ class MessagesList extends React.Component {
     async handleSelectChat(chatId, previousChatId, messageId, previousMessageId) {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
+        console.log ( '%c%s', 'color: green; font: 1.2rem/1 Tahoma;', `selectChat messageId=${messageId}, prevMessageId=${previousMessageId}` );
+        this.sessionId = {
+            loading: false,
+            completed: false,
+            loadMigratedHistory: false
+        };
+        const { sessionId } = this;
 
-        //console.log('MessagesList.newSessionId handleSelectChat');
-        this.sessionId = Date.now();
-        // console.log('[p] loading 0 f');
-        this.loading = false;
-        this.loadMigratedHistory = false;
         this.defferedActions = [];
 
         const scrollPosition = null; //ChatStore.getScrollPosition(chatId);
 
         if (chat) {
-            TdLibController.send({
-                '@type': 'openChat',
-                chat_id: chat.id
-            });
+            if (previousChatId !== chatId && !this.props.filter) {
+                TdLibController.send({
+                    '@type': 'openChat',
+                    chat_id: chatId
+                });
+            }
 
             const unread = !messageId && chat.unread_count > 1;
             let fromMessageId = 0;
@@ -592,9 +602,7 @@ class MessagesList extends React.Component {
             const offset = unread || messageId || scrollPosition ? -1 - MESSAGE_SLICE_LIMIT : 0;
             const limit = unread || messageId || scrollPosition ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
-            // console.log('[p] loading 2 t');
-            this.loading = true;
-            const sessionId = this.sessionId;
+            sessionId.loading = true;
             const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
             .catch(error => {
                 return {
@@ -603,8 +611,7 @@ class MessagesList extends React.Component {
                     total_count: 0
                 };
             }).finally(() => {
-                    // console.log('[p] loading 3 f');
-                this.loading = false;
+                sessionId.loading = false;
             });
 
             if (sessionId !== this.sessionId) {
@@ -658,23 +665,20 @@ class MessagesList extends React.Component {
             loadChatsContent(store, [chatId]);
             loadDraftContent(store, chatId);
 
-            this.loadIncompleteHistory(result);
+            this.loadIncompleteHistory(result, limit);
 
             if (previousChatId !== chatId && !this.props.filter) {
                 getChatFullInfo(chatId);
                 getChatMedia(chatId);
             }
         } else {
-            // console.log('[p] loading 4 t');
-            this.loading = true;
+            sessionId.loading = true;
             this.replace(0, [], () => {
-
-                // console.log('[p] loading 5 f');
-                this.loading = false;
+                sessionId.loading = false;
             });
         }
 
-        if (previousChatId !== chatId) {
+        if (previousChatId !== chatId && !this.props.filter) {
             if (previousChat) {
                 TdLibController.send({
                     '@type': 'closeChat',
@@ -746,24 +750,32 @@ class MessagesList extends React.Component {
         }
     }
 
-    loadIncompleteHistory = async result => {
+    loadIncompleteHistory = async (result, limit) => {
         const MAX_ITERATIONS = 5;
-        let incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
+        let complete = this.isCompleteHistory(result, MESSAGE_SLICE_LIMIT);
 
-        for (let i = 0; i < MAX_ITERATIONS && incomplete; i++) {
+        for (let i = 0; i < MAX_ITERATIONS && !complete; i++) {
             result = await this.onLoadNext();
-            incomplete = result && result.messages.length > 0 && result.messages.length < MESSAGE_SLICE_LIMIT;
+            complete = this.isCompleteHistory(result, MESSAGE_SLICE_LIMIT);
         }
+    };
+
+    isCompleteHistory = (result, limit) => {
+        if (!result) return false;
+        if (!result.messages.length) return false;
+
+        return result.messages.length >= limit;
     };
 
     onLoadNext = async () => {
         const { chatId } = this.props;
         const { history } = this.state;
+        const { sessionId } = this;
 
         if (!chatId) return;
-        if (this.loading) return;
+        if (sessionId.loading) return;
 
-        if (this.loadMigratedHistory) {
+        if (sessionId.loadMigratedHistory) {
             this.onLoadMigratedHistory();
             return;
         }
@@ -771,62 +783,60 @@ class MessagesList extends React.Component {
         const fromMessageId = history && history.length > 0 ? history[0].id : 0;
         const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
-        // console.log('[p] loading 6 t');
-        this.loading = true;
-        const sessionId = this.sessionId;
-        let result = await this.getRequest(chatId, fromMessageId, 0, limit)
-        .finally(() => {
-            // console.log('[p] loading 7 f');
-            this.loading = false;
-        });
+        let result = null;
+        const lastRequestKey = `${chatId}_${fromMessageId}`;
+        if (this.lastRequests.has(lastRequestKey)) {
+            result = this.lastRequests.get(`${chatId}_${fromMessageId}`);
+        } else {
+            sessionId.loading = true;
+            result = await this.getRequest(chatId, fromMessageId, 0, limit)
+                .finally(() => {
+                    sessionId.loading = false;
+                });
+        }
 
         if (sessionId !== this.sessionId) {
             return;
         }
 
-        if (this.props.chatId !== chatId) {
-            return;
+        if (!result.messages.length) {
+            this.lastRequests.set(lastRequestKey, result);
         }
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
 
-        // console.log('[p] loading 8 t');
-        this.loading = true;
-        requestAnimationFrame(() => {
-            // console.log('[p] loading 9 f');
-            this.loading = false;
-            this.insertNext(filterMessages(result.messages), state => {
-                if (filterMessages(result.messages).length > 0) {
-                    this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
-                    setTimeout(() => {
-                        const { history: currentHistory } = this.state;
-                        if (currentHistory.length >= MESSAGE_SLICE_LIMIT * 3) {
-                            this.setState({
-                                history: currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3)
-                            });
-                        }
-                    }, 100);
-                }
-                if (!result.messages.length) {
-                    this.onLoadMigratedHistory();
-                }
-            });
-
-            const store = FileStore.getStore();
-            loadMessageContents(store, result.messages);
-            this.viewMessages(result.messages);
-
-            return result;
+        this.insertNext(filterMessages(result.messages), state => {
+            if (filterMessages(result.messages).length > 0) {
+                this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
+                setTimeout(() => {
+                    const { history: currentHistory } = this.state;
+                    if (currentHistory.length >= MESSAGE_SLICE_LIMIT * 3) {
+                        this.setState({
+                            history: currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3)
+                        });
+                    }
+                }, 100);
+            }
+            if (!result.messages.length) {
+                this.onLoadMigratedHistory();
+            }
         });
+
+        const store = FileStore.getStore();
+        loadMessageContents(store, result.messages);
+        this.viewMessages(result.messages);
+
+        return result;
     };
 
     onLoadMigratedHistory = async () => {
         const { chatId } = this.props;
         const { history } = this.state;
+        const { sessionId } = this;
 
         if (!chatId) return;
-        if (this.loading) return;
+        if (sessionId.loading) return;
 
         const supergroupId = getSupergroupId(chatId);
         if (!supergroupId) return;
@@ -835,7 +845,7 @@ class MessagesList extends React.Component {
         if (!fullInfo) return;
         if (!fullInfo.upgraded_from_basic_group_id) return;
 
-        this.loadMigratedHistory = true;
+        sessionId.loadMigratedHistory = true;
 
         const basicGroupChat = await TdLibController.send({
             '@type': 'createBasicGroupChat',
@@ -846,20 +856,13 @@ class MessagesList extends React.Component {
 
         const fromMessageId = history.length > 0 && history[0].chat_id === basicGroupChat.id ? history[0].id : 0;
 
-        // console.log('[p] loading 10 t');
-        this.loading = true;
-        const sessionId = this.sessionId;
+        sessionId.loading = true;
         const result = await this.getRequest(basicGroupChat.id, fromMessageId, 0, fromMessageId === 0? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT)
         .finally(() => {
-            // console.log('[p] loading 11 f');
-            this.loading = false;
+            sessionId.loading = false;
         });
 
         if (sessionId !== this.sessionId) {
-            return;
-        }
-
-        if (this.props.chatId !== chatId) {
             return;
         }
 
@@ -879,37 +882,27 @@ class MessagesList extends React.Component {
     onLoadPrevious = async () => {
         const { chatId } = this.props;
         const { history } = this.state;
+        const { sessionId } = this;
 
         const chat = ChatStore.get(chatId);
 
-        // console.log('[p] onLoadPrevious', [chat, this.loading, this.hasLastMessage()]);
-
         if (!chat) return;
-        if (this.loading) return;
+        if (sessionId.loading) return;
         if (this.hasLastMessage()) return;
 
         const fromMessageId = history && history.length > 0 ? history[history.length - 1].id : 0;
         const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
-        // console.log('[p] loading 12 t');
-        this.loading = true;
-        const sessionId = this.sessionId;
-        let result = await this.getRequest(chatId, fromMessageId, -limit - 1, limit + 1)
-        .finally(() => {
-            // console.log('[p] loading 13 f');
-            this.loading = false;
-        });
+        sessionId.loading = true;
+        const result = await this.getRequest(chatId, fromMessageId, -limit + 1, limit)
+            .finally(() => {
+                sessionId.loading = false;
+            });
 
-        // console.log('[p] onLoadPrevious 2', [sessionId, this.sessionId, this.props.chatId, chatId]);
         if (sessionId !== this.sessionId) {
             return;
         }
 
-        if (this.props.chatId !== chatId) {
-            return;
-        }
-
-        // console.log('[p] onLoadPrevious 3');
         filterDuplicateMessages(result, this.state.history);
 
         MessageStore.setItems(result.messages);
@@ -1309,30 +1302,24 @@ class MessagesList extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
-        // console.log('MessagesList.newSessionId scrollToStart');
-        this.sessionId = Date.now();
-
-        // console.log('[p] loading 14 f');
-        this.loading = false;
+        this.sessionId = {
+            loading: false,
+            completed: false,
+            loadMigratedHistory: false
+        };
+        const { sessionId } = this;
 
         const fromMessageId = 0;
         const offset = 0;
         const limit = MESSAGE_SLICE_LIMIT;
 
-        // console.log('[p] loading 15 t');
-        this.loading = true;
-        const sessionId = this.sessionId;
+        sessionId.loading = true;
         const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
             .finally(() => {
-                // console.log('[p] loading 16 f');
-            this.loading = false;
+            sessionId.loading = false;
         });
 
         if (sessionId !== this.sessionId) {
-            return;
-        }
-
-        if (this.props.chatId !== chatId) {
             return;
         }
 
@@ -1351,7 +1338,7 @@ class MessagesList extends React.Component {
         loadMessageContents(store, result.messages);
         this.viewMessages(result.messages);
 
-        this.loadIncompleteHistory(result);
+        this.loadIncompleteHistory(result, limit);
     };
 
     handleListDragEnter = event => {
