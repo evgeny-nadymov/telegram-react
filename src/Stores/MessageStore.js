@@ -9,6 +9,7 @@ import EventEmitter from './EventEmitter';
 import { getBlob } from '../Utils/File';
 import FileStore from './FileStore';
 import TdLibController from '../Controllers/TdLibController';
+import ChatStore from './ChatStore';
 
 class MessageStore extends EventEmitter {
     constructor() {
@@ -73,40 +74,42 @@ class MessageStore extends EventEmitter {
                 break;
             }
             case 'updateMessageIsPinned': {
-                const chat = this.items.get(update.chat_id);
+                const { chat_id, message_id, is_pinned } = update;
+
+                const chat = this.items.get(chat_id);
                 if (chat) {
-                    const message = chat.get(update.message_id);
-                    if (message && update.is_pinned !== message.is_pinned) {
-                        const newMessage = {
-                            ...message,
-                            ...{
-                                is_pinned: update.is_pinned
-                            }
-                        };
+                    const message = chat.get(message_id);
+                    if (message && is_pinned !== message.is_pinned) {
+                        const newMessage = { ...message, ...{ is_pinned } };
 
                         this.set(newMessage);
                         this.updateMediaMessage(newMessage);
                     }
                 }
+
+                if (is_pinned) {
+                    const data = ChatStore.getClientData(chat_id);
+                    if (data) {
+                        ChatStore.setClientData(chat_id, { ...data, ...{ unpinned: false }});
+                    }
+                }
+
                 this.emit('updateMessageIsPinned', update);
                 break;
             }
-            case 'updateMessageViews': {
-                const chat = this.items.get(update.chat_id);
+            case 'updateMessageInteractionInfo': {
+                const { chat_id, message_id, interaction_info } = update;
+
+                const chat = this.items.get(chat_id);
                 if (chat) {
-                    const message = chat.get(update.message_id);
-                    if (message && update.views > message.views) {
-                        const newMessage = {
-                            ...message,
-                            ...{
-                                views: update.views
-                            }
-                        };
+                    const message = chat.get(message_id);
+                    if (message) {
+                        const newMessage = { ...message, ...{ interaction_info } };
 
                         this.set(newMessage);
                     }
                 }
-                this.emit('updateMessageViews', update);
+                this.emit('updateMessageInteractionInfo', update);
                 break;
             }
             case 'updateMessageContent': {

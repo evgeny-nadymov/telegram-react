@@ -16,7 +16,7 @@ import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
-import { isChatMember, isCreator, isMeChat } from '../Utils/Chat';
+import { canPinMessages, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
 import { pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
 import { clearSelection, closePinned } from '../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
@@ -308,14 +308,20 @@ class Actions extends React.PureComponent {
 
         if (!result) return;
 
-        if (messageId) {
-            await unpinMessageAction(chatId, messageId);
+        if (canPinMessages(chatId)) {
+            if (messageId) {
+                await unpinMessageAction(chatId, messageId);
+            } else {
+                await unpinAllMessages(chatId);
+            }
         } else {
-            await unpinAllMessages(chatId);
-        }
+            const data = ChatStore.getClientData(chatId);
+            await TdLibController.clientUpdate({
+                '@type': 'clientUpdateSetChatClientData',
+                chatId,
+                clientData: { ...data, ...{ unpinned: true } }
+            });
 
-        const media = MessageStore.getMedia(chatId);
-        if (media && !media.pinned.length) {
             closePinned();
         }
     };

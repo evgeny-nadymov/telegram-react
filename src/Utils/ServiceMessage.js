@@ -272,7 +272,7 @@ function getServiceMessageContent(message, openUser = false) {
 
             return content.user_id === sender.user_id ? (
                 <>
-                    <MessageAuthor sender={{sender}} openUser={openUser} />
+                    <MessageAuthor sender={sender} openUser={openUser} />
                     {' left the group'}
                 </>
             ) : (

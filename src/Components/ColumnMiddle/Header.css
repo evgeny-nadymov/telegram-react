@@ -35,7 +35,7 @@
     width: 100%;
     align-self: flex-end;
     will-change: transform;
-    transition: transform 0.25s ease-in-out;
+    transition: transform 0.15s ease-in-out;
     transform: translateY(0);
 }
 

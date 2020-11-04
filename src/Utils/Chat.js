@@ -151,7 +151,7 @@ export function positionListEquals(p1, p2) {
     return chatListEquals(list1, list2);
 }
 
-export function canUnpinMessage(chatId) {
+export function hasPinnedMessages(chatId) {
     const media = MessageStore.getMedia(chatId);
     if (!media) return false;
 
@@ -1083,7 +1083,7 @@ export async function getChatMedia(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
 
-    console.log('[media] getChatMedia start', chatId);
+    // console.log('[media] getChatMedia start', chatId);
     const promises = [];
 
     const limit = 100;
@@ -1169,7 +1169,7 @@ export async function getChatMedia(chatId) {
         pinned: pinned.messages,
         groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : [],
     }
-    console.log('[media] getChatMedia stop', chatId, media);
+    // console.log('[media] getChatMedia stop', chatId, media);
 
     const store = FileStore.getStore();
     loadMessageContents(store, pinned.messages);

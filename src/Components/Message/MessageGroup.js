@@ -20,24 +20,15 @@ class MessageGroup extends Component {
 
         //this.openForward = this.openForward.bind(this);
         //this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
-        //this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
         //this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
     }
 
     componentDidMount() {
         //MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
-        //MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     handleUpdateMessageEdited(payload) {
-        //if (this.props.message.chat_id === payload.chat_id
-        //    && this.props.message.id === payload.message_id){
-        //    this.forceUpdate();
-        //}
-    }
-
-    handleUpdateMessageViews(payload) {
         //if (this.props.message.chat_id === payload.chat_id
         //    && this.props.message.id === payload.message_id){
         //    this.forceUpdate();
@@ -53,7 +44,6 @@ class MessageGroup extends Component {
 
     componentWillUnmount() {
         //MessageStore.off('updateMessageEdited', this.handleUpdateMessageEdited);
-        //MessageStore.off('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.off('updateMessageContent', this.handleUpdateMessageContent);
     }
 

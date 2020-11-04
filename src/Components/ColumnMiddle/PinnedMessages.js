@@ -11,10 +11,10 @@ import { withTranslation } from 'react-i18next';
 import FooterCommand from './FooterCommand';
 import MessagesList from './MessagesList';
 import PinnedMessagesHeader from './PinnedMessagesHeader';
+import { requestUnpinMessage } from '../../Actions/Client';
+import { canPinMessages } from '../../Utils/Chat';
 import MessageStore from '../../Stores/MessageStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessages.css';
-import { closePinned, requestUnpinMessage } from '../../Actions/Client';
 
 class PinnedMessages extends React.Component {
 
@@ -71,6 +71,8 @@ class PinnedMessages extends React.Component {
         const { opened } = this.state;
         if (!opened) return null;
 
+        const unpinAllTitle = canPinMessages(chatId) ? t('UnpinAllMessages') : t('HidePinnedMessages');
+
         return (
             <div className='pinned-messages'>
                 <div className='pinned-messages-wrapper'>
@@ -78,7 +80,7 @@ class PinnedMessages extends React.Component {
                     <div className='dialog-details-wrapper'>
                         <PinnedMessagesHeader chatId={chatId} />
                         <MessagesList chatId={chatId} filter={{ '@type': 'searchMessagesFilterPinned' }}/>
-                        <FooterCommand command={t('UnpinAllMessages')} onCommand={this.handleUnpinAll} />
+                        <FooterCommand command={unpinAllTitle} onCommand={this.handleUnpinAll} />
                     </div>
                 </div>
             </div>

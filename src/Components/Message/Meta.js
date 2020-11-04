@@ -33,7 +33,7 @@ class Meta extends React.Component {
             const message = MessageStore.get(chatId, id);
             if (!message) return null;
 
-            const { date, edit_date: editDate, views, is_outgoing: isOutgoing } = message;
+            const { date, edit_date: editDate, interaction_info: interactionInfo, is_outgoing: isOutgoing } = message;
 
             return {
                 prevChatId: chatId,
@@ -43,7 +43,7 @@ class Meta extends React.Component {
                 message,
                 date,
                 editDate,
-                views,
+                interactionInfo,
                 isOutgoing,
                 isPinned: ids.some(x => MessageStore.get(chatId, x).is_pinned)
             };
@@ -54,13 +54,13 @@ class Meta extends React.Component {
 
     componentDidMount() {
         MessageStore.on('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.on('updateMessageViews', this.onUpdateMessageViews);
+        MessageStore.on('updateMessageInteractionInfo', this.onUpdateMessageInteractionInfo);
         MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
 
     componentWillUnmount() {
         MessageStore.off('updateMessageEdited', this.onUpdateMessageEdited);
-        MessageStore.off('updateMessageViews', this.onUpdateMessageViews);
+        MessageStore.off('updateMessageInteractionInfo', this.onUpdateMessageInteractionInfo);
         MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
 
@@ -87,20 +87,22 @@ class Meta extends React.Component {
         this.setState({ editDate });
     };
 
-    onUpdateMessageViews = update => {
-        const { chat_id, message_id, views } = update;
+    onUpdateMessageInteractionInfo = update => {
+        const { chat_id, message_id, interaction_info } = update;
         const { message } = this.state;
 
         if (!message) return;
         if (message.chat_id !== chat_id) return;
         if (message.id !== message_id) return;
 
-        this.setState({ views });
+        this.setState({ interactionInfo: interaction_info });
     };
 
     render() {
         const { className, chatId, messageId, onDateClick, t, style } = this.props;
-        const { date, editDate, views, isOutgoing, isPinned } = this.state;
+        const { date, editDate, isOutgoing, isPinned, interactionInfo } = this.state;
+
+        const { view_count: views } = interactionInfo || { view_count: 0, forward_count: 0 };
 
         const dateStr = getDate(date);
         const dateHintStr = getDateHint(date);

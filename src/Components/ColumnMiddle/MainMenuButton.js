@@ -21,11 +21,14 @@ import UnpinIcon from '../../Assets/Icons/Pin2';
 import UserIcon from '../../Assets/Icons/User';
 import GroupIcon from '../../Assets/Icons/Group';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
-import { canClearHistory, canDeleteChat, canUnpinMessage, getViewInfoTitle, isPrivateChat, getDeleteChatTitle } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasPinnedMessages } from '../../Utils/Chat';
+import { unpinMessage } from '../../Actions/Message';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
+import { requestUnpinMessage } from '../../Actions/Client';
+import MessageStore from '../../Stores/MessageStore';
 
 class MainMenuButton extends React.Component {
     state = {
@@ -67,10 +70,15 @@ class MainMenuButton extends React.Component {
         this.handleMenuClose();
 
         const chatId = AppStore.getChatId();
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateUnpin',
-            chatId
-        });
+
+        const media = MessageStore.getMedia(chatId);
+        if (!media) return false;
+
+        const { pinned } = media;
+        if (!pinned) return false;
+        if (pinned.length !== 1) return false;
+
+        requestUnpinMessage(chatId, pinned[0].id);
     };
 
     render() {
@@ -81,7 +89,7 @@ class MainMenuButton extends React.Component {
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
-        const unpinMessage = canUnpinMessage(chatId);
+        const unpinMessage = hasPinnedMessages(chatId);
 
         return (
             <>

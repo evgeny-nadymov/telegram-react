@@ -404,10 +404,6 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateUnpin': {
-                this.emitUpdate(update);
-                break;
-            }
         }
     };
 

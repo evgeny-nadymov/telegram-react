@@ -8,24 +8,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+import classNames from 'classnames';
+import CSSTransition from 'react-transition-group/CSSTransition';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ReplyTile from '../Tile/ReplyTile';
 import PlaylistEditIcon from '../../Assets/Icons/PlaylistEdit';
-import { canPinMessages } from '../../Utils/Chat';
 import { getContent, getReplyMinithumbnail, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
-import { loadMessageContents } from '../../Utils/File';
 import { openChat } from '../../Actions/Client';
-import { unpinMessage } from '../../Actions/Message';
-import { modalManager } from '../../Utils/Modal';
 import ChatStore from '../../Stores/ChatStore';
-import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
@@ -42,29 +33,30 @@ class PinnedMessage extends React.Component {
 
             const pinned = media ? media.pinned : [];
 
+            const messageId = pinned && pinned.length > 0 ? pinned[0].id : 0;
+            const photoSize = getReplyPhotoSize(chatId, messageId);
+            const minithumbnail = getReplyMinithumbnail(chatId, messageId);
+
             return {
                 prevPropsChatId: chatId,
                 clientData: ChatStore.getClientData(chatId),
                 pinned,
-                messageId: pinned && pinned.length > 0 ? pinned[0].id : 0,
-                confirm: false
+                messageId,
+                photoSize,
+                minithumbnail,
+                lastPhoto: {
+                    messageId,
+                    photoSize,
+                    minithumbnail
+                }
             };
         }
 
         return null;
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
-        // const { messages } = this.state;
-
-        // if (messages && prevState.messages !== messages) {
-        //     this.loadContent();
-        // }
-    }
-
     componentDidMount() {
         ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
-        ChatStore.on('clientUpdateUnpin', this.onClientUpdateUnpin);
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -74,7 +66,6 @@ class PinnedMessage extends React.Component {
 
     componentWillUnmount() {
         ChatStore.off('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
-        ChatStore.off('clientUpdateUnpin', this.onClientUpdateUnpin);
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -84,12 +75,8 @@ class PinnedMessage extends React.Component {
 
     onUpdateMessageIsPinned = update => {
         const { chatId } = this.props;
-        const { pinned } = this.state;
-        const { chat_id, message_id, is_pinned } = update;
+        const { chat_id } = update;
         if (chatId !== chat_id) {
-            return;
-        }
-        if (!(pinned.some(x => x.id === message_id) || is_pinned)) {
             return;
         }
 
@@ -145,6 +132,8 @@ class PinnedMessage extends React.Component {
         const { chatId } = this.props;
         const { messageId: currentMessageId } = this.state;
 
+        const clientData = ChatStore.getClientData(chatId);
+
         const media = MessageStore.getMedia(chatId);
         const pinned = media ? media.pinned : [];
 
@@ -152,10 +141,20 @@ class PinnedMessage extends React.Component {
         if (!messageId && pinned.length > 0) {
             messageId = pinned[0].id;
         }
+        const photoSize = getReplyPhotoSize(chatId, messageId);
+        const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         this.setState({
+            clientData,
             pinned,
-            messageId
+            messageId,
+            photoSize,
+            minithumbnail,
+            lastPhoto: {
+                messageId,
+                photoSize,
+                minithumbnail
+            }
         });
     };
 
@@ -167,14 +166,6 @@ class PinnedMessage extends React.Component {
         this.setPinnedState();
     };
 
-    onClientUpdateUnpin = update => {
-        const { chatId } = update;
-
-        if (this.props.chatId !== chatId) return;
-
-        this.handleDelete();
-    };
-
     onClientUpdateSetChatClientData = update => {
         const { chatId, clientData } = update;
 
@@ -183,67 +174,15 @@ class PinnedMessage extends React.Component {
         this.setState({ clientData });
     };
 
-    loadContent = () => {
-        const { chatId } = this.props;
-        const { messageId } = this.state;
-
-        if (!chatId) return;
-        if (!messageId) return;
-
-        const message = MessageStore.get(chatId, messageId);
-        if (message) return;
-
-        TdLibController.send({
-            '@type': 'getMessage',
-            chat_id: chatId,
-            message_id: messageId
-        })
-            .then(result => {
-                MessageStore.set(result);
-
-                const store = FileStore.getStore();
-                loadMessageContents(store, [result]);
-
-                this.forceUpdate();
-            })
-            .catch(error => {
-                const { code, message } = error;
-                if (message !== 'Chat not found') {
-                    const deletedMessage = {
-                        '@type': 'deletedMessage',
-                        chat_id: chatId,
-                        id: messageId,
-                        sender: { },
-                        content: null
-                    };
-
-                    MessageStore.set(deletedMessage);
-                    this.forceUpdate();
-                }
-            });
-    };
-
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { chatId, t, theme } = this.props;
-        const { clientData, confirm, pinned, messageId } = this.state;
-
-        if (nextProps.t !== t) {
-            return true;
-        }
-
-        if (nextProps.theme !== theme) {
-            return true;
-        }
+        const { chatId } = this.props;
+        const { clientData, pinned, messageId } = this.state;
 
         if (nextProps.chatId !== chatId) {
             return true;
         }
 
         if (nextState.clientData !== clientData) {
-            return true;
-        }
-
-        if (nextState.confirm !== confirm) {
             return true;
         }
 
@@ -260,7 +199,7 @@ class PinnedMessage extends React.Component {
 
     handleClick = event => {
         const { chatId } = this.props;
-        const { pinned, messageId } = this.state;
+        const { pinned, messageId, photoSize, minithumbnail } = this.state;
 
         if (!messageId) return;
         if (event.nativeEvent.which !== 1) return;
@@ -271,46 +210,29 @@ class PinnedMessage extends React.Component {
             let index = pinned.findIndex(x => x.id === messageId);
             if (index !== -1) {
                 index = index >= pinned.length - 1 ? 0 : index + 1;
+
+                const nextMessageId = pinned[index].id;
+                const nextPhotoSize = getReplyPhotoSize(chatId, nextMessageId);
+                const nextMinithumbnail = getReplyMinithumbnail(chatId, nextMessageId);
+
+                const lastPhoto = nextPhotoSize ? {
+                    messageId: nextMessageId,
+                    photoSize: nextPhotoSize,
+                    minithumbnail: nextMinithumbnail
+                } : {
+                    messageId,
+                    photoSize,
+                    minithumbnail
+                }
+
                 this.setState({
-                    messageId: pinned[index].id
+                    messageId: nextMessageId,
+                    photoSize: nextPhotoSize,
+                    minithumbnail: nextMinithumbnail,
+                    lastPhoto
                 })
             }
         }
-    };
-
-    handleDelete = async event => {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        const { chatId } = this.props;
-        const { messageId } = this.state;
-
-        const canPin = canPinMessages(chatId);
-        if (canPin) {
-            this.setState({ confirm: true });
-        } else {
-            const data = ChatStore.getClientData(chatId);
-            await TdLibController.clientUpdate({
-                '@type': 'clientUpdateSetChatClientData',
-                chatId: chatId,
-                clientData: Object.assign({}, data, { unpinned_message_id: messageId })
-            });
-        }
-    };
-
-    handleUnpin = async () => {
-        const { chatId } = this.props;
-        const { messageId } = this.state;
-
-        this.handleClose();
-
-        unpinMessage(chatId, messageId);
-    };
-
-    handleClose = () => {
-        this.setState({ confirm: false });
     };
 
     handleMouseDown = event => {
@@ -328,19 +250,19 @@ class PinnedMessage extends React.Component {
 
     render() {
         const { chatId, t } = this.props;
-        const { messageId, pinned, confirm } = this.state;
+        const { messageId, pinned, photoSize, minithumbnail, lastPhoto, clientData } = this.state;
 
         if (!chatId) return null;
 
-        const { unpinned_message_id } = ChatStore.getClientData(chatId);
-        if (unpinned_message_id === messageId) return null;
+        if (clientData) {
+            const { unpinned } = clientData;
+            if (unpinned) return null;
+        }
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
         let content = !message ? t('Loading') : getContent(message, t);
-        const photoSize = getReplyPhotoSize(chatId, messageId);
-        const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         if (isDeletedMessage(message)) {
             content = t('DeletedMessage');
@@ -358,16 +280,23 @@ class PinnedMessage extends React.Component {
 
         return (
             <>
-                <ListItem button className='pinned-message' onMouseDown={this.handleClick}>
+                <ListItem button className={classNames('pinned-message', { 'pinned-message-photo': photoSize })} onMouseDown={this.handleClick}>
                     <div className='border reply-border' />
-                    {photoSize && (
-                        <ReplyTile
-                            chatId={chatId}
-                            messageId={messageId}
-                            photoSize={photoSize}
-                            minithumbnail={minithumbnail}
-                        />
-                    )}
+                    <CSSTransition
+                        in={!!photoSize}
+                        classNames='pinned-message-tile'
+                        timeout={150}
+                        mountOnEnter={true}
+                        unmountOnExit={true}>
+                        <div>
+                            <ReplyTile
+                                chatId={chatId}
+                                messageId={lastPhoto ? lastPhoto.messageId : null}
+                                photoSize={lastPhoto ? lastPhoto.photoSize : null}
+                                minithumbnail={lastPhoto ? lastPhoto.minithumbnail : null}
+                            />
+                        </div>
+                    </CSSTransition>
                     <div className='pinned-message-content'>
                         <div className='pinned-message-title'>{caption}</div>
                         <div className='pinned-message-subtitle'>{content}</div>
@@ -382,27 +311,6 @@ class PinnedMessage extends React.Component {
                         </IconButton>
                     )}
                 </ListItem>
-                {confirm && (
-                    <Dialog
-                        manager={modalManager}
-                        transitionDuration={0}
-                        open
-                        onClose={this.handleClose}
-                        aria-labelledby='unpin-message-confirmation'>
-                        <DialogTitle id='unpin-message-confirmation'>{t('Confirm')}</DialogTitle>
-                        <DialogContent>
-                            <DialogContentText>{t('UnpinMessageAlert')}</DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={this.handleClose} color='primary'>
-                                {t('Cancel')}
-                            </Button>
-                            <Button onClick={this.handleUnpin} color='primary'>
-                                {t('Ok')}
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                )}
             </>
         );
     }

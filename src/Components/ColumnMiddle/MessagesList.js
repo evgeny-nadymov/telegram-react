@@ -24,7 +24,7 @@ import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../U
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages, forwardInfoEquals, senderEquals } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat, isMeChat } from '../../Utils/Chat';
-import { editMessage, highlightMessage, openChat } from '../../Actions/Client';
+import { closePinned, editMessage, highlightMessage, openChat } from '../../Actions/Client';
 import { ALBUM_MESSAGES_LIMIT, MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -137,13 +137,8 @@ class MessagesList extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, theme } = this.props;
+        const { chatId, messageId } = this.props;
         const { playerOpened, history, dragging, clearHistory, selectionActive, scrollDownVisible } = this.state;
-
-        if (nextProps.theme !== theme) {
-            // console.log('[ml] shouldComponentUpdate theme');
-            return true;
-        }
 
         if (nextProps.chatId !== chatId) {
             // console.log('[ml] shouldComponentUpdate chatId');
@@ -203,6 +198,7 @@ class MessagesList extends React.Component {
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSendSucceeded);
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
@@ -221,12 +217,51 @@ class MessagesList extends React.Component {
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSendSucceeded);
         MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSendSucceeded);
         PlayerStore.off('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onUpdateMessageIsPinned = update => {
+        const { chat_id, message_id, is_pinned } = update;
+        const { chatId, filter } = this.props;
+        if (chatId !== chat_id) return;
+        if (!filter) return;
+
+        if (is_pinned) {
+            const message = MessageStore.get(chat_id, message_id);
+
+            const list = this.listRef.current;
+
+            let scrollBehavior = message.is_outgoing && !isServiceMessage(message) ? ScrollBehaviorEnum.SCROLL_TO_BOTTOM : ScrollBehaviorEnum.NONE;
+            if (list.scrollTop + list.offsetHeight >= list.scrollHeight) {
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+            }
+
+            const newState = message.is_outgoing ? { scrollDownVisible: false } : {};
+
+            const history = [message];
+            this.scrollBehaviorNone = true;
+            this.insert(filterMessages(history), newState, () => {
+                this.scrollBehaviorNone = false;
+                this.handleScrollBehavior(scrollBehavior, this.snapshot);
+            });
+
+            const store = FileStore.getStore();
+            loadMessageContents(store, history);
+            this.viewMessages(history);
+        } else {
+            this.deleteHistory([message_id]);
+
+            const media = MessageStore.getMedia(chatId);
+            if (media && !media.pinned.length) {
+                closePinned();
+            }
+        }
+    };
 
     onKeyDown = event => {
         // if (event.keyCode === 27) {
@@ -532,6 +567,7 @@ class MessagesList extends React.Component {
 
         //console.log('MessagesList.newSessionId handleSelectChat');
         this.sessionId = Date.now();
+        // console.log('[p] loading 0 f');
         this.loading = false;
         this.loadMigratedHistory = false;
         this.defferedActions = [];
@@ -556,6 +592,7 @@ class MessagesList extends React.Component {
             const offset = unread || messageId || scrollPosition ? -1 - MESSAGE_SLICE_LIMIT : 0;
             const limit = unread || messageId || scrollPosition ? 2 * MESSAGE_SLICE_LIMIT : MESSAGE_SLICE_LIMIT;
 
+            // console.log('[p] loading 2 t');
             this.loading = true;
             const sessionId = this.sessionId;
             const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
@@ -566,6 +603,7 @@ class MessagesList extends React.Component {
                     total_count: 0
                 };
             }).finally(() => {
+                    // console.log('[p] loading 3 f');
                 this.loading = false;
             });
 
@@ -627,8 +665,11 @@ class MessagesList extends React.Component {
                 getChatMedia(chatId);
             }
         } else {
+            // console.log('[p] loading 4 t');
             this.loading = true;
             this.replace(0, [], () => {
+
+                // console.log('[p] loading 5 f');
                 this.loading = false;
             });
         }
@@ -730,10 +771,12 @@ class MessagesList extends React.Component {
         const fromMessageId = history && history.length > 0 ? history[0].id : 0;
         const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
+        // console.log('[p] loading 6 t');
         this.loading = true;
         const sessionId = this.sessionId;
         let result = await this.getRequest(chatId, fromMessageId, 0, limit)
         .finally(() => {
+            // console.log('[p] loading 7 f');
             this.loading = false;
         });
 
@@ -747,17 +790,18 @@ class MessagesList extends React.Component {
 
         MessageStore.setItems(result.messages);
         result.messages.reverse();
+
+        // console.log('[p] loading 8 t');
         this.loading = true;
         requestAnimationFrame(() => {
+            // console.log('[p] loading 9 f');
             this.loading = false;
             this.insertNext(filterMessages(result.messages), state => {
                 if (filterMessages(result.messages).length > 0) {
                     this.handleScrollBehavior(ScrollBehaviorEnum.KEEP_SCROLL_POSITION, this.snapshot);
                     setTimeout(() => {
                         const { history: currentHistory } = this.state;
-                        // console.log('[h] check', currentHistory.length);
                         if (currentHistory.length >= MESSAGE_SLICE_LIMIT * 3) {
-                            // console.log('[h] trunk', currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3).length);
                             this.setState({
                                 history: currentHistory.slice(0, MESSAGE_SLICE_LIMIT * 3)
                             });
@@ -802,10 +846,12 @@ class MessagesList extends React.Component {
 
         const fromMessageId = history.length > 0 && history[0].chat_id === basicGroupChat.id ? history[0].id : 0;
 
+        // console.log('[p] loading 10 t');
         this.loading = true;
         const sessionId = this.sessionId;
         const result = await this.getRequest(basicGroupChat.id, fromMessageId, 0, fromMessageId === 0? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT)
         .finally(() => {
+            // console.log('[p] loading 11 f');
             this.loading = false;
         });
 
@@ -836,7 +882,7 @@ class MessagesList extends React.Component {
 
         const chat = ChatStore.get(chatId);
 
-        // console.log('[p] onLoadPrevious', [this.loading]);
+        // console.log('[p] onLoadPrevious', [chat, this.loading, this.hasLastMessage()]);
 
         if (!chat) return;
         if (this.loading) return;
@@ -845,13 +891,16 @@ class MessagesList extends React.Component {
         const fromMessageId = history && history.length > 0 ? history[history.length - 1].id : 0;
         const limit = history.length < MESSAGE_SLICE_LIMIT? MESSAGE_SLICE_LIMIT * 2 : MESSAGE_SLICE_LIMIT;
 
+        // console.log('[p] loading 12 t');
         this.loading = true;
         const sessionId = this.sessionId;
         let result = await this.getRequest(chatId, fromMessageId, -limit - 1, limit + 1)
         .finally(() => {
+            // console.log('[p] loading 13 f');
             this.loading = false;
         });
 
+        // console.log('[p] onLoadPrevious 2', [sessionId, this.sessionId, this.props.chatId, chatId]);
         if (sessionId !== this.sessionId) {
             return;
         }
@@ -860,6 +909,7 @@ class MessagesList extends React.Component {
             return;
         }
 
+        // console.log('[p] onLoadPrevious 3');
         filterDuplicateMessages(result, this.state.history);
 
         MessageStore.setItems(result.messages);
@@ -909,6 +959,25 @@ class MessagesList extends React.Component {
         this.setState({ history }, callback);
     }
 
+    insert(history, newState, callback) {
+        if (history.length === 0) {
+            if (callback) callback();
+            return;
+        }
+
+        this.setState({
+            history: history.concat(this.state.history).sort((a, b) => {
+                if (a.id < b.id) {
+                    return -1;
+                } else if (a.id > b.id) {
+                    return 1;
+                }
+
+                return 0;
+            })
+        }, callback);
+    }
+
     insertNext(history, callback) {
         if (history.length === 0) {
             callback && callback();
@@ -954,13 +1023,15 @@ class MessagesList extends React.Component {
         //     list.scrollHeight=${list.scrollHeight}`
         // );
 
+        const scrollToNext = this.prevScrollTop > list.scrollTop;
+
         this.updateItemsInView();
 
-        if (list.scrollTop <= SCROLL_PRECISION) {
+        if (scrollToNext && list.scrollTop <= SCROLL_PRECISION) {
             this.onLoadNext();
         }
 
-        if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
+        if (!scrollToNext && (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION)) {
             this.onLoadPrevious();
         }
 
@@ -1240,16 +1311,20 @@ class MessagesList extends React.Component {
 
         // console.log('MessagesList.newSessionId scrollToStart');
         this.sessionId = Date.now();
+
+        // console.log('[p] loading 14 f');
         this.loading = false;
 
         const fromMessageId = 0;
         const offset = 0;
         const limit = MESSAGE_SLICE_LIMIT;
 
+        // console.log('[p] loading 15 t');
         this.loading = true;
         const sessionId = this.sessionId;
         const result = await this.getRequest(chat.id, fromMessageId, offset, limit)
             .finally(() => {
+                // console.log('[p] loading 16 f');
             this.loading = false;
         });
 
@@ -1364,62 +1439,6 @@ class MessagesList extends React.Component {
         // console.log('[ml] render ', history);
 
         this.itemsMap.clear();
-        // this.messages = clearHistory
-        //     ? null
-        //     : history.map((x, i) => {
-        //         /// history[4] id=5 prev
-        //         /// history[5] id=6 current
-        //         /// history[6] id=7 next
-        //         /// ...
-        //         /// history[9] id=10
-        //
-        //         const prevMessage = i > 0 ? history[i - 1] : null;
-        //         const nextMessage = i < history.length - 1 ? history[i + 1] : null;
-        //
-        //         const showDate = this.showMessageDate(x, prevMessage, i === 0);
-        //
-        //         let m = null;
-        //         if (isServiceMessage(x)) {
-        //             m = (
-        //                 <ServiceMessage
-        //                     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-        //                     ref={el => this.itemsMap.set(i, el)}
-        //                     chatId={x.chat_id}
-        //                     messageId={x.id}
-        //                     showUnreadSeparator={separatorMessageId === x.id}
-        //                 />
-        //             );
-        //         } else {
-        //             const isFirstUnread = separatorMessageId === x.id;
-        //             const isNextFirstUnread = nextMessage && separatorMessageId === nextMessage.id;
-        //             const showTitle = this.showMessageTitle(x, prevMessage, i === 0, isFirstUnread);
-        //             const nextShowTitle = this.showMessageTitle(nextMessage, x, false, isNextFirstUnread);
-        //
-        //             const showTail = !nextMessage
-        //                 || isServiceMessage(nextMessage)
-        //                 || nextMessage.content['@type'] === 'messageSticker'
-        //                 || nextMessage.content['@type'] === 'messageVideoNote'
-        //                 || x.sender_user_id !== nextMessage.sender_user_id
-        //                 || x.is_outgoing !== nextMessage.is_outgoing
-        //                 || nextShowTitle;
-        //
-        //             m = (
-        //                 <Message
-        //                     key={`chat_id=${x.chat_id} message_id=${x.id} show_date=${showDate}`}
-        //                     ref={el => this.itemsMap.set(i, el)}
-        //                     chatId={x.chat_id}
-        //                     messageId={x.id}
-        //                     sendingState={x.sending_state}
-        //                     showTitle={showTitle}
-        //                     showTail={showTail}
-        //                     showUnreadSeparator={separatorMessageId === x.id}
-        //                     showDate={showDate}
-        //                 />
-        //             );
-        //         }
-        //
-        //         return m;
-        //       });
 
         if (clearHistory) {
             this.messages = null;

@@ -22,7 +22,7 @@ class UnpinMessageDialog extends React.Component {
     render() {
         const { messageId, onClose, t } = this.props;
 
-        const text = messageId ? t('UnpinMessageAlert') : 'Do you want to unpin all messages?';
+        const text = messageId ? t('UnpinMessageAlert') : t('UnpinAllMessagesAlert');
 
         return (
             <Dialog

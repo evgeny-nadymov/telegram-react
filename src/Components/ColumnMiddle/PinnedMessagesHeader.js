@@ -17,21 +17,75 @@ import MessageStore from '../../Stores/MessageStore';
 import './PinnedMessagesHeader.css'
 
 class PinnedMessagesHeader extends React.Component {
-    state = { };
+    constructor(props) {
+        super(props);
+
+        const media = MessageStore.getMedia(props.chatId);
+
+        this.state = {
+            selectedCount: MessageStore.selectedItems.size,
+            pinnedCount: media && media.pinned.length ? media.pinned.length : 0
+        };
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { selectedCount, pinnedCount } = this.state;
+
+        if (nextState.selectedCount !== selectedCount) {
+            return true;
+        }
+
+        if (nextState.pinnedCount !== pinnedCount) {
+            return true;
+        }
+
+        return true;
+    }
 
     componentDidMount() {
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
+        MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
     }
 
     componentWillUnmount() {
-
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
+        MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
     }
 
+    onUpdateDeleteMessages = update => {
+        const { chatId } = this.props;
+        const { chat_id } = update;
+        if (chatId !== chat_id) return;
+
+        const media = MessageStore.getMedia(chatId);
+        const pinnedCount = media && media.pinned.length ? media.pinned.length : 0
+
+        this.setState({
+            pinnedCount
+        });
+    };
+
+    onUpdateMessageIsPinned = update => {
+        const { chatId } = this.props;
+        const { chat_id } = update;
+        if (chatId !== chat_id) return;
+
+        const media = MessageStore.getMedia(chatId);
+        const pinnedCount = media && media.pinned.length ? media.pinned.length : 0
+
+        this.setState({
+            pinnedCount
+        });
+    };
+
     onClientUpdateMessageSelected = update => {
-        this.setState({ selectedCount: MessageStore.selectedItems.size });
+        this.setState({
+            selectedCount: MessageStore.selectedItems.size
+        });
     }
 
     handleClose = () => {
@@ -44,12 +98,15 @@ class PinnedMessagesHeader extends React.Component {
     };
 
     render() {
-        const { chatId, t } = this.props;
-        const { selectedCount } = this.state;
+        const { t } = this.props;
+        const { selectedCount, pinnedCount } = this.state;
 
-        const media = MessageStore.getMedia(chatId);
-
-        const title = media && media.pinned.length ? `${media.pinned.length} ${t('PinnedMessages')}` : t('PinnedMessages');
+        let title = t('PinnedMessages');
+        if (pinnedCount === 1) {
+            title = t('PinnedMessage');
+        } else if (pinnedCount > 1) {
+            title = `${pinnedCount} ${t('PinnedMessages')}`;
+        }
 
         return (
             <div className={classNames('header-details', { 'header-details-selection': selectedCount > 0 })}>
