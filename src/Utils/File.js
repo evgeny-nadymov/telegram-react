@@ -159,33 +159,48 @@ async function loadReplies(store, chatId, messageIds) {
     if (!messageIds) return;
     if (!messageIds.length) return;
 
-    const result = await TdLibController.send({
-        '@type': 'getMessages',
-        chat_id: chatId,
-        message_ids: messageIds
-    });
+    let messages = [];
+    const ids = [];
+    for (let i = 0; i < messageIds.length; i++) {
+        const reply = MessageStore.get(chatId, messageIds[i]);
+        if (reply) {
+            messages.push(reply)
+        } else {
+            ids.push(messageIds[i]);
+        }
+    }
 
-    result.messages = result.messages.map((message, i) => {
-        return (
-            message || {
-                '@type': 'deletedMessage',
-                chat_id: chatId,
-                id: messageIds[i],
-                sender: { },
-                content: null
-            }
-        );
-    });
+    if (ids.length > 0) {
+        const result = await TdLibController.send({
+            '@type': 'getMessages',
+            chat_id: chatId,
+            message_ids: messageIds
+        });
 
-    MessageStore.setItems(result.messages);
+        result.messages = result.messages.map((message, i) => {
+            return (
+                message || {
+                    '@type': 'deletedMessage',
+                    chat_id: chatId,
+                    id: messageIds[i],
+                    sender: { },
+                    content: null
+                }
+            );
+        });
 
-    for (let i = messageIds.length - 1; i >= 0; i--) {
-        MessageStore.emit('getMessageResult', MessageStore.get(chatId, messageIds[i]));
+        messages = messages.concat(result.messages);
+    }
+
+    MessageStore.setItems(messages);
+
+    for (let i = ids.length - 1; i >= 0; i--) {
+        MessageStore.emit('getMessageResult', MessageStore.get(chatId, ids[i]));
     }
 
     store = FileStore.getStore();
 
-    loadReplyContents(store, result.messages);
+    loadReplyContents(store, messages);
 }
 
 function loadReplyContents(store, messages) {
