@@ -222,8 +222,8 @@ class Message extends Component {
     handleSelection = () => {
         if (!this.mouseDown) return;
 
-        const selection = window.getSelection().toString();
-        if (selection) return;
+        // const selection = window.getSelection();
+        // if (selection.toString()) return;
 
         const { chatId, messageId } = this.props;
 
