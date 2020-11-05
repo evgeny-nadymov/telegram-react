@@ -15,7 +15,7 @@ import { getContent, isMessageUnread } from './Message';
 import { isServiceMessage } from './ServiceMessage';
 import { formatPhoneNumber } from './Phone';
 import { getChannelStatus } from './Channel';
-import { loadMessageContents } from './File';
+import { loadReplyContents } from './File';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
@@ -1172,7 +1172,7 @@ export async function getChatMedia(chatId) {
     // console.log('[media] getChatMedia stop', chatId, media);
 
     const store = FileStore.getStore();
-    loadMessageContents(store, pinned.messages);
+    loadReplyContents(store, pinned.messages);
 
     TdLibController.clientUpdate({
         '@type': 'clientUpdateChatMedia',

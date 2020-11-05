@@ -203,7 +203,7 @@ async function loadReplies(store, chatId, messageIds) {
     loadReplyContents(store, messages);
 }
 
-function loadReplyContents(store, messages) {
+export function loadReplyContents(store, messages) {
     for (let i = messages.length - 1; i >= 0; i--) {
         const message = messages[i];
         if (!message) {
