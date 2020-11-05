@@ -22,6 +22,11 @@
     position: relative;
 }
 
+.pinned-message .animated-counter {
+    display: inline-flex;
+    font-size: 14px;
+}
+
 .pinned-message-edit-button {
     padding: 6px;
     position: absolute;

@@ -14,12 +14,13 @@ import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ReplyTile from '../Tile/ReplyTile';
 import PlaylistEditIcon from '../../Assets/Icons/PlaylistEdit';
-import { getContent, getReplyMinithumbnail, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Message';
+import { getContent, getReplyMinithumbnail, getReplyThumbnail, isDeletedMessage } from '../../Utils/Message';
 import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
+import AnimatedCounter from './AnimatedCounter';
 
 class PinnedMessage extends React.Component {
     state = {};
@@ -34,7 +35,7 @@ class PinnedMessage extends React.Component {
             const pinned = media ? media.pinned : [];
 
             const messageId = pinned && pinned.length > 0 ? pinned[0].id : 0;
-            const photoSize = getReplyPhotoSize(chatId, messageId);
+            const thumbnail = getReplyThumbnail(chatId, messageId);
             const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
             return {
@@ -43,12 +44,12 @@ class PinnedMessage extends React.Component {
                 pinned,
                 prevMessageId: 0,
                 messageId,
-                photoSize,
                 minithumbnail,
+                thumbnail,
                 lastPhoto: {
                     messageId,
-                    photoSize,
-                    minithumbnail
+                    minithumbnail,
+                    thumbnail
                 }
             };
         }
@@ -199,7 +200,7 @@ class PinnedMessage extends React.Component {
         }
         let prevMessageId = currentMessageId === messageId ? currentPrevMessageId : currentMessageId;
 
-        const photoSize = getReplyPhotoSize(chatId, messageId);
+        const thumbnail = getReplyThumbnail(chatId, messageId);
         const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         this.setState({
@@ -207,11 +208,11 @@ class PinnedMessage extends React.Component {
             pinned,
             prevMessageId,
             messageId,
-            photoSize,
+            thumbnail,
             minithumbnail,
             lastPhoto: {
                 messageId,
-                photoSize,
+                thumbnail,
                 minithumbnail
             }
         }, () => {
@@ -240,7 +241,7 @@ class PinnedMessage extends React.Component {
 
     handleClick = event => {
         const { chatId } = this.props;
-        const { pinned, messageId, photoSize, minithumbnail } = this.state;
+        const { pinned, messageId, thumbnail, minithumbnail } = this.state;
 
         if (!messageId) return;
         if (event.nativeEvent.which !== 1) return;
@@ -253,23 +254,23 @@ class PinnedMessage extends React.Component {
                 index = index >= pinned.length - 1 ? 0 : index + 1;
 
                 const nextMessageId = pinned[index].id;
-                const nextPhotoSize = getReplyPhotoSize(chatId, nextMessageId);
+                const nextThumbnail = getReplyThumbnail(chatId, nextMessageId);
                 const nextMinithumbnail = getReplyMinithumbnail(chatId, nextMessageId);
 
-                const lastPhoto = nextPhotoSize ? {
+                const lastPhoto = nextThumbnail ? {
                     messageId: nextMessageId,
-                    photoSize: nextPhotoSize,
+                    thumbnail: nextThumbnail,
                     minithumbnail: nextMinithumbnail
                 } : {
                     messageId,
-                    photoSize,
+                    thumbnail,
                     minithumbnail
                 }
 
                 this.setState({
                     prevMessageId: messageId,
                     messageId: nextMessageId,
-                    photoSize: nextPhotoSize,
+                    thumbnail: nextThumbnail,
                     minithumbnail: nextMinithumbnail,
                     lastPhoto
                 }, () => {
@@ -297,7 +298,7 @@ class PinnedMessage extends React.Component {
 
     render() {
         const { chatId, t } = this.props;
-        const { messageId, prevMessageId, pinned, photoSize, minithumbnail, lastPhoto, clientData } = this.state;
+        const { messageId, prevMessageId, pinned, thumbnail, minithumbnail, lastPhoto, clientData } = this.state;
 
         if (!chatId) return null;
 
@@ -327,7 +328,16 @@ class PinnedMessage extends React.Component {
             if (pinned.length === 2) {
                 caption = index === 1 ? t('PreviousPinnedMessage') : t('PinnedMessage');
             } else {
-                caption = t('PinnedMessage') + (index > 0 ? ` #${pinned.length - index}` : '');
+                caption = (
+                    <>
+                        {t('PinnedMessage')}
+                        {index > 0 && (
+                            <>
+                                {' #'}
+                                <AnimatedCounter counter={pinned.length - index} height={19} reverse={true}/>
+                            </>)
+                        }
+                    </>);
             }
         }
 
@@ -335,10 +345,10 @@ class PinnedMessage extends React.Component {
 
         return (
             <>
-                <ListItem button className={classNames('pinned-message', { 'pinned-message-photo': photoSize })} onMouseDown={this.handleClick}>
+                <ListItem button className={classNames('pinned-message', { 'pinned-message-photo': thumbnail })} onMouseDown={this.handleClick}>
                     <div className='border reply-border' />
                     <CSSTransition
-                        in={!!photoSize}
+                        in={!!thumbnail}
                         classNames='pinned-message-tile'
                         timeout={250}
                         mountOnEnter={true}
@@ -347,7 +357,7 @@ class PinnedMessage extends React.Component {
                             <ReplyTile
                                 chatId={chatId}
                                 messageId={lastPhoto ? lastPhoto.messageId : null}
-                                photoSize={lastPhoto ? lastPhoto.photoSize : null}
+                                thumbnail={lastPhoto ? lastPhoto.thumbnail : null}
                                 minithumbnail={lastPhoto ? lastPhoto.minithumbnail : null}
                             />
                         </div>

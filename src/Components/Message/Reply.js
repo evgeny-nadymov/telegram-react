@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import ReplyTile from '../Tile/ReplyTile';
-import { getContent, getTitle, isDeletedMessage, getReplyPhotoSize, getReplyMinithumbnail } from '../../Utils/Message';
+import { getContent, getTitle, isDeletedMessage, getReplyThumbnail, getReplyMinithumbnail } from '../../Utils/Message';
 import { openChat } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './Reply.css';
@@ -59,7 +59,7 @@ class Reply extends React.Component {
 
         title = title || getTitle(message, t);
         let content = !message ? t('Loading') : getContent(message, t);
-        const photoSize = getReplyPhotoSize(chatId, messageId);
+        const thumbnail = getReplyThumbnail(chatId, messageId);
         const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         if (isDeletedMessage(message)) {
@@ -71,12 +71,12 @@ class Reply extends React.Component {
             <div className='reply' onMouseDown={this.handleOpen} onClick={this.handleClick}>
                 <div className='reply-wrapper'>
                     <div className='border reply-border' />
-                    {photoSize && (
+                    {thumbnail && (
                         <ReplyTile
                             chatId={chatId}
                             messageId={messageId}
-                            photoSize={photoSize}
                             minithumbnail={minithumbnail}
+                            thumbnail={thumbnail}
                         />
                     )}
                     <div className='reply-content'>

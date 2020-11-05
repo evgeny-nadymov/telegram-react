@@ -30,7 +30,7 @@ class AnimatedCounter extends React.Component {
     }
 
     render() {
-        const { counter, height } = this.props;
+        const { counter, height, reverse } = this.props;
         const { scrollDown } = this.state;
         if (!counter) return null;
 
@@ -38,7 +38,7 @@ class AnimatedCounter extends React.Component {
 
         return (
             <div className='animated-counter' style={{ height }}>
-                {[...counterStr].reverse().map((x, index) => <AnimatedItem key={index} item={x} scrollDown={scrollDown} height={height} />)}
+                {[...counterStr].reverse().map((x, index) => <AnimatedItem key={index} item={x} scrollDown={reverse ? !scrollDown : scrollDown} height={height} />)}
             </div>
         );
     }
@@ -46,12 +46,14 @@ class AnimatedCounter extends React.Component {
 
 AnimatedCounter.propTypes = {
     counter: PropTypes.number,
-    height: PropTypes.number
+    height: PropTypes.number,
+    reverse: PropTypes.bool
 };
 
 AnimatedCounter.defaultProps = {
     counter: 0,
-    height: 21
+    height: 21,
+    reverse: false
 }
 
 export default AnimatedCounter;

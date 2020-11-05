@@ -19,7 +19,7 @@ import {
     LOCATION_WIDTH,
     LOCATION_ZOOM,
     PHOTO_BIG_SIZE,
-    PHOTO_SIZE,
+    PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE,
     PRELOAD_ANIMATION_SIZE,
     PRELOAD_AUDIO_SIZE,
     PRELOAD_DOCUMENT_SIZE,
@@ -228,7 +228,7 @@ function loadReplyContents(store, messages) {
                 case 'messageChatChangePhoto': {
                     const { photo } = content;
 
-                    loadPhotoContent(store, photo, message);
+                    loadPhotoContent(store, photo, message, PHOTO_THUMBNAIL_SIZE);
                     break;
                 }
                 case 'messageDocument': {
@@ -246,7 +246,7 @@ function loadReplyContents(store, messages) {
                 case 'messagePhoto': {
                     const { photo } = content;
 
-                    loadPhotoContent(store, photo, message);
+                    loadPhotoContent(store, photo, message, PHOTO_THUMBNAIL_SIZE);
                     break;
                 }
                 case 'messageSticker': {
@@ -262,7 +262,7 @@ function loadReplyContents(store, messages) {
                     const { animation, audio, document, photo, sticker, video, video_note } = web_page;
 
                     if (photo) {
-                        loadPhotoContent(store, photo, message);
+                        loadPhotoContent(store, photo, message, PHOTO_THUMBNAIL_SIZE);
                         break;
                     }
 

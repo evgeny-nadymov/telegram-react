@@ -21,7 +21,7 @@ import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
 import { getBlockAudio } from './InstantView';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
@@ -1681,7 +1681,7 @@ export function getReplyMinithumbnail(chatId, messageId) {
     return null;
 }
 
-function getReplyPhotoSize(chatId, messageId) {
+export function getReplyThumbnail(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;
 
@@ -1707,7 +1707,7 @@ function getReplyPhotoSize(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes);
+            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
         }
         case 'messageDocument': {
             const { document } = content;
@@ -1729,7 +1729,7 @@ function getReplyPhotoSize(chatId, messageId) {
             }
 
             if (photo) {
-                return getPhotoSize(photo.sizes);
+                return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
             }
 
             return null;
@@ -1738,7 +1738,7 @@ function getReplyPhotoSize(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes);
+            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
         }
         case 'messageSticker': {
             const { sticker } = content;
@@ -1752,7 +1752,7 @@ function getReplyPhotoSize(chatId, messageId) {
             if (web_page) {
                 const { animation, audio, document, photo, sticker, video, video_note } = web_page;
                 if (photo) {
-                    return getPhotoSize(photo.sizes);
+                    return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
                 }
                 if (animation) {
                     const { thumbnail } = animation;
@@ -2779,7 +2779,6 @@ export {
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhotoSize,
     getEmojiMatches,
     messageComparatorDesc,
     substring,

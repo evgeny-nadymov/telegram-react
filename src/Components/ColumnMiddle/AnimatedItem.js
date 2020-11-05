@@ -108,7 +108,7 @@ class AnimatedItem extends React.Component {
 }
 
 AnimatedItem.propTypes = {
-    item: PropTypes.number,
+    item: PropTypes.string,
     scrollDown: PropTypes.bool,
     height: PropTypes.number
 };
