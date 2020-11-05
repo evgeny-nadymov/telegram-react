@@ -41,6 +41,7 @@ class PinnedMessage extends React.Component {
                 prevPropsChatId: chatId,
                 clientData: ChatStore.getClientData(chatId),
                 pinned,
+                prevMessageId: 0,
                 messageId,
                 photoSize,
                 minithumbnail,
@@ -53,6 +54,29 @@ class PinnedMessage extends React.Component {
         }
 
         return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId } = this.props;
+        const { clientData, pinned, messageId } = this.state;
+
+        if (nextProps.chatId !== chatId) {
+            return true;
+        }
+
+        if (nextState.clientData !== clientData) {
+            return true;
+        }
+
+        if (nextState.pinned !== pinned) {
+            return true;
+        }
+
+        if (nextState.messageId !== messageId) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
@@ -128,9 +152,41 @@ class PinnedMessage extends React.Component {
         this.setPinnedState();
     };
 
+    animateText = (messageId, prevMessageId) => {
+
+        const textElement = document.getElementById('pinned-message-animated-text');
+        const text1Element = document.getElementById('pinned-message-animated-text-1');
+        const text2Element = document.getElementById('pinned-message-animated-text-2');
+        if (!textElement || !text1Element || !text2Element) return;
+
+        const duration = '250ms';
+        const timingFunction = 'ease-in-out';
+
+        const scrollDown = prevMessageId === 0 || messageId < prevMessageId;
+        if (scrollDown) {
+            textElement.style.cssText = 'transform: translateY(-19px)';
+            text1Element.style.cssText = 'opacity: 0';
+            text2Element.style.cssText = 'opacity: 1';
+            requestAnimationFrame(() => {
+                textElement.style.cssText = `transform: translateY(0); transition: transform ${duration} ${timingFunction}`;
+                text1Element.style.cssText = `opacity: 1; transition: opacity ${duration} ${timingFunction}`;
+                text2Element.style.cssText = `opacity: 0; transition: opacity ${duration} ${timingFunction}`;
+            });
+        } else {
+            textElement.style.cssText = 'transform: translateY(0px)';
+            text1Element.style.cssText = 'opacity: 1';
+            text2Element.style.cssText = 'opacity: 0';
+            requestAnimationFrame(() => {
+                textElement.style.cssText = `transform: translateY(-19px); transition: transform ${duration} ${timingFunction}`;
+                text1Element.style.cssText = `opacity: 0; transition: opacity ${duration} ${timingFunction}`;
+                text2Element.style.cssText = `opacity: 1; transition: opacity ${duration} ${timingFunction}`;
+            });
+        }
+    };
+
     setPinnedState = () => {
         const { chatId } = this.props;
-        const { messageId: currentMessageId } = this.state;
+        const { messageId: currentMessageId, prevMessageId: currentPrevMessageId } = this.state;
 
         const clientData = ChatStore.getClientData(chatId);
 
@@ -141,12 +197,15 @@ class PinnedMessage extends React.Component {
         if (!messageId && pinned.length > 0) {
             messageId = pinned[0].id;
         }
+        let prevMessageId = currentMessageId === messageId ? currentPrevMessageId : currentMessageId;
+
         const photoSize = getReplyPhotoSize(chatId, messageId);
         const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
         this.setState({
             clientData,
             pinned,
+            prevMessageId,
             messageId,
             photoSize,
             minithumbnail,
@@ -155,6 +214,11 @@ class PinnedMessage extends React.Component {
                 photoSize,
                 minithumbnail
             }
+        }, () => {
+            if (this.state.prevMessageId === 0) return;
+            if (currentMessageId === this.state.messageId) return;
+
+            this.animateText(this.state.messageId, this.state.prevMessageId);
         });
     };
 
@@ -173,29 +237,6 @@ class PinnedMessage extends React.Component {
 
         this.setState({ clientData });
     };
-
-    shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { chatId } = this.props;
-        const { clientData, pinned, messageId } = this.state;
-
-        if (nextProps.chatId !== chatId) {
-            return true;
-        }
-
-        if (nextState.clientData !== clientData) {
-            return true;
-        }
-
-        if (nextState.pinned !== pinned) {
-            return true;
-        }
-
-        if (nextState.messageId !== messageId) {
-            return true;
-        }
-
-        return false;
-    }
 
     handleClick = event => {
         const { chatId } = this.props;
@@ -226,11 +267,17 @@ class PinnedMessage extends React.Component {
                 }
 
                 this.setState({
+                    prevMessageId: messageId,
                     messageId: nextMessageId,
                     photoSize: nextPhotoSize,
                     minithumbnail: nextMinithumbnail,
                     lastPhoto
-                })
+                }, () => {
+                    if (this.state.prevMessageId === 0) return;
+                    if (messageId === this.state.messageId) return;
+
+                    this.animateText(this.state.messageId, this.state.prevMessageId);
+                });
             }
         }
     };
@@ -250,7 +297,7 @@ class PinnedMessage extends React.Component {
 
     render() {
         const { chatId, t } = this.props;
-        const { messageId, pinned, photoSize, minithumbnail, lastPhoto, clientData } = this.state;
+        const { messageId, prevMessageId, pinned, photoSize, minithumbnail, lastPhoto, clientData } = this.state;
 
         if (!chatId) return null;
 
@@ -262,9 +309,15 @@ class PinnedMessage extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
-        let content = !message ? t('Loading') : getContent(message, t);
+        const prevMessage = MessageStore.get(chatId, prevMessageId);
 
+        let content = !message ? t('Loading') : getContent(message, t);
         if (isDeletedMessage(message)) {
+            content = t('DeletedMessage');
+        }
+
+        let prevContent = !prevMessage ? '' : getContent(prevMessage, t);
+        if (isDeletedMessage(prevMessage)) {
             content = t('DeletedMessage');
         }
 
@@ -278,6 +331,8 @@ class PinnedMessage extends React.Component {
             }
         }
 
+        const scrollDown = prevMessageId === 0 || messageId < prevMessageId;
+
         return (
             <>
                 <ListItem button className={classNames('pinned-message', { 'pinned-message-photo': photoSize })} onMouseDown={this.handleClick}>
@@ -285,7 +340,7 @@ class PinnedMessage extends React.Component {
                     <CSSTransition
                         in={!!photoSize}
                         classNames='pinned-message-tile'
-                        timeout={150}
+                        timeout={250}
                         mountOnEnter={true}
                         unmountOnExit={true}>
                         <div>
@@ -299,7 +354,12 @@ class PinnedMessage extends React.Component {
                     </CSSTransition>
                     <div className='pinned-message-content'>
                         <div className='pinned-message-title'>{caption}</div>
-                        <div className='pinned-message-subtitle'>{content}</div>
+                        <div className='pinned-message-subtitle'>
+                            <div id='pinned-message-animated-text'>
+                                <div id='pinned-message-animated-text-1'>{scrollDown ? content : prevContent}</div>
+                                <div id='pinned-message-animated-text-2'>{scrollDown ? prevContent : content}</div>
+                            </div>
+                        </div>
                     </div>
                     { pinned.length > 1 && (
                         <IconButton
