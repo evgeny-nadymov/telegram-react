@@ -87,5 +87,5 @@
 
 .album-item.item-selected .album-item-selection,
 .album-document-item.item-selected .album-item-selection{
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
 }

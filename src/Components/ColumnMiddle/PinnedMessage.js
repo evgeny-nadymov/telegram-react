@@ -21,6 +21,7 @@ import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
 import AnimatedCounter from './AnimatedCounter';
+import PinnedMessageBorder from './PinnedMessageBorder';
 
 class PinnedMessage extends React.Component {
     state = {};
@@ -322,9 +323,10 @@ class PinnedMessage extends React.Component {
             content = t('DeletedMessage');
         }
 
+        let index = 0;
         let caption = t('PinnedMessage');
         if (pinned && pinned.length > 1) {
-            const index = pinned ? pinned.findIndex(x => x.id === messageId) : -1;
+            index = pinned ? pinned.findIndex(x => x.id === messageId) : -1;
             if (pinned.length === 2) {
                 caption = index === 1 ? t('PreviousPinnedMessage') : t('PinnedMessage');
             } else {
@@ -346,7 +348,7 @@ class PinnedMessage extends React.Component {
         return (
             <>
                 <ListItem button className={classNames('pinned-message', { 'pinned-message-photo': thumbnail })} onMouseDown={this.handleClick}>
-                    <div className='border reply-border' />
+                    <PinnedMessageBorder index={pinned.length - index - 1} count={pinned.length}/>
                     <CSSTransition
                         in={!!thumbnail}
                         classNames='pinned-message-tile'

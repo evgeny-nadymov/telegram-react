@@ -183,8 +183,15 @@ class SharedLink extends React.Component {
                 const showLinks = urlEntities.length > 1 || text.text.length > longTextMaxLength;
                 const oneLinkText = entities.length === 1 && entities[0].offset === 0 && entities[0].length === text.text.length;
 
-                const links =
-                    urlEntities.map((x, i) => {
+                const nonEmptyUrlEntities = urlEntities
+                    .filter(x => {
+                        let entityText = substring(text.text, x.offset, x.offset + x.length).trim();
+                        entityText = entityText.replace(/\u200B/g,'');
+
+                        return entityText.length > 0;
+                    });
+
+                const links = nonEmptyUrlEntities.map((x, i) => {
                         const entityText = substring(text.text, x.offset, x.offset + x.length);
                         url = entityText;
                         let mail = false;
@@ -215,7 +222,7 @@ class SharedLink extends React.Component {
                     });
 
                 if (showLinks) {
-                    let d = (urlEntities.length > 0 && urlEntities[0].offset > 0 ? text.text.substring(0, urlEntities[0].offset) : text.text) || description.text || '';
+                    let d = (nonEmptyUrlEntities.length > 0 && nonEmptyUrlEntities[0].offset > 0 ? text.text.substring(0, nonEmptyUrlEntities[0].offset) : text.text) || description.text || '';
                     d = d.trim();
                     content = (
                         <>

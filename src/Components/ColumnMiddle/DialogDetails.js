@@ -227,7 +227,6 @@ class DialogDetails extends Component {
                 <PinnedMessages chatId={chatId}/>
                 <StickerSetDialog />
                 <ChatInfoDialog />
-                {/*<Footer />*/}
             </div>
         );
     }

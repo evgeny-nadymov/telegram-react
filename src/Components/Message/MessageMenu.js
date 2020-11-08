@@ -31,7 +31,7 @@ import RemoveCheckIcon from '../../Assets/Icons/RemoveCheck';
 import ShareIcon from '../../Assets/Icons/Share';
 import StopIcon from '../../Assets/Icons/Stop';
 import PinIcon from '../../Assets/Icons/Pin2';
-import UnpinIcon from '../../Assets/Icons/Pin2';
+import UnpinIcon from '../../Assets/Icons/PinOff';
 import { isPublicSupergroup } from '../../Utils/Supergroup';
 import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isMessagePinned } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';

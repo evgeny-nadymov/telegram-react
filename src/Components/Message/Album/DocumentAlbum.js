@@ -146,8 +146,8 @@ class DocumentAlbum extends React.Component {
     handleSelection = () => {
         // if (!this.mouseDown) return;
 
-        const selection = window.getSelection().toString();
-        if (selection) return;
+        // const selection = window.getSelection().toString();
+        // if (selection) return;
 
         const { chatId, messageIds } = this.props;
         const { selected } = this.state;

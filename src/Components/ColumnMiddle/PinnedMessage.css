@@ -6,6 +6,7 @@
  */
 
 .pinned-message {
+    padding: 0;
     cursor: pointer;
     display: flex;
     flex-direction: row;
@@ -17,7 +18,7 @@
     width: 250px;
     flex-shrink: 0;
     flex-grow: 0;
-    padding: 6px;
+    /*padding: 6px;*/
     border-radius: 6px;
     position: relative;
 }
@@ -44,6 +45,7 @@
     transform: translateX(16px);
     will-change: transform;
     transition: transform 0.15s ease-in-out;
+    padding: 6px 6px 6px 0;
 }
 
 .pinned-message-photo .pinned-message-content {

@@ -151,14 +151,14 @@ export function positionListEquals(p1, p2) {
     return chatListEquals(list1, list2);
 }
 
-export function hasPinnedMessages(chatId) {
+export function hasOnePinnedMessage(chatId) {
     const media = MessageStore.getMedia(chatId);
     if (!media) return false;
 
     const { pinned } = media;
     if (!pinned) return false;
 
-    return pinned.length > 0;
+    return pinned.length === 1;
 }
 
 export function isChatArchived(chatId) {

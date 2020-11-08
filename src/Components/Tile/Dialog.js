@@ -24,7 +24,7 @@ import ArchiveIcon from '../../Assets/Icons/Archive';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import UnarchiveIcon from '../../Assets/Icons/Unarchive';
 import PinIcon from '../../Assets/Icons/Pin2';
-import UnpinIcon from '../../Assets/Icons/Pin2';
+import UnpinIcon from '../../Assets/Icons/PinOff';
 import MuteIcon from '../../Assets/Icons/Mute';
 import UnmuteIcon from '../../Assets/Icons/Unmute';
 import UserIcon from '../../Assets/Icons/User';

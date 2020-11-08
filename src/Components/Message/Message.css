@@ -83,7 +83,7 @@ pre code {
 }
 
 .message-selected {
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
 }
 
 .message-selected:hover .message-select-tick {
@@ -95,8 +95,8 @@ pre code {
 }
 
 @keyframes highlighted-animation {
-    0% { background: var(--color-accent-main22); }
-    77% { background: var(--color-accent-main22); }
+    0% { background: var(--color-accent-main44); }
+    77% { background: var(--color-accent-main44); }
     100% { background: transparent; }
 }
 
@@ -273,7 +273,7 @@ pre code {
 
 .message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
 .message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
     position: absolute;
     right: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
@@ -312,7 +312,7 @@ pre code {
 
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
     position: absolute;
     left: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
@@ -365,7 +365,7 @@ pre code {
 .message.message-selected.message-document-album .message-title {
     margin: -6px -9px;
     padding: 6px 9px;
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
 }
 
 .message-text {

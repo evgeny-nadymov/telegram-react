@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import ReplyTile from '../Tile/ReplyTile';
 import { getContent, getTitle, isDeletedMessage, getReplyThumbnail, getReplyMinithumbnail } from '../../Utils/Message';
-import { openChat } from '../../Actions/Client';
+import { closePinned, openChat } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import './Reply.css';
 
@@ -48,6 +48,7 @@ class Reply extends React.Component {
         if (isDeletedMessage(message)) return null;
 
         openChat(chatId, messageId, false);
+        closePinned();
         if (onClick) onClick();
     };
 

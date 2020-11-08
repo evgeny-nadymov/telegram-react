@@ -17,18 +17,17 @@ import MenuItem from '@material-ui/core/MenuItem';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import MoreVertIcon from '../../Assets/Icons/More';
-import UnpinIcon from '../../Assets/Icons/Pin2';
+import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
 import GroupIcon from '../../Assets/Icons/Group';
+import { requestUnpinMessage } from '../../Actions/Client';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
-import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasPinnedMessages } from '../../Utils/Chat';
-import { unpinMessage } from '../../Actions/Message';
+import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage } from '../../Utils/Chat';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
+import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
-import { requestUnpinMessage } from '../../Actions/Client';
-import MessageStore from '../../Stores/MessageStore';
 
 class MainMenuButton extends React.Component {
     state = {
@@ -89,7 +88,7 @@ class MainMenuButton extends React.Component {
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
-        const unpinMessage = hasPinnedMessages(chatId);
+        const unpinMessage = hasOnePinnedMessage(chatId);
 
         return (
             <>

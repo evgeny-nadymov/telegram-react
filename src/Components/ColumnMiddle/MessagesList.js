@@ -570,7 +570,7 @@ class MessagesList extends React.Component {
     async handleSelectChat(chatId, previousChatId, messageId, previousMessageId) {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
-        console.log ( '%c%s', 'color: green; font: 1.2rem/1 Tahoma;', `selectChat messageId=${messageId}, prevMessageId=${previousMessageId}` );
+        // console.log ( '%c%s', 'color: green; font: 1.2rem/1 Tahoma;', `selectChat messageId=${messageId}, prevMessageId=${previousMessageId}` );
         this.sessionId = {
             loading: false,
             completed: false,
@@ -1212,6 +1212,10 @@ class MessagesList extends React.Component {
                     break;
                 }
             }
+        }
+
+        if (!scrolled) {
+            this.handleSelectChat(chatId, chatId, messageId, messageId);
         }
 
         // console.log(
