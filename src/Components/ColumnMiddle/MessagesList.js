@@ -1268,17 +1268,16 @@ class MessagesList extends React.Component {
     getRequest = (chatId, fromMessageId, offset, limit) => {
         const { filter } = this.props;
 
-        // console.log('[filter] filter', filter, chatId, fromMessageId, offset, limit);
         if (filter) {
-            // if (offset === 0 && limit === MESSAGE_SLICE_LIMIT) {
-            //     const media = MessageStore.getMedia(chatId);
-            //     if (media && media.pinned && media.pinned.length > 0) {
-            //         return Promise.resolve({
-            //             '@type': 'messages',
-            //             messages: media.pinned
-            //         });
-            //     }
-            // }
+            if (fromMessageId === 0 && offset === 0 && limit === MESSAGE_SLICE_LIMIT) {
+                const media = MessageStore.getMedia(chatId);
+                if (media && media.pinned && media.pinned.length > 0) {
+                    return Promise.resolve({
+                        '@type': 'messages',
+                        messages: [...media.pinned]
+                    });
+                }
+            }
 
             return TdLibController.send({
                 '@type': 'searchChatMessages',

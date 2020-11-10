@@ -16,17 +16,16 @@ import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
+import UnpinMessageDialog from './Popup/UnpinMessageDialog';
 import { canPinMessages, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
 import { pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
 import { clearSelection, closePinned } from '../Actions/Client';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
-import MessageStore from '../Stores/MessageStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import UnpinMessageDialog from './Popup/UnpinMessageDialog';
 
 class Actions extends React.PureComponent {
     state = {
@@ -312,17 +311,19 @@ class Actions extends React.PureComponent {
             if (messageId) {
                 await unpinMessageAction(chatId, messageId);
             } else {
+                closePinned();
+
                 await unpinAllMessages(chatId);
             }
         } else {
+            closePinned();
+
             const data = ChatStore.getClientData(chatId);
             await TdLibController.clientUpdate({
                 '@type': 'clientUpdateSetChatClientData',
                 chatId,
                 clientData: { ...data, ...{ unpinned: true } }
             });
-
-            closePinned();
         }
     };
 
