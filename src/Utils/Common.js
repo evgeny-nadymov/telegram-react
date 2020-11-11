@@ -36,7 +36,7 @@ export function isSafari() {
         && !/BlackBerry/.test(navigator.platform);
 }
 
-export function compareMaps(map1, map2) {
+export function mapEquals(map1, map2) {
     if (!map1 || !map2) return false;
 
     let testVal;

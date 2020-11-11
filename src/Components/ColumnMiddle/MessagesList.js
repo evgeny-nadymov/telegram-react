@@ -19,7 +19,7 @@ import ServiceMessage from '../Message/ServiceMessage';
 import Placeholder from './Placeholder';
 import ScrollDownButton from './ScrollDownButton';
 import StickersHint from './StickersHint';
-import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage } from '../../Utils/Common';
+import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage, mapEquals } from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, filterMessages, forwardInfoEquals, senderEquals } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
@@ -522,51 +522,6 @@ class MessagesList extends React.Component {
         this.deleteHistory(message_ids);
     };
 
-    updateItemsInView = () => {
-        if (!this.messages) return;
-
-        const messages = new Map();
-        const items = itemsInView(this.listRef, this.itemsRef);
-        for (let i = 0; i < items.length; i++) {
-            const messageWrapper = this.messages[items[i]];
-            if (messageWrapper) {
-                const message = messageWrapper;
-                const { chatId, messageId } = message.props;
-                const key = `${chatId}_${messageId}`;
-                messages.set(key, key);
-            }
-        }
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateMessagesInView',
-            messages
-        });
-        return;
-
-        if (!messages.length) return;
-
-        /*let ids = messages.map(x => x.id);
-        console.log('[perf] load_messages_contents ids=[' + ids + ']');
-
-                let messagesMap = new Map(messages.map((i) => [i.id, i]));
-
-                if (this.previousMessages){
-                    let cancelMessages = [];
-                    for (let i = 0; i < this.previousMessages.length; i++){
-                        if (!messagesMap.has(this.previousMessages[i].id)){
-                            cancelMessages.push(this.previousMessages[i]);
-                        }
-                    }
-                    if (cancelMessages.length > 0) {
-                        this.cancelLoadMessageContents(cancelMessages);
-                    }
-                }
-                this.previousMessages = messages;*/
-
-        const store = FileStore.getStore();
-        loadMessageContents(store, messages);
-    };
-
     async handleSelectChat(chatId, previousChatId, messageId, previousMessageId) {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
@@ -1005,28 +960,58 @@ class MessagesList extends React.Component {
         this.setState({ history: history.filter(x => !map.has(x.id)) }, callback);
     }
 
-    handleScroll = () => {
+    updateItemsInView = () => {
+        if (!this.messages) return null;
+
+        const messages = [];
+        const messagesMap = new Map();
+        const items = itemsInView(this.listRef, this.itemsRef);
+        for (let i = 0; i < items.length; i++) {
+            const messageWrapper = this.messages[items[i]];
+            if (messageWrapper) {
+                const message = messageWrapper;
+                const { chatId, messageId, messageIds } = message.props;
+                if (messageId) {
+                    const key = `${chatId}_${messageId}`;
+                    messagesMap.set(key, key);
+                    messages.push({ chatId, messageId });
+                } else if (messageIds) {
+                    for (let j = 0; j < messageIds.length; j++) {
+                        const key = `${chatId}_${messageIds[j]}`;
+                        messagesMap.set(key, key);
+                        messages.push({ chatId, messageId });
+                    }
+                }
+            }
+        }
+
+        if (!mapEquals(this.inViewMap, messagesMap)) {
+            TdLibController.clientUpdate({ '@type': 'clientUpdateMessagesInView', messages: messagesMap });
+
+            console.log('[messages] !mapEquals', this.inViewMap, messagesMap, !mapEquals(this.inViewMap, messagesMap));
+            this.inViewMap = messagesMap;
+
+            return messages;
+        }
+
+        return null;
+    };
+
+    updatePinnedMessage = messages => {
+        const { chatId } = this.props;
+        if (!messages) return;
+
+        const media = MessageStore.getMedia(chatId);
+        if (!media) return;
+        if (!media.pinned) return;
+        if (media.pinned.length <= 1) return;
+
+        console.log('[messages] pinned', messages);
+    };
+
+    updateScrollDownVisibility = () => {
         const { scrollDownVisible, replyHistory, history } = this.state;
         const list = this.listRef.current;
-
-        // console.log(
-        //     `[ml] handleScroll
-        //     list.scrollTop=${list.scrollTop}
-        //     list.offsetHeight=${list.offsetHeight}
-        //     list.scrollHeight=${list.scrollHeight}`
-        // );
-
-        const scrollToNext = this.prevScrollTop > list.scrollTop;
-
-        this.updateItemsInView();
-
-        if (scrollToNext && list.scrollTop <= SCROLL_PRECISION) {
-            this.onLoadNext();
-        }
-
-        if (!scrollToNext && (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION)) {
-            this.onLoadPrevious();
-        }
 
         if (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION) {
             if (this.hasLastMessage() && scrollDownVisible) {
@@ -1049,6 +1034,33 @@ class MessagesList extends React.Component {
 
         this.prevScrollTop = list.scrollTop;
         this.prevHistory = history;
+    };
+
+    handleScroll = () => {
+        const list = this.listRef.current;
+
+        // console.log(
+        //     `[ml] handleScroll
+        //     list.scrollTop=${list.scrollTop}
+        //     list.offsetHeight=${list.offsetHeight}
+        //     list.scrollHeight=${list.scrollHeight}`
+        // );
+
+        const scrollToNext = this.prevScrollTop > list.scrollTop;
+
+        const items = this.updateItemsInView();
+
+        this.updatePinnedMessage(items);
+
+        this.updateScrollDownVisibility();
+
+        if (scrollToNext && list.scrollTop <= SCROLL_PRECISION) {
+            this.onLoadNext();
+        }
+
+        if (!scrollToNext && (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION)) {
+            this.onLoadPrevious();
+        }
     };
 
     handleScrollBehavior = (scrollBehavior, snapshot, position) => {

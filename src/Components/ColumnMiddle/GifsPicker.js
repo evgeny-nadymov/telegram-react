@@ -13,7 +13,7 @@ import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import Animation from '../Message/Media/Animation';
 import { loadAnimationContent, loadAnimationThumbnailContent } from '../../Utils/File';
-import { compareMaps, debounce, throttle } from '../../Utils/Common';
+import { mapEquals, debounce, throttle } from '../../Utils/Common';
 import AnimationStore from '../../Stores/AnimationStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -137,7 +137,7 @@ class GifsPicker extends React.Component {
         });
 
         const { animationsInView } = AnimationStore;
-        if (compareMaps(animationsInView, inViewMap)) {
+        if (mapEquals(animationsInView, inViewMap)) {
             // console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
             return;
         }
