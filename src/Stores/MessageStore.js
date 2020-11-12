@@ -233,6 +233,10 @@ class MessageStore extends EventEmitter {
                 this.emit('clientUpdateChatMedia', update);
                 break;
             }
+            case 'clientUpdateCurrentPinnedMessage': {
+                this.emit('clientUpdateCurrentPinnedMessage', update);
+                break;
+            }
             case 'clientUpdateClearSelection': {
                 this.selectedItems.clear();
 

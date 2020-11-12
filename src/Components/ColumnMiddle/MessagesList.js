@@ -13,7 +13,6 @@ import ActionBar from './ActionBar';
 import Album from '../Message/Album/Album';
 import DocumentAlbum from '../Message/Album/DocumentAlbum';
 import FilesDropTarget from './FilesDropTarget';
-import StubMessage from '../Message/StubMessage';
 import Message from '../Message/Message';
 import ServiceMessage from '../Message/ServiceMessage';
 import Placeholder from './Placeholder';
@@ -76,6 +75,7 @@ class MessagesList extends React.Component {
         this.itemsMap = new Map();
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
+        this.updatePinnedMessage = throttle(this.updatePinnedMessage, 150);
     }
 
     hasLastMessage() {
@@ -979,7 +979,7 @@ class MessagesList extends React.Component {
                     for (let j = 0; j < messageIds.length; j++) {
                         const key = `${chatId}_${messageIds[j]}`;
                         messagesMap.set(key, key);
-                        messages.push({ chatId, messageId });
+                        messages.push({ chatId, messageId: messageIds[j] });
                     }
                 }
             }
@@ -988,7 +988,7 @@ class MessagesList extends React.Component {
         if (!mapEquals(this.inViewMap, messagesMap)) {
             TdLibController.clientUpdate({ '@type': 'clientUpdateMessagesInView', messages: messagesMap });
 
-            console.log('[messages] !mapEquals', this.inViewMap, messagesMap, !mapEquals(this.inViewMap, messagesMap));
+            // console.log('[messages] !mapEquals', this.inViewMap, messagesMap, !mapEquals(this.inViewMap, messagesMap));
             this.inViewMap = messagesMap;
 
             return messages;
@@ -997,16 +997,62 @@ class MessagesList extends React.Component {
         return null;
     };
 
-    updatePinnedMessage = messages => {
+    updatePinnedMessage = () => {
         const { chatId } = this.props;
+
+        const messages = [];
+        const items = itemsInView(this.listRef, this.itemsRef);
+        for (let i = 0; i < items.length; i++) {
+            const messageWrapper = this.messages[items[i]];
+            if (messageWrapper) {
+                const message = messageWrapper;
+                const { chatId, messageId, messageIds } = message.props;
+                if (messageId) {
+                    messages.push({ chatId, messageId });
+                } else if (messageIds) {
+                    for (let j = 0; j < messageIds.length; j++) {
+                        messages.push({ chatId, messageId: messageIds[j] });
+                    }
+                }
+            }
+        }
+
         if (!messages) return;
+        if (messages.length <= 1) return;
 
         const media = MessageStore.getMedia(chatId);
         if (!media) return;
         if (!media.pinned) return;
         if (media.pinned.length <= 1) return;
 
-        console.log('[messages] pinned', messages);
+        const minId = messages[0].messageId;
+        const maxId = messages[messages.length - 1].messageId;
+
+        let id = 0;
+        for (let i = 0; i < media.pinned.length; i++) {
+            const pinned = media.pinned[i];
+            if (pinned.id >= minId && pinned.id <= maxId) {
+                id = pinned.id;
+                break;
+            }
+        }
+
+        if (!id) {
+            const pinnedMinId = media.pinned[media.pinned.length - 1].id;
+            const pinnedMaxId = media.pinned[0].id
+
+            if (pinnedMaxId < minId) {
+                id = pinnedMaxId;
+            } else if (pinnedMinId > maxId) {
+                id = pinnedMinId;
+            }
+        }
+
+        if (id && this.prevPinnedId !== id) {
+            this.prevPinnedId = id;
+            TdLibController.clientUpdate({ '@type': 'clientUpdateCurrentPinnedMessage', chatId, messageId: id });
+            console.log('[messages] current', chatId, id);
+        }
     };
 
     updateScrollDownVisibility = () => {

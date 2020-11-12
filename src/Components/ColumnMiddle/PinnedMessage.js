@@ -84,6 +84,7 @@ class PinnedMessage extends React.Component {
     componentDidMount() {
         ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
+        MessageStore.on('clientUpdateCurrentPinnedMessage', this.onClientUpdateCurrentPinnedMessage);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
@@ -93,11 +94,21 @@ class PinnedMessage extends React.Component {
     componentWillUnmount() {
         ChatStore.off('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
         MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
+        MessageStore.off('clientUpdateCurrentPinnedMessage', this.onClientUpdateCurrentPinnedMessage);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
         MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
+
+    onClientUpdateCurrentPinnedMessage = update => {
+        const { chatId } = this.props;
+        if (chatId !== update.chatId) {
+            return;
+        }
+
+        this.scrollToMessageId(update.messageId);
+    };
 
     onUpdateMessageIsPinned = update => {
         const { chatId } = this.props;
@@ -240,48 +251,53 @@ class PinnedMessage extends React.Component {
         this.setState({ clientData });
     };
 
+    scrollToMessageId = nextMessageId => {
+        const { chatId } = this.props;
+        const { messageId, thumbnail, minithumbnail } = this.state;
+
+        const nextThumbnail = getReplyThumbnail(chatId, nextMessageId);
+        const nextMinithumbnail = getReplyMinithumbnail(chatId, nextMessageId);
+
+        const lastPhoto = nextThumbnail ? {
+            messageId: nextMessageId,
+            thumbnail: nextThumbnail,
+            minithumbnail: nextMinithumbnail
+        } : {
+            messageId,
+            thumbnail,
+            minithumbnail
+        }
+
+        this.setState({
+            prevMessageId: messageId,
+            messageId: nextMessageId,
+            thumbnail: nextThumbnail,
+            minithumbnail: nextMinithumbnail,
+            lastPhoto
+        }, () => {
+            if (this.state.prevMessageId === 0) return;
+            if (messageId === this.state.messageId) return;
+
+            this.animateText(this.state.messageId, this.state.prevMessageId);
+        });
+    };
+
     handleClick = event => {
         const { chatId } = this.props;
-        const { pinned, messageId, thumbnail, minithumbnail } = this.state;
+        const { pinned, messageId } = this.state;
+        if (!pinned.length) return;
 
         if (!messageId) return;
         if (event.nativeEvent.which !== 1) return;
 
         openChat(chatId, messageId);
 
-        if (pinned.length > 0) {
-            let index = pinned.findIndex(x => x.id === messageId);
-            if (index !== -1) {
-                index = index >= pinned.length - 1 ? 0 : index + 1;
+        const index = pinned.findIndex(x => x.id === messageId);
+        if (index === -1) return;
 
-                const nextMessageId = pinned[index].id;
-                const nextThumbnail = getReplyThumbnail(chatId, nextMessageId);
-                const nextMinithumbnail = getReplyMinithumbnail(chatId, nextMessageId);
+        const nextIndex = index >= pinned.length - 1 ? 0 : index + 1;
 
-                const lastPhoto = nextThumbnail ? {
-                    messageId: nextMessageId,
-                    thumbnail: nextThumbnail,
-                    minithumbnail: nextMinithumbnail
-                } : {
-                    messageId,
-                    thumbnail,
-                    minithumbnail
-                }
-
-                this.setState({
-                    prevMessageId: messageId,
-                    messageId: nextMessageId,
-                    thumbnail: nextThumbnail,
-                    minithumbnail: nextMinithumbnail,
-                    lastPhoto
-                }, () => {
-                    if (this.state.prevMessageId === 0) return;
-                    if (messageId === this.state.messageId) return;
-
-                    this.animateText(this.state.messageId, this.state.prevMessageId);
-                });
-            }
-        }
+        this.scrollToMessageId(pinned[nextIndex].id);
     };
 
     handleMouseDown = event => {
