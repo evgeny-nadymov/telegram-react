@@ -1408,10 +1408,13 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (!canSendMediaMessages(chatId)) return;
 
+        if (!event.dataTransfer) return;
+        if (!event.dataTransfer.types.some(x => x === 'Files')) return;
+
         TdLibController.clientUpdate({
             '@type': 'clientUpdateDragging',
             dragging: true,
-            files: event.dataTransfer.files
+            dataTransfer: event.dataTransfer
         });
     };
 

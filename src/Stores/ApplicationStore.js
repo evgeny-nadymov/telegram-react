@@ -232,9 +232,9 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateDragging': {
-                const { dragging, files } = update;
+                const { dragging, dataTransfer } = update;
 
-                this.dragParams = dragging ? { dragging, files } : null;
+                this.dragParams = dragging ? { dragging, dataTransfer } : null;
                 this.emit('clientUpdateDragging', update);
                 break;
             }
