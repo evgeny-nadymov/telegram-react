@@ -75,7 +75,7 @@ class MessagesList extends React.Component {
         this.itemsMap = new Map();
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
-        this.updatePinnedMessage = throttle(this.updatePinnedMessage, 150);
+        this.updatePinnedMessage = throttle(this.updatePinnedMessage, 200);
     }
 
     hasLastMessage() {
@@ -1000,6 +1000,11 @@ class MessagesList extends React.Component {
     updatePinnedMessage = () => {
         const { chatId } = this.props;
 
+        const media = MessageStore.getMedia(chatId);
+        if (!media) return;
+        if (!media.pinned) return;
+        if (media.pinned.length <= 1) return;
+
         const messages = [];
         const items = itemsInView(this.listRef, this.itemsRef);
         for (let i = 0; i < items.length; i++) {
@@ -1019,11 +1024,6 @@ class MessagesList extends React.Component {
 
         if (!messages) return;
         if (messages.length <= 1) return;
-
-        const media = MessageStore.getMedia(chatId);
-        if (!media) return;
-        if (!media.pinned) return;
-        if (media.pinned.length <= 1) return;
 
         const minId = messages[0].messageId;
         const maxId = messages[messages.length - 1].messageId;
@@ -1051,7 +1051,6 @@ class MessagesList extends React.Component {
         if (id && this.prevPinnedId !== id) {
             this.prevPinnedId = id;
             TdLibController.clientUpdate({ '@type': 'clientUpdateCurrentPinnedMessage', chatId, messageId: id });
-            console.log('[messages] current', chatId, id);
         }
     };
 
