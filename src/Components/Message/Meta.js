@@ -110,6 +110,7 @@ class Meta extends React.Component {
 
         return (
             <div className={classNames('meta', className)} style={style}>
+                {/*{messageId}*/}
                 <span>&ensp;</span>
                 {views > 0 && (
                     <>

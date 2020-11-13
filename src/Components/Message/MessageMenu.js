@@ -33,7 +33,7 @@ import StopIcon from '../../Assets/Icons/Stop';
 import PinIcon from '../../Assets/Icons/Pin2';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import { isPublicSupergroup } from '../../Utils/Supergroup';
-import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isMessagePinned } from '../../Utils/Message';
+import { canMessageBeClosed, canMessageBeDeleted, canMessageBeEdited, canMessageBeForwarded, canMessageBeUnvoted, isEmptySelection, isMessagePinned } from '../../Utils/Message';
 import { canPinMessages, canSendMessages } from '../../Utils/Chat';
 import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
@@ -187,7 +187,9 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         const selection = window.getSelection().toString();
-        if (selection) return;
+        if (!isEmptySelection(selection)) {
+            return;
+        }
 
         const selected = !MessageStore.selectedItems.has(`chatId=${chatId}_messageId=${messageId}`);
         selectMessage(chatId, messageId, selected);

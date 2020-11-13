@@ -29,7 +29,7 @@ import {
     showMessageForward,
     isMetaBubble,
     canMessageBeForwarded,
-    getMessageStyle
+    getMessageStyle, isBadSelection, isEmptySelection
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
 import { canSendMessages, isChannelChat, isMeChat, isPrivateChat } from '../../Utils/Chat';
@@ -222,8 +222,10 @@ class Message extends Component {
     handleSelection = () => {
         if (!this.mouseDown) return;
 
-        // const selection = window.getSelection();
-        // if (selection.toString()) return;
+        const selection = window.getSelection().toString();
+        if (!isEmptySelection(selection)) {
+            return;
+        }
 
         const { chatId, messageId } = this.props;
 

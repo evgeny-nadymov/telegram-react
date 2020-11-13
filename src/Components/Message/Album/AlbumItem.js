@@ -14,7 +14,7 @@ import MessageMenu from '../MessageMenu';
 import Meta from '../Meta';
 import Photo from '../Media/Photo';
 import Video from '../Media/Video';
-import { getText, getWebPage, openMedia } from '../../../Utils/Message';
+import { getText, getWebPage, isEmptySelection, openMedia } from '../../../Utils/Message';
 import { selectMessage } from '../../../Actions/Client';
 import MessageStore from '../../../Stores/MessageStore';
 import './AlbumItem.css';
@@ -193,9 +193,10 @@ class AlbumItem extends React.Component {
     handleSelection = event => {
         // if (!this.mouseDown) return;
 
-
         const selection = window.getSelection().toString();
-        if (selection) return;
+        if (!isEmptySelection(selection)) {
+            return;
+        }
 
         const { message } = this.props;
         const { chat_id: chatId, id: messageId } = message;

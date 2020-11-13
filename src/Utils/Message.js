@@ -30,6 +30,20 @@ import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function isEmptySelection(selection) {
+    // new line symbol
+    if (selection.length === 1 && selection.charCodeAt(0) === 10) {
+        return true;
+    }
+
+    if (selection.length === 2 && selection.charCodeAt(0) === 10 && selection.charCodeAt(1) === 10) {
+        return true;
+    }
+
+    // console.log('[selection] isBad=false', { selection });
+    return selection.length === 0;
+}
+
 export function senderEquals(lhs, rhs) {
     if (!lhs && !rhs) return true;
     if (!lhs && rhs) return false;

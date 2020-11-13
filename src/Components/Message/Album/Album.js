@@ -22,7 +22,7 @@ import EmptyTile from '../../Tile/EmptyTile';
 import UserTile from '../../Tile/UserTile';
 import { albumHistoryEquals } from '../../../Utils/Common';
 import { selectMessage } from '../../../Actions/Client';
-import { getText, getWebPage, showMessageForward } from '../../../Utils/Message';
+import { getText, getWebPage, isEmptySelection, showMessageForward } from '../../../Utils/Message';
 import { isChannelChat, isMeChat, isPrivateChat } from '../../../Utils/Chat';
 import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
@@ -144,8 +144,10 @@ class Album extends React.Component {
     handleSelection = () => {
         // if (!this.mouseDown) return;
 
-        // const selection = window.getSelection().toString();
-        // if (selection) return;
+        const selection = window.getSelection().toString();
+        if (!isEmptySelection(selection)) {
+            return;
+        }
 
         const { chatId, messageIds } = this.props;
         const { selected } = this.state;
