@@ -81,6 +81,15 @@ class PinnedMessage extends React.Component {
         return false;
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const { chatId } = this.props;
+        const { prevMessageId, messageId } = this.state;
+
+        if (prevProps.chatId !== chatId) {
+            this.animateText(messageId, prevMessageId, 0);
+        }
+    }
+
     componentDidMount() {
         ChatStore.on('clientUpdateSetChatClientData', this.onClientUpdateSetChatClientData);
         MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
@@ -165,14 +174,14 @@ class PinnedMessage extends React.Component {
         this.setPinnedState();
     };
 
-    animateText = (messageId, prevMessageId) => {
+    animateText = (messageId, prevMessageId, duration = 250) => {
+        console.log('[pin] animate', messageId, prevMessageId, duration);
 
         const textElement = document.getElementById('pinned-message-animated-text');
         const text1Element = document.getElementById('pinned-message-animated-text-1');
         const text2Element = document.getElementById('pinned-message-animated-text-2');
         if (!textElement || !text1Element || !text2Element) return;
 
-        const duration = '250ms';
         const timingFunction = 'ease-in-out';
 
         const scrollDown = prevMessageId === 0 || messageId < prevMessageId;
@@ -181,18 +190,18 @@ class PinnedMessage extends React.Component {
             text1Element.style.cssText = 'opacity: 0';
             text2Element.style.cssText = 'opacity: 1';
             requestAnimationFrame(() => {
-                textElement.style.cssText = `transform: translateY(0); transition: transform ${duration} ${timingFunction}`;
-                text1Element.style.cssText = `opacity: 1; transition: opacity ${duration} ${timingFunction}`;
-                text2Element.style.cssText = `opacity: 0; transition: opacity ${duration} ${timingFunction}`;
+                textElement.style.cssText = `transform: translateY(0); transition: transform ${duration}ms ${timingFunction}`;
+                text1Element.style.cssText = `opacity: 1; transition: opacity ${duration}ms ${timingFunction}`;
+                text2Element.style.cssText = `opacity: 0; transition: opacity ${duration}ms ${timingFunction}`;
             });
         } else {
             textElement.style.cssText = 'transform: translateY(0px)';
             text1Element.style.cssText = 'opacity: 1';
             text2Element.style.cssText = 'opacity: 0';
             requestAnimationFrame(() => {
-                textElement.style.cssText = `transform: translateY(-19px); transition: transform ${duration} ${timingFunction}`;
-                text1Element.style.cssText = `opacity: 0; transition: opacity ${duration} ${timingFunction}`;
-                text2Element.style.cssText = `opacity: 1; transition: opacity ${duration} ${timingFunction}`;
+                textElement.style.cssText = `transform: translateY(-19px); transition: transform ${duration}ms ${timingFunction}`;
+                text1Element.style.cssText = `opacity: 0; transition: opacity ${duration}ms ${timingFunction}`;
+                text2Element.style.cssText = `opacity: 1; transition: opacity ${duration}ms ${timingFunction}`;
             });
         }
     };
