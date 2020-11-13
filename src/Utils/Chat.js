@@ -1087,6 +1087,7 @@ export async function getChatMedia(chatId) {
     const promises = [];
 
     const limit = 100;
+    promises.push(getChatFullInfoRequest(chatId) || Promise.resolve(null));
     promises.push(TdLibController.send({
         '@type': 'searchChatMessages',
         chat_id: chatId,
@@ -1147,20 +1148,29 @@ export async function getChatMedia(chatId) {
         limit,
         filter: { '@type': 'searchMessagesFilterPinned' }
     }));
-
     if (isPrivateChat(chatId) && !isMeChat(chatId)) {
-        const userId = getChatUserId(chatId);
-
         promises.push(TdLibController.send({
             '@type': 'getGroupsInCommon',
-            user_id: userId,
+            user_id: getChatUserId(chatId),
             offset_chat_id: 0,
             limit
         }));
+    } else {
+        promises.push(Promise.resolve(null));
+    }
+    if (isSupergroup(chatId) && !isChannelChat(chatId)){
+        promises.push(TdLibController.send({
+            '@type': 'getSupergroupMembers',
+            supergroup_id: getSupergroupId(chatId),
+            filter: { '@type': 'supergroupMembersFilterRecent' },
+            offset: 0,
+            limit: 200
+        }));
     }
 
-    const [photoAndVideo, document, audio, url, voiceNote, pinned, groupsInCommon] = await Promise.all(promises);
+    const [fullInfo, photoAndVideo, document, audio, url, voiceNote, pinned, groupsInCommon, supergroupMembers] = await Promise.all(promises);
     const media = {
+        fullInfo,
         photoAndVideo: photoAndVideo.messages,
         document: document.messages,
         audio: audio.messages,
@@ -1168,6 +1178,7 @@ export async function getChatMedia(chatId) {
         voiceNote: voiceNote.messages,
         pinned: pinned.messages,
         groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : [],
+        supergroupMembers
     }
     // console.log('[media] getChatMedia stop', chatId, media);
 
@@ -1181,7 +1192,7 @@ export async function getChatMedia(chatId) {
     });
 }
 
-async function getChatFullInfo(chatId) {
+export async function getChatFullInfoRequest(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
 
@@ -1189,26 +1200,21 @@ async function getChatFullInfo(chatId) {
     if (!type) return null;
 
     switch (type['@type']) {
-        case 'chatTypePrivate': {
-            return await TdLibController.send({
-                '@type': 'getUserFullInfo',
-                user_id: type.user_id
-            });
-        }
+        case 'chatTypePrivate':
         case 'chatTypeSecret': {
-            return await TdLibController.send({
+            return TdLibController.send({
                 '@type': 'getUserFullInfo',
                 user_id: type.user_id
             });
         }
         case 'chatTypeBasicGroup': {
-            return await TdLibController.send({
+            return TdLibController.send({
                 '@type': 'getBasicGroupFullInfo',
                 basic_group_id: type.basic_group_id
             });
         }
         case 'chatTypeSupergroup': {
-            return await TdLibController.send({
+            return TdLibController.send({
                 '@type': 'getSupergroupFullInfo',
                 supergroup_id: type.supergroup_id
             });
@@ -1216,6 +1222,13 @@ async function getChatFullInfo(chatId) {
     }
 
     return null;
+}
+
+async function getChatFullInfo(chatId) {
+    const request = getChatFullInfoRequest(chatId);
+    if (!request) return null;
+
+    return await request;
 }
 
 function hasBasicGroupId(chatId, basicGroupId) {

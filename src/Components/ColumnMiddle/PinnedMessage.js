@@ -215,6 +215,7 @@ class PinnedMessage extends React.Component {
         const thumbnail = getReplyThumbnail(chatId, messageId);
         const minithumbnail = getReplyMinithumbnail(chatId, messageId);
 
+        MessageStore.currentPinned = { chatId, id: messageId };
         this.setState({
             clientData,
             pinned,
@@ -268,6 +269,7 @@ class PinnedMessage extends React.Component {
             minithumbnail
         }
 
+        MessageStore.currentPinned = { chatId, id: messageId };
         this.setState({
             prevMessageId: messageId,
             messageId: nextMessageId,
@@ -289,6 +291,8 @@ class PinnedMessage extends React.Component {
 
         if (!messageId) return;
         if (event.nativeEvent.which !== 1) return;
+
+        MessageStore.clickedPinned = { chatId, id: messageId };
 
         openChat(chatId, messageId);
 

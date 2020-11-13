@@ -533,6 +533,7 @@ class MessagesList extends React.Component {
         };
         const { sessionId } = this;
 
+        this.prevScrollTop = null;
         this.defferedActions = [];
 
         const scrollPosition = null; //ChatStore.getScrollPosition(chatId);
@@ -605,11 +606,15 @@ class MessagesList extends React.Component {
                 scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_POSITION;
             }
 
+            this.cancelUpdatePinnedMessage = true;
             this.replace(separatorMessageId, result.messages, () => {
                 this.handleScrollBehavior(scrollBehavior, this.snapshot, scrollPosition);
                 if (messageId) {
                     highlightMessage(chatId, messageId);
                 }
+                requestAnimationFrame(() => {
+                    this.cancelUpdatePinnedMessage = false;
+                });
             });
 
             // load files
@@ -623,7 +628,7 @@ class MessagesList extends React.Component {
             this.loadIncompleteHistory(result, limit);
 
             if (previousChatId !== chatId && !this.props.filter) {
-                getChatFullInfo(chatId);
+                 getChatFullInfo(chatId);
                 getChatMedia(chatId);
             }
         } else {
@@ -997,8 +1002,17 @@ class MessagesList extends React.Component {
         return null;
     };
 
-    updatePinnedMessage = () => {
-        const { chatId } = this.props;
+    updatePinnedMessage = scrollToNext => {
+        const { chatId, filter } = this.props;
+        if (filter) return;
+
+        const { prevScrollTop } = this;
+        if (prevScrollTop === null) {
+            // console.log('[pin] handleScroll 3.1');
+            return;
+        }
+        // const { prevScrollTop } = this;
+        // if (prevScrollTop === null) return;
 
         const media = MessageStore.getMedia(chatId);
         if (!media) return;
@@ -1048,9 +1062,20 @@ class MessagesList extends React.Component {
             }
         }
 
-        if (id && this.prevPinnedId !== id) {
-            this.prevPinnedId = id;
+        const { clickedPinned, currentPinned } = MessageStore;
+        // console.log('[pin] handleScroll 3', { id, clickedPinned, currentPinned, scrollToNext, prevScrollTop: this.prevScrollTop });
+        if (id && (!currentPinned || currentPinned.chatId === chatId && currentPinned.id !== id)) {
+
+
+            if (scrollToNext && clickedPinned && clickedPinned.chatId === chatId && clickedPinned.id < id) {
+                // console.log('[pin] handleScroll 3.2');
+                return;
+            }
+
+            // console.log('[pin] handleScroll 4', { chatId, id });
             TdLibController.clientUpdate({ '@type': 'clientUpdateCurrentPinnedMessage', chatId, messageId: id });
+        } else {
+            // console.log('[pin] handleScroll 3.3');
         }
     };
 
@@ -1077,7 +1102,6 @@ class MessagesList extends React.Component {
             }
         }
 
-        this.prevScrollTop = list.scrollTop;
         this.prevHistory = history;
     };
 
@@ -1093,19 +1117,25 @@ class MessagesList extends React.Component {
 
         const scrollToNext = this.prevScrollTop > list.scrollTop;
 
-        const items = this.updateItemsInView();
+        this.updateItemsInView();
 
-        this.updatePinnedMessage(items);
+        if (!this.cancelUpdatePinnedMessage) {
+            this.updatePinnedMessage(scrollToNext);
+        }
 
         this.updateScrollDownVisibility();
 
-        if (scrollToNext && list.scrollTop <= SCROLL_PRECISION) {
-            this.onLoadNext();
+        if (this.prevScrollTop !== null) {
+            if (scrollToNext && list.scrollTop <= SCROLL_PRECISION) {
+                this.onLoadNext();
+            }
+
+            if (!scrollToNext && (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION)) {
+                this.onLoadPrevious();
+            }
         }
 
-        if (!scrollToNext && (list.scrollTop + list.offsetHeight >= list.scrollHeight - SCROLL_PRECISION)) {
-            this.onLoadPrevious();
-        }
+        this.prevScrollTop = list.scrollTop;
     };
 
     handleScrollBehavior = (scrollBehavior, snapshot, position) => {
@@ -1115,6 +1145,7 @@ class MessagesList extends React.Component {
             scrollHeight: 0,
             offsetHeight: 0
         };
+        // console.log('[pin] handleScrollBehavior', scrollBehavior);
 
         // console.log(
         //     `[ml] handleScrollBehavior
