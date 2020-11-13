@@ -249,6 +249,8 @@ class SharedLink extends React.Component {
             <>
                 <div className='shared-link' onContextMenu={this.handleOpenContextMenu}>
                     <SharedLinkTile
+                        chatId={chatId}
+                        messageId={messageId}
                         minithumbnail={minithumbnail}
                         thumbnail={thumbnail}
                         title={getFirstLetter(this.getTitleFromUrl(url))}

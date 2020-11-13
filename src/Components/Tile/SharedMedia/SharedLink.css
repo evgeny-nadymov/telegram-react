@@ -8,7 +8,7 @@
 .shared-link {
     position: relative;
     background: transparent;
-    padding: 12px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: row;
 }

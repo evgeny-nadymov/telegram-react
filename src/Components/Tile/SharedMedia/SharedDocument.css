@@ -14,6 +14,7 @@
 .shared-document .document {
     max-width: unset;
     min-width: unset;
+    margin: 0;
 }
 
 .shared-document .audio-content {
