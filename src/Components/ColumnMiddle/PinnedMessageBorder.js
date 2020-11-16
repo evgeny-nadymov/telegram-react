@@ -12,39 +12,27 @@ import './PinnedMessageBorder.css';
 
 class PinnedMessageBorder extends React.Component {
 
-    getPathData = (barHeight, count) => {
-        let data = '';
-        for (let i = 0; i < count; i++) {
-            const x = 1;
-            const y = 1 + (barHeight + 2) * i;
-            data += `M${x},${y}v${barHeight - 2}Z`;
-        }
-
-        return data;
-    }
+    drawRect = (x, y, width, height, radius) => {
+        return `M${x},${y + radius}A${radius},${radius} 0 0,1 ${x + width},${y + radius}V${y + height - radius}A${radius},${radius} 0 0,1 ${x},${y + height - radius}Z`;
+    };
 
     getClipPath = (id, barHeight, count) => {
+        const radius = 1;
+
+        let d = '';
         if (count === 3) {
-            return (
-                <clipPath id={id}>
-                    <rect x={0} y={0} width={2} height={barHeight} rx={1} ry={1}/>
-                    <rect x={0} y={11} width={2} height={barHeight + 1} rx={1} ry={1}/>
-                    <rect x={0} y={23} width={2} height={barHeight} rx={1} ry={1}/>
-                </clipPath>
-            );
-        }
-
-        const items = [];
-        for (let i = 0; i < count; i++) {
-            const x = 0;
-            const y = (barHeight + 2) * i;
-
-            items.push(<rect key={i} x={x} y={y} width={2} height={barHeight} rx={1} ry={1}/>);
+            d = this.drawRect(0, 0, 2, barHeight, radius)
+                + this.drawRect(0, 11, 2, barHeight + 1, radius)
+                + this.drawRect(0, 23, 2, barHeight, radius);
+        } else {
+            for (let i = 0; i < count; i++) {
+                d += this.drawRect(0, (barHeight + 2) * i, 2, barHeight, radius);
+            }
         }
 
         return (
             <clipPath id={id}>
-                {items}
+                <path d={d}/>
             </clipPath>
         );
     };
