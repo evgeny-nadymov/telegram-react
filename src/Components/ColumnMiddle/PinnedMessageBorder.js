@@ -13,7 +13,7 @@ import './PinnedMessageBorder.css';
 class PinnedMessageBorder extends React.Component {
 
     drawRect = (x, y, width, height, radius) => {
-        return `M${x},${y + radius}A${radius},${radius} 0 0,1 ${x + width},${y + radius}V${y + height - radius}A${radius},${radius} 0 0,1 ${x},${y + height - radius}Z`;
+        return `M${x},${y + radius}a${radius},${radius},0,0,1,${width},0v${height - 2 * radius}a${radius},${radius},0,0,1,${-width},0Z`;
     };
 
     getClipPath = (id, barHeight, count) => {
