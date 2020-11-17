@@ -39,7 +39,7 @@ class NotificationsListItem extends Notifications {
                             {t('Notifications')}
                         </Typography>
                     }
-                    secondary={!isMuted ? t('PopupEnabled') : t('PopupDisabled')}
+                    secondary={!isMuted ? t('NotificationsOn') : t('NotificationsOff')}
                 />
             </ListItem>
         );
