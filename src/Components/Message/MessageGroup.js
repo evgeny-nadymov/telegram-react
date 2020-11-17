@@ -20,24 +20,15 @@ class MessageGroup extends Component {
 
         //this.openForward = this.openForward.bind(this);
         //this.handleUpdateMessageEdited = this.handleUpdateMessageEdited.bind(this);
-        //this.handleUpdateMessageViews = this.handleUpdateMessageViews.bind(this);
         //this.handleUpdateMessageContent = this.handleUpdateMessageContent.bind(this);
     }
 
     componentDidMount() {
         //MessageStore.on('updateMessageEdited', this.handleUpdateMessageEdited);
-        //MessageStore.on('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.on('updateMessageContent', this.handleUpdateMessageContent);
     }
 
     handleUpdateMessageEdited(payload) {
-        //if (this.props.message.chat_id === payload.chat_id
-        //    && this.props.message.id === payload.message_id){
-        //    this.forceUpdate();
-        //}
-    }
-
-    handleUpdateMessageViews(payload) {
         //if (this.props.message.chat_id === payload.chat_id
         //    && this.props.message.id === payload.message_id){
         //    this.forceUpdate();
@@ -53,7 +44,6 @@ class MessageGroup extends Component {
 
     componentWillUnmount() {
         //MessageStore.off('updateMessageEdited', this.handleUpdateMessageEdited);
-        //MessageStore.off('updateMessageViews', this.handleUpdateMessageViews);
         //MessageStore.off('updateMessageContent', this.handleUpdateMessageContent);
     }
 
@@ -98,7 +88,7 @@ class MessageGroup extends Component {
         let messages = this.props.messages;
         if (!messages) return <div>[empty group]</div>;
 
-        let user = UserStore.get(this.props.messages[0].sender_user_id);
+        let user = UserStore.get(this.props.messages[0].sender.user_id);
 
         const groupContent = this.props.messages.map(x => (
             <Message
@@ -114,7 +104,7 @@ class MessageGroup extends Component {
                 {user && (
                     <div className='group-sender'>
                         <div className='group-tile'>
-                            <UserTile userId={this.props.messages[0].sender_user_id} />
+                            <UserTile userId={this.props.messages[0].sender.user_id} />
                         </div>
                     </div>
                 )}

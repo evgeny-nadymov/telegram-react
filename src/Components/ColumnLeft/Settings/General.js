@@ -79,12 +79,12 @@ class General extends React.Component {
                 </div>
                 <div className='sidebar-page-content'>
                     <div className='sidebar-page-section'>
-                        <ListItem autoFocus={false} className='settings-list-item' button onClick={this.openChatBackground}>
-                            <ListItemIcon>
-                                <SharedMediaIcon />
-                            </ListItemIcon>
-                            <ListItemText primary={t('ChatBackground')} />
-                        </ListItem>
+                        {/*<ListItem autoFocus={false} className='settings-list-item' button onClick={this.openChatBackground}>*/}
+                        {/*    <ListItemIcon>*/}
+                        {/*        <SharedMediaIcon />*/}
+                        {/*    </ListItemIcon>*/}
+                        {/*    <ListItemText primary={t('ChatBackground')} />*/}
+                        {/*</ListItem>*/}
                         <ListItem autoFocus={false} className='settings-list-item' button onClick={this.handleAppearance}>
                             <ListItemIcon>
                                 <ColorizeIcon />

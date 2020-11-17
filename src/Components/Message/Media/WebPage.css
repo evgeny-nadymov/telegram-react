@@ -32,8 +32,8 @@
 }
 
 .web-page-button {
-    width: 260px;
-    margin-top: 12px;
+    width: 100%;
+    margin-top: 8px;
     /*color: var(--message-in-reply-title);*/
 }
 
@@ -46,6 +46,11 @@
 }
 
 .web-page-description {
+    white-space: pre-wrap;
+    -webkit-line-clamp: 5;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .web-page-photo {

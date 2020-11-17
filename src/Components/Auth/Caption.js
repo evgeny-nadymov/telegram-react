@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { ReactComponent as Logo } from '../../Assets/telegram-logo.svg';
-// import Lottie from '../Viewer/Lottie';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './Caption.css';
-import QRCode from './QRCode';
 
-const Lottie = React.lazy(() => import('../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../Viewer/RLottie'));
 
 class Caption extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
+            fileId: null,
             data: null,
             lastUpdate: null
         };
@@ -40,7 +39,7 @@ class Caption extends React.Component {
 
             const results = await Promise.all(requests);
 
-            const [closeData, idleData, peekData, trackingData] = await Promise.all(results.map(x => x.json()));
+            const [closeData, idleData, peekData, trackingData] = await Promise.all(results.map(x => x.text()));
 
             this.setState(
                 {
@@ -94,40 +93,77 @@ class Caption extends React.Component {
         AuthStore.off('clientUpdateMonkeyPeek', this.onClientUpdateMonkeyPeek);
     }
 
+    playSegments = (segments, forceFlag) => {
+        const { current } = this.lottieRef;
+        if (!current) {
+            setTimeout(() => {
+                const { current } = this.lottieRef;
+                if (!current) return;
+
+                current.playSegments(segments, forceFlag);
+            }, 100);
+            return;
+        }
+
+        current.playSegments(segments, forceFlag);
+    };
+
     onClientUpdateMonkeyIdle = update => {
         const { idleData } = this.state;
 
         this.setState(
             {
+                fileId: 'idle',
                 data: idleData,
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.anim.playSegments([0, 180], true);
+                this.playSegments([0, 179], true);
             }
         );
+    };
+
+    getFrame = (length, paddingFrames, letterFrames, framesCount) => {
+        if (!length) {
+            return 0;
+        }
+
+        const lastAnimatedLetter = (framesCount - 2 * paddingFrames) / letterFrames;
+
+        let frames = paddingFrames + (length - 1) * letterFrames;
+        if (length > lastAnimatedLetter + 1) {
+            frames += paddingFrames;
+        }
+
+        return Math.min(frames, framesCount - 1);
     };
 
     onClientUpdateMonkeyTracking = update => {
         const { code, prevCode } = update;
         const { trackingData } = this.state;
 
-        const from = Math.min(15 * prevCode.length, 180);
-        const to = Math.min(15 * code.length, 180);
+        const FRAMES_COUNT = 180;
+        const LETTER_FRAMES = 10;
+        const PADDING_FRAMES = 20;
+
+        const from = this.getFrame(prevCode.length, PADDING_FRAMES, LETTER_FRAMES, FRAMES_COUNT);
+        const to = this.getFrame(code.length, PADDING_FRAMES, LETTER_FRAMES, FRAMES_COUNT);
+
+        const isLastFrom = from === 0 || from === 179;
+        const isLastTo = to === 0 || to === 179;
+
+        if (isLastFrom && isLastTo) {
+            return;
+        }
 
         this.setState(
             {
+                fileId: 'tracking',
                 data: trackingData,
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.anim.playSegments([from, to], true);
+                this.playSegments([from, to], true);
             }
         );
     };
@@ -137,14 +173,12 @@ class Caption extends React.Component {
 
         this.setState(
             {
+                fileId: 'close',
                 data: closeData,
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
-                current.anim.playSegments([0, 49], true);
+                this.playSegments([0, 49], true);
             }
         );
     };
@@ -159,17 +193,15 @@ class Caption extends React.Component {
 
         this.setState(
             {
+                fileId: 'peek',
                 data: peekData,
                 lastUpdate: update
             },
             () => {
-                const { current } = this.lottieRef;
-                if (!current) return;
-
                 if (peek) {
-                    current.anim.playSegments([0, 15], true);
+                    this.playSegments([0, 15], true);
                 } else {
-                    current.anim.playSegments([15, 33], true);
+                    this.playSegments([15, 0], true);
                 }
             }
         );
@@ -177,7 +209,7 @@ class Caption extends React.Component {
 
     render() {
         const { state } = this.props;
-        const { data } = this.state;
+        const { fileId, data, trackingData, closeData, peekData, idleData } = this.state;
 
         let control = null;
         switch (state['@type']) {
@@ -196,24 +228,69 @@ class Caption extends React.Component {
             case 'authorizationStateWaitPassword': {
                 control = (
                     <div className='auth-caption-telegram-logo'>
-                        <React.Suspense fallback={null}>
-                            <Lottie
-                                ref={this.lottieRef}
-                                options={{
-                                    autoplay: false,
-                                    loop: false,
-                                    animationData: data,
-                                    renderer: 'svg',
-                                    rendererSettings: {
-                                        preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                        clearCanvas: false,
-                                        progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                        hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                        className: 'auth-caption-lottie'
-                                    }
-                                }}
-                            />
-                        </React.Suspense>
+                        { data && (
+                            <React.Suspense fallback={null}>
+                                <RLottie
+                                    ref={this.lottieRef}
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId,
+                                        stringData: data
+                                    }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'tracking',
+                                        stringData: trackingData,
+                                        queueLength: 1
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'close',
+                                        stringData: closeData,
+                                        queueLength: 1
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'peek',
+                                        stringData: peekData,
+                                        queueLength: 1
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                                <RLottie
+                                    options={{
+                                        width: 160,
+                                        height: 160,
+                                        autoplay: false,
+                                        loop: false,
+                                        fileId: 'idle',
+                                        stringData: idleData,
+                                        queueLength: 1
+                                    }}
+                                    style={{ display: 'none' }}
+                                />
+                            </React.Suspense>
+                        )}
                     </div>
                 );
                 break;

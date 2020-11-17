@@ -269,7 +269,7 @@ class StickersHint extends React.Component {
         ));
 
         return (
-            <div ref={this.hintsRef} className='stickers-hint'>
+            <div ref={this.hintsRef} className='stickers-hint scrollbars-hidden'>
                 {controls}
                 {Boolean(sticker) && showPreview && <StickerPreview sticker={sticker} />}
             </div>

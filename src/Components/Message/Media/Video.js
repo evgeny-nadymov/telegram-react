@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import PlayArrowIcon from '../../../Assets/Icons/PlayArrow';
-import { getFitSize, getDurationString } from '../../../Utils/Common';
+import { getFitSize, getDurationString, getPhotoSize } from '../../../Utils/Common';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
@@ -32,27 +32,31 @@ class Video extends React.Component {
         if (!thumbnail) return;
 
         const { file } = thumbnail;
-        if (file && file.id === fileId) {
-            this.forceUpdate();
-        }
+        if (file && file.id !== fileId) return;
+
+        this.forceUpdate();
     };
 
     render() {
-        const { displaySize, openMedia, title, caption, type, style } = this.props;
+        const { displaySize, stretch, openMedia, title, caption, type, style } = this.props;
         const { minithumbnail, thumbnail, video, width, height, duration } = this.props.video;
 
-        const fitPhotoSize = getFitSize({ width, height } || thumbnail, displaySize);
+        const sizes = [...(thumbnail ? [thumbnail] : []), { width, height }];
+        const photoSize = getPhotoSize(sizes, displaySize);
+        const fitPhotoSize = getFitSize(photoSize, displaySize, stretch);
         if (!fitPhotoSize) return null;
 
         const videoStyle = {
-            width: fitPhotoSize.width,
+            background: 'black',
+            minWidth: stretch ? fitPhotoSize.width : null,
+            width: !stretch ? fitPhotoSize.width : null,
             height: fitPhotoSize.height,
             ...style
         };
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
+        const isBlurred = isBlurredThumbnail(thumbnail, displaySize);
 
         return (
             <div
@@ -64,14 +68,20 @@ class Video extends React.Component {
                 })}
                 style={videoStyle}
                 onClick={openMedia}>
-                <img
-                    className={classNames('video-preview', {
-                        'media-blurred': isBlurred,
-                        'media-mini-blurred': !thumbnailSrc && isBlurred
-                    })}
-                    src={thumbnailSrc || miniSrc}
-                    alt=''
-                />
+                {miniSrc && (
+                    <img
+                        className={classNames('video-preview', 'media-mini-blurred')}
+                        src={miniSrc}
+                        alt=''
+                    />
+                )}
+                {thumbnailSrc && (
+                    <img
+                        className={classNames('video-thumbnail', { 'media-blurred': isBlurred })}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                )}
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
@@ -87,12 +97,14 @@ Video.propTypes = {
     video: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
     size: PropTypes.number,
-    displaySize: PropTypes.number
+    displaySize: PropTypes.number,
+    stretch: PropTypes.bool
 };
 
 Video.defaultProps = {
     size: PHOTO_SIZE,
-    displaySize: PHOTO_DISPLAY_SIZE
+    displaySize: PHOTO_DISPLAY_SIZE,
+    stretch: false
 };
 
 export default Video;

@@ -8,6 +8,7 @@
 .stickers-picker {
     width: 338px;
     height: 358px;
+    overflow-x: hidden;
     background: transparent;
     display: flex;
     flex-direction: column;
@@ -15,8 +16,7 @@
 
 .stickers-picker-scroll {
     background: transparent;
-    margin-right: -15px;
-    padding: 0 12px 6px 6px;
+    padding: 0 6px 6px;
     height: 356px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;

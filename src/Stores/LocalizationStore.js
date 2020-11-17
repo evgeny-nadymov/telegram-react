@@ -47,6 +47,7 @@ i18n.use(initReactI18next).init({
                 FilterCreateError: 'Sorry, you can\'t add more than 10 folders.'
             },
             local: {
+                UnpinAllMessagesAlert: 'Do you want to unpin all messages?',
                 CopyMessageLink: 'Copy Message Link',
                 DragToReposition: 'Drag to Reposition',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',
@@ -138,6 +139,7 @@ i18n.use(initReactI18next).init({
                 GeneralSettings: 'Основные настройки'
             },
             local: {
+                UnpinAllMessagesAlert: 'Хотите открепить все сообщения?',
                 CopyMessageLink: 'Копировать ссылку на сообщение',
                 DragToReposition: 'Перетащите, чтобы изменить положение',
                 PollQuizOneRightAnswer: 'Quiz has only one right answer.',

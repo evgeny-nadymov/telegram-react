@@ -35,7 +35,7 @@ import { CHAT_SLICE_LIMIT, FILTER_TITLE_MAX_LENGTH, NOTIFICATION_AUTO_HIDE_DURAT
 import TdLibController from '../../../Controllers/TdLibController';
 import './CreateFilter.css';
 
-const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../../Viewer/RLottie'));
 
 class CreateFilter extends React.Component {
 
@@ -82,19 +82,13 @@ class CreateFilter extends React.Component {
         if (closeData) return;
 
         try {
-            const requests = [
-                fetch('data/Folders_2.json')
-            ];
+            const requests = [ fetch('data/Folders_2.json') ];
 
             const results = await Promise.all(requests);
 
-            const [data] = await Promise.all(results.map(x => x.json()));
+            const [data] = await Promise.all(results.map(x => x.text()));
 
-            this.setState(
-                {
-                    data
-                }
-            );
+            this.setState({ data });
         } catch (error) {
             console.error(error);
         }
@@ -130,10 +124,9 @@ class CreateFilter extends React.Component {
     handleAnimationClick = () => {
         const lottie = this.lottieRef.current;
         if (!lottie) return;
-        if (!lottie.anim) return;
-        if (!lottie.anim.isPaused) return;
+        if (!lottie.isPaused) return;
 
-        lottie.anim.goToAndPlay(0);
+        lottie.play();
     };
 
     handleDeleteIncludeContacts = () => {
@@ -521,24 +514,22 @@ class CreateFilter extends React.Component {
                 </div>
                 <div className='sidebar-page-content'>
                     <div className='filters-create-animation'>
-                        <React.Suspense fallback={null}>
-                            <Lottie
-                                ref={this.lottieRef}
-                                options={{
-                                    autoplay: true,
-                                    loop: false,
-                                    animationData: data,
-                                    renderer: 'svg',
-                                    rendererSettings: {
-                                        preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                        clearCanvas: false,
-                                        progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                        hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                    }
-                                }}
-                                onClick={this.handleAnimationClick}
-                            />
-                        </React.Suspense>
+                        { data && (
+                            <React.Suspense fallback={null}>
+                                <RLottie
+                                    ref={this.lottieRef}
+                                    options={{
+                                        width: 80,
+                                        height: 80,
+                                        autoplay: true,
+                                        loop: false,
+                                        fileId: 'createFilter',
+                                        stringData: data
+                                    }}
+                                    onClick={this.handleAnimationClick}
+                                />
+                            </React.Suspense>
+                        )}
                     </div>
 
 

@@ -17,14 +17,45 @@ import MessageStore from '../../../Stores/MessageStore';
 import './SharedVoiceNote.css';
 
 class SharedVoiceNote extends React.Component {
-    constructor(props) {
-        super(props);
+    state = {
+        contextMenu: false,
+        left: 0,
+        top: 0
+    };
 
-        this.state = {
-            contextMenu: false,
-            left: 0,
-            top: 0
-        };
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, voiceNote, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (voiceNote !== nextProps.voiceNote) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
     }
 
     handleOpenContextMenu = async event => {
@@ -65,7 +96,7 @@ class SharedVoiceNote extends React.Component {
 
         if (!voiceNote) return null;
 
-        const { date, sender_user_id } = message;
+        const { date, sender } = message;
         const dateString = new Date(date * 1000).toLocaleDateString([i18n.language], {
             day: 'numeric',
             month: 'short',
@@ -82,14 +113,14 @@ class SharedVoiceNote extends React.Component {
                 <div className='shared-voice-note' onContextMenu={this.handleOpenContextMenu}>
                     <VoiceNoteTile chatId={chatId} messageId={messageId} file={file} openMedia={openMedia} />
                     <div className='voice-note-content'>
-                        <MessageAuthor chatId={chatId} messageId={messageId} userId={sender_user_id} />
+                        <div className='document-title'><MessageAuthor sender={sender} messageId={messageId} /></div>
                         <div className='voice-note-meta'>
                             <AudioAction
                                 chatId={chatId}
                                 messageId={messageId}
                                 duration={duration}
                                 file={file}
-                                title={`${dateString}, `}
+                                date={dateString}
                             />
                             <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
                         </div>
@@ -112,8 +143,8 @@ class SharedVoiceNote extends React.Component {
 SharedVoiceNote.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    voiceNote: PropTypes.object.isRequired,
-
+    voiceNote: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
     openMedia: PropTypes.func
 };
 

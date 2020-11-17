@@ -47,9 +47,9 @@ class PrivacySecurity extends React.Component {
         const { users } = this.state;
         if (!users) return;
 
-        const { total_count, user_ids } = users;
+        const { total_count, senders } = users;
         const { is_blocked } = user_full_info;
-        const prevIsBlocked = user_ids.indexOf(user_id) !== -1;
+        const prevIsBlocked = senders.findIndex(x => x.user_id === user_id) !== -1;
         if (is_blocked === prevIsBlocked) return;
 
         if (is_blocked) {
@@ -57,7 +57,7 @@ class PrivacySecurity extends React.Component {
                 users: {
                     ...users,
                     total_count: total_count + 1,
-                    user_ids: [user_id, ...user_ids]
+                    senders: [{ '@type': 'messageSenderUser', user_id }, ...senders]
                 }
             });
         } else {
@@ -65,7 +65,7 @@ class PrivacySecurity extends React.Component {
                 users: {
                     ...users,
                     total_count: total_count - 1,
-                    user_ids: user_ids.filter(x => x !== user_id)
+                    senders: senders.filter(x => x.user_id !== user_id)
                 }
             });
         }
@@ -77,7 +77,7 @@ class PrivacySecurity extends React.Component {
         }).then(sessions => this.setState({ sessions }));
 
         TdLibController.send({
-            '@type': 'getBlockedUsers',
+            '@type': 'getBlockedMessageSenders',
             offset: 0,
             limit: 100
         }).then(users => this.setState({ users }));
@@ -172,45 +172,45 @@ class PrivacySecurity extends React.Component {
                             />
                         </ListItem>
                     </div>
-                    <div className='sidebar-page-section-divider' />
-                    <div className='sidebar-page-section'>
-                        <SectionHeader>{t('PrivacyTitle')}</SectionHeader>
-                        <ListItem className='settings-list-item2' role={undefined} button>
-                            <ListItemText
-                                className='settings-list-item-text2'
-                                primary={t('PrivacyPhoneTitle')}
-                                secondary={t('LastSeenContacts')}
-                            />
-                        </ListItem>
-                        <ListItem className='settings-list-item2' role={undefined} button>
-                            <ListItemText
-                                className='settings-list-item-text2'
-                                primary={t('LastSeenTitle')}
-                                secondary={t('LastSeenEverybody')}
-                            />
-                        </ListItem>
-                        <ListItem className='settings-list-item2' role={undefined} button>
-                            <ListItemText
-                                className='settings-list-item-text2'
-                                primary={t('PrivacyProfilePhotoTitle')}
-                                secondary={t('LastSeenEverybody')}
-                            />
-                        </ListItem>
-                        <ListItem className='settings-list-item2' role={undefined} button>
-                            <ListItemText
-                                className='settings-list-item-text2'
-                                primary={t('PrivacyForwardsTitle')}
-                                secondary={t('LastSeenEverybody')}
-                            />
-                        </ListItem>
-                        <ListItem className='settings-list-item2' role={undefined} button>
-                            <ListItemText
-                                className='settings-list-item-text2'
-                                primary={t('WhoCanAddMe')}
-                                secondary={t('LastSeenEverybody')}
-                            />
-                        </ListItem>
-                    </div>
+                    {/*<div className='sidebar-page-section-divider' />*/}
+                    {/*<div className='sidebar-page-section'>*/}
+                    {/*    <SectionHeader>{t('PrivacyTitle')}</SectionHeader>*/}
+                    {/*    <ListItem className='settings-list-item2' role={undefined} button>*/}
+                    {/*        <ListItemText*/}
+                    {/*            className='settings-list-item-text2'*/}
+                    {/*            primary={t('PrivacyPhoneTitle')}*/}
+                    {/*            secondary={t('LastSeenContacts')}*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <ListItem className='settings-list-item2' role={undefined} button>*/}
+                    {/*        <ListItemText*/}
+                    {/*            className='settings-list-item-text2'*/}
+                    {/*            primary={t('LastSeenTitle')}*/}
+                    {/*            secondary={t('LastSeenEverybody')}*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <ListItem className='settings-list-item2' role={undefined} button>*/}
+                    {/*        <ListItemText*/}
+                    {/*            className='settings-list-item-text2'*/}
+                    {/*            primary={t('PrivacyProfilePhotoTitle')}*/}
+                    {/*            secondary={t('LastSeenEverybody')}*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <ListItem className='settings-list-item2' role={undefined} button>*/}
+                    {/*        <ListItemText*/}
+                    {/*            className='settings-list-item-text2'*/}
+                    {/*            primary={t('PrivacyForwardsTitle')}*/}
+                    {/*            secondary={t('LastSeenEverybody')}*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*    <ListItem className='settings-list-item2' role={undefined} button>*/}
+                    {/*        <ListItemText*/}
+                    {/*            className='settings-list-item-text2'*/}
+                    {/*            primary={t('WhoCanAddMe')}*/}
+                    {/*            secondary={t('LastSeenEverybody')}*/}
+                    {/*        />*/}
+                    {/*    </ListItem>*/}
+                    {/*</div>*/}
                 </div>
                 <SidebarPage open={openBlockedUsers} onClose={this.closeBlockedUsers}>
                     <BlockedUsers users={users} />

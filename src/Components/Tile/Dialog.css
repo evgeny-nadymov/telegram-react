@@ -10,9 +10,12 @@
 /*}*/
 
 .dialog {
-    border-radius: 10px;
     cursor: pointer;
     position: relative;
+    padding: 0;
+    box-sizing: border-box;
+    border-radius: 10px;
+    margin-bottom: 4px;
 }
 
 .dialog:hover {

@@ -13,20 +13,73 @@ import SafeLink from '../Components/Additional/SafeLink';
 import dateFormat from '../Utils/Date';
 import { searchChat, setMediaViewerContent } from '../Actions/Client';
 import { getChatTitle, isMeChat } from './Chat';
-import { openUser } from './../Actions/Client';
+import { openUser } from '../Actions/Client';
 import { getFitSize, getPhotoSize, getSize } from './Common';
-import { download, saveOrDownload } from './File';
+import { download, saveOrDownload, supportsStreaming } from './File';
 import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
 import { getUserFullName } from './User';
-import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../Constants';
+import { getBlockAudio } from './InstantView';
+import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
+import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+
+export function isEmptySelection(selection) {
+    // new line symbol
+    if (selection.length === 1 && selection.charCodeAt(0) === 10) {
+        return true;
+    }
+
+    if (selection.length === 2 && selection.charCodeAt(0) === 10 && selection.charCodeAt(1) === 10) {
+        return true;
+    }
+
+    // console.log('[selection] isBad=false', { selection });
+    return selection.length === 0;
+}
+
+export function senderEquals(lhs, rhs) {
+    if (!lhs && !rhs) return true;
+    if (!lhs && rhs) return false;
+    if (lhs && !rhs) return false;
+
+    switch (lhs['@type']) {
+        case 'messageSenderUser': {
+            return lhs.user_id === rhs.user_id;
+        }
+        case 'messageSenderChat': {
+            return lhs.chat_id === rhs.chat_id;
+        }
+    }
+
+    return false;
+}
+
+export function forwardInfoEquals(lhs, rhs) {
+    if (!lhs && !rhs) return true;
+    if (!lhs && rhs) return false;
+    if (lhs && !rhs) return false;
+
+    switch (lhs.origin['@type']) {
+        case 'messageForwardOriginChannel': {
+            return lhs.origin.chat_id === rhs.origin.chat_id;
+        }
+        case 'messageForwardOriginHiddenUser': {
+            return lhs.origin.sender_name === rhs.origin.sender_name;
+        }
+        case 'messageForwardOriginUser': {
+            return lhs.origin.sender_user_id === rhs.origin.sender_user_id;
+        }
+    }
+
+    return false;
+}
 
 export function isMetaBubble(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
@@ -122,12 +175,16 @@ function getAuthor(message, t = k => k) {
 function getTitle(message, t = k => k) {
     if (!message) return null;
 
-    const { sender_user_id, chat_id } = message;
+    const { sender, chat_id } = message;
 
-    if (sender_user_id) {
-        const user = UserStore.get(sender_user_id);
+    if (!sender) {
+        return null;
+    }
+
+    if (sender.user_id) {
+        const user = UserStore.get(sender.user_id);
         if (user) {
-            return getUserFullName(sender_user_id, null, t);
+            return getUserFullName(sender.user_id, null, t);
         }
     }
 
@@ -163,16 +220,18 @@ function searchCurrentChat(event, text) {
     searchChat(chatId, text);
 }
 
-function getFormattedText(formattedText, t = k => k) {
+function getFormattedText(formattedText, t = k => k, options = { }) {
     if (formattedText['@type'] !== 'formattedText') return null;
 
     const { text, entities } = formattedText;
     if (!text) return null;
-    if (!entities) return text;
-    if (!entities.length) return text;
+    if (!entities) return [text];
+    if (!entities.length) return [text];
 
+    const isValidEntity = options.isValidEntity || (() => true);
     let deleteLineBreakAfterPre = false;
     let result = [];
+
     let index = 0;
     for (let i = 0; i < entities.length; i++) {
         const entity = entities[i];
@@ -202,116 +261,129 @@ function getFormattedText(formattedText, t = k => k) {
             deleteLineBreakAfterPre = false;
         }
 
-        switch (type['@type']) {
-            case 'textEntityTypeBold': {
-                result.push(<strong key={entityKey}>{entityText}</strong>);
-                break;
-            }
-            case 'textEntityTypeBotCommand': {
-                const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
-                result.push(
-                    <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeCashtag': {
-                result.push(
-                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeCode': {
-                result.push(<code key={entityKey}>{entityText}</code>);
-                break;
-            }
-            case 'textEntityTypeEmailAddress': {
-                result.push(
-                    <a
-                        key={entityKey}
-                        href={`mailto:${entityText}`}
-                        onClick={stopPropagation}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeHashtag': {
-                result.push(
-                    <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypeItalic': {
-                result.push(<em key={entityKey}>{entityText}</em>);
-                break;
-            }
-            case 'textEntityTypeMentionName': {
-                result.push(
-                    <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
-                        {entityText}
-                    </MentionLink>
-                );
-                break;
-            }
-            case 'textEntityTypeMention': {
-                result.push(
-                    <MentionLink key={entityKey} username={entityText}>
-                        {entityText}
-                    </MentionLink>
-                );
-                break;
-            }
-            case 'textEntityTypePhoneNumber': {
-                result.push(
-                    <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
-                        {entityText}
-                    </a>
-                );
-                break;
-            }
-            case 'textEntityTypePre': {
-                result.push(<pre key={entityKey}>{entityText}</pre>);
-                deleteLineBreakAfterPre = true;
-                break;
-            }
-            case 'textEntityTypePreCode': {
-                result.push(
-                    <pre key={entityKey}>
+        if (!isValidEntity(entity)) {
+            result.push(entityText);
+        } else {
+
+            switch (type['@type']) {
+                case 'textEntityTypeBold': {
+                    result.push(<strong key={entityKey}>{entityText}</strong>);
+                    break;
+                }
+                case 'textEntityTypeBotCommand': {
+                    const command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
+                    result.push(
+                        <a key={entityKey} onClick={stopPropagation} href={`tg://bot_command?command=${command}&bot=`}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeCashtag': {
+                    result.push(
+                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeCode': {
+                    result.push(<code key={entityKey}>{entityText}</code>);
+                    break;
+                }
+                case 'textEntityTypeEmailAddress': {
+                    result.push(
+                        <a
+                            key={entityKey}
+                            href={`mailto:${entityText}`}
+                            onClick={stopPropagation}
+                            target='_blank'
+                            rel='noopener noreferrer'>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeHashtag': {
+                    result.push(
+                        <a key={entityKey} onClick={event => searchCurrentChat(event, entityText)}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypeItalic': {
+                    result.push(<em key={entityKey}>{entityText}</em>);
+                    break;
+                }
+                case 'textEntityTypeMentionName': {
+                    result.push(
+                        <MentionLink key={entityKey} userId={type.user_id} title={getUserFullName(type.user_id, null, t)}>
+                            {entityText}
+                        </MentionLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeMention': {
+                    result.push(
+                        <MentionLink key={entityKey} username={entityText}>
+                            {entityText}
+                        </MentionLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypePhoneNumber': {
+                    result.push(
+                        <a key={entityKey} href={`tel:${entityText}`} onClick={stopPropagation}>
+                            {entityText}
+                        </a>
+                    );
+                    break;
+                }
+                case 'textEntityTypePre': {
+                    result.push(<pre key={entityKey}>{entityText}</pre>);
+                    deleteLineBreakAfterPre = true;
+                    break;
+                }
+                case 'textEntityTypePreCode': {
+                    result.push(
+                        <pre key={entityKey}>
                         <code>{entityText}</code>
                     </pre>
-                );
-                deleteLineBreakAfterPre = true;
-                break;
-            }
-            case 'textEntityTypeTextUrl': {
-                const url = type.url ? type.url : entityText;
+                    );
+                    deleteLineBreakAfterPre = true;
+                    break;
+                }
+                case 'textEntityTypeStrikethrough': {
+                    result.push(<strike key={entityKey}>{entityText}</strike>);
+                    break;
+                }
+                case 'textEntityTypeTextUrl': {
+                    const url = type.url ? type.url : entityText;
 
-                result.push(
-                    <SafeLink key={entityKey} url={url}>
-                        {entityText}
-                    </SafeLink>
-                );
-                break;
+                    result.push(
+                        <SafeLink key={entityKey} url={url}>
+                            {entityText}
+                        </SafeLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeUrl': {
+                    result.push(
+                        <SafeLink key={entityKey} url={entityText}>
+                            {entityText}
+                        </SafeLink>
+                    );
+                    break;
+                }
+                case 'textEntityTypeUnderline': {
+                    result.push(<u key={entityKey}>{entityText}</u>);
+                    break;
+                }
+                default:
+                    result.push(entityText);
+                    break;
             }
-            case 'textEntityTypeUrl': {
-                result.push(
-                    <SafeLink key={entityKey} url={entityText}>
-                        {entityText}
-                    </SafeLink>
-                );
-                break;
-            }
-            default:
-                result.push(entityText);
-                break;
         }
 
         index += textBeforeLength + entity.length;
@@ -336,7 +408,7 @@ function getText(message, meta, t = k => k) {
     let result = [];
 
     const { content } = message;
-    if (!content) return [...result, meta];
+    if (!content) return [meta];
 
     const { text, caption } = content;
 
@@ -358,6 +430,27 @@ function getWebPage(message) {
 
     return message.content.web_page;
 }
+
+export function getViews(views) {
+    if (views < 1000) {
+        return views
+    }
+
+
+    if (views < 1000000) {
+        views = Math.trunc(views / 100);
+        const fractionDigits = views % 10 < 1 ? 0 : 1;
+
+        return (views / 10).toFixed(fractionDigits) + 'K';
+    }
+
+    views = Math.trunc(views / 100000);
+    const fractionDigits = views % 10 < 1 ? 0 : 1;
+
+    return (views / 10).toFixed(fractionDigits) + 'M';
+}
+
+window.getViews = getViews;
 
 function getDate(date) {
     if (!date) return null;
@@ -433,12 +526,6 @@ function getUnread(message) {
     return chat.last_read_outbox_message_id < message.id;
 }
 
-function getSenderUserId(message) {
-    if (!message) return null;
-
-    return message.sender_user_id;
-}
-
 function filterDuplicateMessages(result, history) {
     if (result.messages.length === 0) return;
     if (history.length === 0) return;
@@ -475,7 +562,10 @@ function getContent(message, t = key => key) {
             return t('AttachGif') + caption;
         }
         case 'messageAudio': {
-            return t('AttachMusic') + caption;
+            const { audio } = content;
+            const title = getAudioTitle(audio) || t('AttachMusic');
+
+            return title + caption;
         }
         case 'messageBasicGroupChatCreate': {
             return getServiceMessageContent(message);
@@ -683,6 +773,57 @@ function isLottieMessage(chatId, messageId) {
     }
 }
 
+export function isEmbedMessage(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
+    if (!message) return false;
+
+    const { content } = message;
+    if (!content) return false;
+
+    switch (content['@type']) {
+        case 'messageText': {
+            const { web_page } = content;
+            if (!web_page) return false;
+
+            const { embed_url, site_name } = web_page;
+            if (!embed_url) return false;
+            if (!site_name) return false;
+
+            switch (site_name) {
+                case 'Coub': {
+                    return true;
+                }
+                case 'SoundCloud': {
+                    return true;
+                }
+                case 'Spotify': {
+                    return true;
+                }
+                case 'Twitch': {
+                    return true;
+                }
+                case 'YouTube': {
+                    return true;
+                }
+                case 'Vimeo': {
+                    return true;
+                }
+                case 'КиноПоиск': {
+                    return true;
+                }
+                case 'Яндекс.Музыка': {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
 function isAnimationMessage(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
@@ -724,7 +865,68 @@ function isContentOpened(chatId, messageId) {
     }
 }
 
-function getMediaTitle(message, t = k => k) {
+export function hasVoice(source) {
+    if (!source) return false;
+
+    switch (source['@type']) {
+        case 'message': {
+            const message = MessageStore.get(source.chat_id, source.id);
+            if (!message) return false;
+
+            const { content } = message;
+            if (!content) return false;
+
+            switch (content['@type']) {
+                case 'messageVoiceNote': {
+                    const { voice_note } = content;
+                    if (voice_note) {
+                        return true;
+                    }
+
+                    break;
+                }
+                case 'messageText': {
+                    const { web_page } = content;
+                    if (web_page) {
+                        const { voice_note } = web_page;
+                        if (voice_note) {
+                            return true;
+                        }
+                    }
+
+                    break;
+                }
+            }
+            break;
+        }
+        case 'pageBlockVoiceNote': {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export function useAudioPlaybackRate(source) {
+    if (!source) return false;
+
+    let audio = null;
+    switch (source['@type']) {
+        case 'message': {
+            audio = getMessageAudio(source.chat_id, source.id);
+            break;
+        }
+        case 'pageBlockAudio': {
+            audio = getBlockAudio(source);
+            break;
+        }
+    }
+
+    return audio && audio.duration > PLAYER_AUDIO_2X_MIN_DURATION;
+}
+
+export function getMessageAudio(chatId, messageId) {
+    const message = MessageStore.get(chatId, messageId);
     if (!message) return null;
 
     const { content } = message;
@@ -733,52 +935,33 @@ function getMediaTitle(message, t = k => k) {
     switch (content['@type']) {
         case 'messageAudio': {
             const { audio } = content;
-            if (audio) {
-                return getAudioTitle(audio);
-            }
-            break;
+
+            return audio;
         }
         case 'messageText': {
             const { web_page } = content;
             if (web_page) {
                 const { audio } = web_page;
-                if (audio) {
-                    return getAudioTitle(audio);
-                }
-                break;
+
+                return audio;
             }
+
+            break;
         }
     }
 
-    return getAuthor(message, t);
+    return null;
 }
 
-function hasAudio(chatId, messageId) {
-    const message = MessageStore.get(chatId, messageId);
-    if (!message) return false;
+function hasAudio(source) {
+    if (!source) return false;
 
-    const { content } = message;
-    if (!content) return false;
-
-    switch (content['@type']) {
-        case 'messageAudio': {
-            const { audio } = content;
-            if (audio) {
-                return true;
-            }
-
-            break;
+    switch (source['@type']) {
+        case 'message': {
+            return !!getMessageAudio(source.chat_id, source.id);
         }
-        case 'messageText': {
-            const { web_page } = content;
-            if (web_page) {
-                const { audio } = web_page;
-                if (audio) {
-                    return true;
-                }
-            }
-
-            break;
+        case 'pageBlockAudio': {
+            return !!getBlockAudio(source);
         }
     }
 
@@ -938,15 +1121,14 @@ function openAudio(audio, message, fileCancel) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { streaming } = TdLibController;
-    if (fileCancel && file.local.is_downloading_active && !streaming) {
+    if (fileCancel && file.local.is_downloading_active && !supportsStreaming()) {
         FileStore.cancelGetRemoteFile(file.id, message);
         return;
     } else if (fileCancel && file.remote.is_uploading_active) {
         FileStore.cancelUploadFile(file.id, message);
         return;
     } else {
-        if (!streaming) {
+        if (!supportsStreaming()) {
             download(file, message, () => FileStore.updateAudioBlob(chat_id, id, file.id));
         }
     }
@@ -957,10 +1139,15 @@ function openAudio(audio, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id
+        source: MessageStore.get(chat_id, id),
+        currentTime,
+        duration
     });
 }
 
@@ -1038,20 +1225,7 @@ function openDocument(document, message, fileCancel) {
         message_id: id
     });
 
-    if (isLottieMessage(chat_id, id)) {
-        TdLibController.send({
-            '@type': 'openMessageContent',
-            chat_id: chat_id,
-            message_id: id
-        });
-
-        setMediaViewerContent({
-            chatId: chat_id,
-            messageId: id
-        });
-    } else {
-        saveOrDownload(file, document.file_name, message);
-    }
+    saveOrDownload(file, document.file_name, message);
 }
 
 function openGame(game, message, fileCancel) {
@@ -1163,7 +1337,7 @@ function openVideo(video, message, fileCancel) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    if (fileCancel && file.local.is_downloading_active) {
+    if (fileCancel && file.local.is_downloading_active && !supportsStreaming()) {
         FileStore.cancelGetRemoteFile(file.id, message);
         return;
     } else if (fileCancel && file.remote.is_uploading_active) {
@@ -1209,10 +1383,15 @@ function openVideoNote(videoNote, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id
+        source: MessageStore.get(chat_id, id),
+        currentTime,
+        duration
     });
 }
 
@@ -1242,10 +1421,15 @@ function openVoiceNote(voiceNote, message, fileCancel) {
         message_id: id
     });
 
+    const { remote } = file;
+    const { unique_id } = remote;
+    const { currentTime, duration } = PlayerStore.getCurrentTime(unique_id);
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateMediaActive',
-        chatId: chat_id,
-        messageId: id
+        source: MessageStore.get(chat_id, id),
+        currentTime,
+        duration
     });
 }
 
@@ -1329,34 +1513,42 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
                 if (animation) {
                     openAnimation(animation, message, fileCancel);
+                    break;
                 }
 
                 if (audio) {
                     openAudio(audio, message, fileCancel);
+                    break;
                 }
 
                 if (document) {
                     openDocument(document, message, fileCancel);
+                    break;
                 }
 
                 if (sticker) {
                     openSticker(sticker, message, fileCancel);
+                    break;
                 }
 
                 if (video) {
                     openVideo(video, message, fileCancel);
+                    break;
                 }
 
                 if (video_note) {
                     openVideoNote(video_note, message, fileCancel);
+                    break;
                 }
 
                 if (voice_note) {
                     openVoiceNote(voice_note, message, fileCancel);
+                    break;
                 }
 
                 if (photo) {
                     openPhoto(photo, message, fileCancel);
+                    break;
                 }
             }
 
@@ -1503,7 +1695,7 @@ export function getReplyMinithumbnail(chatId, messageId) {
     return null;
 }
 
-function getReplyPhotoSize(chatId, messageId) {
+export function getReplyThumbnail(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return;
 
@@ -1529,7 +1721,7 @@ function getReplyPhotoSize(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes);
+            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
         }
         case 'messageDocument': {
             const { document } = content;
@@ -1551,7 +1743,7 @@ function getReplyPhotoSize(chatId, messageId) {
             }
 
             if (photo) {
-                return getPhotoSize(photo.sizes);
+                return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
             }
 
             return null;
@@ -1560,7 +1752,7 @@ function getReplyPhotoSize(chatId, messageId) {
             const { photo } = content;
             if (!photo) return null;
 
-            return getPhotoSize(photo.sizes);
+            return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
         }
         case 'messageSticker': {
             const { sticker } = content;
@@ -1574,7 +1766,7 @@ function getReplyPhotoSize(chatId, messageId) {
             if (web_page) {
                 const { animation, audio, document, photo, sticker, video, video_note } = web_page;
                 if (photo) {
-                    return getPhotoSize(photo.sizes);
+                    return getPhotoSize(photo.sizes, PHOTO_THUMBNAIL_SIZE);
                 }
                 if (animation) {
                     const { thumbnail } = animation;
@@ -1624,6 +1816,8 @@ function getReplyPhotoSize(chatId, messageId) {
 }
 
 function getEmojiMatches(chatId, messageId) {
+    return 0;
+
     const message = MessageStore.get(chatId, messageId);
     if (!message) return 0;
 
@@ -1847,6 +2041,12 @@ export function getNodes(text, entities, t = k => k) {
                     nodes.push(node);
                     break;
                 }
+                case 'textEntityTypeStrikethrough': {
+                    const node = document.createElement('strike');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
+                    break;
+                }
                 case 'textEntityTypeTextUrl': {
                     try {
                         const { url } = x.type;
@@ -1865,6 +2065,12 @@ export function getNodes(text, entities, t = k => k) {
                 }
                 case 'textEntityTypeUrl': {
                     addTextNode(x.offset, x.length, text, nodes);
+                    break;
+                }
+                case 'textEntityTypeUnderline': {
+                    const node = document.createElement('u');
+                    node.innerText = text.substr(x.offset, x.length);
+                    nodes.push(node);
                     break;
                 }
                 default: {
@@ -1902,8 +2108,8 @@ export function getEntities(text) {
     // 1 looking for ``` and ` in order to find mono and pre entities
     text = getMonoPreEntities(text, entities);
 
-    // 2 looking for bold, italic entities
-    text = getBoldItalicEntities(text, entities);
+    // 2 looking for bold, italic, etc. entities
+    text = getSimpleMarkupEntities(text, entities);
 
     return { text, entities };
 }
@@ -2146,6 +2352,31 @@ export function getHTMLEntities(text, entities) {
                 offset += length;
                 break;
             }
+            case 'DEL':
+            case 'S':
+            case 'STRIKE': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeStrikethrough' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
+            case 'INS':
+            case 'U': {
+                entities.push({
+                    '@type': 'textEntity',
+                    offset,
+                    length,
+                    type: { '@type': 'textEntityTypeUnderline' },
+                    textContent: finalText.substring(offset, offset + length)
+                });
+                offset += length;
+                break;
+            }
             default: {
                 offset += length;
                 break;
@@ -2320,10 +2551,12 @@ export function getMonoPreEntities(text, entities) {
     return text;
 }
 
-export function getBoldItalicEntities(text, entities) {
-    const bold = '**';
-    const italic = '__';
-
+export function getSimpleMarkupEntities(text, entities) {
+    const entityTypes = {
+        '*': 'textEntityTypeBold',
+        '_': 'textEntityTypeItalic',
+        '~': 'textEntityTypeStrikethrough'
+    };
 
     let index = -1;     // first index of end tag
     let lastIndex = 0;  // first index after end tag
@@ -2331,11 +2564,10 @@ export function getBoldItalicEntities(text, entities) {
 
     let offset = 0, length = 0;
 
-    for (let c = 0; c < 2; c++) {
+    Object.entries(entityTypes).forEach(([checkChar, type]) => {
+        const checkString = checkChar + checkChar;
         lastIndex = 0;
         start = -1;
-        const checkString = c === 0 ? bold : italic;
-        const checkChar = c === 0 ? '*' : '_';
         while ((index = text.indexOf(checkString, lastIndex)) !== -1) {
             if (start === -1) {
                 const prevChar = index === 0 ? ' ' : text[index - 1];
@@ -2372,7 +2604,7 @@ export function getBoldItalicEntities(text, entities) {
                         offset,
                         length,
                         language: '',
-                        type: { '@type': c === 0 ? 'textEntityTypeBold' : 'textEntityTypeItalic' },
+                        type: { '@type': type },
                         textContent: text.substring(offset, offset + length)
                     };
                     removeOffsetAfter(offset + length, 4, entities);
@@ -2382,7 +2614,7 @@ export function getBoldItalicEntities(text, entities) {
                 start = -1;
             }
         }
-    }
+    })
 
     return text;
 }
@@ -2400,6 +2632,8 @@ export function showMessageForward(chatId, messageId) {
     const message = MessageStore.get(chatId, messageId);
     if (!message) return false;
 
+    if (isMeChat(chatId)) return false;
+
     const { forward_info, content } = message;
 
     return forward_info && content && content['@type'] !== 'messageSticker' && content['@type'] !== 'messageAudio';
@@ -2415,10 +2649,9 @@ export function isTextMessage(chatId, messageId) {
 }
 
 export function isMessagePinned(chatId, messageId) {
-    const chat = ChatStore.get(chatId);
-    if (!chat) return false;
+    const message = MessageStore.get(chatId, messageId);
 
-    return chat.pinned_message_id === messageId;
+    return message && message.is_pinned;
 }
 
 export function canMessageBeUnvoted(chatId, messageId) {
@@ -2472,41 +2705,60 @@ export function getMessageStyle(chatId, messageId) {
 
     switch (content['@type']) {
         case 'messageAnimation': {
-            const { animation } = content;
+            const { animation, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
             if (!animation) return null;
 
             const { width, height, thumbnail } = animation;
 
-            const size = { width, height } || thumbnail;
+            const size = thumbnail || { width, height };
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };
         }
+        case 'messageGame': {
+            return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
+        }
         case 'messagePhoto': {
-            const { photo } = content;
+            const { photo, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
             if (!photo) return null;
 
             const size = getSize(photo.sizes, PHOTO_SIZE);
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, false);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };
         }
+        case 'messageText': {
+            const { web_page } = content;
+            if (!web_page) return null;
+
+            return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
+        }
         case 'messageVideo': {
-            const { video } = content;
+            const { video, caption } = content;
+            if (caption && caption.text) {
+                return { maxWidth: PHOTO_DISPLAY_SIZE };
+            }
+
             if (!video) return null;
 
             const { thumbnail, width, height } = video;
 
-            const size = { width, height } || thumbnail;
+            const size = thumbnail || { width, height };
             if (!size) return null;
 
-            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE);
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
             if (!fitSize) return null;
 
             return { width: fitSize.width };
@@ -2528,7 +2780,6 @@ export {
     isForwardOriginHidden,
     getForwardTitle,
     getUnread,
-    getSenderUserId,
     filterDuplicateMessages,
     filterMessages,
     isMediaContent,
@@ -2538,12 +2789,10 @@ export {
     isLottieMessage,
     getLocationId,
     isContentOpened,
-    getMediaTitle,
     hasAudio,
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhotoSize,
     getEmojiMatches,
     messageComparatorDesc,
     substring,

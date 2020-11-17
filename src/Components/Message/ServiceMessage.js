@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withRestoreRef, withSaveRef, compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -137,6 +138,7 @@ class ServiceMessage extends React.Component {
                             chatId={chatId}
                             messageId={messageId}
                             photo={photo}
+                            displaySize={64}
                             style={chatPhotoStyle}
                             openMedia={this.openMedia}
                         />
@@ -145,6 +147,18 @@ class ServiceMessage extends React.Component {
             </div>
         );
     }
+}
+
+ServiceMessage.propTypes = {
+    chatId: PropTypes.number.isRequired,
+    messageId: PropTypes.number.isRequired,
+    showUnreadSeparator: PropTypes.bool
+}
+
+ServiceMessage.defaultProps = {
+    showTitle: false,
+    showTail: false,
+    showUnreadSeparator: false
 }
 
 const enhance = compose(

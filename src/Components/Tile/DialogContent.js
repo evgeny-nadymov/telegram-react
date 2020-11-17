@@ -76,8 +76,8 @@ class DialogContent extends React.Component {
         const { last_message } = chat;
         if (!last_message) return;
 
-        const { sender_user_id } = last_message;
-        if (sender_user_id !== user.id) return;
+        const { sender } = last_message;
+        if (sender.user_id !== user.id) return;
 
         this.forceUpdate();
     };

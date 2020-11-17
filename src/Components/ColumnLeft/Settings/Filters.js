@@ -25,7 +25,7 @@ import FilterStore from '../../../Stores/FilterStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './Filters.css';
 
-const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../../Viewer/RLottie'));
 
 class Filters extends React.Component {
 
@@ -50,12 +50,10 @@ class Filters extends React.Component {
         this.loadData();
 
         FilterStore.on('updateChatFilters', this.onUpdateChatFilters);
-        // ChatStore.on('updateChatChatList', this.onUpdateChatFilters);
     }
 
     componentWillUnmount() {
         FilterStore.off('updateChatFilters', this.onUpdateChatFilters);
-        // ChatStore.off('updateChatChatList', this.onUpdateChatFilters);
     }
 
     onUpdateChatFilters = update => {
@@ -75,7 +73,7 @@ class Filters extends React.Component {
 
         const { filters: filterInfo } = FilterStore;
         const promises = [];
-        for (let i = 0; i < filterInfo.length; i++) {
+        for (let i = 0; filterInfo && i < filterInfo.length; i++) {
             promises.push(TdLibController.send({
                 '@type': 'getChatFilter',
                 chat_filter_id: filterInfo[i].id
@@ -83,18 +81,14 @@ class Filters extends React.Component {
         }
         const filters = await Promise.all(promises);
 
-        // console.log('[f] filters', filters);
-
         const filtersMap = new Map();
-        for (let i = 0; i < filterInfo.length; i++) {
+        for (let i = 0; filterInfo && i < filterInfo.length; i++) {
             filtersMap.set(filterInfo[i].id, filters[i]);
         }
 
         const recommendedFilters = await TdLibController.send({
             '@type': 'getRecommendedChatFilters'
         });
-
-        // console.log('[f] recommended', recommendedFilters);
 
         this.setState({
             chats,
@@ -115,13 +109,9 @@ class Filters extends React.Component {
 
             const results = await Promise.all(requests);
 
-            const [data] = await Promise.all(results.map(x => x.json()));
+            const [data] = await Promise.all(results.map(x => x.text()));
 
-            this.setState(
-                {
-                    data
-                }
-            );
+            this.setState({ data });
         } catch (error) {
             console.error(error);
         }
@@ -205,10 +195,9 @@ class Filters extends React.Component {
     handleAnimationClick = () => {
         const lottie = this.lottieRef.current;
         if (!lottie) return;
-        if (!lottie.anim) return;
-        if (!lottie.anim.isPaused) return;
+        if (!lottie.isPaused) return;
 
-        lottie.anim.goToAndPlay(0);
+        lottie.play();
     };
 
     handleScheduledAction = message => {
@@ -240,8 +229,6 @@ class Filters extends React.Component {
             && recommendedFilters.chat_filters.length > 0
             && (!filters || filters.length < FILTER_COUNT_MAX);
 
-        // console.log('[f] filters.render');
-
         return (
             <>
                 <div className='header-master'>
@@ -255,24 +242,22 @@ class Filters extends React.Component {
                 <div className='sidebar-page-content'>
                     <div className='sidebar-page-section filters-create'>
                         <div className='filters-create-animation'>
-                            <React.Suspense fallback={null}>
-                                <Lottie
-                                    ref={this.lottieRef}
-                                    options={{
-                                        autoplay: true,
-                                        loop: false,
-                                        animationData: data,
-                                        renderer: 'svg',
-                                        rendererSettings: {
-                                            preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                            clearCanvas: false,
-                                            progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                            hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                        }
-                                    }}
-                                    onClick={this.handleAnimationClick}
-                                />
-                            </React.Suspense>
+                            { data && (
+                                <React.Suspense fallback={null}>
+                                    <RLottie
+                                        ref={this.lottieRef}
+                                        options={{
+                                            width: 80,
+                                            height: 80,
+                                            autoplay: true,
+                                            loop: false,
+                                            fileId: 'filters',
+                                            stringData: data
+                                        }}
+                                        onClick={this.handleAnimationClick}
+                                    />
+                                </React.Suspense>
+                            )}
                         </div>
 
                         <div className='filters-create-hint'>{t('CreateNewFilterInfo')}</div>

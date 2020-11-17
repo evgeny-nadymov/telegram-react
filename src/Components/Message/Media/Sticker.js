@@ -8,20 +8,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-// import Lottie from '../../Viewer/Lottie';
 import { isBlurredThumbnail, isValidAnimatedSticker } from '../../../Utils/Media';
-import { getFitSize } from '../../../Utils/Common';
-import { getBlob, getSrc } from '../../../Utils/File';
-import { inflateBlob } from '../../../Workers/BlobInflator';
+import { getFitSize, isWebpSupported } from '../../../Utils/Common';
+import { getBlob, getPngSrc, getSrc } from '../../../Utils/File';
 import { STICKER_DISPLAY_SIZE } from '../../../Constants';
-import ApplicationStore from '../../../Stores/ApplicationStore';
+import WebpManager from '../../../Stores/WebpManager';
+import AppStore from '../../../Stores/ApplicationStore';
 import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
 import MessageStore from '../../../Stores/MessageStore';
 import StickerStore from '../../../Stores/StickerStore';
 import './Sticker.css';
 
-const Lottie = React.lazy(() => import('../../Viewer/Lottie'));
+const RLottie = React.lazy(() => import('../../Viewer/RLottie'));
 
 export const StickerSourceEnum = Object.freeze({
     HINTS: 'HINTS',
@@ -39,15 +38,16 @@ class Sticker extends React.Component {
 
         this.lottieRef = React.createRef();
         this.windowFocused = window.hasFocus;
-        this.inView = false;
-        this.stickerPreview = StickerStore.stickerPreview;
-        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
-        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
-        this.openIV = Boolean(InstantViewStore.getCurrent());
-        this.dialogChatId = ApplicationStore.dialogChatId;
+        this.messageInView = true;
+        this.stickerPreviewOpened = Boolean(StickerStore.stickerPreview);
+        this.mediaViewerOpened = Boolean(AppStore.mediaViewerContent);
+        this.profileMediaViewerOpened = Boolean(AppStore.profileMediaViewerContent);
+        this.ivOpened = Boolean(InstantViewStore.getCurrent());
+        this.chatPopupOpened = Boolean(AppStore.dialogChatId);
+        this.stickerSetOpened = Boolean(StickerStore.stickerSet);
 
         this.state = {
-            animationDate: null,
+            animationData: null,
             loaded: false,
             hasError: false
         };
@@ -55,8 +55,9 @@ class Sticker extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
         const { sticker } = props;
+        const { prevSticker } = state;
 
-        if (state.prevSticker !== sticker) {
+        if (prevSticker && sticker && prevSticker !== sticker && prevSticker.sticker.id !== sticker.sticker.id) {
             return {
                 prevSticker: sticker,
                 loaded: false,
@@ -76,7 +77,7 @@ class Sticker extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         const { chatId, messageId, sticker, blur, displaySize } = this.props;
-        const { animationData, loaded } = this.state;
+        const { animationData, loaded, pngUrl } = this.state;
 
         if (animationData !== nextState.animationData) {
             return true;
@@ -106,6 +107,10 @@ class Sticker extends React.Component {
             return true;
         }
 
+        if (pngUrl !== nextState.pngUrl) {
+            return true;
+        }
+
         return false;
     }
 
@@ -118,57 +123,63 @@ class Sticker extends React.Component {
     componentDidMount() {
         this.loadContent();
 
-        ApplicationStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
-        ApplicationStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        AppStore.on('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        AppStore.on('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.on('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
+        FileStore.on('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
         FileStore.on('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        FileStore.on('clientUpdateStickerPngBlob', this.onClientUpdateStickerPngBlob);
         MessageStore.on('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.on('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.on('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
     componentWillUnmount() {
-        ApplicationStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
-        ApplicationStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
-        ApplicationStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
-        ApplicationStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
+        this.removeContent();
+
+        AppStore.off('clientUpdateDialogChatId', this.onClientUpdateDialogChatId);
+        AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
+        AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
+        AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         FileStore.off('clientUpdateStickerThumbnailBlob', this.onClientUpdateStickerThumbnailBlob);
+        FileStore.off('clientUpdateStickerThumbnailPngBlob', this.onClientUpdateStickerThumbnailPngBlob);
         FileStore.off('clientUpdateStickerBlob', this.onClientUpdateStickerBlob);
+        FileStore.off('clientUpdateStickerPngBlob', this.onClientUpdateStickerPngBlob);
         MessageStore.off('clientUpdateMessagesInView', this.onClientUpdateMessagesInView);
         StickerStore.off('clientUpdateStickerPreview', this.onClientUpdateStickerPreview);
         StickerStore.off('clientUpdateStickerSet', this.onClientUpdateStickerSet);
     }
 
     onClientUpdateInstantViewContent = update => {
-        this.openIV = Boolean(InstantViewStore.getCurrent());
+        this.ivOpened = Boolean(InstantViewStore.getCurrent());
 
         this.startStopAnimation();
     };
 
     onClientUpdateDialogChatId = update => {
-        this.dialogChatId = ApplicationStore.dialogChatId;
+        this.chatPopupOpened = Boolean(AppStore.dialogChatId);
 
         this.startStopAnimation();
     };
 
     onClientUpdateMediaViewerContent = update => {
-        this.openMediaViewer = Boolean(ApplicationStore.mediaViewerContent);
+        this.mediaViewerOpened = Boolean(AppStore.mediaViewerContent);
 
         this.startStopAnimation();
     };
 
     onClientUpdateProfileMediaViewerContent = update => {
-        this.openProfileMediaViewer = Boolean(ApplicationStore.profileMediaViewerContent);
+        this.profileMediaViewerOpened = Boolean(AppStore.profileMediaViewerContent);
 
         this.startStopAnimation();
     };
 
     onClientUpdateStickerPreview = update => {
-        this.stickerPreview = update.sticker;
+        this.stickerPreviewOpened = Boolean(update.sticker);
 
         this.startStopAnimation();
     };
@@ -177,15 +188,13 @@ class Sticker extends React.Component {
         const { chatId, messageId } = this.props;
         const key = `${chatId}_${messageId}`;
 
-        this.inView = update.messages.has(key);
+        this.messageInView = update.messages.has(key);
 
         this.startStopAnimation();
     };
 
     onClientUpdateStickerSet = update => {
-        const { stickerSet } = update;
-
-        this.openedStickerSet = stickerSet;
+        this.stickerSetOpened = Boolean(update.stickerSet);
 
         this.startStopAnimation();
     };
@@ -202,73 +211,177 @@ class Sticker extends React.Component {
     };
 
     startStopAnimation() {
-        const { autoplay } = this.props;
+        const { autoplay, source } = this.props;
 
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (
-            this.windowFocused &&
-            !this.stickerPreview &&
-            !this.openMediaViewer &&
-            !this.openProfileMediaViewer &&
-            !this.openIV &&
-            !this.dialogChatId
-        ) {
-            if (this.entered) {
-                // console.log('[Sticker] play 1');
-                player.play();
-                this.pause = false;
-                return;
+        const {
+            windowFocused,
+            chatPopupOpened,
+            mediaViewerOpened,
+            profileMediaViewerOpened,
+            ivOpened,
+            stickerPreviewOpened,
+            stickerSetOpened,
+            messageInView,
+            mouseEntered,
+            completeLoop
+        } = this;
+
+        if (!windowFocused) {
+            // console.log('[sticker] stop focused', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        if (chatPopupOpened) {
+            // console.log('[sticker] stop chatPopupOpened', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        if (mediaViewerOpened) {
+            // console.log('[sticker] stop mediaViewerOpened', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        if (profileMediaViewerOpened) {
+            // console.log('[sticker] stop profileMediaViewerOpened', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        if (ivOpened) {
+            // console.log('[sticker] stop ivOpened', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        if (!autoplay && !mouseEntered && !completeLoop) {
+            // console.log('[sticker] stop !autoplay && !mouseEntered', [source, autoplay]);
+            player.pause();
+            return;
+        }
+
+        switch (source) {
+            case StickerSourceEnum.HINTS: {
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
+
+                if (playing) {
+                    player.play();
+                    return;
+                }
+                break;
             }
+            case StickerSourceEnum.MESSAGE: {
+                const playing = !stickerSetOpened && messageInView && !stickerPreviewOpened;
 
-            // console.log('[Sticker] startStopAnimation', this.openedStickerSet);
-            if (!this.openedStickerSet) {
-                if (this.paused) {
-                    // console.log('[Sticker] play 2');
+                if (playing) {
                     player.play();
-                    this.paused = false;
                     return;
                 }
+                break;
+            }
+            case StickerSourceEnum.PICKER: {
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
 
-                if (autoplay && this.inView) {
-                    // console.log('[Sticker] play 3');
+                if (playing) {
                     player.play();
-                    this.paused = false;
                     return;
                 }
+                break;
+            }
+            case StickerSourceEnum.PICKER_HEADER: {
+                const playing = !stickerSetOpened && !stickerPreviewOpened;
+
+                if (playing) {
+                    player.play();
+                    return;
+                }
+                break;
+            }
+            case StickerSourceEnum.PREVIEW: {
+                const playing = true;
+
+                if (playing) {
+                    player.play();
+                    return;
+                }
+                break;
+            }
+            case StickerSourceEnum.STICKER_SET: {
+                const playing = stickerSetOpened && !stickerPreviewOpened;
+
+                if (playing) {
+                    player.play();
+                    return;
+                }
+                break;
+            }
+            case StickerSourceEnum.UNKNOWN: {
+                break;
             }
         }
 
-        // console.log('[Sticker] pause');
-        this.paused = player.pause();
+        // console.log('[sticker] stop', [source, autoplay]);
+        player.pause();
     }
 
-    onClientUpdateStickerBlob = update => {
+    onClientUpdateStickerBlob = async update => {
         const { sticker, is_animated } = this.props.sticker;
         const { fileId } = update;
 
         if (!sticker) return;
+        if (sticker.id !== fileId) return;
 
-        if (sticker.id === fileId) {
-            if (is_animated) {
-                this.loadContent();
-            } else {
-                this.forceUpdate();
-            }
+        if (is_animated) {
+            this.loadContent();
+        } else {
+            if (!await isWebpSupported()) return;
+
+            this.forceUpdate();
+            // FileStore.convertWebpToPng(fileId);
         }
     };
 
-    onClientUpdateStickerThumbnailBlob = update => {
+    onClientUpdateStickerPngBlob = update => {
+        const { sticker, is_animated } = this.props.sticker;
+        const { fileId } = update;
+
+        if (!sticker) return;
+        if (sticker.id !== fileId) return;
+        if (is_animated) return;
+
+        this.forceUpdate();
+    }
+
+    onClientUpdateStickerThumbnailBlob = async update => {
         const { thumbnail } = this.props.sticker;
         if (!thumbnail) return;
 
         const { fileId } = update;
 
         const { file } = thumbnail;
-        if (file && file.id === fileId) {
-            this.forceUpdate();
-        }
+        if (!file) return;
+        if (file.id !== fileId) return;
+        if (!await isWebpSupported()) return;
+
+        this.forceUpdate();
+    };
+
+    onClientUpdateStickerThumbnailPngBlob = update => {
+        const { thumbnail } = this.props.sticker;
+        if (!thumbnail) return;
+
+        const { fileId } = update;
+
+        const { file } = thumbnail;
+        if (!file) return;
+        if (file.id !== fileId) return;
+
+        this.forceUpdate();
     };
 
     loadContent = async () => {
@@ -283,77 +396,80 @@ class Sticker extends React.Component {
         const blob = getBlob(sticker);
         if (!blob) return;
 
-        let animationData = null;
-        try {
-            // animationData = StickerStore.getAnimationData(blob);
-            // if (animationData) {
-            //     this.setState({ animationData });
-            //     return;
-            // }
-            const result = await inflateBlob(blob);
-            if (!result) return;
-
-            animationData = JSON.parse(result);
-            // StickerStore.setAnimationData(blob, animationData);
-        } catch (err) {
-            console.log('[Sticker] loadContent error', err);
-        }
+        const animationData = blob;
         if (!animationData) return;
 
         if (autoplay) {
-            this.setState({ animationData });
+            this.setState({ fileId: sticker.id, animationData });
         } else {
+            this.fileId = sticker.id;
             this.animationData = animationData;
         }
     };
 
-    handleMouseEnter = event => {
-        const { animationData } = this;
-        // console.log('[Sticker] handleMouseEnter', animationData);
-        if (animationData) {
-            this.setState({ animationData }, () => {
-                this.handleAnimationMouseEnter();
-            });
-        }
+    removeContent = () => {
+        const { animationData } = this.state;
+        if (!animationData) return;
+
+        this.setState({
+            animationData: null
+        });
+    };
+
+    handleMouseEnter = () => {
+        const { autoplay } = this.props;
+        if (autoplay) return;
+
+        const { animationData, fileId } = this;
+        if (!animationData) return;
+
+        this.setState({ animationData, fileId }, () => {
+            this.handleAnimationMouseEnter();
+        });
     };
 
     handleAnimationMouseEnter = () => {
-        // console.log('[Sticker] handleAnimationMouseEnter 1');
-        if (this.props.autoplay) return;
-
-        this.entered = true;
+        const { autoplay } = this.props;
+        if (autoplay) return;
 
         const player = this.lottieRef.current;
         if (!player) return;
 
-        // console.log('[Sticker] handleAnimationMouseEnter 2');
         this.loopCount = 0;
+        this.mouseEntered = true;
+        this.completeLoop = false;
+
         this.startStopAnimation();
     };
 
     handleAnimationLoopComplete = () => {
-        if (this.props.autoplay) return;
+        const { autoplay } = this.props;
+        if (autoplay) return;
 
         const player = this.lottieRef.current;
         if (!player) return;
 
-        if (!this.entered) this.loopCount += 1;
-        if (this.loopCount > 2) {
+        if (!this.mouseEntered) this.loopCount += 1;
+        if (this.loopCount > 0) {
+            this.completeLoop = false;
+
             const { animationData } = this.state;
             if (animationData) {
-                this.setState({ animationData: null });
+                this.setState({ loaded: false, animationData: null });
             }
         }
     };
 
-    handleAnimationMouseOut = () => {
-        this.entered = false;
+    handleMouseOut = () => {
+        const { autoplay } = this.props;
+        if (autoplay) return;
+
+        this.mouseEntered = false;
+        this.completeLoop = true;
     };
 
     handleLoad = () => {
-        this.setState({
-            loaded: true
-        });
+        this.setState({ loaded: true });
     };
 
     render() {
@@ -366,16 +482,24 @@ class Sticker extends React.Component {
             sticker: source,
             style,
             openMedia,
-            preview
+            preview,
+            inViewportFunc,
+            meta
         } = this.props;
         const { thumbnail, sticker, width, height } = source;
-        const { animationData, loaded, hasError } = this.state;
+        const { fileId, animationData, loaded, hasError } = this.state;
 
         const isAnimated = isValidAnimatedSticker(source, chatId, messageId);
 
-        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const src = getSrc(sticker);
-        const isBlurred = isBlurredThumbnail(thumbnail) || !preview;
+        const thumbnailSrc =
+            WebpManager.isWebpSupported()
+                ? getSrc(thumbnail ? thumbnail.file : null)
+                : getPngSrc(thumbnail ? thumbnail.file : null);
+        const src =
+            WebpManager.isWebpSupported() || isAnimated
+                ? getSrc(sticker)
+                : getPngSrc(sticker);
+        const isBlurred = isBlurredThumbnail(thumbnail, displaySize) || !preview;
 
         if (hasError) {
             const style = {
@@ -402,59 +526,39 @@ class Sticker extends React.Component {
         }
 
         let content = null;
-        const fitSize = getFitSize({ width: width, height: height }, displaySize);
+        const fitSize = getFitSize({ width, height }, displaySize);
         if (fitSize) {
             content = isAnimated ? (
                 <>
-                    {animationData ? (
+                    {animationData && (
                         <React.Suspense fallback={null}>
-                            <Lottie
+                            <RLottie
                                 ref={this.lottieRef}
                                 options={{
-                                    autoplay: autoplay,
+                                    width: displaySize,
+                                    height: displaySize,
+                                    autoplay,
                                     loop: true,
+                                    fileId,
                                     animationData,
-                                    renderer: 'svg',
-                                    rendererSettings: {
-                                        preserveAspectRatio: 'xMinYMin slice', // Supports the same options as the svg element's preserveAspectRatio property
-                                        clearCanvas: false,
-                                        progressiveLoad: true, // Boolean, only svg renderer, loads dom elements when needed. Might speed up initialization for large number of elements.
-                                        hideOnTransparent: true, //Boolean, only svg renderer, hides elements when opacity reaches 0 (defaults to true)
-                                        className: 'lottie-svg'
-                                    }
+                                    inViewportFunc
                                 }}
                                 eventListeners={[
                                     {
                                         eventName: 'loopComplete',
                                         callback: this.handleAnimationLoopComplete
+                                    },
+                                    {
+                                        eventName: 'firstFrame',
+                                        callback: this.handleLoad
                                     }
                                 ]}
-                                onMouseOut={this.handleAnimationMouseOut}
                             />
                         </React.Suspense>
-                    ) : (
-                        <>
-                            {thumbnailSrc && (
-                                <img
-                                    className={classNames('sticker-image', { 'media-blurred': isBlurred })}
-                                    draggable={false}
-                                    src={thumbnailSrc}
-                                    alt=''
-                                />
-                            )}
-                        </>
                     )}
                 </>
             ) : (
                 <>
-                    { thumbnailSrc && !loaded && (
-                        <img
-                            className={classNames('sticker-image', { 'media-blurred': isBlurred })}
-                            draggable={false}
-                            src={thumbnailSrc}
-                            alt=''
-                        />
-                    )}
                     { src && !preview && <img key={sticker.id} className='sticker-image' src={src} draggable={false} alt='' onLoad={this.handleLoad} /> }
                 </>
             );
@@ -471,8 +575,18 @@ class Sticker extends React.Component {
                 className={classNames('sticker', className)}
                 style={stickerStyle}
                 onClick={openMedia}
-                onMouseEnter={this.handleMouseEnter}>
+                onMouseEnter={this.handleMouseEnter}
+                onMouseOut={this.handleMouseOut}>
+                { thumbnailSrc && (
+                    <img
+                        className={classNames('sticker-image', { 'media-blurred': isBlurred, 'media-loaded': loaded })}
+                        draggable={false}
+                        src={thumbnailSrc}
+                        alt=''
+                    />
+                )}
                 {content}
+                {meta}
             </div>
         );
     }

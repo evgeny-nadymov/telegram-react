@@ -566,7 +566,7 @@ class EditMediaDialog extends React.Component {
         } else if (newItem) {
             media = getMedia({ content: newItem.media });
         }
-        const doneLabel = isEditing ? t('Edit') : t('Send');
+        const doneLabel = isEditing ? t('Save') : t('Send');
 
         return (
             <Dialog
@@ -607,6 +607,7 @@ class EditMediaDialog extends React.Component {
                 <div
                     ref={this.captionRef}
                     id='edit-media-dialog-caption'
+                    className='scrollbars-hidden'
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Caption')}

@@ -6,9 +6,9 @@
  */
 
 .dialogs-list {
-    margin-top: -3px;
+    /*margin-top: -3px;*/
     background: var(--panel-background);
-    overflow-y: auto;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
     height: 100%;

@@ -8,21 +8,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import MediaAudio from '../../Message/Media/Audio';
-import { PHOTO_DISPLAY_SIZE } from '../../../Constants';
 import Caption from './Caption';
 
 function Audio(props) {
-    const { audio, caption, openMedia } = props;
+    const { audio, block, caption, openMedia } = props;
 
     return (
         <figure>
-            <MediaAudio audio={audio} displaySize={PHOTO_DISPLAY_SIZE} openMedia={openMedia} />
+            <MediaAudio block={block} audio={audio} openMedia={openMedia} />
             <Caption text={caption.text} credit={caption.credit} />
         </figure>
     );
 }
 
 Audio.propTypes = {
+    block: PropTypes.object.isRequired,
     audio: PropTypes.object,
     caption: PropTypes.object.isRequired,
     openMedia: PropTypes.func

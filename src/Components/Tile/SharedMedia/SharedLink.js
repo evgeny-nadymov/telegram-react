@@ -7,13 +7,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import ContextMenu from './ContextMenu';
-import Photo from '../../Message/Media/Photo';
 import SafeLink from '../../Additional/SafeLink';
-import { getFirstLetter } from '../../../Utils/Common';
-import { openMedia, substring } from '../../../Utils/Message';
+import SharedLinkTile from './SharedLinkTile';
+import { getFirstLetter, getPhotoSize } from '../../../Utils/Common';
+import { getFormattedText, substring } from '../../../Utils/Message';
 import punycode from '../../../Utils/Punycode';
+import { PHOTO_SIZE } from '../../../Constants';
 import MessageStore from '../../../Stores/MessageStore';
 import './SharedLink.css';
 
@@ -23,6 +23,45 @@ class SharedLink extends React.Component {
         left: 0,
         top: 0
     };
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, webPage, caption, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (webPage !== nextProps.webPage) {
+            return true;
+        }
+
+        if (caption !== nextProps.caption) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
+    }
 
     handleOpenContextMenu = async event => {
         if (event) {
@@ -53,13 +92,16 @@ class SharedLink extends React.Component {
         this.setState({ contextMenu: false });
     };
 
-    isValidEntityType(type) {
+    static isValidEntity(entity) {
+        if (!entity) return false;
+
+        const { type } = entity;
         if (!type) return false;
 
         return (
-            type.type['@type'] === 'textEntityTypeUrl' ||
-            type.type['@type'] === 'textEntityTypeTextUrl' ||
-            type.type['@type'] === 'textEntityTypeEmailAddress'
+            type['@type'] === 'textEntityTypeUrl' ||
+            type['@type'] === 'textEntityTypeTextUrl' ||
+            type['@type'] === 'textEntityTypeEmailAddress'
         );
     }
 
@@ -86,29 +128,72 @@ class SharedLink extends React.Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
 
+        let thumbnail = null;
+        let minithumbnail = null;
         let content = null;
-        let { display_url, description, photo, title, url } = webPage || {
+        let { display_url, description, photo, title, url, animation, audio, document, sticker, video, video_note: videoNote } = webPage || {
             title: '',
-            description: '',
+            description: {
+                '@type': 'formattedText',
+                text: '',
+                entities: []
+            },
             photo: null,
+            animation: null,
+            audio: null,
+            document: null,
+            sticker: null,
+            video: null,
+            video_note: null,
             url: ''
         };
-        if (webPage) {
-            title = title || this.getTitleFromUrl(url);
 
-            content = (
-                <SafeLink className='shared-link-url' url={url}>
-                    {display_url}
-                </SafeLink>
-            );
-        } else {
-            const { text } = message.content;
-            if (text) {
-                const { entities } = text;
-                if (entities && entities.length > 0) {
-                    content = entities.filter(this.isValidEntityType).map(x => {
+        if (animation) {
+            minithumbnail = animation.minithumbnail;
+            thumbnail = animation.thumbnail;
+        } else if (audio) {
+            minithumbnail = audio.album_cover_minithumbnail;
+            thumbnail = audio.album_cover_thumbnail;
+        } else if (document) {
+            minithumbnail = document.minithumbnail;
+            thumbnail = document.thumbnail;
+        } else if (sticker) {
+            minithumbnail = sticker.minithumbnail;
+            thumbnail = sticker.thumbnail;
+        } else if (video) {
+            minithumbnail = video.minithumbnail;
+            thumbnail = video.thumbnail;
+        } else if (videoNote) {
+            minithumbnail = videoNote.minithumbnail;
+            thumbnail = videoNote.thumbnail;
+        }
+
+        if (!thumbnail && !minithumbnail && photo) {
+            minithumbnail = photo.minithumbnail;
+            thumbnail = getPhotoSize(photo.sizes, PHOTO_SIZE);
+        }
+
+        let { text, caption } = message.content;
+        text = text || caption;
+        if (text) {
+            const { entities } = text;
+            if (entities && entities.length > 0) {
+                const longTextMaxLength = 40;
+                const urlEntities = entities.filter(SharedLink.isValidEntity);
+                const showLinks = urlEntities.length > 1 || text.text.length > longTextMaxLength;
+                const oneLinkText = entities.length === 1 && entities[0].offset === 0 && entities[0].length === text.text.length;
+
+                const nonEmptyUrlEntities = urlEntities
+                    .filter(x => {
+                        let entityText = substring(text.text, x.offset, x.offset + x.length).trim();
+                        entityText = entityText.replace(/\u200B/g,'');
+
+                        return entityText.length > 0;
+                    });
+
+                const links = nonEmptyUrlEntities.map((x, i) => {
                         const entityText = substring(text.text, x.offset, x.offset + x.length);
-                        let url = entityText;
+                        url = entityText;
                         let mail = false;
 
                         switch (x.type['@type']) {
@@ -130,37 +215,48 @@ class SharedLink extends React.Component {
                         title = title || this.getTitleFromUrl(url) || ' ';
 
                         return (
-                            <SafeLink className='shared-link-url' url={url} mail={mail}>
+                            <SafeLink key={i} className='shared-link-url' url={url} mail={mail}>
                                 {entityText}
                             </SafeLink>
                         );
                     });
+
+                if (showLinks) {
+                    let d = (nonEmptyUrlEntities.length > 0 && nonEmptyUrlEntities[0].offset > 0 ? text.text.substring(0, nonEmptyUrlEntities[0].offset) : text.text) || description.text || '';
+                    d = d.trim();
+                    content = (
+                        <>
+                            {d && !oneLinkText && <div className='web-page-description'>{d}</div>}
+                            <div>{links}</div>
+                        </>);
+                } else {
+                    let d = description.text || '';
+                    d = d.trim();
+                    content = (
+                        <>
+                            {d && <div className='web-page-description'>{d}</div>}
+                            <div className='shared-link-text'>{getFormattedText(text, x => x, { isValidEntity: SharedLink.isValidEntity })}</div>
+                        </>);
+                }
+
+                if (webPage) {
+                    title = title || this.getTitleFromUrl(url);
                 }
             }
         }
 
-        const tileColor = `tile_color_${(Math.abs(title.charCodeAt(0)) % 7) + 1}`;
-
         return (
             <>
                 <div className='shared-link' onContextMenu={this.handleOpenContextMenu}>
-                    <div className={classNames('shared-link-photo', tileColor)}>
-                        {getFirstLetter(title)}
-                        {photo && (
-                            <Photo
-                                displaySize={90}
-                                chatId={chatId}
-                                messageId={messageId}
-                                photo={photo}
-                                openMedia={openMedia}
-                                showProgress={false}
-                                style={{ width: 48, height: 48, position: 'absolute', top: 0, left: 0 }}
-                            />
-                        )}
-                    </div>
+                    <SharedLinkTile
+                        chatId={chatId}
+                        messageId={messageId}
+                        minithumbnail={minithumbnail}
+                        thumbnail={thumbnail}
+                        title={getFirstLetter(this.getTitleFromUrl(url))}
+                    />
                     <div className='shared-link-content'>
                         {title && <div className='web-page-title'>{title}</div>}
-                        {description && <div className='web-page-description'>{description.text}</div>}
                         {content}
                     </div>
                 </div>
@@ -181,8 +277,9 @@ SharedLink.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
     webPage: PropTypes.object,
-
-    openMedia: PropTypes.func
+    caption: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
+    openMedia: PropTypes.func,
 };
 
 export default SharedLink;

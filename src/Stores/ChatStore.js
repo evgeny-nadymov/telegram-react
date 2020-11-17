@@ -9,6 +9,7 @@ import EventEmitter from './EventEmitter';
 import InputTypingManager from '../Utils/InputTypingManager';
 import { positionListEquals } from '../Utils/Chat';
 import UserStore from './UserStore';
+import MessageStore from './MessageStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class ChatStore extends EventEmitter {
@@ -22,6 +23,7 @@ class ChatStore extends EventEmitter {
     }
 
     reset = () => {
+        this.scrollPositions = new Map();
         this.items = new Map();
         this.typingManagers = new Map();
         this.onlineMemberCount = new Map();
@@ -177,12 +179,14 @@ class ChatStore extends EventEmitter {
                 const chat = this.get(chat_id);
                 if (chat) {
                     this.assign(chat, {
-                        positions: !positions.length ? chat.positions : positions,
+                        positions, // leave channel
+                        // positions: !positions.length ? chat.positions : positions,
                         last_message,
                     });
                 }
 
                 this.updateChatChatLists(chat_id);
+                MessageStore.set(last_message);
 
                 this.emitFastUpdate(update);
                 break;
@@ -221,17 +225,6 @@ class ChatStore extends EventEmitter {
                             break;
                         }
                     }
-                }
-
-                this.emitFastUpdate(update);
-                break;
-            }
-            case 'updateChatPinnedMessage': {
-                const { chat_id, pinned_message_id } = update;
-
-                const chat = this.get(chat_id);
-                if (chat) {
-                    this.assign(chat, { pinned_message_id });
                 }
 
                 this.emitFastUpdate(update);
@@ -411,10 +404,6 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
-            case 'clientUpdateUnpin': {
-                this.emitUpdate(update);
-                break;
-            }
         }
     };
 
@@ -484,6 +473,14 @@ class ChatStore extends EventEmitter {
 
     setTypingManager(chatId, typingManager) {
         return this.typingManagers.set(chatId, typingManager);
+    }
+
+    setScrollPosition(chatId, position) {
+        this.scrollPositions.set(chatId, position);
+    }
+
+    getScrollPosition(chatId) {
+        return this.scrollPositions.get(chatId);
     }
 }
 

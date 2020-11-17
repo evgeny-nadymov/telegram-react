@@ -6,9 +6,14 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
+import MediaAudio from '../Message/Media/Audio';
+import MediaVoiceNote from '../Message/Media/VoiceNote';
 import { openMedia } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
+import { isCurrentSource, playlistItemEquals } from '../../Utils/Player';
+import { openInstantViewMedia } from '../../Utils/InstantView';
 import { SCROLL_PRECISION } from '../../Constants';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -21,16 +26,15 @@ class Playlist extends React.Component {
         this.listRef = React.createRef();
         this.itemRefMap = new Map();
 
-        const { message, playlist } = PlayerStore;
-
-        this.chatId = message ? message.chat_id : 0;
-        this.messageId = message ? message.id : 0;
-
+        const { message, block, playlist } = PlayerStore;
         this.state = {
+            message,
+            block,
+            playlist,
+
             open: false,
             titleMouseOver: false,
-            playlistMouseOver: false,
-            playlist: playlist
+            playlistMouseOver: false
         };
     }
 
@@ -46,10 +50,16 @@ class Playlist extends React.Component {
         const list = this.listRef.current;
         if (!list) return;
 
-        const { messageId } = this;
-        if (!messageId) return;
+        const { playlist, message, block } = this.state;
+        if (!message && !block) return;
+        if (!playlist) return;
 
-        const item = this.itemRefMap.get(messageId);
+        const index = [...playlist.items]
+            .reverse()
+            .findIndex(x => playlistItemEquals(x, message || block));
+        if (index === -1) return;
+
+        const item = this.itemRefMap.get(index);
         if (!item) return;
 
         const node = ReactDOM.findDOMNode(item);
@@ -97,16 +107,36 @@ class Playlist extends React.Component {
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = update;
+        const { source } = update;
 
-        this.chatId = chatId;
-        this.messageId = messageId;
+        switch (source['@type']) {
+            case 'message': {
+
+                this.setState({
+                    message: source,
+                    block: null
+                })
+                break;
+            }
+            case 'instantViewSource': {
+
+                this.setState({
+                    message: null,
+                    block: source.block
+                });
+                break;
+            }
+        }
     };
 
     onClientUpdateMediaPlaylistLoading = update => {
-        const { chatId, messageId } = this;
+        const { message, block } = this.state;
+        const { source } = update;
 
-        if (update.chatId === chatId && update.messageId === messageId) {
+        const chatId = message ? message.chat_id : 0;
+        const messageId = message ? message.id : 0;
+
+        if (isCurrentSource(chatId, messageId, block, source)) {
             this.setState({
                 playlist: null
             });
@@ -114,12 +144,15 @@ class Playlist extends React.Component {
     };
 
     onClientUpdateMediaPlaylist = update => {
-        const { chatId, messageId } = this;
-        const { playlist } = update;
+        const { message, block } = this.state;
+        const { source, playlist } = update;
 
-        if (chatId === playlist.chatId && messageId === playlist.messageId) {
+        const chatId = message ? message.chat_id : 0;
+        const messageId = message ? message.id : 0;
+
+        if (isCurrentSource(chatId, messageId, block, source)) {
             this.setState({
-                playlist: playlist
+                playlist
             });
         }
     };
@@ -179,16 +212,54 @@ class Playlist extends React.Component {
         }
     };
 
+    getPageBlock(block, instantView) {
+        if (!block) return null;
+
+        let element = null;
+        switch (block['@type']) {
+            case 'pageBlockAudio': {
+                element = (
+                    <MediaAudio
+                        block={block}
+                        audio={block.audio}
+                        openMedia={() => openInstantViewMedia(block.audio, block.caption, block, instantView, true)} />
+                );
+                break;
+            }
+            case 'pageBlockVoiceNote': {
+                element = (
+                    <MediaVoiceNote
+                        block={block}
+                        voiceNote={block.voice_note}
+                        openMedia={() => openInstantViewMedia(block.voice_note, block.caption, block, instantView, true)} />
+                );
+                break;
+            }
+        }
+
+        return element;
+    }
+
     render() {
         const { open, playlist } = this.state;
+
         if (!open) return null;
         if (!playlist) return null;
 
-        const { messages } = playlist;
-        if (!messages) return null;
-        if (messages.length <= 1) return null;
+        const { items } = playlist;
+        if (!items) return null;
+        if (items.length <= 1) return null;
 
         this.itemRefMap.clear();
+
+        let iv = null;
+        if (items[0]['@type'] === 'instantViewSource') {
+            iv = playlist.source.instantView;
+        }
+
+        const getMediaFunc = items[0]['@type'] === 'message'
+            ? x => getMedia(x, () => openMedia(x.chat_id, x.id))
+            : x => this.getPageBlock(x, iv)
 
         return (
             <div className='playlist'>
@@ -199,12 +270,11 @@ class Playlist extends React.Component {
                         onMouseEnter={this.handleMouseEnter}
                         onMouseLeave={this.handleMouseLeave}
                         onScroll={this.handleScroll}>
-                        {playlist.messages
-                            .slice(0)
+                        {[...items]
                             .reverse()
-                            .map(x => (
-                                <div key={x.id} ref={el => this.itemRefMap.set(x.id, el)} className='playlist-item'>
-                                    {getMedia(x, () => openMedia(x.chat_id, x.id))}
+                            .map((x, index) => (
+                                <div key={x.id || index} ref={el => this.itemRefMap.set(index, el)} className='playlist-item'>
+                                    {getMediaFunc(x)}
                                 </div>
                             ))}
                     </div>
@@ -213,5 +283,9 @@ class Playlist extends React.Component {
         );
     }
 }
+
+Playlist.propTypes = {
+
+};
 
 export default Playlist;

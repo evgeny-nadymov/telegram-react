@@ -29,6 +29,7 @@
     line-height: normal;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .document-tile-image {

@@ -51,6 +51,7 @@ class CacheStore extends EventEmitter {
                 switch (authorization_state['@type']) {
                     case 'authorizationStateClosed': {
                         this.reset();
+                        this.clear();
                         break;
                     }
                     case 'authorizationStateLoggingOut':
@@ -77,7 +78,7 @@ class CacheStore extends EventEmitter {
     onClientUpdate = update => {
         switch (update['@type']) {
             case 'clientUpdateDialogsReady': {
-                this.clear();
+                this.clearDataUrls();
             }
             default:
                 break;
@@ -103,7 +104,22 @@ class CacheStore extends EventEmitter {
         if (this.cacheContacts) {
             promises.push(CacheManager.load('contacts').catch(error => null));
         }
-        const [cache, files, filters, contacts] = await Promise.all(promises);
+        let [cache, files, filters, contacts] = await Promise.all(promises);
+
+        let dropCache = false;
+        if (cache && cache.chats) {
+            for (let i = 0; i < cache.chats.length; i++) {
+                const { last_message } = cache.chats[i];
+                if (last_message && last_message.sender_user_id) {
+                    dropCache = true;
+                    break;
+                }
+            }
+        }
+        if (dropCache) {
+            cache = null;
+        }
+
         this.cache = cache;
         if (this.cache) {
             this.cache.files = files || [];
@@ -185,8 +201,8 @@ class CacheStore extends EventEmitter {
         const supergroupMap = new Map();
         const meChat = this.meChat;
         const chats = chatIds.map(x => ChatStore.get(x));
+        const chatMap = new Map(chats.map(x => [x.id, x]));
         const archiveChats = archiveChatIds.map(x => ChatStore.get(x));
-
 
         chats.concat(archiveChats).concat([meChat]).forEach(x => {
             const { photo, type, last_message } = x;
@@ -223,19 +239,30 @@ class CacheStore extends EventEmitter {
             }
 
             if (last_message) {
-                const { sender_user_id } = last_message;
-                if (sender_user_id) {
-                    const user = UserStore.get(sender_user_id);
-                    if (user) {
-                        userMap.set(user.id, user);
+                const { sender } = last_message;
+                switch (sender['@type']) {
+                    case 'messageSenderUser': {
+                        const user = UserStore.get(sender.user_id);
+                        if (user) {
+                            userMap.set(user.id, user);
+                        }
+                        break;
+                    }
+                    case 'messageSenderChat': {
+                        const chat = ChatStore.get(sender.chat_id);
+                        if (chat) {
+                            chatMap.set(chat.id, chat);
+                        }
+                        break;
                     }
                 }
             }
         });
 
         return {
+            date: new Date(),
             meChat,
-            chats,
+            chats: [...chatMap.values()],
             archiveChats,
             users: [...userMap.values()],
             basicGroups: [...basicGroupMap.values()],
@@ -303,10 +330,21 @@ class CacheStore extends EventEmitter {
     }
 
     clear() {
+        const promises = [];
+        promises.push(CacheManager.remove('cache').catch(error => null));
+        promises.push(CacheManager.remove('files').catch(error => null));
+        promises.push(CacheManager.remove('filters').catch(error => null));
+        promises.push(CacheManager.remove('contacts').catch(error => null));
+        promises.push(CacheManager.remove('register').catch(error => null));
+
+        Promise.all(promises)
+    }
+
+    clearDataUrls() {
         if (this.cache) {
             const { files } = this.cache;
 
-            files.filter(x => Boolean(x)).forEach(({ id, url }) => {
+            files.forEach(({ id, url }) => {
                 FileStore.deleteDataUrl(id);
             });
         }

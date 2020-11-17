@@ -158,6 +158,8 @@ class EmojiPickerButton extends React.Component {
     };
 
     tryClosePicker = () => {
+        // return;
+
         const { animation, sticker } = this.state;
         if (this.paperEnter || this.buttonEnter || sticker || animation) return;
 
@@ -404,9 +406,9 @@ class EmojiPickerButton extends React.Component {
                             {t('AttachGif')}
                         </Button>
                     </div>
-                    {Boolean(sticker) && <StickerPreview sticker={sticker} />}
-                    {Boolean(animation) && <AnimationPreview animation={animation} />}
                 </div>
+                {Boolean(sticker) && <StickerPreview sticker={sticker} />}
+                {Boolean(animation) && <AnimationPreview animation={animation} />}
             </>
         );
     }

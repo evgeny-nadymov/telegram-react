@@ -288,17 +288,17 @@ class Search extends React.Component {
         const users = new Map();
         for (let i = 0; i < messages.messages.length; i++) {
             chats.set(messages.messages[i].chat_id, messages.messages[i].chat_id);
-            if (messages.messages[i].sender_user_id) {
-                users.set(messages.messages[i].sender_user_id, messages.messages[i].sender_user_id);
+            if (messages.messages[i].sender.user_id) {
+                users.set(messages.messages[i].sender.user_id, messages.messages[i].sender.user_id);
             }
         }
 
         if (linkMessage) {
-            const { chat_id, sender_user_id } = linkMessage;
+            const { chat_id, sender } = linkMessage;
 
             chats.set(chat_id, chat_id);
-            if (sender_user_id) {
-                users.set(sender_user_id, sender_user_id);
+            if (sender.user_id) {
+                users.set(sender.user_id, sender.user_id);
             }
         }
 
@@ -472,8 +472,8 @@ class Search extends React.Component {
         const users = new Map();
         for (let i = 0; i < result.messages.length; i++) {
             chats.set(result.messages[i].chat_id, result.messages[i].chat_id);
-            if (result.messages[i].sender_user_id) {
-                users.set(result.messages[i].sender_user_id, result.messages[i].sender_user_id);
+            if (result.messages[i].sender.user_id) {
+                users.set(result.messages[i].sender.user_id, result.messages[i].sender.user_id);
             }
         }
 

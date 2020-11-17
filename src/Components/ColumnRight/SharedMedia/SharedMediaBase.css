@@ -17,11 +17,13 @@
 
 .shared-photos-list {
     padding: 6px;
+    box-sizing: border-box;
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: flex-start;
     align-content: flex-start;
+    min-height: calc(100% - 44px);
 }
 
 .shared-media-search-list {

@@ -6,8 +6,8 @@
  */
 
 .player {
-    min-width: 320px;
-    min-height: 320px;
+    min-width: 480px;
+    min-height: 480px;
 }
 
 .player-content {
@@ -16,10 +16,19 @@
     height: 100%;
 }
 
+@keyframes player-content-hidden-animation {
+    100% { cursor: none; }
+}
+
+.player-content-hidden {
+    animation: 1s ease-out 1s both player-content-hidden-animation;
+}
+
 .player-video {
     width: 100%;
     height: 100%;
     background: black;
+    pointer-events: none;
 }
 
 .player-panel {
@@ -42,6 +51,7 @@
     padding-bottom: 6px;
     background: transparent;
     user-select: none;
+    color: white;
 }
 
 @keyframes player-panel-hidden-animation {
@@ -91,6 +101,8 @@
     justify-content: left;
     pointer-events: none;
     padding: 0 24px;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .player-button svg {
@@ -135,7 +147,7 @@
 }
 
 .player-slider-thumb::after {
-    display: none;
+    display: none !important;
 }
 
 .player-volume {

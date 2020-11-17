@@ -22,7 +22,7 @@ class UserTile extends Component {
     static getDerivedStateFromProps(props, state) {
         const { userId, firstName, lastName, t } = props;
 
-        if (state.prevUserId !== userId) {
+        if (state.prevUserId !== userId || state.prevFirstName !== firstName || state.prevLastName !== lastName) {
             const user = UserStore.get(userId);
             const file = user && user.profile_photo ? user.profile_photo.small : null;
 
@@ -33,6 +33,8 @@ class UserTile extends Component {
 
             return {
                 prevUserId: userId,
+                prevFirstName: firstName,
+                prevLastName: lastName,
 
                 fileId,
                 src,
@@ -141,11 +143,11 @@ class UserTile extends Component {
     };
 
     render() {
-        const { className, userId, fistName, lastName, onSelect, small, dialog, poll } = this.props;
+        const { className, userId, firstName, lastName, onSelect, small, dialog, poll } = this.props;
         const { fileId, src, loaded, letters } = this.state;
 
         const user = UserStore.get(userId);
-        if (!user && !(fistName || lastName)) return null;
+        if (!user && !(firstName || lastName)) return null;
 
         if (isDeletedUser(userId)) {
             return (
@@ -170,7 +172,7 @@ class UserTile extends Component {
         }
 
         const tileLoaded = src && loaded;
-        const tileColor = `tile_color_${(Math.abs(userId) % 7) + 1}`;
+        const tileColor = `tile_color_${(Math.abs(userId || letters.charCodeAt(0)) % 7) + 1}`;
 
         return (
             <div
@@ -196,7 +198,7 @@ class UserTile extends Component {
 }
 
 UserTile.propTypes = {
-    userId: PropTypes.number.isRequired,
+    userId: PropTypes.number,
     firstName: PropTypes.string,
     lastName: PropTypes.string,
     onSelect: PropTypes.func,

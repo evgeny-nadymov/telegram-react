@@ -17,7 +17,7 @@ import './Document.css';
 
 class Document extends React.Component {
     render() {
-        const { document, openMedia, width, height, meta, title, caption } = this.props;
+        const { document, openMedia, width, height, meta, title, caption, date } = this.props;
         if (!document) return null;
 
         const { minithumbnail, thumbnail, file_name } = document;
@@ -53,7 +53,7 @@ class Document extends React.Component {
                             {file_name}
                         </a>
                     </div>
-                    <DocumentAction file={file} meta={caption ? null : meta} />
+                    <DocumentAction file={file} meta={caption ? null : meta} date={date} />
                 </div>
             </div>
         );
@@ -66,7 +66,8 @@ Document.propTypes = {
     document: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
     width: PropTypes.number,
-    height: PropTypes.number
+    height: PropTypes.number,
+    date: PropTypes.string
 };
 
 export default Document;

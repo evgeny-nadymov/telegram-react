@@ -28,6 +28,7 @@
     flex-direction: row;
     align-items: center;
     padding: 8px 14px;
+    height: 65px;
 }
 
 .sticker-set-dialog-title-typography {
@@ -52,13 +53,13 @@
 .sticker-set-dialog-paper {
     width: 420px;
     max-height: 420px;
+    overflow: hidden;
 }
 
 .sticker-set-dialog-content-root {
     display: flex;
     flex-wrap: wrap;
-    padding: 3px 21px 3px 6px;
-    margin-right: -15px;
+    padding: 3px 6px;
     background: transparent;
 }
 

@@ -17,11 +17,7 @@ import FileStore from '../../../Stores/FileStore';
 import './Photo.css';
 
 class Photo extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {};
-    }
+    state = { };
 
     static getDerivedStateFromProps(props, state) {
         const { photo, size, thumbnailSize } = props;
@@ -57,7 +53,7 @@ class Photo extends React.Component {
     };
 
     render() {
-        const { className, displaySize, openMedia, showProgress, title, caption, type, style } = this.props;
+        const { className, displaySize, stretch, openMedia, showProgress, title, caption, type, style } = this.props;
         const { thumbSize, photoSize, minithumbnail } = this.state;
 
         if (!photoSize) return null;
@@ -65,20 +61,21 @@ class Photo extends React.Component {
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbSize ? thumbSize.photo : null);
         const src = getSrc(photoSize.photo);
-        const isBlurred = (!thumbSrc && miniSrc) || isBlurredThumbnail(thumbSize);
+        const isBlurred = isBlurredThumbnail(thumbSize, displaySize);
 
-        // console.log('[photo] render', photoSize.photo.id, thumbSize.photo.id, src);
-
-        const fitPhotoSize = getFitSize(photoSize, displaySize, false);
+        const fitPhotoSize = getFitSize(photoSize, displaySize, stretch);
         if (!fitPhotoSize) return null;
 
         const photoStyle = {
-            width: fitPhotoSize.width,
+            minWidth: stretch ? fitPhotoSize.width : null,
+            width: !stretch ? fitPhotoSize.width : null,
             height: fitPhotoSize.height,
             ...style
         };
 
-        const hasSrc = Boolean(src || thumbSrc || miniSrc);
+        const hasSrc = Boolean(src || thumbSrc);
+
+        // console.log('[photo] render', [thumbSize, thumbSrc, photoSize, src, minithumbnail]);
 
         return (
             <div
@@ -90,14 +87,18 @@ class Photo extends React.Component {
                 })}
                 style={photoStyle}
                 onClick={openMedia}>
+                {miniSrc && (
+                    <img
+                        className={classNames('photo-preview', 'media-mini-blurred')}
+                        src={miniSrc}
+                        alt=''
+                    />
+                )}
                 {hasSrc && (
                     <img
-                        className={classNames('photo-image', {
-                            'media-blurred': !src && isBlurred,
-                            'media-mini-blurred': !src && !thumbSrc && isBlurred
-                        })}
+                        className={classNames('photo-thumbnail', { 'media-blurred': !src && thumbSrc && isBlurred })}
                         draggable={false}
-                        src={src || thumbSrc || miniSrc}
+                        src={src || thumbSrc}
                         alt=''
                     />
                 )}
@@ -117,6 +118,7 @@ Photo.propTypes = {
     size: PropTypes.number,
     thumbnailSize: PropTypes.number,
     displaySize: PropTypes.number,
+    stretch: PropTypes.bool,
     style: PropTypes.object
 };
 
@@ -124,6 +126,7 @@ Photo.defaultProps = {
     size: PHOTO_SIZE,
     thumbnailSize: PHOTO_THUMBNAIL_SIZE,
     displaySize: PHOTO_DISPLAY_SIZE,
+    stretch: false,
     showProgress: true
 };
 

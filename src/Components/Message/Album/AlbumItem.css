@@ -1,0 +1,91 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.album-item {
+    float: left;
+    padding: 2px;
+    box-sizing: border-box;
+    background: transparent;
+    position: relative;
+}
+
+@keyframes media-highlighted-animation {
+    0% { background: #ffffff88; }
+    77% { background: #ffffff88; }
+    100% { background: transparent; }
+}
+
+.message-album:not(.message-document-album) .album-item-highlighted .album-item-selection {
+    animation: media-highlighted-animation 1s ease-out;
+}
+
+.message-album.message-document-album .album-item-highlighted .album-item-selection {
+    animation: highlighted-animation 1s ease-out;
+}
+
+.album-document-item {
+    padding: 0;
+    box-sizing: border-box;
+    background: transparent;
+    position: relative;
+}
+
+.album-item-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.album-item-selection {
+    pointer-events: none;
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+}
+
+.album-document-item .album-item-selection {
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.album-item-selection-mark {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.album-item-select-tick {
+    width: 18px;
+    height: 18px;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: 9px;
+    opacity: 1;
+    align-self: center;
+    color: white;
+    border: 1px solid white;
+    background: var(--color-accent-main);
+    right: 9px;
+    top: 9px;
+    position: absolute;
+    z-index: 1;
+}
+
+.document-album .album-item-select-tick {
+    left: 42px;
+    right: unset;
+}
+
+.album-item.item-selected .album-item-selection,
+.album-document-item.item-selected .album-item-selection{
+    background: var(--color-accent-main44);
+}

@@ -46,8 +46,8 @@ class MediaStatus extends React.Component {
 }
 
 MediaStatus.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
     icon: PropTypes.node,
     openedIcon: PropTypes.node
 };

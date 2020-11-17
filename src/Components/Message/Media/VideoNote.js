@@ -16,13 +16,14 @@ import MediaStatus from './MediaStatus';
 import { getFileSize, getSrc } from '../../../Utils/File';
 import { isBlurredThumbnail } from '../../../Utils/Media';
 import { clamp, getDurationString } from '../../../Utils/Common';
+import { isCurrentSource } from '../../../Utils/Player';
 import { PHOTO_DISPLAY_SIZE, PHOTO_SIZE } from '../../../Constants';
-import PlayerStore from '../../../Stores/PlayerStore';
-import FileStore from '../../../Stores/FileStore';
-import MessageStore from '../../../Stores/MessageStore';
 import ApplicationStore from '../../../Stores/ApplicationStore';
-import './VideoNote.css';
+import FileStore from '../../../Stores/FileStore';
 import InstantViewStore from '../../../Stores/InstantViewStore';
+import PlayerStore from '../../../Stores/PlayerStore';
+import MessageStore from '../../../Stores/MessageStore';
+import './VideoNote.css';
 
 const circleStyle = {
     circle: 'video-note-progress-circle'
@@ -196,47 +197,50 @@ class VideoNote extends React.Component {
     };
 
     onClientUpdateMediaTime = update => {
-        const { chatId, messageId } = this.props;
-        if (chatId === update.chatId && messageId === update.messageId) {
-            const player = this.videoRef.current;
-            if (player) {
-                this.setState({
-                    currentTime: update.currentTime,
-                    videoDuration: update.duration
-                });
-            }
-        }
+        const { chatId, messageId, block } = this.props;
+        const { currentTime, duration: videoDuration, source } = update;
+
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        const player = this.videoRef.current;
+        if (!player) return;
+
+        this.setState({
+            currentTime,
+            videoDuration
+        });
     };
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState(
-                {
-                    active: false,
-                    srcObject: null,
-                    currentTime: 0
-                },
-                () => {
-                    const player = this.videoRef.current;
-                    if (!player) return;
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
 
-                    this.updateVideoSrc();
+        this.setState(
+            {
+                active: false,
+                srcObject: null,
+                currentTime: 0
+            },
+            () => {
+                const player = this.videoRef.current;
+                if (!player) return;
 
-                    if (!window.hasFocus) {
-                        player.pause();
-                    }
+                this.updateVideoSrc();
+
+                if (!window.hasFocus) {
+                    player.pause();
                 }
-            );
-        }
+            }
+        );
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = this.props;
-        const { video } = this.props.videoNote;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             if (this.state.active) {
             } else {
                 this.setState({
@@ -308,7 +312,7 @@ class VideoNote extends React.Component {
     };
 
     render() {
-        const { displaySize, chatId, messageId, openMedia } = this.props;
+        const { displaySize, chatId, messageId, openMedia, meta } = this.props;
         const { active, currentTime, videoDuration } = this.state;
         const { minithumbnail, thumbnail, video, duration } = this.props.videoNote;
 
@@ -320,9 +324,9 @@ class VideoNote extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const src = getSrc(video);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
+        const isBlurred = isBlurredThumbnail(thumbnail, displaySize);
 
+        const src = getSrc(video);
         let progress = 0;
         if (videoDuration && currentTime) {
             const progressTime = currentTime + 0.25;
@@ -334,12 +338,27 @@ class VideoNote extends React.Component {
                 className={classNames('video-note', { 'video-note-playing': active })}
                 style={style}
                 onClick={openMedia}>
+                <div className='video-note-round'>
+                    {miniSrc && (
+                        <img
+                            className={classNames('video-preview', 'media-mini-blurred')}
+                            src={miniSrc}
+                            alt=''
+                        />
+                    )}
+                    { thumbnailSrc && (
+                        <img
+                            className={classNames('animation-thumbnail', { 'media-blurred': isBlurred })}
+                            src={thumbnailSrc}
+                            alt=''
+                        />
+                    )}
+                </div>
                 {src ? (
                     <>
                         <video
                             ref={this.videoRef}
-                            className={classNames('media-viewer-content-image', 'video-note-round')}
-                            poster={thumbnailSrc || miniSrc}
+                            className={classNames('media-viewer-content-image', 'video-note-video')}
                             muted
                             autoPlay
                             loop
@@ -371,17 +390,6 @@ class VideoNote extends React.Component {
                     </>
                 ) : (
                     <>
-                        <div className='video-note-round'>
-                            <img
-                                className={classNames('animation-preview', {
-                                    'media-blurred': isBlurred,
-                                    'media-mini-blurred': !src && !thumbnailSrc && isBlurred
-                                })}
-                                style={style}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                            />
-                        </div>
                         <div className='animation-meta'>
                             {getDurationString(duration) + ' ' + getFileSize(video)}
                             <MediaStatus chatId={chatId} messageId={messageId} icon={'\u00A0•'} />
@@ -392,14 +400,17 @@ class VideoNote extends React.Component {
                     </>
                 )}
                 <FileProgress file={video} download upload cancelButton icon={<DownloadIcon />} />
+                {meta}
             </div>
         );
     }
 }
 
 VideoNote.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
+    block: PropTypes.object,
+
     videoNote: PropTypes.object.isRequired,
     openMedia: PropTypes.func,
     size: PropTypes.number,

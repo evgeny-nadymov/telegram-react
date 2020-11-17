@@ -39,7 +39,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 3px;
+    /*padding: 3px;*/
     box-sizing: border-box;
     border-radius: 6px;
 }

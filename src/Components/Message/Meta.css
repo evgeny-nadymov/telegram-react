@@ -13,6 +13,7 @@
     color: var(--message-in-meta-color);
     display: flex;
     align-items: center;
+    white-space: nowrap;
 }
 
 .meta-text {
@@ -40,6 +41,7 @@
 
 .meta-hidden {
     opacity: 0;
+    display: inline-flex;
 }
 
 .message .meta a {
@@ -60,4 +62,9 @@
 .meta-views-icon {
     font-size: 14px;
     /*transform: translateY(2px);*/
+}
+
+.meta-pin-icon {
+    font-size: 12px;
+    transform: rotate(45deg) translateY(2px);
 }

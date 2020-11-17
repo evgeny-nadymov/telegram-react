@@ -4,6 +4,7 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
 .media-caption {
     position: absolute;
     bottom: 12px;
@@ -11,6 +12,28 @@
     color: white;
     background: rgba(0, 0, 0, 0.7);
     border-radius: 4px;
+    overflow: hidden;
+
+    /*mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 1) 15px);*/
+}
+
+.media-caption-wrapper {
+    max-height: 140px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+}
+
+.media-caption-wrapper-top {
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 1) 20%);
+}
+
+.media-caption-wrapper-bottom {
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 1) 20%);
+}
+
+.media-caption-wrapper-both {
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 1) 20%, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
 }
 
 .media-caption-text {

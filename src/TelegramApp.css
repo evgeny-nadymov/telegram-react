@@ -25,6 +25,29 @@ body {
     overflow: hidden;
     background: var(--background);
     color: var(--text-primary);
+
+    scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+    scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    /*border: 1px solid transparent;*/
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    /*border: 3px solid transparent;*/
+    /*min-height: 50px;*/
+    /*height: 50px;*/
+    /*max-height: 50px;*/
 }
 
 a {
@@ -97,4 +120,13 @@ mark {
 
 .notification-close-button {
     padding: 4px;
+}
+
+.scrollbars-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scrollbars-hidden::-webkit-scrollbar {
+    display: none;
 }

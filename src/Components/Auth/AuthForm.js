@@ -16,6 +16,7 @@ import AppStore from '../../Stores/ApplicationStore';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './AuthForm.css';
 import QRCode from './QRCode';
+import Footer from '../Footer';
 
 class AuthForm extends React.Component {
     state = {
@@ -101,6 +102,7 @@ class AuthForm extends React.Component {
                 <div className='authorization-form-content'>
                     <Caption state={state} />
                     {control}
+                    <Footer/>
                 </div>
                 <AuthErrorDialog />
             </div>

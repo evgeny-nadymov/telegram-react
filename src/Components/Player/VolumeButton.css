@@ -6,7 +6,7 @@
  */
 
 .volume-button-panel {
-    margin-top: 8px;
+    margin-top: 7px;
     border: 1px solid var(--border);
     background: var(--panel-background);
     display: flex;

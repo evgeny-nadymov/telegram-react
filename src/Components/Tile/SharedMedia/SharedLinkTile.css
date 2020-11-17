@@ -1,0 +1,35 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.shared-link-tile {
+    text-align: center;
+    text-transform: uppercase;
+    color: #ffffff;
+    line-height: 48px;
+    font-size: 19px;
+    /*margin-left: 4px;*/
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    min-width: 48px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.shared-link-tile-photo {
+    user-select: none;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 5px;
+}
+
+.shared-link-tile-photo-round {
+    border-radius: 50%;
+}

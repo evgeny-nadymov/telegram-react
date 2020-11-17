@@ -7,17 +7,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import Player from '../Player/Player';
-import { getMediaFile, getMediaMiniPreview, getMediaPreviewFile, getSrc } from '../../Utils/File';
-import { getText, isAnimationMessage, isVideoMessage } from '../../Utils/Message';
-import { isBlurredThumbnail } from '../../Utils/Media';
-import { setFileOptions } from '../../registerServiceWorker';
+import { getMediaFile, getMediaMinithumbnail, getMediaThumbnail, getSrc } from '../../Utils/File';
+import { getText, isAnimationMessage, isEmbedMessage, isVideoMessage } from '../../Utils/Message';
+import { getThumb } from '../../Utils/Media';
+import { MEDIA_VIEWER_VIDEO_MAX_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
+import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewerContent.css';
 
 class MediaViewerContent extends React.Component {
@@ -33,11 +34,8 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size, t } = props;
 
         if (chatId !== state.prevChatId || messageId !== state.prevMessageId) {
-            let [thumbnailWidth, thumbnailHeight, thumbnail] = getMediaPreviewFile(chatId, messageId);
-            if (thumbnail){
-                thumbnail = FileStore.get(thumbnail.id) || thumbnail;
-            }
-            const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getMediaMiniPreview(chatId, messageId);
+            const thumbnail = getMediaThumbnail(chatId, messageId);
+            const minithumbnail = getMediaMinithumbnail(chatId, messageId);
 
             const message = MessageStore.get(chatId, messageId);
             const text = getText(message, null, t);
@@ -47,12 +45,13 @@ class MediaViewerContent extends React.Component {
             let src = getSrc(file);
             let source = null;
             if (!src && supportsStreaming) {
-                const { video } = message.content;
-                if (video) {
-                    src = `/streaming/file_id=${file.id}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
                 }
             }
+
+            const { content } = message;
+            const { web_page: webPage } = content;
 
             return {
                 prevChatId: chatId,
@@ -68,12 +67,9 @@ class MediaViewerContent extends React.Component {
                 supportsStreaming,
                 mimeType,
                 text,
-                thumbnailWidth,
-                thumbnailHeight,
                 thumbnail,
-                minithumbnailWidth,
-                minithumbnailHeight,
-                minithumbnail
+                minithumbnail,
+                webPage
             };
         }
 
@@ -87,6 +83,7 @@ class MediaViewerContent extends React.Component {
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+        PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
 
     componentWillUnmount() {
@@ -96,7 +93,21 @@ class MediaViewerContent extends React.Component {
         FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+        PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdatePictureInPicture = update => {
+        const { videoInfo } = update;
+        if (!videoInfo) return;
+
+        const { file } = this.state;
+        if (file.id !== videoInfo.fileId) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateMediaViewerContent',
+            content: null
+        });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { src } = this.state;
@@ -113,13 +124,23 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId, size } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+            let [width, height, file, mimeType, supportsStreaming] = getMediaFile(chatId, messageId, size);
+
+            file = FileStore.get(file.id) || file;
+            let src = getSrc(file);
+            let source = null;
+            if (!src && supportsStreaming) {
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
+                }
+            }
 
             this.setState({
                 width,
                 height,
                 file,
-                src: getSrc(file),
+                src,
+                source,
                 supportsStreaming,
                 mimeType
             });
@@ -130,11 +151,9 @@ class MediaViewerContent extends React.Component {
         const { chatId, messageId } = this.props;
 
         if (chatId === update.chatId && messageId === update.messageId) {
-            const [width, height, file] = getMediaPreviewFile(chatId, messageId);
+            const thumbnail = getMediaThumbnail(chatId, messageId);
             this.setState({
-                thumbnailWidth: width,
-                thumbnailHeight: height,
-                thumbnail: file
+                thumbnail
             });
         }
     };
@@ -151,10 +170,8 @@ class MediaViewerContent extends React.Component {
             let src = getSrc(file);
             let source = null;
             if (!src && supportsStreaming) {
-                const { video } = message.content;
-                if (video) {
-                    src = `/streaming/file_id=${file.id}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
+                if (isVideoMessage(chatId, messageId)) {
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${mimeType}`;
                 }
             }
 
@@ -186,6 +203,8 @@ class MediaViewerContent extends React.Component {
         source.loadNextBuffer();
     };
 
+
+
     render() {
         const { chatId, messageId } = this.props;
         const {
@@ -196,32 +215,33 @@ class MediaViewerContent extends React.Component {
             supportsStreaming,
             mimeType,
             text,
-            thumbnailWidth,
-            thumbnailHeight,
             minithumbnail,
             thumbnail,
+            webPage,
             isPlaying
         } = this.state;
 
         if (!file) return null;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
-        const thumbnailSrc = getSrc(thumbnail);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight }) : Boolean(miniSrc);
+        const thumbnailSrc = getSrc(thumbnail ? thumbnail.file : null);
 
+        const isEmbed = isEmbedMessage(chatId, messageId);
         const isVideo = isVideoMessage(chatId, messageId);
         const isAnimation = isAnimationMessage(chatId, messageId);
 
         let videoWidth = width;
         let videoHeight = height;
-        if (Math.max(videoWidth, videoHeight) > 640) {
-            const scale = 640 / Math.max(videoWidth, videoHeight);
-            videoWidth = videoWidth > videoHeight ? 640 : Math.floor(videoWidth * scale);
-            videoHeight = videoHeight > videoWidth ? 640 : Math.floor(videoHeight * scale);
-        }
+        const scale = MEDIA_VIEWER_VIDEO_MAX_SIZE / Math.max(videoWidth, videoHeight);
+        const w = videoWidth > videoHeight ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoWidth * scale);
+        const h = videoHeight > videoWidth ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoHeight * scale);
+        videoWidth = w;
+        videoHeight = h;
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
+        const thumb = getThumb(thumbnail, minithumbnail, videoWidth, videoHeight);
+
         if (isVideo) {
             content = (
                 <div className='media-viewer-content-wrapper'>
@@ -238,29 +258,24 @@ class MediaViewerContent extends React.Component {
                     >
                         {source}
                     </Player>
-                    {!isPlaying && !supportsStreaming &&
-                        ((thumbnailSrc || miniSrc) ? (
-                            <img
-                                className={classNames('media-viewer-content-video-thumbnail', {
-                                    'media-blurred': isBlurred
-                                })}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                                width={videoWidth}
-                                height={videoHeight}
-                            />
-                        ) : (
-                            <div
-                                className='media-viewer-content-video-thumbnail'
-                                style={{
-                                    width: videoWidth,
-                                    height: videoHeight
-                                }}
-                            />
-                        ))}
+                    {!isPlaying && !supportsStreaming && thumb}
                 </div>
             );
         } else if (isAnimation) {
+            // const message = MessageStore.get(chatId, messageId);
+            //
+            // content = (
+            //     <Animation
+            //         type='preview'
+            //         stretch={true}
+            //         displaySize={ANIMATION_PREVIEW_DISPLAY_SIZE}
+            //         animation={message.content.animation || message.content.web_page.animation}
+            //         onClick={this.handleContentClick}
+            //         showProgress={false}
+            //         style={{ borderRadius: 0 }}
+            //         />
+            // );
+
             content = (
                 <div className='media-viewer-content-wrapper'>
                     <video
@@ -277,26 +292,45 @@ class MediaViewerContent extends React.Component {
                     >
                         {source}
                     </video>
-                    {!isPlaying &&
-                        ((thumbnailSrc || miniSrc) ? (
-                            <img
-                                className={classNames('media-viewer-content-video-thumbnail', {
-                                    'media-blurred': isBlurred
-                                })}
-                                src={thumbnailSrc || miniSrc}
-                                alt=''
-                                width={videoWidth}
-                                height={videoHeight}
-                            />
-                        ) : (
-                            <div
-                                className='media-viewer-content-video-thumbnail'
-                                style={{
-                                    width: videoWidth,
-                                    height: videoHeight
-                                }}
-                            />
-                        ))}
+                    {!isPlaying && thumb}
+                </div>
+            );
+        } else if (webPage && webPage.embed_url) {
+            let { embed_url: url } = webPage;
+
+            switch (webPage.site_name) {
+                case 'Coub': {
+                    break;
+                }
+                case 'SoundCloud': {
+                    break;
+                }
+                case 'Spotify': {
+                    break;
+                }
+                case 'Twitch': {
+                    url += `&parent=${window.location.hostname}`;
+                    break;
+                }
+                case 'YouTube': {
+                    url += '?iv_load_policy=3&controls=2&playsinline=1&rel=0&modestbranding=0&autoplay=1&enablejsapi=0&widgetid=1&showinfo=0';
+                    break;
+                }
+                case 'Vimeo': {
+                    url += '?playsinline=true&autoplay=true&dnt=true&title=false';
+                    break;
+                }
+                case 'КиноПоиск': {
+                    break;
+                }
+                case 'Яндекс.Музыка': {
+                    break;
+                }
+            }
+
+            content = (
+                <div className='media-viewer-content-wrapper'>
+                    <iframe src={url} width={videoWidth} height={videoHeight} frameBorder={0} allowFullScreen={true} scrolling='no' style={{ background: 'black' }}/>
                 </div>
             );
         } else {
@@ -306,11 +340,13 @@ class MediaViewerContent extends React.Component {
         }
 
         return (
-            <div className='media-viewer-content'>
-                {content}
-                {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
-                {text && text.length > 0 && <MediaCaption text={text} />}
-            </div>
+            <>
+                <div className='media-viewer-content'>
+                    {content}
+                    {!supportsStreaming && <FileProgress file={file} zIndex={2} />}
+                </div>
+                {text && text.length > 0 && !isVideo && !isEmbed && <MediaCaption text={text} />}
+            </>
         );
     }
 }

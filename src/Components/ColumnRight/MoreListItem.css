@@ -8,3 +8,8 @@
 .list-item {
     padding: 11px 22px;
 }
+
+.list-item-rounded {
+    padding: 11px 22px;
+    border-radius: 8px;
+}

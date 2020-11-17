@@ -20,6 +20,7 @@ import Hint from './Hint';
 import Progress from './Progress';
 import { clamp, getDurationString } from '../../Utils/Common';
 import {
+    PLAYER_LOOP_MAX_DURATION,
     PLAYER_PLAYBACKRATE_MAX,
     PLAYER_PLAYBACKRATE_MIN,
     PLAYER_PLAYBACKRATE_STEP,
@@ -29,6 +30,7 @@ import {
     PLAYER_VOLUME_MIN,
     PLAYER_VOLUME_STEP
 } from '../../Constants';
+import FileStore from '../../Stores/FileStore';
 import PlayerStore from '../../Stores/PlayerStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Player.css';
@@ -41,9 +43,12 @@ class Player extends React.Component {
         this.contentRef = React.createRef();
         this.videoRef = React.createRef();
 
+        const { currentTime, duration } = this.getCurrentTime();
+
         this.state = {
-            duration: 0,
-            currentTime: 0,
+            noPoster: currentTime > 0 && duration > 0,
+            duration,
+            currentTime,
             volume: PlayerStore.volume,
             play: true,
             dragging: false,
@@ -312,6 +317,9 @@ class Player extends React.Component {
 
         TdLibController.clientUpdate({ '@type': 'clientUpdateMediaViewerEnded' });
         onEnded && onEnded(event);
+
+        const video = this.videoRef.current;
+        this.setCurrentTime({ currentTime: 0, duration: video.duration });
     };
 
     handleTimeUpdate = () => {
@@ -335,7 +343,9 @@ class Player extends React.Component {
             duration,
             volume,
             buffered
-        })
+        });
+
+        this.setCurrentTime({ currentTime, duration });
     };
 
     handleLoadedData = () => {
@@ -347,29 +357,18 @@ class Player extends React.Component {
         const video = this.videoRef.current;
         if (!video) return;
 
-        const { currentTime, duration, volume, buffered } = video;
+        const { currentTime } = this.state;
+        const { duration, volume, buffered } = video;
 
         this.setState({
             duration,
-            currentTime: 0,
             volume,
             waiting: true,
             buffered
-        });
+        }, () => {
+            if (!currentTime) return;
 
-        return;
-        const stream = video.captureStream();
-
-        const v2 = document.getElementById('v2');
-        v2.srcObject = stream;
-    };
-
-    handleChange = (event, value) => {
-        const video = this.videoRef.current;
-        if (!video) return;
-
-        this.setState({
-            draggingTime: value * video.duration
+            video.currentTime = currentTime;
         });
     };
 
@@ -382,6 +381,15 @@ class Player extends React.Component {
         this.setState({
             dragging: true,
             draggingTime: video.currentTime
+        });
+    };
+
+    handleChange = (event, value) => {
+        const video = this.videoRef.current;
+        if (!video) return;
+
+        this.setState({
+            draggingTime: value * video.duration
         });
     };
 
@@ -445,7 +453,7 @@ class Player extends React.Component {
         event.stopPropagation();
     }
 
-    getVolumeIcon = value => {
+    static getVolumeIcon = value => {
         if (value === 0) {
             return <VolumeOffIcon fontSize='small' />;
         }
@@ -538,7 +546,7 @@ class Player extends React.Component {
         });
     };
 
-    getBufferedTime = (time, buffered) => {
+    static getBufferedTime = (time, buffered) => {
         if (!buffered || !buffered.length) {
             return 0;
         }
@@ -555,16 +563,15 @@ class Player extends React.Component {
     }
 
     handleWaiting = () => {
-        this.setState({
-            waiting: true
-        });
+        this.setState({ waiting: true });
     };
 
-    handleCanPlay = () => {
+    handleCanPlay = event => {
+        const { target: video } = event;
+
         this.setState({
             waiting: false
         }, () => {
-            const video = this.videoRef.current;
             if (!video) return;
 
             const { play } = this.state;
@@ -577,8 +584,28 @@ class Player extends React.Component {
     };
 
     handlePictureInPicture = async () => {
+        const { fileId } = this.props;
+        const { duration, currentTime, volume, play, buffered, waiting } = this.state;
+
         const video = this.videoRef.current;
         if (!video) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdatePictureInPicture',
+            videoInfo: {
+                fileId,
+                video,
+                duration,
+                currentTime,
+                volume,
+                play,
+                buffered,
+                waiting
+            }
+        });
+
+        return;
+
         if (!video.duration) return;
 
         const pictureInPictureElement = document.pictureInPictureElement || document.mozPictureInPictureElement || document.webkitPictureInPictureElement;
@@ -629,6 +656,11 @@ class Player extends React.Component {
         event.preventDefault();
     };
 
+    handlePanelDoubleClick = event => {
+        event.preventDefault();
+        event.stopPropagation();
+    };
+
     handlePanelEnter = () => {
         this.panelEnter = true;
     };
@@ -655,15 +687,49 @@ class Player extends React.Component {
                 hidden: true
             });
         }, 1000);
-    }
+    };
+
+    getCurrentTime = () => {
+        const { fileId } = this.props;
+
+        const file = FileStore.get(fileId);
+        if (!file) return { currentTime: 0, duration: 0 };
+
+        const { remote } = file;
+        if (!remote) return { currentTime: 0, duration: 0 };
+
+        const { unique_id } = remote;
+        if (!unique_id) return { currentTime: 0, duration: 0 };
+
+        return PlayerStore.getCurrentTime(unique_id);
+    };
+
+    setCurrentTime = currentTime => {
+        const { fileId } = this.props;
+
+        const file = FileStore.get(fileId);
+        if (!file) return;
+
+        const { remote } = file;
+        if (!remote) return;
+
+        const { unique_id } = remote;
+        if (!unique_id) return;
+
+        if (!currentTime) {
+            PlayerStore.clearCurrentTime(unique_id);
+        } else {
+            PlayerStore.setCurrentTime(unique_id, currentTime);
+        }
+    };
 
     render() {
         const { children, src, className, style, width, height, poster, fileId } = this.props;
-        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered, hidden } = this.state;
+        const { waiting, volume, duration, currentTime, play, dragging, draggingTime, buffered, hidden, noPoster } = this.state;
 
         const time = dragging ? draggingTime : currentTime;
         const value = duration > 0 ? time / duration : 0;
-        const bufferedTime = this.getBufferedTime(time, buffered);
+        const bufferedTime = Player.getBufferedTime(time, buffered);
         const bufferedValue = duration > 0 ? bufferedTime / duration : 0;
 
         const timeString = getDurationString(Math.floor(time) || 0);
@@ -675,7 +741,7 @@ class Player extends React.Component {
         }
 
         const fullscreenEnabled = document.fullscreenEnabled || document.mozFullScreenEnabled || document.webkitFullscreenEnabled;
-        const pictureInPictureEnabled = document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
+        const pictureInPictureEnabled = true;//document.pictureInPictureEnabled || document.mozPictureInPictureEnabled || document.webkitPictureInPictureEnabled;
 
         return (
             <div
@@ -685,7 +751,7 @@ class Player extends React.Component {
                 onClick={this.handleClickRoot}
                 onDoubleClick={this.handleDoubleClick}
                 style={rootStyle}>
-                <div ref={this.contentRef} className='player-content' onMouseMove={this.handleMouseOver}>
+                <div ref={this.contentRef} className={classNames('player-content', { 'player-content-hidden': hidden })} onMouseMove={this.handleMouseOver}>
                     <video
                         className='player-video'
                         ref={this.videoRef}
@@ -693,7 +759,8 @@ class Player extends React.Component {
                         controls={false}
                         playsInline={true}
                         src={src}
-                        poster={poster}
+                        poster={noPoster ? null : poster}
+                        loop={duration <= PLAYER_LOOP_MAX_DURATION}
                         onLoadedMetadata={this.handleLoadedMetadata}
                         onLoadedData={this.handleLoadedData}
                         onCanPlay={this.handleCanPlay}
@@ -713,7 +780,7 @@ class Player extends React.Component {
                         className={classNames('player-panel', { 'player-panel-hidden': hidden })}
                         onClick={e => e.stopPropagation()}
                         onMouseDown={e => e.stopPropagation()}
-                        onDoubleClick={e => e.stopPropagation()}
+                        onDoubleClick={this.handlePanelDoubleClick}
                         onMouseEnter={this.handlePanelEnter}
                         onMouseLeave={this.handlePanelLeave}>
                         <div className='player-slider'>
@@ -760,14 +827,14 @@ class Player extends React.Component {
                                 />
                             </div>
                             <button className='player-button' onClick={this.handleMute}>
-                                {this.getVolumeIcon(volume)}
+                                {Player.getVolumeIcon(volume)}
+                            </button>
+                            <button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>
+                                <PictureInPictureIcon/>
                             </button>
                             <button className='player-button' disabled={!fullscreenEnabled} onClick={this.handleFullScreen}>
                                 <FullScreen/>
                             </button>
-                            {/*<button className='player-button' disabled={!pictureInPictureEnabled} onClick={this.handlePictureInPicture}>*/}
-                            {/*    <PictureInPictureIcon/>*/}
-                            {/*</button>*/}
                         </div>
                     </div>
                     <Progress waiting={waiting}/>

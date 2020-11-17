@@ -8,22 +8,18 @@
 .shared-link {
     position: relative;
     background: transparent;
-    padding: 10px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: row;
 }
 
-.shared-link-photo {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    line-height: 48px;
-    font-size: 19px;
-    text-align: center;
-    text-transform: uppercase;
-    color: #ffffff;
-    border-radius: 4px;
+.shared-link-text {
+    -webkit-line-clamp: 3;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 .shared-link-content {
@@ -48,7 +44,7 @@
 }
 
 .shared-link-content .web-page-description {
-    max-height: 60px;
+    -webkit-line-clamp: 3;
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: pre-wrap;
@@ -62,4 +58,8 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.shared-link .photo-thumbnail {
+    object-fit: cover;
 }

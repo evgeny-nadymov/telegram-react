@@ -1,0 +1,14 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.stub-message {
+    width: 300px;
+    /*min-height: 150px;*/
+    margin: 5px;
+    overflow: hidden;
+    background: #6ac9cc;
+}

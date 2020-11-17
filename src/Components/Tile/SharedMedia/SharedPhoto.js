@@ -16,20 +16,61 @@ import FileStore from '../../../Stores/FileStore';
 import './SharedPhoto.css';
 
 class SharedPhoto extends React.Component {
-    constructor(props) {
-        super(props);
+    state = { };
 
+    static getDerivedStateFromProps(props, state) {
         const { photo, size, thumbnailSize } = props;
+        const { prevPhoto } = state;
+        if (photo !== prevPhoto) {
+            return {
+                prevPhoto: photo,
 
-        this.state = {
-            contextMenu: false,
-            left: 0,
-            top: 0,
+                contextMenu: false,
+                left: 0,
+                top: 0,
 
-            photoSize: getSize(photo.sizes, size),
-            thumbSize: getSize(photo.sizes, thumbnailSize),
-            minithumbnail: photo.minithumbnail
-        };
+                photoSize: getSize(photo.sizes, size),
+                thumbSize: getSize(photo.sizes, thumbnailSize),
+                minithumbnail: photo.minithumbnail
+            };
+        }
+
+        return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, photo, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (photo !== nextProps.photo) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
@@ -116,8 +157,8 @@ class SharedPhoto extends React.Component {
 SharedPhoto.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    photo: PropTypes.object.isRequired,
-    showOpenMessage: PropTypes.bool.isRequired,
+    photo: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
     openMedia: PropTypes.func,
 
     size: PropTypes.number,

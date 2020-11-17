@@ -1,0 +1,65 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.album {
+    margin: -6px -9px;
+    overflow: hidden;
+}
+
+.document-album {
+
+}
+
+.album-wrapper {
+    display: block;
+    margin: -2px;
+    /*font-size: 8px;*/
+    white-space: pre;
+    /*color: black;*/
+    overflow: hidden;
+}
+
+.document-album .album-wrapper {
+    margin: 0;
+}
+
+.document-album .document {
+    margin: 0;
+    padding: 6px 9px;
+}
+
+.document-album .message-text {
+    padding: 0 9px 6px;
+}
+
+.album-caption {
+    margin-bottom: 6px;
+}
+
+.album-title {
+    margin-top: 6px;
+}
+
+.album .photo .file-progress,
+.album .video .file-progress {
+    transform: scale(0.75);
+}
+
+.album .photo,
+.album .video {
+    border-radius: 0;
+}
+
+.album .photo-big,
+.album .video-big {
+    margin: 0;
+}
+
+.album .photo-thumbnail,
+.album .video-thumbnail {
+    object-fit: cover;
+}

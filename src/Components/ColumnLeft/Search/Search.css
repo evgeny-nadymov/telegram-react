@@ -12,7 +12,7 @@
     right: 0;
     bottom: 0;
     left: 0;
-    overflow-y: auto;
+    overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     background: var(--panel-background);

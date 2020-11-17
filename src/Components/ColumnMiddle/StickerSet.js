@@ -15,11 +15,7 @@ import './StickerSet.css';
 
 class StickerSet extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { info, theme } = this.props;
-
-        if (theme !== nextProps.theme) {
-            return true;
-        }
+        const { info } = this.props;
 
         if (info !== nextProps.info) {
             return true;
@@ -51,7 +47,7 @@ class StickerSet extends React.Component {
                     sticker={x}
                     autoplay={false}
                     blur={false}
-                    displaySize={STICKER_SMALL_DISPLAY_SIZE - 6}
+                    displaySize={STICKER_SMALL_DISPLAY_SIZE}
                     preview
                     source={StickerSourceEnum.PICKER}
                 />

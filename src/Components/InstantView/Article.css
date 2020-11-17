@@ -63,6 +63,9 @@ article .animation,
 article .video {
     margin: 0 auto 6px;
 }
+article .voice-note {
+    align-self: start;
+}
 
 article blockquote .location,
 article blockquote .photo,
@@ -288,6 +291,8 @@ article figure {
     margin: 0 0 16px;
     padding: 0;
     text-align: center;
+    display: flex;
+    flex-direction: column;
 }
 article figure.nowide {
     margin-left: 0;

@@ -4,3 +4,19 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
+
+.settings-main-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-main-footer {
+    color: var(--dialog-subtle-color);
+    font-size: 12px;
+    line-height: normal;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}

@@ -16,10 +16,12 @@
 
 .chat-details-info {
     margin: 0;
+    padding: 0 8px;
 }
 
 .chat-details-list {
-    overflow-y: scroll;
+    overflow-x: hidden;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex-grow: 1;
     flex-shrink: 1;
@@ -28,4 +30,12 @@
 
 .chat-details-info-icon {
     transform: rotateZ(180deg);
+}
+
+.chat-details-icon {
+}
+
+.shared-media-list {
+    min-height: 100%;
+    box-sizing: border-box;
 }

@@ -151,8 +151,9 @@ class MainMenuButton extends React.Component {
         });
     };
 
-    handleHelp = event => {
+    handleHelp = async event => {
         this.handleMenuClose();
+        // unregister();
     };
 
     handleSearch = () => {

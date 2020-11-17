@@ -9,10 +9,14 @@
 // importScripts('./tdweb.js');
 // importScripts('./subworkers.js');
 
-const SMALLEST_CHUNK_LIMIT = 1024 * 4;
-const STREAM_CHUNK_UPPER_LIMIT = 256 * 1024;
-const STREAM_CHUNK_BIG_FILE = 700 * 1024 * 1024;
-const STREAM_CHUNK_BIG_FILE_UPPER_LIMIT = 512 * 1024;
+const STREAM_CHUNK_VIDEO_512_LIMIT = 512 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1024_LIMIT = 1024 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1536_LIMIT = 1536 * 1024 * 1024;
+const STREAM_CHUNK_VIDEO = 256 * 1024;
+const STREAM_CHUNK_VIDEO_512 = 512 * 1024;
+const STREAM_CHUNK_VIDEO_1024 = 1024 * 1024;
+const STREAM_CHUNK_VIDEO_1536 = 1536 * 1024;
+const STREAM_CHUNK_AUDIO = 1024 * 1024;
 
 function LOG(message, ...optionalParams) {
     return;
@@ -44,84 +48,85 @@ self.addEventListener('push', event => {
     );
 });
 
-function isSafari() {
-    const is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    LOG('[stream] isSafari', is_safari);
-    return is_safari;
-
-}
-
 function parseRange(header) {
     const [, chunks] = header.split('=');
     const ranges = chunks.split(', ');
-    const [offset, end] = ranges[0].split('-');
+    const [start, end] = ranges[0].split('-');
 
-    return [+offset, +end || 0];
+    return [+start, +end || 0];
 }
 
-function alignLimit(limit) {
-    return 2 ** Math.ceil(Math.log(limit) / Math.log(2));
+function getOffsetLimit(start, end, chunk, size) {
+    end = end > 0 && end < start + chunk - 1 ? end : start + chunk - 1;
+    end = end > size - 1 ? size - 1 : end;
+
+    const offset = start;
+    const limit = end - start + 1;
+
+    return [ offset, limit ];
 }
 
-function alignOffset(offset, base = SMALLEST_CHUNK_LIMIT) {
-    return offset - (offset % base);
-}
-
-function setFileOptions(url, location, options) {
-    if (!streams.get(url)) streams.set(url, { url, location, options });
-}
-
-function fetchStreamRequest(url, offset, end, resolve, get) {
-    const info = streams.get(url);
-    if (!info) {
-        resolve(new Response(null, { status: 302, headers: { Location: url } }));
-        return;
+function getChunk(mimeType, size) {
+    if (mimeType && mimeType.startsWith('audio')) {
+        return STREAM_CHUNK_AUDIO;
     }
 
-    LOG('[stream] fetchStreamRequest', info);
+    let chunk = STREAM_CHUNK_VIDEO;
+    if (size > STREAM_CHUNK_VIDEO_1536_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_1536;
+    } else if (size > STREAM_CHUNK_VIDEO_1024_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_1024;
+    } else if (size > STREAM_CHUNK_VIDEO_512_LIMIT) {
+        chunk = STREAM_CHUNK_VIDEO_512;
+    }
+
+    return chunk;
+}
+
+function fetchStreamRequest(url, start, end, resolve, get) {
+    const { searchParams } = new URL(url, 'https://telegram.org');
+    const fileId = parseInt(searchParams.get('id'), 10);
+    const size = parseInt(searchParams.get('size'), 10);
+    const mimeType = searchParams.get('mime_type') || 'video/mp4';
+
+    const info = { url, options: { fileId, size, mimeType } };
+
+    LOG('[stream] fetchStreamRequest', url, info);
 
     // safari workaround
-    if (offset === 0 && end === 1) {
+    if (start === 0 && end === 1) {
         resolve(new Response(new Uint8Array(2).buffer, {
             status: 206,
             statusText: 'Partial Content',
             headers: {
                 'Accept-Ranges': 'bytes',
-                'Content-Range': `bytes 0-1/${info.options.size || '*'}`,
+                'Content-Range': `bytes 0-1/${size || '*'}`,
                 'Content-Length': '2',
-                'Content-Type': info.options.mime_type || 'video/mp4',
+                'Content-Type': mimeType
             },
         }));
         return;
     }
 
-    const isBigFile = info.options.size > STREAM_CHUNK_BIG_FILE;
-    const upperLimit = isBigFile ? STREAM_CHUNK_BIG_FILE_UPPER_LIMIT : STREAM_CHUNK_UPPER_LIMIT;
-    // LOG('[stream] GET', end, isBigFile, upperLimit, info);
+    const chunk = getChunk(mimeType, size);
+    const [ offset, limit ] = getOffsetLimit(start, end, chunk, size);
 
+    LOG(`[stream] get offset=${offset} limit=${limit}`);
+    get(fileId, offset, limit, start, end, async ([blob, error]) => {
+        if (error) {
+            resolve(new Response(null, {
+                status: 416,
+                statusText: 'Range Not Satisfiable'
+            }));
+            return;
+        }
 
-    const limit = end && end < upperLimit ? alignLimit(end - offset + 1) : upperLimit;
-    const alignedOffset = alignOffset(offset, limit);
-
-    LOG(`[stream] get location=${info.location} alignOffset=${alignedOffset} limit=${limit}`);
-    get(info.location, alignedOffset, limit, info.options, async (blob, type) => {
         const headers = {
             'Accept-Ranges': 'bytes',
-            'Content-Range': `bytes ${alignedOffset}-${alignedOffset + blob.size - 1}/${info.options.size || '*'}`,
+            'Content-Range': `bytes ${offset}-${offset + blob.size - 1}/${size || '*'}`,
             'Content-Length': `${blob.size}`,
+            'Content-Type': mimeType
         };
-
-        if (type) headers['Content-Type'] = type;
-
-        if (isSafari()) {
-            let ab = await getArrayBuffer(blob);
-
-            ab = ab.slice(offset - alignedOffset, end - alignedOffset + 1);
-            headers['Content-Range'] = `bytes ${offset}-${offset + ab.byteLength - 1}/${info.options.size || '*'}`;
-            headers['Content-Length'] = `${ab.byteLength}`;
-
-            blob = ab;
-        }
 
         resolve(new Response(blob, {
             status: 206,
@@ -131,14 +136,12 @@ function fetchStreamRequest(url, offset, end, resolve, get) {
     });
 }
 
-async function getFilePartRequest(location, offset, limit, options, ready) {
-    const { fileId } = options;
+async function getFilePartRequest(fileId, offset, limit, start, end, ready) {
 
-    LOG('[stream] getFilePartRequest', offset, limit);
-    const result =
-        await getBufferFromClientAsync(fileId, offset, limit, options);
+    LOG('[stream] getFilePartRequest', fileId, offset, limit);
+    const [data, error] = await getBufferFromClientAsync(fileId, offset, limit, start, end);
 
-    ready(result, options.mimeType);
+    ready([data, error]);
 }
 
 self.addEventListener('fetch', event => {
@@ -146,12 +149,12 @@ self.addEventListener('fetch', event => {
 
     switch (scope) {
         case 'streaming': {
-            const [offset, end] = parseRange(event.request.headers.get('Range') || '');
+            const [start, end] = parseRange(event.request.headers.get('Range') || '');
 
-            LOG(`[SW] fetch offset=${offset} end=${end}`, event.request.url, scope);
+            LOG(`[SW] fetch stream start=${start} end=${end}`, event.request.url, scope);
 
             event.respondWith(new Promise((resolve) => {
-                fetchStreamRequest(url, offset, end, resolve, getFilePartRequest);
+                fetchStreamRequest(url, start, end, resolve, getFilePartRequest);
             }));
             break;
         }
@@ -160,7 +163,7 @@ self.addEventListener('fetch', event => {
 
 const queue = new Map();
 
-async function getBufferFromClientAsync(fileId, offset, limit, options) {
+async function getBufferFromClientAsync(fileId, offset, limit, start, end) {
     return new Promise((resolve, reject) => {
 
         const key = `${fileId}_${offset}_${limit}`;
@@ -173,7 +176,8 @@ async function getBufferFromClientAsync(fileId, offset, limit, options) {
                     fileId,
                     offset,
                     limit,
-                    size: options.size
+                    start,
+                    end
                 });
             });
         })
@@ -190,8 +194,6 @@ async function getArrayBuffer(blob) {
     })
 }
 
-const streams = new Map();
-
 self.addEventListener('message', async e => {
     LOG('[stream] sw.message', e.data);
     switch (e.data['@type']) {
@@ -207,15 +209,24 @@ self.addEventListener('message', async e => {
                 // const buffer = await getArrayBuffer(data);
 
                 LOG('[stream] sw.message resolve', data);
-                resolve(data);
+                resolve([data, null]);
             }
             break;
         }
-        case 'file': {
-            const { url, options } = e.data;
+        case 'getFileError': {
+            const { fileId, offset, limit, error } = e.data;
+            const key = `${fileId}_${offset}_${limit}`;
+            const request = queue.get(key);
+            LOG('[stream] sw.message request', request, queue, e.data);
+            if (request) {
+                queue.delete(key);
+                const { resolve } = request;
 
-            LOG('[stream] set options', url, options);
-            this.setFileOptions(url, null, options);
+                // const buffer = await getArrayBuffer(data);
+
+                LOG('[stream] sw.message resolve', error);
+                resolve([null, error]);
+            }
             break;
         }
     }

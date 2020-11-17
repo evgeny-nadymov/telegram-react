@@ -22,6 +22,7 @@ import SettingsMenuButton from './SettingsMenuButton';
 import UnmuteIcon from '../../../Assets/Icons/Unmute';
 import DataIcon from '../../../Assets/Icons/Data';
 import LanguageIcon from '../../../Assets/Icons/Language';
+import packageJson from '../../../../package.json';
 import { setProfileMediaViewerContent } from '../../../Actions/Client';
 import ChatStore from '../../../Stores/ChatStore';
 import './Main.css';
@@ -67,7 +68,7 @@ class Main extends React.Component {
                     </div>
                     <SettingsMenuButton />
                 </div>
-                <div className='sidebar-page-content'>
+                <div className='sidebar-page-content settings-main-content'>
                     <div className='chat-details-info'>
                         <Chat
                             chatId={chatId}
@@ -113,6 +114,9 @@ class Main extends React.Component {
                         </ListItemIcon>
                         <ListItemText primary={t('Language')} />
                     </ListItem>
+                    <div className='settings-main-footer'>
+                        {packageJson.version}
+                    </div>
                 </div>
             </>
         );

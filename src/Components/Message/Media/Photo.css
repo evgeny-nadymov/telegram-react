@@ -9,6 +9,7 @@
     border-radius: 4px;
     transform: translateZ(0);
     overflow: hidden;
+    user-select: none;
 }
 
 .photo-big {
@@ -27,14 +28,19 @@
     border-bottom-right-radius: 0;
 }
 
-.photo-image {
-    user-select: none;
-    /*background: aliceblue;*/
-    display: block;
+.photo-preview {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+}
+
+.photo-thumbnail {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .photo-progress {

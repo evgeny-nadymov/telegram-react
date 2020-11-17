@@ -6,17 +6,23 @@
  */
 
 .stickers-hint {
-    border-top: 1px solid var(--border);
+    max-width: 695px;
+    margin: 0 auto;
+    border-radius: 12px;
+    /* overflow: hidden; */
+    width: calc(100% - 22px);
+    /*border-top: 1px solid var(--border);*/
     background: var(--panel-background);
     position: absolute;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 4px;
     max-height: 190px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: flex;
     flex-wrap: wrap;
+    z-index: 2;
 }
 
 .sticker-hints-item {

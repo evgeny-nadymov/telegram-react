@@ -91,6 +91,7 @@
 .emoji-mart-scroll {
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
     height: 270px;
     margin-right: -15px;
     padding: 0 6px 6px 6px;
@@ -163,7 +164,7 @@
     width: 100%;
     font-weight: 500;
     padding: 5px 6px;
-    background-color: #424242;
+    background-color: var(--panel-background);
 }
 
 .emoji-mart-category-list {

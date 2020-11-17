@@ -75,7 +75,7 @@ class DocumentAction extends React.Component {
     }
 
     render() {
-        const { meta } = this.props;
+        const { date, meta } = this.props;
         const { file } = this.state;
         if (!file) return null;
 
@@ -94,7 +94,10 @@ class DocumentAction extends React.Component {
 
         return (
             <div className='document-action'>
-                <span>{sizeString}</span>
+                <span>
+                    {sizeString}
+                    {date && ` · ${date}`}
+                </span>
                 {meta}
             </div>
         );
@@ -102,7 +105,8 @@ class DocumentAction extends React.Component {
 }
 
 DocumentAction.propTypes = {
-    file: PropTypes.object.isRequired
+    file: PropTypes.object.isRequired,
+    date: PropTypes.string
 };
 
 export default DocumentAction;

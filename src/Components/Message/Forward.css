@@ -12,6 +12,11 @@
     color: var(--color-accent-main);
 }
 
+.forward-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .forward-arrow {
     position: absolute;
     font-size: 6px;

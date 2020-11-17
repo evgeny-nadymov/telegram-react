@@ -13,6 +13,7 @@ import PauseIcon from '../../Assets/Icons/Pause';
 import DocumentTile from './DocumentTile';
 import PlayerStore from '../../Stores/PlayerStore';
 import './VoiceNoteTile.css';
+import { isCurrentSource } from '../../Utils/Player';
 
 class VoiceNoteTile extends React.Component {
     constructor(props) {
@@ -46,39 +47,39 @@ class VoiceNoteTile extends React.Component {
     }
 
     onClientUpdateMediaEnd = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({
-                active: false,
-                playing: false,
-                currentTime: 0
-            });
-        }
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        this.setState({
+            active: false,
+            playing: false,
+            currentTime: 0
+        });
     };
 
     onClientUpdateMediaPlay = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({ playing: true });
-        } else {
-            this.setState({ playing: false });
-        }
+        this.setState({ playing: isCurrentSource(chatId, messageId, block, source) });
     };
 
     onClientUpdateMediaPause = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
-            this.setState({ playing: false });
-        }
+        if (!isCurrentSource(chatId, messageId, block, source)) return;
+
+        this.setState({ playing: false });
     };
 
     onClientUpdateMediaActive = update => {
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, block } = this.props;
+        const { source } = update;
 
-        if (chatId === update.chatId && messageId === update.messageId) {
+        if (isCurrentSource(chatId, messageId, block, source)) {
             if (!this.state.active) {
                 this.setState({
                     active: true,
@@ -112,8 +113,10 @@ class VoiceNoteTile extends React.Component {
 }
 
 VoiceNoteTile.propTypes = {
-    chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired,
+    chatId: PropTypes.number,
+    messageId: PropTypes.number,
+    block: PropTypes.object,
+
     file: PropTypes.object.isRequired,
     openMedia: PropTypes.func
 };

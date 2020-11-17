@@ -8,11 +8,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import * as ReactDOM from 'react-dom';
+import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import { compose, withRestoreRef, withSaveRef } from '../../Utils/HOC';
 import Animation from '../Message/Media/Animation';
 import { loadAnimationContent, loadAnimationThumbnailContent } from '../../Utils/File';
-import { compareMaps, debounce, throttle } from '../../Utils/Common';
+import { mapEquals, debounce, throttle } from '../../Utils/Common';
 import AnimationStore from '../../Stores/AnimationStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -136,7 +137,7 @@ class GifsPicker extends React.Component {
         });
 
         const { animationsInView } = AnimationStore;
-        if (compareMaps(animationsInView, inViewMap)) {
+        if (mapEquals(animationsInView, inViewMap)) {
             // console.log('[gp] inViewItems equals', inViewIndexes, animationsInView);
             return;
         }
@@ -242,9 +243,9 @@ class GifsPicker extends React.Component {
                 onMouseEnter={this.handleMouseEnter}
                 >
                 <Animation
+                    type='picker'
                     animation={x}
                     openMedia={() => this.openAnimation(x)}
-                    picker={true}
                     style={{ width: 104, height: 104, margin: 2, borderRadius: 0 }}
                 />
             </div>
@@ -252,7 +253,7 @@ class GifsPicker extends React.Component {
 
         return (
             <div className='gifs-picker' style={style}>
-                <div ref={this.scrollRef} className='gifs-picker-scroll' onScroll={this.handleScroll}>
+                <div ref={this.scrollRef} className={classNames('gifs-picker-scroll', 'scrollbars-hidden')} onScroll={this.handleScroll}>
                     {items}
                 </div>
             </div>

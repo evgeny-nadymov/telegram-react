@@ -19,7 +19,7 @@ class KeyboardManager {
     }
 
     handleKeyDown = event => {
-        // console.log('[keydown KeyboardManager] handleKeyDown', this.handlers, event.key);
+        // console.log('[keydown] KeyboardManager.handleKeyDown', this.handlers, event.key);
 
         const { handlers } = this;
         if (!handlers.length) return;
@@ -34,12 +34,12 @@ class KeyboardManager {
     };
 
     add(handler) {
-        // console.log('[KeyboardManager] add', handler);
+        // console.log('[keydown] KeyboardManager.add', handler);
         this.handlers.push(handler);
     }
 
     remove(handler) {
-        // console.log('[KeyboardManager] remove', handler);
+        // console.log('[keydown] KeyboardManager.remove', handler);
         const index = this.handlers.indexOf(handler);
         if (index === -1) return;
 

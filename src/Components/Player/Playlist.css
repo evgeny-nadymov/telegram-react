@@ -7,7 +7,7 @@
 
 .playlist {
     position: relative;
-    top: 22px;
+    top: 21px;
     box-sizing: border-box;
     z-index: 2;
 }

@@ -17,10 +17,36 @@
     background-size: cover;
     background-position: center;
     transition: background-image 0.25s ease;
+    position: relative;
+}
+
+.dialog-details-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .light .dialog-details {
-    background-image: url('../../Assets/bg.jpg');
+    overflow: hidden;
+}
+
+.dialog-background {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--chat-background);
+    background-size: cover;
+    background-position: center;
+}
+
+.light .dialog-background {
+    background-image: url('../../Assets/camomile_blurred.jpg');
 }
 
 .page-small .dialog-details {

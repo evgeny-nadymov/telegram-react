@@ -105,7 +105,7 @@ class Status extends React.Component {
 
 Status.propTypes = {
     chatId: PropTypes.number.isRequired,
-    messageId: PropTypes.number.isRequired
+    messageId: PropTypes.number
 };
 
 export default Status;

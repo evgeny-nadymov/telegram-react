@@ -18,14 +18,12 @@
     -webkit-overflow-scrolling: touch;
     transform: translateZ(0);
     overflow-y: hidden;
-    padding-bottom: 16px;
-    margin-bottom: -16px;
     position: relative;
     background: transparent;
 }
 
 .stickers-picker-header-items {
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
 }
 
@@ -35,6 +33,22 @@
     min-width: 36px;
     margin: 6px;
     cursor: pointer;
+    width: 36px;
+    height: 36px;
+}
+
+.stickers-picker-header-recent {
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 36px;
+    margin: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    width: 36px;
+    height: 36px;
 }
 
 .stickers-picker-header-anchor {
@@ -43,7 +57,7 @@
     width: 48px;
     will-change: transform;
     position: absolute;
-    bottom: 16px;
+    bottom: 0;
     transition: transform 500ms ease-out;
     background: var(--color-accent-dark);
 }

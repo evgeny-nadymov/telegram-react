@@ -1,0 +1,51 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.pinned-message-border {
+    position: relative;
+    height: 32px;
+    width: 2px;
+    padding: 6px 0 6px 6px;
+    overflow: hidden;
+}
+
+.pinned-message-border-wrapper-1 {
+    height: 32px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--color-accent-main);
+}
+
+.pinned-message-border-mask {
+    mask-image: linear-gradient(to bottom, transparent 0, black 6px, black 38px, transparent 44px);
+}
+
+.pinned-message-border-wrapper {
+    color: var(--color-accent-main);
+    background: var(--color-accent-main88);
+    position: relative;
+    will-change: transform;
+    transition: transform 0.25s ease-in-out;
+}
+
+.pinned-message-border-bars {
+    stroke: currentColor;
+    stroke-width: 2px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.pinned-message-border-mark {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2px;
+    background: currentColor;
+    border-radius: 1px;
+    will-change: transform;
+    transition: transform 0.25s ease-in-out;
+}

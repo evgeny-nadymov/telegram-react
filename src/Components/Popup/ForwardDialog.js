@@ -453,7 +453,7 @@ class ForwardDialog extends React.Component {
 
         return (
             <Dialog
-                open
+                open={true}
                 manager={modalManager}
                 transitionDuration={0}
                 onClose={this.handleClose}
@@ -464,6 +464,7 @@ class ForwardDialog extends React.Component {
                 <div
                     ref={this.searchRef}
                     id='forward-dialog-search'
+                    className='scrollbars-hidden'
                     contentEditable
                     suppressContentEditableWarning
                     placeholder={t('Search')}

@@ -12,11 +12,6 @@
     flex-direction: row;
     align-items: center;
     overflow: hidden;
-    box-sizing: border-box;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    background: var(--panel-background);
-    border-color: var(--border);
 }
 
 .header-command-button {

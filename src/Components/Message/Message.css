@@ -83,7 +83,7 @@ pre code {
 }
 
 .message-selected {
-    background: var(--color-accent-main22);
+    background: var(--color-accent-main44);
 }
 
 .message-selected:hover .message-select-tick {
@@ -94,17 +94,14 @@ pre code {
     opacity: 1;
 }
 
-@keyframes message-highlighted-animation {
-    0% {
-        background: var(--color-accent-main22);
-    }
-    100% {
-        background: transparent;
-    }
+@keyframes highlighted-animation {
+    0% { background: var(--color-accent-main44); }
+    77% { background: var(--color-accent-main44); }
+    100% { background: transparent; }
 }
 
 .message-highlighted {
-    animation: message-highlighted-animation 4s ease-out;
+    animation: highlighted-animation 1s ease-out;
 }
 
 .message-padding {
@@ -120,7 +117,7 @@ pre code {
 }
 
 .message-wrapper {
-    max-width: 784px;
+    max-width: 766px;
     padding: 5px 6px;
     margin: 0 auto;
     display: flex;
@@ -166,15 +163,23 @@ pre code {
     flex-direction: row-reverse;
 }
 
-.message-top .message-wrapper {
+.message-group-title .message-wrapper {
     padding: 5px 6px 2px;
 }
 
-.message-middle .message-wrapper {
+.message-group .message-wrapper {
     padding: 3px 6px 2px;
 }
 
-.message-bottom .message-wrapper {
+.message-group-tail .message-wrapper {
+    padding: 3px 6px 5px;
+}
+
+.message-group-tail-rounded .message-wrapper {
+    padding: 3px 6px 5px;
+}
+
+.message-rounded .message-wrapper {
     padding: 3px 6px 5px;
 }
 
@@ -213,32 +218,48 @@ pre code {
     border-radius: 12px;
 }
 
-.message-top .message-bubble:not(.message-bubble-out) {
+.message-group-title .message-bubble:not(.message-bubble-out) {
     border-radius: 12px 12px 12px 6px;
 }
 
-.message-middle .message-bubble:not(.message-bubble-out) {
+.message-group .message-bubble:not(.message-bubble-out) {
     border-radius: 6px 12px 12px 6px;
 }
 
-.message-bottom .message-bubble:not(.message-bubble-out) {
+.message-group-tail .message-bubble:not(.message-bubble-out) {
     border-radius: 6px 12px 12px 0;
 }
 
-.message-top .message-bubble.message-bubble-out {
+.message-group-tail-rounded .message-bubble:not(.message-bubble-out) {
+    border-radius: 6px 12px 12px 12px;
+}
+
+.message-rounded .message-bubble:not(.message-bubble-out) {
+    border-radius: 12px 12px 12px 12px;
+}
+
+.message-group-title .message-bubble.message-bubble-out {
     border-radius: 12px 12px 6px 12px;
 }
 
-.message-middle .message-bubble.message-bubble-out {
+.message-group .message-bubble.message-bubble-out {
     border-radius: 12px 6px 6px 12px;
 }
 
-.message-bottom .message-bubble.message-bubble-out {
+.message-group-tail .message-bubble.message-bubble-out {
     border-radius: 12px 6px 0 12px;
 }
 
-.message:not(.message-out):not(.message-bubble-hidden) .user-tile::before,
-.message:not(.message-out):not(.message-bubble-hidden) .chat-tile::before {
+.message-group-tail-rounded .message-bubble.message-bubble-out {
+    border-radius: 12px 6px 12px 12px;
+}
+
+.message-rounded .message-bubble.message-bubble-out{
+    border-radius: 12px 12px 12px 12px;
+}
+
+.message:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::before,
+.message:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--message-in-background);
     position: absolute;
     right: 0;
@@ -250,9 +271,61 @@ pre code {
     transform: translate(7px, -2px);
 }
 
-.message.message-out:not(.message-bubble-hidden) .user-tile:not(.tile-poll)::before,
-.message.message-out:not(.message-bubble-hidden) .chat-tile::before {
+.message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
+.message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
+    background: var(--color-accent-main44);
+    position: absolute;
+    right: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(7px, -2px);
+}
+
+.message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
+.message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
+    animation: highlighted-animation 1s ease-out;
+    position: absolute;
+    right: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(7px, -2px);
+}
+
+.message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
+.message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::before {
     background: var(--message-out-background);
+    position: absolute;
+    left: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(-7px, -2px) scaleX(-1);
+}
+
+.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
+.message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
+    background: var(--color-accent-main44);
+    position: absolute;
+    left: 0;
+    mask: url(../../Assets/bubble-tail-left.svg);
+    bottom: -3px;
+    width: 11px;
+    height: 20px;
+    content: '';
+    transform: translate(-7px, -2px) scaleX(-1);
+}
+
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
+.message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .chat-tile::after {
+    animation: highlighted-animation 1s ease-out;
     position: absolute;
     left: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
@@ -287,6 +360,12 @@ pre code {
     align-items: baseline;
     font-size: 14px;
     line-height: normal;
+}
+
+.message.message-selected.message-document-album .message-title {
+    margin: -6px -9px;
+    padding: 6px 9px;
+    background: var(--color-accent-main44);
 }
 
 .message-text {
@@ -325,10 +404,12 @@ pre code {
     opacity: 0;
     align-self: center;
     color: white;
+    border: 1px solid #ffffff;
     background: var(--color-accent-main);
 }
 
-.messages-list-selection-active .message-wrapper {
+.messages-list-selection-active .message:not(.message-album) .message-wrapper,
+.messages-list-selection-active .message.message-album .album-item-wrapper {
     pointer-events: none;
 }
 

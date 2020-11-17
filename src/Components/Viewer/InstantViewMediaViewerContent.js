@@ -7,17 +7,18 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import FileProgress from './FileProgress';
 import MediaCaption from './MediaCaption';
 import Caption from '../InstantView/Blocks/Caption';
 import SafeLink from '../Additional/SafeLink';
 import Player from '../Player/Player';
 import { getSrc, getViewerFile, getViewerMinithumbnail, getViewerThumbnail } from '../../Utils/File';
-import { isBlurredThumbnail } from '../../Utils/Media';
+import { getThumb } from '../../Utils/Media';
 import { isEmptyText } from '../../Utils/InstantView';
-import { setFileOptions } from '../../registerServiceWorker';
+import { MEDIA_VIEWER_VIDEO_MAX_SIZE } from '../../Constants';
 import FileStore from '../../Stores/FileStore';
+import PlayerStore from '../../Stores/PlayerStore';
+import TdLibController from '../../Controllers/TdLibController';
 
 class InstantViewMediaViewerContent extends React.Component {
     constructor(props) {
@@ -32,11 +33,8 @@ class InstantViewMediaViewerContent extends React.Component {
         const { media, size, caption, url } = props;
 
         if (media !== state.prevMedia) {
-
-            let [thumbnailWidth, thumbnailHeight, thumbnail] = getViewerThumbnail(media);
-            thumbnail = FileStore.get(thumbnail.id) || thumbnail;
-
-            const [minithumbnailWidth, minithumbnailHeight, minithumbnail] = getViewerMinithumbnail(media);
+            const thumbnail = getViewerThumbnail(media);
+            const minithumbnail = getViewerMinithumbnail(media);
 
             let [width, height, file, mimeType, supportsStreaming] = getViewerFile(media, size);
             file = FileStore.get(file.id) || file;
@@ -45,8 +43,7 @@ class InstantViewMediaViewerContent extends React.Component {
             if (!src && supportsStreaming) {
                 const { video } = media;
                 if (video) {
-                    src = `/streaming/file_id=${file.id}`;
-                    setFileOptions(src, { fileId: file.id, size: file.size, mimeType: video.mime_type });
+                    src = `/streaming/file?id=${file.id}&size=${file.size}&mime_type=${video.mime_type}`;
                 }
             }
 
@@ -62,11 +59,7 @@ class InstantViewMediaViewerContent extends React.Component {
                 source,
                 supportsStreaming,
                 mimeType,
-                thumbnailWidth,
-                thumbnailHeight,
                 thumbnail,
-                minithumbnailWidth,
-                minithumbnailHeight,
                 minithumbnail
             };
         }
@@ -80,6 +73,7 @@ class InstantViewMediaViewerContent extends React.Component {
         FileStore.on('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
         FileStore.on('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.on('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
 
     componentWillUnmount() {
@@ -88,7 +82,21 @@ class InstantViewMediaViewerContent extends React.Component {
         FileStore.off('clientUpdateAnimationBlob', this.onClientUpdateMediaBlob);
         FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
         FileStore.off('clientUpdateAnimationThumbnailBlob', this.onClientUpdateMediaThumbnailBlob);
+        PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdatePictureInPicture = update => {
+        const { videoInfo } = update;
+        if (!videoInfo) return;
+
+        const { file } = this.state;
+        if (file.id !== videoInfo.fileId) return;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateInstantViewViewerContent',
+            content: null
+        });
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const { src } = this.state;
@@ -122,9 +130,9 @@ class InstantViewMediaViewerContent extends React.Component {
 
     onClientUpdateMediaThumbnailBlob = update => {
         const { fileId } = update;
-        const { thumbnail: file } = this.state;
+        const { thumbnail } = this.state;
 
-        if (file && file.id === fileId) {
+        if (thumbnail && thumbnail.file.id === fileId) {
             this.forceUpdate();
         }
     };
@@ -133,23 +141,34 @@ class InstantViewMediaViewerContent extends React.Component {
         const { media, caption, url } = this.props;
         if (!media) return null;
 
-        const { width, height, file, src, mimeType, thumbnailWidth, thumbnailHeight, thumbnail, minithumbnail, isPlaying, supportsStreaming } = this.state;
+        const {
+            width,
+            height,
+            file,
+            src,
+            mimeType,
+            thumbnail,
+            minithumbnail,
+            isPlaying,
+            supportsStreaming
+        } = this.state;
         if (!file) return null;
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbnailSrc = getSrc(thumbnail);
-        const isBlurred = thumbnailSrc ? isBlurredThumbnail({ width: thumbnailWidth, height: thumbnailHeight }) : Boolean(miniSrc);
 
         let videoWidth = width;
         let videoHeight = height;
-        if (Math.max(videoWidth, videoHeight) > 640) {
-            const scale = 640 / Math.max(videoWidth, videoHeight);
-            videoWidth = videoWidth > videoHeight ? 640 : Math.floor(videoWidth * scale);
-            videoHeight = videoHeight > videoWidth ? 640 : Math.floor(videoHeight * scale);
-        }
+        const scale = MEDIA_VIEWER_VIDEO_MAX_SIZE / Math.max(videoWidth, videoHeight);
+        const w = videoWidth > videoHeight ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoWidth * scale);
+        const h = videoHeight > videoWidth ? MEDIA_VIEWER_VIDEO_MAX_SIZE : Math.floor(videoHeight * scale);
+        videoWidth = w;
+        videoHeight = h;
 
         let content = null;
         const source = src ? <source src={src} type={mimeType}/> : null;
+        const thumb = getThumb(thumbnail, minithumbnail, videoWidth, videoHeight);
+
         switch (media['@type']) {
             case 'video': {
                 content = (
@@ -167,31 +186,24 @@ class InstantViewMediaViewerContent extends React.Component {
                         >
                             {source}
                         </Player>
-                        {!isPlaying && !supportsStreaming &&
-                            ((thumbnailSrc || miniSrc) ? (
-                                <img
-                                    className={classNames('media-viewer-content-video-thumbnail', {
-                                        'media-blurred': isBlurred
-                                    })}
-                                    src={thumbnailSrc || miniSrc}
-                                    alt=''
-                                    width={videoWidth}
-                                    height={videoHeight}
-                                />
-                            ) : (
-                                <div
-                                    className='media-viewer-content-video-thumbnail'
-                                    style={{
-                                        width: videoWidth,
-                                        height: videoHeight
-                                    }}
-                                />
-                            ))}
+                        {!isPlaying && !supportsStreaming && thumb}
                     </div>
                 );
                 break;
             }
             case 'animation': {
+                // content = (
+                //     <Animation
+                //         type='preview'
+                //         stretch={true}
+                //         displaySize={ANIMATION_PREVIEW_DISPLAY_SIZE}
+                //         animation={media}
+                //         onClick={this.handleContentClick}
+                //         showProgress={false}
+                //         style={{ borderRadius: 0 }}
+                //     />
+                // );
+
                 content = (
                     <div className='media-viewer-content-wrapper'>
                         <video
@@ -208,26 +220,7 @@ class InstantViewMediaViewerContent extends React.Component {
                         >
                             {source}
                         </video>
-                        {!isPlaying &&
-                            ((thumbnailSrc || miniSrc) ? (
-                                <img
-                                    className={classNames('media-viewer-content-video-thumbnail', {
-                                        'media-blurred': isBlurred
-                                    })}
-                                    src={thumbnailSrc || miniSrc}
-                                    alt=''
-                                    width={videoWidth}
-                                    height={videoHeight}
-                                />
-                            ) : (
-                                <div
-                                    className='media-viewer-content-video-thumbnail'
-                                    style={{
-                                        width: videoWidth,
-                                        height: videoHeight
-                                    }}
-                                />
-                            ))}
+                        {!isPlaying && thumb}
                     </div>
                 );
                 break;

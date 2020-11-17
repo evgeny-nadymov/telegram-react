@@ -34,7 +34,8 @@ function updateLightTheme(theme) {
     style.setProperty('--z-index-modal', theme.zIndex.modal);
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
-    style.setProperty('--color-accent-main22', theme.palette.primary.main + '44');
+    style.setProperty('--color-accent-main44', theme.palette.primary.main + '44');
+    style.setProperty('--color-accent-main88', theme.palette.primary.main + '88');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
     style.setProperty('--color-grey700', theme.palette.grey[700]);
@@ -118,7 +119,8 @@ function updateDarkTheme(theme) {
     style.setProperty('--z-index-modal', theme.zIndex.modal);
 
     style.setProperty('--color-accent-main', theme.palette.primary.main);
-    style.setProperty('--color-accent-main22', theme.palette.primary.main + '44');
+    style.setProperty('--color-accent-main44', theme.palette.primary.main + '44');
+    style.setProperty('--color-accent-main88', theme.palette.primary.main + '88');
     style.setProperty('--color-accent-dark', theme.palette.primary.dark);
     style.setProperty('--color-accent-light', theme.palette.primary.light);
     style.setProperty('--color-grey700', theme.palette.grey[700]);

@@ -8,9 +8,14 @@
 .audio-action {
     margin-top: 2px;
     font-size: 14px;
-    line-height: normal;
+    line-height: 19px;
     color: var(--message-in-subtle-color);
     user-select: none;
+    overflow: hidden;
+    display: flex;
+}
+
+.audio-action span {
     word-wrap: break-word;
     white-space: nowrap;
     overflow: hidden;

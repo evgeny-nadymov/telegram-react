@@ -5,10 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+.tabs {
+    position: relative;
+}
+
 .filters {
     height: 44px;
     margin-bottom: -17px;
-    padding: 0 9px 17px;
+    padding: 0 8px 17px;
     display: flex;
     flex-shrink: 0;
     flex-grow: 0;
@@ -20,12 +24,10 @@
 }
 
 .filter-selection {
-    /*transition: left 0.15s ease, width 0.15s ease;*/
     position: absolute;
     will-change: left;
-    top: 41px;
-    height: 3px;
-    min-width: 30px;
+    top: 40px;
+    height: 4px;
     border-radius: 2px 2px 0 0;
     background: var(--color-accent-main);
 }
@@ -40,6 +42,11 @@
     justify-content: center;
     cursor: pointer;
     color: var(--text-secondary);
+}
+
+.filters::after {
+    content: '';
+    flex: 0 0 8px;
 }
 
 .page-small .filter {

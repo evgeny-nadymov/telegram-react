@@ -31,6 +31,41 @@ class SharedVideo extends React.Component {
         FileStore.off('clientUpdateVideoThumbnailBlob', this.onClientUpdateVideoThumbnailBlob);
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId, messageId, video, showOpenMessage } = this.props;
+        const { contextMenu, left, top } = this.state;
+
+        if (chatId !== nextProps.chatId) {
+            return true;
+        }
+
+        if (messageId !== nextProps.messageId) {
+            return true;
+        }
+
+        if (video !== nextProps.video) {
+            return true;
+        }
+
+        if (showOpenMessage !== nextProps.showOpenMessage) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        return false;
+    }
+
     onClientUpdateVideoThumbnailBlob = update => {
         const { thumbnail } = this.props.video;
         const { fileId } = update;
@@ -79,7 +114,7 @@ class SharedVideo extends React.Component {
 
         const miniSrc = minithumbnail ? 'data:image/jpeg;base64, ' + minithumbnail.data : null;
         const thumbSrc = getSrc(thumbnail ? thumbnail.file : null);
-        const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail, THUMBNAIL_BLURRED_SIZE_90) : Boolean(miniSrc);
+        const isBlurred = thumbSrc ? isBlurredThumbnail(thumbnail) : Boolean(miniSrc);
 
         return (
             <>
@@ -111,8 +146,8 @@ class SharedVideo extends React.Component {
 SharedVideo.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number.isRequired,
-    video: PropTypes.object.isRequired,
-    showOpenMessage: PropTypes.bool.isRequired,
+    video: PropTypes.object,
+    showOpenMessage: PropTypes.bool,
     openMedia: PropTypes.func,
 
     size: PropTypes.number,

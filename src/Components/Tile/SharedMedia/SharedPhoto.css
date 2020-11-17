@@ -43,7 +43,7 @@
 @media (min-width: 1280px) {
     .right-column .shared-photo {
         position: relative;
-        flex: 0 0 33%;
+        flex: 0 0 33.333%;
         display: flex;
         justify-content: center;
         align-items: stretch;

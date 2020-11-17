@@ -164,7 +164,7 @@ class TdLibController extends EventEmitter {
     send = request => {
         if (!this.client) {
             console.log('send (none init)', request);
-            return;
+            return Promise.reject('tdweb client is not ready yet');
         }
 
         if (!this.disableLog) {

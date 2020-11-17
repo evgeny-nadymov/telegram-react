@@ -38,7 +38,7 @@
 #edit-media-dialog-caption {
     box-shadow: 0 0 0 0;
     max-height: 150px;
-    max-width: 324px;
+    width: 324px;
     min-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;

@@ -26,7 +26,7 @@ class Game extends React.Component {
         if (animation) {
             const animationSrc = getSrc(animation.animation);
             if (animationSrc || animation.thumbnail) {
-                return <Animation chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
+                return <Animation stretch={true} chatId={chatId} messageId={messageId} animation={animation} openMedia={openMedia} />;
             }
         }
 
@@ -51,22 +51,25 @@ class Game extends React.Component {
     };
 
     render() {
-        const { game, t } = this.props;
+        const { game, meta, t } = this.props;
         if (!game) return null;
 
         const { title, text, description } = game;
         const formattedText = getFormattedText(text, t);
 
         return (
-            <div className='game'>
-                <div className='border' />
-                <div className='game-wrapper'>
-                    {title && <div className='game-title'>{title}</div>}
-                    {formattedText && <div className='game-text'>{formattedText}</div>}
-                    {description && <div className='game-description'>{description}</div>}
-                    {this.getContent()}
+            <>
+                <div className='game'>
+                    <div className='border' />
+                    <div className='game-wrapper'>
+                        {title && <div className='game-title'>{title}</div>}
+                        {formattedText && <div className='game-text'>{formattedText}</div>}
+                        {description && <div className='game-description'>{description}</div>}
+                        {this.getContent()}
+                    </div>
                 </div>
-            </div>
+                {meta}
+            </>
         );
     }
 }

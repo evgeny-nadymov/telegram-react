@@ -232,9 +232,9 @@ class ApplicationStore extends EventEmitter {
                 break;
             }
             case 'clientUpdateDragging': {
-                const { dragging, files } = update;
+                const { dragging, dataTransfer } = update;
 
-                this.dragParams = dragging ? { dragging, files } : null;
+                this.dragParams = dragging ? { dragging, dataTransfer } : null;
                 this.emit('clientUpdateDragging', update);
                 break;
             }
@@ -251,6 +251,10 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdatePageWidth': {
                 this.emit('clientUpdatePageWidth', update);
+                break;
+            }
+            case 'clientUpdatePinMessage': {
+                this.emit('clientUpdatePinMessage', update);
                 break;
             }
             case 'clientUpdateProfileMediaViewerContent': {
@@ -270,6 +274,14 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateRecordError': {
                 this.recording = false;
+                break;
+            }
+            case 'clientUpdateRequestClearHistory': {
+                this.emit('clientUpdateRequestClearHistory', update);
+                break;
+            }
+            case 'clientUpdateRequestLeaveChat': {
+                this.emit('clientUpdateRequestLeaveChat', update);
                 break;
             }
             case 'clientUpdateSearchChat': {
@@ -306,6 +318,10 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateSetPhoneError': {
                 this.emit('clientUpdateSetPhoneError', update);
+                break;
+            }
+            case 'clientUpdateUnpinMessage': {
+                this.emit('clientUpdateUnpinMessage', update);
                 break;
             }
             case 'clientUpdateDialogChatId': {
