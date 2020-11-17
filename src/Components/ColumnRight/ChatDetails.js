@@ -434,6 +434,21 @@ class ChatDetails extends React.Component {
             openChatTitle = t('OpenGroup');
         }
 
+        let chatUrl = ''
+        if (username) {
+            if (isPrivateChat(chatId)) {
+                chatUrl = username;
+            } else {
+                const tMeUrl = OptionStore.get('t_me_url')
+                    .value
+                    .toLowerCase()
+                    .replace('https://', '')
+                    .replace('http://', '');
+
+                chatUrl = tMeUrl + username;
+            }
+        }
+
         const content = (
             <>
                 <ChatDetailsHeader
@@ -463,7 +478,7 @@ class ChatDetails extends React.Component {
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={bio}
-                                            secondary={t('Bio')}
+                                            secondary={isPrivateChat(chatId) ? t('Bio') : t('DescriptionPlaceholder')}
                                             style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
                                         />
                                     </ListItem>
@@ -476,10 +491,10 @@ class ChatDetails extends React.Component {
                                         <ListItemText
                                             primary={
                                                 <Typography variant='inherit' noWrap>
-                                                    {username}
+                                                    {chatUrl}
                                                 </Typography>
                                             }
-                                            secondary={t('Username')}
+                                            secondary={isPrivateChat(chatId) ? t('Username') : t('InviteLink')}
                                         />
                                     </ListItem>
                                 )}

@@ -175,8 +175,6 @@ class PinnedMessage extends React.Component {
     };
 
     animateText = (messageId, prevMessageId, duration = 250) => {
-        console.log('[pin] animate', messageId, prevMessageId, duration);
-
         const textElement = document.getElementById('pinned-message-animated-text');
         const text1Element = document.getElementById('pinned-message-animated-text-1');
         const text2Element = document.getElementById('pinned-message-animated-text-2');
