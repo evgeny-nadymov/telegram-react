@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "f5c6bd07264448fea7059cd20ea60a5e",
+    "revision": "b79a3d414e4dd8fd7cfe7bbdecbe0150",
     "url": "/telegram-react/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.52c23fd6.chunk.css"
   },
   {
-    "revision": "2f49c002f51aefc110c2",
+    "revision": "242513151d76fd0a819b",
     "url": "/telegram-react/static/css/3.b085dd1f.chunk.css"
   },
   {
@@ -20,7 +20,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/7.792a87e0.chunk.css"
   },
   {
-    "revision": "8a5feea1667eb7916328",
+    "revision": "e0f2d980961db2e36267",
     "url": "/telegram-react/static/css/main.b8b36300.chunk.css"
   },
   {
@@ -28,12 +28,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/0.c99a4dbc.chunk.js"
   },
   {
-    "revision": "2f49c002f51aefc110c2",
-    "url": "/telegram-react/static/js/3.6328f360.chunk.js"
+    "revision": "242513151d76fd0a819b",
+    "url": "/telegram-react/static/js/3.ce269845.chunk.js"
   },
   {
-    "revision": "50334c9b29a2550b94ab",
-    "url": "/telegram-react/static/js/4.faf3a0e1.chunk.js"
+    "revision": "b2870ff6cf4112baaab5",
+    "url": "/telegram-react/static/js/4.cce4166d.chunk.js"
   },
   {
     "revision": "36a314745d32d6020fae",
@@ -48,12 +48,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/7.33693d86.chunk.js"
   },
   {
-    "revision": "8a5feea1667eb7916328",
-    "url": "/telegram-react/static/js/main.f60b0786.chunk.js"
+    "revision": "e0f2d980961db2e36267",
+    "url": "/telegram-react/static/js/main.a2c35270.chunk.js"
   },
   {
-    "revision": "1e61bca594e67c240dda",
-    "url": "/telegram-react/static/js/runtime~main.5556e889.js"
+    "revision": "5a3617264f4ac6f401af",
+    "url": "/telegram-react/static/js/runtime~main.7ddb621a.js"
   },
   {
     "revision": "cbb4eead04871188de6ce488808e4237",
