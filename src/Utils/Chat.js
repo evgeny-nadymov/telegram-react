@@ -7,7 +7,7 @@
 
 import React from 'react';
 import dateFormat from '../Utils/Date';
-import { getUserFullName, getUserShortName, getUserStatus, isUserOnline } from './User';
+import { getUserFullName, getUserShortName, getUserStatus, isMeUser, isUserOnline } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
 import { getLetters } from './Common';
@@ -422,6 +422,10 @@ function getMessageSenderName(message, t = k => k) {
 
             switch (sender['@type']) {
                 case 'messageSenderUser': {
+                    if (isMeUser(sender.user_id)) {
+                        return t('FromYou');
+                    }
+
                     return getUserShortName(sender.user_id, t);
                 }
                 case 'messageSenderChat': {

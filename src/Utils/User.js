@@ -10,6 +10,10 @@ import { getFirstLetter, getLetters, getSize } from './Common';
 import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import UserStore from '../Stores/UserStore';
 
+export function isMeUser(userId) {
+    return UserStore.getMyId() === userId;
+}
+
 function getUserStatus(user) {
     if (!user) return null;
     if (!user.status) return null;
