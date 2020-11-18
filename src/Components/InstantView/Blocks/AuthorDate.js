@@ -28,7 +28,7 @@ function AuthorDate(props) {
                 </a>
             )}
             {hasAuthor && hasDate && ' • '}
-            {hasDate && <time dateTime={d.toISOString()}>{dateFormat(d, 'dd mmm, yyyy')}</time>}
+            {hasDate && <time dateTime={d.toISOString()}>{dateFormat(d, 'dd MMM, yyyy')}</time>}
         </address>
     );
 }

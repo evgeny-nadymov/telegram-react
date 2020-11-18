@@ -550,7 +550,7 @@ function getMessageDate(message) {
     const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
     if (date > dayStart) {
-        return dateFormat(date, 'H:MM');
+        return dateFormat(date, 'H:mm');
     }
 
     const now = new Date();
@@ -561,7 +561,7 @@ function getMessageDate(message) {
         return dateFormat(date, 'ddd');
     }
 
-    return dateFormat(date, 'd.mm.yyyy');
+    return dateFormat(date, 'd.MM.yyyy');
 }
 
 function getLastMessageDate(chat) {

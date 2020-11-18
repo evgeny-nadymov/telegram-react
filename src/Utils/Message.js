@@ -457,14 +457,14 @@ function getDate(date) {
 
     const d = new Date(date * 1000);
 
-    return dateFormat(d, 'H:MM'); //date.toDateString();
+    return dateFormat(d, 'H:mm'); //date.toDateString();
 }
 
 function getDateHint(date) {
     if (!date) return null;
 
     const d = new Date(date * 1000);
-    return dateFormat(d, 'H:MM:ss d.mm.yyyy'); //date.toDateString();
+    return dateFormat(d, 'H:mm:ss d.MM.yyyy'); //date.toDateString();
 }
 
 function isForwardOriginHidden(forwardInfo) {
