@@ -4,10 +4,10 @@
  * This source code is licensed under the GPL v.3.0 license found in the
  * LICENSE file in the root directory of this source tree.
  */
-
-import SupergroupStore from '../Stores/SupergroupStore';
-import ChatStore from '../Stores/ChatStore';
 import { getSupergroupId } from './Chat';
+import ChatStore from '../Stores/ChatStore';
+import SupergroupStore from '../Stores/SupergroupStore';
+import LStore from '../Stores/LocalizationStore';
 
 export function getSupergroupStatus(supergroup, chatId) {
     if (!supergroup) return null;
@@ -25,15 +25,14 @@ export function getSupergroupStatus(supergroup, chatId) {
         }
     }
 
-    if (!count) return '0 members';
-    if (count === 1) return '1 member';
+    if (count <= 1) return LStore.formatPluralString('Members', count);
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${count} members, ${onlineCount} online`;
+        return `${LStore.formatPluralString('Members', count)}, ${LStore.formatPluralString('OnlineCount', count)}`;
     }
 
-    return `${count} members`;
+    return LStore.formatPluralString('Members', count);
 }
 
 export function isPublicSupergroup(chatId) {

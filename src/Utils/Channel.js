@@ -5,8 +5,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import SupergroupStore from '../Stores/SupergroupStore';
+
 import ChatStore from '../Stores/ChatStore';
+import LStore from '../Stores/LocalizationStore';
+import SupergroupStore from '../Stores/SupergroupStore';
 
 export function getChannelStatus(supergroup, chatId) {
     if (!supergroup) return '';
@@ -25,13 +27,12 @@ export function getChannelStatus(supergroup, chatId) {
         }
     }
 
-    if (!count) return '0 subscribers';
-    if (count === 1) return '1 subscriber';
+    if (count <= 1) return LStore.formatPluralString('Subscribers', 1);
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${count} subscribers, ${onlineCount} online`;
+        return `${LStore.formatPluralString('Subscribers', count)}, ${LStore.formatPluralString('OnlineCount', count)}`;
     }
 
-    return `${count} subscribers`;
+    return LStore.formatPluralString('Subscribers', count);
 }

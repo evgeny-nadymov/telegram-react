@@ -17,8 +17,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { getChatShortTitle, isChannelChat, isPrivateChat, isSupergroup } from '../../Utils/Chat';
+import { sprintf } from '../../Utils/Language';
 import { modalManager } from '../../Utils/Modal';
 import MessageStore from '../../Stores/MessageStore';
+import LStore from '../../Stores/LocalizationStore';
 
 class DeleteMessagesDialog extends React.Component {
     state = { };
@@ -64,6 +66,11 @@ class DeleteMessagesDialog extends React.Component {
 
         const count = messageIds ? messageIds.length : 0;
 
+        let confirm = count === 1 ? t('AreYouSureDeleteSingleMessage') : t('AreYouSureDeleteFewMessages');
+        if (isSupergroup(chatId) && !isChannelChat(chatId)) {
+            confirm = count === 1 ? t('AreYouSureDeleteSingleMessageMega') : t('AreYouSureDeleteFewMessagesMega');
+        }
+
         return (
             <Dialog
                 manager={modalManager}
@@ -71,36 +78,20 @@ class DeleteMessagesDialog extends React.Component {
                 open={true}
                 onClose={() => onClose(false, revoke)}
                 aria-labelledby='delete-dialog-title'>
-                <DialogTitle id='delete-dialog-title'>{t('Confirm')}</DialogTitle>
+                <DialogTitle id='delete-dialog-title'>{LStore.formatString('DeleteMessagesTitle', LStore.formatPluralString('messages', count))}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        {count === 1
-                            ? 'Do you want to delete this message?'
-                            : `Do you want to delete ${count} messages?`}
+                        {confirm}
                     </DialogContentText>
-                    { isSupergroup(chatId) ? (
-                        <DialogContentText>
-                            { !isChannelChat(chatId) && (count === 1
-                                ? 'This will delete it for everyone in this chat'
-                                : 'This will delete them for everyone in this chat')
+                    { !isSupergroup(chatId) && canBeDeletedForAllUsers && (
+                        <FormControlLabel
+                            control={<Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />}
+                            label={
+                                isPrivateChat(chatId)
+                                    ? sprintf(t, 'DeleteForUser', getChatShortTitle(chatId, false, t))
+                                    : t('DeleteForAll')
                             }
-                        </DialogContentText>
-                    ) : (
-                        <>
-                            {
-                                canBeDeletedForAllUsers && (
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />
-                                        }
-                                        label={
-                                            isPrivateChat(chatId)
-                                                ? `Delete for ${getChatShortTitle(chatId, false, t)}`
-                                                : 'Delete for all'
-                                        }
-                                    />
-                                )}
-                        </>
+                        />
                     )}
                 </DialogContent>
                 <DialogActions>

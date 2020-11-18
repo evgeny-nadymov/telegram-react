@@ -5,18 +5,44 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import React from 'react';
 import EventEmitter from './EventEmitter';
 import i18n from 'i18next';
+import { sprintfPostprocessor } from '../Utils/Localization';
 import LocalizationCache from '../Localization/Cache';
 import { initReactI18next } from 'react-i18next';
+import {
+    PluralRules_Arabic,
+    PluralRules_Balkan,
+    PluralRules_Breton,
+    PluralRules_Czech,
+    PluralRules_French,
+    PluralRules_Langi,
+    PluralRules_Latvian,
+    PluralRules_Lithuanian,
+    PluralRules_Macedonian,
+    PluralRules_Maltese,
+    PluralRules_None,
+    PluralRules_One,
+    PluralRules_Polish,
+    PluralRules_Romanian,
+    PluralRules_Serbian,
+    PluralRules_Slovenian,
+    PluralRules_Tachelhit,
+    PluralRules_Two,
+    PluralRules_Welsh,
+    PluralRules_Zero, QuantityEnum
+} from '../Utils/Localization';
 import TdLibController from '../Controllers/TdLibController';
-import React from 'react';
 
 const fallbackLng = 'en';
 const defaultNS = 'translation';
 const lng = localStorage.getItem('i18next') || fallbackLng;
 
-i18n.use(initReactI18next).init({
+i18n
+    .use(initReactI18next)
+    .use(sprintfPostprocessor)
+    .init({
     ns: [defaultNS, 'local'],
     defaultNS,
     fallbackNS: ['auth', 'local', 'emoji', 'settings', 'translation', 'search'],
@@ -501,8 +527,72 @@ class LocalizationStore extends EventEmitter {
         this.fallbackLng = fallbackLng;
         this.i18n = i18n;
         this.cache = cache;
+        this.allRules = new Map();
+
+        this.addRules(["bem", "brx", "da", "de", "el", "en", "eo", "es", "et", "fi", "fo", "gl", "he", "iw", "it", "nb",
+            "nl", "nn", "no", "sv", "af", "bg", "bn", "ca", "eu", "fur", "fy", "gu", "ha", "is", "ku",
+            "lb", "ml", "mr", "nah", "ne", "om", "or", "pa", "pap", "ps", "so", "sq", "sw", "ta", "te",
+            "tk", "ur", "zu", "mn", "gsw", "chr", "rm", "pt", "an", "ast"], new PluralRules_One())
+        this.addRules(["cs", "sk"], new PluralRules_Czech());
+        this.addRules(["ff", "fr", "kab"], new PluralRules_French());
+        this.addRules(["ru", "uk", "be", "sh"], new PluralRules_Balkan());
+        this.addRules(["sr", "hr", "bs"], new PluralRules_Serbian());
+        this.addRules(["lv"], new PluralRules_Latvian());
+        this.addRules(["lt"], new PluralRules_Lithuanian());
+        this.addRules(["pl"], new PluralRules_Polish());
+        this.addRules(["ro", "mo"], new PluralRules_Romanian());
+        this.addRules(["sl"], new PluralRules_Slovenian());
+        this.addRules(["ar"], new PluralRules_Arabic());
+        this.addRules(["mk"], new PluralRules_Macedonian());
+        this.addRules(["cy"], new PluralRules_Welsh());
+        this.addRules(["br"], new PluralRules_Breton());
+        this.addRules(["lag"], new PluralRules_Langi());
+        this.addRules(["shi"], new PluralRules_Tachelhit());
+        this.addRules(["mt"], new PluralRules_Maltese());
+        this.addRules(["ga", "se", "sma", "smi", "smj", "smn", "sms"], new PluralRules_Two());
+        this.addRules(["ak", "am", "bh", "fil", "tl", "guw", "hi", "ln", "mg", "nso", "ti", "wa"], new PluralRules_Zero());
+        this.addRules(["az", "bm", "fa", "ig", "hu", "ja", "kde", "kea", "ko", "my", "ses", "sg", "to",
+            "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"], new PluralRules_None());
+
+        const langCode = lng.indexOf('-') !== -1 ? lng.substring(0, lng.indexOf('-')) : lng;
+        this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
 
         this.addTdLibListener();
+    }
+
+    addRules(languages, rules) {
+        languages.forEach(x => this.allRules.set(x, rules));
+    }
+
+    stringForQuantity(quantity) {
+        switch (quantity) {
+            case QuantityEnum.QUANTITY_ZERO:
+                return 'Z';
+            case QuantityEnum.QUANTITY_ONE:
+                return 'O';
+            case QuantityEnum.QUANTITY_TWO:
+                return 'T';
+            case QuantityEnum.QUANTITY_FEW:
+                return 'F';
+            case QuantityEnum.QUANTITY_MANY:
+                return 'M';
+            default:
+                return 'OT';
+        }
+    }
+
+    formatPluralString(key, plural) {
+        if (!key || !this.currentPluralRules) {
+            return 'LOC_ERR: ' + key;
+        }
+
+        const pluralKey = key + this.stringForQuantity(this.currentPluralRules.quantityForNumber(plural));
+
+        return this.formatString(pluralKey, plural);
+    }
+
+    formatString(key, ...args) {
+        return i18n.t(key, { postProcess: 'sprintf', sprintf: args });
     }
 
     addTdLibListener = () => {
@@ -557,13 +647,22 @@ class LocalizationStore extends EventEmitter {
     onClientUpdate = async update => {
         switch (update['@type']) {
             case 'clientUpdateLanguageChange': {
-                const { language } = update;
+                let { language } = update;
+
+                let langCode = language;
+                const countryCodeIndex = language.indexOf('-');
+                if (countryCodeIndex !== -1) {
+                    langCode = language.substring(0, countryCodeIndex);
+                    language = langCode + language.substr(countryCodeIndex).toUpperCase();
+                }
 
                 await this.loadLanguage(language);
 
                 localStorage.setItem('i18next', language);
 
                 await i18n.changeLanguage(language);
+
+                this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng)
 
                 TdLibController.send({
                     '@type': 'setOption',
@@ -623,7 +722,7 @@ class LocalizationStore extends EventEmitter {
     loadLanguage = async language => {
         const result = await TdLibController.send({
             '@type': 'getLanguagePackStrings',
-            language_pack_id: language,
+            language_pack_id: language.toLowerCase(),
             keys: []
         });
 
