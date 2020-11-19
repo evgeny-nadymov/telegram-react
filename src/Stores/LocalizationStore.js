@@ -115,6 +115,8 @@ class LocalizationStore extends EventEmitter {
         this.addRules(["az", "bm", "fa", "ig", "hu", "ja", "kde", "kea", "ko", "my", "ses", "sg", "to",
             "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"], new PluralRules_None());
 
+        this.set24HourFormat();
+
         const langCode = lng.indexOf('-') !== -1 ? lng.substring(0, lng.indexOf('-')) : lng;
         this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
         this.recreateFormatters();
@@ -122,10 +124,18 @@ class LocalizationStore extends EventEmitter {
         this.addTdLibListener();
     }
 
+    set24HourFormat() {
+        try {
+            this.is24HourFormat = !Intl.DateTimeFormat([], { hour: 'numeric' }).resolvedOptions().hour12;
+        } catch (e) {
+            this.is24HourFormat = false;
+        }
+    }
+
     recreateFormatters() {
-        this.formatterDay = 'H:mm';
-        this.formatterDayMonth = 'd MMM';
-        this.formatterYear = 'dd.MM.yy';
+        this.formatterDay = this.is24HourFormat ? (this.getString('formatterDay24H') || 'HH:mm') : (this.getString('formatterDay12H') || 'h:mm a');
+        this.formatterDayMonth = this.getString('formatterMonth') || 'd MMM';
+        this.formatterYear = this.getString('formatterYear') || 'dd.MM.yy';
     }
 
     addRules(languages, rules) {

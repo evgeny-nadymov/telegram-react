@@ -25,6 +25,7 @@ import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_D
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
+import LStore from '../Stores/LocalizationStore';
 import MessageStore from '../Stores/MessageStore';
 import PlayerStore from '../Stores/PlayerStore';
 import UserStore from '../Stores/UserStore';
@@ -457,14 +458,15 @@ function getDate(date) {
 
     const d = new Date(date * 1000);
 
-    return dateFormat(d, 'H:mm'); //date.toDateString();
+    return dateFormat(d, LStore.formatterDay);
 }
 
 function getDateHint(date) {
     if (!date) return null;
 
     const d = new Date(date * 1000);
-    return dateFormat(d, 'H:mm:ss d.MM.yyyy'); //date.toDateString();
+
+    return LStore.formatString('formatDateAtTime', dateFormat(d, LStore.formatterYear), dateFormat(d, LStore.formatterDay));
 }
 
 function isForwardOriginHidden(forwardInfo) {

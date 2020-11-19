@@ -20,6 +20,7 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
+import LStore from '../Stores/LocalizationStore';
 import MessageStore from '../Stores/MessageStore';
 import NotificationStore from '../Stores/NotificationStore';
 import SupergroupStore from '../Stores/SupergroupStore';
@@ -550,7 +551,7 @@ function getMessageDate(message) {
     const dayStart = new Date();
     dayStart.setHours(0, 0, 0, 0);
     if (date > dayStart) {
-        return dateFormat(date, 'H:mm');
+        return dateFormat(date, LStore.formatterDay);
     }
 
     const now = new Date();
@@ -558,10 +559,11 @@ function getMessageDate(message) {
     const weekStart = now.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(now.setDate(weekStart));
     if (date > monday) {
-        return dateFormat(date, 'ddd');
+        return date.toLocaleString(LStore.i18n.language, { weekday: 'short' });
+        //return dateFormat(date, 'ddd');
     }
 
-    return dateFormat(date, 'd.MM.yyyy');
+    return dateFormat(date, LStore.formatterYear);
 }
 
 function getLastMessageDate(chat) {

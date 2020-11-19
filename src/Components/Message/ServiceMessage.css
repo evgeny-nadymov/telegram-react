@@ -26,6 +26,9 @@
     padding: 0 6px;
     min-height: 24px;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .service-message-content .message-author,
@@ -34,7 +37,7 @@
 }
 
 .service-message-content div {
-    transform: translate(0, 1px);
+    /*transform: translate(0, 1px);*/
 }
 
 .service-message-photo {

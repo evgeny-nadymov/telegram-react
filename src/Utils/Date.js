@@ -20,7 +20,7 @@
  */
 
 const dateFormat = (function() {
-    const token = /d{1,4}|M{1,4}|yy(?:yy)?|([HhmsTt])\1?|[LloSZWN]|"[^"]*"|'[^']*'/g;
+    const token = /d{1,4}|M{1,4}|yy(?:yy)?|([HhmsAa])\1?|[LloSZWN]|"[^"]*"|'[^']*'/g;
     const timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g;
     const timezoneClip = /[^-+\dA-Z]/g;
 
@@ -87,10 +87,10 @@ const dateFormat = (function() {
             ss: pad(s),
             l: pad(L, 3),
             L: pad(Math.round(L / 10)),
-            t: H < 12 ? dateFormat.i18n.timeNames[0] : dateFormat.i18n.timeNames[1],
-            tt: H < 12 ? dateFormat.i18n.timeNames[2] : dateFormat.i18n.timeNames[3],
-            T: H < 12 ? dateFormat.i18n.timeNames[4] : dateFormat.i18n.timeNames[5],
-            TT: H < 12 ? dateFormat.i18n.timeNames[6] : dateFormat.i18n.timeNames[7],
+            a: H < 12 ? dateFormat.i18n.timeNames[0] : dateFormat.i18n.timeNames[1],
+            aa: H < 12 ? dateFormat.i18n.timeNames[2] : dateFormat.i18n.timeNames[3],
+            A: H < 12 ? dateFormat.i18n.timeNames[4] : dateFormat.i18n.timeNames[5],
+            AA: H < 12 ? dateFormat.i18n.timeNames[6] : dateFormat.i18n.timeNames[7],
             Z: gmt ? 'GMT' : utc ? 'UTC' : (String(date).match(timezone) || ['']).pop().replace(timezoneClip, ''),
             o: (o > 0 ? '-' : '+') + pad(Math.floor(Math.abs(o) / 60) * 100 + (Math.abs(o) % 60), 4),
             S: ['th', 'st', 'nd', 'rd'][d % 10 > 3 ? 0 : (((d % 100) - (d % 10) != 10) * d) % 10],
@@ -113,9 +113,9 @@ dateFormat.masks = {
     mediumDate: 'MMM d, yyyy',
     longDate: 'MMMM d, yyyy',
     fullDate: 'dddd, MMMM d, yyyy',
-    shortTime: 'h:mm TT',
-    mediumTime: 'h:mm:ss TT',
-    longTime: 'h:mm:ss TT Z',
+    shortTime: 'h:mm AA',
+    mediumTime: 'h:mm:ss AA',
+    longTime: 'h:mm:ss AA Z',
     isoDate: 'yyyy-MM-dd',
     isoTime: 'HH:mm:ss',
     isoDateTime: "yyyy-MM-dd'T'HH:mm:sso",

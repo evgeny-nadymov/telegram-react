@@ -84,7 +84,6 @@ function getUserStatus(user) {
                 // return `last seen yesterday at ${dateFormat(wasOnline, 'H:mm')}`;
             }
 
-            console.log('[last seen] ', wasOnline, LStore.formatterYear, LStore.formatterDay);
             return LStore.formatString('LastSeenDateFormatted', LStore.formatString('formatDateAtTime', dateFormat(wasOnline, LStore.formatterYear), dateFormat(wasOnline, LStore.formatterDay)));
             // return `last seen ${dateFormat(wasOnline, 'dd.MM.yyyy')}`;
         }
