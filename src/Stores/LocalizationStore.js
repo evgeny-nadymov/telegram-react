@@ -37,8 +37,8 @@ import {
 import en from '../Resources/en/translation.json';
 import ru from '../Resources/ru/translation.json';
 import it from '../Resources/it/translation.json';
-import es from '../Resources/it/translation.json';
-import pl from '../Resources/it/translation.json';
+import es from '../Resources/es/translation.json';
+import pl from '../Resources/pl/translation.json';
 import TdLibController from '../Controllers/TdLibController';
 
 const fallbackLng = 'en';
