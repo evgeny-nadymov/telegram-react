@@ -9,38 +9,59 @@ import React from 'react';
 import Currency from './Currency';
 import MessageAuthor from '../Components/Message/MessageAuthor';
 import ChatStore from '../Stores/ChatStore';
-import UserStore from '../Stores/UserStore';
+import LStore from '../Stores/LocalizationStore';
 import MessageStore from '../Stores/MessageStore';
+import UserStore from '../Stores/UserStore';
 
-let serviceMap = new Map();
-serviceMap.set('messageBasicGroupChatCreate', 'messageBasicGroupChatCreate');
-serviceMap.set('messageChatAddMembers', 'messageChatAddMembers');
-serviceMap.set('messageChatChangePhoto', 'messageChatChangePhoto');
-serviceMap.set('messageChatChangeTitle', 'messageChatChangeTitle');
-serviceMap.set('messageChatDeleteMember', 'messageChatDeleteMember');
-serviceMap.set('messageChatDeletePhoto', 'messageChatDeletePhoto');
-serviceMap.set('messageChatJoinByLink', 'messageChatJoinByLink');
-serviceMap.set('messageChatSetTtl', 'messageChatSetTtl');
-serviceMap.set('messageChatUpgradeFrom', 'messageChatUpgradeFrom');
-serviceMap.set('messageChatUpgradeTo', 'messageChatUpgradeTo');
-serviceMap.set('messageContactRegistered', 'messageContactRegistered');
-serviceMap.set('messageCustomServiceAction', 'messageCustomServiceAction');
-serviceMap.set('messageGameScore', 'messageGameScore');
-serviceMap.set('messagePassportDataReceived', 'messagePassportDataReceived');
-serviceMap.set('messagePassportDataSent', 'messagePassportDataSent');
-serviceMap.set('messagePaymentSuccessful', 'messagePaymentSuccessful');
-serviceMap.set('messagePaymentSuccessfulBot', 'messagePaymentSuccessfulBot');
-serviceMap.set('messagePinMessage', 'messagePinMessage');
-serviceMap.set('messageScreenshotTaken', 'messageScreenshotTaken');
-serviceMap.set('messageSupergroupChatCreate', 'messageSupergroupChatCreate');
-serviceMap.set('messageUnsupported', 'messageUnsupported');
-serviceMap.set('messageWebsiteConnected', 'messageWebsiteConnected');
+const serviceMap = new Map();
+serviceMap.set('messageText', false);
+serviceMap.set('messageAnimation', false);
+serviceMap.set('messageAudio', false);
+serviceMap.set('messageDocument', false);
+serviceMap.set('messagePhoto', false);
+serviceMap.set('messageExpiredPhoto', true);
+serviceMap.set('messageSticker', false);
+serviceMap.set('messageVideo', false);
+serviceMap.set('messageExpiredVideo', true);
+serviceMap.set('messageVideoNote', false);
+serviceMap.set('messageVoiceNote', false);
+serviceMap.set('messageLocation', false);
+serviceMap.set('messageVenue', false);
+serviceMap.set('messageContact', false);
+serviceMap.set('messageDice', false);
+serviceMap.set('messageGame', false);
+serviceMap.set('messagePoll', false);
+serviceMap.set('messageInvoice', false);
+serviceMap.set('messageCall', false);
+serviceMap.set('messageBasicGroupChatCreate', true);
+serviceMap.set('messageSupergroupChatCreate', true);
+serviceMap.set('messageChatChangeTitle', true);
+serviceMap.set('messageChatChangePhoto', true);
+serviceMap.set('messageChatDeletePhoto', true);
+serviceMap.set('messageChatAddMembers', true);
+serviceMap.set('messageChatJoinByLink', true);
+serviceMap.set('messageChatDeleteMember', true);
+serviceMap.set('messageChatUpgradeTo', true);
+serviceMap.set('messageChatUpgradeFrom', true);
+serviceMap.set('messagePinMessage', true);
+serviceMap.set('messageScreenshotTaken', true);
+serviceMap.set('messageChatSetTtl', true);
+serviceMap.set('messageCustomServiceAction', true);
+serviceMap.set('messageGameScore', true);
+serviceMap.set('messagePaymentSuccessful', true);
+serviceMap.set('messagePaymentSuccessfulBot', true);
+serviceMap.set('messageContactRegistered', true);
+serviceMap.set('messageWebsiteConnected', true);
+serviceMap.set('messagePassportDataSent', true);
+serviceMap.set('messagePassportDataReceived', true);
+serviceMap.set('messageLiveLocationApproached', true);
+serviceMap.set('messageUnsupported', true);
 
-function isServiceMessage(message) {
+export function isServiceMessage(message) {
     if (!message) return false;
     if (!message.content) return false;
 
-    return serviceMap.has(message.content['@type']) || message.ttl > 0;
+    return serviceMap.has(message.content['@type']) && serviceMap.get(message.content['@type']) || message.ttl > 0;
 }
 
 function getTTLString(ttl) {
@@ -70,43 +91,43 @@ function getTTLString(ttl) {
 function getPassportElementTypeString(type) {
     switch (type['@type']) {
         case 'passportElementTypeAddress': {
-            return 'Address';
+            return LStore.getString('ActionBotDocumentAddress');
         }
         case 'passportElementTypeBankStatement': {
-            return 'Bank Statement';
+            return LStore.getString('ActionBotDocumentBankStatement');
         }
         case 'passportElementTypeDriverLicense': {
-            return 'Driver Licence';
+            return LStore.getString('ActionBotDocumentDriverLicence');
         }
         case 'passportElementTypeEmailAddress': {
-            return 'Email';
+            return LStore.getString('ActionBotDocumentEmail');
         }
         case 'passportElementTypeIdentityCard': {
-            return 'Identity Card';
+            return LStore.getString('ActionBotDocumentIdentityCard');
         }
         case 'passportElementTypeInternalPassport': {
-            return 'Internal Passport';
+            return LStore.getString('ActionBotDocumentInternalPassport');
         }
         case 'passportElementTypePassport': {
-            return 'Passport';
+            return LStore.getString('ActionBotDocumentPassport');
         }
         case 'passportElementTypePassportRegistration': {
-            return 'Passport Registration';
+            return LStore.getString('ActionBotDocumentPassportRegistration');
         }
         case 'passportElementTypePersonalDetails': {
-            return 'Personal details';
+            return LStore.getString('ActionBotDocumentIdentity');
         }
         case 'passportElementTypePhoneNumber': {
-            return 'Phone Number';
+            return LStore.getString('ActionBotDocumentPhone');
         }
         case 'passportElementTypeRentalAgreement': {
-            return 'Tenancy Agreement';
+            return LStore.getString('ActionBotDocumentRentalAgreement');
         }
         case 'passportElementTypeTemporaryRegistration': {
-            return 'Temporary Registration';
+            return LStore.getString('ActionBotDocumentTemporaryRegistration');
         }
         case 'passportElementTypeUtilityBill': {
-            return 'Utility Bill';
+            return LStore.getString('ActionBotDocumentUtilityBill');
         }
     }
 
@@ -128,7 +149,7 @@ function getMessageAuthor(message, openUser) {
     return chat.title;
 }
 
-function getServiceMessageContent(message, openUser = false) {
+export function getServiceMessageContent(message, openUser = false) {
     if (!message) return null;
     if (!message.content) return null;
 
@@ -587,7 +608,7 @@ function getServiceMessageContent(message, openUser = false) {
             );
         }
         case 'messageUnsupported': {
-            return 'Unsupported message';
+            return LStore.getString('UnsupportedMedia');
         }
         case 'messageWebsiteConnected': {
             return `You allowed this bot to message you when you logged in on ${content.domain_name}.`;
@@ -596,5 +617,3 @@ function getServiceMessageContent(message, openUser = false) {
 
     return `[${message.content['@type']}]`;
 }
-
-export { isServiceMessage, getServiceMessageContent };

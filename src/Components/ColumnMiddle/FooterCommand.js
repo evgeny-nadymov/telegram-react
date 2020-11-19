@@ -14,11 +14,13 @@ class FooterCommand extends React.Component {
         const { command, onCommand } = this.props;
 
         return (
-            <div className='footer-command-wrapper'>
-                <div className='footer-command-actions'>
-                    <Button color='primary' className='footer-command-button' onClick={onCommand}>
-                        {command}
-                    </Button>
+            <div className='footer-command'>
+                <div className='inputbox'>
+                    <div className='inputbox-bubble'>
+                        <Button color='primary' className='footer-command-button' onClick={onCommand}>
+                            {command}
+                        </Button>
+                    </div>
                 </div>
             </div>
         );

@@ -5,24 +5,19 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.footer-command-wrapper {
-    /*margin-top: 8px;*/
-    text-align: center;
-    height: 75px;
-    box-sizing: border-box;
-    border-top: 1px solid var(--border);
-    background: var(--panel-background);
-    z-index: 1;
-}
-
-.footer-command-actions {
+.footer-command .inputbox-bubble {
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    padding: 0;
+}
+
+.footer-command .inputbox-bubble::after {
+    display: none;
 }
 
 .footer-command-button {
-    margin: 14px;
+    margin: 10px;
     min-width: 100px;
 }
