@@ -27,7 +27,7 @@ class DayMeta extends React.Component {
     render() {
         const { date, i18n } = this.props;
 
-        const showYear = new Date(date * 1000) < new Date().setMonth(new Date().getMonth() - 3);
+        const showYear = new Date(date * 1000).getFullYear() !== new Date().getFullYear();
         const options = showYear
             ? {
                   day: 'numeric',
