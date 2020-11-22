@@ -28,6 +28,7 @@ import { modalManager } from '../../Utils/Modal';
 import { PROFILE_PHOTO_BIG_SIZE } from '../../Constants';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
+import LStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ProfileMediaViewer.css';
 
@@ -409,11 +410,12 @@ class ProfileMediaViewer extends React.Component {
         return (
             <div className={classNames('media-viewer', 'media-viewer-default')}>
                 <div className='media-viewer-footer'>
-                    <ProfileMediaInfo chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)} />
+                    <ProfileMediaInfo chatId={chatId} date={getProfilePhotoDateHint(userProfilePhoto)}/>
                     <MediaViewerFooterText
                         title={t('AttachPhoto')}
-                        subtitle={totalCount && index >= 0 ? `${index + 1} of ${totalCount}` : null}
+                        subtitle={totalCount > 1 && index >= 0 ? LStore.formatString('Of', index + 1, totalCount) : null}
                     />
+                    <div style={{ width: 64 }}/>
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />
                     <MediaViewerDownloadButton title={t('Forward')} fileId={file.id} onClick={this.handleForward}>
                         <ReplyIcon />

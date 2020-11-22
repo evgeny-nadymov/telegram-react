@@ -25,6 +25,7 @@ import { cancelPreloadIVMediaViewerContent, getViewerFile, preloadIVMediaViewerC
 import { getInputMediaContent } from '../../Utils/Media';
 import { forward, setInstantViewViewerContent } from '../../Actions/Client';
 import { modalManager } from '../../Utils/Modal';
+import LStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InstantViewMediaViewer.css';
 
@@ -237,7 +238,7 @@ class InstantViewMediaViewer extends React.Component {
                 <div className='media-viewer-footer'>
                     <MediaViewerFooterText
                         title={title}
-                        subtitle={maxCount && index >= 0 ? `${index + 1} of ${maxCount}` : null}
+                        subtitle={maxCount > 1 && index >= 0 ? LStore.formatString('Of', index + 1, maxCount) : null}
                         style={{ marginLeft: 128 }}
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={file.id} onClick={this.handleSave} />

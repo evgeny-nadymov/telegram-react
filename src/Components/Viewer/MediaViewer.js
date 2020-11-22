@@ -50,6 +50,7 @@ import { PHOTO_BIG_SIZE, MEDIA_SLICE_LIMIT } from '../../Constants';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
+import LStore from '../../Stores/LocalizationStore';
 
 class MediaViewer extends React.Component {
     constructor(props) {
@@ -854,7 +855,7 @@ class MediaViewer extends React.Component {
                     <MediaInfo chatId={chatId} messageId={currentMessageId} />
                     <MediaViewerFooterText
                         title={title}
-                        subtitle={maxCount && index >= 0 ? `${maxCount - index} of ${maxCount}` : null}
+                        subtitle={maxCount > 1 && index >= 0 ? LStore.formatString('Of', maxCount - index, maxCount) : null}
                     />
                     <MediaViewerDownloadButton title={t('Save')} fileId={fileId} disabled={isEmbedMessage(chatId, currentMessageId)} onClick={this.handleSave} />
                     <MediaViewerFooterButton
