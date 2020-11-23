@@ -793,9 +793,11 @@ function isGroupChat(chatId) {
     if (!chat.type) return false;
 
     switch (chat.type['@type']) {
-        case 'chatTypeBasicGroup':
-        case 'chatTypeSupergroup': {
+        case 'chatTypeBasicGroup': {
             return true;
+        }
+        case 'chatTypeSupergroup': {
+            return !chat.type.is_channel;
         }
         case 'chatTypePrivate':
         case 'chatTypeSecret': {
@@ -813,9 +815,7 @@ function isChannelChat(chatId) {
 
     switch (chat.type['@type']) {
         case 'chatTypeSupergroup': {
-            const supergroup = SupergroupStore.get(chat.type.supergroup_id);
-
-            return supergroup && supergroup.is_channel;
+            return chat.type.is_channel;
         }
         case 'chatTypeBasicGroup':
         case 'chatTypePrivate':
@@ -1086,6 +1086,8 @@ function getGroupChatMembers(chatId) {
 }
 
 export async function getChatMedia(chatId) {
+    // return;
+
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
 

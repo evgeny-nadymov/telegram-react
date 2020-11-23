@@ -167,7 +167,7 @@ dateFormat.i18n = {
         'November',
         'December'
     ],
-    timeNames: ['a', 'p', 'am', 'pm', 'A', 'P', 'AM', 'PM']
+    timeNames: ['AM', 'PM', 'AM', 'PM', 'AM', 'PM', 'AM', 'PM']
 };
 
 function pad(val, len) {

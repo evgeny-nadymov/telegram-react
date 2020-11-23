@@ -6,6 +6,7 @@
  */
 
 .footer-command .inputbox-bubble {
+    margin: 0;
     border-radius: 12px;
     display: flex;
     align-items: center;
