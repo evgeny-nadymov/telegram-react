@@ -294,11 +294,14 @@ class Search extends React.Component {
         }
 
         if (linkMessage) {
-            const { chat_id, sender } = linkMessage;
+            const { chat_id, message } = linkMessage;
 
             chats.set(chat_id, chat_id);
-            if (sender.user_id) {
-                users.set(sender.user_id, sender.user_id);
+            if (message) {
+                const { sender } = message;
+                if (sender && sender.user_id) {
+                    users.set(sender.user_id, sender.user_id);
+                }
             }
         }
 

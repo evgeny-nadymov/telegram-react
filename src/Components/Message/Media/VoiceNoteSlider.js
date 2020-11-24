@@ -238,6 +238,11 @@ class VoiceNoteSlider extends React.Component {
         });
     };
 
+    handleClick = event => {
+        event.stopPropagation();
+        event.preventDefault();
+    };
+
     render() {
         const { chatId, messageId, audio, waveform, className, style } = this.props;
         const { duration, value, dragging, buffered } = this.state;
@@ -271,6 +276,7 @@ class VoiceNoteSlider extends React.Component {
                     onChange={this.handleChange}
                     onChangeCommitted={this.handleChangeCommitted}
                     onMouseDown={this.handleMouseDown}
+                    onClick={this.handleClick}
                 />
             </div>
         );

@@ -90,10 +90,11 @@ class ForwardDialog extends React.Component {
         if (!getChatUsername(chatId)) return;
 
         const result = await TdLibController.send({
-            '@type': 'getPublicMessageLink',
+            '@type': 'getMessageLink',
             chat_id: chatId,
             message_id: messageIds[0],
-            for_album: false
+            for_album: false,
+            for_comment: false
         });
 
         this.setState({

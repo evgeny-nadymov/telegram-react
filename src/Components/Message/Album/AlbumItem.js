@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import CheckMarkIcon from '@material-ui/icons/Check';
+import Audio from '../Media/Audio';
 import Document from '../Media/Document';
 import MessageMenu from '../MessageMenu';
 import Meta from '../Meta';
@@ -29,6 +30,37 @@ class AlbumItem extends React.Component {
         const { chat_id, id, content } = message;
 
         switch (content['@type']) {
+            case 'messageAudio': {
+                const inlineMeta = (
+                    <Meta
+                        className='meta-hidden'
+                        key={`${chat_id}_${id}_meta`}
+                        chatId={chat_id}
+                        messageId={id}
+                    />
+                );
+
+                const webPage = getWebPage(message);
+                const text = getText(message, !!webPage ? null : inlineMeta, x => x);
+
+                return (
+                    <>
+                        <Audio
+                            type='message'
+                            chatId={chat_id}
+                            messageId={id}
+                            audio={content.audio}
+                            displaySize={displaySize}
+                            style={{ width: '100%', height: '100%' }}
+                            openMedia={this.openMedia}/>
+                        { text && text.length > 0 && (
+                            <div className={'message-text'}>
+                                {text}
+                            </div>
+                        )}
+                    </>
+                );
+            }
             case 'messagePhoto': {
                 return (
                     <Photo
