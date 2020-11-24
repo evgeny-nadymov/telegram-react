@@ -540,10 +540,6 @@ function filterDuplicateMessages(result, history) {
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
-function filterMessages(messages) {
-    return messages.filter(x => x.content['@type'] !== 'messageChatUpgradeTo');
-}
-
 function getContent(message, t = key => key) {
     if (!message) return null;
 
@@ -2783,7 +2779,6 @@ export {
     getForwardTitle,
     getUnread,
     filterDuplicateMessages,
-    filterMessages,
     isMediaContent,
     isDeletedMessage,
     isVideoMessage,

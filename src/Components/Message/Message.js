@@ -32,7 +32,7 @@ import {
     getMessageStyle, isBadSelection, isEmptySelection
 } from '../../Utils/Message';
 import { getMedia } from '../../Utils/Media';
-import { canSendMessages, isChannelChat, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { canSendMessages, isChannelChat, isGroupChat, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import {
     openUser,
     openChat,
@@ -367,7 +367,7 @@ class Message extends Component {
         const hasCaption = text !== null && text.length > 0;
         const showForward = showMessageForward(chatId, messageId);
         const showReply = Boolean(reply_to_message_id);
-        const suppressTitle = isPrivateChat(chatId) && !(isMeChat(chatId) && !isOutgoing);
+        const suppressTitle = isPrivateChat(chatId) && !(isMeChat(chatId) && !isOutgoing) || (isGroupChat(chatId) && isOutgoing);
         const hasTitle = (!suppressTitle && showTitle) || showForward || showReply;
         const media = getMedia(message, this.openMedia, { hasTitle, hasCaption, inlineMeta, meta });
         const isChannel = isChannelChat(chatId);

@@ -177,6 +177,33 @@ class LocalizationStore extends EventEmitter {
         return i18n.t(key);
     }
 
+    replace(str, key, obj) {
+        const index = str.indexOf(key);
+        if (index === -1) return str;
+
+        return [str.substring(0, index), obj, str.substring(index + key.length)];
+    }
+
+    replaceTwo(str, key1, obj1, key2, obj2) {
+        let first = { index: str.indexOf(key1), key: key1, obj: obj1 };
+        let second = { index: str.indexOf(key2), key: key2, obj: obj2 };
+        if (first.index > second.index) {
+            const temp = first;
+            first = second;
+            second = temp;
+        }
+
+        if (first.index === -1 && second.index === -1) return str;
+
+        if (first.index === -1) {
+            return this.replace(str, second.key, second.obj);
+        } else if (second.index === -1) {
+            return this.replace(str, first.key, first.obj);
+        }
+
+        return [str.substring(0, first.index), first.obj, str.substring(first.index + first.key.length, second.index), second.obj, str.substring(second.index + second.key.length)];
+    }
+
     addTdLibListener = () => {
         TdLibController.on('update', this.onUpdate);
         TdLibController.on('clientUpdate', this.onClientUpdate);

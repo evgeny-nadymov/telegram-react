@@ -110,10 +110,11 @@ class MessageMenu extends React.PureComponent {
         onClose(event);
 
         const httpUrl = await TdLibController.send({
-            '@type': 'getPublicMessageLink',
+            '@type': 'getMessageLink',
             chat_id: chatId,
             message_id: messageId,
-            for_album: false
+            for_album: false,
+            for_comment: false
         });
 
         if (!httpUrl) return;

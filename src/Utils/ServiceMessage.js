@@ -8,10 +8,11 @@
 import React from 'react';
 import Currency from './Currency';
 import MessageAuthor from '../Components/Message/MessageAuthor';
+import { isChannelChat, isSupergroup } from './Chat';
+import { getUserShortName, isMeUser } from './User';
 import ChatStore from '../Stores/ChatStore';
 import LStore from '../Stores/LocalizationStore';
 import MessageStore from '../Stores/MessageStore';
-import UserStore from '../Stores/UserStore';
 
 const serviceMap = new Map();
 serviceMap.set('messageText', false);
@@ -66,26 +67,21 @@ export function isServiceMessage(message) {
 
 function getTTLString(ttl) {
     if (ttl < 60) {
-        const seconds = ttl === 1 ? 'second' : 'seconds';
-        return `${ttl} ${seconds}`;
+        return LStore.formatPluralString('Seconds', Math.floor(ttl));
     }
     if (ttl < 60 * 60) {
-        const minutes = Math.floor(ttl / 60) === 1 ? 'minute' : 'minutes';
-        return `${ttl} ${minutes}`;
+        return LStore.formatPluralString('Minutes', Math.floor(ttl / 60));
     }
     if (ttl < 24 * 60 * 60) {
-        const hours = Math.floor(ttl / 60 / 60) === 1 ? 'hour' : 'hours';
-        return `${ttl} ${hours}`;
-    }
-    if (ttl < 7 * 24 * 60 * 60) {
-        const days = Math.floor(ttl / 60 / 60 / 24) === 1 ? 'day' : 'days';
-        return `${ttl} ${days}`;
-    }
-    if (ttl === 7 * 24 * 60 * 60) {
-        return '1 week';
+        return LStore.formatPluralString('Hours', Math.floor(ttl / 60 / 60));
     }
 
-    return `${ttl} seconds`;
+    const days = ttl / 60 / 60 / 24;
+    if (ttl % 7 === 0) {
+        return LStore.formatPluralString('Weeks', Math.floor(days / 7));
+    }
+
+    return `${LStore.formatPluralString('Weeks', Math.floor(days / 7))} ${LStore.formatPluralString('Days', Math.floor(days % 7))}`
 }
 
 function getPassportElementTypeString(type) {
@@ -134,13 +130,13 @@ function getPassportElementTypeString(type) {
     return '';
 }
 
-function getMessageAuthor(message, openUser) {
+function getMessageAuthor(key, message, openUser) {
     if (!message) return null;
 
     const { chat_id, sender } = message;
 
     if (sender) {
-        return <MessageAuthor sender={sender} openUser={openUser} />;
+        return <MessageAuthor key={key} sender={sender} openUser={openUser} />;
     }
 
     const chat = ChatStore.get(chat_id);
@@ -153,10 +149,8 @@ export function getServiceMessageContent(message, openUser = false) {
     if (!message) return null;
     if (!message.content) return null;
 
-    const chat = ChatStore.get(message.chat_id);
-    const isChannel = chat.type['@type'] === 'chatTypeSupergroup' && chat.type.is_channel;
-
-    const { ttl, sender, content, is_outgoing: isOutgoing } = message;
+    const { chat_id, ttl, sender, content, is_outgoing: isOutgoing } = message;
+    const isChannel = isChannelChat(chat_id);
     if (ttl > 0) {
         switch (content['@type']) {
             case 'messagePhoto': {
@@ -183,154 +177,232 @@ export function getServiceMessageContent(message, openUser = false) {
                     </>
                 );
             }
-            default: {
-                if (isOutgoing) {
-                    return 'You sent a self-destructing message. Please view it on your mobile';
-                }
-
-                return (
-                    <>
-                        <MessageAuthor sender={sender} openUser={openUser} />
-                        {' sent a self-destructing message. Please view it on your mobile'}
-                    </>
-                );
-            }
         }
     }
 
     switch (content['@type']) {
+        case 'messageExpiredPhoto': {
+            return LStore.getString('AttachPhotoExpired');
+        }
+        case 'messageExpiredVideo': {
+            return LStore.getString('AttachVideoExpired');
+        }
         case 'messageBasicGroupChatCreate': {
-            const { title } = ChatStore.get(message.chat_id);
-
             if (isOutgoing) {
-                return `You created group «${title}»`;
+                return LStore.getString('ActionYouCreateGroup');
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` created group «${title}»`}
-                </>
-            );
+            return LStore.replace(LStore.getString('ActionCreateGroup'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
-        case 'messageChatAddMembers': {
-            const members = content.member_user_ids
-                .map(x => <MessageAuthor key={x} sender={{ '@type': 'messageSenderUser', user_id: x }} openUser={openUser} />)
-                .reduce((accumulator, current, index, array) => {
-                    const separator = index === array.length - 1 ? ' and ' : ', ';
-                    return accumulator === null ? [current] : [...accumulator, separator, current];
-                }, null);
-
-            if (isOutgoing) {
-                return content.member_user_ids.length === 1 && content.member_user_ids[0] === UserStore.getMyId() ? (
-                    'You joined the group'
-                ) : (
-                    <>
-                        {'You added '}
-                        {members}
-                    </>
-                );
-            }
-
-            return content.member_user_ids.length === 1 && content.member_user_ids[0] === message.sender.user_id ? (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' joined the group'}
-                </>
-            ) : (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' added '}
-                    {members}
-                </>
-            );
-        }
-        case 'messageChatChangePhoto': {
+        case 'messageSupergroupChatCreate': {
             if (isChannel) {
-                return 'Channel photo updated';
+                return LStore.getString('ActionCreateChannel');
             }
 
-            if (isOutgoing) {
-                return 'You updated group photo';
-            }
-
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` updated group photo`}
-                </>
-            );
+            return LStore.getString('ActionCreateMega');
         }
         case 'messageChatChangeTitle': {
             const { title } = content;
 
             if (isChannel) {
-                return `Channel name was changed to «${title}»`;
+                return LStore.getString('ActionChannelChangedTitle').replace('un2', title);
             }
 
             if (isOutgoing) {
-                return `You changed group name to «${title}»`;
+                return LStore.getString('ActionYouChangedTitle').replace('un2', title);
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` changed group name to «${title}»`}
-                </>
-            );
+            return LStore.replace(LStore.getString('ActionChangedTitle').replace('un2', title), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
-        case 'messageChatDeleteMember': {
-            if (isOutgoing) {
-                return content.user_id === UserStore.getMyId() ? (
-                    'You left the group'
-                ) : (
-                    <>
-                        {'You removed '}
-                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />
-                    </>
-                );
+        case 'messageChatChangePhoto': {
+            if (isChannel) {
+                return LStore.getString('ActionChannelChangedPhoto');
             }
 
-            return content.user_id === sender.user_id ? (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' left the group'}
-                </>
-            ) : (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' removed '}
-                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />
-                </>
-            );
+            if (isOutgoing) {
+                return LStore.getString('ActionYouChangedPhoto');
+            }
+
+            return LStore.replace(LStore.getString('ActionChangedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
         case 'messageChatDeletePhoto': {
             if (isChannel) {
-                return 'Channel photo removed';
+                return LStore.getString('ActionChannelRemovedPhoto');
             }
 
             if (isOutgoing) {
-                return 'You removed group photo';
+                return LStore.getString('ActionYouRemovedPhoto');
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' removed group photo'}
-                </>
-            );
+            return LStore.replace(LStore.getString('ActionRemovedPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+        }
+        case 'messageChatAddMembers': {
+            const singleMember = content.member_user_ids.length === 1;
+            if (singleMember) {
+                const memberUserId = content.member_user_ids[0];
+                if (sender.user_id === memberUserId) {
+                    if (isSupergroup(chat_id) && isChannel) {
+                        return LStore.getString('ChannelJoined');
+                    }
+
+                    if (isSupergroup(chat_id) && !isChannel) {
+                        if (isMeUser(memberUserId)) {
+                            return LStore.getString('ChannelMegaJoined');
+                        }
+
+                        return LStore.replace(LStore.getString('ActionAddUserSelfMega'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    }
+
+                    if (isOutgoing) {
+                        return LStore.getString('ActionAddUserSelfYou');
+                    }
+
+                    return LStore.replace(LStore.getString('ActionAddUserSelf'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                }
+
+                if (isOutgoing) {
+                    return LStore.replace(LStore.getString('ActionYouAddUser'), 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+                }
+
+                if (isMeUser(memberUserId)) {
+                    if (isSupergroup(chat_id)) {
+                        if (!isChannel) {
+                            return LStore.replace(LStore.getString('MegaAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                        }
+
+                        return LStore.replace(LStore.getString('ChannelAddedBy'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    }
+
+                    return LStore.replace(LStore.getString('ActionAddUserYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                }
+
+                return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+            }
+
+            const members = content.member_user_ids
+                .map(x => <MessageAuthor key={x} sender={{ '@type': 'messageSenderUser', user_id: x }} openUser={openUser} />)
+                .reduce((accumulator, current, index, array) => {
+                    // const separator = index === array.length - 1 ? ' and ' : ', ';
+                    const separator = ', ';
+                    return accumulator === null ? [current] : [...accumulator, separator, current];
+                }, null);
+
+            if (isOutgoing) {
+                return LStore.replace(LStore.getString('ActionYouAddUser'), 'un2', members);
+            }
+
+            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', members);
         }
         case 'messageChatJoinByLink': {
             if (isOutgoing) {
-                return 'You joined the group via invite link';
+                return LStore.getString('ActionInviteYou');
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' joined the group via invite link'}
-                </>
-            );
+            return LStore.replace(LStore.getString('ActionInviteUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+        }
+        case 'messageChatDeleteMember': {
+            if (content.user_id === sender.user_id) {
+                if (isOutgoing) {
+                    return LStore.getString('ActionYouLeftUser');
+                }
+
+                return LStore.replace(LStore.getString('ActionLeftUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            }
+
+            if (isOutgoing) {
+                return LStore.replace(LStore.getString('ActionYouKickUser'), 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />);
+            } else if (isMeUser(content.user_id)) {
+                return LStore.replace(LStore.getString('ActionKickUserYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+            }
+
+            return LStore.replaceTwo(LStore.getString('ActionKickUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: content.user_id }} openUser={openUser} />);
+        }
+        case 'messageChatUpgradeTo': {
+            return LStore.getString('ActionMigrateFromGroup');
+        }
+        case 'messageChatUpgradeFrom': {
+            return LStore.getString('ActionMigrateFromGroup');
+        }
+        case 'messagePinMessage': {
+            const author = getMessageAuthor('un1', message, openUser);
+            const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
+            if (!pinnedMessage || !pinnedMessage.content) {
+                return LStore.replace(LStore.getString('ActionPinnedNoText'), 'un1', author);
+            }
+
+            switch (pinnedMessage.content['@type']) {
+                case 'messageAnimation': {
+                    return LStore.replace(LStore.getString('ActionPinnedGif'), 'un1', author);
+                }
+                case 'messageAudio': {
+                    return LStore.replace(LStore.getString('ActionPinnedMusic'), 'un1', author);
+                }
+                case 'messageContact': {
+                    return LStore.replace(LStore.getString('ActionPinnedContact'), 'un1', author);
+                }
+                case 'messageDocument': {
+                    return LStore.replace(LStore.getString('ActionPinnedFile'), 'un1', author);
+                }
+                case 'messageExpiredPhoto': {
+                    return LStore.replace(LStore.getString('ActionPinnedPhoto'), 'un1', author);
+                }
+                case 'messageExpiredVideo': {
+                    return LStore.replace(LStore.getString('ActionPinnedVideo'), 'un1', author);
+                }
+                case 'messageGame': {
+                    return LStore.replace(LStore.formatString('ActionPinnedGame', '\uD83C\uDFAE ' + pinnedMessage.content.game.title), 'un1', author);
+                }
+                case 'messageLocation': {
+                    if (pinnedMessage.content.live_period > 0) {
+                        return LStore.replace(LStore.getString('ActionPinnedGeoLive'), 'un1', author);
+                    }
+
+                    return LStore.replace(LStore.getString('ActionPinnedGeo'), 'un1', author);
+                }
+                case 'messagePhoto': {
+                    return LStore.replace(LStore.getString('ActionPinnedPhoto'), 'un1', author);
+                }
+                case 'messagePoll': {
+                    if (pinnedMessage.content.poll.type['@type'] === 'pollTypeQuiz') {
+                        return LStore.replace(LStore.getString('ActionPinnedQuiz'), 'un1', author);
+                    }
+
+                    return LStore.replace(LStore.getString('ActionPinnedPoll'), 'un1', author);
+                }
+                case 'messageSticker': {
+                    return LStore.replace(LStore.getString('ActionPinnedSticker'), 'un1', author);
+                }
+                case 'messageText': {
+                    const maxLength = 20;
+                    let text = pinnedMessage.content.text.text;
+                    if (text.length >= maxLength) {
+                        text = text.substring(0, maxLength);
+                    }
+
+                    return LStore.replace(LStore.formatString('ActionPinnedText', text), 'un1', author);
+                }
+                case 'messageVenue': {
+                    return LStore.replace(LStore.getString('ActionPinnedGeo'), 'un1', author);
+                }
+                case 'messageVideo': {
+                    return LStore.replace(LStore.getString('ActionPinnedVideo'), 'un1', author);
+                }
+                case 'messageVideoNote': {
+                    return LStore.replace(LStore.getString('ActionPinnedRound'), 'un1', author);
+                }
+                case 'messageVoiceNote': {
+                    return LStore.replace(LStore.getString('ActionPinnedVoice'), 'un1', author);
+                }
+            }
+
+            return LStore.replace(LStore.getString('ActionPinnedNoText'), 'un1', author);
+        }
+        case 'messageScreenshotTaken': {
+            if (isOutgoing) {
+                return LStore.getString('ActionTakeScreenshootYou');
+            }
+
+            return LStore.replace(LStore.getString('ActionTakeScreenshoot'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
         case 'messageChatSetTtl': {
             const { ttl } = content;
@@ -338,282 +410,110 @@ export function getServiceMessageContent(message, openUser = false) {
 
             if (ttl <= 0) {
                 if (isOutgoing) {
-                    return 'You disabled the self-destruct timer';
+                    return LStore.getString('MessageLifetimeYouRemoved');
                 }
 
-                return (
-                    <>
-                        <MessageAuthor sender={sender} openUser={openUser} />
-                        {' disabled the self-destruct timer'}
-                    </>
-                );
+                return LStore.formatString('MessageLifetimeRemoved', getUserShortName(sender.user_id, LStore.i18n.t));
             }
 
             if (isOutgoing) {
-                return `You set the self-destruct timer to ${ttlString}`;
+                return LStore.formatString('MessageLifetimeChangedOutgoing', ttlString);
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` set the self-destruct timer to ${ttlString}`}
-                </>
-            );
-        }
-        case 'messageChatUpgradeFrom': {
-            return 'The group was upgraded to a supergroup';
-        }
-        case 'messageChatUpgradeTo': {
-            return 'Group migrated to a supergroup';
-        }
-        case 'messageContactRegistered': {
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' just joined Telegram'}
-                </>
-            );
+            return LStore.formatString('MessageLifetimeChanged', getUserShortName(sender.user_id, LStore.i18n.t), ttlString);
         }
         case 'messageCustomServiceAction': {
             return content.text;
         }
         case 'messageGameScore': {
             const messageGame = MessageStore.get(message.chat_id, content.game_message_id);
-            if (
-                messageGame &&
-                messageGame.content &&
-                messageGame.content['@type'] === 'messageGame' &&
-                messageGame.content.game
-            ) {
-                const { game } = messageGame.content;
+            if (messageGame) {
+                const { content } = messageGame;
+                if (content && content['@type'] === 'messageGame') {
+                    const { game, score } = content;
+                    if (game) {
+                        if (isOutgoing) {
+                            return LStore.formatString('ActionYouScoredInGame', LStore.formatPluralString('Points', score)).replace('un2', game.title);
+                        }
 
-                if (isOutgoing) {
-                    return `You scored ${content.score} in «${game.title}»`;
+                        const str = LStore.formatString('ActionUserScoredInGame', LStore.formatPluralString('Points', score)).replace('un2', game.title);
+                        return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    }
+
+                    if (isOutgoing) {
+                        return LStore.formatString('ActionYouScored', LStore.formatPluralString('Points', score));
+                    }
+
+                    const str = LStore.formatString('ActionUserScoredInGame', LStore.formatPluralString('Points', score));
+                    return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
                 }
-
-                return (
-                    <>
-                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: messageGame.sender_user_id }} openUser={openUser} />
-                        {` scored ${content.score} in «${game.title}»`}
-                    </>
-                );
             }
-
-            if (isOutgoing) {
-                return `You scored ${content.score}`;
-            }
-
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` scored ${content.score}`}
-                </>
-            );
-        }
-        case 'messagePassportDataReceived': {
-            return 'Telegram Passport data received';
-        }
-        case 'messagePassportDataSent': {
-            const chat = ChatStore.get(message.chat_id);
-
-            const passportElementTypes = content.types
-                .map(x => getPassportElementTypeString(x))
-                .reduce((accumulator, current) => {
-                    return accumulator === null ? [current] : [...accumulator, ', ', current];
-                }, null);
-
-            return (
-                <>
-                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
-                    {' received the following documents: '}
-                    {passportElementTypes}
-                </>
-            );
+            break;
         }
         case 'messagePaymentSuccessful': {
             const chat = ChatStore.get(message.chat_id);
 
             const messageInvoice = MessageStore.get(message.chat_id, content.invoice_message_id);
-            if (
-                messageInvoice &&
-                messageInvoice.content &&
-                messageInvoice.content['@type'] === 'messageInvoice' &&
-                messageInvoice.content.invoice
-            ) {
-                const { invoice } = messageInvoice.content;
+            if (messageInvoice) {
+                const { content } = messageInvoice;
+                if (content && content['@type'] === 'messageInvoice') {
+                    const { invoice, total_amount, currency } = content;
+                    if (invoice) {
+                        return LStore.formatString('PaymentSuccessfullyPaid', Currency.getString(total_amount, currency), getUserShortName(chat.type.user_id, LStore.i18n.t), invoice.title);
+                    }
 
-                return (
-                    <>
-                        {`You have just successfully transferred ${Currency.getString(
-                            content.total_amount,
-                            content.currency
-                        )} to `}
-                        <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
-                        {` for ${invoice.title}`}
-                    </>
-                );
-            }
-
-            return (
-                <>
-                    {`You have just successfully transferred ${Currency.getString(
-                        content.total_amount,
-                        content.currency
-                    )} to `}
-                    <MessageAuthor sender={{ '@type': 'messageSenderUser', user_id: chat.type.user_id }} openUser={openUser} />
-                </>
-            );
-        }
-        case 'messagePaymentSuccessfulBot': {
-            return 'Payment successful';
-        }
-        case 'messagePinMessage': {
-            const author = getMessageAuthor(message, openUser);
-            const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
-            if (!pinnedMessage || !pinnedMessage.content) {
-                return (
-                    <>
-                        {author}
-                        {' pinned a message'}
-                    </>
-                );
-            }
-
-            let pinnedContent = ' pinned a message';
-            if (isServiceMessage(pinnedMessage)) {
-                pinnedContent = ' pinned a service message';
-            } else {
-                switch (pinnedMessage.content['@type']) {
-                    case 'messageAnimation': {
-                        pinnedContent = ' pinned a GIF';
-                        break;
-                    }
-                    case 'messageAudio': {
-                        pinnedContent = ' pinned a track';
-                        break;
-                    }
-                    case 'messageCall': {
-                        pinnedContent = ' pinned a call';
-                        break;
-                    }
-                    case 'messageContact': {
-                        pinnedContent = ' pinned a contact';
-                        break;
-                    }
-                    case 'messageDocument': {
-                        pinnedContent = ' pinned a file';
-                        break;
-                    }
-                    case 'messageExpiredPhoto': {
-                        pinnedContent = ' pinned a photo';
-                        break;
-                    }
-                    case 'messageExpiredVideo': {
-                        pinnedContent = ' pinned a video';
-                        break;
-                    }
-                    case 'messageGame': {
-                        pinnedContent = ' pinned a game';
-                        break;
-                    }
-                    case 'messageInvoice': {
-                        pinnedContent = ' pinned an invoice';
-                        break;
-                    }
-                    case 'messageLocation': {
-                        pinnedContent = ' pinned a map';
-                        break;
-                    }
-                    case 'messagePhoto': {
-                        pinnedContent = ' pinned a photo';
-                        break;
-                    }
-                    case 'messagePoll': {
-                        pinnedContent = ' pinned a poll';
-                        break;
-                    }
-                    case 'messageSticker': {
-                        pinnedContent = ' pinned a sticker';
-                        break;
-                    }
-                    case 'messageText': {
-                        const maxLength = 16;
-                        const text = pinnedMessage.content.text.text;
-                        if (text.length <= maxLength) {
-                            pinnedContent = ` pinned «${text}»`;
-                        } else {
-                            pinnedContent = ` pinned «${text.substring(0, maxLength)}...»`;
-                        }
-
-                        break;
-                    }
-                    case 'messageUnsupported': {
-                        pinnedContent = ' pinned unsupported message';
-                        break;
-                    }
-                    case 'messageVenue': {
-                        pinnedContent = ' pinned a venue';
-                        break;
-                    }
-                    case 'messageVideo': {
-                        pinnedContent = ' pinned a video';
-                        break;
-                    }
-                    case 'messageVideoNote': {
-                        pinnedContent = ' pinned a video message';
-                        break;
-                    }
-                    case 'messageVoiceNote': {
-                        pinnedContent = ' pinned a voice message';
-                        break;
-                    }
+                    return LStore.formatString('PaymentSuccessfullyPaidNoItem', Currency.getString(total_amount, currency), getUserShortName(chat.type.user_id, LStore.i18n.t));
                 }
             }
-
-            return (
-                <>
-                    {author}
-                    {pinnedContent}
-                </>
-            );
+            break;
         }
-        case 'messageScreenshotTaken': {
-            if (isOutgoing) {
-                return 'You took a screenshot!';
-            }
-
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {' took a screenshot!'}
-                </>
-            );
+        case 'messagePaymentSuccessfulBot': {
+            // bots only
+            break;
         }
-        case 'messageSupergroupChatCreate': {
-            const { title } = content;
+        case 'messageContactRegistered': {
+            return LStore.replace(LStore.formatString('NotificationContactJoined', 'un1'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+        }
+        case 'messageWebsiteConnected': {
+            return LStore.formatString('ActionBotAllowed', content.domain_name);
+        }
+        case 'messagePassportDataSent': {
+            const chat = ChatStore.get(message.chat_id);
 
-            if (isChannel) {
-                return 'Channel created';
+            const documents = content.types
+                .map(x => getPassportElementTypeString(x))
+                .reduce((accumulator, current) => {
+                    return accumulator === null ? current : accumulator + ', ' + current;
+                }, null);
+
+            return LStore.formatString('ActionBotDocuments', getUserShortName(chat.type.user_id, LStore.i18n.t), documents);
+        }
+        case 'messagePassportDataReceived': {
+            // bots only
+            break;
+        }
+        case 'messageLiveLocationApproached': {
+            const { approacher, observer, distance } = content;
+            if (isMeUser(observer.user_id)) {
+                return LStore.replace(LStore.formatString('ActionUserWithinRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />);
             }
 
-            if (isOutgoing) {
-                return `You created group «${title}»`;
+            if (isMeUser(approacher.user_id)) {
+                return LStore.replace(LStore.formatString('ActionUserWithinYouRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={observer} openUser={openUser} />);
             }
 
-            return (
-                <>
-                    <MessageAuthor sender={sender} openUser={openUser} />
-                    {` created group «${title}»`}
-                </>
-            );
+            return LStore.replaceTwo(LStore.formatString('ActionUserWithinOtherRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={observer} openUser={openUser} />);
         }
         case 'messageUnsupported': {
             return LStore.getString('UnsupportedMedia');
         }
-        case 'messageWebsiteConnected': {
-            return `You allowed this bot to message you when you logged in on ${content.domain_name}.`;
-        }
     }
 
-    return `[${message.content['@type']}]`;
+    return LStore.getString('UnsupportedMedia');
+}
+
+function formatDistance(distance, type, useImperial = null) {
+
+
+    return distance;
 }

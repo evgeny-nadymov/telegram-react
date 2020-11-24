@@ -19,8 +19,8 @@ import MessageStore from '../../Stores/MessageStore';
 import './ServiceMessage.css';
 
 const chatPhotoStyle = {
-    width: 64,
-    height: 64,
+    width: 96,
+    height: 96,
     borderRadius: '50%',
     margin: '0 auto 5px'
 };
@@ -37,8 +37,12 @@ class ServiceMessage extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, sendingState, showUnreadSeparator } = this.props;
+        const { chatId, messageId, sendingState, showUnreadSeparator, t } = this.props;
         const { highlighted } = this.state;
+
+        if (nextProps.t !== t) {
+            return true;
+        }
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -116,6 +120,7 @@ class ServiceMessage extends React.Component {
 
         const { content, date } = message;
         if (!content) return null;
+        if (content['@type'] === 'messageChatUpgradeTo') return null;
 
         const { photo } = content;
 
@@ -138,7 +143,7 @@ class ServiceMessage extends React.Component {
                             chatId={chatId}
                             messageId={messageId}
                             photo={photo}
-                            displaySize={64}
+                            displaySize={96}
                             style={chatPhotoStyle}
                             openMedia={this.openMedia}
                         />
