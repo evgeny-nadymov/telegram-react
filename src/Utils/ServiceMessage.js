@@ -155,27 +155,17 @@ export function getServiceMessageContent(message, openUser = false) {
         switch (content['@type']) {
             case 'messagePhoto': {
                 if (isOutgoing) {
-                    return 'You sent a self-destructing photo. Please view it on your mobile';
+                    return LStore.getString('ActionYouSendTTLPhoto');
                 }
 
-                return (
-                    <>
-                        <MessageAuthor sender={sender} openUser={openUser} />
-                        {' sent a self-destructing photo. Please view it on your mobile'}
-                    </>
-                );
+                return LStore.replace(LStore.getString('ActionSendTTLPhoto'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
             }
             case 'messageVideo': {
                 if (isOutgoing) {
-                    return 'You sent a self-destructing video. Please view it on your mobile';
+                    return LStore.getString('ActionYouSendTTLVideo');
                 }
 
-                return (
-                    <>
-                        <MessageAuthor sender={sender} openUser={openUser} />
-                        {' sent a self-destructing video. Please view it on your mobile'}
-                    </>
-                );
+                return LStore.replace(LStore.getString('ActionSendTTLVideo'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
             }
         }
     }
