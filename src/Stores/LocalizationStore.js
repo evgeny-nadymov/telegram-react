@@ -8,7 +8,7 @@
 import React from 'react';
 import EventEmitter from './EventEmitter';
 import i18n from 'i18next';
-import { sprintfPostprocessor } from '../Utils/Localization';
+import { sprintfPostprocessor, sprintf } from '../Utils/Localization';
 import LocalizationCache from '../Localization/Cache';
 import { initReactI18next } from 'react-i18next';
 import {
@@ -117,9 +117,13 @@ class LocalizationStore extends EventEmitter {
 
         this.set24HourFormat();
 
-        const langCode = lng.indexOf('-') !== -1 ? lng.substring(0, lng.indexOf('-')) : lng;
-        this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
-        this.recreateFormatters();
+        i18n.on('languageChanged', () => {
+            console.log('[l] languageChanged', i18n.language);
+            const index = i18n.language.indexOf('-');
+            const langCode = index !== -1 ? i18n.language.substring(0, index) : i18n.language;
+            this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
+            this.recreateFormatters();
+        });
 
         this.addTdLibListener();
     }
@@ -171,6 +175,10 @@ class LocalizationStore extends EventEmitter {
 
     formatString(key, ...args) {
         return i18n.t(key, { postProcess: 'sprintf', sprintf: args });
+    }
+
+    format(str, ...args) {
+        return sprintf(str, ...args);
     }
 
     getString(key) {
@@ -271,9 +279,6 @@ class LocalizationStore extends EventEmitter {
 
                 await i18n.changeLanguage(language);
 
-                this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng)
-                this.recreateFormatters();
-
                 TdLibController.send({
                     '@type': 'setOption',
                     name: 'language_pack_id',
@@ -328,6 +333,56 @@ class LocalizationStore extends EventEmitter {
 
         return result;
     };
+
+    formatCallDuration = duration => {
+        if (duration > 3600) {
+            let result = this.formatPluralString('Hours', Math.floor(duration / 3600));
+            const minutes = Math.floor(duration % 3600 / 3600);
+            if (minutes > 0) {
+                result += ', ' + this.formatPluralString('Minutes', minutes);
+            }
+
+            return result;
+        }
+
+        if (duration > 60) {
+            return this.formatPluralString('Minutes', Math.floor(duration / 60));
+        }
+
+        return this.formatPluralString('Seconds', Math.floor(duration));
+    };
+
+    formatDistance = (distance, type, useImperial = null) => {
+        if (distance < 1000) {
+            switch (type) {
+                case 0: {
+                    return this.formatString('MetersAway2', this.format('%d', Math.max(1, distance)));
+                }
+                case 1: {
+                    return this.formatString('MetersFromYou2', this.format('%d', Math.max(1, distance)));
+                }
+            }
+        } else {
+            let arg = null;
+            if (distance % 1000 === 0) {
+                arg = this.format('%d', Math.floor(distance / 1000));
+            } else {
+                arg = this.format('%.2f', distance / 1000.0);
+            }
+
+            switch (type) {
+                case 0: {
+                    return this.formatString('KMetersAway2', arg);
+                }
+                case 1: {
+                    return this.formatString('KMetersFromYou2', arg);
+                }
+            }
+        }
+
+        return distance;
+    };
+
 
     loadLanguage = async language => {
         const result = await TdLibController.send({

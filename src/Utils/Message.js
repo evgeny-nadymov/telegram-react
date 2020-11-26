@@ -19,7 +19,7 @@ import { download, saveOrDownload, supportsStreaming } from './File';
 import { getAudioTitle } from './Media';
 import { getDecodedUrl } from './Url';
 import { getServiceMessageContent } from './ServiceMessage';
-import { getUserFullName } from './User';
+import { getUserFullName, isMeUser } from './User';
 import { getBlockAudio } from './InstantView';
 import { LOCATION_HEIGHT, LOCATION_SCALE, LOCATION_WIDTH, LOCATION_ZOOM, PHOTO_DISPLAY_SIZE, PHOTO_SIZE, PHOTO_THUMBNAIL_SIZE, PLAYER_AUDIO_2X_MIN_DURATION } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
@@ -540,10 +540,51 @@ function filterDuplicateMessages(result, history) {
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
+export function getCallContent(sender, content) {
+    const { is_video, discard_reason } = content;
+    const isMissed = discard_reason && discard_reason['@type'] === 'callDiscardReasonMissed';
+    const isBusy = discard_reason && discard_reason['@type'] === 'callDiscardReasonDeclined';
+    if (isMeUser(sender.user_id)) {
+        if (isMissed) {
+            if (is_video) {
+                return LStore.getString('CallMessageVideoOutgoingMissed');
+            } else {
+                return LStore.getString('CallMessageOutgoingMissed');
+            }
+        } else {
+            if (is_video) {
+                return LStore.getString('CallMessageVideoOutgoing');
+            } else {
+                return LStore.getString('CallMessageOutgoing');
+            }
+        }
+    } else {
+        if (isMissed) {
+            if (is_video) {
+                return LStore.getString('CallMessageVideoIncomingMissed');
+            } else {
+                return LStore.getString('CallMessageIncomingMissed');
+            }
+        } else if (isBusy) {
+            if (is_video) {
+                return LStore.getString('CallMessageVideoIncomingDeclined');
+            } else {
+                return LStore.getString('CallMessageIncomingDeclined');
+            }
+        } else {
+            if (is_video) {
+                return LStore.getString('CallMessageVideoIncoming');
+            } else {
+                return LStore.getString('CallMessageIncoming');
+            }
+        }
+    }
+}
+
 function getContent(message, t = key => key) {
     if (!message) return null;
 
-    const { content } = message;
+    const { content, is_outgoing, sender } = message;
     if (!content) return null;
 
     let caption = '';
@@ -569,7 +610,14 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageCall': {
-            return t('Call') + caption;
+            const text = getCallContent(sender, content);
+
+            const { duration } = content;
+            if (duration > 0) {
+                return LStore.formatString('CallMessageWithDuration', text, LStore.formatCallDuration(duration));
+            }
+
+            return text;
         }
         case 'messageChatAddMembers': {
             return getServiceMessageContent(message);

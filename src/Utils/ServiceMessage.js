@@ -485,14 +485,14 @@ export function getServiceMessageContent(message, openUser = false) {
         case 'messageLiveLocationApproached': {
             const { approacher, observer, distance } = content;
             if (isMeUser(observer.user_id)) {
-                return LStore.replace(LStore.formatString('ActionUserWithinRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />);
+                return LStore.replace(LStore.formatString('ActionUserWithinRadius', LStore.formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />);
             }
 
             if (isMeUser(approacher.user_id)) {
-                return LStore.replace(LStore.formatString('ActionUserWithinYouRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={observer} openUser={openUser} />);
+                return LStore.replace(LStore.formatString('ActionUserWithinYouRadius', LStore.formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={observer} openUser={openUser} />);
             }
 
-            return LStore.replaceTwo(LStore.formatString('ActionUserWithinOtherRadius', formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={observer} openUser={openUser} />);
+            return LStore.replaceTwo(LStore.formatString('ActionUserWithinOtherRadius', LStore.formatDistance(distance, 2)), 'un1', <MessageAuthor key='un1' sender={approacher} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={observer} openUser={openUser} />);
         }
         case 'messageUnsupported': {
             return LStore.getString('UnsupportedMedia');
@@ -500,10 +500,4 @@ export function getServiceMessageContent(message, openUser = false) {
     }
 
     return LStore.getString('UnsupportedMedia');
-}
-
-function formatDistance(distance, type, useImperial = null) {
-
-
-    return distance;
 }

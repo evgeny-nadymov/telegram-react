@@ -7,31 +7,42 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import IconButton from '@material-ui/core/IconButton';
 import CallIcon from '@material-ui/icons/Call';
-import { getCallTitle } from '../../../Utils/Media';
-import { getDurationString } from '../../../Utils/Common';
+import { getCallContent } from '../../../Utils/Message';
+import LStore from '../../../Stores/LocalizationStore';
+import MessageStore from '../../../Stores/MessageStore';
 import './Call.css';
 
 class Call extends React.Component {
     render() {
-        const { chatId, messageId, duration, openMedia, title, meta } = this.props;
+        const { chatId, messageId, call, openMedia, title, meta } = this.props;
 
-        const callTitle = getCallTitle(chatId, messageId);
-        const durationString = getDurationString(Math.floor(duration || 0));
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return null;
+
+        const { sender, content } = message;
+
+        const callTitle = getCallContent(sender, content);
+        const durationString = call.duration > 0 ? LStore.formatCallDuration(Math.floor(call.duration || 0)) : null;
+
+        console.log('[l] call.render');
 
         return (
-            <div className={classNames('document', { 'media-title': title })}>
-                <IconButton color='primary' aria-label='Call'>
+            <div className={classNames('call', 'document', { 'media-title': title })}>
+                <IconButton className='call-button' color='primary' aria-label='Call'>
                     <CallIcon fontSize='large' />
                 </IconButton>
                 <div className='document-content'>
                     <div className='document-title'>{callTitle}</div>
-                    <div className='document-action'>
-                        {durationString}
-                        {meta}
-                    </div>
+                    { durationString && (
+                        <div className='document-action'>
+                            {durationString}
+                            {meta}
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -41,7 +52,8 @@ class Call extends React.Component {
 Call.propTypes = {
     chatId: PropTypes.number,
     messageId: PropTypes.number,
+    call: PropTypes.object,
     openMedia: PropTypes.func
 };
 
-export default Call;
+export default withTranslation()(Call);

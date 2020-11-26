@@ -1,4 +1,8 @@
 {
+  "ActionSendTTLPhoto": "un1 sent a self-destructing photo. Please view it on your mobile",
+  "ActionSendTTLVideo": "un1 sent a self-destructing video. Please view it on your mobile",
+  "ActionYouSendTTLPhoto": "You sent a self-destructing photo. Please view it on your mobile",
+  "ActionYouSendTTLVideo": "You sent a self-destructing video. Please view it on your mobile",
   "Activity": "Activity",
   "AnimalsNature": "Animals & Nature",
   "AppName": "Telegram",
