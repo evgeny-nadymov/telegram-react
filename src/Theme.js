@@ -287,7 +287,16 @@ function createTheme(type, primary) {
                     paddingBottom: 10
                 }
             },
-            MuiTouchRipple
+            MuiTouchRipple,
+            MuiSnackbarContent: {
+                root: {
+                    flexWrap: 'nowrap',
+                    fontSize: 'inherit'
+                },
+                message: {
+                    maxWidth: 512
+                }
+            }
         }
     });
 

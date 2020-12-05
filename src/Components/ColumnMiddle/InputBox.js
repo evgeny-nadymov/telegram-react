@@ -185,6 +185,7 @@ class InputBox extends Component {
         FileStore.on('clientUpdateSendFiles', this.onClientUpdateSendFiles);
         MessageStore.on('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.on('clientUpdateReply', this.onClientUpdateReply);
+        MessageStore.on('clientUpdateSendText', this.onClientUpdateSendText);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         StickerStore.on('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
@@ -203,11 +204,24 @@ class InputBox extends Component {
         MessageStore.off('clientUpdateEditMessage', this.onClientUpdateEditMessage);
         MessageStore.off('clientUpdateReply', this.onClientUpdateReply);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
+        MessageStore.off('clientUpdateSendText', this.onClientUpdateSendText);
         StickerStore.off('clientUpdateStickerSend', this.onClientUpdateStickerSend);
 
         document.removeEventListener('selectionchange', this.selectionChangeListener, true);
 
         this.handleCancelRecord();
+    }
+
+    onClientUpdateSendText = update => {
+        const { text } = update;
+
+        if (!text) return;
+
+        const element = this.newMessageRef.current;
+        if (!element) return;
+
+        element.innerText = text;
+        focusInput(element);
     }
 
     onClientUpdateInputShake = update => {

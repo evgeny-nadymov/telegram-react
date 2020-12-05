@@ -416,11 +416,13 @@ export function getServiceMessageContent(message, openUser = false) {
             return content.text;
         }
         case 'messageGameScore': {
-            const messageGame = MessageStore.get(message.chat_id, content.game_message_id);
+            const { score, game_message_id } = content;
+
+            const messageGame = MessageStore.get(message.chat_id, game_message_id);
             if (messageGame) {
-                const { content } = messageGame;
-                if (content && content['@type'] === 'messageGame') {
-                    const { game, score } = content;
+                const { content: messageGameContent } = messageGame;
+                if (messageGameContent && messageGameContent['@type'] === 'messageGame') {
+                    const { game } = messageGameContent;
                     if (game) {
                         if (isOutgoing) {
                             return LStore.formatString('ActionYouScoredInGame', LStore.formatPluralString('Points', score)).replace('un2', game.title);
@@ -429,16 +431,15 @@ export function getServiceMessageContent(message, openUser = false) {
                         const str = LStore.formatString('ActionUserScoredInGame', LStore.formatPluralString('Points', score)).replace('un2', game.title);
                         return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
                     }
-
-                    if (isOutgoing) {
-                        return LStore.formatString('ActionYouScored', LStore.formatPluralString('Points', score));
-                    }
-
-                    const str = LStore.formatString('ActionUserScoredInGame', LStore.formatPluralString('Points', score));
-                    return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
                 }
             }
-            break;
+
+            if (isOutgoing) {
+                return LStore.formatString('ActionYouScored', LStore.formatPluralString('Points', score));
+            }
+
+            const str = LStore.formatString('ActionUserScored', LStore.formatPluralString('Points', score));
+            return LStore.replace(str, 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
         case 'messagePaymentSuccessful': {
             const chat = ChatStore.get(message.chat_id);

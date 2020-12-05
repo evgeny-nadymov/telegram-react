@@ -28,8 +28,6 @@ class Call extends React.Component {
         const callTitle = getCallContent(sender, content);
         const durationString = call.duration > 0 ? LStore.formatCallDuration(Math.floor(call.duration || 0)) : null;
 
-        console.log('[l] call.render');
-
         return (
             <div className={classNames('call', 'document', { 'media-title': title })}>
                 <IconButton className='call-button' color='primary' aria-label='Call'>

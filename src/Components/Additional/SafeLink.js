@@ -7,15 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withTranslation } from 'react-i18next';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogActions from '@material-ui/core/DialogActions';
-import { openChat } from '../../Actions/Client';
-import { modalManager } from '../../Utils/Modal';
+import { openChat, showOpenUrlAlert } from '../../Actions/Client';
 import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
 import MessageStore from '../../Stores/MessageStore';
 import OptionStore from '../../Stores/OptionStore';
@@ -23,11 +15,7 @@ import TdLibController from '../../Controllers/TdLibController';
 import './SafeLink.css';
 
 class SafeLink extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {};
-    }
+    state = { };
 
     static getDerivedStateFromProps(props, state) {
         const { displayText, mail, url } = props;
@@ -38,8 +26,7 @@ class SafeLink extends React.Component {
                 prevDisplayText: displayText,
                 safe: isUrlSafe(displayText, url),
                 decodedUrl: getDecodedUrl(url, mail),
-                href: getHref(url, mail),
-                confirm: false
+                href: getHref(url, mail)
             };
         }
 
@@ -50,31 +37,10 @@ class SafeLink extends React.Component {
         event.preventDefault();
         event.stopPropagation();
 
-        this.setState({ confirm: true });
-    };
+        const { onClick } = this.props;
+        const { decodedUrl } = this.state;
 
-    handleDialogClick = event => {
-        event.preventDefault();
-        event.stopPropagation();
-    };
-
-    handleClose = () => {
-        this.setState({ confirm: false });
-    };
-
-    handleDone = event => {
-        this.handleClose();
-
-        const { url, onClick } = this.props;
-        if (!url) return;
-
-        if (onClick) {
-            onClick(event);
-        } else {
-            const newWindow = window.open();
-            newWindow.opener = null;
-            newWindow.location = url;
-        }
+        showOpenUrlAlert(decodedUrl, { onClick, punycode: false, ask: true, tryTelegraph: false });
     };
 
     isTelegramLink(url) {
@@ -171,8 +137,8 @@ class SafeLink extends React.Component {
     };
 
     render() {
-        const { className, children, t, url } = this.props;
-        const { confirm, decodedUrl, href, safe } = this.state;
+        const { className, children, url } = this.props;
+        const { decodedUrl, href, safe } = this.state;
 
         if (!url) return null;
         if (!decodedUrl) return null;
@@ -190,31 +156,9 @@ class SafeLink extends React.Component {
                         {children || url}
                     </a>
                 ) : (
-                    <>
-                        <a className={className} title={decodedUrl} onClick={this.handleClick}>
-                            {children || url}
-                        </a>
-                        {confirm && (
-                            <Dialog
-                                manager={modalManager}
-                                transitionDuration={0}
-                                open={confirm}
-                                onClose={this.handleClose}
-                                onClick={this.handleDialogClick}
-                                aria-labelledby='confirm-dialog-title'>
-                                <DialogTitle id='confirm-dialog-title'>{t('Confirm')}</DialogTitle>
-                                <DialogContent classes={{ root: 'safe-link-content-root' }}>
-                                    <DialogContentText>{`Open this link?\n\n${decodedUrl}`}</DialogContentText>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={this.handleClose}>{t('Cancel')}</Button>
-                                    <Button onClick={this.handleDone} color='primary'>
-                                        {t('Open')}
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                        )}
-                    </>
+                    <a className={className} title={decodedUrl} onClick={this.handleClick}>
+                        {children || url}
+                    </a>
                 )}
             </>
         );
@@ -228,4 +172,4 @@ SafeLink.propTypes = {
     onClick: PropTypes.func
 };
 
-export default withTranslation()(SafeLink);
+export default SafeLink;

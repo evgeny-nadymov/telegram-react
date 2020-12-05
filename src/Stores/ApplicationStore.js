@@ -7,9 +7,10 @@
 
 import EventEmitter from './EventEmitter';
 import ActionScheduler from '../Utils/ActionScheduler';
-import { closeChat } from '../Actions/Client';
+import { closeChat, showAlert } from '../Actions/Client';
 import { subscribeNotifications } from '../registerServiceWorker';
 import { PAGE_WIDTH_SMALL } from '../Constants';
+import LStore from './LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
 
 class ApplicationStore extends EventEmitter {
@@ -167,7 +168,11 @@ class ApplicationStore extends EventEmitter {
                                 }
                                 break;
                             default:
-                                alert(text.text);
+                                showAlert({
+                                    title: LStore.getString('AppName'),
+                                    message: text,
+                                    ok: LStore.getString('OK')
+                                });
                                 break;
                         }
                     }
@@ -182,6 +187,10 @@ class ApplicationStore extends EventEmitter {
 
     onClientUpdate = update => {
         switch (update['@type']) {
+            case 'clientUpdateAlert': {
+                this.emit('clientUpdateAlert', update);
+                break;
+            }
             case 'clientUpdateAppInactive': {
                 this.emit('clientUpdateAppInactive');
                 break;
@@ -238,6 +247,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateDragging', update);
                 break;
             }
+            case 'clientUpdateInputPasswordAlert': {
+                this.emit('clientUpdateInputPasswordAlert', update);
+                break;
+            }
             case 'clientUpdateMediaViewerContent': {
                 const { content } = update;
                 this.mediaViewerContent = content;
@@ -247,6 +260,14 @@ class ApplicationStore extends EventEmitter {
             }
             case 'clientUpdateNewContentAvailable': {
                 this.emit('clientUpdateNewContentAvailable', update);
+                break;
+            }
+            case 'clientUpdateOpenGameAlert': {
+                this.emit('clientUpdateOpenGameAlert', update);
+                break;
+            }
+            case 'clientUpdateOpenUrlAlert': {
+                this.emit('clientUpdateOpenUrlAlert', update);
                 break;
             }
             case 'clientUpdatePageWidth': {
@@ -284,6 +305,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateRequestLeaveChat', update);
                 break;
             }
+            case 'clientUpdateRequestUrlAlert': {
+                this.emit('clientUpdateRequestUrlAlert', update);
+                break;
+            }
             case 'clientUpdateSearchChat': {
                 this.emit('clientUpdateSearchChat', update);
                 break;
@@ -310,6 +335,10 @@ class ApplicationStore extends EventEmitter {
                 }
 
                 this.emit('clientUpdateSetPhone', update);
+                break;
+            }
+            case 'clientUpdateSnackbar': {
+                this.emit('clientUpdateSnackbar', update);
                 break;
             }
             case 'clientUpdateSetPhoneResult': {

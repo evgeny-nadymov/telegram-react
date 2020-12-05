@@ -201,6 +201,8 @@ class MessagesList extends React.Component {
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.on('clientUpdateOpenReply', this.onClientUpdateOpenReply);
+        MessageStore.on('clientUpdateStartMessageEditing', this.onClientUpdateStartMessageEditing);
+        MessageStore.on('clientUpdateStopMessageEditing', this.onClientUpdateStopMessageEditing);
         MessageStore.on('clientUpdateTryEditMessage', this.onClientUpdateTryEditMessage);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -220,6 +222,8 @@ class MessagesList extends React.Component {
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateSelection);
         MessageStore.off('clientUpdateOpenReply', this.onClientUpdateOpenReply);
+        MessageStore.off('clientUpdateStartMessageEditing', this.onClientUpdateStartMessageEditing);
+        MessageStore.off('clientUpdateStopMessageEditing', this.onClientUpdateStopMessageEditing);
         MessageStore.off('clientUpdateTryEditMessage', this.onClientUpdateTryEditMessage);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
@@ -231,6 +235,47 @@ class MessagesList extends React.Component {
         PlayerStore.off('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.off('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
     }
+
+    onClientUpdateStartMessageEditing = update => {
+        const { chatId, messageId } = update;
+        const { chatId: currentChatId } = this.props;
+        if (currentChatId !== chatId) return;
+
+        const { history } = this.state;
+        if (!history.length) return;
+
+        const { current: list } = this.listRef;
+        if (list.offsetHeight + list.scrollTop < list.scrollHeight){
+            return;
+        }
+
+        const lastMessage = history[history.length - 1];
+        if (!lastMessage) return;
+
+        if (lastMessage.chat_id !== chatId) return;
+        if (lastMessage.id !== messageId) return;
+
+        this.scrollBottomAfterEditing = {
+            chatId,
+            messageId
+        };
+    };
+
+    onClientUpdateStopMessageEditing = update => {
+        const { chatId, messageId } = update;
+        const { chatId: currentChatId } = this.props;
+        if (currentChatId !== chatId) return;
+
+        const { scrollBottomAfterEditing } = this;
+        if (!scrollBottomAfterEditing) return;
+
+        if (chatId !== scrollBottomAfterEditing.chatId) return;
+        if (messageId !== scrollBottomAfterEditing.messageId) return;
+
+        const { current: list } = this.listRef;
+        list.scrollTop = list.scrollHeight - list.offsetHeight;
+        this.scrollBottomAfterEditing = null;
+    };
 
     onUpdateMessageIsPinned = update => {
         const { chat_id, message_id, is_pinned } = update;

@@ -116,12 +116,11 @@ class LocalizationStore extends EventEmitter {
             "tr", "vi", "wo", "yo", "zh", "bo", "dz", "id", "jv", "jw", "ka", "km", "kn", "ms", "th", "in"], new PluralRules_None());
 
         this.set24HourFormat();
+        this.updatePluralRules();
+        this.recreateFormatters();
 
         i18n.on('languageChanged', () => {
-            console.log('[l] languageChanged', i18n.language);
-            const index = i18n.language.indexOf('-');
-            const langCode = index !== -1 ? i18n.language.substring(0, index) : i18n.language;
-            this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
+            this.updatePluralRules();
             this.recreateFormatters();
         });
 
@@ -134,6 +133,12 @@ class LocalizationStore extends EventEmitter {
         } catch (e) {
             this.is24HourFormat = false;
         }
+    }
+
+    updatePluralRules() {
+        const index = i18n.language.indexOf('-');
+        const langCode = index !== -1 ? i18n.language.substring(0, index) : i18n.language;
+        this.currentPluralRules = this.allRules.get(langCode) || this.allRules.get(fallbackLng);
     }
 
     recreateFormatters() {
@@ -211,6 +216,10 @@ class LocalizationStore extends EventEmitter {
 
         return [str.substring(0, first.index), first.obj, str.substring(first.index + first.key.length, second.index), second.obj, str.substring(second.index + second.key.length)];
     }
+
+    formatShortNumber = (number, rounded) => {
+
+    };
 
     addTdLibListener = () => {
         TdLibController.on('update', this.onUpdate);

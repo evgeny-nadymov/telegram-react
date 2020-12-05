@@ -16,7 +16,7 @@ import { isServiceMessage } from './ServiceMessage';
 import { formatPhoneNumber } from './Phone';
 import { getChannelStatus } from './Channel';
 import { loadReplyContents } from './File';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
+import { SERVICE_NOTIFICATIONS_USER_IDS } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
@@ -185,7 +185,7 @@ export function canAddChatToList(chatId) {
     if (!positions) return false;
 
     const mainPosition = positions.find(x => x.list['@type'] === 'chatListMain');
-    if (mainPosition && isMeChat(chatId) || chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+    if (mainPosition && isMeChat(chatId) || SERVICE_NOTIFICATIONS_USER_IDS.some(x => x === chatId)) {
         return false;
     }
 
@@ -973,15 +973,15 @@ export function isChatRead(chatId) {
     return !isMessageUnread(chatId, id);
 }
 
-function getChatTitle(chatId, showSavedMessages = false, t = key => key) {
+function getChatTitle(chatId, showSavedMessages = false) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
 
     if (isMeChat(chatId) && showSavedMessages) {
-        return t('SavedMessages');
+        return LStore.i18n.t('SavedMessages');
     }
 
-    return chat.title || t('HiddenName');
+    return chat.title || LStore.i18n.t('HiddenName');
 }
 
 export function getChatType(chatId, t = key => key) {

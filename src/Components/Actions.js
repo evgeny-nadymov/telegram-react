@@ -11,21 +11,27 @@ import { withSnackbar } from 'notistack';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import AlertDialog from './Popup/AlertDialog';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
 import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
+import OpenGameDialog from './Popup/OpenGameDialog';
+import OpenUrlDialog from './Popup/OpenUrlDialog';
+import RequestUrlDialog from './Popup/RequestUrlDialog';
 import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
 import UnpinMessageDialog from './Popup/UnpinMessageDialog';
 import { canPinMessages, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
 import { pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
 import { clearSelection, closePinned } from '../Actions/Client';
+import { openGameInBrowser } from '../Utils/Game';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import InputPasswordDialog from './Popup/InputPasswordDialog';
 
 class Actions extends React.PureComponent {
     state = {
@@ -33,7 +39,12 @@ class Actions extends React.PureComponent {
         clearHistory: null,
         deleteMessages: null,
         pinMessage: null,
-        unpinMessage: null
+        unpinMessage: null,
+        alert: null,
+        openUrlAlert: null,
+        openGameAlert: null,
+        requestUrlAlert: null,
+        inputPasswordAlert: null
     }
 
     componentDidMount() {
@@ -42,6 +53,12 @@ class Actions extends React.PureComponent {
         AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
         AppStore.on('clientUpdatePinMessage', this.onClientUpdatePinMessage);
         AppStore.on('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
+        AppStore.on('clientUpdateAlert', this.onClientUpdateAlert);
+        AppStore.on('clientUpdateInputPasswordAlert', this.onClientUpdateInputPasswordAlert);
+        AppStore.on('clientUpdateSnackbar', this.onClientUpdateSnackbar);
+        AppStore.on('clientUpdateOpenUrlAlert', this.onClientUpdateOpenUrlAlert);
+        AppStore.on('clientUpdateOpenGameAlert', this.onClientUpdateOpenGameAlert);
+        AppStore.on('clientUpdateRequestUrlAlert', this.onClientUpdateRequestUrlAlert);
     }
 
     componentWillUnmount() {
@@ -50,7 +67,64 @@ class Actions extends React.PureComponent {
         AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
         AppStore.off('clientUpdatePinMessage', this.onClientUpdatePinMessage);
         AppStore.off('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
+        AppStore.off('clientUpdateAlert', this.onClientUpdateAlert);
+        AppStore.off('clientUpdateInputPasswordAlert', this.onClientUpdateInputPasswordAlert);
+        AppStore.off('clientUpdateSnackbar', this.onClientUpdateSnackbar);
+        AppStore.off('clientUpdateOpenUrlAlert', this.onClientUpdateOpenUrlAlert);
+        AppStore.off('clientUpdateOpenGameAlert', this.onClientUpdateOpenGameAlert);
+        AppStore.off('clientUpdateRequestUrlAlert', this.onClientUpdateRequestUrlAlert);
     }
+
+    onClientUpdateInputPasswordAlert = update => {
+        const { state, onPassword } = update;
+
+        this.setState({ inputPasswordAlert: { state, onPassword } });
+    }
+
+    onClientUpdateOpenGameAlert = update => {
+        const { game, params } = update;
+
+        if (params && params.isVerified) {
+            this.openGameAlert = { game, params };
+            this.handleOpenGameContinue(null, true);
+        } else {
+            this.setState({ openGameAlert: { game, params } });
+        }
+    }
+
+    onClientUpdateOpenUrlAlert = update => {
+        const { url, params } = update;
+
+        if (params && !params.ask) {
+            this.openUrlAlert = { url, params };
+            this.handleOpenUrlContinue(null, true);
+        } else {
+            this.setState({ openUrlAlert: { url, params } });
+        }
+    };
+
+    onClientUpdateRequestUrlAlert = update => {
+        const { url, params } = update;
+
+        this.setState({ requestUrlAlert: { url, params } });
+    }
+
+    onClientUpdateSnackbar = update => {
+        const { enqueueSnackbar, closeSnackbar } = this.props;
+        const { message, action } = update;
+
+        enqueueSnackbar(message, {
+            autoHideDuration: NOTIFICATION_AUTO_HIDE_DURATION_MS,
+            preventDuplicate: true,
+            action: action(closeSnackbar)
+        });
+    };
+
+    onClientUpdateAlert = update => {
+        const { params } = update;
+
+        this.setState({ alert: { params } });
+    };
 
     onClientUpdateUnpinMessage = update => {
         const { chatId, messageId } = update;
@@ -327,8 +401,94 @@ class Actions extends React.PureComponent {
         }
     };
 
+    handleAlertContinue = result => {
+        this.setState({ alert: null });
+    };
+
+    handleOpenUrlContinue = (event, result) => {
+        const openUrlAlert = this.state.openUrlAlert || this.openUrlAlert;
+
+        this.setState({ openUrlAlert: null });
+        this.openUrlAlert = null;
+
+        if (!result) return;
+
+        const { url, onClick } = openUrlAlert;
+        if (!url) return;
+
+        if (onClick) {
+            onClick(event);
+        } else {
+            const newWindow = window.open();
+            newWindow.opener = null;
+            newWindow.location = url;
+        }
+    };
+
+    handleOpenGameContinue = (event, result) => {
+        const openGameAlert = this.state.openGameAlert || this.openGameAlert;
+
+        this.setState({ openGameAlert: null });
+        this.openGameAlert = null;
+
+        if (!result) return;
+
+        const { game, params } = openGameAlert;
+        if (!game) return;
+        if (!params) return;
+
+        const { url, message } = params;
+        if (!url) return;
+        if (!message) return;
+
+        openGameInBrowser(url, message);
+    };
+
+    handleRequestUrlContinue = async (event, open, values) => {
+        const { requestUrlAlert } = this.state;
+        this.setState({ requestUrlAlert: null });
+
+        if (!open) return;
+
+        const { params } = requestUrlAlert;
+        if (!params) return;
+
+        const { result, chatId, messageId, buttonId } = params;
+        if (!result) return;
+
+        if (!values.value1) {
+            this.openUrlAlert = { url: result.url };
+            this.handleOpenUrlContinue(event, open);
+        } else {
+            const httpUrl = await TdLibController.send({
+                '@type': 'getLoginUrl',
+                chat_id: chatId,
+                message_id: messageId,
+                button_id: buttonId,
+                allow_write_access: result.request_write_access && values.value2
+            });
+
+            this.openUrlAlert = { url: httpUrl.url };
+            this.handleOpenUrlContinue(event, open);
+        }
+    };
+
+    handleInputPasswordContinue = (result, password) => {
+        const { inputPasswordAlert } = this.state;
+        const onCloseDialog = () => this.setState({ inputPasswordAlert: null });
+        const onError = error => this.setState({ inputPasswordAlert: { ...inputPasswordAlert, error } })
+
+        if (!result) {
+            onCloseDialog();
+            return;
+        }
+
+        const { onPassword } = inputPasswordAlert;
+        onPassword && onPassword(password, onCloseDialog, onError);
+    };
+
     render() {
-        const { leaveChat, clearHistory, deleteMessages, pinMessage, unpinMessage } = this.state;
+        const { leaveChat, clearHistory, deleteMessages, pinMessage, unpinMessage, alert, openUrlAlert, openGameAlert, requestUrlAlert, inputPasswordAlert } = this.state;
         if (leaveChat) {
             const { chatId } = leaveChat;
 
@@ -371,6 +531,50 @@ class Actions extends React.PureComponent {
                     chatId={chatId}
                     messageId={messageId}
                     onClose={this.handleUnpinMessageContinue} />
+            );
+        } else if (alert) {
+            const { params } = alert;
+
+            return (
+                <AlertDialog
+                    params={params}
+                    onClose={this.handleAlertContinue} />
+            );
+        } else if (openUrlAlert) {
+            const { url, params } = openUrlAlert;
+
+            return (
+                <OpenUrlDialog
+                    url={url}
+                    params={params}
+                    onClose={this.handleOpenUrlContinue}/>
+            );
+        } else if (openGameAlert) {
+            const { game, params } = openGameAlert;
+
+            return (
+                <OpenGameDialog
+                    game={game}
+                    params={params}
+                    onClose={this.handleOpenGameContinue}/>
+            );
+        } else if (requestUrlAlert) {
+            const { url, params } = requestUrlAlert;
+
+            return (
+                <RequestUrlDialog
+                    url={url}
+                    params={params}
+                    onClose={this.handleRequestUrlContinue}/>
+            );
+        } else if (inputPasswordAlert) {
+            const { state, error } = inputPasswordAlert;
+
+            return (
+                <InputPasswordDialog
+                    state={state}
+                    error={error}
+                    onClose={this.handleInputPasswordContinue}/>
             );
         }
 

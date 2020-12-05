@@ -7,6 +7,22 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function startMessageEditing(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateStartMessageEditing',
+        chatId,
+        messageId
+    });
+}
+
+export function stopMessageEditing(chatId, messageId) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateStopMessageEditing',
+        chatId,
+        messageId
+    });
+}
+
 export function viewMessages(chatId, messageIds, forceRead) {
     TdLibController.send({
         '@type': 'viewMessages',

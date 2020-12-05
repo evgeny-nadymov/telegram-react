@@ -12,10 +12,16 @@ import LStore from '../Stores/LocalizationStore';
 export function getSupergroupStatus(supergroup, chatId) {
     if (!supergroup) return null;
 
-    let { status, is_channel, member_count: count } = supergroup;
+    let { status, member_count: count, username, has_location } = supergroup;
 
-    if (status && status['@type'] === 'chatMemberStatusBanned') {
-        return is_channel ? 'channel is inaccessible' : 'group is inaccessible';
+    if (status) {
+        if (status['@type'] === 'chatMemberStatusBanned') {
+            return LStore.getString('YouWereKicked');
+        } else if (status['@type'] === 'chatMemberStatusLeft') {
+            return LStore.getString('YouLeft');
+        } else if (status['@type'] === 'chatMemberStatusCreator' && !status.is_member) {
+            return LStore.getString('YouLeft');
+        }
     }
 
     if (!count) {
@@ -25,11 +31,23 @@ export function getSupergroupStatus(supergroup, chatId) {
         }
     }
 
-    if (count <= 1) return LStore.formatPluralString('Members', count);
+    if (count <= 0) {
+        if (has_location){
+            return LStore.getString('MegaLocation').toLowerCase();
+        }
+
+        return username
+            ? LStore.getString('MegaPublic').toLowerCase()
+            : LStore.getString('MegaPrivate').toLowerCase();
+    }
+
+    if (count <= 1) {
+        return LStore.formatPluralString('Members', count);
+    }
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${LStore.formatPluralString('Members', count)}, ${LStore.formatPluralString('OnlineCount', count)}`;
+        return `${LStore.formatPluralString('Members', count)}, ${LStore.formatPluralString('OnlineCount', onlineCount)}`;
     }
 
     return LStore.formatPluralString('Members', count);

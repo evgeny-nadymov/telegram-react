@@ -7,6 +7,60 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function showInputPasswordAlert(state, onPassword) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateInputPasswordAlert',
+        state,
+        onPassword
+    });
+}
+
+export function setText(text) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateSendText',
+        text
+    });
+}
+
+export function showOpenGameAlert(game, params) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateOpenGameAlert',
+        game,
+        params
+    });
+}
+
+export function showOpenUrlAlert(url, params) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateOpenUrlAlert',
+        url,
+        params
+    });
+}
+
+export function showRequestUrlAlert(url, params) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateRequestUrlAlert',
+        url,
+        params
+    });
+}
+
+export function showAlert(params) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateAlert',
+        params
+    });
+}
+
+export function showSnackbar(message, action) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateSnackbar',
+        message,
+        action
+    });
+}
+
 export function openArchive() {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateArchive',

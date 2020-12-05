@@ -51,7 +51,7 @@ class ActiveSessions extends React.Component {
     };
 
     handleDoneConfirmation = async () => {
-        const { sessions } = this.props;
+        const { sessions, t } = this.props;
         const { session } = this.state;
         if (!session) return;
 

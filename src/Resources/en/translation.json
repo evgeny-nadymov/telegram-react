@@ -31,6 +31,7 @@
   "FoodDrink": "Food & Drink",
   "GeneralSettings": "General Settings",
   "GoToMessage": "Go to message",
+  "InvalidPassword": "Invalid password. Please check the password and try again.",
   "InvalidPhoneNumber": "Invalid phone number. Please check the number and try again.",
   "KeepMeSignedIn": "Keep me signed in",
   "LeftChannel": "Left channel",

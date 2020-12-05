@@ -13,12 +13,8 @@ import SupergroupStore from '../Stores/SupergroupStore';
 export function getChannelStatus(supergroup, chatId) {
     if (!supergroup) return '';
 
-    let { status, is_channel, member_count: count } = supergroup;
+    let { is_channel, member_count: count, username } = supergroup;
     if (!is_channel) return '';
-
-    if (status && status['@type'] === 'chatMemberStatusBanned') {
-        return 'channel is inaccessible';
-    }
 
     if (!count) {
         const fullInfo = SupergroupStore.getFullInfo(supergroup.id);
@@ -27,11 +23,19 @@ export function getChannelStatus(supergroup, chatId) {
         }
     }
 
-    if (count <= 1) return LStore.formatPluralString('Subscribers', 1);
+    if (count <= 0) {
+        return username
+            ? LStore.getString('ChannelPublic').toLowerCase()
+            : LStore.getString('ChannelPrivate').toLowerCase();
+    }
+
+    if (count <= 1) {
+        return LStore.formatPluralString('Subscribers', 1);
+    }
 
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
     if (onlineCount > 1) {
-        return `${LStore.formatPluralString('Subscribers', count)}, ${LStore.formatPluralString('OnlineCount', count)}`;
+        return `${LStore.formatPluralString('Subscribers', count)}, ${LStore.formatPluralString('OnlineCount', onlineCount)}`;
     }
 
     return LStore.formatPluralString('Subscribers', count);

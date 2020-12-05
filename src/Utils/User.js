@@ -7,7 +7,7 @@
 
 import dateFormat from '../Utils/Date';
 import { getFirstLetter, getLetters, getSize } from './Common';
-import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
+import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_IDS } from '../Constants';
 import LStore from '../Stores/LocalizationStore';
 import UserStore from '../Stores/UserStore';
 
@@ -19,12 +19,16 @@ function getUserStatus(user) {
     if (!user) return null;
     if (!user.status) return null;
 
-    if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
+    if (SERVICE_NOTIFICATIONS_USER_IDS.some(x => x === user.id)) {
         return LStore.getString('ServiceNotifications');
     }
 
+    if (user.is_support) {
+        return LStore.getString('SupportStatus');
+    }
+
     if (user.type && user.type['@type'] === 'userTypeBot') {
-        return LStore.getString('Bot');
+        return LStore.getString('Bot').toLowerCase();
     }
 
     switch (user.status['@type']) {
@@ -104,12 +108,12 @@ function isUserOnline(user) {
     const { id, status, type } = user;
     if (!status) return false;
     if (!type) return false;
-    if (id === SERVICE_NOTIFICATIONS_USER_ID) return false;
+    if (SERVICE_NOTIFICATIONS_USER_IDS.some(x => x === id)) return false;
 
     return status['@type'] === 'userStatusOnline' && type['@type'] !== 'userTypeBot';
 }
 
-function getUserFullName(userId, user, t = k => k) {
+function getUserFullName(userId, user) {
     user = UserStore.get(userId) || user;
     if (!user) return null;
 
@@ -125,7 +129,7 @@ function getUserFullName(userId, user, t = k => k) {
         }
         case 'userTypeDeleted':
         case 'userTypeUnknown': {
-            return t('HiddenName');
+            return LStore.i18n.t('HiddenName');
         }
     }
 

@@ -68,6 +68,7 @@ class DialogsList extends React.Component {
     constructor(props) {
         super(props);
 
+        window._m = new Map();
         this.hiddenChats = new Map();
 
         this.listRef = React.createRef();
@@ -282,7 +283,8 @@ class DialogsList extends React.Component {
         } else {
             if (currentIndex === -1) {
                 if (loading) {
-                    console.error('[vl] skip add while getChats', update);
+                    console.error(`[vl] skip ${update['@type']}`, { id: chat_id, title: ChatStore.get(chat_id).title, chat: ChatStore.get(chat_id) });
+                    window._m.set(chat_id, chat_id);
                     // TODO: check and add if within loaded part
                 } else {
                     newChatIds.push(chat_id);
@@ -308,6 +310,7 @@ class DialogsList extends React.Component {
             return;
         }
 
+        // console.log('[vl] reorderChats', orderedChatIds);
         this.setState({ chats: orderedChatIds }, callback);
     }
 
@@ -358,15 +361,16 @@ class DialogsList extends React.Component {
 
         let offsetOrder = '9223372036854775807'; // 2^63 - 1
         let offsetChatId = 0;
+        let offsetChat = null;
         if (!replace && chats && chats.length > 0) {
-            const chat = ChatStore.get(chats[chats.length - 1]);
-            if (chat) {
-                offsetOrder = getChatOrder(chat.id, chatList);
-                offsetChatId = chat.id;
+            offsetChat = ChatStore.get(chats[chats.length - 1]);
+            if (offsetChat) {
+                offsetOrder = getChatOrder(offsetChat.id, chatList);
+                offsetChatId = offsetChat.id;
             }
         }
 
-        // if (type === 'chatListMain') console.log('[folders] GETCHATS start', type, offsetOrder, offsetChatId);
+        if (type === 'chatListMain') console.log('[vl] GETCHATS start', type, offsetOrder, offsetChatId, offsetChat);
         params.loading = true;
         const result = await TdLibController.send({
             '@type': 'getChats',
@@ -380,7 +384,7 @@ class DialogsList extends React.Component {
                 TdLibController.clientUpdate({ '@type': 'clientUpdateDialogsReady', list: chatList });
             }
         });
-        // if (type === 'chatListMain') console.log('[folders] GETCHATS stop', replace, type, result);
+        if (type === 'chatListMain') console.log('[vl] GETCHATS stop', replace, type, result);
 
         if (params !== this.state.params) {
             // console.log('[folders] onLoadNext cancel', chatList);
@@ -494,7 +498,17 @@ class DialogsList extends React.Component {
             }
         }
 
-        // console.log('[vl] render', this.source);
+        window._chats = chats;
+        window._c = new Map((chats || []).map(i => [i, i]));
+        const ids = [];
+        window._m.forEach((value, key) => {
+            if (!window._c.has(key)) {
+                ids.push(key);
+            }
+        });
+        console.log('[vl] render', (chats || []).length, window._c.size, window._m.size, ids.length,
+            //ids.map(x => ChatStore.get(x))
+        );
 
         return (
             <VirtualizedList
