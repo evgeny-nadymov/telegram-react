@@ -265,10 +265,10 @@ pre code {
     right: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(9px, 3px);
+    transform: translateX(6px);
 }
 
 .message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -278,10 +278,10 @@ pre code {
     right: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(9px, 3px);
+    transform: translateX(6px);
 }
 
 .message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -291,10 +291,10 @@ pre code {
     right: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(9px, 3px);
+    transform: translateX(6px);
 }
 
 .message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
@@ -304,10 +304,10 @@ pre code {
     left: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(-9px, 3px) scaleX(-1);
+    transform: translateX(-6px) scaleX(-1);
 }
 
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -317,10 +317,10 @@ pre code {
     left: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(-9px, 3px) scaleX(-1);
+    transform: translateX(-6px) scaleX(-1);
 }
 
 .message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -330,10 +330,10 @@ pre code {
     left: 0;
     bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    width: 11px;
-    height: 20px;
+    width: 8px;
+    height: 17px;
     content: '';
-    transform: translate(-9px, 3px) scaleX(-1);
+    transform: translateX(-6px) scaleX(-1);
 }
 
 .message-bubble-out {
