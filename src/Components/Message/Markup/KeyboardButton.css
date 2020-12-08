@@ -11,13 +11,13 @@
     text-overflow: ellipsis;
     border-radius: 6px;
     margin: 3px;
-    background: var(--message-service-background);
+    background: var(--message-keyboard-button);
     color: white;
     overflow: hidden;
 }
 
-.keyboard-button:hover{
-    background: var(--message-service-background);
+.keyboard-button:hover {
+    background: var(--message-keyboard-button-hover);
 }
 
 .keyboard-button-content {

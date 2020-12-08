@@ -249,11 +249,7 @@ class MessagesList extends React.Component {
             return;
         }
 
-        const lastMessage = history[history.length - 1];
-        if (!lastMessage) return;
-
-        if (lastMessage.chat_id !== chatId) return;
-        if (lastMessage.id !== messageId) return;
+        if (!history.some(x => x.chat_id === chatId && x.id === messageId)) return;
 
         this.scrollBottomAfterEditing = {
             chatId,

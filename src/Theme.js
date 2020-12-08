@@ -54,6 +54,9 @@ function updateLightTheme(theme) {
 
     style.setProperty('--online-indicator', '#0AC630');
 
+    style.setProperty('--message-keyboard-button', '#00000033');
+    style.setProperty('--message-keyboard-button-hover', '#00000022');
+
     style.setProperty('--message-service-color', '#FFFFFF');
     style.setProperty('--message-service-background', '#00000033');
 
@@ -138,6 +141,9 @@ function updateDarkTheme(theme) {
     style.setProperty('--badge-item-selected', getBadgeSelectedColor(theme.palette.primary.main));
 
     style.setProperty('--online-indicator', '#0AC630');
+
+    style.setProperty('--message-keyboard-button', '#424242');
+    style.setProperty('--message-keyboard-button-hover', '#42424288');
 
     style.setProperty('--message-service-color', '#FFFFFF');
     style.setProperty('--message-service-background', '#303030');

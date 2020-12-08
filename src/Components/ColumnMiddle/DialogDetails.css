@@ -20,6 +20,20 @@
     position: relative;
 }
 
+.dialog-details::before {
+    mask: url(../../Assets/bubble-tail-left.svg);
+    content: '';
+    width: 0;
+    height: 0;
+}
+
+.dialog-details::after {
+    mask: url(../../Assets/bubble-tail-right.svg);
+    content: '';
+    width: 0;
+    height: 0;
+}
+
 .dialog-details-wrapper {
     position: absolute;
     left: 0;
