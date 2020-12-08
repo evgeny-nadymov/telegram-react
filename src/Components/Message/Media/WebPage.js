@@ -117,8 +117,19 @@ class WebPage extends React.Component {
                 (type === 'article' || type === 'photo' || type === 'telegram_megagroup' || type === 'telegram_channel') &&
                 (site_name || title || description && description.text.length > 0) &&
                 photoSize &&
-                (photoSize.width === photoSize.height || Math.max(photoSize.width, photoSize.height) < PHOTO_DISPLAY_SIZE );
-            const extraSmallPhoto = smallPhoto && (!description || description.text.length < 50);
+                (photoSize.width === photoSize.height || Math.max(photoSize.width, photoSize.height) < PHOTO_SIZE );
+            let totalLength = 0;
+            if (site_name) {
+                totalLength += site_name.length;
+            }
+            if (title) {
+                totalLength += title.length;
+            }
+            if (description) {
+                totalLength += description.text.length;
+            }
+
+            const extraSmallPhoto = smallPhoto && totalLength < 50;
 
             const style =
                 smallPhoto || extraSmallPhoto
