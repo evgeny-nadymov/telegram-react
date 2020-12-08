@@ -39,7 +39,8 @@
     flex-direction: column;
 }
 
-.light .dialog-details {
+.light .dialog-details,
+.dark .dialog-details {
     overflow: hidden;
 }
 
