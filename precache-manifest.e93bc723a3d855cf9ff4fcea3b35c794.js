@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "0a649e348440fa19182964cbb44800b6",
+    "revision": "fd9d0088e0c41dd379786cfe9bcd1903",
     "url": "/telegram-react/index.html"
   },
   {
@@ -8,8 +8,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/0.52c23fd6.chunk.css"
   },
   {
-    "revision": "9ffd397af43d972b4c47",
-    "url": "/telegram-react/static/css/3.14be1a4e.chunk.css"
+    "revision": "efe08638d8d2bf0017a2",
+    "url": "/telegram-react/static/css/3.522003e7.chunk.css"
   },
   {
     "revision": "aafddcfd03e3bef6383e",
@@ -20,7 +20,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/css/7.792a87e0.chunk.css"
   },
   {
-    "revision": "c3979d307ebd57dde6b9",
+    "revision": "a291e4b73c162725e3d0",
     "url": "/telegram-react/static/css/main.a0fffbcb.chunk.css"
   },
   {
@@ -28,7 +28,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/0.8312ab26.chunk.js"
   },
   {
-    "revision": "9ffd397af43d972b4c47",
+    "revision": "efe08638d8d2bf0017a2",
     "url": "/telegram-react/static/js/3.00319170.chunk.js"
   },
   {
@@ -48,16 +48,16 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/telegram-react/static/js/7.f8706f64.chunk.js"
   },
   {
-    "revision": "c3979d307ebd57dde6b9",
-    "url": "/telegram-react/static/js/main.6cd1f6fc.chunk.js"
+    "revision": "a291e4b73c162725e3d0",
+    "url": "/telegram-react/static/js/main.1afff3b7.chunk.js"
   },
   {
-    "revision": "9e15dcf5af835e935cfc",
-    "url": "/telegram-react/static/js/runtime~main.03023cef.js"
+    "revision": "57f5493efdb999824b0c",
+    "url": "/telegram-react/static/js/runtime~main.e5d1e9f5.js"
   },
   {
-    "revision": "c4cb7a6dfa433b1cd66709a851ee5989",
-    "url": "/telegram-react/static/media/bubble-tail-left.c4cb7a6d.svg"
+    "revision": "85479cc199de7ace1a44d901720601b8",
+    "url": "/telegram-react/static/media/bubble-tail-left.85479cc1.svg"
   },
   {
     "revision": "bcf112461b322d3b888e4eb550e3386a",
