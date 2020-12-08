@@ -268,7 +268,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(10px, 3px);
+    transform: translate(9px, 3px);
 }
 
 .message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -281,7 +281,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(10px, 3px);
+    transform: translate(9px, 3px);
 }
 
 .message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -294,7 +294,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(10px, 3px);
+    transform: translate(9px, 3px);
 }
 
 .message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
@@ -307,7 +307,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-10px, 3px) scaleX(-1);
+    transform: translate(-9px, 3px) scaleX(-1);
 }
 
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -320,7 +320,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-10px, 3px) scaleX(-1);
+    transform: translate(-9px, 3px) scaleX(-1);
 }
 
 .message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -333,7 +333,7 @@ pre code {
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-10px, 3px) scaleX(-1);
+    transform: translate(-9px, 3px) scaleX(-1);
 }
 
 .message-bubble-out {
