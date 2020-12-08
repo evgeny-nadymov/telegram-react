@@ -205,7 +205,7 @@ class Animation extends React.Component {
         if (!fitPhotoSize) return null;
 
         const animationStyle = {
-            background: 'black',
+            // background: 'black',
             minWidth: stretch ? fitPhotoSize.width : null,
             width: !stretch ? fitPhotoSize.width : null,
             height: fitPhotoSize.height,

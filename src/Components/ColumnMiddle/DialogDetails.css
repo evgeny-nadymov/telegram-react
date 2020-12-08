@@ -21,7 +21,7 @@
 }
 
 .dialog-details::after {
-    mask: url(../../Assets/bubble-tail-left.svg), url(../../Assets/bubble-tail-right.svg);
+    mask: url(../../Assets/bubble-tail-left.svg);
     content: 'a';
     font-weight: bold;
     width: 0;

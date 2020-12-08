@@ -93,13 +93,13 @@
 
 .inputbox-bubble::after {
     position: absolute;
-    bottom: -3px;
-    right: -11px;
+    bottom: 0;
+    right: 0;
     width: 11px;
     height: 20px;
     content: '';
-    mask: url(../../Assets/bubble-tail-right.svg);
-    transform: translate(-2px, -2px);
+    mask: url(../../Assets/bubble-tail-left.svg);
+    transform: translate(7px, 3px) scaleX(-1);
     box-sizing: border-box;
     background: var(--message-in-background);
 }

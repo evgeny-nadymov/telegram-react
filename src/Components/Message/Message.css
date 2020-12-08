@@ -263,12 +263,12 @@ pre code {
     background: var(--message-in-background);
     position: absolute;
     right: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(7px, -2px);
+    transform: translate(10px, 3px);
 }
 
 .message.message-album-last-selected:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -276,12 +276,12 @@ pre code {
     background: var(--color-accent-main44);
     position: absolute;
     right: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(7px, -2px);
+    transform: translate(10px, 3px);
 }
 
 .message.message-album-last-highlighted:not(.message-out):not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile::after,
@@ -289,12 +289,12 @@ pre code {
     animation: highlighted-animation 1s ease-out;
     position: absolute;
     right: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(7px, -2px);
+    transform: translate(10px, 3px);
 }
 
 .message.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::before,
@@ -302,12 +302,12 @@ pre code {
     background: var(--message-out-background);
     position: absolute;
     left: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-7px, -2px) scaleX(-1);
+    transform: translate(-10px, 3px) scaleX(-1);
 }
 
 .message.message-album-last-selected.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -315,12 +315,12 @@ pre code {
     background: var(--color-accent-main44);
     position: absolute;
     left: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-7px, -2px) scaleX(-1);
+    transform: translate(-10px, 3px) scaleX(-1);
 }
 
 .message.message-album-last-highlighted.message-out:not(.message-bubble-hidden):not(.message-group-tail-rounded):not(.message-rounded) .user-tile:not(.tile-poll)::after,
@@ -328,12 +328,12 @@ pre code {
     animation: highlighted-animation 1s ease-out;
     position: absolute;
     left: 0;
+    bottom: 0;
     mask: url(../../Assets/bubble-tail-left.svg);
-    bottom: -3px;
     width: 11px;
     height: 20px;
     content: '';
-    transform: translate(-7px, -2px) scaleX(-1);
+    transform: translate(-10px, 3px) scaleX(-1);
 }
 
 .message-bubble-out {
