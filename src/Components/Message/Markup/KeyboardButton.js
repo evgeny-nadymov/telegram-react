@@ -85,7 +85,11 @@ class KeyboardButton extends React.Component {
 
         switch (type['@type']) {
             case 'inlineKeyboardButtonTypeBuy': {
-
+                showAlert({
+                    title: LStore.getString('AppName'),
+                    message: LStore.getString('PaymentsNotSupported'),
+                    ok: LStore.getString('OK')
+                });
                 break;
             }
             case 'inlineKeyboardButtonTypeCallback':

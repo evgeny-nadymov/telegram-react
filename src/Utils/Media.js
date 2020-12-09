@@ -27,6 +27,7 @@ import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
 import { getSrc } from './File';
 import classNames from 'classnames';
+import Invoice from '../Components/Message/Media/Invoice';
 
 const waveformCache = new Map();
 
@@ -648,6 +649,18 @@ export function getMedia(message, openMedia, options = {}) {
                     chatId={chat_id}
                     messageId={id}
                     game={content.game}
+                    openMedia={openMedia}
+                    meta={inlineMeta}
+                />
+            );
+        case 'messageInvoice':
+            return (
+                <Invoice
+                    title={hasTitle}
+                    caption={hasCaption}
+                    chatId={chat_id}
+                    messageId={id}
+                    invoice={content}
                     openMedia={openMedia}
                     meta={inlineMeta}
                 />

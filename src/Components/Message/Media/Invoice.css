@@ -5,11 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-.reply-markup {
-    margin: 3px 2px -3px;
+.invoice-photo {
+    margin: 2px -9px -6px;
+    position: relative;
 }
 
-.message-short .reply-markup {
-    margin-left: 35px;
-    margin-right: 35px;
+.invoice-meta {
+    position: absolute;
+}
+
+.invoice .photo {
+    border-radius: 0;
 }

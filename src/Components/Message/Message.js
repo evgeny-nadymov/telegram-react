@@ -447,7 +447,7 @@ class Message extends Component {
 
         const style = getMessageStyle(chatId, messageId);
         const withBubble = content['@type'] !== 'messageSticker' && content['@type'] !== 'messageVideoNote';
-        const tailRounded = !hasCaption && (content['@type'] === 'messageAnimation' || content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto') || reply_markup;
+        const tailRounded = !hasCaption && (content['@type'] === 'messageAnimation' || content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto' || content['@type'] === 'messageInvoice' && content.photo) || reply_markup;
 
         // console.log('[p] m.render id=' + message.id);
 

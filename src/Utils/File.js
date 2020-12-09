@@ -1061,6 +1061,14 @@ function loadMessageContents(store, messages) {
                     loadGameThumbnailContent(store, game, message);
                     break;
                 }
+                case 'messageInvoice': {
+                    const { photo } = content;
+
+                    loadBigPhotoContent(store, photo, message);
+                    loadPhotoContent(store, photo, message);
+                    loadPhotoThumbnailContent(store, photo, message);
+                    break;
+                }
                 case 'messageLocation': {
                     const { location } = content;
 
@@ -1396,6 +1404,7 @@ export function getMediaMinithumbnail(chatId, messageId) {
             }
             break;
         }
+        case 'messageInvoice':
         case 'messagePhoto': {
             const { photo } = content;
             if (photo && photo.minithumbnail) {
@@ -1468,6 +1477,7 @@ export function getMediaThumbnail(chatId, messageId) {
             }
             break;
         }
+        case 'messageInvoice':
         case 'messagePhoto': {
             const [width, height, file] = getMediaFile(chatId, messageId, PHOTO_SIZE);
 
@@ -1576,6 +1586,7 @@ function getMediaFile(chatId, messageId, size) {
             }
             break;
         }
+        case 'messageInvoice':
         case 'messagePhoto': {
             const { photo } = content;
             if (photo) {
@@ -1685,6 +1696,13 @@ function cancelLoadMediaViewerContent(messages) {
                     cancelLoadAnimationContent(animation);
                     break;
                 }
+                case 'messageInvoice': {
+                    const { photo } = content;
+                    if (!photo) break;
+
+                    cancelLoadBigPhotoContent(photo);
+                    break;
+                }
                 case 'messagePhoto': {
                     const { photo } = content;
                     if (!photo) break;
@@ -1790,6 +1808,12 @@ function loadMediaViewerContent(messages, useSizeLimit = false) {
                     const { document } = content;
 
                     loadDocumentContent(store, document, message, useSizeLimit);
+                    break;
+                }
+                case 'messageInvoice': {
+                    const { photo } = content;
+
+                    loadBigPhotoContent(store, photo, message);
                     break;
                 }
                 case 'messagePhoto': {

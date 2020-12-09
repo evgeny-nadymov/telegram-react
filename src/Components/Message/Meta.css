@@ -31,7 +31,7 @@
     align-items: center;
     border-radius: 9px;
     padding: 0 5px 0 0;
-    background: var(--message-service-background);
+    background: rgba(0, 0, 0, 0.25);
 }
 
 .message .meta.meta-bubble,

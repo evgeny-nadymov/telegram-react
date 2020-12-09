@@ -45,6 +45,7 @@
   "NotificationsDisabled": "Disabled",
   "NotificationsEnabled": "Enabled",
   "Objects": "Objects",
+  "PaymentsNotSupported": "Sorry, this Telegram client doesn't support payments yet. Please use one of our mobile apps to do this.",
   "PhoneNumber": "Phone Number",
   "PhotosTitle": "Photos",
   "PollQuizOneRightAnswer": "Quiz has only one right answer.",

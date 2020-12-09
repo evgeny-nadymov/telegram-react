@@ -85,7 +85,7 @@ class Video extends React.Component {
                 <div className='video-play'>
                     <PlayArrowIcon />
                 </div>
-                <div className='video-meta'>{getDurationString(duration) + ' ' + getFileSize(video)}</div>
+                <div className='media-top-meta'>{getDurationString(duration) + ' ' + getFileSize(video)}</div>
             </div>
         );
     }

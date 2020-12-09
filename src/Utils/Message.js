@@ -102,6 +102,10 @@ export function isMetaBubble(chatId, messageId) {
         case 'messageAnimation': {
             return true;
         }
+        case 'messageInvoice': {
+            const { photo } = content;
+            return Boolean(photo);
+        }
         case 'messageLocation': {
             return true;
         }
@@ -676,7 +680,9 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageInvoice': {
-            return getServiceMessageContent(message);
+            const { title } = content;
+
+            return title + caption;
         }
         case 'messageLocation': {
             return t('AttachLocation') + caption;
@@ -1536,6 +1542,7 @@ function openMedia(chatId, messageId, fileCancel = true) {
 
             break;
         }
+        case 'messageInvoice':
         case 'messagePhoto': {
             const { photo } = content;
             if (photo) {
@@ -2769,6 +2776,18 @@ export function getMessageStyle(chatId, messageId) {
         }
         case 'messageGame': {
             return { maxWidth : PHOTO_DISPLAY_SIZE + 10 + 9 * 2 };
+        }
+        case 'messageInvoice': {
+            const { photo } = content;
+            if (!photo) return null;
+
+            const size = getSize(photo.sizes, PHOTO_SIZE);
+            if (!size) return null;
+
+            const fitSize = getFitSize(size, PHOTO_DISPLAY_SIZE, true);
+            if (!fitSize) return null;
+
+            return { width: fitSize.width };
         }
         case 'messagePhoto': {
             const { photo, caption } = content;
