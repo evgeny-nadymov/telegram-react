@@ -40,11 +40,8 @@ export function focusInput(element) {
 export function scrollTop(element, behavior = 'smooth') {
     if (!element) return;
 
-    element.scrollTop = Math.min(element.scrollTop, 100);
+    element.scrollTop = Math.min(element.scrollTop, 50);
     setTimeout(() => {
-        element.scrollTo({
-            top: 0,
-            behavior
-        });
-    }, 50);
+        element.scrollTo({ top: 0, behavior });
+    }, 1);
 }

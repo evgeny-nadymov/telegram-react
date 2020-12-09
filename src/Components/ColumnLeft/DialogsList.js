@@ -170,15 +170,19 @@ class DialogsList extends React.Component {
     onClientUpdateChatList = update => {
         const { chatList } = update;
 
-        this.setState({
-            chatList,
-            params: {
-                loading: false,
-                completed: false
-            }
-        }, () => {
-            this.loadFirstSlice();
-        });
+        if (chatListEquals(this.state.chatList, chatList)) {
+            this.scrollToTop();
+        } else {
+            this.setState({
+                chatList,
+                params: {
+                    loading: false,
+                    completed: false
+                }
+            }, () => {
+                this.loadFirstSlice();
+            });
+        }
     };
 
     onUpdateSupergroup = update => {
