@@ -39,6 +39,7 @@ import { cancelPollAnswer, stopPoll } from '../../Actions/Poll';
 import { copy } from '../../Utils/Text';
 import { clearSelection, deleteMessages, editMessage, forwardMessages, requestPinMessage, requestUnpinMessage, replyMessage, selectMessage } from '../../Actions/Client';
 import { saveBlob } from '../../Utils/File';
+import { isServiceMessage } from '../../Utils/ServiceMessage';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import FileStore from '../../Stores/FileStore';
@@ -232,13 +233,19 @@ class MessageMenu extends React.PureComponent {
         const canBeUnvoted = canMessageBeUnvoted(chatId, messageId) && source === 'chat';
         const canBeClosed = canMessageBeClosed(chatId, messageId) && source === 'chat';
         const canBeReplied = canSendMessages(chatId) && source === 'chat';
-        const canBePinned = canPinMessages(chatId);
+        const canBePinned = canPinMessages(chatId) && !isServiceMessage(MessageStore.get(chatId, messageId));
         const canBeForwarded = canMessageBeForwarded(chatId, messageId);
         const canBeDeleted = canMessageBeDeleted(chatId, messageId);
         const canBeEdited = canMessageBeEdited(chatId, messageId) && !AppStore.recording && source === 'chat';
-        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId);
+        const canBeSelected = !MessageStore.hasSelectedMessage(chatId, messageId) && !isServiceMessage(MessageStore.get(chatId, messageId));
         const canCopyLink = Boolean(copyLink);
         const canCopyPublicMessageLink = isPublicSupergroup(chatId);
+
+        const hasItems =
+            canBeUnvoted || canBeClosed || canBeReplied || canBePinned || canBeForwarded || canBeDeleted || canBeEdited || canBeSelected || canCopyLink || canCopyPublicMessageLink;
+        if (!hasItems) {
+            return null;
+        }
 
         return (
             <>

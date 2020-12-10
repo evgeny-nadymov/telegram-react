@@ -17,6 +17,7 @@ import { openMedia } from '../../Utils/Message';
 import { getServiceMessageContent } from '../../Utils/ServiceMessage';
 import MessageStore from '../../Stores/MessageStore';
 import './ServiceMessage.css';
+import MessageMenu from './MessageMenu';
 
 const chatPhotoStyle = {
     width: 96,
@@ -32,13 +33,14 @@ class ServiceMessage extends React.Component {
         const { chatId, messageId } = this.props;
         this.state = {
             message: MessageStore.get(chatId, messageId),
-            highlighted: false
+            highlighted: false,
+            contextMenu: false,
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, messageId, sendingState, showUnreadSeparator, t } = this.props;
-        const { highlighted } = this.state;
+        const { highlighted, contextMenu } = this.state;
 
         if (nextProps.t !== t) {
             return true;
@@ -61,6 +63,10 @@ class ServiceMessage extends React.Component {
         }
 
         if (nextState.highlighted !== highlighted) {
+            return true;
+        }
+
+        if (nextState.contextMenu !== contextMenu) {
             return true;
         }
 
@@ -111,9 +117,46 @@ class ServiceMessage extends React.Component {
         openMedia(chatId, messageId);
     };
 
+    handleOpenContextMenu = async event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { contextMenu } = this.state;
+
+        if (contextMenu) {
+            this.setState({ contextMenu: false });
+        } else {
+            if (MessageStore.selectedItems.size > 1) {
+                return;
+            }
+
+            const left = event.clientX;
+            const top = event.clientY;
+            const copyLink =
+                event.target && event.target.tagName === 'A' && event.target.href ? event.target.href : null;
+
+            this.setState({
+                contextMenu: true,
+                copyLink,
+                left,
+                top
+            });
+        }
+    };
+
+    handleCloseContextMenu = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        this.setState({ contextMenu: false });
+    };
+
     render() {
         const { chatId, messageId, showUnreadSeparator, showDate } = this.props;
-        const { highlighted } = this.state;
+        const { highlighted, contextMenu, left, top } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
@@ -131,7 +174,8 @@ class ServiceMessage extends React.Component {
                 {showDate && <DayMeta date={date} />}
                 <div
                     className={classNames('service-message', { 'message-highlighted': highlighted })}
-                    onAnimationEnd={this.handleAnimationEnd}>
+                    onAnimationEnd={this.handleAnimationEnd}
+                    onContextMenu={this.handleOpenContextMenu}>
                     {showUnreadSeparator && <UnreadSeparator />}
                     <div className='service-message-wrapper'>
                         <div className='service-message-content'>
@@ -149,6 +193,15 @@ class ServiceMessage extends React.Component {
                         />
                     )}
                 </div>
+                <MessageMenu
+                    chatId={chatId}
+                    messageId={messageId}
+                    anchorPosition={{ top, left }}
+                    open={contextMenu}
+                    onClose={this.handleCloseContextMenu}
+                    copyLink={null}
+                    source={'chat'}
+                />
             </div>
         );
     }
