@@ -325,6 +325,10 @@ class ApplicationStore extends EventEmitter {
                 this.recording = false;
                 break;
             }
+            case 'clientUpdateRequestBlockSender': {
+                this.emit('clientUpdateRequestBlockSender', update);
+                break;
+            }
             case 'clientUpdateRequestClearHistory': {
                 this.emit('clientUpdateRequestClearHistory', update);
                 break;

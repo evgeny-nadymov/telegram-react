@@ -332,7 +332,10 @@ class DialogsList extends React.Component {
 
     handleScroll = () => {
         // console.log('[vl] onScroll');
-        const list = this.listRef.current.getListRef().current;
+        const { current } = this.listRef;
+        if (!current) return;
+
+        const list = current.getListRef().current;
         if (!list) return;
 
         // console.log(`[vl] onScroll [scrollTop, offsetHeight, scrollHeight] = [${list.scrollTop}, ${list.offsetHeight}, ${list.scrollHeight}]`, list.scrollTop + list.offsetHeight, (list.scrollHeight - SCROLL_CHATS_PRECISION));

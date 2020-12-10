@@ -27,6 +27,58 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function getChatSender(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return { '@type': 'messageSenderChat', chat_id: chatId };
+        }
+        case 'chatTypeSupergroup': {
+            return { '@type': 'messageSenderChat', chat_id: chatId };
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return { '@type': 'messageSenderUser', user_id: getChatUserId(chatId) };
+        }
+    }
+
+    return null;
+}
+
+export function getChatLocation(chatId) {
+    const supergoupId = getSupergroupId(chatId);
+    if (!supergoupId) return null;
+
+    const fullInfo = SupergroupStore.getFullInfo(supergoupId);
+    if (!fullInfo) return null;
+
+    return fullInfo.location;
+}
+
+export function canSwitchBlocked(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return null;
+    if (!chat.type) return null;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            return false;
+        }
+        case 'chatTypeSupergroup': {
+            return false;
+        }
+        case 'chatTypePrivate':
+        case 'chatTypeSecret': {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function getDeleteChatTitle(chatId, t = x => x) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;

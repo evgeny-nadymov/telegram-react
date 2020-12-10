@@ -12,8 +12,10 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import AlertDialog from './Popup/AlertDialog';
+import BlockSenderDialog from './Popup/BlockSenderDialog';
 import ClearHistoryDialog from './Popup/ClearHistoryDialog';
 import DeleteMessagesDialog from './Popup/DeleteMessagesDialog';
+import InputPasswordDialog from './Popup/InputPasswordDialog';
 import LeaveChatDialog from './Popup/LeaveChatDialog';
 import OpenGameDialog from './Popup/OpenGameDialog';
 import OpenUrlDialog from './Popup/OpenUrlDialog';
@@ -21,8 +23,8 @@ import RequestUrlDialog from './Popup/RequestUrlDialog';
 import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
 import UnpinMessageDialog from './Popup/UnpinMessageDialog';
-import { canPinMessages, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
-import { pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
+import { canDeleteChat, canPinMessages, getChatLocation, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
+import { blockSender, pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
 import { clearSelection, closePinned } from '../Actions/Client';
 import { openGameInBrowser } from '../Utils/Game';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
@@ -31,7 +33,7 @@ import ChatStore from '../Stores/ChatStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import InputPasswordDialog from './Popup/InputPasswordDialog';
+import { reportChat } from '../Actions/Chat';
 
 class Actions extends React.PureComponent {
     state = {
@@ -44,10 +46,12 @@ class Actions extends React.PureComponent {
         openUrlAlert: null,
         openGameAlert: null,
         requestUrlAlert: null,
-        inputPasswordAlert: null
+        inputPasswordAlert: null,
+        requestBlockSenderAlert: null
     }
 
     componentDidMount() {
+        AppStore.on('clientUpdateRequestBlockSender', this.onClientUpdateBlockSender);
         AppStore.on('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.on('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
         AppStore.on('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
@@ -62,6 +66,7 @@ class Actions extends React.PureComponent {
     }
 
     componentWillUnmount() {
+        AppStore.off('clientUpdateRequestBlockSender', this.onClientUpdateBlockSender);
         AppStore.off('clientUpdateRequestLeaveChat', this.onClientUpdateLeaveChat);
         AppStore.off('clientUpdateRequestClearHistory', this.onClientUpdateClearHistory);
         AppStore.off('clientUpdateDeleteMessages', this.onClientUpdateDeleteMessages);
@@ -73,6 +78,12 @@ class Actions extends React.PureComponent {
         AppStore.off('clientUpdateOpenUrlAlert', this.onClientUpdateOpenUrlAlert);
         AppStore.off('clientUpdateOpenGameAlert', this.onClientUpdateOpenGameAlert);
         AppStore.off('clientUpdateRequestUrlAlert', this.onClientUpdateRequestUrlAlert);
+    }
+
+    onClientUpdateBlockSender = update => {
+        const { sender } = update;
+
+        this.setState({ requestBlockSenderAlert: { sender }});
     }
 
     onClientUpdateInputPasswordAlert = update => {
@@ -209,14 +220,15 @@ class Actions extends React.PureComponent {
         this.handleScheduledAction(chatId, 'clientUpdateClearHistory', message, [request]);
     };
 
-    handleLeaveContinue = result => {
-        const { leaveChat } = this.state;
+    handleLeaveContinue = async (result, undo = true) => {
+        const { leaveChat } = this.state || this;
         if (!leaveChat) return;
 
         const { chatId } = leaveChat;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
+        this.leaveChat = null;
         this.setState({ leaveChat: null });
 
         if (!result) return;
@@ -251,7 +263,17 @@ class Actions extends React.PureComponent {
             }
         }
 
-        this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, requests);
+        if (undo) {
+            this.handleScheduledAction(chatId, 'clientUpdateLeaveChat', message, requests);
+        } else {
+            try {
+                for (let i = 0; i < requests.length; i++) {
+                    await TdLibController.send(requests[i]);
+                }
+            } finally {
+
+            }
+        }
     };
 
     handleDeleteMessagesContinue = (result, revoke) => {
@@ -487,8 +509,62 @@ class Actions extends React.PureComponent {
         onPassword && onPassword(password, onCloseDialog, onError);
     };
 
+    handleBlockSenderContinue = async (result, params) => {
+        const { requestBlockSenderAlert } = this.state;
+
+        this.setState({ requestBlockSenderAlert: null });
+
+        if (!result) {
+            return;
+        }
+
+        const { sender } = requestBlockSenderAlert;
+        if (!sender) return;
+
+        let chatId = null;
+        switch (sender['@type']) {
+            case 'messageSenderUser': {
+                blockSender(sender);
+                chatId = await TdLibController.send({ '@type': 'createPrivateChat', user_id: sender.user_id });
+                break;
+            }
+            case 'messageSenderChat': {
+                chatId = sender.chat_id;
+                break;
+            }
+        }
+
+        if (!params || params.reportSpam) {
+            const reason = getChatLocation(chatId)
+                ? { '@type': 'chatReportReasonUnrelatedLocation' }
+                : { '@type': 'chatReportReasonSpam' };
+
+            reportChat(chatId, reason);
+        }
+
+        if (!params || params.deleteChat) {
+            const deleteChat = canDeleteChat(chatId);
+            if (!deleteChat) return;
+
+            this.leaveChat = { chatId };
+            this.handleLeaveContinue(true, false);
+        }
+    };
+
     render() {
-        const { leaveChat, clearHistory, deleteMessages, pinMessage, unpinMessage, alert, openUrlAlert, openGameAlert, requestUrlAlert, inputPasswordAlert } = this.state;
+        const {
+            leaveChat,
+            clearHistory,
+            deleteMessages,
+            pinMessage,
+            unpinMessage,
+            alert,
+            openUrlAlert,
+            openGameAlert,
+            requestUrlAlert,
+            inputPasswordAlert,
+            requestBlockSenderAlert
+        } = this.state;
         if (leaveChat) {
             const { chatId } = leaveChat;
 
@@ -575,6 +651,14 @@ class Actions extends React.PureComponent {
                     state={state}
                     error={error}
                     onClose={this.handleInputPasswordContinue}/>
+            );
+        } else if (requestBlockSenderAlert) {
+            const { sender } = requestBlockSenderAlert;
+
+            return (
+                <BlockSenderDialog
+                    sender={sender}
+                    onClose={this.handleBlockSenderContinue}/>
             );
         }
 

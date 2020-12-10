@@ -6,23 +6,24 @@
  */
 
 import React from 'react';
-import { compose } from '../../Utils/HOC';
 import { withTranslation } from 'react-i18next';
-import { withSnackbar } from 'notistack';
 import IconButton from '@material-ui/core/IconButton';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import AddMemberIcon from '../../Assets/Icons/AddMember';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import MoreVertIcon from '../../Assets/Icons/More';
+import RemoveMemberIcon from '../../Assets/Icons/RemoveMember';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
 import GroupIcon from '../../Assets/Icons/Group';
 import { requestUnpinMessage } from '../../Actions/Client';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
-import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender } from '../../Utils/Chat';
+import { requestBlockSender, unblockSender } from '../../Actions/Message';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -80,15 +81,38 @@ class MainMenuButton extends React.Component {
         requestUnpinMessage(chatId, pinned[0].id);
     };
 
+    handleSwitchBlocked = () => {
+        this.handleMenuClose();
+
+        const chatId = AppStore.getChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        const sender = getChatSender(chatId);
+        const { is_blocked } = chat;
+        if (is_blocked) {
+            unblockSender(sender);
+        } else {
+            requestBlockSender(sender);
+        }
+
+    };
+
     render() {
         const { t } = this.props;
         const { anchorEl } = this.state;
 
         const chatId = AppStore.getChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+
+        const { is_blocked } = chat;
+
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
         const unpinMessage = hasOnePinnedMessage(chatId);
+        const switchBlocked = canSwitchBlocked(chatId);
 
         return (
             <>
@@ -146,15 +170,18 @@ class MainMenuButton extends React.Component {
                             <ListItemText primary={t('UnpinMessageAlertTitle')} />
                         </MenuItem>
                     )}
+                    {switchBlocked && (
+                        <MenuItem onClick={this.handleSwitchBlocked}>
+                            <ListItemIcon>
+                                {is_blocked ? <AddMemberIcon /> : <RemoveMemberIcon />}
+                            </ListItemIcon>
+                            <ListItemText primary={is_blocked ? t('Unblock') : t('BlockContact')} />
+                        </MenuItem>
+                    )}
                 </Menu>
             </>
         );
     }
 }
 
-const enhance = compose(
-    withSnackbar,
-    withTranslation()
-);
-
-export default enhance(MainMenuButton);
+export default withTranslation()(MainMenuButton);

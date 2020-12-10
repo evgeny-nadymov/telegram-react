@@ -11,6 +11,7 @@ import InputBox from './InputBox';
 import FooterCommand from './FooterCommand';
 import NotificationsCommand from './NotificationsCommand';
 import { hasBasicGroupId, hasSupergroupId } from '../../Utils/Chat';
+import { unblockSender } from '../../Actions/Message';
 import ChatStore from '../../Stores/ChatStore';
 import BasicGroupStore from '../../Stores/BasicGroupStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -34,13 +35,23 @@ class Footer extends React.Component {
 
     componentDidMount() {
         BasicGroupStore.on('updateBasicGroup', this.onUpdateBasicGroup);
+        ChatStore.on('updateChatIsBlocked', this.onUpdateChatIsBlocked);
         SupergroupStore.on('updateSupergroup', this.onUpdateSupergroup);
     }
 
     componentWillUnmount() {
         BasicGroupStore.off('updateBasicGroup', this.onUpdateBasicGroup);
+        ChatStore.off('updateChatIsBlocked', this.onUpdateChatIsBlocked);
         SupergroupStore.off('updateSupergroup', this.onUpdateSupergroup);
     }
+
+    onUpdateChatIsBlocked = update => {
+        const { chatId } = this.props;
+
+        if (chatId === update.chat_id) {
+            this.forceUpdate();
+        }
+    };
 
     onUpdateBasicGroup = update => {
         const { chatId } = this.props;
@@ -85,13 +96,23 @@ class Footer extends React.Component {
         //     });
     };
 
+    handleUnblock = () => {
+        const { chatId } = this.props;
+
+        unblockSender({ '@type': 'messageSenderChat', chat_id: chatId });
+    }
+
     render() {
         const { chatId, t } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { type } = chat;
+        const { type, is_blocked } = chat;
         if (!type) return null;
+
+        if (is_blocked) {
+            return <FooterCommand command={t('Unblock')} onCommand={this.handleUnblock} />;
+        }
 
         switch (type['@type']) {
             case 'chatTypeBasicGroup': {
@@ -129,10 +150,8 @@ class Footer extends React.Component {
                 }
                 break;
             }
+            case 'chatTypeSecret':
             case 'chatTypePrivate': {
-                return <InputBox />;
-            }
-            case 'chatTypeSecret': {
                 return <InputBox />;
             }
             case 'chatTypeSupergroup': {

@@ -21,6 +21,7 @@ import User from '../../Tile/User';
 import UnblockIcon from '../../../Assets/Icons/Unblock';
 import { loadChatsContent, loadUsersContent } from '../../../Utils/File';
 import { openUser } from '../../../Actions/Client';
+import { unblockSender } from '../../../Actions/Message';
 import FileStore from '../../../Stores/FileStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './BlockedUsers.css';
@@ -117,11 +118,7 @@ class BlockedUsers extends React.Component {
     }
 
     handleUnblockUser = async userId => {
-        await TdLibController.send({
-           '@type': 'toggleMessageSenderIsBlocked',
-            sender: { '@type': 'messageSenderUser', user_id: userId },
-            is_blocked: false
-        });
+        unblockSender({ '@type': 'messageSenderUser', user_id: userId });
     };
 
     render() {

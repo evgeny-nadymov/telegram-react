@@ -162,6 +162,17 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
+            case 'updateChatIsBlocked': {
+                const { chat_id, is_blocked } = update;
+
+                const chat = this.get(chat_id);
+                if (chat) {
+                    this.assign(chat, { is_blocked });
+                }
+
+                this.emitFastUpdate(update);
+                break;
+            }
             case 'updateChatIsMarkedAsUnread': {
                 const { chat_id, is_marked_as_unread } = update;
 

@@ -7,6 +7,29 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function requestBlockSender(sender) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateRequestBlockSender',
+        sender
+    });
+}
+
+export function blockSender(sender) {
+    toggleMessageSenderIsBlocked(sender, true);
+}
+
+export function unblockSender(sender) {
+    toggleMessageSenderIsBlocked(sender, false);
+}
+
+function toggleMessageSenderIsBlocked(sender, isBlocked) {
+    TdLibController.send({
+        '@type': 'toggleMessageSenderIsBlocked',
+        sender,
+        is_blocked: isBlocked
+    });
+}
+
 export function openSwitchInlinePlaceholder(inline) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateSwitchInline',
