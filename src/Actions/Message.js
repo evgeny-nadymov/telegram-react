@@ -7,6 +7,20 @@
 
 import TdLibController from '../Controllers/TdLibController';
 
+export function openSwitchInlinePlaceholder(inline) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateSwitchInline',
+        inline
+    });
+}
+
+export function closeSwitchInlinePlaceholder() {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateSwitchInline',
+        inline: null
+    });
+}
+
 export function startMessageEditing(chatId, messageId) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateStartMessageEditing',

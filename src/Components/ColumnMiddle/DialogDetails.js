@@ -13,6 +13,7 @@ import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
 import PinnedMessages from './PinnedMessages';
 import StickerSetDialog from '../Popup/StickerSetDialog';
+import SwitchInlinePlaceholder from './SwitchInlinePlaceholder';
 import { getSrc } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -28,12 +29,13 @@ class DialogDetails extends Component {
             messageId: AppStore.getMessageId(),
             selectedCount: 0,
             wallpaper: null,
-            wallpaperSrc: null
+            wallpaperSrc: null,
+            switchInline: null
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, selectedCount, wallpaper } = this.state;
+        const { chatId, messageId, selectedCount, wallpaper, switchInline } = this.state;
         if (nextState.chatId !== chatId) {
             return true;
         }
@@ -46,6 +48,9 @@ class DialogDetails extends Component {
         if (nextState.wallpaper !== wallpaper) {
             return true;
         }
+        if (nextState.switchInline !== switchInline) {
+            return true;
+        }
 
         return false;
     }
@@ -53,6 +58,7 @@ class DialogDetails extends Component {
     componentDidMount() {
         AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.on('clientUpdateSwitchInline', this.onClientUpdateSwitchInline);
         ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
         FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
@@ -61,10 +67,19 @@ class DialogDetails extends Component {
     componentWillUnmount() {
         AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
+        AppStore.off('clientUpdateSwitchInline', this.onClientUpdateSwitchInline);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
         FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
+
+    onClientUpdateSwitchInline = update => {
+        const { inline } = update;
+
+        this.setState({
+            switchInline: inline
+        });
+    };
 
     onClientUpdateDocumentBlob = update => {
         const { wallpaper } = this.state;
@@ -140,9 +155,11 @@ class DialogDetails extends Component {
     };
 
     onClientUpdateChatId = update => {
+        const { nextChatId: chatId, nextMessageId: messageId } = update;
+
         this.setState({
-            chatId: update.nextChatId,
-            messageId: update.nextMessageId
+            chatId,
+            messageId
         });
     };
 
@@ -191,7 +208,7 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
-        const { chatId, messageId, wallpaper } = this.state;
+        const { chatId, messageId, wallpaper, switchInline } = this.state;
 
         let style = null;
         let src = null;
@@ -213,8 +230,6 @@ class DialogDetails extends Component {
             }
         }
 
-        // console.log('[p] dialogDetails.render');
-
         return (
             <div className='dialog-details' style={style}>
                 <div className='dialog-background'/>
@@ -222,8 +237,9 @@ class DialogDetails extends Component {
                     <HeaderPlayer />
                     <Header chatId={chatId} />
                     <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
-                    <Footer chatId={chatId} />
+                    <Footer chatId={chatId}/>
                 </div>
+                {switchInline && <SwitchInlinePlaceholder/>}
                 <PinnedMessages chatId={chatId}/>
                 <StickerSetDialog />
                 <ChatInfoDialog />

@@ -17,6 +17,7 @@ import ShareFilledIcon from '../../../Assets/Icons/ShareFilled';
 import { getUserFullName } from '../../../Utils/User';
 import { getChatTitle } from '../../../Utils/Chat';
 import { setText, showAlert, showInputPasswordAlert, showOpenGameAlert, showOpenUrlAlert, showRequestUrlAlert, showSnackbar } from '../../../Actions/Client';
+import { openSwitchInlinePlaceholder } from '../../../Actions/Message';
 import LStore from '../../../Stores/LocalizationStore';
 import MessageStore from '../../../Stores/MessageStore';
 import UserStore from '../../../Stores/UserStore';
@@ -211,25 +212,27 @@ class KeyboardButton extends React.Component {
                 break;
             }
             case 'inlineKeyboardButtonTypeSwitchInline': {
-                /// qwerty_bot
+                /// youtube
                 const { in_current_chat, query } = type;
 
+                const message = MessageStore.get(chatId, messageId);
+                if (!message) break;
+
+                const { sender, via_bot_user_id } = message;
+                let userId = sender.user_id;
+                if (via_bot_user_id !== 0) {
+                    userId = via_bot_user_id;
+                }
+
+                const user = UserStore.get(userId);
+                if (!user) break;
+
+                const inline = `@${user.username} ${query}`;
+
                 if (in_current_chat){
-                    const message = MessageStore.get(chatId, messageId);
-                    if (!message) break;
-
-                    const { sender, via_bot_user_id } = message;
-                    let userId = sender.user_id;
-                    if (via_bot_user_id !== 0) {
-                        userId = via_bot_user_id;
-                    }
-
-                    const user = UserStore.get(userId);
-                    if (!user) break;
-
-                    setText(`@${user.username} ${query}`)
+                    setText(inline);
                 } else {
-
+                    openSwitchInlinePlaceholder(inline);
                 }
 
                 break;

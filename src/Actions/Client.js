@@ -5,6 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { canSendMessages } from '../Utils/Chat';
+import AppStore from '../Stores/ApplicationStore';
+import LStore from '../Stores/LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
 
 export function showInputPasswordAlert(state, onPassword) {
@@ -125,6 +128,16 @@ export function openUser(userId, popup = false) {
 }
 
 export function openChat(chatId, messageId = null, popup = false) {
+    const { switchInline } = AppStore;
+    if (switchInline && !canSendMessages(chatId)) {
+        showAlert({
+            title: LStore.getString('AppName'),
+            message: LStore.getString('InlineSwitchCant'),
+            ok: LStore.getString('OK')
+        })
+        return;
+    }
+
     TdLibController.clientUpdate({
         '@type': 'clientUpdateOpenChat',
         chatId,

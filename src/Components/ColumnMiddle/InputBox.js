@@ -37,6 +37,7 @@ import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { editMessage, replyMessage } from '../../Actions/Client';
+import { closeSwitchInlinePlaceholder } from '../../Actions/Message';
 import { PHOTO_SIZE, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
 import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
@@ -470,6 +471,13 @@ class InputBox extends Component {
         const { chatId } = this.state;
 
         const element = this.newMessageRef.current;
+
+        const { switchInline } = AppStore;
+        if (switchInline) {
+            closeSwitchInlinePlaceholder();
+            this.setFormattedText({ '@type': 'formattedText', text: switchInline, entities: [] });
+            return;
+        }
 
         const formattedText = getChatDraft(chatId);
         if (formattedText) {

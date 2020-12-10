@@ -227,12 +227,15 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateChatId', extendedUpdate);
                 break;
             }
-            case 'clientUpdateTdLibDatabaseExists': {
-                this.emit('clientUpdateTdLibDatabaseExists', update);
-                break;
-            }
             case 'clientUpdateDeleteMessages': {
                 this.emit('clientUpdateDeleteMessages', update);
+                break;
+            }
+            case 'clientUpdateDialogChatId': {
+                const { chatId } = update;
+                this.dialogChatId = chatId;
+
+                this.emit('clientUpdateDialogChatId', update);
                 break;
             }
             case 'clientUpdateDialogsReady': {
@@ -247,8 +250,33 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateDragging', update);
                 break;
             }
+            case 'clientUpdateFocusWindow': {
+                if (!this.authorizationState) {
+                    break;
+                }
+
+                TdLibController.send({
+                    '@type': 'setOption',
+                    name: 'online',
+                    value: { '@type': 'optionValueBoolean', value: update.focused }
+                });
+
+                this.emit('clientUpdateFocusWindow', update);
+                break;
+            }
+            case 'clientUpdateForward': {
+                this.emit('clientUpdateForward', update);
+                break;
+            }
             case 'clientUpdateInputPasswordAlert': {
                 this.emit('clientUpdateInputPasswordAlert', update);
+                break;
+            }
+            case 'clientUpdateLeaveChat': {
+                if (update.inProgress && this.chatId === update.chatId) {
+                    TdLibController.setChatId(0);
+                }
+
                 break;
             }
             case 'clientUpdateMediaViewerContent': {
@@ -349,40 +377,18 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateSetPhoneError', update);
                 break;
             }
+            case 'clientUpdateSwitchInline': {
+                this.switchInline = update.inline;
+
+                this.emit('clientUpdateSwitchInline', update);
+                break;
+            }
+            case 'clientUpdateTdLibDatabaseExists': {
+                this.emit('clientUpdateTdLibDatabaseExists', update);
+                break;
+            }
             case 'clientUpdateUnpinMessage': {
                 this.emit('clientUpdateUnpinMessage', update);
-                break;
-            }
-            case 'clientUpdateDialogChatId': {
-                const { chatId } = update;
-                this.dialogChatId = chatId;
-
-                this.emit('clientUpdateDialogChatId', update);
-                break;
-            }
-            case 'clientUpdateFocusWindow': {
-                if (!this.authorizationState) {
-                    break;
-                }
-
-                TdLibController.send({
-                    '@type': 'setOption',
-                    name: 'online',
-                    value: { '@type': 'optionValueBoolean', value: update.focused }
-                });
-
-                this.emit('clientUpdateFocusWindow', update);
-                break;
-            }
-            case 'clientUpdateForward': {
-                this.emit('clientUpdateForward', update);
-                break;
-            }
-            case 'clientUpdateLeaveChat': {
-                if (update.inProgress && this.chatId === update.chatId) {
-                    TdLibController.setChatId(0);
-                }
-
                 break;
             }
         }
