@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "9e0c6d16e58c8fb7673f3918e9fc273a",
+    "revision": "d24c50bb770cafc8e2b1fbdfa0a4b8ca",
     "url": "/telegram-react/index.html"
   },
   {
