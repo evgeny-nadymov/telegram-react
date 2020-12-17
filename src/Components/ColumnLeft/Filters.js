@@ -11,11 +11,11 @@ import { withTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import Animator from '../../Utils/Animatior';
 import { clamp, getFirstLetter, throttle } from '../../Utils/Common';
+import { openChatList } from '../../Actions/Chat';
 import AppStore from '../../Stores/ApplicationStore';
 import CacheStore from '../../Stores/CacheStore';
 import FilterStore from '../../Stores/FilterStore';
 import LocalizationStore from '../../Stores/LocalizationStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './Filters.css';
 
 class Filters extends React.Component {
@@ -206,24 +206,13 @@ class Filters extends React.Component {
     handleMainClick = event => {
         if (event && event.button !== 0) return;
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateChatList',
-            chatList: {
-                '@type': 'chatListMain'
-            }
-        });
+        openChatList({ '@type': 'chatListMain' });
     };
 
     handleFilterClick = (event, id) => {
         if (event && event.button !== 0) return;
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateChatList',
-            chatList: {
-                '@type': 'chatListFilter',
-                chat_filter_id: id
-            }
-        });
+        openChatList({ '@type': 'chatListFilter', chat_filter_id: id });
     };
 
     handleWheel = event => {

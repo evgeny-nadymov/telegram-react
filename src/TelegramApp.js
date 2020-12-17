@@ -26,13 +26,14 @@ import registerServiceWorker from './registerServiceWorker';
 import { isMobile } from './Utils/Common';
 import { loadData } from './Utils/Phone';
 import KeyboardManager, { KeyboardHandler } from './Components/Additional/KeyboardManager';
-import { openPinnedChat } from './Actions/Chat';
+import { openChatList, openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
 import { clearSelection, editMessage, replyMessage, searchChat } from './Actions/Client';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore from './Stores/AuthorizationStore';
+import FilterStore from './Stores/FilterStore';
 import MessageStore from './Stores/MessageStore';
 import TdLibController from './Controllers/TdLibController';
 import './TelegramApp.css';
@@ -71,6 +72,7 @@ class TelegramApp extends Component {
 
         this.keyMap.set(key, key);
 
+        const { chatList } = FilterStore;
         const { authorizationState, chatId } = AppStore;
         if (!authorizationState) return;
         if (authorizationState['@type'] !== 'authorizationStateReady') return;
@@ -91,13 +93,14 @@ class TelegramApp extends Component {
                     if (this.editMessageId) {
                         editMessage(chatId, 0);
                         return;
-                    }
-                    else if (this.replyMessageId) {
+                    } else if (this.replyMessageId) {
                         replyMessage(chatId, 0);
                         return;
-                    }
-                    else if (MessageStore.selectedItems.size > 0) {
+                    } else if (MessageStore.selectedItems.size > 0) {
                         clearSelection();
+                        return;
+                    } else if (chatList && chatList['@type'] !== 'chatListMain') {
+                        openChatList({ '@type': 'chatListMain' });
                         return;
                     } else if (!chatId) {
                         // open search if no one dialog opened
