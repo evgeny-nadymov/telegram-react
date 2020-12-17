@@ -1455,10 +1455,11 @@ class MessagesList extends React.Component {
 
         const chat = ChatStore.get(chatId);
 
-        if (history.some(x => x.chat_id === chatId && x.id === messageId || !messageId && chat && chat.last_message.id === x.id)) {
+        const hasLastMessage = history.some(x => x.chat_id === chatId && chat && chat.last_message && chat.last_message.id === x.id);
+        if (hasLastMessage) {
             this.scrollToBottom();
         } else {
-            this.handleSelectChat(chatId, chatId, messageId, messageId);
+            this.handleSelectChat(chatId, chatId, 0, messageId);
         }
     };
 
