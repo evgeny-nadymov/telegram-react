@@ -23,7 +23,7 @@ import { getCyrillicInput, getLatinInput } from '../../../Utils/Language';
 import { orderCompare } from '../../../Utils/Common';
 import { getChatOrder } from '../../../Utils/Chat';
 import { modalManager } from '../../../Utils/Modal';
-import { SCROLL_PRECISION, USERNAME_LENGTH_MIN } from '../../../Constants';
+import { SCROLL_PRECISION, SEARCH_GLOBAL_TEXT_MIN, USERNAME_LENGTH_MIN } from '../../../Constants';
 import ChatStore from '../../../Stores/ChatStore';
 import FileStore from '../../../Stores/FileStore';
 import MessageStore from '../../../Stores/MessageStore';
@@ -187,7 +187,9 @@ class Search extends React.Component {
 
             let trimmedText = text.trim();
             trimmedText = trimmedText.startsWith('@') ? trimmedText.substr(1) : trimmedText;
-            if (trimmedText.length >= USERNAME_LENGTH_MIN) {
+            if (trimmedText.length >= SEARCH_GLOBAL_TEXT_MIN) {
+                trimmedText = trimmedText.length === SEARCH_GLOBAL_TEXT_MIN ? trimmedText + '.' : trimmedText;
+
                 const globalPromises = [];
 
                 const globalPromise = TdLibController.send({
