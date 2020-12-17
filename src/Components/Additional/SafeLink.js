@@ -179,14 +179,14 @@ class SafeLink extends React.Component {
 
     /// based on Android handleIntent function
     handleSafeClick = async event => {
-        event.stopPropagation();
+        event && event.stopPropagation();
 
         let { onClick, url: href } = this.props;
 
         href = href.startsWith('http') || href.startsWith('tg://') ? href : 'https://' + href;
         let handled = false;
         if (isTelegramLink(href)) {
-            event.preventDefault();
+            event && event.preventDefault();
             try {
                 const url = new URL(href);
                 console.log('[SafeLink] url', url);
@@ -337,6 +337,8 @@ class SafeLink extends React.Component {
         if (onClick) {
             onClick(event);
         } else {
+            event && event.preventDefault();
+
             const newWindow = window.open();
             newWindow.opener = null;
             newWindow.location = href;

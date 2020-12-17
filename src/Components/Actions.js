@@ -443,6 +443,8 @@ class Actions extends React.PureComponent {
         if (onClick) {
             onClick(event);
         } else {
+            event && event.preventDefault();
+
             const newWindow = window.open();
             newWindow.opener = null;
             newWindow.location = url;
