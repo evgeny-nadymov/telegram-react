@@ -131,7 +131,7 @@ class MainPage extends React.Component {
         this.setState({ forwardInfo: info });
     };
 
-    handleSelectChat = (chatId, messageId = null, popup = false, options = {}) => {
+    handleSelectChat = (chatId, messageId = null, popup = false, options = null) => {
         const currentChatId = AppStore.getChatId();
         const currentDialogChatId = AppStore.dialogChatId;
         const currentMessageId = AppStore.getMessageId();
