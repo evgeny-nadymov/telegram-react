@@ -401,7 +401,7 @@ class Message extends Component {
         );
 
         const webPage = getWebPage(message);
-        const text = getText(message, !!webPage ? null : inlineMeta, t);
+        const text = getText(message, !!webPage ? null : inlineMeta, t, { chatId, messageId });
         const hasCaption = text !== null && text.length > 0;
         const showForward = showMessageForward(chatId, messageId);
         const showReply = Boolean(reply_to_message_id);
@@ -447,7 +447,12 @@ class Message extends Component {
 
         const style = getMessageStyle(chatId, messageId);
         const withBubble = content['@type'] !== 'messageSticker' && content['@type'] !== 'messageVideoNote';
-        const tailRounded = !hasCaption && (content['@type'] === 'messageAnimation' || content['@type'] === 'messageVideo' || content['@type'] === 'messagePhoto' || content['@type'] === 'messageInvoice' && content.photo) || reply_markup;
+        const tailRounded =
+            !hasCaption  && (
+                content['@type'] === 'messageAnimation' ||
+                content['@type'] === 'messageVideo' ||
+                content['@type'] === 'messagePhoto' ||
+                content['@type'] === 'messageInvoice' && content.photo) || reply_markup && reply_markup['@type'] === 'replyMarkupInlineKeyboard';
 
         // console.log('[p] m.render id=' + message.id);
 

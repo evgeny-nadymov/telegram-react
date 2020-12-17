@@ -31,13 +31,13 @@ import PasteFilesDialog from '../Popup/PasteFilesDialog';
 import RecordTimer from './RecordTimer';
 import EditMediaDialog from '../Popup/EditMediaDialog';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
-import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
+import { draftEquals, getChatDraft, getChatDraftReplyToMessageId, getChatFullInfo, isMeChat, isPrivateChat, isSupergroup } from '../../Utils/Chat';
 import { findLastTextNode, focusInput } from '../../Utils/DOM';
 import { getMediaDocumentFromFile, getMediaPhotoFromFile, isEditedMedia } from '../../Utils/Media';
 import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { editMessage, replyMessage } from '../../Actions/Client';
-import { closeSwitchInlinePlaceholder } from '../../Actions/Message';
+import { isDeletedUser, isMeUser } from '../../Utils/User';
 import { PHOTO_SIZE, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
 import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
@@ -45,6 +45,7 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
 import StickerStore from '../../Stores/StickerStore';
+import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './InputBox.css';
 
@@ -212,6 +213,12 @@ class InputBox extends Component {
 
         this.handleCancelRecord();
     }
+
+    onClientUpdateClearHistory = update => {
+        const { chatId } = this.props;
+
+        if (chatId !== update.chatId) return;
+    };
 
     onClientUpdateSendText = update => {
         const { text } = update;
@@ -472,10 +479,9 @@ class InputBox extends Component {
 
         const element = this.newMessageRef.current;
 
-        const { switchInline } = AppStore;
-        if (switchInline) {
-            closeSwitchInlinePlaceholder();
-            this.setFormattedText({ '@type': 'formattedText', text: switchInline, entities: [] });
+        const { chatSelectOptions } = AppStore;
+        if (chatSelectOptions && chatSelectOptions.switchInline) {
+            this.setFormattedText({ '@type': 'formattedText', text: chatSelectOptions.switchInline, entities: [] });
             return;
         }
 
@@ -1216,7 +1222,6 @@ class InputBox extends Component {
 
         try {
             await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
-
             const result = await TdLibController.send({
                 '@type': 'sendMessage',
                 chat_id: chatId,
@@ -1259,7 +1264,244 @@ class InputBox extends Component {
         this.setTyping();
         this.setHints();
         this.setRecordingReadyState();
+
+        // const { text, position } = this.getTextAndCaretPosition();
+        // this.searchUsernameOrHashtag(text, position, [], false);
     };
+
+    getTextAndCaretPosition = () => {
+        const { current: input } = this.newMessageRef;
+        if (!input) return;
+
+        input.focus()
+        let _range = document.getSelection().getRangeAt(0);
+        let range = _range.cloneRange();
+        range.selectNodeContents(input);
+        range.setEnd(_range.endContainer, _range.endOffset);
+
+        return { text: input.innerText, position: range.toString().length };
+    };
+
+    searchUsernameOrHashtag(text, position, messages, usernameOnly) {
+        const { chatId } = this.state;
+
+        const searchResultUsernames = [];
+
+        if (this.cancelDelayRunnable) {
+            clearTimeout(this.cancelDelayRunnable);
+            this.cancelDelayRunnable = null;
+        }
+
+        const info = getChatFullInfo(chatId);
+        const needUsernames = true;
+        const needBotContext = true;
+
+        const now = Date.now();
+        this.now = now;
+
+        let searchPosition = position;
+        if (text.length > 0) {
+            searchPosition--;
+        }
+
+        this.lastText = text;
+        this.lastUsernameOnly = usernameOnly;
+
+        let foundType = -1;
+        let result = '';
+        let resultStartPosition;
+        let resultLength;
+
+        let dogPosition = -1;
+        if (usernameOnly) {
+            result += text.substring(1);
+            resultStartPosition = 0;
+            resultLength = result.length;
+            foundType = 0;
+        } else {
+            for (let i = searchPosition; i >= 0; i--) {
+                if (i >= text.length){
+                    continue;
+                }
+                let ch = text[i];
+                if (i === 0 || text[i - 1] === ' ' || text[i - 1] === '\n' || text[i - 1] === ':') {
+                    if (ch === '@') {
+                        if (needUsernames || needBotContext && i === 0){
+                            if (!info && i !== 0) {
+                                this.lastText = text;
+                                this.lastPosition = position;
+                                this.messages = messages;
+                                this.closeHints(now);
+                                return;
+                            }
+                            dogPosition = i;
+                            foundType = 0;
+                            resultStartPosition = i;
+                            resultLength = result.length + 1;
+                        }
+                    }
+                }
+
+                result = ch + result;
+            }
+        }
+
+        if (foundType === -1) {
+            this.closeHints(now);
+            return;
+        }
+
+        if (foundType === 0) {
+            const users = [];
+            const usersMap = new Map();
+            for (let i = 0; i < Math.min(100, messages.length); i++) {
+                const { sender } = messages[i];
+                if (sender && sender.user_id && !usersMap.has(sender.user_id)) {
+                    usersMap.set(sender.user_id, sender.user_id);
+                    users.push(sender.user_id);
+                }
+            }
+
+            let usernameString = result.substr(resultStartPosition, resultLength).toLowerCase();
+            const hasSpace = usernameString.indexOf(' ') >= 0;
+            const newResult = [];
+            const newResultsMap = new Map();
+            const newMap = new Map();
+
+            const inlineBots = [];
+            if (!usernameOnly && needBotContext && dogPosition === 0 && inlineBots.length > 0) {
+
+            }
+
+            const chat = ChatStore.get(chatId);
+            if (chat && info && info.members) {
+                for (let i = -1; i < info.members.length; i++) {
+                    let username;
+                    let firstName;
+                    let lastName;
+                    let object;
+                    let id;
+                    if (i === -1) {
+                        if (!usernameString.length) {
+                            newResult.push(chat);
+                            continue;
+                        }
+                        firstName = chat.title;
+                        lastName = '';
+                        username = chat.username;
+                        object = chat;
+                        id = -chat.id;
+                    } else {
+                        const { user_id } = info.members[i];
+                        const user = UserStore.get(user_id);
+                        if (!user || !usernameOnly && isMeUser(user_id) || newResultsMap.has(user_id)) {
+                            continue;
+                        }
+                        if (!usernameString.length) {
+                            if (!isDeletedUser(user_id)) {
+                                newResult.push(user);
+                                continue;
+                            }
+                        }
+                        firstName = user.first_name;
+                        lastName = user.last_name;
+                        username = user.username;
+                        object = user;
+                        id = user.id;
+                    }
+
+                    if (username.length > 0 && username.toLowerCase().startsWith(usernameString)
+                        || firstName.length > 0 && firstName.toLowerCase().startsWith(usernameString)
+                        || lastName.length > 0 && lastName.toLowerCase().startsWith(usernameString)
+                        || hasSpace && `${firstName} ${lastName}`.toLowerCase().startsWith(usernameString)) {
+                        newResult.push(object);
+                        newMap.set(id, object);
+                    }
+                }
+            }
+
+            if (isSupergroup(chatId) && usernameString.length > 0) {
+                if (newResult.length < 5) {
+                    this.cancelDelayRunnable = setTimeout(() => {
+                        this.cancelDelayRunnable = null;
+                        this.showUsersResult(now, newResult, newMap, true);
+                    }, 0);
+                } else {
+                    this.showUsersResult(now, newResult, newMap, true);
+                }
+
+                setTimeout(async () => {
+                    if (this.now !== now) {
+                        return;
+                    }
+
+                    const result = await TdLibController.send({
+                        '@type': 'searchChatMembers',
+                        chat_id: chatId,
+                        query: usernameString,
+                        limit: 20,
+                        filter: { '@type': 'chatMembersFilterMention', message_thread_id: 0 }
+                    });
+
+                    if (this.now !== now) {
+                        return;
+                    }
+
+                    const { members } = result;
+                    if (members.length > 0) {
+                        for (let i = 0; i < members.length; i++) {
+                            const { user_id } = members[i];
+                            if (isMeUser(user_id)) {
+                                continue;
+                            }
+                            const user = UserStore.get(user_id);
+                            if (!user) {
+                                continue;
+                            }
+
+                            searchResultUsernames.push(user);
+                        }
+
+                        this.notifyDataSetChanged(now, searchResultUsernames);
+                    }
+
+
+                }, 200);
+            } else {
+                this.showUsersResult(now, newResult, newMap, true);
+            }
+        }
+    }
+
+    notifyDataSetChanged(id, searchResultUsernames) {
+        console.log('[search] global', searchResultUsernames);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateHintsGlobal',
+            id,
+            global: searchResultUsernames
+        });
+    }
+
+    showUsersResult(id, newResult, newMap, notify) {
+        console.log('[search] local', newResult);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateHintsLocal',
+            id,
+            local: newResult
+        });
+    }
+
+    closeHints(id) {
+        console.log('[search] close');
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateHintsClose',
+            id
+        });
+    }
+
+    openHints() {
+
+    }
 
     setRecordingReadyState() {
         const { editMessageId } = this.state;

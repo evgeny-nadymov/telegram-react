@@ -11,6 +11,12 @@ import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS
 import LStore from '../Stores/LocalizationStore';
 import UserStore from '../Stores/UserStore';
 
+export function isBotUser(userId) {
+    const user = UserStore.get(userId);
+
+    return user && user.type['@type'] === 'userTypeBot';
+}
+
 export function isMeUser(userId) {
     return UserStore.getMyId() === userId;
 }

@@ -6,13 +6,53 @@
  */
 
 import punycode from './Punycode';
+import OptionStore from '../Stores/OptionStore';
+
+let tMeUrl = null;
+
+const telegramUrls = [
+    't.me/',
+    'telegram.org/',
+    'telegram.dog/',
+    tMeUrl
+];
+
+function getTelegramUrls() {
+    if (!tMeUrl) {
+        tMeUrl = OptionStore.get('t_me_url');
+        if (tMeUrl) {
+            const url = tMeUrl.value
+                .toLowerCase()
+                .replace('https://', '')
+                .replace('http://', '')
+            telegramUrls.push(url);
+        }
+    }
+
+    return telegramUrls;
+}
+
+export function isTelegramLink(href) {
+    if (!href) return false;
+
+    const lowerCaseUrl = href
+        .toLowerCase()
+        .replace('https://', '')
+        .replace('http://', '');
+
+    if (lowerCaseUrl.startsWith('tg://')) {
+        return true;
+    }
+
+    return getTelegramUrls().some(x => lowerCaseUrl.startsWith(x));
+}
 
 export function getHref(url, mail) {
     if (!url) return null;
 
     if (mail) return url.startsWith('mailto:') ? url : 'mailto:' + url;
 
-    // if (url.startsWith('tg://')) return url;
+    if (url.startsWith('tg:')) return url;
 
     return url.startsWith('http') ? url : 'http://' + url;
 }
@@ -37,7 +77,7 @@ export function getDecodedUrl(url, mail) {
     try {
         let decodedHref = decodeURI(href);
 
-        const domain = decodedHref.match(/^https?:\/\/([^\/:?#]+)(?:[\/:?#]|$)/i)[1];
+        const domain = decodedHref.match(/^(https?|tg):\/\/([^\/:?#]+)(?:[\/:?#]|$)/i)[1];
         decodedHref = decodedHref.replace(domain, punycode.ToUnicode(domain));
 
         return decodedHref;

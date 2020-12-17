@@ -7,10 +7,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { openChat, showOpenUrlAlert } from '../../Actions/Client';
-import { getDecodedUrl, getHref, isUrlSafe } from '../../Utils/Url';
-import MessageStore from '../../Stores/MessageStore';
-import OptionStore from '../../Stores/OptionStore';
+import { openChat, showAlert, showOpenUrlAlert } from '../../Actions/Client';
+import { getDecodedUrl, getHref, isTelegramLink, isUrlSafe } from '../../Utils/Url';
+import { openChatSelect } from '../../Actions/Message';
+import { isBotChat } from '../../Utils/Chat';
+import AppStore from '../../Stores/ApplicationStore';
+import LStore from '../../Stores/LocalizationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './SafeLink.css';
 
@@ -43,96 +45,301 @@ class SafeLink extends React.Component {
         showOpenUrlAlert(decodedUrl, { onClick, punycode: false, ask: true, tryTelegraph: false });
     };
 
-    isTelegramLink(url) {
-        if (!url) return false;
+    async handleAddStickersLink(name) {
+        const stickerSet = await TdLibController.send({
+            '@type': 'searchStickerSet',
+            name
+        }).catch(() => {
+            showAlert({
+                title: LStore.getString('AppName'),
+                message: LStore.getString('ChooseStickerSetNotFound'),
+                ok: LStore.getString('OK')
+            });
+        });
 
-        const lowerCaseUrl = url
-            .toLowerCase()
-            .replace('https://', '')
-            .replace('http://', '');
-
-        const tMeUrl = OptionStore.get('t_me_url')
-            .value
-            .toLowerCase()
-            .replace('https://', '')
-            .replace('http://', '');
-
-        return lowerCaseUrl.startsWith('t.me/') || lowerCaseUrl.startsWith('tg://') || lowerCaseUrl.startsWith(tMeUrl);
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateStickerSet',
+            stickerSet
+        });
     }
 
-    isAddStickersLink(url) {
-        if (!url) return false;
+    handleBotCommand(command) {
+        if (!command) return;
 
-        const lowerCaseUrl = url
-            .toLowerCase()
-            .replace('https://', '')
-            .replace('http://', '');
-
-        const tMeUrl = OptionStore.get('t_me_url')
-            .value
-            .toLowerCase()
-            .replace('https://', '')
-            .replace('http://', '');
-
-        return lowerCaseUrl.startsWith('t.me/addstickers/') || lowerCaseUrl.startsWith(tMeUrl + 'addstickers/');
+        TdLibController.send({
+            '@type': 'sendMessage',
+            chat_id: AppStore.getChatId(),
+            message_thread_id: 0,
+            reply_to_message_id: 0,
+            options: null,
+            reply_markup: null,
+            input_message_content: {
+                '@type': 'inputMessageText',
+                text: {
+                    '@type': 'formattedText',
+                    text: command,
+                    entities: []
+                },
+                disable_web_page_preview: true,
+                clear_draft: false
+            }
+        });
     }
 
+    async handleOpenUsername(username) {
+        const chat = await TdLibController.send({
+            '@type': 'searchPublicChat',
+            username
+        }).catch(() => {
+            showAlert({
+                title: LStore.getString('AppName'),
+                message: LStore.getString('NoUsernameFound'),
+                ok: LStore.getString('OK')
+            });
+        });
+
+        if (!chat) return;
+
+        openChat(chat.id);
+    }
+
+    async handleBotStart(username, parameter, isGroup) {
+        const chat = await TdLibController.send({
+            '@type': 'searchPublicChat',
+            username
+        }).catch(() => {
+            showAlert({
+                title: LStore.getString('AppName'),
+                message: LStore.getString('NoUsernameFound'),
+                ok: LStore.getString('OK')
+            });
+        });
+
+        if (!chat) return;
+        if (!isBotChat(chat.id)) return;
+
+        if (isGroup) {
+            openChatSelect({ botStartMessage: { botUserId: chat.type.user_id, parameter }})
+        } else {
+            openChat(chat.id, null, false, { botStartMessage: { botUserId: chat.type.user_id, parameter }});
+        }
+    }
+
+    async handleOpenMessageLinkInfo(url) {
+        const result = await TdLibController.send({
+            '@type': 'getMessageLinkInfo',
+            url
+        }).catch(e => {
+            console.log('[SafeLink] getMessageLinkInfo error', url, e);
+            throw e;
+        });
+
+        if (!result) return;
+
+        const { is_public, chat_id, message, for_album, for_comment } = result;
+        if (!chat_id) return;
+
+        openChat(chat_id, message ? message.id: null, false);
+    };
+
+    async handlePrivatePost(url) {
+        if (url.searchParams.has('channel')) {
+
+        }
+
+        if (url.searchParams.has('post')) {
+
+        }
+
+        if (url.searchParams.has('thread')) {
+
+        }
+
+        if (url.searchParams.has('comment')) {
+
+        }
+
+        await this.handleOpenMessageLinkInfo(url.href);
+    }
+
+    async handleUnknownDeepLink(href) {
+        const result = await TdLibController.send({
+            '@type': 'getDeepLinkInfo',
+            link: href
+        });
+
+        const { text, need_update_application } = result;
+
+        showAlert({
+            title: LStore.getString('AppName'),
+            message: text,
+            ok: LStore.getString('OK')
+        });
+    }
+
+    /// based on Android handleIntent function
     handleSafeClick = async event => {
         event.stopPropagation();
 
-        const { onClick, url: href } = this.props;
+        let { onClick, url: href } = this.props;
 
-        if (this.isAddStickersLink(href)) {
+        href = href.startsWith('http') || href.startsWith('tg://') ? href : 'https://' + href;
+        let handled = false;
+        if (isTelegramLink(href)) {
             event.preventDefault();
             try {
-                const nameIndex = href.toLowerCase().indexOf('/addstickers/') + '/addstickers/'.length;
-                if (nameIndex !== -1) {
-                    const name = href.substr(nameIndex);
+                const url = new URL(href);
+                console.log('[SafeLink] url', url);
 
-                    const stickerSet = await TdLibController.send({
-                        '@type': 'searchStickerSet',
-                        name
-                    });
+                switch (url.protocol) {
+                    case 'http:':
+                    case 'https:': {
+                        if (url.pathname.startsWith('/bg/')) {
 
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateStickerSet',
-                        stickerSet
-                    });
+                        } else if (url.pathname.startsWith('/login/')) {
+
+                        } else if (url.pathname.startsWith('/joinchat/')) {
+
+                        } else if (url.pathname.startsWith('/addstickers/')) {
+                            const set = url.pathname.replace('/addstickers/', '');
+                            await this.handleAddStickersLink(set);
+                            handled = true;
+                        } else if (url.pathname.startsWith('/mgs/') || url.pathname.startsWith('/share/')) {
+
+                        } else if (url.pathname.startsWith('/confirmphone/')) {
+
+                        } else if (url.pathname.startsWith('/setlanguage/')) {
+
+                        } else if (url.pathname.startsWith('/addtheme/')) {
+
+                        } else if (url.pathname.startsWith('/c/')) {
+                            await this.handlePrivatePost(url);
+                            handled = true;
+                        } else if (url.pathname.length > 1) {
+                            const username = url.pathname[0] === '/' ? url.pathname.substr(1) : url.pathname;
+                            if (username) {
+                                if (url.searchParams.has('start')){
+                                    await this.handleBotStart(username, url.searchParams.get('start'), false);
+                                    handled = true;
+                                } else if (url.searchParams.has('startgroup')) {
+                                    await this.handleBotStart(username, url.searchParams.get('startgroup'), true);
+                                    handled = true;
+                                } else if (url.searchParams.has('game')) {
+                                    await this.handleOpenUsername(username);
+                                    handled = true;
+                                } else if (url.searchParams.has('post')) {
+
+                                } else if (url.searchParams.has('thread')) {
+
+                                } else if (url.searchParams.has('comment')) {
+
+                                }
+
+                                if (!handled) {
+                                    await this.handleOpenMessageLinkInfo(href);
+                                    handled = true;
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+                    case 'tg:': {
+                        if (href.startsWith('tg:resolve') || href.startsWith('tg://resolve')) {
+                            const username = url.searchParams('domain');
+                            if (username) {
+                                if (username === 'telegrampassport') {
+
+                                } else {
+                                    if (url.searchParams.has('start')){
+                                        await this.handleBotStart(username, url.searchParams.get('start'), false);
+                                        handled = true;
+                                    } else if (url.searchParams.has('startgroup')) {
+                                        await this.handleBotStart(username, url.searchParams.get('startgroup'), true);
+                                        handled = true;
+                                    } else if (url.searchParams.has('game')) {
+                                        await this.handleOpenUsername(username);
+                                        handled = true;
+                                    } else if (url.searchParams.has('post')) {
+
+                                    } else if (url.searchParams.has('thread')) {
+
+                                    } else if (url.searchParams.has('comment')) {
+
+                                    }
+
+                                    if (!handled) {
+                                        await this.handleOpenMessageLinkInfo(href);
+                                        handled = true;
+                                    }
+                                }
+                            }
+                        } else if (href.startsWith('tg:privatepost') || href.startsWith('tg://privatepost')) {
+                            await this.handlePrivatePost(url)
+                            handled = true;
+                        } else if (href.startsWith('tg:bg') || href.startsWith('tg://bg')) {
+
+                        } else if (href.startsWith('tg:join') || href.startsWith('tg://join')) {
+
+                        } else if (href.startsWith('tg:addstickers') || href.startsWith('tg://addstickers')) {
+                            const set = url.searchParams.get('set');
+                            await this.handleAddStickersLink(set);
+                            handled = true;
+                        } else if (href.startsWith('tg:msg') || href.startsWith('tg://msg') || href.startsWith('tg:share') || href.startsWith('tg://share')) {
+
+                        } else if (href.startsWith('tg:confirmphone') || href.startsWith('tg://confirmphone')) {
+
+                        } else if (href.startsWith('tg:login') || href.startsWith('tg://login')) {
+
+                        } else if (href.startsWith('tg:openmessage') || href.startsWith('tg://openmessage')) {
+
+                        } else if (href.startsWith('tg:passport') || href.startsWith('tg://passport') || href.startsWith('tg:secureid') || href.startsWith('tg://secureid')) {
+
+                        } else if (href.startsWith('tg:setlanguage') || href.startsWith('tg://setlanguage')) {
+
+                        } else if (href.startsWith('tg:addtheme') || href.startsWith('tg://addtheme')) {
+
+                        } else if (href.startsWith('tg:settings') || href.startsWith('tg://settings')) {
+
+                        } else if (href.startsWith('tg:search') || href.startsWith('tg://search')) {
+
+                        } else if (href.startsWith('tg:calllog') || href.startsWith('tg://calllog')) {
+
+                        } else if (href.startsWith('tg:call') || href.startsWith('tg://call')) {
+
+                        } else if (href.startsWith('tg:scanqr') || href.startsWith('tg://scanqr')) {
+
+                        } else if (href.startsWith('tg:addcontact') || href.startsWith('tg://addcontact')) {
+
+                        } else if (href.startsWith('tg:bot_command') || href.startsWith('tg://bot_command')) {
+                            const command = url.searchParams.get('command');
+                            const bot = url.searchParams.get('bot');
+
+                            this.handleBotCommand(`/${command}` + (bot ? `@${bot}` : ''));
+                            handled = true;
+                        } else {
+                            await this.handleUnknownDeepLink(href);
+                            handled = true;
+                        }
+                        break;
+                    }
                 }
             } catch (error) {
-                console.log('[safeLink] messageLinkInfo error', error);
-            }
-
-            if (onClick) {
-                onClick(event);
-            }
-        } else if (this.isTelegramLink(href)) {
-            event.preventDefault();
-            try {
-                const messageLinkInfo = await TdLibController.send({
-                    '@type': 'getMessageLinkInfo',
-                    url: href
-                });
-
-                MessageStore.setItems([messageLinkInfo.message]);
-
-                const { chat_id, message } = messageLinkInfo;
-                if (chat_id) {
-                    openChat(chat_id, message ? message.id : null);
-                    return;
-                }
-            } catch (error) {
-                console.log('[safeLink] messageLinkInfo error', error);
-            }
-
-            if (onClick) {
-                onClick(event);
+                console.log('[safeLink] handleSafeLink error', error);
+                handled = false;
             }
         }
 
+        if (handled) {
+            return;
+        }
+
         if (onClick) {
-            event.preventDefault();
             onClick(event);
+        } else {
+            const newWindow = window.open();
+            newWindow.opener = null;
+            newWindow.location = href;
         }
     };
 

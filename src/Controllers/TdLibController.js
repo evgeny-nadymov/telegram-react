@@ -250,11 +250,12 @@ class TdLibController extends EventEmitter {
         });
     }
 
-    setChatId = (chatId, messageId = null) => {
+    setChatId = (chatId, messageId = null, options = { }) => {
         const update = {
             '@type': 'clientUpdateChatId',
             chatId,
-            messageId
+            messageId,
+            options
         };
 
         this.clientUpdate(update);

@@ -29,6 +29,7 @@ import MessageStore from '../../Stores/MessageStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './ForwardDialog.css';
+import AppStore from '../../Stores/ApplicationStore';
 
 class ForwardDialog extends React.Component {
     constructor(props) {
@@ -166,8 +167,9 @@ class ForwardDialog extends React.Component {
 
         const text = this.getInnerText(this.messageRef.current);
 
-        this.targetChats.forEach(targetChatId => {
+        this.targetChats.forEach(async targetChatId => {
             if (inputMessageContent) {
+                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 if (text) {
                     if ('caption' in inputMessageContent) {
                         inputMessageContent.caption = {
@@ -214,6 +216,7 @@ class ForwardDialog extends React.Component {
             if (size) {
                 const { width, height, photo } = size;
 
+                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 TdLibController.send({
                     '@type': 'sendMessage',
                     chat_id: targetChatId,
@@ -244,6 +247,7 @@ class ForwardDialog extends React.Component {
             }
 
             if (text) {
+                await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
                 TdLibController.send({
                     '@type': 'sendMessage',
                     chat_id: targetChatId,

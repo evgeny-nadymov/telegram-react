@@ -96,9 +96,9 @@ class MainPage extends React.Component {
     };
 
     onClientUpdateOpenChat = update => {
-        const { chatId, messageId, popup } = update;
+        const { chatId, messageId, popup, options } = update;
 
-        this.handleSelectChat(chatId, messageId, popup);
+        this.handleSelectChat(chatId, messageId, popup, options || AppStore.chatSelectOptions);
     };
 
     onClientUpdateOpenUser = update => {
@@ -131,7 +131,7 @@ class MainPage extends React.Component {
         this.setState({ forwardInfo: info });
     };
 
-    handleSelectChat = (chatId, messageId = null, popup = false) => {
+    handleSelectChat = (chatId, messageId = null, popup = false, options = {}) => {
         const currentChatId = AppStore.getChatId();
         const currentDialogChatId = AppStore.dialogChatId;
         const currentMessageId = AppStore.getMessageId();
@@ -147,15 +147,15 @@ class MainPage extends React.Component {
             return;
         }
 
-        if (currentChatId === chatId && messageId && currentMessageId === messageId) {
+        if (currentChatId === chatId && messageId && currentMessageId === messageId && !options) {
             this.dialogDetailsRef.current.scrollToMessage();
             if (messageId) {
                 highlightMessage(chatId, messageId);
             }
-        } else if (currentChatId === chatId && !messageId) {
+        } else if (currentChatId === chatId && !messageId && !options) {
             this.dialogDetailsRef.current.scrollToStart();
         } else {
-            TdLibController.setChatId(chatId, messageId);
+            TdLibController.setChatId(chatId, messageId, options);
         }
     };
 

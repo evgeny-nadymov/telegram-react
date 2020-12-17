@@ -13,7 +13,7 @@ import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
 import PinnedMessages from './PinnedMessages';
 import StickerSetDialog from '../Popup/StickerSetDialog';
-import SwitchInlinePlaceholder from './SwitchInlinePlaceholder';
+import SelectChatPlaceholder from './SelectChatPlaceholder';
 import { getSrc } from '../../Utils/File';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -30,12 +30,13 @@ class DialogDetails extends Component {
             selectedCount: 0,
             wallpaper: null,
             wallpaperSrc: null,
-            switchInline: null
+            chatSelectOptions: null,
+            chatOpenOptions: null
         };
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { chatId, messageId, selectedCount, wallpaper, switchInline } = this.state;
+        const { chatId, messageId, selectedCount, wallpaper, chatSelectOptions, chatOpenOptions } = this.state;
         if (nextState.chatId !== chatId) {
             return true;
         }
@@ -48,7 +49,10 @@ class DialogDetails extends Component {
         if (nextState.wallpaper !== wallpaper) {
             return true;
         }
-        if (nextState.switchInline !== switchInline) {
+        if (nextState.chatSelectOptions !== chatSelectOptions) {
+            return true;
+        }
+        if (nextState.chatOpenOptions !== chatOpenOptions) {
             return true;
         }
 
@@ -58,8 +62,9 @@ class DialogDetails extends Component {
     componentDidMount() {
         AppStore.on('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
-        AppStore.on('clientUpdateSwitchInline', this.onClientUpdateSwitchInline);
+        AppStore.on('clientUpdateChatSelect', this.onClientUpdateChatSelect);
         ChatStore.on('clientUpdateChatBackground', this.onClientUpdateChatBackground);
+        ChatStore.on('clientUpdateClearOpenChatOptions', this.onClientUpdateClearOpenChatOptions);
         FileStore.on('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.on('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
@@ -67,17 +72,24 @@ class DialogDetails extends Component {
     componentWillUnmount() {
         AppStore.off('clientUpdateChatDetailsVisibility', this.onClientUpdateChatDetailsVisibility);
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
-        AppStore.off('clientUpdateSwitchInline', this.onClientUpdateSwitchInline);
+        AppStore.off('clientUpdateChatSelect', this.onClientUpdateChatSelect);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
+        ChatStore.on('clientUpdateClearOpenChatOptions', this.onClientUpdateClearOpenChatOptions);
         FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
 
-    onClientUpdateSwitchInline = update => {
-        const { inline } = update;
+    onClientUpdateClearOpenChatOptions = update => {
+        this.setState({
+            chatOpenOptions: null
+        });
+    }
+
+    onClientUpdateChatSelect = update => {
+        const { options } = update;
 
         this.setState({
-            switchInline: inline
+            chatSelectOptions: options
         });
     };
 
@@ -155,11 +167,14 @@ class DialogDetails extends Component {
     };
 
     onClientUpdateChatId = update => {
-        const { nextChatId: chatId, nextMessageId: messageId } = update;
+        const { chatSelectOptions } = this.state;
+        const { nextChatId: chatId, nextMessageId: messageId, options: chatOpenOptions } = update;
 
         this.setState({
             chatId,
-            messageId
+            messageId,
+            chatOpenOptions,
+            chatSelectOptions: chatOpenOptions && chatOpenOptions.closeChatSelect ? null: chatSelectOptions
         });
     };
 
@@ -208,7 +223,7 @@ class DialogDetails extends Component {
         this.groups = groups.map(x => {
             return (<MessageGroup key={x.key} senderUserId={x.senderUserId} messages={x.messages} onSelectChat={this.props.onSelectChat}/>);
         });*/
-        const { chatId, messageId, wallpaper, switchInline } = this.state;
+        const { chatId, messageId, chatOpenOptions, wallpaper, chatSelectOptions } = this.state;
 
         let style = null;
         let src = null;
@@ -236,10 +251,10 @@ class DialogDetails extends Component {
                 <div className='dialog-details-wrapper'>
                     <HeaderPlayer />
                     <Header chatId={chatId} />
-                    <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} />
-                    <Footer chatId={chatId}/>
+                    <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} options={chatOpenOptions} />
+                    <Footer chatId={chatId} options={chatOpenOptions}/>
                 </div>
-                {switchInline && <SwitchInlinePlaceholder/>}
+                {chatSelectOptions && <SelectChatPlaceholder/>}
                 <PinnedMessages chatId={chatId}/>
                 <StickerSetDialog />
                 <ChatInfoDialog />

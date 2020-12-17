@@ -8,13 +8,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
-import { closeSwitchInlinePlaceholder } from '../../Actions/Message';
-import './SwitchInlinePlaceholder.css';
+import { closeChatSelect } from '../../Actions/Message';
+import './SelectChatPlaceholder.css';
 
-class SwitchInlinePlaceholder extends React.Component {
+class SelectChatPlaceholder extends React.Component {
 
     handleClick = () => {
-        closeSwitchInlinePlaceholder();
+        closeChatSelect();
     }
 
     render() {
@@ -29,6 +29,6 @@ class SwitchInlinePlaceholder extends React.Component {
 
 }
 
-SwitchInlinePlaceholder.propTypes = {};
+SelectChatPlaceholder.propTypes = {};
 
-export default withTranslation()(SwitchInlinePlaceholder);
+export default withTranslation()(SelectChatPlaceholder);

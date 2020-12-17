@@ -369,7 +369,23 @@ class ChatStore extends EventEmitter {
                 this.emitUpdate(update);
                 break;
             }
+            case 'clientUpdateHintsClose': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateHintsGlobal': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateHintsLocal': {
+                this.emitUpdate(update);
+                break;
+            }
             case 'clientUpdateClearHistory': {
+                this.emitUpdate(update);
+                break;
+            }
+            case 'clientUpdateClearOpenChatOptions': {
                 this.emitUpdate(update);
                 break;
             }

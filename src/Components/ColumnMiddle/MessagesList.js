@@ -13,6 +13,7 @@ import ActionBar from './ActionBar';
 import Album from '../Message/Album/Album';
 import DocumentAlbum from '../Message/Album/DocumentAlbum';
 import FilesDropTarget from './FilesDropTarget';
+import InputBoxHints from './InputBoxHints';
 import Message from '../Message/Message';
 import ServiceMessage from '../Message/ServiceMessage';
 import Placeholder from './Placeholder';
@@ -22,8 +23,9 @@ import { throttle, getPhotoSize, itemsInView, historyEquals, getScrollMessage, m
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { canMessageBeEdited, filterDuplicateMessages, forwardInfoEquals, senderEquals } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
-import { canSendMediaMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat, isMeChat } from '../../Utils/Chat';
+import { canSendMediaMessages, canSendMessages, getChatFullInfo, getChatMedia, getSupergroupId, isChannelChat, isGroupChat, isMeChat } from '../../Utils/Chat';
 import { closePinned, editMessage, highlightMessage, openChat } from '../../Actions/Client';
+import { sendBotStartMessage } from '../../Actions/Message';
 import { ALBUM_MESSAGES_LIMIT, MESSAGE_SLICE_LIMIT, MESSAGE_SPLIT_MAX_TIME_S, SCROLL_PRECISION } from '../../Constants';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
@@ -673,6 +675,14 @@ class MessagesList extends React.Component {
             if (previousChatId !== chatId && !this.props.filter) {
                 // getChatFullInfo(chatId);
                 getChatMedia(chatId);
+                if (this.props.options) {
+                    const { botStartMessage } = this.props.options;
+                    if (botStartMessage && canSendMessages(chatId) && isGroupChat(chatId)) {
+                        const { botUserId, parameter } = botStartMessage;
+
+                        await sendBotStartMessage(chatId, botUserId, parameter);
+                    }
+                }
             }
         } else {
             sessionId.loading = true;
@@ -1724,6 +1734,7 @@ class MessagesList extends React.Component {
                 )}
                 <FilesDropTarget />
                 <StickersHint />
+                {/*<InputBoxHints />*/}
             </div>
         );
     }
@@ -1732,6 +1743,7 @@ class MessagesList extends React.Component {
 MessagesList.propTypes = {
     chatId: PropTypes.number.isRequired,
     messageId: PropTypes.number,
+    options: PropTypes.object,
     filter: PropTypes.object
 };
 

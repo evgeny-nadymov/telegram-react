@@ -5,7 +5,21 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import AppStore from '../Stores/ApplicationStore';
+import { clearOpenChatOptions } from './Client';
 import TdLibController from '../Controllers/TdLibController';
+
+export async function sendBotStartMessage(chatId, botUserId, parameter) {
+    clearOpenChatOptions();
+
+    await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
+    return TdLibController.send({
+        '@type': 'sendBotStartMessage',
+        bot_user_id: botUserId,
+        chat_id: chatId,
+        parameter
+    });
+}
 
 export function requestBlockSender(sender) {
     TdLibController.clientUpdate({
@@ -30,17 +44,17 @@ function toggleMessageSenderIsBlocked(sender, isBlocked) {
     });
 }
 
-export function openSwitchInlinePlaceholder(inline) {
+export function openChatSelect(options) {
     TdLibController.clientUpdate({
-        '@type': 'clientUpdateSwitchInline',
-        inline
+        '@type': 'clientUpdateChatSelect',
+        options
     });
 }
 
-export function closeSwitchInlinePlaceholder() {
+export function closeChatSelect() {
     TdLibController.clientUpdate({
-        '@type': 'clientUpdateSwitchInline',
-        inline: null
+        '@type': 'clientUpdateChatSelect',
+        options: null
     });
 }
 

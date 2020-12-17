@@ -17,7 +17,7 @@ import ShareFilledIcon from '../../../Assets/Icons/ShareFilled';
 import { getUserFullName } from '../../../Utils/User';
 import { getChatTitle } from '../../../Utils/Chat';
 import { setText, showAlert, showInputPasswordAlert, showOpenGameAlert, showOpenUrlAlert, showRequestUrlAlert, showSnackbar } from '../../../Actions/Client';
-import { openSwitchInlinePlaceholder } from '../../../Actions/Message';
+import { openChatSelect } from '../../../Actions/Message';
 import LStore from '../../../Stores/LocalizationStore';
 import MessageStore from '../../../Stores/MessageStore';
 import UserStore from '../../../Stores/UserStore';
@@ -232,7 +232,7 @@ class KeyboardButton extends React.Component {
                 if (in_current_chat){
                     setText(inline);
                 } else {
-                    openSwitchInlinePlaceholder(inline);
+                    openChatSelect({ switchInline: inline });
                 }
 
                 break;

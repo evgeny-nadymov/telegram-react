@@ -217,8 +217,9 @@ class ApplicationStore extends EventEmitter {
                     '@type': 'clientUpdateChatId',
                     nextChatId: update.chatId,
                     nextMessageId: update.messageId,
+                    options: update.options,
                     previousChatId: this.chatId,
-                    previousMessageId: this.messageId
+                    previousMessageId: this.messageId,
                 };
 
                 this.chatId = update.chatId;
@@ -381,10 +382,10 @@ class ApplicationStore extends EventEmitter {
                 this.emit('clientUpdateSetPhoneError', update);
                 break;
             }
-            case 'clientUpdateSwitchInline': {
-                this.switchInline = update.inline;
+            case 'clientUpdateChatSelect': {
+                this.chatSelectOptions = update.options;
 
-                this.emit('clientUpdateSwitchInline', update);
+                this.emit('clientUpdateChatSelect', update);
                 break;
             }
             case 'clientUpdateTdLibDatabaseExists': {

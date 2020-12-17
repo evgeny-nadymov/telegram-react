@@ -324,7 +324,7 @@ class Actions extends React.PureComponent {
     };
 
     handleScheduledAction = (chatId, clientUpdateType, message, requests) => {
-        const { t } = this.props;
+        const { t, enqueueSnackbar, closeSnackbar } = this.props;
         if (!clientUpdateType) return;
 
         const key = `${clientUpdateType} chatId=${chatId}`;
@@ -334,14 +334,16 @@ class Actions extends React.PureComponent {
                     await TdLibController.send(requests[i]);
                 }
             } finally {
+                closeSnackbar(snackKey);
                 TdLibController.clientUpdate({ '@type': clientUpdateType, chatId, inProgress: false });
             }
         };
         const cancel = () => {
+            closeSnackbar(snackKey);
             TdLibController.clientUpdate({ '@type': clientUpdateType, chatId, inProgress: false });
         };
 
-        const { enqueueSnackbar, closeSnackbar } = this.props;
+        AppStore.addScheduledAction(key, Number.MAX_VALUE, action, cancel);
 
         TdLibController.clientUpdate({ '@type': clientUpdateType, chatId, inProgress: true });
         const snackKey = enqueueSnackbar(message, {
@@ -357,7 +359,7 @@ class Actions extends React.PureComponent {
                         timeout={NOTIFICATION_AUTO_HIDE_DURATION_MS}
                         onTimeout={() => {
                             action();
-                            closeSnackbar(snackKey);
+                            AppStore.removeScheduledAction(key);
                         }}/>
                 </IconButton>,
                 <Button
@@ -366,7 +368,7 @@ class Actions extends React.PureComponent {
                     size='small'
                     onClick={() => {
                         cancel();
-                        closeSnackbar(snackKey);
+                        AppStore.removeScheduledAction(key);
                     }}>
                     {t('Undo')}
                 </Button>
