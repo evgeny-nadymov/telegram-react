@@ -709,6 +709,9 @@ function getContent(message, t = key => key) {
         case 'messageGameScore': {
             return getServiceMessageContent(message);
         }
+        case 'messageInviteVoiceChatParticipants': {
+            return getServiceMessageContent(message);
+        }
         case 'messageInvoice': {
             const { title } = content;
 
@@ -769,6 +772,12 @@ function getContent(message, t = key => key) {
         }
         case 'messageVideoNote': {
             return t('AttachRound') + caption;
+        }
+        case 'messageVoiceChatStarted': {
+            return getServiceMessageContent(message);
+        }
+        case 'messageVoiceChatEnded': {
+            return getServiceMessageContent(message);
         }
         case 'messageVoiceNote': {
             return t('AttachAudio') + caption;

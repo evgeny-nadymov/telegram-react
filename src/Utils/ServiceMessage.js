@@ -57,6 +57,9 @@ serviceMap.set('messagePassportDataSent', true);
 serviceMap.set('messagePassportDataReceived', true);
 serviceMap.set('messageLiveLocationApproached', true);
 serviceMap.set('messageUnsupported', true);
+serviceMap.set('messageVoiceChatStarted', true);
+serviceMap.set('messageVoiceChatEnded', true);
+serviceMap.set('messageInviteVoiceChatParticipants', true);
 
 export function isServiceMessage(message) {
     if (!message) return false;
@@ -497,6 +500,19 @@ export function getServiceMessageContent(message, openUser = false) {
         }
         case 'messageUnsupported': {
             return LStore.getString('UnsupportedMedia');
+        }
+        case 'messageVoiceChatStarted': {
+            if (isOutgoing) {
+                return LStore.getString('ActionGroupCallStartedByYou');
+            }
+
+            return LStore.replace(LStore.getString('ActionGroupCallStarted'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+        }
+        case 'messageVoiceChatEnded': {
+            return LStore.getString('ActionGroupCallEnded');
+        }
+        case 'messageInviteVoiceChatParticipants': {
+            break;
         }
     }
 

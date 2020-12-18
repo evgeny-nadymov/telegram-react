@@ -309,6 +309,17 @@ class ChatStore extends EventEmitter {
                 this.emitFastUpdate(update);
                 break;
             }
+            case 'updateChatVoiceChat': {
+                const { chat_id, voice_chat_group_call_id, is_voice_chat_empty } = update;
+
+                const chat = this.get(chat_id);
+                if (chat) {
+                    this.assign(chat, { voice_chat_group_call_id, is_voice_chat_empty });
+                }
+
+                this.emitFastUpdate(update);
+                break;
+            }
             case 'updateNewChat': {
                 this.set(update.chat);
 

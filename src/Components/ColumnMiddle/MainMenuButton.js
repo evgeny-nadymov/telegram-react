@@ -25,15 +25,27 @@ import { clearHistory, leaveChat } from '../../Actions/Chat';
 import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender } from '../../Utils/Chat';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
 import AppStore from '../../Stores/ApplicationStore';
+import CallStore from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
+import { parseSdp } from '../../Calls/Utils';
+import { LocalConferenceDescription } from '../../Calls/LocalConferenceDescription';
 
 class MainMenuButton extends React.Component {
-    state = {
-        anchorEl: null
-    };
+    constructor(props) {
+        super(props);
+
+        this.tracks = [];
+        this.users = [];
+        this.participants = [];
+
+
+        this.state = {
+            anchorEl: null
+        };
+    }
 
     handleButtonClick = async event => {
         const { currentTarget: anchorEl } = event;
@@ -95,8 +107,197 @@ class MainMenuButton extends React.Component {
         } else {
             requestBlockSender(sender);
         }
-
     };
+
+    handleGroupCall = async () => {
+        this.handleMenuClose();
+
+        const chatId = AppStore.getChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return null;
+
+        const { voice_chat_group_call_id } = chat;
+        let groupCall = CallStore.get(voice_chat_group_call_id);
+        if (!groupCall) {
+            groupCall = await TdLibController.send({
+                '@type': 'getGroupCall',
+                group_call_id: voice_chat_group_call_id
+            });
+        }
+        console.log('[call] groupCall', groupCall);
+        if (!groupCall) return;
+
+        const { is_joined } = groupCall;
+        if (is_joined) {
+            await TdLibController.send({
+                '@type': 'leaveGroupCall',
+                group_call_id: voice_chat_group_call_id
+            });
+        } else {
+            navigator.getUserMedia (
+                { audio: true },
+                stream => {
+                    console.log('[call] getUserMedia result', stream);
+
+                    this.joinGroupCall(voice_chat_group_call_id, stream);
+                },
+                error => {
+                    console.log('[call] getUserMedia error', error);
+                }
+            );
+        }
+
+        // await TdLibController.send({
+        //     '@type': 'loadGroupCallParticipants',
+        //     group_call_id: voice_chat_group_call_id,
+        //     limit: 5000
+        // })
+    }
+
+    async joinGroupCall(groupCallId, stream) {
+        const connection = new RTCPeerConnection(null);
+        connection.ontrack = event => {
+            console.error('[call] conn.ontrack', event);
+            this.onTrack(event);
+        };
+        connection.onicecandidate = event => {
+            console.log('[call] conn.onicecandidate', event);
+        };
+        connection.oniceconnectionstatechange = event => {
+            console.log(`[call] conn.oniceconnectionstatechange = ${connection.iceConnectionState}`);
+        };
+        connection.ondatachannel = event => {
+            console.log(`[call] conn.ondatachannel = ${connection.iceConnectionState}`);
+        };
+        if (stream) {
+            stream.getTracks().forEach((track) => {
+                console.log('[call] conn.addTrack', [track, stream]);
+                connection.addTrack(track, stream);
+            });
+        }
+        console.log('[call] conn', connection);
+        const offerOptions = {
+            offerToReceiveAudio: 1,
+            offerToReceiveVideo: 0,
+        };
+        const offer = await connection.createOffer(offerOptions);
+        console.log('[call] offer', offer, offer.sdp);
+
+        await connection.setLocalDescription(offer);
+
+        const clientInfo = parseSdp(offer.sdp);
+        console.log('[call] clientInfo', clientInfo);
+
+        const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
+
+        console.log('[call] joinGroupCall request', source);
+        const result = await TdLibController.send({
+            '@type': 'joinGroupCall',
+            group_call_id: groupCallId,
+            payload: {
+                '@type': 'groupCallPayload',
+                ufrag,
+                pwd,
+                fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup, fingerprint }]
+            },
+            source: source << 0,
+            is_muted: false
+        });
+        console.log('[call] joinGroupCall result', result);
+
+        const description = new LocalConferenceDescription();
+        description.onSsrcs = () => {
+            console.log('[call] desc.onSsrcs');
+        };
+
+        await TdLibController.send({
+            '@type': 'loadGroupCallParticipants',
+            group_call_id: groupCallId,
+            limit: 5000
+        });
+
+        const participants = Array.from(CallStore.participants.get(groupCallId).values())
+        console.log('[call] participants', participants);
+
+        const data = {
+            transport: this.getTransport(result),
+            ssrcs: participants.map((x, i) => ({ ssrc: x.source >>> 0, isMain: i === 0, name: x.user_id }))
+        };
+        console.log('[call] data', data);
+
+        description.updateFromServer(data);
+        const sdp = description.generateSdp(true);
+        console.log('[call] desc.generateSdp', sdp);
+
+        await connection.setRemoteDescription({
+            type: 'answer',
+            sdp,
+        });
+    }
+
+    getTransport(responce) {
+        const { payload, candidates } = responce;
+
+        const { ufrag, pwd, fingerprints } = payload;
+
+        return {
+            ufrag,
+            pwd,
+            fingerprints,
+            candidates
+        };
+    }
+
+    // parseSdp(sdp) {
+    //     let lines = sdp.split("\r\n");
+    //     let lookup = (prefix, force = true) => {
+    //         for (let line of lines) {
+    //             if (line.startsWith(prefix)) {
+    //                 return line.substr(prefix.length);
+    //             }
+    //         }
+    //         if (force) {
+    //             console.error("Can't find prefix", prefix);
+    //         }
+    //         return null;
+    //     };
+    //
+    //     let info = {
+    //         // transport
+    //         fingerprint: lookup("a=fingerprint:").split(" ")[1],
+    //         hash: lookup("a=fingerprint:").split(" ")[0],
+    //         setup: lookup("a=setup:"),
+    //         pwd: lookup("a=ice-pwd:"),
+    //         ufrag: lookup("a=ice-ufrag:"),
+    //     };
+    //     let rawSource = lookup("a=ssrc:", false);
+    //     if (rawSource) {
+    //         info.source = parseInt(rawSource.split(" ")[0]);
+    //     }
+    //     return info;
+    // }
+
+    tryAddTrack(event) {
+        const stream = event.streams[0];
+        const endpoint = stream.id.substring(6);
+
+        const { users } = this;
+
+        for (let user of users) {
+            if (user.endpoint === endpoint) {
+                const audio = document.querySelector(`#audio${endpoint}`);
+                if (audio) {
+                    audio.srcObject = stream;
+                }
+                break;
+            }
+        }
+        this.tracks.push(event);
+    }
+
+    onTrack(event) {
+        this.tryAddTrack(event);
+    }
 
     render() {
         const { t } = this.props;
@@ -106,13 +307,15 @@ class MainMenuButton extends React.Component {
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
 
-        const { is_blocked } = chat;
+        const { is_blocked, voice_chat_group_call_id } = chat;
 
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
         const unpinMessage = hasOnePinnedMessage(chatId);
         const switchBlocked = canSwitchBlocked(chatId);
+
+        const groupCall = CallStore.get(voice_chat_group_call_id);
 
         return (
             <>
@@ -140,6 +343,13 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
+                    { Boolean(voice_chat_group_call_id) && (
+                        <MenuItem onClick={this.handleGroupCall}>
+                            <ListItemIcon>
+                            </ListItemIcon>
+                            <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />
+                        </MenuItem>
+                    )}
                     <MenuItem onClick={this.handleChatInfo}>
                         <ListItemIcon>
                             {isPrivateChat(chatId) ? <UserIcon /> : <GroupIcon />}
