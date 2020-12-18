@@ -135,9 +135,16 @@ class MainMenuButton extends React.Component {
             });
         } else {
             navigator.getUserMedia (
-                { audio: true },
+                { audio: true, video: false },
                 stream => {
                     console.log('[call] getUserMedia result', stream);
+
+                    // const audio = document.createElement('audio');
+                    // audio.autoplay = 'true';
+                    // audio.controls = 'controls';
+                    // audio.srcObject = stream;
+                    // audio.volume = 1.0;
+                    // document.getElementById('players').appendChild(audio);
 
                     this.joinGroupCall(voice_chat_group_call_id, stream);
                 },
@@ -324,6 +331,7 @@ class MainMenuButton extends React.Component {
             audio.volume = 1.0;
             document.getElementById('players').appendChild(audio);
             audios.push(audio);
+            audio.play();
         }
 
         // this.tracks.push(event);
