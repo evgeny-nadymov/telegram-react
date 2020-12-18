@@ -139,6 +139,8 @@ export class SdpBuilder {
                 }
             }
         }
+
+        console.log('[call] addConference', conference, ssrcs);
         this.addHeader(conference.sessionId, ssrcs);
         for (let entry of ssrcs) {
             this.addSsrcEntry(entry, conference.transport, isAnswer);

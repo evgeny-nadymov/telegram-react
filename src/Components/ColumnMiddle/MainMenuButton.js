@@ -32,15 +32,15 @@ import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
 import { parseSdp } from '../../Calls/Utils';
 import { LocalConferenceDescription } from '../../Calls/LocalConferenceDescription';
+import { getUserFullName } from '../../Utils/User';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
         super(props);
 
         this.tracks = [];
-        this.users = [];
+        this.audios = [];
         this.participants = [];
-
 
         this.state = {
             anchorEl: null
@@ -157,7 +157,7 @@ class MainMenuButton extends React.Component {
     async joinGroupCall(groupCallId, stream) {
         const connection = new RTCPeerConnection(null);
         connection.ontrack = event => {
-            console.error('[call] conn.ontrack', event);
+            console.log('[call] conn.ontrack', event);
             this.onTrack(event);
         };
         connection.onicecandidate = event => {
@@ -189,6 +189,7 @@ class MainMenuButton extends React.Component {
         console.log('[call] clientInfo', clientInfo);
 
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
+        const signSource = source << 0;
 
         console.log('[call] joinGroupCall request', source);
         const result = await TdLibController.send({
@@ -200,7 +201,7 @@ class MainMenuButton extends React.Component {
                 pwd,
                 fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup, fingerprint }]
             },
-            source: source << 0,
+            source: signSource,
             is_muted: false
         });
         console.log('[call] joinGroupCall result', result);
@@ -217,22 +218,45 @@ class MainMenuButton extends React.Component {
         });
 
         const participants = Array.from(CallStore.participants.get(groupCallId).values())
-        console.log('[call] participants', participants);
+        const meParticipant = participants.filter(x => x.source === signSource)[0];
+        const otherParticipants = participants.filter(x => x.source !== signSource);
+        console.log('[call] participants', [participants, meParticipant, otherParticipants]);
 
-        const data = {
+        const data1 = {
             transport: this.getTransport(result),
-            ssrcs: participants.map((x, i) => ({ ssrc: x.source >>> 0, isMain: i === 0, name: x.user_id }))
+            ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: true, name: getUserFullName(meParticipant.user_id) }]
         };
-        console.log('[call] data', data);
+        console.log('[call] data1', data1);
 
-        description.updateFromServer(data);
-        const sdp = description.generateSdp(true);
-        console.log('[call] desc.generateSdp', sdp);
+        description.updateFromServer(data1);
+        const sdp1 = description.generateSdp(true);
+        console.log('[call] desc.generateSdp 1', sdp1);
 
         await connection.setRemoteDescription({
             type: 'answer',
-            sdp,
+            sdp: sdp1,
         });
+
+        const data2 = {
+            transport: this.getTransport(result),
+            ssrcs: participants.map(x => ({ ssrc: x.source >>> 0, isMain: x.source === signSource, name: getUserFullName(x.user_id) }))
+        };
+        console.log('[call] data2', data1);
+
+        description.updateFromServer(data2);
+        const sdp2 = description.generateSdp();
+        console.log('[call] desc.generateSdp 2', sdp2);
+
+        await connection.setRemoteDescription({
+            type: 'offer',
+            sdp: sdp2,
+        });
+
+        const answer = await connection.createAnswer();
+        console.log('[call] sdp answer', answer.sdp);
+        await connection.setLocalDescription(answer);
+        const clientInfo2 = parseSdp(answer.sdp);
+        console.log('[call] clientInfo 2', clientInfo2);
     }
 
     getTransport(responce) {
@@ -281,18 +305,28 @@ class MainMenuButton extends React.Component {
         const stream = event.streams[0];
         const endpoint = stream.id.substring(6);
 
-        const { users } = this;
+        const { audios } = this;
 
-        for (let user of users) {
-            if (user.endpoint === endpoint) {
-                const audio = document.querySelector(`#audio${endpoint}`);
-                if (audio) {
-                    audio.srcObject = stream;
-                }
+        let handled;
+        for (let audio of audios) {
+            if (audio.e === endpoint) {
+                audio.srcObject = stream;
+                handled = true;
                 break;
             }
         }
-        this.tracks.push(event);
+
+        if (!handled) {
+            const audio = document.createElement('audio');
+            audio.autoplay = 'true';
+            audio.controls = 'controls';
+            audio.srcObject = stream;
+            audio.volume = 1.0;
+            document.getElementById('players').appendChild(audio);
+            audios.push(audio);
+        }
+
+        // this.tracks.push(event);
     }
 
     onTrack(event) {
