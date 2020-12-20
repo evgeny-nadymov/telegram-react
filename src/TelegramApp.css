@@ -91,7 +91,9 @@ mark {
     overflow: hidden;
     background: transparent;
 }
-
+.FullWith{
+    min-width: 100vw !important;
+} 
 .page {
     height: 100%;
     display: flex;

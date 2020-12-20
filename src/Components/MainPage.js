@@ -43,10 +43,13 @@ class MainPage extends React.Component {
             isSmallWidth,
             forwardInfo: null,
             instantViewContent: null,
-            videoInfo: null
+            videoInfo: null,
+            IsFullWith:localStorage.IsFullWith==="true" && localStorage.IsFullWith
+            ? true
+            : false, 
         };
     }
-
+    
     componentDidMount() {
         UserStore.on('clientUpdateOpenUser', this.onClientUpdateOpenUser);
         ChatStore.on('clientUpdateOpenChat', this.onClientUpdateOpenChat);
@@ -58,8 +61,14 @@ class MainPage extends React.Component {
         AppStore.on('clientUpdateForward', this.onClientUpdateForward);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
+        AppStore.on("ToogleFullWith",this.ToogleFullWith)
     }
-
+    ToogleFullWith = ()=>{
+       let {IsFullWith} = this.state 
+       this.setState({
+        IsFullWith : !IsFullWith
+       })
+    }
     componentWillUnmount() {
         UserStore.off('clientUpdateOpenUser', this.onClientUpdateOpenUser);
         ChatStore.off('clientUpdateOpenChat', this.onClientUpdateOpenChat);
@@ -179,15 +188,18 @@ class MainPage extends React.Component {
             profileMediaViewerContent,
             forwardInfo,
             videoInfo,
-            isSmallWidth
+            isSmallWidth,
+            IsFullWith
         } = this.state;
 
         return (
             <>
                 <div
-                    className={classNames('page', {
+                    className={classNames('page',
+                    `${IsFullWith ?"FullWith": "" }`
+                    , {
                         'page-small': isSmallWidth,
-                        'page-third-column': isChatDetailsVisible
+                        'page-third-column': isChatDetailsVisible ,  
                     })}>
                     <Dialogs />
                     <DialogDetails ref={this.dialogDetailsRef} />

@@ -26,6 +26,7 @@ import green from '@material-ui/core/colors/green';
 import blue from '@material-ui/core/colors/blue';
 import indigo from '@material-ui/core/colors/indigo';
 import deepPurple from '@material-ui/core/colors/deepPurple';
+import Checkbox from '@material-ui/core/Checkbox'
 import { modalManager } from '../../Utils/Modal';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import './ThemePicker.css';
@@ -37,8 +38,11 @@ class ThemePicker extends React.Component {
         this.state = {
             open: false,
             type: this.props.theme.palette.type,
-            color: this.getColorString(this.props.theme.palette.primary.main)
-        };
+            color: this.getColorString(this.props.theme.palette.primary.main),
+            FullWithCheckInput :localStorage.IsFullWith==="true" && localStorage.IsFullWith
+            ? true
+            : false,  
+          };
     }
 
     handleChange = event => {
@@ -108,6 +112,14 @@ class ThemePicker extends React.Component {
     open = () => {
         this.setState({ open: true });
     };
+
+    ToogleFullWith = (e)=>{
+          localStorage.IsFullWith = e.target.checked
+          this.setState({
+            FullWithCheckInput: e.target.checked
+          })
+          ApplicationStore.emit('ToogleFullWith')
+    }
 
     render() {
         const { t } = this.props;
@@ -232,6 +244,12 @@ class ThemePicker extends React.Component {
                                 label='Deep Purple'
                             />
                         </RadioGroup>
+                    </FormControl>
+                    <FormControl component="fieldset" className="theme-picker-form">
+                      <FormLabel focused component="legend">
+                          {t("Width 100% (for 4k monitors)")}
+                          <Checkbox onChange={this.ToogleFullWith} checked={this.state.FullWithCheckInput}/>
+                      </FormLabel>
                     </FormControl>
                 </DialogContent>
             </Dialog>
