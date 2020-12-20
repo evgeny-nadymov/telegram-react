@@ -444,3 +444,23 @@ pre code {
 .message-out .message-control-disabled {
     color: var(--text-disabled);
 }
+
+.message pre, code {
+    border-color: var(--message-in-control-border);
+    color: var(--message-in-control);
+}
+
+.message.message-out pre, .message-out code {
+    border-color: var(--message-out-control-border);
+    color: var(--message-out-control);
+}
+
+.dark .message pre, .dark .message code {
+    border-color: var(--border);
+    color: var(--text-primary);
+}
+
+.dark .message.message-out pre, .dark .message-out code {
+    border-color: var(--border);
+    color: var(--text-primary);
+}

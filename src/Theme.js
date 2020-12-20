@@ -142,8 +142,8 @@ function updateDarkTheme(theme) {
 
     style.setProperty('--online-indicator', '#0AC630');
 
-    style.setProperty('--message-keyboard-button', '#424242');
-    style.setProperty('--message-keyboard-button-hover', '#42424288');
+    style.setProperty('--message-keyboard-button', '#303030');
+    style.setProperty('--message-keyboard-button-hover', '#30303088');
 
     style.setProperty('--message-service-color', '#FFFFFF');
     style.setProperty('--message-service-background', '#303030');
