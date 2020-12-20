@@ -99,12 +99,12 @@ class TelegramApp extends Component {
                     } else if (MessageStore.selectedItems.size > 0) {
                         clearSelection();
                         return;
-                    } else if (chatList && chatList['@type'] !== 'chatListMain') {
-                        openChatList({ '@type': 'chatListMain' });
-                        return;
                     } else if (!chatId) {
                         // open search if no one dialog opened
                         searchChat(0, null);
+                        return;
+                    } else if (chatList && chatList['@type'] !== 'chatListMain') {
+                        openChatList({ '@type': 'chatListMain' });
                         return;
                     }
 
