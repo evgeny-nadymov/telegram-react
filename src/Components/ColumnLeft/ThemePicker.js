@@ -115,6 +115,7 @@ class ThemePicker extends React.Component {
 
         return (
             <Dialog
+                disableEnforceFocus={true}
                 manager={modalManager}
                 transitionDuration={0}
                 open={open}
