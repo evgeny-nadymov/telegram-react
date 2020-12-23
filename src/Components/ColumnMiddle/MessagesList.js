@@ -566,7 +566,7 @@ class MessagesList extends React.Component {
         this.deleteHistory(message_ids);
     };
 
-    async handleSelectChat(chatId, previousChatId, messageId, previousMessageId) {
+    async handleSelectChat(chatId, previousChatId, messageId, previousMessageId, ignoreUnread = false) {
         const chat = ChatStore.get(chatId);
         const previousChat = ChatStore.get(previousChatId);
         // console.log ( '%c%s', 'color: green; font: 1.2rem/1 Tahoma;', `selectChat messageId=${messageId}, prevMessageId=${previousMessageId}` );
@@ -593,7 +593,7 @@ class MessagesList extends React.Component {
 
             const unread = !messageId && chat.unread_count > 1;
             let fromMessageId = 0;
-            if (unread && chat.last_read_inbox_message_id) {
+            if (!ignoreUnread && unread && chat.last_read_inbox_message_id) {
                 fromMessageId = chat.last_read_inbox_message_id;
             } else if (messageId) {
                 fromMessageId = messageId;
@@ -1459,7 +1459,7 @@ class MessagesList extends React.Component {
         if (hasLastMessage) {
             this.scrollToBottom();
         } else {
-            this.handleSelectChat(chatId, chatId, 0, messageId);
+            this.handleSelectChat(chatId, chatId, 0, messageId, true);
         }
     };
 
