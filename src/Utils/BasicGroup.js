@@ -17,9 +17,9 @@ export function getBasicGroupStatus(basicGroup, chatId) {
         if (status['@type'] === 'chatMemberStatusBanned') {
             return LStore.getString('YouWereKicked');
         } else if (status['@type'] === 'chatMemberStatusLeft') {
-            return LStore.getString('YouLeft');
+            // return LStore.getString('YouLeft');
         } else if (status['@type'] === 'chatMemberStatusCreator' && !status.is_member) {
-            return LStore.getString('YouLeft');
+            // return LStore.getString('YouLeft');
         }
     }
 
