@@ -12,13 +12,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import AddMemberIcon from '../../Assets/Icons/AddMember';
+import BlockIcon from '../../Assets/Icons/Block';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import GroupIcon from '../../Assets/Icons/Group';
 import LocalConferenceDescription from '../../Calls/LocalConferenceDescription';
 import MoreVertIcon from '../../Assets/Icons/More';
-import RemoveMemberIcon from '../../Assets/Icons/RemoveMember';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
 import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender } from '../../Utils/Chat';
@@ -394,7 +393,7 @@ class MainMenuButton extends React.Component {
                     {switchBlocked && (
                         <MenuItem onClick={this.handleSwitchBlocked}>
                             <ListItemIcon>
-                                {is_blocked ? <AddMemberIcon /> : <RemoveMemberIcon />}
+                                <BlockIcon />
                             </ListItemIcon>
                             <ListItemText primary={is_blocked ? t('Unblock') : t('BlockContact')} />
                         </MenuItem>
