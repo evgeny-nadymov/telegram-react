@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
+import PlaylistEditIcon from '../../Assets/Icons/PlaylistEdit';
 import SearchIcon from '../../Assets/Icons/Search';
 import MainMenuButton from './MainMenuButton';
 import HeaderChat from '../Tile/HeaderChat';
@@ -25,21 +26,34 @@ import { openChat, searchChat } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './Header.css';
 
 class Header extends Component {
-    state = {
-        authorizationState: AppStore.getAuthorizationState(),
-        connectionState: AppStore.getConnectionState()
-    };
+    constructor(props) {
+        super(props);
+
+        const chatId = AppStore.getChatId();
+        const media = MessageStore.getMedia(chatId);
+        const pinned = media ? media.pinned : [];
+
+        this.state = {
+            chatId,
+            pinned,
+            authorizationState: AppStore.getAuthorizationState(),
+            connectionState: AppStore.getConnectionState()
+        };
+    }
 
     componentDidMount() {
         AppStore.on('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.on('updateConnectionState', this.onUpdateConnectionState);
 
+        MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.on('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.on('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.on('updateMessageIsPinned', this.onUpdateMessageIsPinned);
     }
 
     componentWillUnmount() {
@@ -47,8 +61,35 @@ class Header extends Component {
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('updateConnectionState', this.onUpdateConnectionState);
 
+        MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
+        MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
+    }
+
+    onUpdateMessageIsPinned = update => {
+        const { chatId } = this.state;
+        const { chat_id } = update;
+        if (chatId !== chat_id) return;
+
+        this.setPinnedState();
+    };
+
+    onClientUpdateChatMedia = update => {
+        const { chatId: currentChatId } = this.state;
+        const { chatId } = update;
+        if (chatId !== currentChatId) return;
+
+        this.setPinnedState();
+    };
+
+    setPinnedState() {
+        const { chatId } = this.state;
+
+        const media = MessageStore.getMedia(chatId);
+        const pinned = media ? media.pinned : [];
+
+        this.setState({ pinned });
     }
 
     onClientUpdateMessageSelected = update => {
@@ -56,7 +97,14 @@ class Header extends Component {
     };
 
     onClientUpdateChatId = update => {
-        this.forceUpdate();
+        const chatId = AppStore.getChatId();
+        const media = MessageStore.getMedia(chatId);
+        const pinned = media ? media.pinned : [];
+
+        this.setState({
+            chatId,
+            pinned
+        });
     };
 
     onUpdateConnectionState = update => {
@@ -68,7 +116,7 @@ class Header extends Component {
     };
 
     openChatDetails = () => {
-        const chatId = AppStore.getChatId();
+        const { chatId } = this.state;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -82,7 +130,7 @@ class Header extends Component {
     };
 
     handleSearchChat = () => {
-        const chatId = AppStore.getChatId();
+        const { chatId } = this.state;
         const chat = ChatStore.get(chatId);
         if (!chat) return;
 
@@ -97,15 +145,29 @@ class Header extends Component {
             .replace('…', '');
     };
 
+    handleMouseDown = event => {
+        event.stopPropagation();
+    };
+
+    handlePinClick = () => {
+        const { chatId } = this.state;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateOpenPinned',
+            chatId
+        })
+    };
+
     render() {
         const { t } = this.props;
         const {
+            chatId,
+            pinned,
             authorizationState,
             connectionState,
             selectionCount,
         } = this.state;
 
-        const chatId = AppStore.getChatId();
         const chat = ChatStore.get(chatId);
 
         const isAccentSubtitle = isAccentChatSubtitle(chatId);
@@ -200,8 +262,16 @@ class Header extends Component {
                         <PinnedMessage chatId={chatId} />
                         {chat && (
                             <>
+                                { pinned.length > 1 && (
+                                    <IconButton
+                                        className='header-right-second-button'
+                                        aria-label='Pins'
+                                        onClick={this.handlePinClick}
+                                        onMouseDown={this.handleMouseDown}>
+                                        <PlaylistEditIcon />
+                                    </IconButton>
+                                )}
                                 <IconButton
-                                    className='header-right-second-button'
                                     aria-label='Search'
                                     onClick={this.handleSearchChat}>
                                     <SearchIcon />

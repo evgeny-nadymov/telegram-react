@@ -36,7 +36,7 @@
 
 .pinned-message-content {
     width: 100%;
-    max-width: 160px;
+    max-width: 228px;
     overflow: hidden;
     user-select: none;
     background: transparent;
@@ -50,6 +50,7 @@
 
 .pinned-message-photo .pinned-message-content {
     transform: translateX(52px);
+    max-width: 192px;
 }
 
 .pinned-message-tile {
