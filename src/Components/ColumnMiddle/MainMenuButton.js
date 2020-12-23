@@ -15,24 +15,24 @@ import MenuItem from '@material-ui/core/MenuItem';
 import AddMemberIcon from '../../Assets/Icons/AddMember';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
+import GroupIcon from '../../Assets/Icons/Group';
+import LocalConferenceDescription from '../../Calls/LocalConferenceDescription';
 import MoreVertIcon from '../../Assets/Icons/More';
 import RemoveMemberIcon from '../../Assets/Icons/RemoveMember';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
-import GroupIcon from '../../Assets/Icons/Group';
-import { requestUnpinMessage } from '../../Actions/Client';
-import { clearHistory, leaveChat } from '../../Actions/Chat';
 import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender } from '../../Utils/Chat';
+import { clearHistory, leaveChat } from '../../Actions/Chat';
+import { getUserFullName } from '../../Utils/User';
+import { parseSdp } from '../../Calls/Utils';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
+import { requestUnpinMessage } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import CallStore from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
-import { parseSdp } from '../../Calls/Utils';
-import { LocalConferenceDescription } from '../../Calls/LocalConferenceDescription';
-import { getUserFullName } from '../../Utils/User';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -129,29 +129,25 @@ class MainMenuButton extends React.Component {
 
         const { is_joined } = groupCall;
         if (is_joined) {
+            if (this.connection) {
+                this.connection.close();
+                this.connection = null;
+            }
+
+            if (this.stream) {
+                this.stream.getTracks().forEach(t => t.stop());
+                this.stream = null;
+            }
+
             await TdLibController.send({
                 '@type': 'leaveGroupCall',
                 group_call_id: voice_chat_group_call_id
             });
         } else {
-            navigator.getUserMedia (
-                { audio: true, video: false },
-                stream => {
-                    console.log('[call] getUserMedia result', stream);
-
-                    // const audio = document.createElement('audio');
-                    // audio.autoplay = 'true';
-                    // audio.controls = 'controls';
-                    // audio.srcObject = stream;
-                    // audio.volume = 1.0;
-                    // document.getElementById('players').appendChild(audio);
-
-                    this.joinGroupCall(voice_chat_group_call_id, stream);
-                },
-                error => {
-                    console.log('[call] getUserMedia error', error);
-                }
-            );
+            const stream = await navigator.mediaDevices.getUserMedia ({ audio: true, video: false });
+            this.stream = stream;
+            console.log('[call] getUserMedia result', stream);
+            this.joinGroupCall(voice_chat_group_call_id, stream);
         }
 
         // await TdLibController.send({
@@ -163,6 +159,7 @@ class MainMenuButton extends React.Component {
 
     async joinGroupCall(groupCallId, stream) {
         const connection = new RTCPeerConnection(null);
+        this.connection = connection;
         connection.ontrack = event => {
             console.log('[call] conn.ontrack', event);
             this.onTrack(event);
@@ -171,7 +168,7 @@ class MainMenuButton extends React.Component {
             console.log('[call] conn.onicecandidate', event);
         };
         connection.oniceconnectionstatechange = event => {
-            console.log(`[call] conn.oniceconnectionstatechange = ${connection.iceConnectionState}`);
+            console.log(`[call] conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection, connection.getSenders(), connection.getReceivers());
         };
         connection.ondatachannel = event => {
             console.log(`[call] conn.ondatachannel = ${connection.iceConnectionState}`);
@@ -188,7 +185,7 @@ class MainMenuButton extends React.Component {
             offerToReceiveVideo: 0,
         };
         const offer = await connection.createOffer(offerOptions);
-        console.log('[call] offer', offer, offer.sdp);
+        console.log('[call] conn.setLocalDescription offer', offer, offer.sdp);
 
         await connection.setLocalDescription(offer);
 
@@ -198,25 +195,25 @@ class MainMenuButton extends React.Component {
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
         const signSource = source << 0;
 
-        console.log('[call] joinGroupCall request', source);
-        const result = await TdLibController.send({
+        const request = {
             '@type': 'joinGroupCall',
             group_call_id: groupCallId,
             payload: {
                 '@type': 'groupCallPayload',
                 ufrag,
                 pwd,
-                fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup, fingerprint }]
+                fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup: 'active', fingerprint }]
             },
             source: signSource,
-            is_muted: false
-        });
+            is_muted: true
+        };
+
+        console.log('[call] joinGroupCall request', request);
+        const result = await TdLibController.send(request);
         console.log('[call] joinGroupCall result', result);
 
         const description = new LocalConferenceDescription();
-        description.onSsrcs = () => {
-            console.log('[call] desc.onSsrcs');
-        };
+        description.onSsrcs = () => { console.log('[call] desc.onSsrcs'); };
 
         await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
@@ -231,14 +228,14 @@ class MainMenuButton extends React.Component {
 
         const data1 = {
             transport: this.getTransport(result),
-            ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: true, name: getUserFullName(meParticipant.user_id) }]
+            ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: meParticipant.source === signSource, name: getUserFullName(meParticipant.user_id) }]
         };
         console.log('[call] data1', data1);
 
         description.updateFromServer(data1);
         const sdp1 = description.generateSdp(true);
-        console.log('[call] desc.generateSdp 1', sdp1);
 
+        console.log('[call] conn.setRemoteDescription answer', sdp1);
         await connection.setRemoteDescription({
             type: 'answer',
             sdp: sdp1,
@@ -248,11 +245,11 @@ class MainMenuButton extends React.Component {
             transport: this.getTransport(result),
             ssrcs: participants.map(x => ({ ssrc: x.source >>> 0, isMain: x.source === signSource, name: getUserFullName(x.user_id) }))
         };
-        console.log('[call] data2', data1);
+        console.log('[call] data2', data2);
 
         description.updateFromServer(data2);
         const sdp2 = description.generateSdp();
-        console.log('[call] desc.generateSdp 2', sdp2);
+        console.log('[call] conn.setRemoteDescription offer', sdp2);
 
         await connection.setRemoteDescription({
             type: 'offer',
@@ -260,8 +257,9 @@ class MainMenuButton extends React.Component {
         });
 
         const answer = await connection.createAnswer();
-        console.log('[call] sdp answer', answer.sdp);
+        console.log('[call] conn.setLocalDescription answer', [answer, answer.sdp]);
         await connection.setLocalDescription(answer);
+
         const clientInfo2 = parseSdp(answer.sdp);
         console.log('[call] clientInfo 2', clientInfo2);
     }
@@ -278,35 +276,6 @@ class MainMenuButton extends React.Component {
             candidates
         };
     }
-
-    // parseSdp(sdp) {
-    //     let lines = sdp.split("\r\n");
-    //     let lookup = (prefix, force = true) => {
-    //         for (let line of lines) {
-    //             if (line.startsWith(prefix)) {
-    //                 return line.substr(prefix.length);
-    //             }
-    //         }
-    //         if (force) {
-    //             console.error("Can't find prefix", prefix);
-    //         }
-    //         return null;
-    //     };
-    //
-    //     let info = {
-    //         // transport
-    //         fingerprint: lookup("a=fingerprint:").split(" ")[1],
-    //         hash: lookup("a=fingerprint:").split(" ")[0],
-    //         setup: lookup("a=setup:"),
-    //         pwd: lookup("a=ice-pwd:"),
-    //         ufrag: lookup("a=ice-ufrag:"),
-    //     };
-    //     let rawSource = lookup("a=ssrc:", false);
-    //     if (rawSource) {
-    //         info.source = parseInt(rawSource.split(" ")[0]);
-    //     }
-    //     return info;
-    // }
 
     tryAddTrack(event) {
         const stream = event.streams[0];

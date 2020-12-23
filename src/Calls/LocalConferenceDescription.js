@@ -8,7 +8,7 @@
 import { SdpBuilder } from './SdpBuilder';
 import { mergeSsrcs } from './Utils';
 
-export class LocalConferenceDescription {
+export default class LocalConferenceDescription {
     #sessionId;
     #transport;
     #ssrcs = [];

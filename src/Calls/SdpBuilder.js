@@ -105,12 +105,12 @@ export class SdpBuilder {
         add("a=rtcp-mux");
         add("a=rtcp-fb:111 transport-cc");
         add("a=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level");
-        add(
-            "a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time"
-        );
-        add(
-            "a=extmap:5 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01"
-        );
+        // add(
+        //     "a=extmap:3 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time"
+        // );
+        // add(
+        //     "a=extmap:5 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01"
+        // );
         if (isAnswer) {
             add("a=recvonly");
             return this;
