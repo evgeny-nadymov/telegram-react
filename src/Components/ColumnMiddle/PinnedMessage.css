@@ -84,8 +84,8 @@
 
 .pinned-message-title {
     font-size: 14px;
-    height: 16px;
-    line-height: normal;
+    height: 19px;
+    line-height: 19px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

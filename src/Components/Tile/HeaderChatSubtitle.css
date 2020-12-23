@@ -7,7 +7,7 @@
 
 .header-chat-subtitle {
     font-size: 14px;
-    line-height: normal;
+    line-height: 19px;
     color: var(--header-subtle-color);
     overflow: hidden;
     text-overflow: ellipsis;

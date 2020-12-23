@@ -32,7 +32,7 @@ pre {
     font-size: 90%;
     font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
 
-    margin-top: 6px;
+    margin-top: 3px;
     margin-bottom: 0;
     padding: 6px 12px;
     border-style: solid;
@@ -359,7 +359,7 @@ pre code {
     flex-direction: row;
     align-items: baseline;
     font-size: 14px;
-    line-height: normal;
+    line-height: 19px;
 }
 
 .message.message-selected.message-document-album .message-title {
