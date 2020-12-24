@@ -61,7 +61,7 @@ class Header extends Component {
         AppStore.off('updateAuthorizationState', this.onUpdateAuthorizationState);
         AppStore.off('updateConnectionState', this.onUpdateConnectionState);
 
-        MessageStore.on('clientUpdateChatMedia', this.onClientUpdateChatMedia);
+        MessageStore.off('clientUpdateChatMedia', this.onClientUpdateChatMedia);
         MessageStore.off('clientUpdateClearSelection', this.onClientUpdateMessageSelected);
         MessageStore.off('clientUpdateMessageSelected', this.onClientUpdateMessageSelected);
         MessageStore.off('updateMessageIsPinned', this.onUpdateMessageIsPinned);
@@ -261,10 +261,9 @@ class Header extends Component {
                         )}
                         <PinnedMessage chatId={chatId} />
                         {chat && (
-                            <>
+                            <div className='header-right-buttons'>
                                 { pinned.length > 1 && (
                                     <IconButton
-                                        className='header-right-second-button'
                                         aria-label='Pins'
                                         onClick={this.handlePinClick}
                                         onMouseDown={this.handleMouseDown}>
@@ -277,7 +276,7 @@ class Header extends Component {
                                     <SearchIcon />
                                 </IconButton>
                                 <MainMenuButton openChatDetails={this.openChatDetails} />
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

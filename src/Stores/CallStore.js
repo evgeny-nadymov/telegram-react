@@ -17,12 +17,19 @@ class CallStore extends EventEmitter {
     }
 
     reset = () => {
+        this.currentGroupCall = null;
         this.items = new Map();
         this.participants = new Map();
     };
 
     onUpdate = update => {
         switch (update['@type']) {
+            case 'updateChatVoiceChat': {
+                const { chat_id, voice_chat_group_call_id, is_empty } = update;
+
+                this.emit('updateChatVoiceChat', update);
+                break;
+            }
             case 'updateGroupCall': {
                 const { group_call } = update;
 

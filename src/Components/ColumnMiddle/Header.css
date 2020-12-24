@@ -103,6 +103,10 @@
     margin: 6px 0 6px 20px;
 }
 
+.header-right-buttons {
+    margin: 6px 6px 6px 20px;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }

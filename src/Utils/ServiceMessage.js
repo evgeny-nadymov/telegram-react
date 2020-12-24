@@ -87,6 +87,25 @@ function getTTLString(ttl) {
     return `${LStore.formatPluralString('Weeks', Math.floor(days / 7))} ${LStore.formatPluralString('Days', Math.floor(days % 7))}`
 }
 
+function getCallDuration(duration) {
+    const days = duration / (3600 * 24);
+    if (days > 0) {
+        return LStore.formatPluralString('Days', Math.floor(days));
+    }
+
+    const hours = duration / 3600;
+    if (hours > 0) {
+        return LStore.formatPluralString('Hours', Math.floor(hours));
+    }
+
+    const minutes = duration / 60;
+    if (minutes > 0) {
+        return LStore.formatPluralString('Minutes', Math.floor(minutes));
+    }
+
+    return LStore.formatPluralString('Seconds', duration);
+}
+
 function getPassportElementTypeString(type) {
     switch (type['@type']) {
         case 'passportElementTypeAddress': {
@@ -509,10 +528,40 @@ export function getServiceMessageContent(message, openUser = false) {
             return LStore.replace(LStore.getString('ActionGroupCallStarted'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
         }
         case 'messageVoiceChatEnded': {
-            return LStore.getString('ActionGroupCallEnded');
+            const { duration } = content;
+
+            return LStore.formatString('ActionGroupCallEnded', getCallDuration(duration));
         }
         case 'messageInviteVoiceChatParticipants': {
-            break;
+            const singleMember = content.user_ids.length === 1;
+            if (singleMember) {
+                const memberUserId = content.user_ids[0];
+                if (memberUserId !== 0) {
+                    if (isOutgoing) {
+                        return LStore.replace(LStore.getString('ActionGroupCallYouInvited'), 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+                    }
+
+                    if (isMeUser(memberUserId)) {
+                        return LStore.replace(LStore.getString('ActionGroupCallInvitedYou'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />);
+                    }
+
+                    return LStore.replaceTwo(LStore.getString('ActionGroupCallInvited'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', <MessageAuthor key='un2' sender={{ '@type': 'messageSenderUser', user_id: memberUserId }} openUser={openUser} />);
+                }
+            }
+
+            const members = content.user_ids
+                .map(x => <MessageAuthor key={x} sender={{ '@type': 'messageSenderUser', user_id: x }} openUser={openUser} />)
+                .reduce((accumulator, current, index, array) => {
+                    // const separator = index === array.length - 1 ? ' and ' : ', ';
+                    const separator = ', ';
+                    return accumulator === null ? [current] : [...accumulator, separator, current];
+                }, null);
+
+            if (isOutgoing) {
+                return LStore.replace(LStore.getString('ActionGroupCallYouInvited'), 'un2', members);
+            }
+
+            return LStore.replaceTwo(LStore.getString('ActionAddUser'), 'un1', <MessageAuthor key='un1' sender={sender} openUser={openUser} />, 'un2', members);
         }
     }
 

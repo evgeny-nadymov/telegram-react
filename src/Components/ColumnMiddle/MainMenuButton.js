@@ -128,22 +128,20 @@ class MainMenuButton extends React.Component {
 
         const { is_joined } = groupCall;
         if (is_joined) {
-            if (this.connection) {
-                this.connection.close();
-                this.connection = null;
-            }
-
-            if (this.stream) {
-                this.stream.getTracks().forEach(t => t.stop());
-                this.stream = null;
-            }
-
-            await TdLibController.send({
-                '@type': 'leaveGroupCall',
-                group_call_id: voice_chat_group_call_id
-            });
+            this.leaveGroupCall(voice_chat_group_call_id);
         } else {
             const stream = await navigator.mediaDevices.getUserMedia ({ audio: true, video: false });
+            stream.getTracks().forEach(x => {
+                x.onmute = x => {
+                    console.log('[call] track.onmute', x);
+                };
+                x.onunmute = x => {
+                    console.log('[call] track.onunmute', x);
+                };
+
+                x.enabled = false;
+            });
+
             this.stream = stream;
             console.log('[call] getUserMedia result', stream);
             this.joinGroupCall(voice_chat_group_call_id, stream);
@@ -154,6 +152,27 @@ class MainMenuButton extends React.Component {
         //     group_call_id: voice_chat_group_call_id,
         //     limit: 5000
         // })
+    }
+
+    async leaveGroupCall(groupCallId) {
+        console.log('[call] leaveGroupCall', groupCallId);
+        if (this.connection) {
+            this.connection.close();
+            this.connection = null;
+        }
+
+        if (this.stream) {
+            this.stream.getTracks().forEach(t => t.stop());
+            this.stream = null;
+        }
+
+        let groupCall = CallStore.get(groupCallId);
+        if (groupCall && groupCall.is_joined) {
+            await TdLibController.send({
+                '@type': 'leaveGroupCall',
+                group_call_id: groupCallId
+            });
+        }
     }
 
     async joinGroupCall(groupCallId, stream) {
@@ -168,6 +187,9 @@ class MainMenuButton extends React.Component {
         };
         connection.oniceconnectionstatechange = event => {
             console.log(`[call] conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection, connection.getSenders(), connection.getReceivers());
+            if (connection.iceConnectionState === 'disconnected') {
+                this.leaveGroupCall(groupCallId);
+            }
         };
         connection.ondatachannel = event => {
             console.log(`[call] conn.ondatachannel = ${connection.iceConnectionState}`);
@@ -332,7 +354,6 @@ class MainMenuButton extends React.Component {
                 <IconButton
                     aria-owns={anchorEl ? 'simple-menu' : null}
                     aria-haspopup='true'
-                    className='main-menu-button'
                     aria-label='Menu'
                     onClick={this.handleButtonClick}>
                     <MoreVertIcon />
