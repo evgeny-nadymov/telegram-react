@@ -280,6 +280,10 @@ class ApplicationStore extends EventEmitter {
 
                 break;
             }
+            case 'clientUpdateLeaveVoiceChatAlert': {
+                this.emit('clientUpdateLeaveVoiceChatAlert', update);
+                break;
+            }
             case 'clientUpdateMediaViewerContent': {
                 const { content } = update;
                 this.mediaViewerContent = content;

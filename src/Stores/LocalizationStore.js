@@ -40,6 +40,7 @@ import it from '../Resources/it/translation.json';
 import es from '../Resources/es/translation.json';
 import pl from '../Resources/pl/translation.json';
 import TdLibController from '../Controllers/TdLibController';
+import { getSimpleMarkupEntities } from '../Utils/Message';
 
 const fallbackLng = 'en';
 const defaultNS = 'translation';
@@ -392,6 +393,12 @@ class LocalizationStore extends EventEmitter {
         return distance;
     };
 
+    replaceTags(text) {
+        const entities = [];
+        text = getSimpleMarkupEntities(text, entities);
+
+        return { '@type': 'formattedText', text, entities };
+    }
 
     loadLanguage = async language => {
         const result = await TdLibController.send({

@@ -23,17 +23,18 @@ import RequestUrlDialog from './Popup/RequestUrlDialog';
 import PinMessageDialog from './Popup/PinMessageDialog';
 import NotificationTimer from './Additional/NotificationTimer';
 import UnpinMessageDialog from './Popup/UnpinMessageDialog';
-import { canDeleteChat, canPinMessages, getChatLocation, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
 import { blockSender, pinMessage as pinMessageAction, unpinAllMessages, unpinMessage as unpinMessageAction } from '../Actions/Message';
+import { canDeleteChat, canPinMessages, getChatLocation, isChatMember, isCreator, isMeChat } from '../Utils/Chat';
 import { clearSelection, closePinned } from '../Actions/Client';
 import { openGameInBrowser } from '../Utils/Game';
+import { reportChat } from '../Actions/Chat';
 import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../Constants';
 import AppStore from '../Stores/ApplicationStore';
 import ChatStore from '../Stores/ChatStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import { reportChat } from '../Actions/Chat';
+import LeaveVoiceChatDialog from './Popup/LeaveVoiceChatDialog';
 
 class Actions extends React.PureComponent {
     state = {
@@ -47,7 +48,8 @@ class Actions extends React.PureComponent {
         openGameAlert: null,
         requestUrlAlert: null,
         inputPasswordAlert: null,
-        requestBlockSenderAlert: null
+        requestBlockSenderAlert: null,
+        leaveVoiceChatAlert: null
     }
 
     componentDidMount() {
@@ -59,6 +61,7 @@ class Actions extends React.PureComponent {
         AppStore.on('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
         AppStore.on('clientUpdateAlert', this.onClientUpdateAlert);
         AppStore.on('clientUpdateInputPasswordAlert', this.onClientUpdateInputPasswordAlert);
+        AppStore.on('clientUpdateLeaveVoiceChatAlert', this.onClientUpdateLeaveVoiceChatAlert);
         AppStore.on('clientUpdateSnackbar', this.onClientUpdateSnackbar);
         AppStore.on('clientUpdateOpenUrlAlert', this.onClientUpdateOpenUrlAlert);
         AppStore.on('clientUpdateOpenGameAlert', this.onClientUpdateOpenGameAlert);
@@ -74,6 +77,7 @@ class Actions extends React.PureComponent {
         AppStore.off('clientUpdateUnpinMessage', this.onClientUpdateUnpinMessage);
         AppStore.off('clientUpdateAlert', this.onClientUpdateAlert);
         AppStore.off('clientUpdateInputPasswordAlert', this.onClientUpdateInputPasswordAlert);
+        AppStore.off('clientUpdateLeaveVoiceChatAlert', this.onClientUpdateLeaveVoiceChatAlert);
         AppStore.off('clientUpdateSnackbar', this.onClientUpdateSnackbar);
         AppStore.off('clientUpdateOpenUrlAlert', this.onClientUpdateOpenUrlAlert);
         AppStore.off('clientUpdateOpenGameAlert', this.onClientUpdateOpenGameAlert);
@@ -90,6 +94,12 @@ class Actions extends React.PureComponent {
         const { state, onPassword } = update;
 
         this.setState({ inputPasswordAlert: { state, onPassword } });
+    }
+
+    onClientUpdateLeaveVoiceChatAlert = update => {
+        const { params } = update;
+
+        this.setState({ leaveVoiceChatAlert: { params }});
     }
 
     onClientUpdateOpenGameAlert = update => {
@@ -426,7 +436,14 @@ class Actions extends React.PureComponent {
     };
 
     handleAlertContinue = result => {
+        const { alert } = this.state;
+        if (!alert) return;
+
+        const { params } = alert;
         this.setState({ alert: null });
+
+        const { onResult } = params;
+        onResult && onResult(result);
     };
 
     handleOpenUrlContinue = (event, result) => {
@@ -555,6 +572,19 @@ class Actions extends React.PureComponent {
         }
     };
 
+    handleLeaveVoiceChatContinue = (result, resultParams) => {
+        const { leaveVoiceChatAlert } = this.state;
+
+        this.setState({ leaveVoiceChatAlert: null });
+
+        const { params } = leaveVoiceChatAlert;
+        if (!params) return;
+
+        const { onResult } = params;
+
+        onResult && onResult(resultParams);
+    };
+
     render() {
         const {
             leaveChat,
@@ -567,7 +597,8 @@ class Actions extends React.PureComponent {
             openGameAlert,
             requestUrlAlert,
             inputPasswordAlert,
-            requestBlockSenderAlert
+            requestBlockSenderAlert,
+            leaveVoiceChatAlert
         } = this.state;
         if (leaveChat) {
             const { chatId } = leaveChat;
@@ -663,6 +694,14 @@ class Actions extends React.PureComponent {
                 <BlockSenderDialog
                     sender={sender}
                     onClose={this.handleBlockSenderContinue}/>
+            );
+        } else if (leaveVoiceChatAlert) {
+            const { params } = leaveVoiceChatAlert;
+
+            return (
+                <LeaveVoiceChatDialog
+                    params={params}
+                    onClose={this.handleLeaveVoiceChatContinue}/>
             );
         }
 

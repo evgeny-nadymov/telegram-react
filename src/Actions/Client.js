@@ -10,6 +10,13 @@ import AppStore from '../Stores/ApplicationStore';
 import LStore from '../Stores/LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function showLeaveVoiceChatAlert(params) {
+    TdLibController.clientUpdate({
+        '@type': 'clientUpdateLeaveVoiceChatAlert',
+        params
+    });
+}
+
 export function showInputPasswordAlert(state, onPassword) {
     TdLibController.clientUpdate({
         '@type': 'clientUpdateInputPasswordAlert',

@@ -6,6 +6,8 @@
  */
 
 // changes ssrcs
+import { LOG_CALL } from '../Stores/CallStore';
+
 export function mergeSsrcs(ssrcs, newSsrcs) {
     let res = false;
     let has = (ssrcs, needle) => {
@@ -73,4 +75,21 @@ export function parseSdp(sdp) {
         info.source = parseInt(rawSource.split(" ")[0]);
     }
     return info;
+}
+
+export async function getStream(constraints, muted) {
+    const stream = await navigator.mediaDevices.getUserMedia (constraints);
+    stream.getTracks().forEach(x => {
+        x.onmute = x => {
+            LOG_CALL('track.onmute', x);
+        };
+        x.onunmute = x => {
+            LOG_CALL('track.onunmute', x);
+        };
+
+        x.enabled = !muted;
+    });
+
+    LOG_CALL('getStream result', stream);
+    return stream;
 }

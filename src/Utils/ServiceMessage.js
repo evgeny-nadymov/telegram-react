@@ -88,19 +88,19 @@ function getTTLString(ttl) {
 }
 
 function getCallDuration(duration) {
-    const days = duration / (3600 * 24);
+    const days = Math.floor(duration / (3600 * 24));
     if (days > 0) {
-        return LStore.formatPluralString('Days', Math.floor(days));
+        return LStore.formatPluralString('Days', days);
     }
 
-    const hours = duration / 3600;
+    const hours = Math.floor(duration / 3600);
     if (hours > 0) {
-        return LStore.formatPluralString('Hours', Math.floor(hours));
+        return LStore.formatPluralString('Hours', hours);
     }
 
-    const minutes = duration / 60;
+    const minutes = Math.floor(duration / 60);
     if (minutes > 0) {
-        return LStore.formatPluralString('Minutes', Math.floor(minutes));
+        return LStore.formatPluralString('Minutes', minutes);
     }
 
     return LStore.formatPluralString('Seconds', duration);

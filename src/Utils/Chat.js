@@ -27,6 +27,45 @@ import SupergroupStore from '../Stores/SupergroupStore';
 import UserStore from '../Stores/UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+export function canManageVoiceChats(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    let status = null;
+    const { type } = chat;
+    switch (type['@type']) {
+        case 'chatTypeBasicGroup': {
+            const basicGroup = BasicGroupStore.get(getBasicGroupId(chatId));
+            if (!basicGroup) return false;
+
+            status = basicGroup.status;
+            break;
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(getSupergroupId(chatId));
+            if (!supergroup) return false;
+
+            status = supergroup.status;
+            break;
+        }
+    }
+
+    if (!status) {
+        return false;
+    }
+
+    switch (status['@type']) {
+        case 'chatMemberStatusAdministrator': {
+            return status.can_manage_voice_chats;
+        }
+        case 'chatMemberStatusCreator': {
+            return status.is_member;
+        }
+    }
+
+    return false;
+}
+
 export function getChatSender(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return null;
@@ -1289,6 +1328,19 @@ async function getChatFullInfo(chatId) {
     if (!request) return null;
 
     return await request;
+}
+
+export function getBasicGroupId(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+
+    if (type && type['@type'] === 'chatTypeBasicGroup') {
+        return type.basic_group_id;
+    }
+
+    return 0;
 }
 
 function hasBasicGroupId(chatId, basicGroupId) {

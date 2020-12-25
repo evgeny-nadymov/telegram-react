@@ -16,30 +16,25 @@ import BlockIcon from '../../Assets/Icons/Block';
 import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import GroupIcon from '../../Assets/Icons/Group';
-import LocalConferenceDescription from '../../Calls/LocalConferenceDescription';
 import MoreVertIcon from '../../Assets/Icons/More';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
-import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender, canManageVoiceChats } from '../../Utils/Chat';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
-import { getUserFullName } from '../../Utils/User';
-import { parseSdp } from '../../Calls/Utils';
+import { getStream } from '../../Calls/Utils';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
-import { requestUnpinMessage } from '../../Actions/Client';
+import { requestUnpinMessage, showAlert } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
-import CallStore from '../../Stores/CallStore';
+import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
+import LStore from '../../Stores/LocalizationStore';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
         super(props);
-
-        this.tracks = [];
-        this.audios = [];
-        this.participants = [];
 
         this.state = {
             anchorEl: null
@@ -123,213 +118,51 @@ class MainMenuButton extends React.Component {
                 group_call_id: voice_chat_group_call_id
             });
         }
-        console.log('[call] groupCall', groupCall);
+        LOG_CALL('groupCall', groupCall);
         if (!groupCall) return;
 
         const { is_joined } = groupCall;
         if (is_joined) {
-            this.leaveGroupCall(voice_chat_group_call_id);
+            await CallStore.leaveGroupCall(chatId, voice_chat_group_call_id);
         } else {
-            const stream = await navigator.mediaDevices.getUserMedia ({ audio: true, video: false });
-            stream.getTracks().forEach(x => {
-                x.onmute = x => {
-                    console.log('[call] track.onmute', x);
-                };
-                x.onunmute = x => {
-                    console.log('[call] track.onunmute', x);
-                };
+            const muted = true;
+            let stream = null;
+            try {
+                stream = await getStream({ audio: true, video: false }, muted);
 
-                x.enabled = false;
-            });
-
-            this.stream = stream;
-            console.log('[call] getUserMedia result', stream);
-            this.joinGroupCall(voice_chat_group_call_id, stream);
-        }
-
-        // await TdLibController.send({
-        //     '@type': 'loadGroupCallParticipants',
-        //     group_call_id: voice_chat_group_call_id,
-        //     limit: 5000
-        // })
-    }
-
-    async leaveGroupCall(groupCallId) {
-        console.log('[call] leaveGroupCall', groupCallId);
-        if (this.connection) {
-            this.connection.close();
-            this.connection = null;
-        }
-
-        if (this.stream) {
-            this.stream.getTracks().forEach(t => t.stop());
-            this.stream = null;
-        }
-
-        let groupCall = CallStore.get(groupCallId);
-        if (groupCall && groupCall.is_joined) {
-            await TdLibController.send({
-                '@type': 'leaveGroupCall',
-                group_call_id: groupCallId
-            });
-        }
-    }
-
-    async joinGroupCall(groupCallId, stream) {
-        const connection = new RTCPeerConnection(null);
-        this.connection = connection;
-        connection.ontrack = event => {
-            console.log('[call] conn.ontrack', event);
-            this.onTrack(event);
-        };
-        connection.onicecandidate = event => {
-            console.log('[call] conn.onicecandidate', event);
-        };
-        connection.oniceconnectionstatechange = event => {
-            console.log(`[call] conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection, connection.getSenders(), connection.getReceivers());
-            if (connection.iceConnectionState === 'disconnected') {
-                this.leaveGroupCall(groupCallId);
+            } catch (e) {
+                ERROR_CALL('getStream', e);
+                showAlert({
+                    title: LStore.getString('AppName'),
+                    message: LStore.getString('VoipNeedMicPermission'),
+                    ok: LStore.getString('OK')
+                });
             }
-        };
-        connection.ondatachannel = event => {
-            console.log(`[call] conn.ondatachannel = ${connection.iceConnectionState}`);
-        };
-        if (stream) {
-            stream.getTracks().forEach((track) => {
-                console.log('[call] conn.addTrack', [track, stream]);
-                connection.addTrack(track, stream);
-            });
+            if (!stream) return;
+
+            await CallStore.joinGroupCall(chatId, voice_chat_group_call_id, stream, muted);
         }
-        console.log('[call] conn', connection);
-        const offerOptions = {
-            offerToReceiveAudio: 1,
-            offerToReceiveVideo: 0,
-        };
-        const offer = await connection.createOffer(offerOptions);
-        console.log('[call] conn.setLocalDescription offer', offer, offer.sdp);
-
-        await connection.setLocalDescription(offer);
-
-        const clientInfo = parseSdp(offer.sdp);
-        console.log('[call] clientInfo', clientInfo);
-
-        const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
-        const signSource = source << 0;
-
-        const request = {
-            '@type': 'joinGroupCall',
-            group_call_id: groupCallId,
-            payload: {
-                '@type': 'groupCallPayload',
-                ufrag,
-                pwd,
-                fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup: 'active', fingerprint }]
-            },
-            source: signSource,
-            is_muted: true
-        };
-
-        console.log('[call] joinGroupCall request', request);
-        const result = await TdLibController.send(request);
-        console.log('[call] joinGroupCall result', result);
-
-        const description = new LocalConferenceDescription();
-        description.onSsrcs = () => { console.log('[call] desc.onSsrcs'); };
-
-        await TdLibController.send({
-            '@type': 'loadGroupCallParticipants',
-            group_call_id: groupCallId,
-            limit: 5000
-        });
-
-        const participants = Array.from(CallStore.participants.get(groupCallId).values())
-        const meParticipant = participants.filter(x => x.source === signSource)[0];
-        const otherParticipants = participants.filter(x => x.source !== signSource);
-        console.log('[call] participants', [participants, meParticipant, otherParticipants]);
-
-        const data1 = {
-            transport: this.getTransport(result),
-            ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: meParticipant.source === signSource, name: getUserFullName(meParticipant.user_id) }]
-        };
-        console.log('[call] data1', data1);
-
-        description.updateFromServer(data1);
-        const sdp1 = description.generateSdp(true);
-
-        console.log('[call] conn.setRemoteDescription answer', sdp1);
-        await connection.setRemoteDescription({
-            type: 'answer',
-            sdp: sdp1,
-        });
-
-        const data2 = {
-            transport: this.getTransport(result),
-            ssrcs: participants.map(x => ({ ssrc: x.source >>> 0, isMain: x.source === signSource, name: getUserFullName(x.user_id) }))
-        };
-        console.log('[call] data2', data2);
-
-        description.updateFromServer(data2);
-        const sdp2 = description.generateSdp();
-        console.log('[call] conn.setRemoteDescription offer', sdp2);
-
-        await connection.setRemoteDescription({
-            type: 'offer',
-            sdp: sdp2,
-        });
-
-        const answer = await connection.createAnswer();
-        console.log('[call] conn.setLocalDescription answer', [answer, answer.sdp]);
-        await connection.setLocalDescription(answer);
-
-        const clientInfo2 = parseSdp(answer.sdp);
-        console.log('[call] clientInfo 2', clientInfo2);
     }
 
-    getTransport(responce) {
-        const { payload, candidates } = responce;
+    handleStartGroupCall = () => {
+        this.handleMenuClose();
 
-        const { ufrag, pwd, fingerprints } = payload;
+        const chatId = AppStore.getChatId();
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
 
-        return {
-            ufrag,
-            pwd,
-            fingerprints,
-            candidates
-        };
-    }
-
-    tryAddTrack(event) {
-        const stream = event.streams[0];
-        const endpoint = stream.id.substring(6);
-
-        const { audios } = this;
-
-        let handled;
-        for (let audio of audios) {
-            if (audio.e === endpoint) {
-                audio.srcObject = stream;
-                handled = true;
-                break;
+        showAlert({
+            title: LStore.getString('StartVoipChatTitle'),
+            message: LStore.getString('StartVoipChatAlertText'),
+            ok: LStore.getString('Start'),
+            cancel: LStore.getString('Cancel'),
+            onResult: async result => {
+                if (result){
+                    await CallStore.startGroupCall(chatId);
+                }
             }
-        }
-
-        if (!handled) {
-            const audio = document.createElement('audio');
-            audio.autoplay = 'true';
-            audio.controls = 'controls';
-            audio.srcObject = stream;
-            audio.volume = 1.0;
-            document.getElementById('players').appendChild(audio);
-            audios.push(audio);
-            audio.play();
-        }
-
-        // this.tracks.push(event);
-    }
-
-    onTrack(event) {
-        this.tryAddTrack(event);
-    }
+        })
+    };
 
     render() {
         const { t } = this.props;
@@ -346,6 +179,7 @@ class MainMenuButton extends React.Component {
         const deleteChatTitle = getDeleteChatTitle(chatId, t);
         const unpinMessage = hasOnePinnedMessage(chatId);
         const switchBlocked = canSwitchBlocked(chatId);
+        const manageVoiceChats = canManageVoiceChats(chatId);
 
         const groupCall = CallStore.get(voice_chat_group_call_id);
 
@@ -374,13 +208,33 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
-                    { Boolean(voice_chat_group_call_id) && (
+                    { Boolean(voice_chat_group_call_id) ? (
                         <MenuItem onClick={this.handleGroupCall}>
                             <ListItemIcon>
                             </ListItemIcon>
                             <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />
                         </MenuItem>
+                        ) : manageVoiceChats && (
+                        <MenuItem onClick={this.handleStartGroupCall}>
+                            <ListItemIcon>
+                            </ListItemIcon>
+                            <ListItemText primary={t('StartVoipChat')} />
+                        </MenuItem>
                     )}
+                    {/*{ !Boolean(voice_chat_group_call_id) && manageVoiceChats && (*/}
+                    {/*    <MenuItem onClick={this.handleStartGroupCall}>*/}
+                    {/*        <ListItemIcon>*/}
+                    {/*        </ListItemIcon>*/}
+                    {/*        <ListItemText primary={t('StartVoipChat')} />*/}
+                    {/*    </MenuItem>*/}
+                    {/*)}*/}
+                    {/*{ Boolean(voice_chat_group_call_id) && (*/}
+                    {/*    <MenuItem onClick={this.handleGroupCall}>*/}
+                    {/*        <ListItemIcon>*/}
+                    {/*        </ListItemIcon>*/}
+                    {/*        <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />*/}
+                    {/*    </MenuItem>*/}
+                    {/*)}*/}
                     <MenuItem onClick={this.handleChatInfo}>
                         <ListItemIcon>
                             {isPrivateChat(chatId) ? <UserIcon /> : <GroupIcon />}

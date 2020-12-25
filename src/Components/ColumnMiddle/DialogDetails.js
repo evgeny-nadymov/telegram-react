@@ -19,6 +19,7 @@ import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './DialogDetails.css';
+import GroupCallTopPanel from './GroupCallTopPanel';
 
 class DialogDetails extends Component {
     constructor(props) {
@@ -249,6 +250,7 @@ class DialogDetails extends Component {
             <div className='dialog-details' style={style}>
                 <div className='dialog-background'/>
                 <div className='dialog-details-wrapper'>
+                    <GroupCallTopPanel/>
                     <HeaderPlayer />
                     <Header chatId={chatId} />
                     <MessagesList ref={ref => (this.messagesList = ref)} chatId={chatId} messageId={messageId} options={chatOpenOptions} />

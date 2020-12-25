@@ -105,6 +105,7 @@
 
 .header-right-buttons {
     margin: 6px 6px 6px 20px;
+    display: flex;
 }
 
 .cursor-pointer {
