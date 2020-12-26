@@ -230,6 +230,15 @@ class TdLibController extends EventEmitter {
             // }
         });
 
+        this.send({
+            '@type': 'setOption',
+            name: 'use_quick_ack',
+            value: {
+                '@type': 'optionValueBoolean',
+                value: true
+            }
+        });
+
         if (this.parameters.tag && this.parameters.tagVerbosity) {
             for (let i = 0; i < this.parameters.tag.length; i++) {
                 let tag = this.parameters.tag[i];

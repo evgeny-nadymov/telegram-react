@@ -42,6 +42,7 @@ class Status extends React.Component {
 
         MessageStore.on('updateMessageSendFailed', this.onUpdateMessageSend);
         MessageStore.on('updateMessageSendSucceeded', this.onUpdateMessageSend);
+        MessageStore.on('updateMessageSendAcknowledged', this.onUpdateMessageSendAcknowledged);
     }
 
     componentWillUnmount() {
@@ -49,7 +50,19 @@ class Status extends React.Component {
 
         MessageStore.off('updateMessageSendFailed', this.onUpdateMessageSend);
         MessageStore.off('updateMessageSendSucceeded', this.onUpdateMessageSend);
+        MessageStore.off('updateMessageSendAcknowledged', this.onUpdateMessageSendAcknowledged);
     }
+
+    onUpdateMessageSendAcknowledged = update => {
+        const { chatId, messageId } = this.props;
+        const { chat_id, message_id } = update;
+
+        if (chatId !== chat_id) return;
+        if (messageId !== message_id) return;
+
+        console.trace('[m] acknowledged', chat_id, message_id, chatId, messageId);
+        this.setState({ sendingState: null });
+    };
 
     onUpdateMessageSend = update => {
         const { chatId, messageId } = this.props;
@@ -78,6 +91,7 @@ class Status extends React.Component {
     };
 
     render() {
+        const { chatId, messageId } = this.props;
         const { sendingState, unread } = this.state;
         if (!unread) {
             return <SucceededIcon className='status' viewBox='0 0 17 10' style={{ width: 16, height: 9 }} />;
@@ -99,6 +113,7 @@ class Status extends React.Component {
             );
         }
 
+        console.log('[m] ack render 1', [chatId, messageId, sendingState, unread]);
         return <SentIcon className='status' viewBox='0 0 12 10' style={{ width: 16, height: 9 }} />;
     }
 }
