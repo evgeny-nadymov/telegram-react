@@ -70,7 +70,7 @@ class Animation extends React.Component {
     }
 
     componentWillUnmount() {
-        AnimationStore.on('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
+        AnimationStore.off('clientUpdateAnimationsInView', this.onClientUpdateAnimationsInView);
         AppStore.off('clientUpdateFocusWindow', this.onClientUpdateFocusWindow);
         AppStore.off('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);

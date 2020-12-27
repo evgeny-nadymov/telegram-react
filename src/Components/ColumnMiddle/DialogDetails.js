@@ -75,7 +75,7 @@ class DialogDetails extends Component {
         AppStore.off('clientUpdateChatId', this.onClientUpdateChatId);
         AppStore.off('clientUpdateChatSelect', this.onClientUpdateChatSelect);
         ChatStore.off('clientUpdateChatBackground', this.onClientUpdateChatBackground);
-        ChatStore.on('clientUpdateClearOpenChatOptions', this.onClientUpdateClearOpenChatOptions);
+        ChatStore.off('clientUpdateClearOpenChatOptions', this.onClientUpdateClearOpenChatOptions);
         FileStore.off('clientUpdateDocumentBlob', this.onClientUpdateDocumentBlob);
         FileStore.off('clientUpdateDocumentThumbnailBlob', this.onClientUpdateDocumentThumbnailBlob);
     }
