@@ -1213,7 +1213,7 @@ function saveAnimation(animation, message) {
 
     const { id: fileId } = file;
 
-    saveOrDownload(file, file_name || fileId, message || animation, () =>
+    saveOrDownload(file, file_name || fileId + '.mp4', message || animation, () =>
         FileStore.updateAnimationBlob(chatId, messageId, fileId)
     );
 }
@@ -1245,7 +1245,7 @@ function saveVideo(video, message) {
 
     const { id: fileId } = file;
 
-    saveOrDownload(file, file_name || fileId, message || video, () =>
+    saveOrDownload(file, file_name || fileId + '.mp4', message || video, () =>
         FileStore.updateVideoBlob(chatId, messageId, fileId)
     );
 }
