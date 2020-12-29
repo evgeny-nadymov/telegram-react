@@ -39,3 +39,10 @@
     padding-bottom: 24px;
     padding-top: 55px;
 }
+
+.messages-list-top-panel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+}

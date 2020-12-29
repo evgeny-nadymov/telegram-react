@@ -36,6 +36,7 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
+import GroupCallJoinPanel from './GroupCallJoinPanel';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -1728,7 +1729,10 @@ class MessagesList extends React.Component {
                         {this.messages}
                     </div>
                 </div>
-                <ActionBar chatId={chatId} />
+                <div className='messages-list-top-panel'>
+                    {/*<GroupCallJoinPanel chatId={chatId}/>*/}
+                    <ActionBar chatId={chatId} />
+                </div>
                 <Placeholder />
                 {scrollDownVisible && (
                     <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} />

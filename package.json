@@ -1,7 +1,7 @@
 {
   "homepage": "https://evgeny-nadymov.github.io/telegram-react",
   "name": "telegram_react",
-  "version": "0.0.884",
+  "version": "0.0.887",
   "private": true,
   "dependencies": {
     "@arseny30/tdweb": "^1.7.2",

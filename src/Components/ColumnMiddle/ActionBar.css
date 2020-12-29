@@ -6,10 +6,6 @@
  */
 
 .action-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
     height: 60px;
     background: var(--panel-background);
     border-bottom: 1px solid var(--border);

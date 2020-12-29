@@ -53,7 +53,7 @@ class TelegramApp extends Component {
             tdlibDatabaseExists: false,
             inactive: false,
             fatalError: false,
-            nativeMobile: false,//isMobile(),
+            nativeMobile: isMobile(),
             isSmall: window.innerWidth < 800
         };
 
