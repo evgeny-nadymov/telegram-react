@@ -167,6 +167,8 @@ class ForwardDialog extends React.Component {
 
         const text = this.getInnerText(this.messageRef.current);
 
+        messageIds.sort();
+
         this.targetChats.forEach(async targetChatId => {
             if (inputMessageContent) {
                 await AppStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
