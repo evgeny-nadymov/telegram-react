@@ -87,6 +87,7 @@ export const PROFILE_PHOTO_SMALL_SIZE = 160;
 export const SCROLL_PRECISION = 800;
 export const SCROLL_CHATS_PRECISION = 400;
 export const SEARCH_GLOBAL_TEXT_MIN = 4;
+export const SEND_BY_CTRL_ENTER_KEY = 'x_send_by_ctrl_enter';
 export const SERVICE_NOTIFICATIONS_USER_IDS = [42777, 333000, 777000];
 export const SHARED_MESSAGE_SLICE_LIMIT = 42;
 export const STICKER_DISPLAY_SIZE = 192;

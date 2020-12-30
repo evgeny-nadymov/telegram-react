@@ -59,6 +59,10 @@ export function isMobile() {
     return isAndroid() || isIOS() || isWindowsPhone();
 }
 
+export function isMacOS() {
+    return navigator.platform.toLowerCase().indexOf('mac') >= 0;
+}
+
 export function isIOS() {
     const iDevices = ['iPad Simulator', 'iPhone Simulator', 'iPod Simulator', 'iPad', 'iPhone', 'iPod'];
 

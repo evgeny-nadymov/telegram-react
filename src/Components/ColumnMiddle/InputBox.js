@@ -38,12 +38,13 @@ import { getEntities, getNodes, isTextMessage } from '../../Utils/Message';
 import { getSize, readImageSize } from '../../Utils/Common';
 import { editMessage, replyMessage } from '../../Actions/Client';
 import { isDeletedUser, isMeUser } from '../../Utils/User';
-import { PHOTO_SIZE, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
+import { PHOTO_SIZE, SEND_BY_CTRL_ENTER_KEY, VOICENOTE_MIN_RECORD_DURATION } from '../../Constants';
 import AnimationStore from '../../Stores/AnimationStore';
 import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import MessageStore from '../../Stores/MessageStore';
+import OptionStore from '../../Stores/OptionStore';
 import StickerStore from '../../Stores/StickerStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -934,19 +935,37 @@ class InputBox extends Component {
             }
             case 'Enter':
             case 'NumpadEnter': {
-                // enter+cmd, enter+ctrl, enter+shift
-                if (!altKey && (ctrlKey || metaKey || shiftKey) && !repeat) {
-                    document.execCommand('insertLineBreak');
+                const sendByCtrlEnter = OptionStore.get(SEND_BY_CTRL_ENTER_KEY);
+                if (sendByCtrlEnter && sendByCtrlEnter.value) {
+                    // enter+cmd, enter+ctrl, enter+shift
+                    if (!altKey && !ctrlKey && !metaKey && !repeat) {
+                        document.execCommand('insertLineBreak');
 
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                // enter
-                else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
-                    this.handleSubmit(false);
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    // enter+cmd, enter+ctrl
+                    else if (!altKey && (ctrlKey || metaKey) && !shiftKey && !repeat) {
+                        this.handleSubmit(false);
 
-                    event.preventDefault();
-                    event.stopPropagation();
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                } else {
+                    // enter+cmd, enter+ctrl, enter+shift
+                    if (!altKey && (ctrlKey || metaKey || shiftKey) && !repeat) {
+                        document.execCommand('insertLineBreak');
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    // enter
+                    else if (!altKey && !ctrlKey && !metaKey && !shiftKey && !repeat) {
+                        this.handleSubmit(false);
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
                 }
                 break;
             }

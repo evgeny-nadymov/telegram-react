@@ -13,12 +13,17 @@ import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Radio from '@material-ui/core/Radio';
 import ArrowBackIcon from '../../../Assets/Icons/Back';
 import ColorizeIcon from '../../../Assets/Icons/Colorize';
 import ChatBackground from './ChatBackground';
+import SectionHeader from '../SectionHeader';
 import SidebarPage from '../SidebarPage';
 import SharedMediaIcon from '../../../Assets/Icons/SharedMedia';
 import ThemePicker from '../ThemePicker';
+import { isMacOS } from '../../../Utils/Common';
+import { SEND_BY_CTRL_ENTER_KEY } from '../../../Constants';
+import OptionStore from '../../../Stores/OptionStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './General.css';
 
@@ -26,9 +31,12 @@ class General extends React.Component {
     constructor(props) {
         super(props);
 
+        const sendByCtrlEnterOption = OptionStore.get(SEND_BY_CTRL_ENTER_KEY);
+
         this.state = {
             backgrounds: null,
-            openChatBackground: false
+            openChatBackground: false,
+            sendByCtrlEnter: sendByCtrlEnterOption && sendByCtrlEnterOption.value
         };
 
         this.themePickerRef = React.createRef();
@@ -63,10 +71,40 @@ class General extends React.Component {
         });
     };
 
+    async handleSetOption(command) {
+        console.log('[s] handleSetOption', command);
+        let value = false;
+        switch (command) {
+            case 'sendByCtrlEnter': {
+                value = true;
+                break;
+            }
+            case 'sendByEnter': {
+                value = false;
+                break;
+            }
+        }
+
+        console.log('[s] handleSetOption', command, value);
+        await TdLibController.send({
+            '@type': 'setOption',
+            name: SEND_BY_CTRL_ENTER_KEY,
+            value: {
+                '@type': 'optionValueBoolean',
+                value
+            }
+        });
+
+        this.setState({
+            sendByCtrlEnter: value
+        });
+    }
+
     render() {
         const { t, onClose } = this.props;
-        const { backgrounds, openChatBackground } = this.state;
+        const { backgrounds, openChatBackground, sendByCtrlEnter } = this.state;
 
+        console.log('[s] render', sendByCtrlEnter);
         return (
             <>
                 <div className='header-master'>
@@ -91,6 +129,38 @@ class General extends React.Component {
                             </ListItemIcon>
                             <ListItemText primary={t('Appearance')} />
                         </ListItem>
+                    </div>
+                    <div className='sidebar-page-section-divider' />
+                    <div className='sidebar-page-section'>
+                        <SectionHeader>{t('Keyboard')}</SectionHeader>
+                        <div className='settings-item' onClick={() => this.handleSetOption('sendByEnter')}>
+                            <Radio
+                                color='primary'
+                                className='settings-item-control'
+                                checked={!sendByCtrlEnter}
+                                tabIndex={-1}
+                                inputProps={{ 'aria-labelledby': 'label-1' }}
+                            />
+                            <ListItemText
+                                id='label-1'
+                                primary={t('SendByEnter')}
+                                secondary={t('NewLineByShiftEnter')}
+                            />
+                        </div>
+                        <div className='settings-item' onClick={() => this.handleSetOption('sendByCtrlEnter')}>
+                            <Radio
+                                color='primary'
+                                className='settings-item-control'
+                                checked={sendByCtrlEnter}
+                                tabIndex={-1}
+                                inputProps={{ 'aria-labelledby': 'label-2' }}
+                            />
+                            <ListItemText
+                                id='label-2'
+                                primary={isMacOS() ? t('SendByCommandEnter') : t('SendByControlEnter')}
+                                secondary={t('NewLineByEnter')}
+                            />
+                        </div>
                     </div>
                 </div>
                 <SidebarPage open={openChatBackground} onClose={this.closeChatBackground}>
