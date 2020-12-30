@@ -122,7 +122,7 @@ class ThemePicker extends React.Component {
                 onClose={this.handleClose}
                 aria-labelledby='alert-dialog-title'
                 aria-describedby='alert-dialog-description'>
-                <DialogTitle id='alert-dialog-title'>{t('Appearance')}</DialogTitle>
+                <DialogTitle id='alert-dialog-title'>{t('Theme')}</DialogTitle>
                 <DialogContent>
                     <FormControl component='fieldset' className='theme-picker-form'>
                         <FormLabel focused component='legend'>
