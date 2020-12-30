@@ -9,14 +9,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
-import './GroupCallJoinPanel.css';
-import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
-import AppStore from '../../Stores/ApplicationStore';
-import ChatStore from '../../Stores/ChatStore';
-import TdLibController from '../../Controllers/TdLibController';
 import { getStream } from '../../Calls/Utils';
 import { showAlert } from '../../Actions/Client';
+import AppStore from '../../Stores/ApplicationStore';
+import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
+import ChatStore from '../../Stores/ChatStore';
 import LStore from '../../Stores/LocalizationStore';
+import TdLibController from '../../Controllers/TdLibController';
+import './GroupCallJoinPanel.css';
 
 class GroupCallJoinPanel extends React.Component {
     constructor(props) {
@@ -27,6 +27,16 @@ class GroupCallJoinPanel extends React.Component {
         const call = currentGroupCall && currentGroupCall.chatId === chatId ? currentGroupCall : null;
 
         this.state = { call };
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { call } = this.state;
+
+        if (nextState.call !== call) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {

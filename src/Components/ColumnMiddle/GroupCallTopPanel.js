@@ -31,6 +31,24 @@ class GroupCallTopPanel extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { call, status, connected } = this.state;
+
+        if (nextState.call !== call) {
+            return true;
+        }
+
+        if (nextState.status !== status) {
+            return true;
+        }
+
+        if (nextState.connected !== connected) {
+            return true;
+        }
+
+        return false;
+    }
+
     componentDidMount() {
         CallStore.on('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
         CallStore.on('clientUpdateGroupCallConnectionState', this.handleClientUpdateGroupCallConnectionState);
@@ -82,12 +100,47 @@ class GroupCallTopPanel extends React.Component {
             connected = connection && connection.iceConnectionState === 'connected';
         }
 
+        this.saveMessagesScrollPosition();
         this.setState({
             call,
             status,
             connected
+        }, () => {
+            this.restoreMessagesScrollPosition(Boolean(call));
         });
     };
+
+    saveMessagesScrollPosition() {
+        const elements = document.getElementsByClassName('messages-list-wrapper');
+        if (!elements.length) return;
+
+        [...elements].forEach(x => {
+            const list = x;
+            if (!list) return;
+
+            const prevOffsetHeight = list.offsetHeight;
+            const prevScrollTop = list.scrollTop;
+
+            list.prevOffsetHeight = prevOffsetHeight;
+            list.prevScrollTop = prevScrollTop;
+        });
+    }
+
+    restoreMessagesScrollPosition(openPanel = true) {
+        const elements = document.getElementsByClassName('messages-list-wrapper');
+        if (!elements.length) return;
+
+        [...elements].forEach(x => {
+            const list = x;
+            if (!list) return;
+
+            const { prevScrollTop, prevOffsetHeight } = list;
+            if (list.scrollTop === prevScrollTop) {
+                const offsetHeightDiff = Math.abs(prevOffsetHeight - list.offsetHeight);
+                list.scrollTop += openPanel ? offsetHeightDiff : - offsetHeightDiff;
+            }
+        });
+    }
 
     handleMicrophone = async () => {
         const { call, status } = this.state;
@@ -134,29 +187,31 @@ class GroupCallTopPanel extends React.Component {
     render() {
         const { t } = this.props;
         const { call, status, connected } = this.state;
-        if (!call) return null;
+        if (!call) return (<></>);
 
         const { chatId } = call;
         const title = connected ? getChatTitle(chatId).toUpperCase() : t('Connecting');
 
         return (
-            <div className={classNames('group-call-top-panel',
-                {
-                    'group-call-top-panel-muted-by-admin ': connected && status === 'forceMuted',
-                    'group-call-top-panel-unmuted': connected && status === 'unmuted',
-                    'group-call-top-panel-connecting': !connected,
+            <>
+                <div className={classNames('group-call-top-panel',
+                    {
+                        'group-call-top-panel-muted-by-admin ': connected && status === 'forceMuted',
+                        'group-call-top-panel-unmuted': connected && status === 'unmuted',
+                        'group-call-top-panel-connecting': !connected,
 
-                })}>
-                <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>
-                    {status === 'unmuted' ? <MicIcon fontSize='small'/> : <MicOffIcon fontSize='small' />}
-                </IconButton>
-                <div className='group-call-top-panel-title'>
-                    {title}
+                    })}>
+                    <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>
+                        {status === 'unmuted' ? <MicIcon fontSize='small'/> : <MicOffIcon fontSize='small' />}
+                    </IconButton>
+                    <div className='group-call-top-panel-title'>
+                        {title}
+                    </div>
+                    <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleLeave}>
+                        <CallEndIcon fontSize='small' />
+                    </IconButton>
                 </div>
-                <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleLeave}>
-                    <CallEndIcon fontSize='small' />
-                </IconButton>
-            </div>
+            </>
         )
     }
 

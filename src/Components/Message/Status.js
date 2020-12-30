@@ -60,7 +60,6 @@ class Status extends React.Component {
         if (chatId !== chat_id) return;
         if (messageId !== message_id) return;
 
-        console.trace('[m] acknowledged', chat_id, message_id, chatId, messageId);
         this.setState({ sendingState: null });
     };
 

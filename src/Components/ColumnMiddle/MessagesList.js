@@ -36,7 +36,6 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MessagesList.css';
-import GroupCallJoinPanel from './GroupCallJoinPanel';
 
 const ScrollBehaviorEnum = Object.freeze({
     SCROLL_TO_BOTTOM: 'SCROLL_TO_BOTTOM',
@@ -453,12 +452,10 @@ class MessagesList extends React.Component {
     onClientUpdateMediaEnd = udpate => {
         const list = this.listRef.current;
 
-        //const prevOffsetHeight = list.offsetHeight;
-        //const prevScrollTop = list.scrollTop;
-
+        const { prevScrollTop, prevOffsetHeight } = this;
         this.setState({ playerOpened: false }, () => {
-            if (list.scrollTop === this.prevScrollTop) {
-                list.scrollTop -= Math.abs(this.prevOffsetHeight - list.offsetHeight);
+            if (list.scrollTop === prevScrollTop) {
+                list.scrollTop -= Math.abs(prevOffsetHeight - list.offsetHeight);
             }
         });
     };

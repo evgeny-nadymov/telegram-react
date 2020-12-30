@@ -99,7 +99,6 @@ class General extends React.Component {
         const { t, onClose } = this.props;
         const { backgrounds, openChatBackground, sendByCtrlEnter } = this.state;
 
-        console.log('[s] render', [sendByCtrlEnter]);
         return (
             <>
                 <div className='header-master'>
