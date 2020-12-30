@@ -19,8 +19,11 @@ import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
 import { OPTIMIZATIONS_FIRST_START, PLAYER_STREAMING_PRIORITY } from './Constants';
 import AppStore from './Stores/ApplicationStore';
 import FileStore from './Stores/FileStore';
+import LStore from './Stores/LocalizationStore';
 import NotificationStore from './Stores/NotificationStore';
 import TdLibController from './Controllers/TdLibController';
+import { showAlert } from './Actions/Client';
+import CallStore from './Stores/CallStore';
 
 const isLocalhost =
     //false;
@@ -80,6 +83,14 @@ async function registerValidSW(swUrl) {
                         console.log('[SW] New content is available; please refresh.');
 
                         TdLibController.clientUpdate({ '@type': 'clientUpdateNewContentAvailable' });
+                        showAlert({
+                            title: LStore.getString('NewVersionTitle'),
+                            message: LStore.getString('NewVersionText'),
+                            ok: LStore.getString('OK'),
+                            onResult: async () => {
+                                window.location.reload();
+                            }
+                        });
                     } else {
                         // At this point, everything has been precached.
                         // It's the perfect time to display a

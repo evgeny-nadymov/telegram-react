@@ -493,7 +493,7 @@ class Dialogs extends Component {
                                 />
                             </CSSTransition>
                         </div>
-                        <UpdatePanel />
+                        {/*<UpdatePanel />*/}
                     </div>
 
                     <SidebarPage open={openArchive} timeout={timeout} onClose={this.handleCloseArchive}>
