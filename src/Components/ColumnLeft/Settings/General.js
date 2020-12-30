@@ -36,7 +36,7 @@ class General extends React.Component {
         this.state = {
             backgrounds: null,
             openChatBackground: false,
-            sendByCtrlEnter: sendByCtrlEnterOption && sendByCtrlEnterOption.value
+            sendByCtrlEnter: Boolean(sendByCtrlEnterOption && sendByCtrlEnterOption.value)
         };
 
         this.themePickerRef = React.createRef();
@@ -72,7 +72,6 @@ class General extends React.Component {
     };
 
     async handleSetOption(command) {
-        console.log('[s] handleSetOption', command);
         let value = false;
         switch (command) {
             case 'sendByCtrlEnter': {
@@ -85,14 +84,10 @@ class General extends React.Component {
             }
         }
 
-        console.log('[s] handleSetOption', command, value);
         await TdLibController.send({
             '@type': 'setOption',
             name: SEND_BY_CTRL_ENTER_KEY,
-            value: {
-                '@type': 'optionValueBoolean',
-                value
-            }
+            value: { '@type': 'optionValueBoolean', value }
         });
 
         this.setState({
@@ -104,7 +99,7 @@ class General extends React.Component {
         const { t, onClose } = this.props;
         const { backgrounds, openChatBackground, sendByCtrlEnter } = this.state;
 
-        console.log('[s] render', sendByCtrlEnter);
+        console.log('[s] render', [sendByCtrlEnter]);
         return (
             <>
                 <div className='header-master'>
@@ -127,7 +122,7 @@ class General extends React.Component {
                             <ListItemIcon>
                                 <ColorizeIcon />
                             </ListItemIcon>
-                            <ListItemText primary={t('Appearance')} />
+                            <ListItemText primary={t('Theme')} />
                         </ListItem>
                     </div>
                     <div className='sidebar-page-section-divider' />
