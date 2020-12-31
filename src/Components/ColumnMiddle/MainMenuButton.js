@@ -209,11 +209,12 @@ class MainMenuButton extends React.Component {
                         horizontal: 'right'
                     }}>
                     { Boolean(voice_chat_group_call_id) ? (
-                        <MenuItem onClick={this.handleGroupCall}>
-                            <ListItemIcon>
-                            </ListItemIcon>
-                            <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />
-                        </MenuItem>
+                        <></>
+                        // <MenuItem onClick={this.handleGroupCall}>
+                        //     <ListItemIcon>
+                        //     </ListItemIcon>
+                        //     <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />
+                        // </MenuItem>
                         ) : manageVoiceChats && (
                         <MenuItem onClick={this.handleStartGroupCall}>
                             <ListItemIcon>

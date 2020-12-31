@@ -18,6 +18,7 @@ import { getChannelStatus } from './Channel';
 import { loadReplyContents } from './File';
 import { SERVICE_NOTIFICATIONS_USER_IDS } from '../Constants';
 import BasicGroupStore from '../Stores/BasicGroupStore';
+import CallStore from '../Stores/CallStore';
 import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import LStore from '../Stores/LocalizationStore';
@@ -1176,6 +1177,12 @@ function getGroupChatMembers(chatId) {
     return fallbackValue;
 }
 
+export function hasChatGroupCall(chatId) {
+    const chat = ChatStore.get(chatId);
+
+    return Boolean(chat && chat.voice_chat_group_call_id);
+}
+
 export async function getChatMedia(chatId) {
     // return;
 
@@ -1183,6 +1190,8 @@ export async function getChatMedia(chatId) {
     if (!chat) return null;
 
     // console.log('[media] getChatMedia start', chatId);
+    const { voice_chat_group_call_id } = chat;
+
     const promises = [];
 
     const limit = 100;
@@ -1257,6 +1266,15 @@ export async function getChatMedia(chatId) {
     } else {
         promises.push(Promise.resolve(null));
     }
+    const call = CallStore.get(voice_chat_group_call_id);
+    if (hasChatGroupCall(chatId) && !call){
+        promises.push(TdLibController.send({
+            '@type': 'getGroupCall',
+            group_call_id: voice_chat_group_call_id
+        }));
+    } else {
+        promises.push(Promise.resolve(call));
+    }
     if (isSupergroup(chatId) && !isChannelChat(chatId)){
         promises.push(TdLibController.send({
             '@type': 'getSupergroupMembers',
@@ -1267,7 +1285,7 @@ export async function getChatMedia(chatId) {
         }));
     }
 
-    const [fullInfo, photoAndVideo, document, audio, url, voiceNote, pinned, groupsInCommon, supergroupMembers] = await Promise.all(promises);
+    const [fullInfo, photoAndVideo, document, audio, url, voiceNote, pinned, groupsInCommon, groupCall, supergroupMembers] = await Promise.all(promises);
     const media = {
         fullInfo,
         photoAndVideo: photoAndVideo.messages,
@@ -1277,6 +1295,7 @@ export async function getChatMedia(chatId) {
         voiceNote: voiceNote.messages,
         pinned: pinned.messages,
         groupsInCommon: groupsInCommon ? groupsInCommon.chat_ids.map(x => ChatStore.get(x)) : [],
+        groupCall,
         supergroupMembers
     }
     // console.log('[media] getChatMedia stop', chatId, media);

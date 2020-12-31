@@ -22,17 +22,43 @@ class GroupCallJoinPanel extends React.Component {
     constructor(props) {
         super(props);
 
-        const { chatId } = props;
-        const { currentGroupCall } = CallStore;
-        const call = currentGroupCall && currentGroupCall.chatId === chatId ? currentGroupCall : null;
+        this.state = { };
+    }
 
-        this.state = { call };
+    static getDerivedStateFromProps(props, state) {
+        const { chatId } = props;
+        const { prevChatId } = state;
+
+        if (prevChatId !== chatId) {
+            const chat = ChatStore.get(chatId);
+
+            let groupCallId = 0;
+            if (chat) {
+                const { voice_chat_group_call_id } = chat;
+                groupCallId = voice_chat_group_call_id;
+            }
+
+            const { currentGroupCall } = CallStore;
+            const isCurrent = currentGroupCall && currentGroupCall.chatId === chatId;
+
+            return {
+                prevChatId: chatId,
+                groupCallId,
+                isCurrent
+            };
+        }
+
+        return null;
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { call } = this.state;
+        const { isCurrent, groupCallId } = this.state;
 
-        if (nextState.call !== call) {
+        if (nextState.groupCallId !== groupCallId) {
+            return true;
+        }
+
+        if (nextState.isCurrent !== isCurrent) {
             return true;
         }
 
@@ -41,21 +67,35 @@ class GroupCallJoinPanel extends React.Component {
 
     componentDidMount() {
         CallStore.on('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
-        CallStore.on('updateGroupCall', this.handleClientUpdateGroupCall);
+        CallStore.on('updateGroupCall', this.handleUpdateGroupCall);
     }
 
     componentWillUnmount() {
         CallStore.off('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
-        CallStore.off('updateGroupCall', this.handleClientUpdateGroupCall);
+        CallStore.off('updateGroupCall', this.handleUpdateGroupCall);
     }
+
+    handleUpdateGroupCall = update => {
+        const { group_call } = update;
+
+        const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+
+        const { voice_chat_group_call_id } = chat;
+        if (group_call && group_call.id !== voice_chat_group_call_id) return;
+
+        this.setState({
+            groupCallId: group_call ? group_call.id : 0
+        });
+    };
 
     handleClientUpdateGroupCall = update => {
         const { chatId } = this.props;
 
         const { currentGroupCall } = CallStore;
-        const call = currentGroupCall && currentGroupCall.chatId === chatId ? currentGroupCall : null;
+        const isCurrent = currentGroupCall && currentGroupCall.chatId === chatId;
 
-        this.setState({ call });
+        this.setState({ isCurrent });
     };
 
     handleJoin = async () => {
@@ -95,9 +135,12 @@ class GroupCallJoinPanel extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
-        const { call } = this.state;
-        if (call) return null;
+        const { chatId, t } = this.props;
+        if (!chatId) return null;
+
+        const { groupCallId, isCurrent } = this.state;
+        if (!groupCallId) return null;
+        if (isCurrent) return null;
 
         return (
             <div className='group-call-join-panel' onClick={this.handleJoin}>

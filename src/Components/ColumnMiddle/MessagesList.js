@@ -13,6 +13,7 @@ import ActionBar from './ActionBar';
 import Album from '../Message/Album/Album';
 import DocumentAlbum from '../Message/Album/DocumentAlbum';
 import FilesDropTarget from './FilesDropTarget';
+import GroupCallJoinPanel from './GroupCallJoinPanel';
 import InputBoxHints from './InputBoxHints';
 import Message from '../Message/Message';
 import ServiceMessage from '../Message/ServiceMessage';
@@ -1727,7 +1728,7 @@ class MessagesList extends React.Component {
                     </div>
                 </div>
                 <div className='messages-list-top-panel'>
-                    {/*<GroupCallJoinPanel chatId={chatId}/>*/}
+                    <GroupCallJoinPanel chatId={chatId}/>
                     <ActionBar chatId={chatId} />
                 </div>
                 <Placeholder />
