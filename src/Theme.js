@@ -10,9 +10,9 @@ import blue from '@material-ui/core/colors/blue';
 import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
 import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import { StylesProvider } from '@material-ui/core/styles';
+import { getBadgeSelectedColor } from './Utils/Color';
 import { getDisplayName } from './Utils/HOC';
 import ApplicationStore from './Stores/ApplicationStore';
-import { getBadgeSelectedColor } from './Utils/Color';
 
 function updateLightTheme(theme) {
     // const root = document.querySelector(':root');
@@ -190,7 +190,22 @@ function updateDarkTheme(theme) {
     style.setProperty('--message-out-control-border-hover', theme.palette.primary.main);
 }
 
+function getSystemThemeType() {
+    if (window.matchMedia) {
+        if(window.matchMedia('(prefers-color-scheme: dark)').matches){
+            return 'dark';
+        } else {
+            return 'light';
+        }
+    }
+    return 'light';
+}
+
 function createTheme(type, primary) {
+    if (type === 'default') {
+        type = getSystemThemeType();
+    }
+
     let MuiTouchRipple = {};
     let action = {};
     if (type === 'light') {
@@ -331,7 +346,27 @@ function withTheme(WrappedComponent) {
             const theme = createTheme(type, primary);
 
             this.state = { theme };
+
+            if (window.matchMedia) {
+                const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                colorSchemeQuery.addEventListener('change', this.onSystemThemeChange);
+            }
         }
+
+        onSystemThemeChange = () => {
+            let { type, primary } = { type: 'light', primary: { main: '#50A2E9' } };
+            try {
+                const themeOptions = JSON.parse(localStorage.getItem('themeOptions'));
+                if (themeOptions && themeOptions.type !== 'default') {
+                    return;
+                }
+                type = themeOptions.type;
+                primary = themeOptions.primary;
+            } catch {}
+
+            const theme = createTheme(type, primary);
+            this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
+        };
 
         componentDidMount() {
             ApplicationStore.on('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
