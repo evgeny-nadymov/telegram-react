@@ -38,13 +38,21 @@ class GroupCallJoinPanel extends React.Component {
                 groupCallId = voice_chat_group_call_id;
             }
 
+            let participantCount = 0;
+            const groupCall = CallStore.get(groupCallId);
+            if (groupCall) {
+                const { participant_count } = groupCall;
+                participantCount = participant_count;
+            }
+
             const { currentGroupCall } = CallStore;
             const isCurrent = currentGroupCall && currentGroupCall.chatId === chatId;
 
             return {
                 prevChatId: chatId,
                 groupCallId,
-                isCurrent
+                isCurrent,
+                participantCount
             };
         }
 
@@ -52,9 +60,13 @@ class GroupCallJoinPanel extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { isCurrent, groupCallId } = this.state;
+        const { isCurrent, groupCallId, participantCount } = this.state;
 
         if (nextState.groupCallId !== groupCallId) {
+            return true;
+        }
+
+        if (nextState.participantCount !== participantCount) {
             return true;
         }
 
@@ -80,12 +92,27 @@ class GroupCallJoinPanel extends React.Component {
 
         const { chatId } = this.props;
         const chat = ChatStore.get(chatId);
+        if (!chat) return;
 
         const { voice_chat_group_call_id } = chat;
         if (group_call && group_call.id !== voice_chat_group_call_id) return;
 
+        let groupCallId = 0;
+        if (chat) {
+            const { voice_chat_group_call_id } = chat;
+            groupCallId = voice_chat_group_call_id;
+        }
+
+        let participantCount = 0;
+        const groupCall = CallStore.get(groupCallId);
+        if (groupCall) {
+            const { participant_count } = groupCall;
+            participantCount = participant_count;
+        }
+
         this.setState({
-            groupCallId: group_call ? group_call.id : 0
+            groupCallId: group_call ? group_call.id : 0,
+            participantCount
         });
     };
 
@@ -138,7 +165,7 @@ class GroupCallJoinPanel extends React.Component {
         const { chatId, t } = this.props;
         if (!chatId) return null;
 
-        const { groupCallId, isCurrent } = this.state;
+        const { groupCallId, isCurrent, participantCount } = this.state;
         if (!groupCallId) return null;
         if (isCurrent) return null;
 
@@ -146,7 +173,7 @@ class GroupCallJoinPanel extends React.Component {
             <div className='group-call-join-panel' onClick={this.handleJoin}>
                 <div className='group-call-join-panel-content'>
                     <div className='group-call-join-panel-title'>{t('VoipGroupVoiceChat')}</div>
-                    <div className='group-call-join-panel-subtitle'>{t('MembersTalkingNobody')}</div>
+                    <div className='group-call-join-panel-subtitle'>{participantCount === 0? t('MembersTalkingNobody') : LStore.formatPluralString('Participants', participantCount)}</div>
                 </div>
                 <Button className='group-call-join-panel-button' variant='contained' color='primary' disableElevation>
                     {t('VoipChatJoin')}

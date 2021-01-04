@@ -12,7 +12,7 @@ import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import { StylesProvider } from '@material-ui/core/styles';
 import { getBadgeSelectedColor } from './Utils/Color';
 import { getDisplayName } from './Utils/HOC';
-import ApplicationStore from './Stores/ApplicationStore';
+import AppStore from './Stores/ApplicationStore';
 
 function updateLightTheme(theme) {
     // const root = document.querySelector(':root');
@@ -365,15 +365,15 @@ function withTheme(WrappedComponent) {
             } catch {}
 
             const theme = createTheme(type, primary);
-            this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
+            this.setState({ theme }, () => AppStore.emit('clientUpdateThemeChange'));
         };
 
         componentDidMount() {
-            ApplicationStore.on('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
+            AppStore.on('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
         }
 
         componentWillUnmount() {
-            ApplicationStore.off('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
+            AppStore.off('clientUpdateThemeChanging', this.onClientUpdateThemeChanging);
         }
 
         onClientUpdateThemeChanging = update => {
@@ -382,7 +382,7 @@ function withTheme(WrappedComponent) {
             const theme = createTheme(type, primary);
             localStorage.setItem('themeOptions', JSON.stringify({ type, primary }));
 
-            this.setState({ theme }, () => ApplicationStore.emit('clientUpdateThemeChange'));
+            this.setState({ theme }, () => AppStore.emit('clientUpdateThemeChange'));
         };
 
         render() {
