@@ -27,10 +27,10 @@ import { requestUnpinMessage, showAlert } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
 import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
+import LStore from '../../Stores/LocalizationStore';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
-import LStore from '../../Stores/LocalizationStore';
 
 class MainMenuButton extends React.Component {
     constructor(props) {
@@ -181,8 +181,6 @@ class MainMenuButton extends React.Component {
         const switchBlocked = canSwitchBlocked(chatId);
         const manageVoiceChats = canManageVoiceChats(chatId);
 
-        const groupCall = CallStore.get(voice_chat_group_call_id);
-
         return (
             <>
                 <IconButton
@@ -208,34 +206,13 @@ class MainMenuButton extends React.Component {
                         vertical: 'top',
                         horizontal: 'right'
                     }}>
-                    { Boolean(voice_chat_group_call_id) ? (
-                        <></>
-                        // <MenuItem onClick={this.handleGroupCall}>
-                        //     <ListItemIcon>
-                        //     </ListItemIcon>
-                        //     <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />
-                        // </MenuItem>
-                        ) : manageVoiceChats && (
+                    { !Boolean(voice_chat_group_call_id) && manageVoiceChats && (
                         <MenuItem onClick={this.handleStartGroupCall}>
                             <ListItemIcon>
                             </ListItemIcon>
                             <ListItemText primary={t('StartVoipChat')} />
                         </MenuItem>
                     )}
-                    {/*{ !Boolean(voice_chat_group_call_id) && manageVoiceChats && (*/}
-                    {/*    <MenuItem onClick={this.handleStartGroupCall}>*/}
-                    {/*        <ListItemIcon>*/}
-                    {/*        </ListItemIcon>*/}
-                    {/*        <ListItemText primary={t('StartVoipChat')} />*/}
-                    {/*    </MenuItem>*/}
-                    {/*)}*/}
-                    {/*{ Boolean(voice_chat_group_call_id) && (*/}
-                    {/*    <MenuItem onClick={this.handleGroupCall}>*/}
-                    {/*        <ListItemIcon>*/}
-                    {/*        </ListItemIcon>*/}
-                    {/*        <ListItemText primary={groupCall && groupCall.is_joined ? t('VoipGroupLeave') : t('VoipChatJoin')} />*/}
-                    {/*    </MenuItem>*/}
-                    {/*)}*/}
                     <MenuItem onClick={this.handleChatInfo}>
                         <ListItemIcon>
                             {isPrivateChat(chatId) ? <UserIcon /> : <GroupIcon />}

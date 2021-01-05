@@ -13,7 +13,7 @@ import ActionBar from './ActionBar';
 import Album from '../Message/Album/Album';
 import DocumentAlbum from '../Message/Album/DocumentAlbum';
 import FilesDropTarget from './FilesDropTarget';
-import GroupCallJoinPanel from './GroupCallJoinPanel';
+import GroupCallJoinPanel from '../Calls/GroupCallJoinPanel';
 import InputBoxHints from './InputBoxHints';
 import Message from '../Message/Message';
 import ServiceMessage from '../Message/ServiceMessage';

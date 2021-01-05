@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import ChatInfoDialog from '../Popup/ChatInfoDialog';
 import Footer from './Footer';
+import GroupCallTopPanel from '../Calls/GroupCallTopPanel';
 import Header from './Header';
 import HeaderPlayer from '../Player/HeaderPlayer';
 import MessagesList from './MessagesList';
@@ -19,7 +20,6 @@ import AppStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './DialogDetails.css';
-import GroupCallTopPanel from './GroupCallTopPanel';
 
 class DialogDetails extends Component {
     constructor(props) {
