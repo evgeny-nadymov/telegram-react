@@ -134,7 +134,7 @@ class EditProfile extends React.Component {
 
         await TdLibController.send({
             '@type': 'setProfilePhoto',
-            photo: { '@type': 'inputFileBlob', name: 'profile_photo.jpg', data }
+            photo: { '@type': 'inputChatPhotoStatic', photo: { '@type': 'inputFileBlob', name: 'profile_photo.jpg', data } }
         });
 
         const store = FileStore.getStore();

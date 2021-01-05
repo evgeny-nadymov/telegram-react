@@ -61,17 +61,15 @@ class NewGroup extends React.Component {
                 location: null
             });
 
-            if (defaultPhotoFile) {
+            if (defaultPhotoFile || defaultPhoto) {
+                const photo = defaultPhotoFile
+                     ? { '@type': 'inputFileId', id: defaultPhotoFile.id }
+                     : { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto };
+
                 TdLibController.send({
                     '@type': 'setChatPhoto',
                     chat_id: chat.id,
-                    photo: { '@type': 'inputFileId', id: defaultPhotoFile.id }
-                });
-            } else if (defaultPhoto) {
-                TdLibController.send({
-                    '@type': 'setChatPhoto',
-                    chat_id: chat.id,
-                    photo: { '@type': 'inputFileBlob', name: 'photo.jpg', data: defaultPhoto }
+                    photo: { '@type': 'inputChatPhotoStatic', photo }
                 });
             }
 

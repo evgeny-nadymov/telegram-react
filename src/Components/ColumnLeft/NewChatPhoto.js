@@ -41,7 +41,7 @@ class NewChatPhoto extends React.Component {
     }
 
     handleDone = () => {
-        const cropper = this.cropperRef.current;
+        const cropper = this.cropperRef.current.cropper;
         if (!cropper) return;
 
         cropper.getCroppedCanvas().toBlob(blob => {
