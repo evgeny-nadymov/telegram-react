@@ -6,8 +6,16 @@
  */
 import TdLibController from '../Controllers/TdLibController';
 import { isChatMuted, isChatPinned } from '../Utils/Chat';
+import { openUser } from './Client';
 import { MUTED_VALUE_MAX, MUTED_VALUE_MIN } from '../Constants';
 import ChatStore from '../Stores/ChatStore';
+
+export async function openSupportChat() {
+    const user = await TdLibController.send({ '@type': 'getSupportUser' });
+    if (!user) return;
+
+    openUser(user.id);
+}
 
 export function openChatList(chatList) {
     TdLibController.clientUpdate({

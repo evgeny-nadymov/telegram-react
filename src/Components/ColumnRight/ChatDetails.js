@@ -498,22 +498,20 @@ class ChatDetails extends React.Component {
                                         />
                                     </ListItem>
                                 )}
-                                {phoneNumber && (
-                                    <>
-                                        <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handlePhoneHint}>
-                                            <ListItemIcon>
-                                                <CallIcon />
-                                            </ListItemIcon>
-                                            <ListItemText
-                                                primary={
-                                                    <Typography variant='inherit' noWrap>
-                                                        {formatPhoneNumber(phoneNumber)}
-                                                    </Typography>
-                                                }
-                                                secondary={t('Phone')}
-                                            />
-                                        </ListItem>
-                                    </>
+                                {isPrivateChat(chatId) && (
+                                    <ListItem button className='list-item-rounded' alignItems='flex-start' onClick={this.handlePhoneHint}>
+                                        <ListItemIcon>
+                                            <CallIcon />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary={
+                                                <Typography variant='inherit' noWrap>
+                                                    {phoneNumber ? formatPhoneNumber(phoneNumber) : t('PhoneHidden')}
+                                                </Typography>
+                                            }
+                                            secondary={t('Phone')}
+                                        />
+                                    </ListItem>
                                 )}
                                 <NotificationsListItem chatId={chatId} />
                                 {popup && (
