@@ -120,6 +120,41 @@ class CallStore extends EventEmitter {
         this.items.set(call.id, call);
     }
 
+    playSound(sound) {
+        try {
+            const audio = new Audio(sound);
+            audio.play();
+        } catch (e) {
+            ERROR_CALL('playSound', sound, e);
+        }
+    }
+
+    startConnectingSound(connection) {
+        this.stopConnectingSound(null);
+
+        setTimeout(() => {
+            const { currentGroupCall } = this;
+            if (currentGroupCall && currentGroupCall.connection === connection && (connection.iceConnectionState === 'checking' || connection.iceConnectionState === 'new')) {
+                const audio = new Audio('sounds/group_call_connect.mp3');
+                audio.loop = true;
+                audio.connection = connection;
+
+                this.connectionAudio = audio;
+
+                audio.play();
+            }
+        }, 1000);
+    }
+
+    stopConnectingSound(connection) {
+        const { connectionAudio } = this;
+        if (!connectionAudio) return;
+        if (connection && connectionAudio.connection !== connection) return;
+
+        this.connectionAudio = null;
+        connectionAudio.pause();
+    }
+
     async startGroupCall(chatId) {
         let { currentGroupCall } = this;
         LOG_CALL('startGroupCall', currentGroupCall);
@@ -230,7 +265,7 @@ class CallStore extends EventEmitter {
             // LOG_CALL('conn.onicecandidate', event);
         };
         connection.oniceconnectionstatechange = event => {
-            LOG_CALL(`conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection, connection.getSenders(), connection.getReceivers());
+            LOG_CALL(`conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection);
 
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateGroupCallConnectionState',
@@ -238,32 +273,59 @@ class CallStore extends EventEmitter {
                 groupCallId
             });
 
-            if (connection.iceConnectionState === 'disconnected') {
-                this.hangUp(groupCallId);
+            if (connection.iceConnectionState !== 'checking') {
+                this.stopConnectingSound(connection);
+            }
+
+            switch (connection.iceConnectionState) {
+                case 'checking': {
+                    break;
+                }
+                case 'closed': {
+                    break;
+                }
+                case 'completed': {
+                    break;
+                }
+                case 'connected': {
+                    break;
+                }
+                case 'disconnected': {
+                    this.hangUp(groupCallId);
+                    break;
+                }
+                case 'failed': {
+                    break;
+                }
+                case 'new': {
+                    break;
+                }
             }
         };
         connection.ondatachannel = event => {
             // LOG_CALL(`conn.ondatachannel = ${connection.iceConnectionState}`);
         };
         if (stream) {
-            stream.getTracks().forEach((track) => {
+            stream.getTracks().forEach(track => {
                 // LOG_CALL('conn.addTrack', [track, stream]);
                 connection.addTrack(track, stream);
             });
         }
 
-        if (this.currentGroupCall && rejoin) {
-            this.currentGroupCall.stream = stream;
-            this.currentGroupCall.connection = connection;
-            LOG_CALL('joinGroupCallInternal update current', groupCallId, this.currentGroupCall);
+        let { currentGroupCall } = this;
+        if (currentGroupCall && rejoin) {
+            currentGroupCall.stream = stream;
+            currentGroupCall.connection = connection;
+            LOG_CALL('joinGroupCallInternal update current', groupCallId, currentGroupCall);
         } else {
-            this.setCurrentGroupCall({
+            currentGroupCall = {
                 chatId,
                 groupCallId,
                 stream,
                 connection,
-            });
-            LOG_CALL('joinGroupCallInternal set current', groupCallId, this.currentGroupCall);
+            }
+            this.setCurrentGroupCall(currentGroupCall);
+            LOG_CALL('joinGroupCallInternal set current', groupCallId, currentGroupCall);
         }
 
         // LOG_CALL('conn', connection);
@@ -282,6 +344,10 @@ class CallStore extends EventEmitter {
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
         const signSource = source << 0;
 
+        if (!rejoin) {
+            this.playSound('sounds/group_call_start.mp3');
+            this.startConnectingSound(connection);
+        }
         const request = {
             '@type': 'joinGroupCall',
             group_call_id: groupCallId,
@@ -295,9 +361,25 @@ class CallStore extends EventEmitter {
             is_muted: muted
         };
 
-        // LOG_CALL('joinGroupCallInternal request', request);
+        LOG_CALL('joinGroupCallInternal request', request);
         const result = await TdLibController.send(request);
-        // LOG_CALL('joinGroupCallInternal result', result);
+        LOG_CALL(`joinGroupCallInternal result connectionState=${connection.iceConnectionState}`, result);
+
+        if (connection.iceConnectionState !== 'new') {
+            LOG_CALL(`joinGroupCallInternal abort 0 connectionState=${connection.iceConnectionState}`);
+            this.closeConnectionAndStream(connection, stream);
+            return;
+        }
+        if (this.currentGroupCall !== currentGroupCall) {
+            LOG_CALL('joinGroupCallInternal abort 1', this.currentGroupCall, currentGroupCall);
+            this.closeConnectionAndStream(connection, stream);
+            return;
+        }
+        if (currentGroupCall.connection !== connection) {
+            LOG_CALL('joinGroupCallInternal abort 2');
+            this.closeConnectionAndStream(connection, stream);
+            return;
+        }
 
         const description = new LocalConferenceDescription();
         description.onSsrcs = () => {
@@ -366,23 +448,14 @@ class CallStore extends EventEmitter {
 
         const { connection, stream } = currentGroupCall;
 
-        try {
-            if (connection) {
-                connection.close();
-            }
-        } catch (e) {
-            LOG_CALL('hangUp error 1', e);
-        }
-
-        try {
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-            }
-        } catch (e) {
-            LOG_CALL('hangUp error 2', e);
-        }
+        this.closeConnectionAndStream(connection, stream);
 
         document.getElementById('players').innerHTML = '';
+
+        if (!rejoin) {
+            this.stopConnectingSound(null);
+            this.playSound('sounds/group_call_end.mp3');
+        }
 
         if (discard) {
             LOG_CALL('hangUp discard', groupCallId);
@@ -399,6 +472,24 @@ class CallStore extends EventEmitter {
                     group_call_id: groupCallId
                 });
             }
+        }
+    }
+
+    closeConnectionAndStream(connection, stream) {
+        try {
+            if (connection) {
+                connection.close();
+            }
+        } catch (e) {
+            LOG_CALL('hangUp error 1', e);
+        }
+
+        try {
+            if (stream) {
+                stream.getTracks().forEach(t => t.stop());
+            }
+        } catch (e) {
+            LOG_CALL('hangUp error 2', e);
         }
     }
 

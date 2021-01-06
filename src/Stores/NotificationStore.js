@@ -178,11 +178,9 @@ class NotificationStore extends EventEmitter {
                         const now = new Date();
                         if (now > this.nextSoundAt) {
                             try {
-                                const audio = new Audio('sound_a.mp3');
+                                const audio = new Audio('sounds/sound_a.mp3');
                                 audio.play();
-                            } catch {
-
-                            }
+                            } catch { }
 
                             const nextSoundAt = new Date();
                             nextSoundAt.setMilliseconds(nextSoundAt.getMilliseconds() + NOTIFICATION_AUDIO_DELAY_MS);
