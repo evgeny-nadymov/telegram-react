@@ -8,7 +8,7 @@ import EventEmitter from './EventEmitter';
 import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { getUserFullName } from '../Utils/User';
-import { parseSdp } from '../Calls/Utils';
+import { getStream, parseSdp } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import LStore from './LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
@@ -39,15 +39,24 @@ class CallStore extends EventEmitter {
     onUpdate = update => {
         switch (update['@type']) {
             case 'updateChatVoiceChat': {
-                const { chat_id, voice_chat_group_call_id, is_empty } = update;
-
                 this.emit('updateChatVoiceChat', update);
                 break;
             }
             case 'updateGroupCall': {
                 const { group_call } = update;
+                const prevGroupCall = this.get(group_call.id);
 
                 this.set(group_call);
+
+                const { need_rejoin, is_joined } = group_call;
+                const { currentGroupCall } = this;
+                if (currentGroupCall && currentGroupCall.groupCallId === group_call.id) {
+                    if (need_rejoin) {
+                        this.rejoinGroupCall();
+                    } else if (prevGroupCall && prevGroupCall.is_joined && !is_joined) {
+                        this.hangUp(currentGroupCall.groupCallId);
+                    }
+                }
 
                 this.emit('updateGroupCall', update);
                 break;
@@ -148,8 +157,21 @@ class CallStore extends EventEmitter {
         LOG_CALL('startGroupCallInternal finish', chatId, groupCallId);
     }
 
-    async joinGroupCall(chatId, groupCallId, stream, muted = true) {
-        LOG_CALL('joinGroupCall', groupCallId, stream, muted);
+    async joinGroupCall(chatId, groupCallId, muted = true) {
+        LOG_CALL('joinGroupCall', groupCallId, muted);
+
+        let stream = null;
+        try {
+            stream = await getStream({ audio: true, video: false }, muted);
+        } catch (e) {
+            ERROR_CALL('getStream', e);
+            showAlert({
+                title: LStore.getString('AppName'),
+                message: LStore.getString('VoipNeedMicPermission'),
+                ok: LStore.getString('OK')
+            });
+        }
+        if (!stream) return;
 
         let { currentGroupCall } = this;
         LOG_CALL('joinGroupCall has another', groupCallId, currentGroupCall);
@@ -183,6 +205,18 @@ class CallStore extends EventEmitter {
             '@type': 'clientUpdateGroupCall',
             call
         });
+    }
+
+    async rejoinGroupCall() {
+        const { currentGroupCall } = this;
+        LOG_CALL('rejoinGroupCall', currentGroupCall);
+        if (!currentGroupCall) return;
+
+        const { chatId, groupCallId } = currentGroupCall;
+
+        const muted = true;
+        this.hangUp(groupCallId);
+        this.joinGroupCall(chatId, groupCallId, muted);
     }
 
     async joinGroupCallInternal(chatId, groupCallId, stream, muted) {
@@ -349,11 +383,14 @@ class CallStore extends EventEmitter {
                 group_call_id: groupCallId
             });
         } else {
-            LOG_CALL('hangUp leave', groupCallId);
-            await TdLibController.send({
-                '@type': 'leaveGroupCall',
-                group_call_id: groupCallId
-            });
+            const groupCall = this.get(groupCallId);
+            LOG_CALL('hangUp leave', groupCallId, groupCall && groupCall.is_joined);
+            if (groupCall && groupCall.is_joined) {
+                await TdLibController.send({
+                    '@type': 'leaveGroupCall',
+                    group_call_id: groupCallId
+                });
+            }
         }
     }
 

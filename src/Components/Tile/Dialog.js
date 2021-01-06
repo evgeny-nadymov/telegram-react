@@ -300,7 +300,7 @@ class Dialog extends Component {
                 style={style}
                 >
                     <div className='dialog-wrapper'>
-                        <ChatTile chatId={chatId} dialog showSavedMessages={showSavedMessages} showOnline />
+                        <ChatTile chatId={chatId} dialog showSavedMessages={showSavedMessages} showOnline showGroupCall/>
                         <div className='dialog-inner-wrapper'>
                             <div className='tile-first-row'>
                                 <DialogTitle chatId={chatId} />

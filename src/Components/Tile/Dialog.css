@@ -22,11 +22,13 @@
     background: var(--color-hover);
 }
 
-.dialog:hover .online-status-icon {
+.dialog:hover .online-status-icon,
+.dialog:hover .group-call-status-icon {
     background: var(--color-hover);
 }
 
-.dialog.item-selected .online-status-icon {
+.dialog.item-selected .online-status-icon,
+.dialog.item-selected .group-call-status-icon {
     background: var(--color-hover);
 }
 

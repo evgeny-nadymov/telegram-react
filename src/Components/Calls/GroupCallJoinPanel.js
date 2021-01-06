@@ -116,20 +116,8 @@ class GroupCallJoinPanel extends React.Component {
         if (is_joined) return;
 
         const muted = true;
-        let stream = null;
-        try {
-            stream = await getStream({ audio: true, video: false }, muted);
-        } catch (e) {
-            ERROR_CALL('getStream', e);
-            showAlert({
-                title: LStore.getString('AppName'),
-                message: LStore.getString('VoipNeedMicPermission'),
-                ok: LStore.getString('OK')
-            });
-        }
-        if (!stream) return;
 
-        await CallStore.joinGroupCall(chatId, voice_chat_group_call_id, stream, muted);
+        await CallStore.joinGroupCall(chatId, voice_chat_group_call_id, muted);
     };
 
     render() {

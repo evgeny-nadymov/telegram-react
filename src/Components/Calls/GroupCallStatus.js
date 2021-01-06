@@ -13,11 +13,16 @@ import './GroupCallStatus.css';
 
 class GroupCallStatus extends React.Component {
     state = {
-        isEmpty: true
+        isEmpty: true,
+        hasGroupCall: false
     };
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { isEmpty } = this.state;
+        const { hasGroupCall, isEmpty } = this.state;
+
+        if (nextState.hasGroupCall !== hasGroupCall) {
+            return true;
+        }
 
         if (nextState.isEmpty !== isEmpty) {
             return true;
@@ -32,15 +37,18 @@ class GroupCallStatus extends React.Component {
 
         if (prevChatId !== chatId) {
             let isEmpty = false;
-            const chat = ChatStore.get(id);
+            let hasGroupCall = false;
+            const chat = ChatStore.get(chatId);
             if (chat) {
-                const { is_voice_chat_empty } = chat;
+                const { is_voice_chat_empty, voice_chat_group_call_id } = chat;
                 isEmpty = is_voice_chat_empty;
+                hasGroupCall = Boolean(voice_chat_group_call_id);
             }
 
             return {
                 prevChatId: chatId,
-                isEmpty
+                isEmpty,
+                hasGroupCall
             };
         }
 
@@ -62,21 +70,31 @@ class GroupCallStatus extends React.Component {
         if (chat_id !== chatId) return;
 
         let isEmpty = false;
-        const chat = ChatStore.get(id);
+        let hasGroupCall = false;
+        const chat = ChatStore.get(chatId);
         if (chat) {
-            const { is_voice_chat_empty } = chat;
+            const { is_voice_chat_empty, voice_chat_group_call_id } = chat;
             isEmpty = is_voice_chat_empty;
+            hasGroupCall = Boolean(voice_chat_group_call_id);
         }
 
-        this.setState({ isEmpty });
+        this.setState({ isEmpty, hasGroupCall });
     };
 
     render() {
-        const { isEmpty } = this.state;
+        const { isEmpty, hasGroupCall } = this.state;
+        if (!hasGroupCall) return null;
+        if (isEmpty) return null;
 
         return (
             <div className={classNames('group-call-status', { 'group-call-status-active': !isEmpty })}>
-
+                <div className='group-call-status-icon'>
+                    <div className='group-call-status-indicator' >
+                        <div className={classNames('group-call-status-bar', 'group-call-status-bar1')}/>
+                        <div className={classNames('group-call-status-bar', 'group-call-status-bar2')}/>
+                        <div className={classNames('group-call-status-bar', 'group-call-status-bar3')}/>
+                    </div>
+                </div>
             </div>
         );
     }

@@ -103,47 +103,6 @@ class MainMenuButton extends React.Component {
         }
     };
 
-    handleGroupCall = async () => {
-        this.handleMenuClose();
-
-        const chatId = AppStore.getChatId();
-        const chat = ChatStore.get(chatId);
-        if (!chat) return null;
-
-        const { voice_chat_group_call_id } = chat;
-        let groupCall = CallStore.get(voice_chat_group_call_id);
-        if (!groupCall) {
-            groupCall = await TdLibController.send({
-                '@type': 'getGroupCall',
-                group_call_id: voice_chat_group_call_id
-            });
-        }
-        LOG_CALL('groupCall', groupCall);
-        if (!groupCall) return;
-
-        const { is_joined } = groupCall;
-        if (is_joined) {
-            await CallStore.leaveGroupCall(chatId, voice_chat_group_call_id);
-        } else {
-            const muted = true;
-            let stream = null;
-            try {
-                stream = await getStream({ audio: true, video: false }, muted);
-
-            } catch (e) {
-                ERROR_CALL('getStream', e);
-                showAlert({
-                    title: LStore.getString('AppName'),
-                    message: LStore.getString('VoipNeedMicPermission'),
-                    ok: LStore.getString('OK')
-                });
-            }
-            if (!stream) return;
-
-            await CallStore.joinGroupCall(chatId, voice_chat_group_call_id, stream, muted);
-        }
-    }
-
     handleStartGroupCall = () => {
         this.handleMenuClose();
 

@@ -187,7 +187,7 @@ class GroupCallTopPanel extends React.Component {
     render() {
         const { t } = this.props;
         const { call, status, connected } = this.state;
-        if (!call) return (<></>);
+        if (!call) return null;
 
         const { chatId } = call;
         const title = connected ? getChatTitle(chatId).toUpperCase() : t('Connecting');

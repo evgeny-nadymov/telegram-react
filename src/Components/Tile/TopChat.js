@@ -72,7 +72,7 @@ class TopChat extends React.PureComponent {
         return (
             <>
                 <ListItem button className='top-chat' onClick={onSelect} onContextMenu={this.handleContextMenu}>
-                    <ChatTile dialog chatId={chatId} showSavedMessages={showSavedMessages} showOnline />
+                    <ChatTile dialog chatId={chatId} showSavedMessages={showSavedMessages} showOnline showGroupCall/>
                     <div className='top-chat-title'>{shortTitle}</div>
                 </ListItem>
                 <Popover

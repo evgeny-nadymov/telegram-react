@@ -15,7 +15,8 @@
     margin-right: 5px;
 }
 
-.top-chat:hover .online-status-icon {
+.top-chat:hover .online-status-icon,
+.top-chat:hover .group-call-status-icon {
     background: var(--color-hover);
 }
 

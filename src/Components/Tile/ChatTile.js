@@ -17,6 +17,7 @@ import { getSrc, loadChatContent } from '../../Utils/File';
 import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import './ChatTile.css';
+import GroupCallStatus from '../Calls/GroupCallStatus';
 
 class ChatTile extends Component {
     state = { };
@@ -160,7 +161,7 @@ class ChatTile extends Component {
     };
 
     render() {
-        const { chatId, showOnline, showSavedMessages, onSelect, small, dialog, big, size } = this.props;
+        const { chatId, showOnline, showGroupCall, showSavedMessages, onSelect, small, dialog, big, size } = this.props;
         const { src, loaded, letters } = this.state;
 
         let style = null;
@@ -237,6 +238,7 @@ class ChatTile extends Component {
                 )}
                 {src && <img className='tile-photo' src={src} onLoad={this.handleLoad} draggable={false} alt='' />}
                 {showOnline && isPrivateChat(chatId) && <OnlineStatus chatId={chatId} />}
+                {showGroupCall && <GroupCallStatus chatId={chatId} />}
             </div>
         );
     }
@@ -247,12 +249,14 @@ ChatTile.propTypes = {
     onSelect: PropTypes.func,
     showSavedMessages: PropTypes.bool,
     showOnline: PropTypes.bool,
+    showGroupCall: PropTypes.bool,
     size: PropTypes.number
 };
 
 ChatTile.defaultProps = {
     showSavedMessages: true,
-    showOnline: false
+    showOnline: false,
+    showGroupCall: false
 };
 
 export default withTranslation()(ChatTile);
