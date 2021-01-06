@@ -1977,13 +1977,9 @@ function loadProfileMediaViewerContent(chatId, photos) {
     photos.forEach(photo => {
         switch (photo['@type']) {
             case 'chatPhoto': {
-                const { small, big } = photo;
+                photo = getProfilePhoto(photo);
+                if (!photo) break;
 
-                loadChatFileContent(store, small, chatId);
-                loadChatFileContent(store, big, chatId);
-                break;
-            }
-            case 'profilePhoto': {
                 const userId = getChatUserId(chatId);
 
                 const { small, big } = photo;
@@ -1992,10 +1988,14 @@ function loadProfileMediaViewerContent(chatId, photos) {
                 loadUserFileContent(store, big, userId);
                 break;
             }
-            case 'userProfilePhoto': {
-                photo = getProfilePhoto(photo);
-                if (!photo) break;
+            case 'chatPhotoInfo': {
+                const { small, big } = photo;
 
+                loadChatFileContent(store, small, chatId);
+                loadChatFileContent(store, big, chatId);
+                break;
+            }
+            case 'profilePhoto': {
                 const userId = getChatUserId(chatId);
 
                 const { small, big } = photo;
