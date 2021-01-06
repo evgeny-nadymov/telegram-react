@@ -157,7 +157,7 @@ class CallStore extends EventEmitter {
         LOG_CALL('startGroupCallInternal finish', chatId, groupCallId);
     }
 
-    async joinGroupCall(chatId, groupCallId, muted = true) {
+    async joinGroupCall(chatId, groupCallId, muted = true, rejoin = false) {
         LOG_CALL('joinGroupCall', groupCallId, muted);
 
         let stream = null;
@@ -175,7 +175,7 @@ class CallStore extends EventEmitter {
 
         let { currentGroupCall } = this;
         LOG_CALL('joinGroupCall has another', groupCallId, currentGroupCall);
-        if (currentGroupCall) {
+        if (currentGroupCall && !rejoin) {
             const { chatId: oldChatId } = currentGroupCall;
 
             showAlert({
@@ -189,7 +189,7 @@ class CallStore extends EventEmitter {
                         if (currentGroupCall) {
                             this.hangUp(currentGroupCall.groupCallId);
                         }
-                        this.joinGroupCallInternal(chatId, groupCallId, stream, muted);
+                        this.joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin);
                     }
                 }
             });
@@ -197,7 +197,7 @@ class CallStore extends EventEmitter {
             return;
         }
 
-        await this.joinGroupCallInternal(chatId, groupCallId, stream, muted);
+        await this.joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin);
     }
 
     setCurrentGroupCall(call) {
@@ -215,11 +215,11 @@ class CallStore extends EventEmitter {
         const { chatId, groupCallId } = currentGroupCall;
 
         const muted = true;
-        this.hangUp(groupCallId);
-        this.joinGroupCall(chatId, groupCallId, muted);
+        this.hangUp(groupCallId, false, true);
+        this.joinGroupCall(chatId, groupCallId, muted, true);
     }
 
-    async joinGroupCallInternal(chatId, groupCallId, stream, muted) {
+    async joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin = false) {
         LOG_CALL('joinGroupCallInternal start', groupCallId);
         const connection = new RTCPeerConnection(null);
         connection.ontrack = event => {
@@ -252,13 +252,19 @@ class CallStore extends EventEmitter {
             });
         }
 
-        this.setCurrentGroupCall({
-            chatId,
-            groupCallId,
-            stream,
-            connection,
-        });
-        LOG_CALL('joinGroupCallInternal set current', groupCallId, this.currentGroupCall);
+        if (this.currentGroupCall && rejoin) {
+            this.currentGroupCall.stream = stream;
+            this.currentGroupCall.connection = connection;
+            LOG_CALL('joinGroupCallInternal update current', groupCallId, this.currentGroupCall);
+        } else {
+            this.setCurrentGroupCall({
+                chatId,
+                groupCallId,
+                stream,
+                connection,
+            });
+            LOG_CALL('joinGroupCallInternal set current', groupCallId, this.currentGroupCall);
+        }
 
         // LOG_CALL('conn', connection);
         const offerOptions = {
@@ -348,13 +354,15 @@ class CallStore extends EventEmitter {
         LOG_CALL('joinGroupCallInternal finish', groupCallId);
     }
 
-    async hangUp(groupCallId, discard = false) {
+    async hangUp(groupCallId, discard = false, rejoin = false) {
         LOG_CALL('hangUp', groupCallId, discard);
         const { currentGroupCall } = this;
         if (!currentGroupCall) return;
         if (currentGroupCall.groupCallId !== groupCallId) return;
 
-        this.setCurrentGroupCall(null);
+        if (!rejoin) {
+            this.setCurrentGroupCall(null);
+        }
 
         const { connection, stream } = currentGroupCall;
 
