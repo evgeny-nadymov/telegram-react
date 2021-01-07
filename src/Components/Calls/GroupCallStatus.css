@@ -34,14 +34,47 @@
     background: var(--online-indicator);
 }
 
+@keyframes bar-animation-transform-1 {
+    0%   { transform: scaleY(0.33); }
+    12.5%  { transform: scaleY(1.66); }
+    25%  { transform: scaleY(0.33); }
+    37.5%  { transform: scaleY(1); }
+    50%  { transform: scaleY(0.33); }
+    62.5%  { transform: scaleY(1.66); }
+    75%  { transform: scaleY(0.33); }
+    87.5% { transform: scaleY(1.66); }
+    100%   { transform: scaleY(0.33); }
+}
+
+@keyframes bar-animation-transform-2 {
+    0%   { transform: scaleY(1); }
+    12.5%  { transform: scaleY(0.33); }
+    25%  { transform: scaleY(1.66); }
+    37.5%  { transform: scaleY(0.33); }
+    50%  { transform: scaleY(1); }
+    62.5%  { transform: scaleY(0.33); }
+    75%  { transform: scaleY(1.66); }
+    87.5% { transform: scaleY(0.33); }
+    100%   { transform: scaleY(1); }
+}
+
 .group-call-status-bar {
     width: 2px;
-    height: 4px;
+    height: 6px;
     background: white;
     border-radius: 1px;
     margin: 1px;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .group-call-status-bar2 {
-    height: 6px;
+}
+
+.group-call-status-active .group-call-status-bar {
+    animation: bar-animation-transform-2 3.2s normal infinite;
+}
+
+.group-call-status-active .group-call-status-bar2 {
+    animation: bar-animation-transform-1 3.2s normal infinite;
 }

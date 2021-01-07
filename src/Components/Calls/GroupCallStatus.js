@@ -84,7 +84,6 @@ class GroupCallStatus extends React.Component {
     render() {
         const { isEmpty, hasGroupCall } = this.state;
         if (!hasGroupCall) return null;
-        if (isEmpty) return null;
 
         return (
             <div className={classNames('group-call-status', { 'group-call-status-active': !isEmpty })}>
@@ -92,7 +91,7 @@ class GroupCallStatus extends React.Component {
                     <div className='group-call-status-indicator' >
                         <div className={classNames('group-call-status-bar', 'group-call-status-bar1')}/>
                         <div className={classNames('group-call-status-bar', 'group-call-status-bar2')}/>
-                        <div className={classNames('group-call-status-bar', 'group-call-status-bar3')}/>
+                        <div className={classNames('group-call-status-bar', 'group-call-status-bar1')}/>
                     </div>
                 </div>
             </div>
