@@ -14,11 +14,11 @@ import LStore from './LocalizationStore';
 import TdLibController from '../Controllers/TdLibController';
 
 export function LOG_CALL(str, ...data) {
-    console.log('[call] ' + str, data);
+    console.log('[call] ' + str, ...data);
 }
 
 export function ERROR_CALL(str, ...data) {
-    console.error('[call] ' + str, data);
+    console.error('[call] ' + str, ...data);
 }
 
 class CallStore extends EventEmitter {
@@ -143,7 +143,7 @@ class CallStore extends EventEmitter {
 
                 audio.play();
             }
-        }, 1000);
+        }, 2500);
     }
 
     stopConnectingSound(connection) {
@@ -193,13 +193,18 @@ class CallStore extends EventEmitter {
     }
 
     async joinGroupCall(chatId, groupCallId, muted = true, rejoin = false) {
-        LOG_CALL('joinGroupCall', groupCallId, muted);
+        LOG_CALL(`joinGroupCall chatId=${chatId} id=${groupCallId} muted=${muted} rejoin=${rejoin}`);
+        const groupCall = this.get(groupCallId);
+        if (!groupCall) {
+            LOG_CALL('joinGroupCall getGroupCall', groupCallId);
+            TdLibController.send({ '@type': 'getGroupCall', group_call_id: groupCallId });
+        }
 
         let stream = null;
         try {
             stream = await getStream({ audio: true, video: false }, muted);
         } catch (e) {
-            ERROR_CALL('getStream', e);
+            ERROR_CALL('joinGroupCall getStream error', e);
             showAlert({
                 title: LStore.getString('AppName'),
                 message: LStore.getString('VoipNeedMicPermission'),
@@ -282,12 +287,18 @@ class CallStore extends EventEmitter {
                     break;
                 }
                 case 'closed': {
+                    this.hangUp(groupCallId);
                     break;
                 }
                 case 'completed': {
                     break;
                 }
                 case 'connected': {
+                    const { currentGroupCall } = this;
+                    if (currentGroupCall && currentGroupCall.connection === connection && !currentGroupCall.joined) {
+                        currentGroupCall.joined = true;
+                        this.playSound('sounds/group_call_start.mp3');
+                    }
                     break;
                 }
                 case 'disconnected': {
@@ -295,6 +306,7 @@ class CallStore extends EventEmitter {
                     break;
                 }
                 case 'failed': {
+                    this.hangUp(groupCallId);
                     break;
                 }
                 case 'new': {
@@ -316,7 +328,7 @@ class CallStore extends EventEmitter {
         if (currentGroupCall && rejoin) {
             currentGroupCall.stream = stream;
             currentGroupCall.connection = connection;
-            LOG_CALL('joinGroupCallInternal update current', groupCallId, currentGroupCall);
+            LOG_CALL('joinGroupCallInternal update currentGroupCall', groupCallId, currentGroupCall);
         } else {
             currentGroupCall = {
                 chatId,
@@ -325,29 +337,23 @@ class CallStore extends EventEmitter {
                 connection,
             }
             this.setCurrentGroupCall(currentGroupCall);
-            LOG_CALL('joinGroupCallInternal set current', groupCallId, currentGroupCall);
+            LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);
         }
 
-        // LOG_CALL('conn', connection);
         const offerOptions = {
             offerToReceiveAudio: 1,
             offerToReceiveVideo: 0,
         };
         const offer = await connection.createOffer(offerOptions);
-        // LOG_CALL('conn.setLocalDescription offer', offer, offer.sdp);
-
         await connection.setLocalDescription(offer);
-
         const clientInfo = parseSdp(offer.sdp);
-        // LOG_CALL('clientInfo', clientInfo);
-
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
         const signSource = source << 0;
 
         if (!rejoin) {
-            this.playSound('sounds/group_call_start.mp3');
             this.startConnectingSound(connection);
         }
+
         const request = {
             '@type': 'joinGroupCall',
             group_call_id: groupCallId,
@@ -361,22 +367,32 @@ class CallStore extends EventEmitter {
             is_muted: muted
         };
 
-        LOG_CALL('joinGroupCallInternal request', request);
-        const result = await TdLibController.send(request);
-        LOG_CALL(`joinGroupCallInternal result connectionState=${connection.iceConnectionState}`, result);
+        LOG_CALL('joinGroupCall', request);
+        let result = null;
+        try {
+            result = await TdLibController.send(request);
+            LOG_CALL(`joinGroupCall result connectionState=${connection.iceConnectionState}`, result);
+        } catch (e) {
+            ERROR_CALL('joinGroupCall error', e);
+        }
 
+        if (!result) {
+            LOG_CALL('joinGroupCallInternal abort 0');
+            this.closeConnectionAndStream(connection, stream);
+            return;
+        }
         if (connection.iceConnectionState !== 'new') {
-            LOG_CALL(`joinGroupCallInternal abort 0 connectionState=${connection.iceConnectionState}`);
+            LOG_CALL(`joinGroupCallInternal abort 1 connectionState=${connection.iceConnectionState}`);
             this.closeConnectionAndStream(connection, stream);
             return;
         }
         if (this.currentGroupCall !== currentGroupCall) {
-            LOG_CALL('joinGroupCallInternal abort 1', this.currentGroupCall, currentGroupCall);
+            LOG_CALL('joinGroupCallInternal abort 2', this.currentGroupCall, currentGroupCall);
             this.closeConnectionAndStream(connection, stream);
             return;
         }
         if (currentGroupCall.connection !== connection) {
-            LOG_CALL('joinGroupCallInternal abort 2');
+            LOG_CALL('joinGroupCallInternal abort 3');
             this.closeConnectionAndStream(connection, stream);
             return;
         }
@@ -401,12 +417,10 @@ class CallStore extends EventEmitter {
             transport: this.getTransport(result),
             ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: meParticipant.source === signSource, name: getUserFullName(meParticipant.user_id) }]
         };
-        // LOG_CALL('data1', data1);
 
         description.updateFromServer(data1);
         const sdp1 = description.generateSdp(true);
 
-        // LOG_CALL('conn.setRemoteDescription answer', sdp1);
         await connection.setRemoteDescription({
             type: 'answer',
             sdp: sdp1,
@@ -416,63 +430,61 @@ class CallStore extends EventEmitter {
             transport: this.getTransport(result),
             ssrcs: participants.map(x => ({ ssrc: x.source >>> 0, isMain: x.source === signSource, name: getUserFullName(x.user_id) }))
         };
-        // LOG_CALL('data2', data2);
 
         description.updateFromServer(data2);
         const sdp2 = description.generateSdp();
-        // LOG_CALL('conn.setRemoteDescription offer', sdp2);
 
         await connection.setRemoteDescription({
             type: 'offer',
             sdp: sdp2,
         });
-
         const answer = await connection.createAnswer();
-        // LOG_CALL('conn.setLocalDescription answer', [answer, answer.sdp]);
         await connection.setLocalDescription(answer);
 
-        // const clientInfo2 = parseSdp(answer.sdp);
-
-        LOG_CALL('joinGroupCallInternal finish', groupCallId);
+        LOG_CALL('joinGroupCallInternal stop', groupCallId);
     }
 
     async hangUp(groupCallId, discard = false, rejoin = false) {
-        LOG_CALL('hangUp', groupCallId, discard);
+        LOG_CALL(`hangUp start id=${groupCallId} discard=${discard} rejoin=${rejoin}`);
         const { currentGroupCall } = this;
         if (!currentGroupCall) return;
         if (currentGroupCall.groupCallId !== groupCallId) return;
 
         if (!rejoin) {
             this.setCurrentGroupCall(null);
+            this.stopConnectingSound(null);
         }
 
         const { connection, stream } = currentGroupCall;
-
         this.closeConnectionAndStream(connection, stream);
 
         document.getElementById('players').innerHTML = '';
 
-        if (!rejoin) {
-            this.stopConnectingSound(null);
-            this.playSound('sounds/group_call_end.mp3');
-        }
-
         if (discard) {
-            LOG_CALL('hangUp discard', groupCallId);
+            LOG_CALL(`hangUp discard id=${groupCallId}`);
             await TdLibController.send({
                 '@type': 'discardGroupCall',
                 group_call_id: groupCallId
             });
-        } else {
-            const groupCall = this.get(groupCallId);
-            LOG_CALL('hangUp leave', groupCallId, groupCall && groupCall.is_joined);
-            if (groupCall && groupCall.is_joined) {
-                await TdLibController.send({
-                    '@type': 'leaveGroupCall',
-                    group_call_id: groupCallId
-                });
-            }
+            return;
         }
+
+        const groupCall = this.get(groupCallId);
+        if (groupCall && groupCall.is_joined) {
+            LOG_CALL(`hangUp leave id=${groupCallId}`);
+            await TdLibController.send({
+                '@type': 'leaveGroupCall',
+                group_call_id: groupCallId
+            });
+            return;
+        }
+
+        LOG_CALL(`hangUp join payload=null id=${groupCallId}`);
+        await TdLibController.send({
+            '@type': 'joinGroupCall',
+            group_call_id: groupCallId,
+            payload: null
+        });
     }
 
     closeConnectionAndStream(connection, stream) {
@@ -502,16 +514,14 @@ class CallStore extends EventEmitter {
                     LOG_CALL('leaveGroupCall result', result);
                     if (!result) return;
 
-                    if (result.discard) {
-                        await this.hangUp(groupCallId, true);
-                    } else {
-                        await this.hangUp(groupCallId);
-                    }
+                    this.playSound('sounds/group_call_end.mp3');
+                    await this.hangUp(groupCallId, result.discard);
                 }
             });
             return;
         }
 
+        this.playSound('sounds/group_call_end.mp3');
         await this.hangUp(groupCallId);
     }
 

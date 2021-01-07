@@ -11,12 +11,8 @@ import { withTranslation } from 'react-i18next';
 import Button from '@material-ui/core/Button';
 import GroupCallJoinPanelSubtitle from './GroupCallJoinPanelSubtitle';
 import GroupCallRecentParticipants from './GroupCallRecentParticipants';
-import { getStream } from '../../Calls/Utils';
-import { showAlert } from '../../Actions/Client';
-import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
+import CallStore from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
-import LStore from '../../Stores/LocalizationStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './GroupCallJoinPanel.css';
 
 class GroupCallJoinPanel extends React.Component {
@@ -102,21 +98,10 @@ class GroupCallJoinPanel extends React.Component {
         if (!chat) return null;
 
         const { voice_chat_group_call_id } = chat;
-        let groupCall = CallStore.get(voice_chat_group_call_id);
-        if (!groupCall) {
-            groupCall = await TdLibController.send({
-                '@type': 'getGroupCall',
-                group_call_id: voice_chat_group_call_id
-            });
-        }
-        LOG_CALL('groupCall', groupCall);
-        if (!groupCall) return;
-
-        const { is_joined } = groupCall;
-        if (is_joined) return;
+        const groupCall = CallStore.get(voice_chat_group_call_id);
+        if (groupCall && groupCall.is_joined) return;
 
         const muted = true;
-
         await CallStore.joinGroupCall(chatId, voice_chat_group_call_id, muted);
     };
 
