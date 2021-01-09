@@ -51,6 +51,8 @@ import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MediaViewer.css';
 import LStore from '../../Stores/LocalizationStore';
+import AppStore from '../../Stores/ApplicationStore';
+
 
 class MediaViewer extends React.Component {
     constructor(props) {
@@ -131,6 +133,8 @@ class MediaViewer extends React.Component {
         MessageStore.on('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.on('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.on('updateMessageContent', this.onUpdateMessageContent);
+
+        AppStore.on('clientUpdateChatId', this.handleClose); 
     }
 
     componentWillUnmount() {
@@ -138,6 +142,9 @@ class MediaViewer extends React.Component {
         MessageStore.off('updateDeleteMessages', this.onUpdateDeleteMessages);
         MessageStore.off('updateNewMessage', this.onUpdateNewMessage);
         MessageStore.off('updateMessageContent', this.onUpdateMessageContent);
+
+        AppStore.off('clientUpdateChatId', this.handleClose); 
+
     }
 
     onKeyDown = event => {
