@@ -18,6 +18,7 @@ import { getChatTitle } from '../../Utils/Chat';
 import { showSnackbar } from '../../Actions/Client';
 import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
+import TdLibController from '../../Controllers/TdLibController';
 import './GroupCallTopPanel.css';
 
 class GroupCallTopPanel extends React.Component {
@@ -50,38 +51,52 @@ class GroupCallTopPanel extends React.Component {
     }
 
     componentDidMount() {
-        CallStore.on('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
-        CallStore.on('clientUpdateGroupCallConnectionState', this.handleClientUpdateGroupCallConnectionState);
-        CallStore.on('updateGroupCall', this.handleClientUpdateGroupCall);
+        CallStore.on('clientUpdateGroupCall', this.onClientUpdateGroupCall);
+        CallStore.on('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
+        CallStore.on('clientUpdateGroupCallMuted', this.onClientUpdateGroupCallMuted);
+        CallStore.on('updateGroupCall', this.onUpdateGroupCall);
     }
 
     componentWillUnmount() {
-        CallStore.off('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
-        CallStore.off('clientUpdateGroupCallConnectionState', this.handleClientUpdateGroupCallConnectionState);
-        CallStore.off('updateGroupCall', this.handleClientUpdateGroupCall);
+        CallStore.off('clientUpdateGroupCall', this.onClientUpdateGroupCall);
+        CallStore.off('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
+        CallStore.off('clientUpdateGroupCallMuted', this.onClientUpdateGroupCallMuted);
+        CallStore.off('updateGroupCall', this.onUpdateGroupCall);
     }
 
-    handleUpdateGroupCall = update => {
+    onClientUpdateGroupCallMuted = update => {
+        const { groupCallId, muted } = update;
+        const { call } = this.state;
+        if (!call) return;
+
+        if (groupCallId !== call.groupCallId) return;
+
+        this.setState({
+            status: !muted ? 'unmuted' : 'muted'
+        });
+    }
+
+    onUpdateGroupCall = update => {
         const { group_call } = update;
         const { call } = this.state;
         if (!call) return;
 
         if (group_call.id !== call.groupCallId) return;
 
-        this.handleClientUpdateGroupCall(update);
+        this.onClientUpdateGroupCall(update);
     };
 
-    handleClientUpdateGroupCallConnectionState = update => {
+    onClientUpdateGroupCallConnectionState = update => {
         const { groupCallId } = update;
         const { call } = this.state;
         if (!call) return;
 
         if (groupCallId !== call.groupCallId) return;
 
-        this.handleClientUpdateGroupCall(update);
+        this.onClientUpdateGroupCall(update);
     };
 
-    handleClientUpdateGroupCall = update => {
+    onClientUpdateGroupCall = update => {
         const { currentGroupCall: call } = CallStore;
 
         let connected = false;
@@ -97,7 +112,7 @@ class GroupCallTopPanel extends React.Component {
                     status = audioTracks.length > 0 && audioTracks[0].enabled ? 'unmuted' : 'muted';
                 }
             }
-            connected = connection && connection.iceConnectionState === 'connected';
+            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
         }
 
         this.saveMessagesScrollPosition();
@@ -142,7 +157,9 @@ class GroupCallTopPanel extends React.Component {
         });
     }
 
-    handleMicrophone = async () => {
+    handleMicrophone = async event => {
+        event.stopPropagation();
+
         const { call, status } = this.state;
         if (!call) return;
 
@@ -165,23 +182,32 @@ class GroupCallTopPanel extends React.Component {
                 )
             });
         } else {
-            const audioTracks = stream.getAudioTracks();
-            if (audioTracks.length > 0) {
-                audioTracks[0].enabled = !audioTracks[0].enabled;
-                this.setState({
-                    status: audioTracks[0].enabled ? 'unmuted' : 'muted'
-                });
-            }
+            CallStore.changeMuted(!CallStore.isMuted());
         }
     };
 
-    handleLeave = async () => {
+    handleLeave = async event => {
+        event.stopPropagation();
+
         const { call } = this.state;
         if (!call) return;
 
         const { chatId, groupCallId } = call;
 
         await CallStore.leaveGroupCall(chatId, groupCallId);
+    };
+
+    handleOpenGroupCall = () => {
+        const { call } = this.state;
+        if (!call) return;
+
+        const { groupCallId } = call;
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateGroupCallPanel',
+            opened: true,
+            groupCallId
+        });
     };
 
     render() {
@@ -193,25 +219,25 @@ class GroupCallTopPanel extends React.Component {
         const title = connected ? getChatTitle(chatId).toUpperCase() : t('Connecting');
 
         return (
-            <>
-                <div className={classNames('group-call-top-panel',
-                    {
-                        'group-call-top-panel-muted-by-admin ': connected && status === 'forceMuted',
-                        'group-call-top-panel-unmuted': connected && status === 'unmuted',
-                        'group-call-top-panel-connecting': !connected,
+            <div className={classNames('group-call-top-panel',
+                {
+                    'group-call-top-panel-muted-by-admin ': connected && status === 'forceMuted',
+                    'group-call-top-panel-unmuted': connected && status === 'unmuted',
+                    'group-call-top-panel-connecting': !connected,
 
-                    })}>
-                    <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>
-                        {status === 'unmuted' ? <MicIcon fontSize='small'/> : <MicOffIcon fontSize='small' />}
-                    </IconButton>
-                    <div className='group-call-top-panel-title'>
-                        {title}
-                    </div>
-                    <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleLeave}>
-                        <CallEndIcon fontSize='small' />
-                    </IconButton>
+                })}
+                onClick={this.handleOpenGroupCall}
+            >
+                <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleMicrophone}>
+                    {status === 'unmuted' ? <MicIcon fontSize='small'/> : <MicOffIcon fontSize='small' />}
+                </IconButton>
+                <div className='group-call-top-panel-title'>
+                    {title}
                 </div>
-            </>
+                <IconButton className='header-player-button' style={{ color: 'white' }} onClick={this.handleLeave}>
+                    <CallEndIcon fontSize='small' />
+                </IconButton>
+            </div>
         )
     }
 

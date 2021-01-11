@@ -110,6 +110,7 @@ class GroupCallJoinPanel extends React.Component {
         if (!chatId) return null;
 
         const { groupCallId, isCurrent } = this.state;
+        // console.log('[call] join.render', groupCallId, isCurrent);
         if (!groupCallId) return null;
         if (isCurrent) return null;
 
@@ -117,7 +118,7 @@ class GroupCallJoinPanel extends React.Component {
             <div className='group-call-join-panel' onClick={this.handleJoin}>
                 <div className='group-call-join-panel-content'>
                     <div className='group-call-join-panel-title'>{t('VoipGroupVoiceChat')}</div>
-                    <GroupCallJoinPanelSubtitle id={groupCallId}/>
+                    <GroupCallJoinPanelSubtitle groupCallId={groupCallId}/>
                 </div>
                 <GroupCallRecentParticipants id={groupCallId}/>
                 <Button className='group-call-join-panel-button' variant='contained' color='primary' disableElevation>

@@ -32,6 +32,8 @@
     justify-content: center;
     border-radius: 50%;
     background: var(--online-indicator);
+    color: white;
+    fill: currentColor;
 }
 
 @keyframes bar-animation-transform-1 {

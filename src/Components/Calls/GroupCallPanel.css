@@ -1,0 +1,71 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.group-call-panel {
+    min-width: 380px;
+    min-height: 600px;
+    border-radius: 12px;
+    background: var(--group-call-panel);
+    display: flex;
+    flex-direction: column;
+}
+
+.group-call-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+}
+
+.group-call-panel-caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.group-call-panel-participants {
+    flex: 1 1 auto;
+}
+
+.group-call-panel-buttons {
+    padding: 40px;
+    display: flex;
+    flex-direction: row;
+}
+
+.group-call-panel-button-settings {
+    border-radius: 50%;
+    background: var(--group-call-button-settings-mutedbyadmin);
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-call-panel-button-leave {
+    border-radius: 50%;
+    background: var(--group-call-button-leave);
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-call-panel-button {
+    margin-top: 30px;
+}
+
+.group-call-panel-button-text {
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: normal;
+    text-align: center;
+}

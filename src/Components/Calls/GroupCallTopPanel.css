@@ -25,6 +25,7 @@
     height: 43px;
     padding: 0 12px;
     background: linear-gradient(to left, var(--key_voipgroup_topPanelBlue1) 0%, var(--key_voipgroup_topPanelBlue2) 100%);
+    cursor: pointer;
 }
 
 .group-call-top-panel-muted-by-admin {
@@ -42,6 +43,5 @@
 .group-call-top-panel-title {
     flex: 1 1 auto;
     text-align: center;
-    cursor: pointer;
     user-select: none;
 }

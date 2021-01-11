@@ -28,19 +28,19 @@ class GroupCallJoinPanelSubtitle extends React.Component {
     }
 
     static getDerivedStateFromProps(props, state) {
-        const { id } = props;
-        const { prevId } = state;
+        const { groupCallId } = props;
+        const { prevGroupCallId } = state;
 
-        if (prevId !== id) {
+        if (prevGroupCallId !== groupCallId) {
             let participantCount = 0;
-            const groupCall = CallStore.get(id);
+            const groupCall = CallStore.get(groupCallId);
             if (groupCall) {
                 const { participant_count } = groupCall;
                 participantCount = participant_count;
             }
 
             return {
-                prevId: id,
+                prevGroupCallId: groupCallId,
                 participantCount
             };
         }
@@ -57,13 +57,13 @@ class GroupCallJoinPanelSubtitle extends React.Component {
     }
 
     onUpdateGroupCall = update => {
-        const { id } = this.props;
+        const { groupCallId } = this.props;
         const { group_call } = update;
 
-        if (group_call && group_call.id !== id) return;
+        if (group_call && group_call.id !== groupCallId) return;
 
         let participantCount = 0;
-        const groupCall = CallStore.get(id);
+        const groupCall = CallStore.get(groupCallId);
         if (groupCall) {
             const { participant_count } = groupCall;
             participantCount = participant_count;
@@ -73,12 +73,12 @@ class GroupCallJoinPanelSubtitle extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
+        const { t, participantsOnly } = this.props;
         const { participantCount } = this.state;
 
         return (
             <div className='group-call-join-panel-subtitle'>
-                {participantCount === 0? t('MembersTalkingNobody') : LStore.formatPluralString('Participants', participantCount)}
+                {participantCount === 0 && !participantsOnly? t('MembersTalkingNobody') : LStore.formatPluralString('Participants', participantCount)}
             </div>
         );
     }
@@ -86,7 +86,12 @@ class GroupCallJoinPanelSubtitle extends React.Component {
 }
 
 GroupCallJoinPanelSubtitle.propTypes = {
-    id: PropTypes.number
+    groupCallId: PropTypes.number,
+    participantsOnly: PropTypes.bool
 };
+
+GroupCallJoinPanelSubtitle.defaultProps = {
+    participantsOnly: false
+}
 
 export default withTranslation()(GroupCallJoinPanelSubtitle);

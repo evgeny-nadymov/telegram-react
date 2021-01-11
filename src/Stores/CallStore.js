@@ -34,6 +34,7 @@ class CallStore extends EventEmitter {
         this.currentGroupCall = null;
         this.items = new Map();
         this.participants = new Map();
+        this.panelOpened = false;
     };
 
     onUpdate = update => {
@@ -86,11 +87,27 @@ class CallStore extends EventEmitter {
             case 'clientUpdateGroupCall': {
                 this.currentGroupCall = update.call;
 
+                if (this.panelOpened && !this.currentGroupCall) {
+                    TdLibController.clientUpdate({
+                        '@type': 'clientUpdateGroupCallPanel',
+                        opened: false
+                    });
+                }
+
                 this.emit('clientUpdateGroupCall', update);
                 break;
             }
             case 'clientUpdateGroupCallConnectionState': {
                 this.emit('clientUpdateGroupCallConnectionState', update);
+                break;
+            }
+            case 'clientUpdateGroupCallMuted': {
+                this.emit('clientUpdateGroupCallMuted', update);
+                break;
+            }
+            case 'clientUpdateGroupCallPanel': {
+                this.panelOpened = update.opened;
+                this.emit('clientUpdateGroupCallPanel', update);
                 break;
             }
             default:
@@ -254,9 +271,8 @@ class CallStore extends EventEmitter {
 
         const { chatId, groupCallId } = currentGroupCall;
 
-        const muted = true;
         this.hangUp(groupCallId, false, true);
-        this.joinGroupCall(chatId, groupCallId, muted, true);
+        this.joinGroupCall(chatId, groupCallId, this.isMuted(), true);
     }
 
     async joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin = false) {
@@ -567,6 +583,40 @@ class CallStore extends EventEmitter {
 
     onTrack(event) {
         this.tryAddTrack(event);
+    }
+
+    isMuted() {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return true;
+
+        const { groupCallId, stream } = currentGroupCall;
+        if (!stream) return true;
+
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            return !audioTracks[0].enabled;
+        }
+
+        return true;
+    }
+
+    changeMuted(muted) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        const { groupCallId, stream } = currentGroupCall;
+        if (!stream) return;
+
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            audioTracks[0].enabled = !muted;
+        }
+
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateGroupCallMuted',
+            groupCallId,
+            muted
+        });
     }
 }
 

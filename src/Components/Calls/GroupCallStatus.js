@@ -92,6 +92,20 @@ class GroupCallStatus extends React.Component {
                         <div className={classNames('group-call-status-bar', 'group-call-status-bar1')}/>
                         <div className={classNames('group-call-status-bar', 'group-call-status-bar2')}/>
                         <div className={classNames('group-call-status-bar', 'group-call-status-bar1')}/>
+                        {/*<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 100 100">*/}
+                        {/*    <rect rx="10" ry="10" x="0" y="0" width="20" height="60">*/}
+                        {/*        <animate attributeName="height" values="60;20;100;20;60;20;100;20;60" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*        <animate attributeName="y" values="20;40;0;40;20;40;0;40;20" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*    </rect>*/}
+                        {/*    <rect rx="10" ry="10" x="40" y="0" width="20" height="60">*/}
+                        {/*        <animate attributeName="height" values="20;100;20;60;20;100;20;100;20" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*        <animate attributeName="y" values="40;0;40;20;40;0;40;0;40" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*    </rect>*/}
+                        {/*    <rect rx="10" ry="10" x="80" y="0" width="20" height="60">*/}
+                        {/*        <animate attributeName="height" values="60;20;100;20;60;20;100;20;60" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*        <animate attributeName="y" values="20;40;0;40;20;40;0;40;20" dur="3.2s" fill="freeze" repeatCount="indefinite" />*/}
+                        {/*    </rect>*/}
+                        {/*</svg>*/}
                     </div>
                 </div>
             </div>

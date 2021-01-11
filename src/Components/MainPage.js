@@ -10,23 +10,25 @@ import classNames from 'classnames';
 import { compose } from '../Utils/HOC';
 import withLanguage from '../Language';
 import withSnackbarNotifications from '../Notifications';
-import PipPlayer from './Player/PipPlayer';
-import ForwardDialog from './Popup/ForwardDialog';
+import Actions from './Actions';
 import ChatInfo from './ColumnRight/ChatInfo';
 import Dialogs from './ColumnLeft/Dialogs';
 import DialogDetails from './ColumnMiddle/DialogDetails';
+import ForwardDialog from './Popup/ForwardDialog';
+import GroupCall from './Calls/GroupCall';
 import InstantViewer from './InstantView/InstantViewer';
 import MediaViewer from './Viewer/MediaViewer';
+import PipPlayer from './Player/PipPlayer';
 import ProfileMediaViewer from './Viewer/ProfileMediaViewer';
 import { highlightMessage } from '../Actions/Client';
 import AppStore from '../Stores/ApplicationStore';
+import CallStore from '../Stores/CallStore';
 import ChatStore from '../Stores/ChatStore';
 import InstantViewStore from '../Stores/InstantViewStore';
 import UserStore from '../Stores/UserStore';
 import PlayerStore from '../Stores/PlayerStore';
 import TdLibController from '../Controllers/TdLibController';
 import '../TelegramApp.css';
-import Actions from './Actions';
 
 class MainPage extends React.Component {
     constructor(props) {
@@ -43,7 +45,8 @@ class MainPage extends React.Component {
             isSmallWidth,
             forwardInfo: null,
             instantViewContent: null,
-            videoInfo: null
+            videoInfo: null,
+            groupCallId: 0
         };
     }
 
@@ -56,6 +59,7 @@ class MainPage extends React.Component {
         AppStore.on('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         AppStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         AppStore.on('clientUpdateForward', this.onClientUpdateForward);
+        CallStore.on('clientUpdateGroupCallPanel', this.onClientUpdateGroupCallPanel);
         InstantViewStore.on('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         PlayerStore.on('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
@@ -69,9 +73,18 @@ class MainPage extends React.Component {
         AppStore.off('clientUpdatePageWidth', this.onClientUpdatePageWidth);
         AppStore.off('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         AppStore.off('clientUpdateForward', this.onClientUpdateForward);
+        CallStore.off('clientUpdateGroupCallPanel', this.onClientUpdateGroupCallPanel);
         InstantViewStore.off('clientUpdateInstantViewContent', this.onClientUpdateInstantViewContent);
         PlayerStore.off('clientUpdatePictureInPicture', this.onClientUpdatePictureInPicture);
     }
+
+    onClientUpdateGroupCallPanel = update => {
+        const { opened, groupCallId } = update;
+
+        this.setState({
+            groupCallId: opened ? groupCallId : 0
+        });
+    };
 
     onClientUpdatePictureInPicture = update => {
         const { videoInfo } = update;
@@ -179,6 +192,7 @@ class MainPage extends React.Component {
             profileMediaViewerContent,
             forwardInfo,
             videoInfo,
+            groupCallId,
             isSmallWidth
         } = this.state;
 
@@ -199,6 +213,7 @@ class MainPage extends React.Component {
                 {profileMediaViewerContent && <ProfileMediaViewer {...profileMediaViewerContent} />}
                 {forwardInfo && <ForwardDialog {...forwardInfo} />}
                 {videoInfo && <PipPlayer {...videoInfo}/>}
+                {groupCallId && <GroupCall groupCallId={groupCallId}/>}
             </>
         );
     }
