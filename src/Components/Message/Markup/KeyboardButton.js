@@ -71,8 +71,6 @@ class KeyboardButton extends React.Component {
                             handled = true;
                         } else if (url.pathname.length > 1) {
                             const username = url.pathname[0] === '/' ? url.pathname.substr(1) : url.pathname;
-                            console.log('username='+username)
-
                             if (username) {
                                 if (url.searchParams.has('start')){
                                     await this.handleBotStart(username, url.searchParams.get('start'), false);
@@ -89,6 +87,8 @@ class KeyboardButton extends React.Component {
 
                                 } else if (url.searchParams.has('comment')) {
 
+                                } else if (username.indexOf('/') !== -1 ) {
+                                    href = href.replace(/\/$/, "");
                                 } else {
                                     await this.handleOpenUsername(username);
                                     handled = true;
@@ -104,13 +104,10 @@ class KeyboardButton extends React.Component {
                         break;
                     }
                     case 'tg:': {
-                        console.log('href='+href);
                         if (href.startsWith('tg:resolve') || href.startsWith('tg:\/\/resolve')) {
                             const username = url.searchParams.get('domain');
-                            console.log('!!!username='+username);
 
                             if (username) {
-                                console.log('!!!username='+username);
                                 if (username === 'telegrampassport') {
 
                                 } else {
@@ -120,7 +117,7 @@ class KeyboardButton extends React.Component {
                                     } else if (url.searchParams.has('startgroup')) {
                                         await this.handleBotStart(username, url.searchParams.get('startgroup'), true);
                                         handled = true;
-                                    } else if (url.searchParams.has('game') || url.searchParams.has('domain')) {
+                                    } else if (url.searchParams.has('game')) {
                                         await this.handleOpenUsername(username);
                                         handled = true;
                                     } else if (url.searchParams.has('resolve')) {
@@ -131,6 +128,9 @@ class KeyboardButton extends React.Component {
 
                                     } else if (url.searchParams.has('comment')) {
 
+                                    } else {
+                                        await this.handleOpenUsername(username);
+                                        handled = true;
                                     }
 
                                     if (!handled) {
@@ -247,7 +247,7 @@ class KeyboardButton extends React.Component {
         });
     }
 
-    async handleOpenUsername(username) {
+    async handleOpenUsername(username,msgid=null) {
         const chat = await TdLibController.send({
             '@type': 'searchPublicChat',
             username
@@ -261,7 +261,7 @@ class KeyboardButton extends React.Component {
 
         if (!chat) return;
 
-        openChat(chat.id);
+        openChat(chat.id, msgid);
     }
 
     async handleBotStart(username, parameter, isGroup) {
@@ -291,6 +291,7 @@ class KeyboardButton extends React.Component {
             '@type': 'getMessageLinkInfo',
             url
         }).catch(e => {
+            showOpenUrlAlert(url, { punycode: false, ask: true, tryTelegraph: true }); 
             console.log('[SafeLink] getMessageLinkInfo error', url, e);
             throw e;
         });

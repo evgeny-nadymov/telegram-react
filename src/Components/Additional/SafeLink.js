@@ -233,6 +233,8 @@ class SafeLink extends React.Component {
 
                                 } else if (url.searchParams.has('comment')) {
 
+                                } else if (username.indexOf('/') !== -1 ) {
+                                    href = href.replace(/\/$/, "");
                                 } else {
                                     await this.handleOpenUsername(username);
                                     handled = true;
