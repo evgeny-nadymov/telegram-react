@@ -1,0 +1,37 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.group-call-participants {
+    border-radius: 5px;
+    overflow: hidden;
+    min-height: 50px;
+    background: var(--group-call-participants-panel);
+    margin: 0 16px;
+    display: flex;
+    flex-direction: column;
+    color: var(--group-call-text-secondary);
+}
+
+.group-call-participants-invite {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 0 17px;
+    font-size: 14px;
+    line-height: normal;
+}
+
+.group-call-participants-invite:hover {
+    background: var(--group-call-participants-item-hover);
+}
+
+.group-call-participants-invite-text {
+    margin-left: 22px;
+}

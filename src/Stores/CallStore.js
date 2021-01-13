@@ -11,6 +11,7 @@ import { getUserFullName } from '../Utils/User';
 import { getStream, parseSdp } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import LStore from './LocalizationStore';
+import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
 export function LOG_CALL(str, ...data) {
@@ -71,8 +72,22 @@ class CallStore extends EventEmitter {
                     this.participants.set(group_call_id, participants);
                 }
 
-                const { user_id } = participant;
+                const { user_id, is_muted } = participant;
                 participants.set(user_id, participant);
+
+                // mute stream on updateGroupCallParticipant, unmute can be done only on UI user action
+                if (user_id === UserStore.getMyId() && is_muted) {
+                    const { currentGroupCall } = this;
+                    if (currentGroupCall) {
+                        const { groupCallId, stream } = currentGroupCall;
+                        if (stream && group_call_id === groupCallId) {
+                            const audioTracks = stream.getAudioTracks();
+                            if (audioTracks.length > 0) {
+                                audioTracks[0].enabled = false;
+                            }
+                        }
+                    }
+                }
 
                 this.emit('updateGroupCallParticipant', update);
                 break;
@@ -99,10 +114,6 @@ class CallStore extends EventEmitter {
             }
             case 'clientUpdateGroupCallConnectionState': {
                 this.emit('clientUpdateGroupCallConnectionState', update);
-                break;
-            }
-            case 'clientUpdateGroupCallMuted': {
-                this.emit('clientUpdateGroupCallMuted', update);
                 break;
             }
             case 'clientUpdateGroupCallPanel': {
@@ -612,10 +623,11 @@ class CallStore extends EventEmitter {
             audioTracks[0].enabled = !muted;
         }
 
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateGroupCallMuted',
-            groupCallId,
-            muted
+        TdLibController.send({
+            '@type': 'toggleGroupCallParticipantIsMuted',
+            group_call_id: groupCallId,
+            user_id: UserStore.getMyId(),
+            is_muted: muted
         });
     }
 }

@@ -8,17 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '../../Assets/Icons/Close';
-import MicIcon from '../../Assets/Icons/Mic';
-import MicOffIcon from '../../Assets/Icons/MicOff';
-import { showSnackbar } from '../../Actions/Client';
 import CallStore from '../../Stores/CallStore';
-import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
-import './GroupCallMicButton.css';
+import './GroupCallPanelButtons.css'
 
-class GroupCallMicButton extends React.Component {
+class GroupCallPanelButtons extends React.Component {
     constructor(props) {
         super(props);
 
@@ -42,7 +36,7 @@ class GroupCallMicButton extends React.Component {
             call,
             status,
             connected
-        }
+        };
     }
 
     componentDidMount() {
@@ -68,7 +62,7 @@ class GroupCallMicButton extends React.Component {
 
         if (group_call_id !== call.groupCallId) return;
 
-        const { user_id, is_muted } = participant
+        const { user_id } = participant;
         if (user_id !== UserStore.getMyId()) return;
 
         let connected = false;
@@ -83,12 +77,11 @@ class GroupCallMicButton extends React.Component {
                     status = !CallStore.isMuted() ? 'unmuted' : 'muted';
                 }
             }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
+            // connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
         }
 
         this.setState({
-            status,
-            connected
+            status
         });
     }
 
@@ -137,56 +130,24 @@ class GroupCallMicButton extends React.Component {
         });
     };
 
-    handleClick = () => {
-        const { call, status } = this.state;
-        if (!call) return;
-
-        const { chatId, groupCallId, stream } = call;
-
-        const groupCall = CallStore.get(groupCallId);
-        if (!groupCall) return;
-
-        if (!groupCall.can_unmute_self) {
-            showSnackbar(LStore.getString('VoipMutedByAdminInfo'), closeSnackbar => snackKey => {
-                return (
-                    <IconButton
-                        key='close'
-                        aria-label='Close'
-                        color='inherit'
-                        className='notification-close-button'
-                        onClick={() => { closeSnackbar(snackKey); }}>
-                        <CloseIcon />
-                    </IconButton>
-                )
-            });
-        } else {
-            CallStore.changeMuted(!CallStore.isMuted());
-        }
-    };
 
     render() {
+        const { children } = this.props;
         const { status, connected } = this.state;
 
         return (
-            <div className='group-call-mic-button-wrapper' >
-                <div className={classNames('group-call-mic-button',
-                    {
-                        'group-call-muted-by-admin ': connected && status === 'forceMuted',
-                        'group-call-unmuted': connected && status === 'unmuted',
-                        'group-call-connecting': !connected,
-                    })}
-                    onClick={this.handleClick}
-                >
-                    {status === 'unmuted' ? <MicIcon style={{ fontSize: 36 }}/> : <MicOffIcon style={{ fontSize: 36 }}/>}
-                </div>
+            <div className={classNames('group-call-panel-buttons', {
+                'group-call-connecting': !connected,
+                'group-call-muted': connected && status === 'muted',
+                'group-call-muted-by-admin': connected && status === 'forceMuted',
+                'group-call-unmuted': connected && status === 'unmuted',
+            })}>
+                {children}
             </div>
-        )
+        );
     }
 }
 
-GroupCallMicButton.propTypes = {
-    groupCallId: PropTypes.number,
-    onClick: PropTypes.func
-};
+GroupCallPanelButtons.propTypes = {};
 
-export default GroupCallMicButton;
+export default GroupCallPanelButtons;

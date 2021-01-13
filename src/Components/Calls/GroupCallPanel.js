@@ -11,10 +11,12 @@ import { withTranslation } from 'react-i18next';
 import GroupCallMicButton from './GroupCallMicButton';
 import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
-import TuneIcon from '../../Assets/Icons/Tune';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
+import GroupCallParticipants from './GroupCallParticipants';
+import GroupCallSettingsButton from './GroupCallSettingsButton';
+import GroupCallPanelButtons from './GroupCallPanelButtons';
 
 class GroupCallPanel extends React.Component {
 
@@ -51,13 +53,11 @@ class GroupCallPanel extends React.Component {
                     </div>
                 </div>
                 <div className='group-call-panel-participants'>
-
+                    <GroupCallParticipants groupCallId={groupCallId}/>
                 </div>
-                <div className='group-call-panel-buttons'>
+                <GroupCallPanelButtons>
                     <div className='group-call-panel-button'>
-                        <div className='group-call-panel-button-settings'>
-                            <TuneIcon />
-                        </div>
+                        <GroupCallSettingsButton/>
                         <div className='group-call-panel-button-text'>
                             {t('Settings')}
                         </div>
@@ -71,7 +71,7 @@ class GroupCallPanel extends React.Component {
                             {t('Leave')}
                         </div>
                     </div>
-                </div>
+                </GroupCallPanelButtons>
             </div>
         );
     }

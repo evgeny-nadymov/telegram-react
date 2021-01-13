@@ -1,0 +1,35 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.group-call-settings-button {
+    border-radius: 50%;
+    background: var(--group-call-button-settings);
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.15s linear;
+    will-change: background-color;
+}
+
+.group-call-muted-by-admin .group-call-settings-button {
+    background: var(--group-call-button-settings-muted-by-admin);
+}
+
+.group-call-muted .group-call-settings-button {
+    background: var(--group-call-button-settings-muted);
+}
+
+.group-call-unmuted .group-call-settings-button {
+    background: var(--group-call-button-settings-unmuted);
+}
+
+.group-call-connecting .group-call-settings-button {
+    background: var(--group-call-button-settings-connecting);
+}

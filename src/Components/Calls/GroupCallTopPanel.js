@@ -18,6 +18,7 @@ import { getChatTitle } from '../../Utils/Chat';
 import { showSnackbar } from '../../Actions/Client';
 import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
+import UserStore from '../../Stores/UserStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './GroupCallTopPanel.css';
 
@@ -25,11 +26,27 @@ class GroupCallTopPanel extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {
-            call: CallStore.currentGroupCall,
-            status: 'muted',
-            connected: false
+        const { currentGroupCall: call } = CallStore;
+        let connected = false;
+        let status = '';
+        if (call) {
+            const { groupCallId, connection } = call;
+            const groupCall = CallStore.get(groupCallId);
+            if (groupCall) {
+                if (!groupCall.can_unmute_self) {
+                    status = 'forceMuted';
+                } else {
+                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
+                }
+            }
+            connected = connection && connection.iceConnectionState === 'connected';
         }
+
+        this.state = {
+            call,
+            status,
+            connected
+        };
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -53,26 +70,46 @@ class GroupCallTopPanel extends React.Component {
     componentDidMount() {
         CallStore.on('clientUpdateGroupCall', this.onClientUpdateGroupCall);
         CallStore.on('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
-        CallStore.on('clientUpdateGroupCallMuted', this.onClientUpdateGroupCallMuted);
+        CallStore.on('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
         CallStore.on('updateGroupCall', this.onUpdateGroupCall);
     }
 
     componentWillUnmount() {
         CallStore.off('clientUpdateGroupCall', this.onClientUpdateGroupCall);
         CallStore.off('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
-        CallStore.off('clientUpdateGroupCallMuted', this.onClientUpdateGroupCallMuted);
+        CallStore.off('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
         CallStore.off('updateGroupCall', this.onUpdateGroupCall);
     }
 
-    onClientUpdateGroupCallMuted = update => {
-        const { groupCallId, muted } = update;
+    onUpdateGroupCallParticipant = update => {
+        const { group_call_id, participant } = update;
+        if (!participant) return;
+
         const { call } = this.state;
         if (!call) return;
 
-        if (groupCallId !== call.groupCallId) return;
+        if (group_call_id !== call.groupCallId) return;
+
+        const { user_id } = participant;
+        if (user_id !== UserStore.getMyId()) return;
+
+        let connected = false;
+        let status = '';
+        if (call) {
+            const { groupCallId, connection } = call;
+            const groupCall = CallStore.get(groupCallId);
+            if (groupCall) {
+                if (!groupCall.can_unmute_self) {
+                    status = 'forceMuted';
+                } else {
+                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
+                }
+            }
+            // connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
+        }
 
         this.setState({
-            status: !muted ? 'unmuted' : 'muted'
+            status
         });
     }
 
@@ -102,14 +139,13 @@ class GroupCallTopPanel extends React.Component {
         let connected = false;
         let status = '';
         if (call) {
-            const { groupCallId, stream, connection } = call;
+            const { groupCallId, connection } = call;
             const groupCall = CallStore.get(groupCallId);
             if (groupCall) {
                 if (!groupCall.can_unmute_self) {
                     status = 'forceMuted';
                 } else {
-                    const audioTracks = stream.getAudioTracks();
-                    status = audioTracks.length > 0 && audioTracks[0].enabled ? 'unmuted' : 'muted';
+                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
                 }
             }
             connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';

@@ -1,0 +1,67 @@
+/*
+ *  Copyright (c) 2018-present, Evgeny Nadymov
+ *
+ * This source code is licensed under the GPL v.3.0 license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+.group-call-participant {
+    height: 52px;
+    padding: 0 12px;
+    user-select: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.group-call-participant .user-tile {
+    width: 40px;
+    height: 40px;
+}
+
+.group-call-participant:hover {
+    background: var(--group-call-participants-item-hover);
+}
+
+.group-call-participant-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    margin-left: 12px;
+}
+
+.group-call-participant-content-title {
+    word-wrap: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--group-call-text-primary);
+}
+
+.group-call-participant-content-subtitle {
+    font-size: 14px;
+    line-height: 19px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.group-call-participant-mic {
+    width: 24px;
+    height: 24px;
+}
+
+.participant-listening {
+    color: var(--group-call-status-listening)
+}
+
+.participant-speaking {
+    color: var(--group-call-status-speaking);
+}
+
+.participant-muted-by-admin {
+    color: var(--group-call-status-muted-by-admin);
+}
+
+
