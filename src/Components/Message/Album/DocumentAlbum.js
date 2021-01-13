@@ -256,6 +256,10 @@ class DocumentAlbum extends React.Component {
                         tile = <ChatTile small chatId={forward_info.origin.chat_id} onSelect={this.handleSelectChat} />;
                         break;
                     }
+                    case 'messageForwardOriginChat': {
+                        tile = <ChatTile small chatId={forward_info.origin.sender_chat_id} onSelect={this.handleSelectChat} />;
+                        break;
+                    }
                 }
             } else if (isPrivate) {
                 tile = <EmptyTile small />
