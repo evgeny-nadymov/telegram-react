@@ -11,7 +11,8 @@ import { withTranslation } from 'react-i18next';
 import AddMemberIcon from '../../Assets/Icons/AddMember';
 import GroupCallParticipant from './GroupCallParticipant';
 import { loadUsersContent } from '../../Utils/File';
-import { orderCompare, throttle } from '../../Utils/Common';
+import { orderCompare } from '../../Utils/Common';
+import { PROFILE_PHOTO_PRELOAD_TIME_MS } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import FileStore from '../../Stores/FileStore';
 import './GroupCallParticipants.css';
@@ -25,7 +26,7 @@ class GroupCallParticipants extends React.Component {
         };
 
         this.participantsMap = new Map();
-        this.updateParticipants = throttle(this.updateParticipants, 1000);
+        // this.updateParticipants = throttle(this.updateParticipants, 1000);
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -67,16 +68,13 @@ class GroupCallParticipants extends React.Component {
             this.loadContent();
         }
 
-        this.updateParticipants();
-    };
-
-    updateParticipants = () => {
-        const { groupCallId } = this.props;
-
         const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
-        this.setState({
-            participants: participants.map(x => x.user_id)
-        });
+        // wait 500 ms for profile photo
+        setTimeout(() => {
+            this.setState({
+                participants: participants.map(x => x.user_id)
+            });
+        }, PROFILE_PHOTO_PRELOAD_TIME_MS);
     };
 
     preloadContent = () => {

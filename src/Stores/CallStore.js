@@ -8,11 +8,12 @@ import EventEmitter from './EventEmitter';
 import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { getUserFullName } from '../Utils/User';
-import { getStream, parseSdp } from '../Calls/Utils';
+import { getStream, getTransport, parseSdp } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import LStore from './LocalizationStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
+import { throttle } from '../Utils/Common';
 
 export function LOG_CALL(str, ...data) {
     console.log('[call] ' + str, ...data);
@@ -29,6 +30,8 @@ class CallStore extends EventEmitter {
         this.reset();
 
         this.addTdLibListener();
+
+        this.updateGroupCallParticipants = throttle(this.updateGroupCallParticipants, 1000);
     }
 
     reset = () => {
@@ -72,7 +75,9 @@ class CallStore extends EventEmitter {
                     this.participants.set(group_call_id, participants);
                 }
 
-                const { user_id, is_muted } = participant;
+                const { user_id, is_muted, order } = participant;
+                const prevParticipant = participants.get(user_id);
+
                 participants.set(user_id, participant);
 
                 // mute stream on updateGroupCallParticipant, unmute can be done only on UI user action
@@ -87,6 +92,10 @@ class CallStore extends EventEmitter {
                             }
                         }
                     }
+                }
+
+                if (!prevParticipant && participant.order !== '0' || participant.order === '0') {
+                    this.updateGroupCallParticipants(group_call_id);
                 }
 
                 this.emit('updateGroupCallParticipant', update);
@@ -181,6 +190,52 @@ class CallStore extends EventEmitter {
 
         this.connectionAudio = null;
         connectionAudio.pause();
+    }
+
+    async updateGroupCallParticipants(groupCallId) {
+        LOG_CALL(`updateGroupCallParticipants id=${groupCallId}`);
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+        if (currentGroupCall.groupCallId !== groupCallId) return;
+
+        const { transport, meSignSource, connection, description, handleUpdateGroupCallParticipants } = currentGroupCall;
+        if (!handleUpdateGroupCallParticipants) return;
+        if (!transport) return;
+        if (!meSignSource) return;
+        if (!description) return;
+
+        if (this.updatingParticipants) {
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} cancel`, this.updatingParticipants);
+            return
+        }
+
+        try {
+            this.updatingParticipants = true;
+
+            const participants = Array.from(this.participants.get(groupCallId).values()).filter(x => x.order !== '0');
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId}`, participants);
+            const data = {
+                transport,
+                ssrcs: participants.map(x => ({
+                    ssrc: x.source >>> 0,
+                    isMain: x.source === currentGroupCall.meSignSource,
+                    name: getUserFullName(x.user_id)
+                }))
+            };
+
+            description.updateFromServer(data);
+            const sdp = description.generateSdp();
+
+            await connection.setRemoteDescription({
+                type: 'offer',
+                sdp,
+            });
+
+            const answer = await connection.createAnswer();
+            await connection.setLocalDescription(answer);
+        } finally {
+            this.updatingParticipants = false;
+        }
     }
 
     async startGroupCall(chatId) {
@@ -297,7 +352,7 @@ class CallStore extends EventEmitter {
             // LOG_CALL('conn.onicecandidate', event);
         };
         connection.oniceconnectionstatechange = event => {
-            LOG_CALL(`conn.oniceconnectionstatechange = ${connection.iceConnectionState}`, connection);
+            LOG_CALL(`conn.oniceconnectionstatechange = ${connection.iceConnectionState}`);
 
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateGroupCallConnectionState',
@@ -344,6 +399,7 @@ class CallStore extends EventEmitter {
         connection.ondatachannel = event => {
             // LOG_CALL(`conn.ondatachannel = ${connection.iceConnectionState}`);
         };
+
         if (stream) {
             stream.getTracks().forEach(track => {
                 connection.addTrack(track, stream);
@@ -354,6 +410,7 @@ class CallStore extends EventEmitter {
         if (currentGroupCall && rejoin) {
             currentGroupCall.stream = stream;
             currentGroupCall.connection = connection;
+            currentGroupCall.handleUpdateGroupCallParticipants = false;
             LOG_CALL('joinGroupCallInternal update currentGroupCall', groupCallId, currentGroupCall);
         } else {
             currentGroupCall = {
@@ -374,7 +431,8 @@ class CallStore extends EventEmitter {
         await connection.setLocalDescription(offer);
         const clientInfo = parseSdp(offer.sdp);
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
-        const signSource = source << 0;
+
+        currentGroupCall.meSignSource = source << 0;
 
         if (!rejoin) {
             this.startConnectingSound(connection);
@@ -389,7 +447,7 @@ class CallStore extends EventEmitter {
                 pwd,
                 fingerprints: [{ '@type': 'groupCallPayloadFingerprint', hash, setup: 'active', fingerprint }]
             },
-            source: signSource,
+            source: currentGroupCall.meSignSource,
             is_muted: muted
         };
 
@@ -407,6 +465,10 @@ class CallStore extends EventEmitter {
             this.closeConnectionAndStream(connection, stream);
             return;
         }
+
+        const transport = getTransport(result);
+        this.currentGroupCall.transport = transport;
+
         if (connection.iceConnectionState !== 'new') {
             LOG_CALL(`joinGroupCallInternal abort 1 connectionState=${connection.iceConnectionState}`);
             this.closeConnectionAndStream(connection, stream);
@@ -423,25 +485,27 @@ class CallStore extends EventEmitter {
             return;
         }
 
-        const description = new LocalConferenceDescription();
-        description.onSsrcs = () => {
-            // LOG_CALL('desc.onSsrcs');
-        };
+        const description = new LocalConferenceDescription();;
+        description.onSsrcs = () => { };
+
+        currentGroupCall.description = description
 
         await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
             group_call_id: groupCallId,
-            limit: 5000
+            limit: 1000
         });
 
         const participants = Array.from(this.participants.get(groupCallId).values())
-        const meParticipant = participants.filter(x => x.source === signSource)[0];
-        const otherParticipants = participants.filter(x => x.source !== signSource);
-        // LOG_CALL('participants', [participants, meParticipant, otherParticipants]);
+        const meParticipant = participants.filter(x => x.source === currentGroupCall.meSignSource)[0];
 
         const data1 = {
-            transport: this.getTransport(result),
-            ssrcs: [{ ssrc: meParticipant.source >>> 0, isMain: meParticipant.source === signSource, name: getUserFullName(meParticipant.user_id) }]
+            transport,
+            ssrcs: [{
+                ssrc: meParticipant.source >>> 0,
+                isMain: meParticipant.source === currentGroupCall.meSignSource,
+                name: getUserFullName(meParticipant.user_id)
+            }]
         };
 
         description.updateFromServer(data1);
@@ -452,20 +516,27 @@ class CallStore extends EventEmitter {
             sdp: sdp1,
         });
 
-        const data2 = {
-            transport: this.getTransport(result),
-            ssrcs: participants.map(x => ({ ssrc: x.source >>> 0, isMain: x.source === signSource, name: getUserFullName(x.user_id) }))
-        };
+        currentGroupCall.handleUpdateGroupCallParticipants = true;
+        await this.updateGroupCallParticipants(groupCallId);
 
-        description.updateFromServer(data2);
-        const sdp2 = description.generateSdp();
-
-        await connection.setRemoteDescription({
-            type: 'offer',
-            sdp: sdp2,
-        });
-        const answer = await connection.createAnswer();
-        await connection.setLocalDescription(answer);
+        // const data2 = {
+        //     transport,
+        //     ssrcs: participants.map(x => ({
+        //         ssrc: x.source >>> 0,
+        //         isMain: x.source === currentGroupCall.meSignSource,
+        //         name: getUserFullName(x.user_id)
+        //     }))
+        // };
+        //
+        // description.updateFromServer(data2);
+        // const sdp2 = description.generateSdp();
+        //
+        // await connection.setRemoteDescription({
+        //     type: 'offer',
+        //     sdp: sdp2,
+        // });
+        // const answer = await connection.createAnswer();
+        // await connection.setLocalDescription(answer);
 
         LOG_CALL('joinGroupCallInternal stop', groupCallId);
     }
@@ -551,25 +622,26 @@ class CallStore extends EventEmitter {
         await this.hangUp(groupCallId);
     }
 
-    getTransport(response) {
-        const { payload, candidates } = response;
-
-        const { ufrag, pwd, fingerprints } = payload;
-
-        return {
-            ufrag,
-            pwd,
-            fingerprints,
-            candidates
-        };
-    }
-
     tryAddTrack(event) {
-        const stream = event.streams[0];
+        const { streams, track } = event;
+
+        const stream = streams[0];
         const endpoint = stream.id.substring(6);
 
         const players = document.getElementById('players');
         if (!players) return;
+
+        if (track) {
+            track.onended = () => {
+                LOG_CALL('track.onended');
+                for (let audio of players.getElementsByTagName('audio')) {
+                    if (audio.e === endpoint && audio.srcObject === stream) {
+                        players.removeChild(audio);
+                        break;
+                    }
+                }
+            }
+        }
 
         let handled;
         for (let audio of players.getElementsByTagName('audio')) {
@@ -582,6 +654,7 @@ class CallStore extends EventEmitter {
 
         if (!handled) {
             const audio = document.createElement('audio');
+            audio.e = endpoint;
             audio.autoplay = true;
             audio.controls = true;
             audio.srcObject = stream;

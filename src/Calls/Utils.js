@@ -8,6 +8,19 @@
 // changes ssrcs
 import { LOG_CALL } from '../Stores/CallStore';
 
+export function getTransport(joinResponse) {
+    const { payload, candidates } = joinResponse;
+
+    const { ufrag, pwd, fingerprints } = payload;
+
+    return {
+        ufrag,
+        pwd,
+        fingerprints,
+        candidates
+    };
+}
+
 export function mergeSsrcs(ssrcs, newSsrcs) {
     let res = false;
     let has = (ssrcs, needle) => {

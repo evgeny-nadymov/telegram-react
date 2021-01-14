@@ -32,7 +32,7 @@ class GroupCallJoinPanel extends React.Component {
             }
 
             const { currentGroupCall } = CallStore;
-            const isCurrent = currentGroupCall && currentGroupCall.chatId === chatId;
+            const isCurrent = Boolean(currentGroupCall && currentGroupCall.chatId === chatId);
 
             return {
                 prevChatId: chatId,
@@ -45,7 +45,12 @@ class GroupCallJoinPanel extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { chatId } = this.props;
         const { isCurrent, groupCallId } = this.state;
+
+        if (nextProps.chatId !== chatId) {
+            return true;
+        }
 
         if (nextState.groupCallId !== groupCallId) {
             return true;
@@ -61,11 +66,28 @@ class GroupCallJoinPanel extends React.Component {
     componentDidMount() {
         CallStore.on('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
         CallStore.on('updateGroupCall', this.handleUpdateGroupCall);
+        ChatStore.on('updateChatVoiceChat', this.handleUpdateChatVoiceChat);
     }
 
     componentWillUnmount() {
         CallStore.off('clientUpdateGroupCall', this.handleClientUpdateGroupCall);
         CallStore.off('updateGroupCall', this.handleUpdateGroupCall);
+        ChatStore.off('updateChatVoiceChat', this.handleUpdateChatVoiceChat);
+    }
+
+    handleUpdateChatVoiceChat = update => {
+        const { chat_id } = update;
+        const { chatId } = this.props;
+
+        if ( chatId !== chat_id) return;
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        const { voice_chat_group_call_id } = chat;
+
+        this.setState({
+            groupCallId: voice_chat_group_call_id
+        });
     }
 
     handleUpdateGroupCall = update => {
@@ -110,7 +132,6 @@ class GroupCallJoinPanel extends React.Component {
         if (!chatId) return null;
 
         const { groupCallId, isCurrent } = this.state;
-        // console.log('[call] join.render', groupCallId, isCurrent);
         if (!groupCallId) return null;
         if (isCurrent) return null;
 

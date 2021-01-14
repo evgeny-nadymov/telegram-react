@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import UserTile from '../Tile/UserTile';
 import { loadUsersContent } from '../../Utils/File';
+import { PROFILE_PHOTO_PRELOAD_TIME_MS } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import FileStore from '../../Stores/FileStore';
 import './GroupCallRecentParticipants.css';
@@ -60,15 +61,13 @@ class GroupCallRecentParticipants extends React.Component {
         return null;
     }
 
-    loadContent() {
-        const { speakers } = this.state;
-
+    loadContent(speakers) {
         const store = FileStore.getStore();
         loadUsersContent(store, speakers.map(x => x.user_id));
     }
 
     componentDidMount() {
-        this.loadContent();
+        this.loadContent(this.state.speakers);
 
         CallStore.on('updateGroupCall', this.onUpdateGroupCall);
     }
@@ -90,9 +89,11 @@ class GroupCallRecentParticipants extends React.Component {
             speakers = recent_speakers;
         }
 
-        this.setState({ speakers }, () => {
-            this.loadContent();
-        });
+        this.loadContent(speakers);
+
+        setTimeout(() => {
+            this.setState({ speakers });
+        }, PROFILE_PHOTO_PRELOAD_TIME_MS);
     };
 
     render() {
