@@ -6,14 +6,13 @@
  */
 
 .group-call-participants {
-    border-radius: 5px;
     overflow: hidden;
     min-height: 50px;
-    background: var(--group-call-participants-panel);
-    margin: 0 16px;
     display: flex;
     flex-direction: column;
     color: var(--group-call-text-secondary);
+    background: var(--group-call-participants-panel);
+    border-radius: 5px;
 }
 
 .group-call-participants-invite {

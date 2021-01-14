@@ -8,15 +8,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
+import CallEndIcon from '../../Assets/Icons/CallEnd';
 import GroupCallMicButton from './GroupCallMicButton';
 import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
-import CallEndIcon from '../../Assets/Icons/CallEnd';
+import GroupCallSettingsButton from './GroupCallSettingsButton';
+import GroupCallPanelButtons from './GroupCallPanelButtons';
+import GroupCallParticipants from './GroupCallParticipants';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
-import GroupCallParticipants from './GroupCallParticipants';
-import GroupCallSettingsButton from './GroupCallSettingsButton';
-import GroupCallPanelButtons from './GroupCallPanelButtons';
 
 class GroupCallPanel extends React.Component {
 
@@ -52,7 +52,7 @@ class GroupCallPanel extends React.Component {
                         <GroupCallSubtitle groupCallId={groupCallId} participantsOnly={true}/>
                     </div>
                 </div>
-                <div className='group-call-panel-participants'>
+                <div className='group-call-panel-participants scrollbars-hidden'>
                     <GroupCallParticipants groupCallId={groupCallId}/>
                 </div>
                 <GroupCallPanelButtons>

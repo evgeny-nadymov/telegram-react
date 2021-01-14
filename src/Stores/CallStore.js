@@ -290,7 +290,7 @@ class CallStore extends EventEmitter {
         LOG_CALL('joinGroupCallInternal start', groupCallId);
         const connection = new RTCPeerConnection(null);
         connection.ontrack = event => {
-            // LOG_CALL('conn.ontrack', event);
+            LOG_CALL('conn.ontrack', event);
             this.onTrack(event);
         };
         connection.onicecandidate = event => {
@@ -346,7 +346,6 @@ class CallStore extends EventEmitter {
         };
         if (stream) {
             stream.getTracks().forEach(track => {
-                // LOG_CALL('conn.addTrack', [track, stream]);
                 connection.addTrack(track, stream);
             });
         }
@@ -583,8 +582,8 @@ class CallStore extends EventEmitter {
 
         if (!handled) {
             const audio = document.createElement('audio');
-            audio.autoplay = 'true';
-            audio.controls = 'controls';
+            audio.autoplay = true;
+            audio.controls = true;
             audio.srcObject = stream;
             audio.volume = 1.0;
             players.appendChild(audio);

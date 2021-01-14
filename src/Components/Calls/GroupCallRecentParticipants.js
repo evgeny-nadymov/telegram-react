@@ -102,7 +102,7 @@ class GroupCallRecentParticipants extends React.Component {
 
         return (
             <div className='group-call-recent-participants'>
-                {speakers.map(x => <UserTile key={x.user_id} userId={x.user_id} small speaking={x.is_speaking}/>)}
+                {[...speakers].reverse().map(x => <UserTile key={x.user_id} userId={x.user_id} small speaking={x.is_speaking}/>)}
             </div>
         );
     }

@@ -6,12 +6,13 @@
  */
 
 .group-call-panel {
-    min-width: 380px;
-    min-height: 600px;
+    width: 380px;
+    height: 600px;
     border-radius: 12px;
     background: var(--group-call-panel);
     display: flex;
     flex-direction: column;
+    will-change: left, top;
 }
 
 .group-call-panel-header {
@@ -19,6 +20,7 @@
     align-items: center;
     justify-content: center;
     height: 60px;
+    flex-shrink: 0;
 }
 
 .group-call-panel-caption {
@@ -29,9 +31,13 @@
 
 .group-call-panel-participants {
     flex: 1 1 auto;
+    overflow-y: auto;
+    margin: 0 16px;
+    border-radius: 5px;
 }
 
 .group-call-panel-buttons {
+    flex-shrink: 0;
     padding: 40px;
     display: flex;
     flex-direction: row;

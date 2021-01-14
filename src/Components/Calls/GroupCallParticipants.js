@@ -10,22 +10,30 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import AddMemberIcon from '../../Assets/Icons/AddMember';
 import GroupCallParticipant from './GroupCallParticipant';
-import { orderCompare } from '../../Utils/Common';
+import { loadUsersContent } from '../../Utils/File';
+import { orderCompare, throttle } from '../../Utils/Common';
 import CallStore from '../../Stores/CallStore';
+import FileStore from '../../Stores/FileStore';
 import './GroupCallParticipants.css';
 
 class GroupCallParticipants extends React.Component {
-    state = {
-        participants: []
-    };
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            participants: []
+        };
+
+        this.participantsMap = new Map();
+        this.updateParticipants = throttle(this.updateParticipants, 1000);
+    }
 
     static getDerivedStateFromProps(props, state) {
         const { groupCallId } = props;
         const { prevGroupCallId } = state;
 
         if (prevGroupCallId !== groupCallId) {
-            const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(a.order, b.order));
-
+            const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
 
             return {
                 prevGroupCallId: groupCallId,
@@ -37,6 +45,8 @@ class GroupCallParticipants extends React.Component {
     }
 
     componentDidMount() {
+        this.preloadContent();
+
         CallStore.on('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
     }
 
@@ -51,11 +61,45 @@ class GroupCallParticipants extends React.Component {
 
         if (group_call_id !== groupCallId) return;
 
-        const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(a.order, b.order));
+        const { order, user_id } = participant;
+        if (order !== '0') {
+            this.participantsMap.set(user_id, user_id);
+            this.loadContent();
+        }
+
+        this.updateParticipants();
+    };
+
+    updateParticipants = () => {
+        const { groupCallId } = this.props;
+
+        const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
         this.setState({
             participants: participants.map(x => x.user_id)
         });
     };
+
+    preloadContent = () => {
+        const { participants } = this.state;
+        if (!participants) return;
+        if (!participants.length) return;
+
+        participants.forEach(x => {
+            this.participantsMap.set(x, x);
+        });
+        this.loadContent();
+    };
+
+    loadContent = () => {
+        const { participantsMap } = this;
+        if (!participantsMap) return;
+        if (!participantsMap.size) return;
+
+        this.participantsMap = new Map();
+
+        const store = FileStore.getStore();
+        loadUsersContent(store, Array.from(participantsMap.keys()));
+    }
 
     render() {
         const { t, groupCallId } = this.props;

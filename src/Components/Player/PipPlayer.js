@@ -283,7 +283,6 @@ class PipPlayer extends React.Component {
     };
 
     onWindowResize = () => {
-
         const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
         if (fullscreenElement) return;
 

@@ -67,16 +67,16 @@
     border-radius: 1px;
     margin: 1px;
     will-change: transform;
-    transform: translateZ(0);
+    /*transform: translateZ(0);*/
 }
 
 .group-call-status-bar2 {
 }
 
 .group-call-status-active .group-call-status-bar {
-    animation: bar-animation-transform-2 3.2s normal infinite;
+    /*animation: bar-animation-transform-2 3.2s normal infinite;*/
 }
 
 .group-call-status-active .group-call-status-bar2 {
-    animation: bar-animation-transform-1 3.2s normal infinite;
+    /*animation: bar-animation-transform-1 3.2s normal infinite;*/
 }

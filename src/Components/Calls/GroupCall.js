@@ -10,13 +10,12 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import GroupCallPanel from './GroupCallPanel';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
+import { clamp } from '../../Utils/Common';
 import { modalManager } from '../../Utils/Modal';
+import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './GroupCall.css';
-import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
-import { clamp } from '../../Utils/Common';
-import PlayerStore from '../../Stores/PlayerStore';
 
 class GroupCall extends React.Component {
 
@@ -54,13 +53,17 @@ class GroupCall extends React.Component {
     };
 
     componentDidMount() {
-        KeyboardManager.add(this.keyboardHandler);
+        this.setPosition();
+
         CallStore.on('clientUpdateGroupCallFullScreen', this.onClientUpdateGroupCallFullScreen);
+        KeyboardManager.add(this.keyboardHandler);
+        window.addEventListener('resize', this.onWindowResize);
     }
 
     componentWillUnmount() {
-        KeyboardManager.remove(this.keyboardHandler);
         CallStore.off('clientUpdateGroupCallFullScreen', this.onClientUpdateGroupCallFullScreen);
+        KeyboardManager.remove(this.keyboardHandler);
+        window.removeEventListener('resize', this.onWindowResize);
     }
 
     onClientUpdateGroupCallFullScreen = update => {
@@ -80,16 +83,18 @@ class GroupCall extends React.Component {
     };
 
     handleMouseDown = event => {
+        if (event.nativeEvent.which !== 1) return;
+
         const element = document.getElementById('group-call');
         if (element) element.focus();
 
         this.mouseDownRoot = true;
         event.preventDefault();
 
-        if (event.nativeEvent.which !== 1) return;
-
-        this.offsetX = event.nativeEvent.offsetX;
-        this.offsetY = event.nativeEvent.offsetY;
+        this.left = parseInt(element.style.left, 10);
+        this.top = parseInt(element.style.top, 10);
+        this.pageX = event.nativeEvent.pageX;
+        this.pageY = event.nativeEvent.pageY;
 
         document.onmousemove = this.handleMouseMove;
         document.onmouseup = this.handleMouseUp;
@@ -99,10 +104,29 @@ class GroupCall extends React.Component {
         });
     };
 
+    onWindowResize = () => {
+        const fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
+        if (fullscreenElement) return;
+
+        const player = document.getElementById('group-call');
+
+        const oldLeft = parseInt(player.style.left, 10);
+        const oldTop = parseInt(player.style.top, 10);
+
+        const { left, top } = this.normalizePosition(oldLeft, oldTop, true);
+
+        if (oldLeft === left && oldTop === top) return;
+
+        // console.log('[pip] windowResize', left, top);
+        player.style.left = left + 'px';
+        player.style.top = top + 'px';
+    };
+
     handleMouseMove = event => {
         event.preventDefault();
 
-        const { left, top } = this.normalizePosition(event.clientX - this.offsetX, event.clientY - this.offsetY, false);
+        const { left: startLeft, top: startTop, pageX, pageY } = this;
+        const { left, top } = this.normalizePosition(startLeft + event.pageX - pageX, startTop + event.pageY - pageY, false);
 
         const element = document.getElementById('group-call');
         element.style.left = left + 'px';
@@ -119,6 +143,24 @@ class GroupCall extends React.Component {
             windowDragging: false
         });
     };
+
+    setPosition() {
+        const element = document.getElementById('group-call');
+        let { pipParams } = CallStore;
+        if (!pipParams) {
+            pipParams = {
+                left: (window.document.documentElement.clientWidth - element.clientWidth) / 2,
+                top: (window.document.documentElement.clientHeight - element.clientHeight) / 2
+            }
+        }
+
+        const { left: prevLeft, top: prevTop } = pipParams;
+
+        const { left, top } = this.normalizePosition(prevLeft, prevTop, false);
+
+        element.style.left = left + 'px';
+        element.style.top = top + 'px';
+    }
 
     normalizePosition(left, top, checkGlue = true) {
         const player = document.getElementById('group-call');
@@ -155,7 +197,7 @@ class GroupCall extends React.Component {
         this.glueTop = top === 0;
         this.glueBottom = top === documentHeight - playerHeight;
 
-        PlayerStore.pipParams = { left, top };
+        CallStore.pipParams = { left, top };
 
         return { left, top };
     }
