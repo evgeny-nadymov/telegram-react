@@ -17,15 +17,15 @@ import BroomIcon from '../../Assets/Icons/Broom';
 import DeleteIcon from '../../Assets/Icons/Delete';
 import GroupIcon from '../../Assets/Icons/Group';
 import MoreVertIcon from '../../Assets/Icons/More';
+import PhoneIcon from '../../Assets/Icons/Phone';
 import UnpinIcon from '../../Assets/Icons/PinOff';
 import UserIcon from '../../Assets/Icons/User';
 import { canClearHistory, canDeleteChat, getViewInfoTitle, isPrivateChat, getDeleteChatTitle, hasOnePinnedMessage, canSwitchBlocked, getChatSender, canManageVoiceChats } from '../../Utils/Chat';
 import { clearHistory, leaveChat } from '../../Actions/Chat';
-import { getStream } from '../../Calls/Utils';
 import { requestBlockSender, unblockSender } from '../../Actions/Message';
 import { requestUnpinMessage, showAlert } from '../../Actions/Client';
 import AppStore from '../../Stores/ApplicationStore';
-import CallStore, { ERROR_CALL, LOG_CALL } from '../../Stores/CallStore';
+import CallStore from '../../Stores/CallStore';
 import ChatStore from '../../Stores/ChatStore';
 import LStore from '../../Stores/LocalizationStore';
 import MessageStore from '../../Stores/MessageStore';
@@ -168,6 +168,7 @@ class MainMenuButton extends React.Component {
                     { !Boolean(voice_chat_group_call_id) && manageVoiceChats && (
                         <MenuItem onClick={this.handleStartGroupCall}>
                             <ListItemIcon>
+                                <PhoneIcon />
                             </ListItemIcon>
                             <ListItemText primary={t('StartVoipChat')} />
                         </MenuItem>

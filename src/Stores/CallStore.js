@@ -204,13 +204,16 @@ class CallStore extends EventEmitter {
         if (!meSignSource) return;
         if (!description) return;
 
-        if (this.updatingParticipants) {
-            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} cancel`, this.updatingParticipants);
+        if (currentGroupCall.updatingSdp) {
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} cancel`, currentGroupCall.updatingSdp);
             return
         }
 
+        const ts = new Date().getMilliseconds();
+
         try {
-            this.updatingParticipants = true;
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp start`, ts);
+            currentGroupCall.updatingSdp = true;
 
             const participants = Array.from(this.participants.get(groupCallId).values()).filter(x => x.order !== '0');
             LOG_CALL(`updateGroupCallParticipants id=${groupCallId}`, participants);
@@ -226,15 +229,20 @@ class CallStore extends EventEmitter {
             description.updateFromServer(data);
             const sdp = description.generateSdp();
 
+            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 1`);
             await connection.setRemoteDescription({
                 type: 'offer',
                 sdp,
             });
 
+            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 2`, ts);
             const answer = await connection.createAnswer();
+            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 3`, ts);
             await connection.setLocalDescription(answer);
+            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 4`, ts);
         } finally {
-            this.updatingParticipants = false;
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp finish`, ts);
+            currentGroupCall.updatingSdp = false;
         }
     }
 
@@ -411,6 +419,7 @@ class CallStore extends EventEmitter {
             currentGroupCall.stream = stream;
             currentGroupCall.connection = connection;
             currentGroupCall.handleUpdateGroupCallParticipants = false;
+            currentGroupCall.updatingSdp = false;
             LOG_CALL('joinGroupCallInternal update currentGroupCall', groupCallId, currentGroupCall);
         } else {
             currentGroupCall = {
@@ -418,6 +427,8 @@ class CallStore extends EventEmitter {
                 groupCallId,
                 stream,
                 connection,
+                handleUpdateGroupCallParticipants: false,
+                updatingSdp: false
             }
             this.setCurrentGroupCall(currentGroupCall);
             LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);

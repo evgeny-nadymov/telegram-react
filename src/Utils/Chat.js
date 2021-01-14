@@ -43,6 +43,8 @@ export function canManageVoiceChats(chatId) {
             break;
         }
         case 'chatTypeSupergroup': {
+            if (isChannelChat(chatId)) return false;
+            
             const supergroup = SupergroupStore.get(getSupergroupId(chatId));
             if (!supergroup) return false;
 
