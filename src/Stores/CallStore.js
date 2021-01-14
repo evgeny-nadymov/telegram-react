@@ -159,7 +159,10 @@ class CallStore extends EventEmitter {
 
     playSound(sound) {
         try {
-            const audio = new Audio(sound);
+            const { audio } = this;
+            if (!audio) return;
+
+            audio.src = sound;
             audio.play();
         } catch (e) {
             ERROR_CALL('playSound', sound, e);
@@ -229,7 +232,7 @@ class CallStore extends EventEmitter {
             description.updateFromServer(data);
             const sdp = description.generateSdp();
 
-            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 1`);
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 1`, sdp);
             await connection.setRemoteDescription({
                 type: 'offer',
                 sdp,
@@ -284,6 +287,9 @@ class CallStore extends EventEmitter {
     }
 
     async joinGroupCall(chatId, groupCallId, muted = true, rejoin = false) {
+        this.audio = this.audio || new Audio();
+        this.audio.play();
+
         LOG_CALL(`joinGroupCall chatId=${chatId} id=${groupCallId} muted=${muted} rejoin=${rejoin}`);
         const groupCall = this.get(groupCallId);
         if (!groupCall) {
@@ -392,7 +398,7 @@ class CallStore extends EventEmitter {
                     break;
                 }
                 case 'disconnected': {
-                    this.hangUp(groupCallId);
+                    // this.hangUp(groupCallId);    // Firefox can issue disconnected then connected state changing
                     break;
                 }
                 case 'failed': {
@@ -568,31 +574,33 @@ class CallStore extends EventEmitter {
 
         document.getElementById('players').innerHTML = '';
 
-        if (discard) {
-            LOG_CALL(`hangUp discard id=${groupCallId}`);
-            await TdLibController.send({
-                '@type': 'discardGroupCall',
-                group_call_id: groupCallId
-            });
-            return;
-        }
+        if (!rejoin) {
+            if (discard) {
+                LOG_CALL(`hangUp discard id=${groupCallId}`);
+                await TdLibController.send({
+                    '@type': 'discardGroupCall',
+                    group_call_id: groupCallId
+                });
+                return;
+            }
 
-        const groupCall = this.get(groupCallId);
-        if (groupCall && groupCall.is_joined) {
-            LOG_CALL(`hangUp leave id=${groupCallId}`);
-            await TdLibController.send({
-                '@type': 'leaveGroupCall',
-                group_call_id: groupCallId
-            });
-            return;
-        }
+            const groupCall = this.get(groupCallId);
+            if (groupCall && groupCall.is_joined) {
+                LOG_CALL(`hangUp leave id=${groupCallId}`);
+                await TdLibController.send({
+                    '@type': 'leaveGroupCall',
+                    group_call_id: groupCallId
+                });
+                return;
+            }
 
-        LOG_CALL(`hangUp join payload=null id=${groupCallId}`);
-        await TdLibController.send({
-            '@type': 'joinGroupCall',
-            group_call_id: groupCallId,
-            payload: null
-        });
+            LOG_CALL(`hangUp join payload=null id=${groupCallId}`);
+            await TdLibController.send({
+                '@type': 'joinGroupCall',
+                group_call_id: groupCallId,
+                payload: null
+            });
+        }
     }
 
     closeConnectionAndStream(connection, stream) {
