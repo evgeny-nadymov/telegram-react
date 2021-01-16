@@ -195,17 +195,17 @@ function getTitle(message, t = k => k) {
         }
     }
 
-    if (chat_id) {
-        const chat = ChatStore.get(chat_id);
-        if (chat) {
-            return chat.title;
-        }
-    }
-
     if (sender.user_id) {
         const user = UserStore.get(sender.user_id);
         if (user) {
             return getUserFullName(sender.user_id, null, t);
+        }
+    }
+
+    if (chat_id) {
+        const chat = ChatStore.get(chat_id);
+        if (chat) {
+            return chat.title;
         }
     }
 

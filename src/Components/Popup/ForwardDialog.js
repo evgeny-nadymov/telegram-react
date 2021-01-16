@@ -268,6 +268,8 @@ class ForwardDialog extends React.Component {
                 });
             }
 
+            messageIds.sort(); 
+
             TdLibController.send({
                 '@type': 'forwardMessages',
                 chat_id: targetChatId,
