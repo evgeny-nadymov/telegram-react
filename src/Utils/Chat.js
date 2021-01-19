@@ -529,6 +529,15 @@ function showChatUnreadMentionCount(chatId) {
     return unread_mention_count > 0;
 }
 
+export function getChatUnreadMentionCount(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { unread_mention_count } = chat;
+
+    return unread_mention_count;
+}
+
 function showChatUnreadCount(chatId) {
     const chat = ChatStore.get(chatId);
     if (!chat) return false;
@@ -540,6 +549,15 @@ function showChatUnreadCount(chatId) {
         (unread_count === 1 && unread_mention_count === 0) ||
         (is_marked_as_unread && unread_count === 0 && unread_mention_count === 0)
     );
+}
+
+export function getChatUnreadCount(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { unread_count } = chat;
+
+    return unread_count;
 }
 
 function isChatUnread(chatId) {

@@ -1731,7 +1731,7 @@ class MessagesList extends React.Component {
                 <ActionBar chatId={chatId} />
                 <Placeholder />
                 {scrollDownVisible && (
-                    <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} />
+                    <ScrollDownButton ref={this.scrollDownButtonRef} onClick={this.handleScrollDownClick} chatId={chatId}/>
                 )}
                 <FilesDropTarget />
                 <StickersHint />
