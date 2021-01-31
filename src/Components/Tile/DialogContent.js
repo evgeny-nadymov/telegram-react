@@ -99,7 +99,7 @@ class DialogContent extends React.Component {
         if (!chat) return <div className='dialog-content'>{'\u00A0'}</div>;
 
         let contentControl = null;
-        const typingString = getChatTypingString(chatId);
+        const typingString = getChatTypingString(chatId, t);
         if (typingString) {
             contentControl = <span className='dialog-content-accent'>{typingString}</span>;
         }
