@@ -8,10 +8,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
-// import TelegramApp from './Components/Auth/TestPage';
 import TelegramApp from './TelegramApp';
 import registerServiceWorker from './registerServiceWorker';
-import { OPTIMIZATIONS_FIRST_START } from './Constants';
+import {
+    OPTIMIZATIONS_FIRST_START,
+    STORAGE_REGISTER_KEY,
+    STORAGE_REGISTER_TEST_KEY
+} from './Constants';
+import TdLibController from './Controllers/TdLibController';
 import './index.css';
 
 ReactDOM.render(
@@ -22,7 +26,8 @@ ReactDOM.render(
 );
 
 if (OPTIMIZATIONS_FIRST_START) {
-    const register = localStorage.getItem('register');
+    const registerKey = TdLibController.parameters.useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
+    const register = localStorage.getItem(registerKey);
     if (register) {
         registerServiceWorker();
     }

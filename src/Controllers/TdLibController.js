@@ -9,6 +9,7 @@ import EventEmitter from '../Stores/EventEmitter';
 import packageJson from '../../package.json';
 import { stringToBoolean, getBrowser, getOSName } from '../Utils/Common';
 import {
+    DATABASE_NAME, DATABASE_TEST_NAME,
     VERBOSITY_JS_MAX,
     VERBOSITY_JS_MIN,
     VERBOSITY_MAX,
@@ -54,19 +55,19 @@ class TdLibController extends EventEmitter {
         this.setParameters(location);
 
         const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
-        const dbName = useTestDC ? 'tdlib_test' : 'tdlib';
+        const instanceName = useTestDC ? DATABASE_NAME : DATABASE_TEST_NAME;
 
-        databaseExists(dbName, exists => {
+        databaseExists(instanceName, exists => {
             this.clientUpdate({ '@type': 'clientUpdateTdLibDatabaseExists', exists });
 
             let options = {
                 logVerbosityLevel: verbosity,
                 jsLogVerbosityLevel: jsVerbosity,
-                mode: mode, // 'wasm-streaming'/'wasm'/'asmjs'
-                prefix: useTestDC ? 'tdlib_test' : 'tdlib',
-                readOnly: readOnly,
+                mode, // 'wasm-streaming', 'wasm', 'asmjs'
+                instanceName,
+                readOnly,
                 isBackground: false,
-                useDatabase: useDatabase,
+                useDatabase,
                 wasmUrl: `${WASM_FILE_NAME}?_sw-precache=${WASM_FILE_HASH}`
                 // onUpdate: update => this.emit('update', update)
             };
@@ -279,5 +280,5 @@ class TdLibController extends EventEmitter {
 }
 
 const controller = new TdLibController();
-
+window.controller = controller;
 export default controller;

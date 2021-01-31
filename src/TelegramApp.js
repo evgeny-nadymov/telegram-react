@@ -29,7 +29,7 @@ import KeyboardManager, { KeyboardHandler } from './Components/Additional/Keyboa
 import { openChatList, openPinnedChat } from './Actions/Chat';
 import { modalManager } from './Utils/Modal';
 import { clearSelection, editMessage, replyMessage, searchChat } from './Actions/Client';
-import { OPTIMIZATIONS_FIRST_START } from './Constants';
+import { OPTIMIZATIONS_FIRST_START, STORAGE_REGISTER_KEY, STORAGE_REGISTER_TEST_KEY } from './Constants';
 import UserStore from './Stores/UserStore';
 import AppStore from './Stores/ApplicationStore';
 import AuthorizationStore from './Stores/AuthorizationStore';
@@ -219,7 +219,8 @@ class TelegramApp extends Component {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
-                const register = localStorage.getItem('register');
+                const registerKey = TdLibController.parameters.useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
+                const register = localStorage.getItem(registerKey);
                 if (!register) {
                     registerServiceWorker();
                 }

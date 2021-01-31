@@ -16,14 +16,18 @@
 // This link also includes instructions on opting out of this behavior.
 
 import { arrayBufferToBase64, isAuthorizationReady } from './Utils/Common';
-import { OPTIMIZATIONS_FIRST_START, PLAYER_STREAMING_PRIORITY } from './Constants';
+import { showAlert } from './Actions/Client';
+import {
+    OPTIMIZATIONS_FIRST_START,
+    PLAYER_STREAMING_PRIORITY,
+    STORAGE_REGISTER_KEY,
+    STORAGE_REGISTER_TEST_KEY
+} from './Constants';
 import AppStore from './Stores/ApplicationStore';
 import FileStore from './Stores/FileStore';
 import LStore from './Stores/LocalizationStore';
 import NotificationStore from './Stores/NotificationStore';
 import TdLibController from './Controllers/TdLibController';
-import { showAlert } from './Actions/Client';
-import CallStore from './Stores/CallStore';
 
 const isLocalhost =
     //false;
@@ -39,7 +43,8 @@ export default async function register() {
     console.log('[SW] Register');
 
     if (OPTIMIZATIONS_FIRST_START) {
-        localStorage.setItem('register', 'true');
+        const registerKey = TdLibController.parameters.useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
+        localStorage.setItem(registerKey, 'true');
     }
 
     if ('serviceWorker' in navigator) {
