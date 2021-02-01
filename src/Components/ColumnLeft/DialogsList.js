@@ -68,7 +68,6 @@ class DialogsList extends React.Component {
     constructor(props) {
         super(props);
 
-        window._m = new Map();
         this.hiddenChats = new Map();
 
         this.listRef = React.createRef();
@@ -289,7 +288,6 @@ class DialogsList extends React.Component {
             if (currentIndex === -1) {
                 if (loading) {
                     console.error(`[vl] skip ${update['@type']}`, { id: chat_id, title: ChatStore.get(chat_id).title, chat: ChatStore.get(chat_id) });
-                    window._m.set(chat_id, chat_id);
                     // TODO: check and add if within loaded part
                 } else {
                     newChatIds.push(chat_id);
@@ -333,6 +331,8 @@ class DialogsList extends React.Component {
 
     handleScroll = () => {
         // console.log('[vl] onScroll');
+        if (this.stub) return;
+
         const { current } = this.listRef;
         if (!current) return;
 
@@ -458,9 +458,13 @@ class DialogsList extends React.Component {
         scrollTop(list);
     }
 
-    renderItem = ({ index, style }, source) => {
+    renderItem = ({ index, style }, source, stub = false) => {
         const { chatList } = this.state;
         const x = source[index];
+
+        if (stub) {
+            return <DialogPlaceholder key={index} index={index} />
+        }
 
         return <DialogListItem key={x} chatId={x} chatList={chatList} hidden={this.hiddenChats.has(x)} style={style} />;
 
@@ -471,11 +475,10 @@ class DialogsList extends React.Component {
         const { open, cacheItems, showArchive, archiveTitle } = this.props;
         const { chats, chatList } = this.state;
 
-        // console.log('[dl] render', type, open, chats, cacheChats);
         if (!open) return null;
 
         this.source = [];
-        let dialogs = null;
+        this.stub = false;
         if (chats) {
             let lastPinnedId = 0;
             chats.forEach(x => {
@@ -492,31 +495,12 @@ class DialogsList extends React.Component {
                 }
             });
             this.source = cacheItems.map(x => x.id);
-            // dialogs = cacheItems.map(x => (
-            //     <Dialog
-            //         key={x.id}
-            //         chatId={x.id}
-            //         isLastPinned={x === lastPinnedId}
-            //         hidden={this.hiddenChats.has(x.id)}
-            //     />
-            // ));
         } else {
             if (chatList['@type'] === 'chatListMain') {
-                dialogs = Array.from(Array(10)).map((x, index) => <DialogPlaceholder key={index} index={index} />);
+                this.source = Array.from(Array(10));
+                this.stub = true;
             }
         }
-
-        window._chats = chats;
-        window._c = new Map((chats || []).map(i => [i, i]));
-        const ids = [];
-        window._m.forEach((value, key) => {
-            if (!window._c.has(key)) {
-                ids.push(key);
-            }
-        });
-        console.log('[vl] render', (chats || []).length, window._c.size, window._m.size, ids.length,
-            //ids.map(x => ChatStore.get(x))
-        );
 
         return (
             <VirtualizedList
@@ -525,7 +509,7 @@ class DialogsList extends React.Component {
                 source={this.source}
                 rowHeight={76}
                 overScanCount={20}
-                renderItem={x => this.renderItem(x, this.source)}
+                renderItem={x => this.renderItem(x, this.source, this.stub)}
                 onScroll={this.handleScroll}
             />
         );

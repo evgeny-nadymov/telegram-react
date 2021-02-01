@@ -20,11 +20,14 @@
     overflow-y: hidden;
     position: relative;
     background: transparent;
+    height: 100%;
 }
 
 .stickers-picker-header-items {
     display: inline-flex;
     flex-direction: row;
+    align-items: center;
+    height: 100%;
 }
 
 .stickers-picker-header-sticker {
