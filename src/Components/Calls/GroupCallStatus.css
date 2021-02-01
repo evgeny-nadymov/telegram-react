@@ -7,8 +7,8 @@
 
 .group-call-status {
     position: absolute;
-    right: -2px;
-    bottom: -2px;
+    right: -1px;
+    bottom: -1px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -74,9 +74,9 @@
 }
 
 .group-call-status-active .group-call-status-bar {
-    /*animation: bar-animation-transform-2 3.2s normal infinite;*/
+    animation: bar-animation-transform-2 3.2s normal infinite;
 }
 
 .group-call-status-active .group-call-status-bar2 {
-    /*animation: bar-animation-transform-1 3.2s normal infinite;*/
+    animation: bar-animation-transform-1 3.2s normal infinite;
 }

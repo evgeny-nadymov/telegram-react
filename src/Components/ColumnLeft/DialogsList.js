@@ -138,6 +138,7 @@ class DialogsList extends React.Component {
     }
 
     componentDidMount() {
+        // console.log('[dl] didmount');
         this.loadFirstSlice();
 
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);

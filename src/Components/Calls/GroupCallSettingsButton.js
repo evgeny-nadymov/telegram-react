@@ -12,8 +12,10 @@ import './GroupCallSettingsButton.css';
 
 class GroupCallSettingsButton extends React.Component {
     render() {
+        const { onClick } = this.props;
+
         return (
-            <div className='group-call-settings-button'>
+            <div className='group-call-settings-button' onClick={onClick}>
                 <TuneIcon />
             </div>
         );
@@ -21,7 +23,8 @@ class GroupCallSettingsButton extends React.Component {
 }
 
 GroupCallSettingsButton.propTypes = {
-    groupCallId: PropTypes.number
+    groupCallId: PropTypes.number,
+    onClick: PropTypes.func
 };
 
 export default GroupCallSettingsButton;

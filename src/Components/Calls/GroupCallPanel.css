@@ -38,9 +38,13 @@
 
 .group-call-panel-buttons {
     flex-shrink: 0;
-    padding: 40px;
+    padding: 58px 40px;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    height: 220px;
+    box-sizing: border-box;
+    position: relative;
 }
 
 .group-call-panel-button-leave {
@@ -56,6 +60,7 @@
 
 .group-call-panel-button {
     margin-top: 30px;
+    z-index: 1;
 }
 
 .group-call-panel-button-text {

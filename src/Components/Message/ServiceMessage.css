@@ -38,6 +38,7 @@
 
 .service-message-content div {
     /*transform: translate(0, 1px);*/
+    overflow: hidden;
 }
 
 .service-message-photo {

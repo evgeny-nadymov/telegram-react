@@ -18,11 +18,17 @@
     --key_voipgroup_mutedByAdminGradient: #57A4FE;
     --key_voipgroup_mutedByAdminGradient2: #F05459;
     --key_voipgroup_mutedByAdminGradient3: #766EE9;
+    --key_voipgroup_listViewBackgroundUnscrolled: #222A33;
 
     flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
 }
 
 .group-call-mic-button {
@@ -45,5 +51,5 @@
 }
 
 .group-call-connecting {
-    background: var(--key_voipgroup_topPanelGray);
+    background: var(--key_voipgroup_listViewBackgroundUnscrolled);
 }

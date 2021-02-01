@@ -16,6 +16,7 @@ import { PROFILE_PHOTO_PRELOAD_TIME_MS } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import FileStore from '../../Stores/FileStore';
 import './GroupCallParticipants.css';
+import { canManageVoiceChats } from '../../Utils/Chat';
 
 class GroupCallParticipants extends React.Component {
     constructor(props) {
@@ -103,14 +104,23 @@ class GroupCallParticipants extends React.Component {
         const { t, groupCallId } = this.props;
         const { participants } = this.state;
 
+        const { currentGroupCall } = CallStore;
+        if (!currentGroupCall) return null;
+
+        const { chatId } = currentGroupCall;
+
+        const manageGroupCalls = canManageVoiceChats(chatId);
+
         return (
             <div className='group-call-participants'>
-                <div className='group-call-participants-invite'>
-                    <AddMemberIcon/>
-                    <div className='group-call-participants-invite-text'>
-                        {t('VoipGroupInviteMember')}
+                { manageGroupCalls && (
+                    <div className='group-call-participants-invite'>
+                        <AddMemberIcon/>
+                        <div className='group-call-participants-invite-text'>
+                            {t('VoipGroupInviteMember')}
+                        </div>
                     </div>
-                </div>
+                )}
                 {participants.map(x => <GroupCallParticipant key={x} userId={x} groupCallId={groupCallId}/>)}
             </div>
         );

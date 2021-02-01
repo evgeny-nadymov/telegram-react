@@ -10,15 +10,19 @@ import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
 import GroupCallMicButton from './GroupCallMicButton';
-import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
-import GroupCallSettingsButton from './GroupCallSettingsButton';
 import GroupCallPanelButtons from './GroupCallPanelButtons';
 import GroupCallParticipants from './GroupCallParticipants';
+import GroupCallSettings from './GroupCallSettings';
+import GroupCallSettingsButton from './GroupCallSettingsButton';
+import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
 
 class GroupCallPanel extends React.Component {
+    state = {
+        openSettings: false
+    };
 
     handleClick = () => {
         const { onClose } = this.props;
@@ -37,8 +41,23 @@ class GroupCallPanel extends React.Component {
         await CallStore.leaveGroupCall(chatId, groupCallId);
     };
 
+    handleOpenSettings = async event => {
+        CallStore.devices = await navigator.mediaDevices.enumerateDevices();
+
+        this.setState({
+            openSettings: true
+        });
+    };
+
+    handleCloseSettings = () => {
+        this.setState({
+            openSettings: false
+        });
+    };
+
     render() {
         const { groupCallId, t } = this.props;
+        const { openSettings } = this.state;
         const { currentGroupCall } = CallStore;
         if (!currentGroupCall) return null;
 
@@ -56,13 +75,13 @@ class GroupCallPanel extends React.Component {
                     <GroupCallParticipants groupCallId={groupCallId}/>
                 </div>
                 <GroupCallPanelButtons>
+                    <GroupCallMicButton/>
                     <div className='group-call-panel-button'>
-                        <GroupCallSettingsButton/>
+                        <GroupCallSettingsButton onClick={this.handleOpenSettings}/>
                         <div className='group-call-panel-button-text'>
                             {t('Settings')}
                         </div>
                     </div>
-                    <GroupCallMicButton/>
                     <div className='group-call-panel-button'>
                         <div className='group-call-panel-button-leave' onClick={this.handleLeave}>
                             <CallEndIcon />
@@ -72,6 +91,7 @@ class GroupCallPanel extends React.Component {
                         </div>
                     </div>
                 </GroupCallPanelButtons>
+                {openSettings && <GroupCallSettings groupCallId={groupCallId} onClose={this.handleCloseSettings}/>}
             </div>
         );
     }
