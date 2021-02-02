@@ -993,10 +993,12 @@ class FileStore extends EventEmitter {
     };
 
     setDataUrl = (id, dataUrl) => {
+        // console.log('[f] setDataUrl', id);
         this.dataUrls.set(id, dataUrl);
     };
 
     deleteDataUrl = id => {
+        // console.log('[f] deleteDataUrl', id);
         this.dataUrls.delete(id);
     };
 

@@ -87,30 +87,14 @@ class DialogsList extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        const { theme, open, showArchive, archiveTitle, items, cacheItems } = this.props;
+        const { theme, cacheItems } = this.props;
         const { chats, chatList } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
         }
 
-        if (nextProps.open !== open) {
-            return true;
-        }
-
-        if (nextProps.items !== items) {
-            return true;
-        }
-
         if (nextProps.cacheItems !== cacheItems) {
-            return true;
-        }
-
-        if (nextProps.showArchive !== showArchive) {
-            return true;
-        }
-
-        if (nextProps.archiveTitle !== archiveTitle) {
             return true;
         }
 
@@ -137,7 +121,6 @@ class DialogsList extends React.Component {
     }
 
     componentDidMount() {
-        // console.log('[dl] didmount');
         this.loadFirstSlice();
 
         AppStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
@@ -472,10 +455,8 @@ class DialogsList extends React.Component {
     };
 
     render() {
-        const { open, cacheItems, showArchive, archiveTitle } = this.props;
+        const { cacheItems } = this.props;
         const { chats, chatList } = this.state;
-
-        if (!open) return null;
 
         this.source = [];
         this.stub = false;
@@ -518,10 +499,7 @@ class DialogsList extends React.Component {
 
 DialogsList.propTypes = {
     type: PropTypes.oneOf(['chatListMain', 'chatListArchive']).isRequired,
-    showArchive: PropTypes.bool,
-    archiveTitle: PropTypes.string,
     cacheItems: PropTypes.array,
-    items: PropTypes.array
 };
 
 export default DialogsList;

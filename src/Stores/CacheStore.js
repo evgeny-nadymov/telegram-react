@@ -44,7 +44,10 @@ class CacheStore extends EventEmitter {
 
         this.addTdLibListener();
 
-        this.saveInternal = debounce(this.saveInternal, 2000);
+        this.saveInternal = debounce(this.saveInternal, 2000, {
+            leading: false,
+            trailing: true
+        });
     }
 
     reset = () => {
@@ -113,7 +116,6 @@ class CacheStore extends EventEmitter {
     };
 
     async load() {
-        // console.log('[cm] getChats start');
         const promises = [];
         promises.push(CacheManager.load(this.cacheKey).catch(error => null));
         promises.push(CacheManager.load(this.filesKey).catch(error => null));
@@ -122,6 +124,7 @@ class CacheStore extends EventEmitter {
             promises.push(CacheManager.load(this.contactsKey).catch(error => null));
         }
         let [cache, files, filters, contacts] = await Promise.all(promises);
+        // console.log('[f] cache.load', files);
 
         let dropCache = false;
         if (cache && cache.chats) {
@@ -170,7 +173,7 @@ class CacheStore extends EventEmitter {
         if (!cache) return;
 
         const { meChat, chats, archiveChats, users, basicGroups, supergroups, files, options } = cache;
-        // console.log('[cache] parseCache', cache);
+        // console.log('[f] cache.parse', cache.files);
 
         (files || []).filter(x => Boolean(x)).forEach(({ id, url }) => {
             FileStore.setDataUrl(id, url);
@@ -304,11 +307,12 @@ class CacheStore extends EventEmitter {
         }
         this.filters = filters;
 
+        // console.log('[cm] save');
         this.saveInternal();
     }
 
     async saveInternal() {
-        // console.log('[cm] saveInternal', this.filters, this.chatIds, this.archiveChatIds);
+        // console.log('[cm] saveInternal');
         const cache = await this.getCache(this.chatIds, this.archiveChatIds);
         const files = cache.files;
         cache.files = [];
@@ -331,9 +335,7 @@ class CacheStore extends EventEmitter {
                 })
             );
         });
-        // console.log('[cm] save files start', files);
         const results = await Promise.all(promises);
-        // console.log('[cm] save files', results);
         await CacheManager.save(this.filesKey, results);
 
         if (this.cacheContacts) {
@@ -354,7 +356,7 @@ class CacheStore extends EventEmitter {
         promises.push(CacheManager.remove(this.contactsKey).catch(error => null));
         promises.push(CacheManager.remove(this.registerKey).catch(error => null));
 
-        Promise.all(promises)
+        Promise.all(promises);
     }
 
     clearDataUrls() {

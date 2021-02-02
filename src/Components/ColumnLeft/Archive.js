@@ -24,7 +24,7 @@ class Archive extends React.Component {
     };
 
     render() {
-        const { t, innerListRef, items, cacheItems, onClose } = this.props;
+        const { t, innerListRef, cacheItems, onClose } = this.props;
 
         return (
             <>
@@ -41,8 +41,6 @@ class Archive extends React.Component {
                         type='chatListArchive'
                         ref={innerListRef}
                         cacheItems={cacheItems}
-                        open={true}
-                        items={items}
                     />
                 </div>
             </>

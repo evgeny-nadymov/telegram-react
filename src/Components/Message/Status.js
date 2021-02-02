@@ -112,7 +112,6 @@ class Status extends React.Component {
             );
         }
 
-        console.log('[m] ack render 1', [chatId, messageId, sendingState, unread]);
         return <SentIcon className='status' viewBox='0 0 12 10' style={{ width: 16, height: 9 }} />;
     }
 }

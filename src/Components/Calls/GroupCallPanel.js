@@ -18,6 +18,8 @@ import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
+import CloseIcon from '../../Assets/Icons/Close';
+import MenuIcon from '../../Assets/Icons/More';
 
 class GroupCallPanel extends React.Component {
     state = {
@@ -25,9 +27,7 @@ class GroupCallPanel extends React.Component {
     };
 
     handleClick = () => {
-        const { onClose } = this.props;
-
-        onClose && onClose();
+        this.handleClose();
     }
 
     handleLeave = async event => {
@@ -55,6 +55,12 @@ class GroupCallPanel extends React.Component {
         });
     };
 
+    handleClose = () => {
+        const { onClose } = this.props;
+
+        onClose && onClose();
+    };
+
     render() {
         const { groupCallId, t } = this.props;
         const { openSettings } = this.state;
@@ -66,10 +72,14 @@ class GroupCallPanel extends React.Component {
         return (
             <div className='group-call-panel'>
                 <div className='group-call-panel-header'>
+                    <div className='group-call-panel-caption-button' onClick={this.handleClose}>
+                        <CloseIcon />
+                    </div>
                     <div className='group-call-panel-caption'>
                         <div className='group-call-title'>{getChatTitle(chatId)}</div>
                         <GroupCallSubtitle groupCallId={groupCallId} participantsOnly={true}/>
                     </div>
+                    <div style={{ width: 48 }}/>
                 </div>
                 <div className='group-call-panel-participants scrollbars-hidden'>
                     <GroupCallParticipants groupCallId={groupCallId}/>

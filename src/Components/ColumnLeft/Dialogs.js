@@ -443,8 +443,7 @@ class Dialogs extends Component {
         } = this.state;
 
         const mainCacheItems = cache && cache.chats ? cache.chats : null;
-        console.log('[dl] dialogs.render', cache, mainCacheItems);
-        const archiveCacheItems = cache ? cache.archiveChats || [] : null;
+        const archiveCacheItems = cache && cache.archiveChats ? cache.archiveChats : null;
 
         return (
             <>
@@ -466,9 +465,6 @@ class Dialogs extends Component {
                                     type='chatListMain'
                                     ref={this.dialogListRef}
                                     cacheItems={mainCacheItems}
-                                    showArchive={showArchive}
-                                    archiveTitle={archiveTitle}
-                                    open={true}
                                     onSaveCache={this.handleSaveCache}
                                 />
                             </div>

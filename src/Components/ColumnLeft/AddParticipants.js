@@ -78,7 +78,7 @@ class AddParticipants extends React.Component {
             focusedItem: null
         };
 
-        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100, false);
+        this.handleDebounceScroll = debounce(this.handleDebounceScroll, 100);
         this.handleThrottleScroll = throttle(this.handleThrottleScroll, 200, false);
     }
 
