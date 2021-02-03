@@ -9,17 +9,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import CallEndIcon from '../../Assets/Icons/CallEnd';
+import CloseIcon from '../../Assets/Icons/Close';
 import GroupCallMicButton from './GroupCallMicButton';
 import GroupCallPanelButtons from './GroupCallPanelButtons';
 import GroupCallParticipants from './GroupCallParticipants';
 import GroupCallSettings from './GroupCallSettings';
 import GroupCallSettingsButton from './GroupCallSettingsButton';
 import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
+import { closeGroupCallPanel } from '../../Actions/Call';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
-import CloseIcon from '../../Assets/Icons/Close';
-import MenuIcon from '../../Assets/Icons/More';
 
 class GroupCallPanel extends React.Component {
     state = {
@@ -56,9 +56,7 @@ class GroupCallPanel extends React.Component {
     };
 
     handleClose = () => {
-        const { onClose } = this.props;
-
-        onClose && onClose();
+        closeGroupCallPanel();
     };
 
     render() {

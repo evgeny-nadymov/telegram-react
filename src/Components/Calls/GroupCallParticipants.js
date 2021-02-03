@@ -63,19 +63,24 @@ class GroupCallParticipants extends React.Component {
 
         if (group_call_id !== groupCallId) return;
 
+        const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
+
         const { order, user_id } = participant;
         if (order !== '0') {
             this.participantsMap.set(user_id, user_id);
             this.loadContent();
-        }
 
-        const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
-        // wait 500 ms for profile photo
-        setTimeout(() => {
+            // wait 500 ms for profile photo
+            setTimeout(() => {
+                this.setState({
+                    participants: participants.map(x => x.user_id)
+                });
+            }, PROFILE_PHOTO_PRELOAD_TIME_MS);
+        } else {
             this.setState({
                 participants: participants.map(x => x.user_id)
             });
-        }, PROFILE_PHOTO_PRELOAD_TIME_MS);
+        }
     };
 
     preloadContent = () => {

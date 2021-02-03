@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import GroupCallPanel from './GroupCallPanel';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { clamp } from '../../Utils/Common';
+import { closeGroupCallPanel } from '../../Actions/Call';
 import { modalManager } from '../../Utils/Modal';
 import { PIP_PLAYER_BORDER_PRECISION } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
@@ -70,16 +71,10 @@ class GroupCall extends React.Component {
         const { fullscreen } = update;
 
         this.setState({ fullscreen });
-    }
+    };
 
     handleClose = () => {
-        const { groupCallId } = this.props;
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateGroupCallPanel',
-            groupCallId,
-            opened: false
-        });
+        closeGroupCallPanel();
     };
 
     handleMouseDown = event => {
@@ -212,7 +207,7 @@ class GroupCall extends React.Component {
                 className={classNames('group-call', { 'group-call-fullscreen': fullscreen })}
                 onMouseDown={this.handleMouseDown}
             >
-                <GroupCallPanel groupCallId={groupCallId} onClose={this.handleClose}/>
+                <GroupCallPanel groupCallId={groupCallId}/>
             </div>
         )
     }

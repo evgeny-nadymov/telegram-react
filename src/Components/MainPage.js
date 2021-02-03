@@ -79,10 +79,11 @@ class MainPage extends React.Component {
     }
 
     onClientUpdateGroupCallPanel = update => {
-        const { opened, groupCallId } = update;
+        const { opened } = update;
+        const { currentGroupCall } = CallStore;
 
         this.setState({
-            groupCallId: opened ? groupCallId : 0
+            groupCallId: currentGroupCall && opened ? currentGroupCall.groupCallId : 0
         });
     };
 

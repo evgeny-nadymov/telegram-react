@@ -15,11 +15,11 @@ import CloseIcon from '../../Assets/Icons/Close';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
 import { getChatTitle } from '../../Utils/Chat';
+import { openGroupCallPanel } from '../../Actions/Call';
 import { showSnackbar } from '../../Actions/Client';
 import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
-import TdLibController from '../../Controllers/TdLibController';
 import './GroupCallTopPanel.css';
 
 class GroupCallTopPanel extends React.Component {
@@ -237,13 +237,7 @@ class GroupCallTopPanel extends React.Component {
         const { call } = this.state;
         if (!call) return;
 
-        const { groupCallId } = call;
-
-        TdLibController.clientUpdate({
-            '@type': 'clientUpdateGroupCallPanel',
-            opened: true,
-            groupCallId
-        });
+        openGroupCallPanel();
     };
 
     render() {

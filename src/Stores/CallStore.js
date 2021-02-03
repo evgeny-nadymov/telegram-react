@@ -7,20 +7,22 @@
 import EventEmitter from './EventEmitter';
 import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
+import { closeGroupCallPanel } from '../Actions/Call';
 import { getUserFullName } from '../Utils/User';
 import { getStream, getTransport, parseSdp } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
+import { throttle } from '../Utils/Common';
+import AppStore from './ApplicationStore';
 import LStore from './LocalizationStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
-import { throttle } from '../Utils/Common';
 
 export function LOG_CALL(str, ...data) {
-    console.log('[call] ' + str, ...data);
+    console.log('[call]' + str, ...data);
 }
 
 export function ERROR_CALL(str, ...data) {
-    console.error('[call] ' + str, ...data);
+    console.error('[call]' + str, ...data);
 }
 
 class CallStore extends EventEmitter {
@@ -44,11 +46,24 @@ class CallStore extends EventEmitter {
     onUpdate = update => {
         switch (update['@type']) {
             case 'updateChatVoiceChat': {
+                LOG_CALL('[update] updateChatVoiceChat', update);
+                const { chat_id, voice_chat_group_call_id } = update;
+                if (AppStore.getChatId() === chat_id && voice_chat_group_call_id) {
+                    const groupCall = this.get(voice_chat_group_call_id);
+                    if (!groupCall) {
+                        TdLibController.send({
+                            '@type': 'getGroupCall',
+                            group_call_id: voice_chat_group_call_id
+                        });
+                    }
+                }
+
                 this.emit('updateChatVoiceChat', update);
                 break;
             }
             case 'updateGroupCall': {
                 const { group_call } = update;
+                LOG_CALL('[update] updateGroupCall', group_call);
                 const prevGroupCall = this.get(group_call.id);
 
                 this.set(group_call);
@@ -94,7 +109,9 @@ class CallStore extends EventEmitter {
                     }
                 }
 
-                if (!prevParticipant && participant.order !== '0' || participant.order === '0') {
+                LOG_CALL('[update] updateGroupCallParticipant', !prevParticipant || prevParticipant.order === '0' && participant.order !== '0' || prevParticipant.order !== '0' && participant.order === '0', prevParticipant, participant);
+                // no information before || join group call || leave group call
+                if (!prevParticipant || prevParticipant.order === '0' && participant.order !== '0' || prevParticipant.order !== '0' && participant.order === '0') {
                     this.updateGroupCallParticipants(group_call_id);
                 }
 
@@ -112,10 +129,7 @@ class CallStore extends EventEmitter {
                 this.currentGroupCall = update.call;
 
                 if (this.panelOpened && !this.currentGroupCall) {
-                    TdLibController.clientUpdate({
-                        '@type': 'clientUpdateGroupCallPanel',
-                        opened: false
-                    });
+                    closeGroupCallPanel();
                 }
 
                 this.emit('clientUpdateGroupCall', update);
@@ -218,31 +232,35 @@ class CallStore extends EventEmitter {
             LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp start`, ts);
             currentGroupCall.updatingSdp = true;
 
-            const participants = Array.from(this.participants.get(groupCallId).values()).filter(x => x.order !== '0');
-            LOG_CALL(`updateGroupCallParticipants id=${groupCallId}`, participants);
+            let participants = Array.from(this.participants.get(groupCallId).values()).filter(x => x.order !== '0');
+            if (!participants.some(x => x.user_id === UserStore.getMyId())) {
+                participants = [{ '@type': 'groupCallParticipantMe', source: currentGroupCall.meSignSource, user_id: UserStore.getMyId() }, ...participants];
+            }
+            const ssrcs = participants.map(x => ({
+                ssrc: x.source >>> 0,
+                isMain: x.source === currentGroupCall.meSignSource,
+                name: getUserFullName(x.user_id),
+                userId: x.user_id
+            }));
+            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} ssrcs`, participants, ssrcs);
             const data = {
                 transport,
-                ssrcs: participants.map(x => ({
-                    ssrc: x.source >>> 0,
-                    isMain: x.source === currentGroupCall.meSignSource,
-                    name: getUserFullName(x.user_id)
-                }))
+                ssrcs
             };
 
             description.updateFromServer(data);
             const sdp = description.generateSdp();
 
-            LOG_CALL(`updateGroupCallParticipants id=${groupCallId} conn.setRemoteDescription signalingState=${connection.signalingState}`, sdp);
+            LOG_CALL(`[conn][updateGroupCallParticipants] setRemoteDescription participantsCount=${participants.length} signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp);
             await connection.setRemoteDescription({
                 type: 'offer',
                 sdp,
             });
 
-            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 2`, ts);
+            LOG_CALL(`[conn][updateGroupCallParticipants] createAnswer id=${groupCallId}`, ts);
             const answer = await connection.createAnswer();
-            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 3`, ts);
+            LOG_CALL(`[conn][updateGroupCallParticipants] setLocalDescription id=${groupCallId}`, ts);
             await connection.setLocalDescription(answer);
-            // LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp 4`, ts);
         } finally {
             LOG_CALL(`updateGroupCallParticipants id=${groupCallId} updateSdp finish`, ts);
             currentGroupCall.updatingSdp = false;
@@ -278,12 +296,12 @@ class CallStore extends EventEmitter {
     }
 
     async startGroupCallInternal(chatId) {
-        LOG_CALL('startGroupCallInternal start', chatId);
+        LOG_CALL('[tdweb] createVoiceChat', chatId);
         const groupCallId = await TdLibController.send({
             '@type': 'createVoiceChat',
             chat_id: chatId
         });
-        LOG_CALL('startGroupCallInternal finish', chatId, groupCallId);
+        LOG_CALL('[tdweb] createVoiceChat result', groupCallId);
     }
 
     async joinGroupCall(chatId, groupCallId, muted = true, rejoin = false) {
@@ -293,7 +311,7 @@ class CallStore extends EventEmitter {
         LOG_CALL(`joinGroupCall chatId=${chatId} id=${groupCallId} muted=${muted} rejoin=${rejoin}`);
         const groupCall = this.get(groupCallId);
         if (!groupCall) {
-            LOG_CALL('joinGroupCall getGroupCall', groupCallId);
+            LOG_CALL('[tdweb] getGroupCall id=' + groupCallId);
             TdLibController.send({ '@type': 'getGroupCall', group_call_id: groupCallId });
         }
 
@@ -357,22 +375,23 @@ class CallStore extends EventEmitter {
 
     async joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin = false) {
         LOG_CALL('joinGroupCallInternal start', groupCallId);
+        LOG_CALL('[conn] ctor');
         const connection = new RTCPeerConnection(null);
         connection.ontrack = event => {
-            LOG_CALL('conn.ontrack', event);
+            LOG_CALL('[conn] ontrack', event);
             this.onTrack(event);
         };
         connection.onsignalingstatechange = event => {
-            LOG_CALL('conn.onsignalingstatechange', connection.signalingState);
+            LOG_CALL('[conn] onsignalingstatechange', connection.signalingState);
         };
         connection.onnegotiationneeded = event => {
-            LOG_CALL('conn.onnegotiationneeded', connection.signalingState);
+            LOG_CALL('[conn] onnegotiationneeded', connection.signalingState);
         };
         connection.onicecandidate = event => {
-            // LOG_CALL('conn.onicecandidate', event);
+            LOG_CALL('[conn] onicecandidate', event);
         };
         connection.oniceconnectionstatechange = event => {
-            LOG_CALL(`conn.oniceconnectionstatechange = ${connection.iceConnectionState}`);
+            LOG_CALL(`[conn] oniceconnectionstatechange = ${connection.iceConnectionState}`);
 
             TdLibController.clientUpdate({
                 '@type': 'clientUpdateGroupCallConnectionState',
@@ -417,11 +436,12 @@ class CallStore extends EventEmitter {
             }
         };
         connection.ondatachannel = event => {
-            // LOG_CALL(`conn.ondatachannel = ${connection.iceConnectionState}`);
+            LOG_CALL(`[conn] ondatachannel`);
         };
 
         if (stream) {
             stream.getTracks().forEach(track => {
+                LOG_CALL('[conn] addTrack', track);
                 connection.addTrack(track, stream);
             });
         }
@@ -450,7 +470,9 @@ class CallStore extends EventEmitter {
             offerToReceiveAudio: 1,
             offerToReceiveVideo: 0,
         };
+        LOG_CALL('[conn][joinGroupCallInternal] createOffer', offerOptions);
         const offer = await connection.createOffer(offerOptions);
+        LOG_CALL('[conn][joinGroupCallInternal] setLocalDescription', offer);
         await connection.setLocalDescription(offer);
         const clientInfo = parseSdp(offer.sdp);
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
@@ -474,13 +496,13 @@ class CallStore extends EventEmitter {
             is_muted: muted
         };
 
-        LOG_CALL('joinGroupCall', request);
         let result = null;
         try {
+            LOG_CALL(`[tdweb] joinGroupCall id=${groupCallId}`, request);
             result = await TdLibController.send(request);
-            LOG_CALL(`joinGroupCall result connectionState=${connection.iceConnectionState}`, result);
+            LOG_CALL('[tdweb] joinGroupCall result', result);
         } catch (e) {
-            ERROR_CALL('joinGroupCall error', e);
+            ERROR_CALL('[tdweb] joinGroupCall error', e);
         }
 
         if (!result) {
@@ -513,17 +535,46 @@ class CallStore extends EventEmitter {
 
         currentGroupCall.description = description
 
-        await TdLibController.send({
+        const limit = 1000;
+        LOG_CALL(`[tdweb] loadGroupCallParticipants limit=${limit}`);
+        const r = await TdLibController.send({
             '@type': 'loadGroupCallParticipants',
             group_call_id: groupCallId,
-            limit: 1000
+            limit
         });
+        LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r);
 
-        LOG_CALL('onne setRemoteDescription');
+        // let meParticipant = null;
+        // const participants = this.participants.get(groupCallId);
+        // if (participants) {
+        //     meParticipant = participants.get(UserStore.getMyId());
+        // }
+        //
+        // if (meParticipant && meParticipant.source !== source) {
+        //     meParticipant = { ...meParticipant, ...{ source } };
+        // }
+        //
+        // if (!meParticipant) {
+        //     meParticipant = {
+        //         '@type': 'groupCallParticipantMe',
+        //         user_id: UserStore.getMyId(),
+        //         source,
+        //         can_be_muted: true,
+        //         can_be_unmuted: true,
+        //         can_unmute_self: true,
+        //         is_muted: true,
+        //         is_speaking: false,
+        //         order: Number
+        //     }
+        // }
 
         const data1 = {
             transport,
             ssrcs: [{
+                // ssrc: meParticipant.source,
+                // isMain: true,
+                // name: getUserFullName(meParticipant.user_id),
+                // user_id: meParticipant.user_id
                 ssrc: currentGroupCall.meSignSource >>> 0,
                 isMain: true,
                 name: getUserFullName(UserStore.getMyId())
@@ -533,11 +584,11 @@ class CallStore extends EventEmitter {
         description.updateFromServer(data1);
         const sdp1 = description.generateSdp(true);
 
+        LOG_CALL(`[conn][joinGroupCallInternal] setRemoteDescription signaling=${connection.signalingState} ice=${connection.iceConnectionState} gathering=${connection.iceGatheringState} connection=${connection.connectionState}`, sdp1);
         await connection.setRemoteDescription({
             type: 'answer',
             sdp: sdp1,
         });
-
 
         currentGroupCall.handleUpdateGroupCallParticipants = true;
         await this.updateGroupCallParticipants(groupCallId);
@@ -582,7 +633,7 @@ class CallStore extends EventEmitter {
 
         if (!rejoin) {
             if (discard) {
-                LOG_CALL(`hangUp discard id=${groupCallId}`);
+                LOG_CALL(`[tdweb] discardGroupCall id=${groupCallId}`);
                 await TdLibController.send({
                     '@type': 'discardGroupCall',
                     group_call_id: groupCallId
@@ -592,7 +643,7 @@ class CallStore extends EventEmitter {
 
             const groupCall = this.get(groupCallId);
             if (groupCall && groupCall.is_joined) {
-                LOG_CALL(`hangUp leave id=${groupCallId}`);
+                LOG_CALL(`[tdweb] leaveGroupCall id=${groupCallId}`);
                 await TdLibController.send({
                     '@type': 'leaveGroupCall',
                     group_call_id: groupCallId
@@ -600,7 +651,7 @@ class CallStore extends EventEmitter {
                 return;
             }
 
-            LOG_CALL(`hangUp join payload=null id=${groupCallId}`);
+            LOG_CALL(`[tdweb] id=${groupCallId} payload=null`);
             await TdLibController.send({
                 '@type': 'joinGroupCall',
                 group_call_id: groupCallId,
@@ -612,6 +663,7 @@ class CallStore extends EventEmitter {
     closeConnectionAndStream(connection, stream) {
         try {
             if (connection) {
+                LOG_CALL('[conn][closeConnectionAndStream] close');
                 connection.close();
             }
         } catch (e) {
@@ -658,7 +710,7 @@ class CallStore extends EventEmitter {
 
         if (track) {
             track.onended = () => {
-                LOG_CALL('track.onended');
+                LOG_CALL('conn.track.onended');
                 for (let audio of players.getElementsByTagName('audio')) {
                     if (audio.e === endpoint && audio.srcObject === stream) {
                         players.removeChild(audio);
@@ -794,6 +846,7 @@ class CallStore extends EventEmitter {
             audioTracks[0].enabled = !muted;
         }
 
+        LOG_CALL(`[tdweb] toggleGroupCallParticipantIsMuted id=${groupCallId} user_id=${UserStore.getMyId()} is_muted=${muted}`)
         TdLibController.send({
             '@type': 'toggleGroupCallParticipantIsMuted',
             group_call_id: groupCallId,

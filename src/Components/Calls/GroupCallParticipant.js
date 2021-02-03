@@ -9,33 +9,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
+import ListItemText from '@material-ui/core/ListItemText';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Popover from '@material-ui/core/Popover';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
 import UserTile from '../Tile/UserTile';
+import { closeGroupCallPanel } from '../../Actions/Call';
 import { getUserFullName } from '../../Utils/User';
-import CallStore from '../../Stores/CallStore';
-import './GroupCallParticipant.css';
-import MenuItem from '@material-ui/core/MenuItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import LinkIcon from '@material-ui/icons/Link';
-import ListItemText from '@material-ui/core/ListItemText';
-import ShareIcon from '@material-ui/icons/Share';
-import Menu from '@material-ui/core/Menu';
-import MenuList from '@material-ui/core/MenuList';
-import UnarchiveIcon from '../../Assets/Icons/Unarchive';
-import ArchiveIcon from '../../Assets/Icons/Archive';
-import UnpinIcon from '../../Assets/Icons/PinOff';
-import PinIcon from '../../Assets/Icons/Pin2';
-import { canAddChatToList, getViewInfoTitle, isChatPinned, isMeChat, isPrivateChat } from '../../Utils/Chat';
-import UserIcon from '../../Assets/Icons/User';
-import GroupIcon from '../../Assets/Icons/Group';
-import UnmuteIcon from '../../Assets/Icons/Unmute';
-import MuteIcon from '../../Assets/Icons/Mute';
-import MessageIcon from '../../Assets/Icons/Message';
-import UnreadIcon from '../../Assets/Icons/Unread';
-import DeleteIcon from '../../Assets/Icons/Delete';
-import Popover from '@material-ui/core/Popover';
 import { openUser } from '../../Actions/Client';
+import CallStore from '../../Stores/CallStore';
+import UserStore from '../../Stores/UserStore';
+import './GroupCallParticipant.css';
 
 class GroupCallParticipant extends React.Component {
 
@@ -70,6 +56,9 @@ class GroupCallParticipant extends React.Component {
             event.preventDefault();
             event.stopPropagation();
         }
+        const { userId } = this.props;
+        if (userId === UserStore.getMyId()) return;
+
         const { contextMenu } = this.state;
 
         if (contextMenu) {
@@ -101,6 +90,7 @@ class GroupCallParticipant extends React.Component {
         const { userId } = this.props;
 
         openUser(userId, true);
+        closeGroupCallPanel();
     };
 
     handleSendMessage = event => {
@@ -109,6 +99,7 @@ class GroupCallParticipant extends React.Component {
         const { userId } = this.props;
 
         openUser(userId, false);
+        closeGroupCallPanel();
     };
 
     render() {
@@ -118,15 +109,16 @@ class GroupCallParticipant extends React.Component {
         const participant = participants.get(userId);
         if (!participant) return null;
 
-        const { is_speaking, is_muted, can_unmute_self } = participant;
+        const { is_speaking, is_muted, can_unmute_self, order } = participant;
 
         return (
-            <div className='group-call-participant' onClick={this.handleOpenContextMenu}>
+            <div className='group-call-participant' onClick={this.handleOpenContextMenu} onContextMenu={this.handleOpenContextMenu}>
                 <UserTile userId={userId}/>
                 <div className='group-call-participant-content'>
                     <div className='group-call-participant-content-title'>{getUserFullName(userId)}</div>
                     <div className={classNames('group-call-participant-content-subtitle', 'participant-listening', { 'participant-speaking': is_speaking })}>
-                        {is_speaking ? t('Speaking') : t('Listening')}
+                        {order}
+                        {/*{is_speaking ? t('Speaking') : t('Listening')}*/}
                     </div>
                 </div>
                 <div className={classNames('group-call-participant-mic', { 'participant-muted-by-admin': is_muted && !can_unmute_self, 'participant-speaking': is_speaking })}>
