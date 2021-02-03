@@ -13,8 +13,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Popover from '@material-ui/core/Popover';
-import MicIcon from '../../Assets/Icons/Mic';
-import MicOffIcon from '../../Assets/Icons/MicOff';
+import MicIcon from '../../Assets/Icons/MicOutlined';
+import MicOffIcon from '../../Assets/Icons/MicOffOutlined';
 import UserTile from '../Tile/UserTile';
 import { closeGroupCallPanel } from '../../Actions/Call';
 import { getUserFullName } from '../../Utils/User';
@@ -115,7 +115,10 @@ class GroupCallParticipant extends React.Component {
             <div className='group-call-participant' onClick={this.handleOpenContextMenu} onContextMenu={this.handleOpenContextMenu}>
                 <UserTile userId={userId}/>
                 <div className='group-call-participant-content'>
-                    <div className='group-call-participant-content-title'>{getUserFullName(userId)}</div>
+                    <div className='group-call-participant-content-title'>
+                        {userId}
+                        {/*{getUserFullName(userId)}*/}
+                    </div>
                     <div className={classNames('group-call-participant-content-subtitle', 'participant-listening', { 'participant-speaking': is_speaking })}>
                         {order}
                         {/*{is_speaking ? t('Speaking') : t('Listening')}*/}

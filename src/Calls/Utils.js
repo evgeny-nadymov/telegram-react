@@ -106,3 +106,15 @@ export async function getStream(constraints, muted) {
     LOG_CALL('getStream result', stream);
     return stream;
 }
+
+/// NOTE: telegram returns sign source, while webrtc uses unsign source internally
+/// unsign => sign
+export function toTelegramSource(source) {
+    return source << 0;
+}
+
+/// NOTE: telegram returns sign source, while webrtc uses unsign source internally
+/// sign => unsign
+export function fromTelegramSource(source) {
+    return source >>> 0;
+}

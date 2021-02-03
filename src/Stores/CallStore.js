@@ -9,7 +9,7 @@ import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { closeGroupCallPanel } from '../Actions/Call';
 import { getUserFullName } from '../Utils/User';
-import { getStream, getTransport, parseSdp } from '../Calls/Utils';
+import { fromTelegramSource, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import { throttle } from '../Utils/Common';
 import AppStore from './ApplicationStore';
@@ -237,7 +237,7 @@ class CallStore extends EventEmitter {
                 participants = [{ '@type': 'groupCallParticipantMe', source: currentGroupCall.meSignSource, user_id: UserStore.getMyId() }, ...participants];
             }
             const ssrcs = participants.map(x => ({
-                ssrc: x.source >>> 0,
+                ssrc: fromTelegramSource(x.source),
                 isMain: x.source === currentGroupCall.meSignSource,
                 name: getUserFullName(x.user_id),
                 userId: x.user_id
@@ -477,7 +477,7 @@ class CallStore extends EventEmitter {
         const clientInfo = parseSdp(offer.sdp);
         const { ufrag, pwd, hash, setup, fingerprint, source } = clientInfo;
 
-        currentGroupCall.meSignSource = source << 0;
+        currentGroupCall.meSignSource = toTelegramSource(source);
 
         if (!rejoin) {
             this.startConnectingSound(connection);
@@ -575,7 +575,7 @@ class CallStore extends EventEmitter {
                 // isMain: true,
                 // name: getUserFullName(meParticipant.user_id),
                 // user_id: meParticipant.user_id
-                ssrc: currentGroupCall.meSignSource >>> 0,
+                ssrc: fromTelegramSource(currentGroupCall.meSignSource),
                 isMain: true,
                 name: getUserFullName(UserStore.getMyId())
             }]
@@ -733,19 +733,27 @@ class CallStore extends EventEmitter {
             const audio = document.createElement('audio');
             audio.e = endpoint;
             audio.autoplay = true;
-            audio.controls = true;
             audio.srcObject = stream;
             audio.volume = 1.0;
 
-            if (typeof audio.sinkId !== 'undefined') {
-                const { currentGroupCall } = this;
-                if (currentGroupCall) {
+            const { currentGroupCall } = this;
+            if (currentGroupCall) {
+                const participants = this.participants.get(currentGroupCall.groupCallId);
+                if (participants) {
+                    const participant = Array.from(participants.values()).find(x => x.source === toTelegramSource(Number.parseInt(endpoint, 10)));
+                    if (participant) {
+                        audio.dataset.userId = participant.user_id;
+                    }
+                }
+
+                if (typeof audio.sinkId !== 'undefined') {
                     const { outputDeviceId } = currentGroupCall;
                     if (outputDeviceId) {
                         audio.setSinkId(outputDeviceId);
                     }
                 }
             }
+            audio.dataset.source = endpoint;
 
             players.appendChild(audio);
             audio.play();
