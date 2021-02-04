@@ -173,8 +173,8 @@ class CallStore extends EventEmitter {
 
     playSound(sound) {
         try {
+            this.audio = this.audio || new Audio();
             const { audio } = this;
-            if (!audio) return;
 
             audio.src = sound;
             audio.play();
@@ -305,8 +305,10 @@ class CallStore extends EventEmitter {
     }
 
     async joinGroupCall(chatId, groupCallId, muted = true, rejoin = false) {
-        this.audio = this.audio || new Audio();
-        this.audio.play();
+        if (!this.audio) {
+            this.audio = new Audio()
+            this.audio.play();
+        }
 
         LOG_CALL(`joinGroupCall chatId=${chatId} id=${groupCallId} muted=${muted} rejoin=${rejoin}`);
         const groupCall = this.get(groupCallId);
@@ -483,6 +485,7 @@ class CallStore extends EventEmitter {
             this.startConnectingSound(connection);
         }
 
+        // this.participants.set(currentGroupCall.groupCallId, new Map());
         const request = {
             '@type': 'joinGroupCall',
             group_call_id: groupCallId,
@@ -544,40 +547,42 @@ class CallStore extends EventEmitter {
         });
         LOG_CALL(`[tdweb] loadGroupCallParticipants result`, r);
 
-        // let meParticipant = null;
-        // const participants = this.participants.get(groupCallId);
-        // if (participants) {
-        //     meParticipant = participants.get(UserStore.getMyId());
-        // }
-        //
-        // if (meParticipant && meParticipant.source !== source) {
-        //     meParticipant = { ...meParticipant, ...{ source } };
-        // }
-        //
-        // if (!meParticipant) {
-        //     meParticipant = {
-        //         '@type': 'groupCallParticipantMe',
-        //         user_id: UserStore.getMyId(),
-        //         source,
-        //         can_be_muted: true,
-        //         can_be_unmuted: true,
-        //         can_unmute_self: true,
-        //         is_muted: true,
-        //         is_speaking: false,
-        //         order: Number
-        //     }
-        // }
+        let meParticipant = null;
+        const participants = this.participants.get(groupCallId);
+        if (participants) {
+            meParticipant = participants.get(UserStore.getMyId());
+        }
+
+        if (meParticipant && meParticipant.source !== currentGroupCall.meSignSource) {
+            meParticipant = { ...meParticipant, ...{ source: currentGroupCall.meSignSource } };
+            this.participants.get(groupCallId).set(UserStore.getMyId(), meParticipant);
+        }
+
+        if (!meParticipant) {
+            meParticipant = {
+                '@type': 'groupCallParticipantMe',
+                user_id: UserStore.getMyId(),
+                source: currentGroupCall.meSignSource,
+                can_be_muted: true,
+                can_be_unmuted: true,
+                can_unmute_self: true,
+                is_muted: true,
+                is_speaking: false,
+                order: Number
+            };
+        }
 
         const data1 = {
             transport,
             ssrcs: [{
-                // ssrc: meParticipant.source,
-                // isMain: true,
-                // name: getUserFullName(meParticipant.user_id),
-                // user_id: meParticipant.user_id
-                ssrc: fromTelegramSource(currentGroupCall.meSignSource),
+                ssrc: fromTelegramSource(meParticipant.source),
                 isMain: true,
-                name: getUserFullName(UserStore.getMyId())
+                name: getUserFullName(meParticipant.user_id),
+                user_id: meParticipant.user_id
+                // ssrc: fromTelegramSource(currentGroupCall.meSignSource),
+                // isMain: true,
+                // name: getUserFullName(UserStore.getMyId())
+                // user_id: UserStore.getMyId()
             }]
         };
 

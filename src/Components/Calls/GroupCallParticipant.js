@@ -116,12 +116,12 @@ class GroupCallParticipant extends React.Component {
                 <UserTile userId={userId}/>
                 <div className='group-call-participant-content'>
                     <div className='group-call-participant-content-title'>
-                        {userId}
-                        {/*{getUserFullName(userId)}*/}
+                        {/*{userId}*/}
+                        {getUserFullName(userId)}
                     </div>
                     <div className={classNames('group-call-participant-content-subtitle', 'participant-listening', { 'participant-speaking': is_speaking })}>
-                        {order}
-                        {/*{is_speaking ? t('Speaking') : t('Listening')}*/}
+                        {/*{order}*/}
+                        {is_speaking ? t('Speaking') : t('Listening')}
                     </div>
                 </div>
                 <div className={classNames('group-call-participant-mic', { 'participant-muted-by-admin': is_muted && !can_unmute_self, 'participant-speaking': is_speaking })}>
