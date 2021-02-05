@@ -554,6 +554,7 @@ class CallStore extends EventEmitter {
         }
 
         if (meParticipant && meParticipant.source !== currentGroupCall.meSignSource) {
+            LOG_CALL('[fix] meParticipant', meParticipant.source, currentGroupCall.meSignSource);
             meParticipant = { ...meParticipant, ...{ source: currentGroupCall.meSignSource } };
             this.participants.get(groupCallId).set(UserStore.getMyId(), meParticipant);
         }
@@ -579,10 +580,6 @@ class CallStore extends EventEmitter {
                 isMain: true,
                 name: getUserFullName(meParticipant.user_id),
                 user_id: meParticipant.user_id
-                // ssrc: fromTelegramSource(currentGroupCall.meSignSource),
-                // isMain: true,
-                // name: getUserFullName(UserStore.getMyId())
-                // user_id: UserStore.getMyId()
             }]
         };
 
@@ -859,11 +856,26 @@ class CallStore extends EventEmitter {
             audioTracks[0].enabled = !muted;
         }
 
-        LOG_CALL(`[tdweb] toggleGroupCallParticipantIsMuted id=${groupCallId} user_id=${UserStore.getMyId()} is_muted=${muted}`)
+        LOG_CALL(`[tdweb] toggleGroupCallParticipantIsMuted id=${groupCallId} user_id=${UserStore.getMyId()} is_muted=${muted}`, this.get(groupCallId));
         TdLibController.send({
             '@type': 'toggleGroupCallParticipantIsMuted',
             group_call_id: groupCallId,
             user_id: UserStore.getMyId(),
+            is_muted: muted
+        });
+    }
+
+    changeUserMuted(userId, muted) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        const { groupCallId } = currentGroupCall;
+
+        LOG_CALL(`[tdweb] toggleGroupCallParticipantIsMuted id=${groupCallId} user_id=${UserStore.getMyId()} is_muted=${muted}`, this.get(groupCallId));
+        TdLibController.send({
+            '@type': 'toggleGroupCallParticipantIsMuted',
+            group_call_id: groupCallId,
+            user_id: userId,
             is_muted: muted
         });
     }

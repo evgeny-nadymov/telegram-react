@@ -102,6 +102,20 @@ class GroupCallParticipant extends React.Component {
         closeGroupCallPanel();
     };
 
+    handleMute = event => {
+        this.handleCloseContextMenu(event);
+
+        const { userId } = this.props;
+        CallStore.changeUserMuted(userId, true);
+    };
+
+    handleUnmute = event => {
+        this.handleCloseContextMenu(event);
+
+        const { userId } = this.props;
+        CallStore.changeUserMuted(userId, false);
+    };
+
     render() {
         const { groupCallId, userId, t } = this.props;
         const { contextMenu, left, top } = this.state;
@@ -109,7 +123,8 @@ class GroupCallParticipant extends React.Component {
         const participant = participants.get(userId);
         if (!participant) return null;
 
-        const { is_speaking, is_muted, can_unmute_self, order } = participant;
+        const { is_speaking, is_muted, can_unmute_self, can_be_muted_for_all_users, can_be_unmuted_for_all_users, order } = participant;
+        console.log('[part] render', participant);
 
         return (
             <div className='group-call-participant' onClick={this.handleOpenContextMenu} onContextMenu={this.handleOpenContextMenu}>
@@ -146,6 +161,34 @@ class GroupCallParticipant extends React.Component {
                     }}
                     onMouseDown={e => e.stopPropagation()}>
                     <MenuList onClick={e => e.stopPropagation()}>
+                        { can_be_unmuted_for_all_users && (
+                            <MenuItem
+                                classes={{ root: 'group-call-participant-menu-item' }}
+                                ListItemClasses={{ focusVisible: 'group-call-participant-menu-item-focus-visible' }}
+                                TouchRippleProps={{
+                                    classes : {
+                                        child : 'group-call-participant-menu-item-ripple-child',
+                                        rippleVisible : 'group-call-participant-menu-item-ripple-visible'
+                                    }
+                                }}
+                                onClick={this.handleUnmute}>
+                                <ListItemText primary={t('VoipGroupUnmute')} />
+                            </MenuItem>
+                        )}
+                        { can_be_muted_for_all_users && (
+                            <MenuItem
+                                classes={{ root: 'group-call-participant-menu-item' }}
+                                ListItemClasses={{ focusVisible: 'group-call-participant-menu-item-focus-visible' }}
+                                TouchRippleProps={{
+                                    classes : {
+                                        child : 'group-call-participant-menu-item-ripple-child',
+                                        rippleVisible : 'group-call-participant-menu-item-ripple-visible'
+                                    }
+                                }}
+                                onClick={this.handleMute}>
+                                <ListItemText primary={t('VoipGroupMute')} />
+                            </MenuItem>
+                        )}
                         <MenuItem
                             classes={{ root: 'group-call-participant-menu-item' }}
                             ListItemClasses={{ focusVisible: 'group-call-participant-menu-item-focus-visible' }}
