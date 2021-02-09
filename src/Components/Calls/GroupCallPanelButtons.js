@@ -130,7 +130,6 @@ class GroupCallPanelButtons extends React.Component {
         });
     };
 
-
     render() {
         const { children } = this.props;
         const { status, connected } = this.state;

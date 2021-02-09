@@ -51,6 +51,7 @@
     overflow-y: auto;
     margin: 0 16px;
     border-radius: 5px;
+    z-index: 1;
 }
 
 .group-call-panel-buttons {
@@ -76,13 +77,13 @@
 }
 
 .group-call-panel-button {
-    margin-top: 30px;
+    margin-top: 29px;
     z-index: 1;
 }
 
 .group-call-panel-button-text {
     margin-top: 8px;
-    font-size: 12px;
+    font-size: 11px;
     line-height: normal;
     text-align: center;
 }

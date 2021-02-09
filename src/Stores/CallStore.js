@@ -144,6 +144,11 @@ class CallStore extends EventEmitter {
                 this.emit('clientUpdateGroupCallPanel', update);
                 break;
             }
+            case 'clientUpdateOutputAmplitudeChange': {
+
+                this.emit('clientUpdateOutputAmplitudeChange', update);
+                break;
+            }
             default:
                 break;
         }
@@ -378,6 +383,7 @@ class CallStore extends EventEmitter {
     async joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin = false) {
         LOG_CALL('joinGroupCallInternal start', groupCallId);
         LOG_CALL('[conn] ctor');
+
         const connection = new RTCPeerConnection(null);
         connection.ontrack = event => {
             LOG_CALL('[conn] ontrack', event);
@@ -449,6 +455,9 @@ class CallStore extends EventEmitter {
         }
 
         let { currentGroupCall } = this;
+
+        this.addAmplitudeAnalyzer(stream, currentGroupCall ? currentGroupCall.stream : null);
+
         if (currentGroupCall && rejoin) {
             currentGroupCall.stream = stream;
             currentGroupCall.connection = connection;
@@ -675,6 +684,7 @@ class CallStore extends EventEmitter {
         try {
             if (stream) {
                 stream.getTracks().forEach(t => t.stop());
+                this.addAmplitudeAnalyzer(null, stream);
             }
         } catch (e) {
             LOG_CALL('hangUp error 2', e);
@@ -878,6 +888,62 @@ class CallStore extends EventEmitter {
             user_id: userId,
             is_muted: muted
         });
+    }
+
+    addAmplitudeAnalyzer(stream, oldStream) {
+        if (oldStream) {
+            console.log('stop mic');
+            this.microphone.disconnect();
+            this.analyser.disconnect();
+            this.processor.disconnect();
+        }
+
+        if (stream) {
+            console.log('start mic');
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const analyser = audioContext.createAnalyser();
+            this.analyser = analyser;
+            const microphone = audioContext.createMediaStreamSource(stream);
+            this.microphone = microphone;
+            const processor = audioContext.createScriptProcessor(2048, 1, 1);
+            this.processor = processor;
+
+            analyser.minDecibels = -100;
+            analyser.maxDecibels = -30;
+            analyser.smoothingTimeConstant = 0.05;
+            analyser.fftSize = 1024;
+
+            microphone.connect(analyser);
+            analyser.connect(processor);
+            processor.connect(audioContext.destination);
+            processor.onaudioprocess = event =>  {
+                const array = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(array);
+
+                const length = array.length;
+                let total = 0;
+                let total2 = 0;
+                for (let i = 0; i < length; i++) {
+                    total += array[i] * array[i];
+                    total2 += Math.abs(array[i]);
+                }
+
+                const rms = Math.sqrt(total / length) / 255;
+                const average = total2 / length / 255;
+                const first = array[0] / 255;
+
+                let value = rms * 3;
+                value = Math.min(1, value);
+                // let value = Math.abs(array[0] / 255)
+
+                TdLibController.clientUpdate({
+                    '@type': 'clientUpdateOutputAmplitudeChange',
+                    value
+                })
+            }
+        }
+
+
     }
 }
 

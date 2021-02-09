@@ -20,6 +20,7 @@ import { closeGroupCallPanel } from '../../Actions/Call';
 import { getChatTitle } from '../../Utils/Chat';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
+import Button from './Button';
 
 class GroupCallPanel extends React.Component {
     state = {
