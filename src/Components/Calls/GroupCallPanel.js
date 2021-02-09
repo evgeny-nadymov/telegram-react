@@ -18,9 +18,9 @@ import GroupCallSettingsButton from './GroupCallSettingsButton';
 import GroupCallSubtitle from './GroupCallJoinPanelSubtitle';
 import { closeGroupCallPanel } from '../../Actions/Call';
 import { getChatTitle } from '../../Utils/Chat';
+import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
 import './GroupCallPanel.css';
-import Button from './Button';
 
 class GroupCallPanel extends React.Component {
     state = {
@@ -71,7 +71,7 @@ class GroupCallPanel extends React.Component {
         return (
             <div className='group-call-panel'>
                 <div className='group-call-panel-header'>
-                    <div className='group-call-panel-caption-button' onClick={this.handleClose}>
+                    <div className='group-call-panel-caption-button' onMouseDown={stopPropagation} onClick={this.handleClose}>
                         <CloseIcon />
                     </div>
                     <div className='group-call-panel-caption'>
@@ -92,7 +92,7 @@ class GroupCallPanel extends React.Component {
                         </div>
                     </div>
                     <div className='group-call-panel-button'>
-                        <div className='group-call-panel-button-leave' onClick={this.handleLeave}>
+                        <div className='group-call-panel-button-leave' onMouseDown={stopPropagation} onClick={this.handleLeave}>
                             <CallEndIcon />
                         </div>
                         <div className='group-call-panel-button-text'>

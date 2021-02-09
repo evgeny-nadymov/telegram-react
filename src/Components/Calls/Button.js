@@ -22,6 +22,7 @@ import {
     MUTE_BUTTON_STATE_MUTED_BY_ADMIN,
     MUTE_BUTTON_STATE_UNMUTE
 } from './TopBar';
+import { stopPropagation } from '../../Utils/Message';
 
 /// https://github.com/aosp-mirror/platform_frameworks_base/blob/master/core/java/android/view/animation/OvershootInterpolator.java
 class OvershootInterpolator {
@@ -865,11 +866,8 @@ class Button extends React.Component {
         // console.log('[button] setAmplitude', [this.amplitude, this.animateToAmplitude, this.animateAmplitudeDiff]);
     }
 
-    handleClick = event => {
+    handleMouseDown = event => {
         event.stopPropagation();
-        const { onClick } = this.props;
-
-        onClick && onClick(event);
     }
 
     render() {
@@ -893,7 +891,9 @@ class Button extends React.Component {
                     marginLeft: -52,
                     marginTop: -38,
                     cursor: 'pointer'
-                }} onClick={this.handleClick}>
+                }}
+                     onMouseDown={stopPropagation}
+                     onClick={onClick}>
                     {children}
                 </div>
             </div>

@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import TuneIcon from '../../Assets/Icons/Tune';
+import { stopPropagation } from '../../Utils/Message';
 import './GroupCallSettingsButton.css';
 
 class GroupCallSettingsButton extends React.Component {
@@ -15,7 +16,7 @@ class GroupCallSettingsButton extends React.Component {
         const { onClick } = this.props;
 
         return (
-            <div className='group-call-settings-button' onClick={onClick}>
+            <div className='group-call-settings-button' onMouseDown={stopPropagation} onClick={onClick}>
                 <TuneIcon />
             </div>
         );

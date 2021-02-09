@@ -41,10 +41,10 @@ class AnimatedItem extends React.Component {
     }
 
     componentDidMount() {
-        const { scrollDown } = this.props;
+        const { scrollDown, animateOnMount } = this.props;
         const { to } = this.state;
 
-        this.animate('', to, scrollDown);
+        this.animate('', to, scrollDown, animateOnMount);
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -56,7 +56,7 @@ class AnimatedItem extends React.Component {
         }
     }
 
-    animate = (from, to, scrollDown) => {
+    animate = (from, to, scrollDown, animate = true) => {
         const { height } = this.props;
 
         const container = this.containerRef.current;
@@ -65,7 +65,7 @@ class AnimatedItem extends React.Component {
 
         if (!container || !item1 || !item2) return;
 
-        const duration = '250ms';
+        const duration = !animate ? '0ms' : '250ms';
         const timingFunction = 'ease-in-out';
 
         if (scrollDown) {
@@ -90,17 +90,15 @@ class AnimatedItem extends React.Component {
     };
 
     render() {
-        const { scrollDown, height } = this.props;
+        const { scrollDown, height, getItemTemplate } = this.props;
         const { from, to } = this.state;
-
-        // console.log('[c] render', [from, to, scrollDown]);
 
         return (
             <div className='animated-item' style={{ height }}>
-                <div className='animated-item-placeholder'>{to}</div>
+                <div className='animated-item-placeholder'>{getItemTemplate(to)}</div>
                 <div ref={this.containerRef} className='animated-item-wrapper'>
-                    <div ref={this.item1Ref} className='animated-item-1' style={{ height }}>{scrollDown ? to : from }</div>
-                    <div ref={this.item2Ref} className='animated-item-2' style={{ height }}>{scrollDown ? from : to }</div>
+                    <div ref={this.item1Ref} className='animated-item-1' style={{ height }}>{scrollDown ? getItemTemplate(to) : getItemTemplate(from) }</div>
+                    <div ref={this.item2Ref} className='animated-item-2' style={{ height }}>{scrollDown ? getItemTemplate(from) : getItemTemplate(to) }</div>
                 </div>
             </div>
         );
@@ -109,14 +107,18 @@ class AnimatedItem extends React.Component {
 
 AnimatedItem.propTypes = {
     item: PropTypes.string,
+    getItemTemplate: PropTypes.func,
     scrollDown: PropTypes.bool,
-    height: PropTypes.number
+    height: PropTypes.number,
+    animateOnMount: PropTypes.bool
 };
 
 AnimatedItem.defaultProps = {
     item: null,
+    getItemTemplate: x => x,
     scrollDown: true,
-    height: 21
+    height: 21,
+    animateOnMount: true
 }
 
 export default AnimatedItem;

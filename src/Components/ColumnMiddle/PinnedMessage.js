@@ -400,15 +400,6 @@ class PinnedMessage extends React.Component {
                             </div>
                         </div>
                     </div>
-                    {/*{ pinned.length > 1 && (*/}
-                    {/*    <IconButton*/}
-                    {/*        className='pinned-message-edit-button'*/}
-                    {/*        aria-label='Edit'*/}
-                    {/*        onClick={this.handleEditClick}*/}
-                    {/*        onMouseDown={this.handleMouseDown}>*/}
-                    {/*        <PlaylistEditIcon />*/}
-                    {/*    </IconButton>*/}
-                    {/*)}*/}
                 </ListItem>
             </>
         );

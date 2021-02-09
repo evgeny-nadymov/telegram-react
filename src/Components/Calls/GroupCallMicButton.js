@@ -16,6 +16,8 @@ import { MUTE_BUTTON_STATE_CONNECTING, MUTE_BUTTON_STATE_MUTE, MUTE_BUTTON_STATE
 import CallStore from '../../Stores/CallStore';
 import UserStore from '../../Stores/UserStore';
 import './GroupCallMicButton.css';
+import AnimatedItem from '../ColumnMiddle/AnimatedItem';
+import GroupCallMicButtonHint from './GroupCallMicButtonHint';
 
 class GroupCallMicButton extends React.Component {
     constructor(props) {
@@ -211,31 +213,7 @@ class GroupCallMicButton extends React.Component {
     };
 
     render() {
-        const { t } = this.props;
         const { status, connected, animated, shook } = this.state;
-
-        let title = '';
-        let subtitle = '';
-        if (connected) {
-            switch (status) {
-                case 'muted': {
-                    title = t('VoipGroupUnmute');
-                    // subtitle = t('VoipHoldAndTalk');
-                    break;
-                }
-                case 'unmuted': {
-                    title = t('VoipTapToMute');
-                    break;
-                }
-                case 'forceMuted': {
-                    title = t('VoipMutedByAdmin');
-                    subtitle = t('VoipMutedByAdminInfo');
-                    break;
-                }
-            }
-        } else {
-            title = t('Connecting');
-        }
 
         return (
             <div className='group-call-mic-button-wrapper' >
@@ -255,10 +233,12 @@ class GroupCallMicButton extends React.Component {
                         {connected && status === 'unmuted' ? <MicIcon style={{ fontSize: 36 }}/> : <MicOffIcon style={{ fontSize: 36 }}/>}
                     </div>
                 )}
-                <div className={classNames('group-call-mic-button-description', { 'shook-horizontal': shook })}>
-                    <div className='group-call-mic-button-description-title'>{title}</div>
-                    {subtitle && <div className='group-call-mic-button-description-subtitle'>{subtitle}</div>}
-                </div>
+                {/*<div className={classNames('group-call-mic-button-description', { 'shook-horizontal': shook })}>*/}
+                {/*    <div className='group-call-mic-button-description-title'>{title}</div>*/}
+                {/*    {subtitle && <div className='group-call-mic-button-description-subtitle'>{subtitle}</div>}*/}
+                {/*</div>*/}
+                <GroupCallMicButtonHint className={shook ? 'shook-horizontal' : ''} status={connected ? status : 'connecting'}/>
+                {/*<AnimatedItem item={title} scrollDown={true}/>*/}
             </div>
         )
     }
