@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { withTranslation } from 'react-i18next';
 import Button from './Button';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
@@ -190,32 +191,51 @@ class GroupCallMicButton extends React.Component {
         if (!groupCall) return;
 
         if (!groupCall.can_unmute_self) {
-            // showSnackbar(LStore.getString('VoipMutedByAdminInfo'), closeSnackbar => snackKey => {
-            //     return (
-            //         <IconButton
-            //             key='close'
-            //             aria-label='Close'
-            //             color='inherit'
-            //             className='notification-close-button'
-            //             onClick={() => { closeSnackbar(snackKey); }}>
-            //             <CloseIcon />
-            //         </IconButton>
-            //     )
-            // });
+            const { shook } = this.state;
+            if (shook) {
+                this.setState({
+                    shook: false
+                }, () => {
+                    requestAnimationFrame(() => {
+                        this.setState({ shook: true });
+                    })
+                });
+            } else {
+                this.setState({
+                    shook: true
+                });
+            }
         } else {
             CallStore.changeMuted(!CallStore.isMuted());
         }
     };
 
-    // handleClick = () => {
-    //     this.setState({
-    //         animated: !this.state.animated
-    //     })
-    // };
-
     render() {
-        const { status, connected, animated, state } = this.state;
-        console.log('[mic] render', state, connected, status);
+        const { t } = this.props;
+        const { status, connected, animated, shook } = this.state;
+
+        let title = '';
+        let subtitle = '';
+        if (connected) {
+            switch (status) {
+                case 'muted': {
+                    title = t('VoipGroupUnmute');
+                    // subtitle = t('VoipHoldAndTalk');
+                    break;
+                }
+                case 'unmuted': {
+                    title = t('VoipTapToMute');
+                    break;
+                }
+                case 'forceMuted': {
+                    title = t('VoipMutedByAdmin');
+                    subtitle = t('VoipMutedByAdminInfo');
+                    break;
+                }
+            }
+        } else {
+            title = t('Connecting');
+        }
 
         return (
             <div className='group-call-mic-button-wrapper' >
@@ -235,6 +255,10 @@ class GroupCallMicButton extends React.Component {
                         {connected && status === 'unmuted' ? <MicIcon style={{ fontSize: 36 }}/> : <MicOffIcon style={{ fontSize: 36 }}/>}
                     </div>
                 )}
+                <div className={classNames('group-call-mic-button-description', { 'shook-horizontal': shook })}>
+                    <div className='group-call-mic-button-description-title'>{title}</div>
+                    {subtitle && <div className='group-call-mic-button-description-subtitle'>{subtitle}</div>}
+                </div>
             </div>
         )
     }
@@ -245,4 +269,4 @@ GroupCallMicButton.propTypes = {
     onClick: PropTypes.func
 };
 
-export default GroupCallMicButton;
+export default withTranslation()(GroupCallMicButton);

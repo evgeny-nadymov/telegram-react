@@ -159,6 +159,31 @@ pre code {
     }
 }
 
+.shook-horizontal {
+    animation: shake-horizontal-animation 250ms;
+}
+
+@keyframes shake-horizontal-animation {
+    0% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(3px);
+    }
+    40% {
+        transform: translateX(-3px);
+    }
+    60% {
+        transform: translateX(3px);
+    }
+    80% {
+        transform: translateX(-3px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
 .message-out .message-wrapper {
     flex-direction: row-reverse;
 }

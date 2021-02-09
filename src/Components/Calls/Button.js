@@ -865,6 +865,13 @@ class Button extends React.Component {
         // console.log('[button] setAmplitude', [this.amplitude, this.animateToAmplitude, this.animateAmplitudeDiff]);
     }
 
+    handleClick = event => {
+        event.stopPropagation();
+        const { onClick } = this.props;
+
+        onClick && onClick(event);
+    }
+
     render() {
         const { children, onClick } = this.props;
         const { left, right, top, bottom, scale } = this;
@@ -886,7 +893,7 @@ class Button extends React.Component {
                     marginLeft: -52,
                     marginTop: -38,
                     cursor: 'pointer'
-                }} onClick={onClick}>
+                }} onClick={this.handleClick}>
                     {children}
                 </div>
             </div>

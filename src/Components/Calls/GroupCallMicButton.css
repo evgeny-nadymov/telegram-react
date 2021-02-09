@@ -31,6 +31,27 @@
     top: 0;
 }
 
+.group-call-mic-button-description {
+    position: absolute;
+    bottom: 10px;
+    left: auto;
+    right: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 37px;
+}
+
+.group-call-mic-button-description-title {
+    font-size: 18px;
+}
+
+.group-call-mic-button-description-subtitle {
+    margin-top: -5px;
+    font-size: 12px;
+}
+
 .group-call-mic-button {
     width: 104px;
     height: 104px;
