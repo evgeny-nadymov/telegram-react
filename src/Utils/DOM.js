@@ -39,9 +39,20 @@ export function focusInput(element) {
 
 export function scrollTop(element, behavior = 'smooth') {
     if (!element) return;
+    if (element.scrollTop === 0) return;
 
     element.scrollTop = Math.min(element.scrollTop, 50);
     setTimeout(() => {
         element.scrollTo({ top: 0, behavior });
+    }, 1);
+}
+
+export function scrollBottom(element, behavior = 'smooth') {
+    if (!element) return;
+    if (element.scrollTop === element.scrollHeight - element.offsetHeight) return;
+
+    element.scrollTop = Math.max(element.scrollTop, element.scrollHeight - element.offsetHeight - 50);
+    setTimeout(() => {
+        element.scrollTo({ top: element.scrollHeight - element.offsetHeight, behavior });
     }, 1);
 }

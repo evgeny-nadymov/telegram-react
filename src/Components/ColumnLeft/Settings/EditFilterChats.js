@@ -28,6 +28,7 @@ import { loadChatsContent } from '../../../Utils/File';
 import FileStore from '../../../Stores/FileStore';
 import TdLibController from '../../../Controllers/TdLibController';
 import './EditFilterChats.css';
+import { scrollBottom } from '../../../Utils/DOM';
 
 class EditFilterChats extends React.Component {
 
@@ -132,12 +133,12 @@ class EditFilterChats extends React.Component {
                 requestAnimationFrame(() => {
                     wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
                     setTimeout(() => {
-                        this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
+                        scrollBottom(wrapPanel, 'auto');
                     }, 250);
                 });
             } else {
                 wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+                scrollBottom(wrapPanel, 'smooth');
             }
         } else if (collapsed) {
             if (currentHeight < maxHeight) {
@@ -154,7 +155,7 @@ class EditFilterChats extends React.Component {
                 wrapPanel.style.cssText = prevCSSText;
                 wrapPanel.scrollTop = prevScrollTop;
             } else {
-                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+                scrollBottom(wrapPanel, 'smooth');
             }
         }
     }
@@ -408,7 +409,7 @@ class EditFilterChats extends React.Component {
                         </>
                     )}
                     {items.map(x => <ChatChip selected={focusedItem === x} ref={el => { this.itemsRef.set(x, el); }} key={x} chatId={x} onClick={() => this.handleChatChange(x)}/>)}
-                    <SearchInput inputRef={this.searchInputRef} hint={t('Search')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
+                    <SearchInput wrapperRef={this.searchRef} inputRef={this.searchInputRef} hint={t('Search')} onClose={this.handleSearchClose} onChange={this.handleSearch} onBackspace={this.handleBackspace} />
                 </div>
                 <div className='sidebar-page-top-divider' style={{ zIndex: 1 }}/>
                 <div ref={this.scrollRef} className='sidebar-page-content' style={{ marginTop: -3, position: 'relative', height: '100%' }} onScroll={onScroll}>

@@ -26,6 +26,7 @@ import ChatStore from '../../Stores/ChatStore';
 import FileStore from '../../Stores/FileStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './Contacts.css';
+import { scrollBottom } from '../../Utils/DOM';
 
 class UserListItem extends React.Component {
     shouldComponentUpdate(nextProps, nextState, nextContext) {
@@ -219,12 +220,12 @@ class AddParticipants extends React.Component {
                 requestAnimationFrame(() => {
                     wrapPanel.style.cssText = `max-height: ${Math.min(currentHeight, maxHeight)}px;`;
                     setTimeout(() => {
-                        this.searchInputRef.current.scrollIntoView({ behavior: 'auto' });
+                        scrollBottom(wrapPanel, 'auto');
                     }, 250);
                 });
             } else {
                 wrapPanel.style.cssText = `max-height: ${maxHeight}px;`;
-                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+                scrollBottom(wrapPanel, 'smooth');
             }
         } else if (collapsed) {
             if (currentHeight < maxHeight) {
@@ -241,7 +242,7 @@ class AddParticipants extends React.Component {
                 wrapPanel.style.cssText = prevCSSText;
                 wrapPanel.scrollTop = prevScrollTop;
             } else {
-                this.searchInputRef.current.scrollIntoView({ behavior: 'smooth' });
+                scrollBottom(wrapPanel, 'smooth');
             }
         }
     }
