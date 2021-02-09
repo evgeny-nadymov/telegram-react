@@ -81,19 +81,21 @@ class SearchInput extends React.Component {
 
         return (
             <div className='search-input'>
-                <div
-                    id='search-inputbox'
-                    ref={inputRef}
-                    placeholder={hint || t('Search')}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onKeyDown={this.handleKeyDown}
-                    onKeyUp={this.handleKeyUp}
-                    onPaste={this.handlePaste}
-                    onInput={this.handleInput}
-                    onFocus={onFocus}
-                />
-                {showIcon && <SearchIcon className='search-input-icon' />}
+                <div className='search-input-wrapper'>
+                    {showIcon && <SearchIcon className='search-input-icon' />}
+                    <div
+                        id='search-inputbox'
+                        ref={inputRef}
+                        placeholder={hint || t('Search')}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onKeyDown={this.handleKeyDown}
+                        onKeyUp={this.handleKeyUp}
+                        onPaste={this.handlePaste}
+                        onInput={this.handleInput}
+                        onFocus={onFocus}
+                    />
+                </div>
             </div>
         );
     }
