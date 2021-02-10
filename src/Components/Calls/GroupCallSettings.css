@@ -72,6 +72,10 @@
     padding: 0 22px;
 }
 
+.group-call-settings-panel-item-secondary {
+    color: #c84b4a;
+}
+
 .group-call-settings-panel-item-title {
     flex: 1 1 auto;
 }

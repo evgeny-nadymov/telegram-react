@@ -13,11 +13,12 @@ import CloseIcon from '../../Assets/Icons/Close';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { modalManager } from '../../Utils/Modal';
 import { copy } from '../../Utils/Text';
-import { getChatUsername } from '../../Utils/Chat';
+import { canManageVoiceChats, getChatUsername } from '../../Utils/Chat';
 import { showSnackbar } from '../../Actions/Client';
 import CallStore from '../../Stores/CallStore';
 import OptionStore from '../../Stores/OptionStore';
 import './GroupCallSettings.css';
+import { getStream } from '../../Calls/Utils';
 
 class GroupCallSettings extends React.Component {
     constructor(props) {
@@ -183,12 +184,30 @@ class GroupCallSettings extends React.Component {
                 break;
             }
             case 'inputAudio': {
+                // const stream = getStream({
+                //     audio: { exact: deviceId },
+                //     video: false
+                // });
+                //
+                // this.setState({
+                //     inputAudioDeviceId: deviceId,
+                //     inputAudioStream: stream
+                // });
                 break;
             }
             case 'inputVideo': {
                 break;
             }
         }
+    };
+
+    handleEnd = () => {
+        const { currentGroupCall: call } = CallStore;
+        if (!call) return;
+
+        const { chatId, groupCallId } = call;
+
+        CallStore.leaveGroupCall(chatId, groupCallId, true);
     };
 
     render() {
@@ -210,8 +229,9 @@ class GroupCallSettings extends React.Component {
         const inputAudioString = !inputAudioDeviceInfo || inputAudioDeviceInfo.deviceId === 'default' || !inputAudioDeviceInfo.label ? t('Default') : inputAudioDeviceInfo.label;
 
         const { currentGroupCall } = CallStore;
+        const chatId = currentGroupCall ? currentGroupCall.chatId : 0;
 
-        const username = getChatUsername(currentGroupCall ? currentGroupCall.chatId : 0);
+        const username = getChatUsername(chatId);
 
         if (openDeviceSelect) {
             const { type } = openDeviceSelect;
@@ -273,6 +293,8 @@ class GroupCallSettings extends React.Component {
             </svg>
         );
 
+        const canManage = canManageVoiceChats(chatId);
+
         return (
             <>
                 <div className='group-call-settings'>
@@ -297,6 +319,11 @@ class GroupCallSettings extends React.Component {
                             { username && (
                                 <div className='group-call-settings-panel-item' onClick={this.handleCopyLink}>
                                     {t('VoipGroupCopyInviteLink')}
+                                </div>
+                            )}
+                            { canManage && (
+                                <div className='group-call-settings-panel-item group-call-settings-panel-item-secondary' onClick={this.handleEnd}>
+                                    {t('VoipGroupEndChat')}
                                 </div>
                             )}
                         </div>

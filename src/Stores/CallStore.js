@@ -324,7 +324,21 @@ class CallStore extends EventEmitter {
 
         let stream = null;
         try {
-            stream = await getStream({ audio: true, video: false }, muted);
+            let constraints = {
+                audio: true,
+                video: false
+            };
+            if (rejoin) {
+                const { currentGroupCall } = this;
+                if (currentGroupCall && currentGroupCall.inputAudioDeviceId) {
+                    constraints = {
+                        audio: { deviceId: { exact: currentGroupCall.inputAudioDeviceId } },
+                        video: false
+                    };
+                }
+            }
+
+            stream = await getStream(constraints, muted);
         } catch (e) {
             ERROR_CALL('joinGroupCall getStream error', e);
             showAlert({
@@ -691,10 +705,16 @@ class CallStore extends EventEmitter {
         }
     }
 
-    async leaveGroupCall(chatId, groupCallId) {
+    async leaveGroupCall(chatId, groupCallId, forceDiscard = false) {
         LOG_CALL('leaveGroupCall', chatId, groupCallId);
         const manageVoiceCalls = canManageVoiceChats(chatId);
         if (manageVoiceCalls) {
+            if (forceDiscard) {
+                this.playSound('sounds/group_call_end.mp3');
+                await this.hangUp(groupCallId, true);
+                return;
+            }
+
             showLeaveVoiceChatAlert({
                 onResult: async result => {
                     LOG_CALL('leaveGroupCall result', result);
@@ -772,20 +792,24 @@ class CallStore extends EventEmitter {
         }
     }
 
-    setOutputDeviceId(deviceId) {
-        const { currentGroupCall } = this;
-        if (!currentGroupCall) return;
-
+    replaceOutputDevice(deviceId) {
         const players = document.getElementById('players');
         if (!players) return;
-
-        currentGroupCall.outputDeviceId = deviceId;
 
         for (let audio of players.getElementsByTagName('audio')) {
             if (typeof audio.sinkId !== 'undefined') {
                 audio.setSinkId(deviceId);
             }
         }
+    }
+
+    setOutputDeviceId(deviceId) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        currentGroupCall.outputDeviceId = deviceId;
+
+        this.replaceOutputDevice(deviceId);
     }
 
     getOutputDeviceId() {
@@ -804,8 +828,41 @@ class CallStore extends EventEmitter {
         return null;
     }
 
+    async replaceInputAudioDevice(stream) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        const { connection } = currentGroupCall;
+        if (!connection) return;
+
+        // const videoTrack = stream.getVideoTracks()[0];
+        // const sender = pc.getSenders().find(function(s) {
+        //     return s.track.kind == videoTrack.kind;
+        // });
+        // sender.replaceTrack(videoTrack);
+
+        const audioTrack = stream.getAudioTracks()[0];
+        const sender2 = connection.getSenders().find(x => {
+            return x.track.kind === audioTrack.kind;
+        });
+        await sender2.replaceTrack(audioTrack);
+
+        currentGroupCall.stream = stream;
+    }
+
+    async setInputAudioDeviceId(deviceId, stream) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
+
+        await this.replaceInputAudioDevice(stream);
+        currentGroupCall.inputAudioDeviceId = deviceId;
+    }
+
     getInputAudioDeviceId() {
-        return null;
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return null;
+
+        return currentGroupCall.inputAudioDeviceId;
     }
 
     getInputVideoDeviceId() {
