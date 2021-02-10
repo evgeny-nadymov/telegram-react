@@ -9,16 +9,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withTranslation } from 'react-i18next';
 import IconButton from '@material-ui/core/IconButton';
+import Switch from '@material-ui/core/Switch';
 import CloseIcon from '../../Assets/Icons/Close';
 import KeyboardManager, { KeyboardHandler } from '../Additional/KeyboardManager';
 import { modalManager } from '../../Utils/Modal';
 import { copy } from '../../Utils/Text';
 import { canManageVoiceChats, getChatUsername } from '../../Utils/Chat';
+import { getStream } from '../../Calls/Utils';
 import { showSnackbar } from '../../Actions/Client';
+import { stopPropagation } from '../../Utils/Message';
 import CallStore from '../../Stores/CallStore';
 import OptionStore from '../../Stores/OptionStore';
 import './GroupCallSettings.css';
-import { getStream } from '../../Calls/Utils';
 
 class GroupCallSettings extends React.Component {
     constructor(props) {
@@ -26,9 +28,7 @@ class GroupCallSettings extends React.Component {
 
         this.keyboardHandler = new KeyboardHandler(this.onKeyDown);
 
-        this.state = {
-
-        };
+        this.state = { };
     }
 
     onKeyDown = event => {
@@ -76,6 +76,20 @@ class GroupCallSettings extends React.Component {
             const inputVideoDeviceId = CallStore.getInputVideoDeviceId();
             const inputVideo = (devices || []).filter(x => x.kind === 'videoinput');
 
+            let muteSettings = { };
+            const groupCall = CallStore.get(groupCallId);
+            if (groupCall) {
+                const {
+                    mute_new_participants: muteNewParticipants,
+                    allowed_change_mute_new_participants: allowedChangeMuteNewParticipants
+                } = groupCall;
+
+                muteSettings = {
+                    muteNewParticipants,
+                    allowedChangeMuteNewParticipants
+                }
+            }
+
             return {
                 prevGroupCallId: groupCallId,
                 devices,
@@ -84,7 +98,8 @@ class GroupCallSettings extends React.Component {
                 inputAudioDeviceId,
                 inputAudio,
                 inputVideoDeviceId,
-                inputVideo
+                inputVideo,
+                ...muteSettings
             };
         }
 
@@ -94,12 +109,32 @@ class GroupCallSettings extends React.Component {
     componentDidMount() {
         navigator.mediaDevices.addEventListener('devicechange', this.onDeviceChange);
         KeyboardManager.add(this.keyboardHandler);
+        CallStore.on('updateGroupCall', this.onUpdateGroupCall);
     }
 
     componentWillUnmount() {
         navigator.mediaDevices.removeEventListener('devicechange', this.onDeviceChange);
         KeyboardManager.remove(this.keyboardHandler);
+        CallStore.off('updateGroupCall', this.onUpdateGroupCall);
     }
+
+    onUpdateGroupCall = update => {
+        const { groupCallId } = this.props;
+        const { group_call } = update;
+        if (!group_call) return;
+
+        const {
+            id,
+            mute_new_participants: muteNewParticipants,
+            allowed_change_mute_new_participants: allowedChangeMuteNewParticipants
+        } = group_call;
+        if (id !== groupCallId) return;
+
+        this.setState({
+            muteNewParticipants,
+            allowedChangeMuteNewParticipants
+        });
+    };
 
     onDeviceChange = async () => {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -210,8 +245,19 @@ class GroupCallSettings extends React.Component {
         CallStore.leaveGroupCall(chatId, groupCallId, true);
     };
 
+    handleMuteNewParticipants = () => {
+        const { groupCallId } = this.props;
+        const { muteNewParticipants } = this.state;
+
+        this.setState({
+            muteNewParticipants: !muteNewParticipants
+        });
+
+        CallStore.toggleMuteNewParticipants(groupCallId, !muteNewParticipants);
+    };
+
     render() {
-        const { t, onClose } = this.props;
+        const { groupCallId, t, onClose } = this.props;
         const {
             inputAudioDeviceId,
             inputAudio,
@@ -219,7 +265,9 @@ class GroupCallSettings extends React.Component {
             inputVideo,
             outputDeviceId,
             output,
-            openDeviceSelect
+            openDeviceSelect,
+            muteNewParticipants,
+            allowedChangeMuteNewParticipants
         } = this.state;
 
         const outputDeviceInfo = output.find(x => x.deviceId === outputDeviceId || !outputDeviceId && x.deviceId === 'default');
@@ -294,10 +342,11 @@ class GroupCallSettings extends React.Component {
         );
 
         const canManage = canManageVoiceChats(chatId);
+        console.log('[call][GroupCallSettings] render', muteNewParticipants);
 
         return (
             <>
-                <div className='group-call-settings'>
+                <div className='group-call-settings' onMouseDown={stopPropagation}>
                     <div className='group-call-settings-panel' onClick={this.handlePanelClick}>
                         <div className='group-call-settings-panel-header'>
                             <div className='group-call-panel-caption'>
@@ -305,6 +354,23 @@ class GroupCallSettings extends React.Component {
                             </div>
                         </div>
                         <div className='group-call-settings-panel-content'>
+                            { allowedChangeMuteNewParticipants && (
+                                <div className='group-call-settings-panel-item' onClick={this.handleMuteNewParticipants}>
+                                    <div className='group-call-settings-panel-item-title'>{t('VoipGroupOnlyAdminsCanSpeak')}</div>
+                                    <Switch
+                                        disableRipple
+                                        classes={{
+                                            root: 'group-call-settings-panel-switch-root',
+                                            switchBase: 'group-call-settings-panel-switch-base',
+                                            colorSecondary: 'group-call-settings-panel-switch-color-secondary',
+                                            checked: 'group-call-settings-panel-switch-checked',
+                                            track: 'group-call-settings-panel-switch-track'
+                                        }}
+                                        checked={muteNewParticipants}
+                                        onChange={this.handleMuteNewParticipants}/>
+                                </div>
+                            )}
+
                             <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('output')}>
                                 <div className='group-call-settings-panel-item-title'>{t('Speaker')}</div>
                                 <div className='group-call-settings-panel-item-subtitle'>{outputString}</div>

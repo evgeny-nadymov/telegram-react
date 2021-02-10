@@ -999,8 +999,21 @@ class CallStore extends EventEmitter {
                 })
             }
         }
+    }
 
+    toggleMuteNewParticipants(groupCallId, mute) {
+        const { currentGroupCall } = this;
+        if (!currentGroupCall) return;
 
+        const { groupCallId: currentGroupCallId } = currentGroupCall;
+        if (groupCallId !== currentGroupCallId) return;
+
+        LOG_CALL('toggleMuteNewParticipants', groupCallId, mute);
+        TdLibController.send({
+            '@type': 'toggleGroupCallMuteNewParticipants',
+            group_call_id: groupCallId,
+            mute_new_participants: mute
+        });
     }
 }
 
