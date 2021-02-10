@@ -13,6 +13,7 @@ import Button from './Button';
 import GroupCallMicButtonHint from './GroupCallMicButtonHint';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
+import { getCallStatus } from '../../Calls/Utils';
 import { MUTE_BUTTON_STATE_CONNECTING, MUTE_BUTTON_STATE_MUTE, MUTE_BUTTON_STATE_MUTED_BY_ADMIN, MUTE_BUTTON_STATE_UNMUTE } from './TopBar';
 import CallStore from '../../Stores/CallStore';
 import UserStore from '../../Stores/UserStore';
@@ -23,22 +24,9 @@ class GroupCallMicButton extends React.Component {
         super(props);
 
         this.buttonRef = React.createRef();
-        const { currentGroupCall: call } = CallStore;
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
 
+        const { currentGroupCall: call } = CallStore;
+        const { connected, status } = getCallStatus(call);
         this.state = {
             call,
             status,
@@ -122,21 +110,7 @@ class GroupCallMicButton extends React.Component {
         const { user_id, is_muted } = participant
         if (user_id !== UserStore.getMyId()) return;
 
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.setState({
             status,
             connected
@@ -168,21 +142,7 @@ class GroupCallMicButton extends React.Component {
     onClientUpdateGroupCall = update => {
         const { currentGroupCall: call } = CallStore;
 
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.setState({
             call,
             status,

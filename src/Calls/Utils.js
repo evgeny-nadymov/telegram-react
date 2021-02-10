@@ -6,7 +6,7 @@
  */
 
 // changes ssrcs
-import { LOG_CALL } from '../Stores/CallStore';
+import CallStore, { LOG_CALL } from '../Stores/CallStore';
 
 export function getTransport(joinResponse) {
     const { payload, candidates } = joinResponse;
@@ -117,4 +117,23 @@ export function toTelegramSource(source) {
 /// sign => unsign
 export function fromTelegramSource(source) {
     return source >>> 0;
+}
+
+export function getCallStatus(call) {
+    let connected = false;
+    let status = '';
+    if (call) {
+        const { groupCallId, connection } = call;
+        const groupCall = CallStore.get(groupCallId);
+        if (groupCall) {
+            if (!groupCall.can_unmute_self) {
+                status = 'forceMuted';
+            } else {
+                status = !CallStore.isMuted() ? 'unmuted' : 'muted';
+            }
+        }
+        connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
+    }
+
+    return { connected, status };
 }

@@ -11,27 +11,15 @@ import classNames from 'classnames';
 import CallStore from '../../Stores/CallStore';
 import UserStore from '../../Stores/UserStore';
 import './GroupCallPanelButtons.css'
+import { getCallStatus } from '../../Calls/Utils';
 
 class GroupCallPanelButtons extends React.Component {
     constructor(props) {
         super(props);
 
         const { currentGroupCall: call } = CallStore;
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState === 'connected';
-        }
 
+        const { connected, status } = getCallStatus(call);
         this.state = {
             call,
             status,
@@ -80,21 +68,7 @@ class GroupCallPanelButtons extends React.Component {
         const { user_id } = participant;
         if (user_id !== UserStore.getMyId()) return;
 
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            // connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.setState({
             status
         });
@@ -123,21 +97,7 @@ class GroupCallPanelButtons extends React.Component {
     onClientUpdateGroupCall = update => {
         const { currentGroupCall: call } = CallStore;
 
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.setState({
             call,
             status,

@@ -121,6 +121,7 @@ class GroupCallJoinPanel extends React.Component {
 
         const { voice_chat_group_call_id } = chat;
         const groupCall = CallStore.get(voice_chat_group_call_id);
+        console.log('[call] handleJoin', groupCall);
         if (groupCall && groupCall.is_joined) return;
 
         const muted = true;

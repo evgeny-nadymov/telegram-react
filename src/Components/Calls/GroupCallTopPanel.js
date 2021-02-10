@@ -21,27 +21,14 @@ import CallStore from '../../Stores/CallStore';
 import LStore from '../../Stores/LocalizationStore';
 import UserStore from '../../Stores/UserStore';
 import './GroupCallTopPanel.css';
+import { getCallStatus } from '../../Calls/Utils';
 
 class GroupCallTopPanel extends React.Component {
     constructor(props) {
         super(props);
 
         const { currentGroupCall: call } = CallStore;
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState === 'connected';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.state = {
             call,
             status,
@@ -93,21 +80,7 @@ class GroupCallTopPanel extends React.Component {
         const { user_id } = participant;
         if (user_id !== UserStore.getMyId()) return;
 
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            // connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.setState({
             status
         });
@@ -135,22 +108,7 @@ class GroupCallTopPanel extends React.Component {
 
     onClientUpdateGroupCall = update => {
         const { currentGroupCall: call } = CallStore;
-
-        let connected = false;
-        let status = '';
-        if (call) {
-            const { groupCallId, connection } = call;
-            const groupCall = CallStore.get(groupCallId);
-            if (groupCall) {
-                if (!groupCall.can_unmute_self) {
-                    status = 'forceMuted';
-                } else {
-                    status = !CallStore.isMuted() ? 'unmuted' : 'muted';
-                }
-            }
-            connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-        }
-
+        const { connected, status } = getCallStatus(call);
         this.saveMessagesScrollPosition();
         this.setState({
             call,
