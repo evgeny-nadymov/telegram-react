@@ -28,8 +28,49 @@ class GroupCallParticipant extends React.Component {
     state = {
         contextMenu: false,
         left: 0,
-        top: 0
+        top: 0,
+        participant: null
     };
+
+    static getDerivedStateFromProps(props, state) {
+        const { userId, groupCallId } = props;
+        const { prevUserId, prevGroupCallId } = state;
+
+        if (prevUserId !== userId || prevGroupCallId !== groupCallId) {
+            const participants = CallStore.participants.get(groupCallId) || new Map();
+            const participant = participants.get(userId);
+
+            return {
+                prevUserId: userId,
+                prevGroupCallId: groupCallId,
+                participant
+            };
+        }
+
+        return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { participant, left, top, contextMenu } = this.state;
+
+        if (participant !== nextState.participant) {
+            return true;
+        }
+
+        if (left !== nextState.left) {
+            return true;
+        }
+
+        if (top !== nextState.top) {
+            return true;
+        }
+
+        if (contextMenu !== nextState.contextMenu) {
+            return true;
+        }
+
+        return false;
+    }
 
     componentDidMount() {
         CallStore.on('updateGroupCallParticipant', this.onUpdateGroupCallParticipant);
@@ -48,7 +89,9 @@ class GroupCallParticipant extends React.Component {
         const { user_id } = participant;
         if (userId !== user_id) return;
 
-        this.forceUpdate();
+        this.setState({
+            participant
+        });
     };
 
     handleOpenContextMenu = event => {
@@ -117,14 +160,12 @@ class GroupCallParticipant extends React.Component {
     };
 
     render() {
-        const { groupCallId, userId, t } = this.props;
-        const { contextMenu, left, top } = this.state;
-        const participants = CallStore.participants.get(groupCallId) || new Map();
-        const participant = participants.get(userId);
+        const { userId, t } = this.props;
+        const { contextMenu, left, top, participant } = this.state;
+        // console.log('[call][GroupCallParticipant] render', participant);
         if (!participant) return null;
 
-        const { is_speaking, is_muted, can_unmute_self, can_be_muted_for_all_users, can_be_unmuted_for_all_users, order } = participant;
-        console.log('[part] render', participant);
+        const { is_speaking, is_muted, can_unmute_self, can_be_muted_for_all_users, can_be_unmuted_for_all_users } = participant;
 
         return (
             <div className='group-call-participant' onClick={this.handleOpenContextMenu} onContextMenu={this.handleOpenContextMenu}>

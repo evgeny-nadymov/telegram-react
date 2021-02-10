@@ -75,6 +75,7 @@ class GroupCallJoinPanelSubtitle extends React.Component {
     render() {
         const { t, participantsOnly } = this.props;
         const { participantCount } = this.state;
+        // console.log('[call][GroupCallPanelSubtitle] render');
 
         return (
             <div className='group-call-join-panel-subtitle'>

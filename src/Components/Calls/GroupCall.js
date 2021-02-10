@@ -94,9 +94,7 @@ class GroupCall extends React.Component {
         document.onmousemove = this.handleMouseMove;
         document.onmouseup = this.handleMouseUp;
 
-        this.setState({
-            windowDragging: true
-        });
+        this.windowDragging = true;
     };
 
     onWindowResize = () => {
@@ -134,9 +132,7 @@ class GroupCall extends React.Component {
         document.onmousemove = null;
         document.onmouseup = null;
 
-        this.setState({
-            windowDragging: false
-        });
+        this.windowDragging = false;
     };
 
     setPosition() {

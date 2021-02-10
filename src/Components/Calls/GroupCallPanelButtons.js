@@ -39,6 +39,21 @@ class GroupCallPanelButtons extends React.Component {
         };
     }
 
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { status, connected } = this.state;
+
+        if (connected !== nextState.connected) {
+            return true;
+        }
+
+        if (status !== nextState.status) {
+            return true;
+        }
+
+
+        return false;
+    }
+
     componentDidMount() {
         CallStore.on('clientUpdateGroupCall', this.onClientUpdateGroupCall);
         CallStore.on('clientUpdateGroupCallConnectionState', this.onClientUpdateGroupCallConnectionState);
@@ -133,6 +148,7 @@ class GroupCallPanelButtons extends React.Component {
     render() {
         const { children } = this.props;
         const { status, connected } = this.state;
+        // console.log('[call][GroupCallPanelButtons] render');
 
         return (
             <div className={classNames('group-call-panel-buttons', {

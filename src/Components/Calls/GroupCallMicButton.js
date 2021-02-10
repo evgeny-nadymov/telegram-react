@@ -10,14 +10,13 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withTranslation } from 'react-i18next';
 import Button from './Button';
+import GroupCallMicButtonHint from './GroupCallMicButtonHint';
 import MicIcon from '../../Assets/Icons/Mic';
 import MicOffIcon from '../../Assets/Icons/MicOff';
 import { MUTE_BUTTON_STATE_CONNECTING, MUTE_BUTTON_STATE_MUTE, MUTE_BUTTON_STATE_MUTED_BY_ADMIN, MUTE_BUTTON_STATE_UNMUTE } from './TopBar';
 import CallStore from '../../Stores/CallStore';
 import UserStore from '../../Stores/UserStore';
 import './GroupCallMicButton.css';
-import AnimatedItem from '../ColumnMiddle/AnimatedItem';
-import GroupCallMicButtonHint from './GroupCallMicButtonHint';
 
 class GroupCallMicButton extends React.Component {
     constructor(props) {
@@ -27,7 +26,6 @@ class GroupCallMicButton extends React.Component {
         const { currentGroupCall: call } = CallStore;
         let connected = false;
         let status = '';
-        let state = null;
         if (call) {
             const { groupCallId, connection } = call;
             const groupCall = CallStore.get(groupCallId);
@@ -39,16 +37,33 @@ class GroupCallMicButton extends React.Component {
                 }
             }
             connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-            state = connection.iceConnectionState;
         }
 
         this.state = {
             call,
             status,
             connected,
-            state,
             animated: true
         };
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { status, connected, animated } = this.state;
+
+        if (animated !== nextState.animated) {
+            return true;
+        }
+
+        if (connected !== nextState.connected) {
+            return true;
+        }
+
+        if (status !== nextState.status) {
+            return true;
+        }
+
+
+        return false;
     }
 
     componentDidMount() {
@@ -109,7 +124,6 @@ class GroupCallMicButton extends React.Component {
 
         let connected = false;
         let status = '';
-        let state = null;
         if (call) {
             const { groupCallId, connection } = call;
             const groupCall = CallStore.get(groupCallId);
@@ -121,13 +135,11 @@ class GroupCallMicButton extends React.Component {
                 }
             }
             connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-            state = connection.iceConnectionState;
         }
 
         this.setState({
             status,
-            connected,
-            state
+            connected
         }, () => {
             this.switchButtonState();
         });
@@ -158,7 +170,6 @@ class GroupCallMicButton extends React.Component {
 
         let connected = false;
         let status = '';
-        let state = null;
         if (call) {
             const { groupCallId, connection } = call;
             const groupCall = CallStore.get(groupCallId);
@@ -170,21 +181,19 @@ class GroupCallMicButton extends React.Component {
                 }
             }
             connected = connection && connection.iceConnectionState !== 'new' && connection.iceConnectionState !== 'connecting';
-            state = connection.iceConnectionState;
         }
 
         this.setState({
             call,
             status,
-            connected,
-            state
+            connected
         }, () => {
             this.switchButtonState();
         });
     };
 
     handleClick = () => {
-        const { call, status } = this.state;
+        const { call } = this.state;
         if (!call) return;
 
         const { chatId, groupCallId, stream } = call;
@@ -214,6 +223,7 @@ class GroupCallMicButton extends React.Component {
 
     render() {
         const { status, connected, animated, shook } = this.state;
+        // console.log('[call][GroupCallMicButton] render');
 
         return (
             <div className='group-call-mic-button-wrapper' >
@@ -233,12 +243,7 @@ class GroupCallMicButton extends React.Component {
                         {connected && status === 'unmuted' ? <MicIcon style={{ fontSize: 36 }}/> : <MicOffIcon style={{ fontSize: 36 }}/>}
                     </div>
                 )}
-                {/*<div className={classNames('group-call-mic-button-description', { 'shook-horizontal': shook })}>*/}
-                {/*    <div className='group-call-mic-button-description-title'>{title}</div>*/}
-                {/*    {subtitle && <div className='group-call-mic-button-description-subtitle'>{subtitle}</div>}*/}
-                {/*</div>*/}
                 <GroupCallMicButtonHint className={shook ? 'shook-horizontal' : ''} status={connected ? status : 'connecting'}/>
-                {/*<AnimatedItem item={title} scrollDown={true}/>*/}
             </div>
         )
     }

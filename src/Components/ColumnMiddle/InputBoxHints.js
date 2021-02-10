@@ -82,7 +82,7 @@ class InputBoxHints extends React.Component {
 
         const results = (local || []).concat(global || []);
 
-        console.log('[hints] render', local, global, results);
+        // console.log('[hints] render', local, global, results);
         if (!results.length) return null;
 
         const controls = results.map(x => <ListItem key={x.id} button style={{ padding: 6}}><User userId={x.id} showUsername={true}/></ListItem>);

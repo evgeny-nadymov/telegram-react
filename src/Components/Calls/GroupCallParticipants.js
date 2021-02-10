@@ -11,12 +11,12 @@ import { withTranslation } from 'react-i18next';
 import AddMemberIcon from '../../Assets/Icons/AddMember';
 import GroupCallParticipant from './GroupCallParticipant';
 import { loadUsersContent } from '../../Utils/File';
-import { orderCompare } from '../../Utils/Common';
+import { albumHistoryEquals, orderCompare } from '../../Utils/Common';
 import { PROFILE_PHOTO_PRELOAD_TIME_MS } from '../../Constants';
 import CallStore from '../../Stores/CallStore';
 import FileStore from '../../Stores/FileStore';
 import './GroupCallParticipants.css';
-import { canManageVoiceChats } from '../../Utils/Chat';
+import { canManageVoiceChats, chatListEquals } from '../../Utils/Chat';
 
 class GroupCallParticipants extends React.Component {
     constructor(props) {
@@ -44,6 +44,15 @@ class GroupCallParticipants extends React.Component {
         }
 
         return null;
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        const { participants } = this.state;
+        if (!albumHistoryEquals(participants, nextState.participants)) {
+            return true;
+        }
+
+        return false;
     }
 
     componentDidMount() {
@@ -108,6 +117,7 @@ class GroupCallParticipants extends React.Component {
     render() {
         const { t, groupCallId } = this.props;
         const { participants } = this.state;
+        // console.log('[call][GroupCallParticipants] render');
 
         const { currentGroupCall } = CallStore;
         if (!currentGroupCall) return null;

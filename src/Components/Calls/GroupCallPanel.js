@@ -63,6 +63,7 @@ class GroupCallPanel extends React.Component {
     render() {
         const { groupCallId, t } = this.props;
         const { openSettings } = this.state;
+        // console.log('[call][GroupCallPanel] render');
         const { currentGroupCall } = CallStore;
         if (!currentGroupCall) return null;
 
