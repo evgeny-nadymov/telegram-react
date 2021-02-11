@@ -85,6 +85,9 @@ class ApplicationStore extends EventEmitter {
                 switch (update.authorization_state['@type']) {
                     case 'authorizationStateLoggingOut':
                         this.loggingOut = true;
+                        if (this.chatId) {
+                            this.setChatId(0);
+                        }
                         break;
                     case 'authorizationStateWaitTdlibParameters':
                         TdLibController.sendTdParameters();

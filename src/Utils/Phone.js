@@ -7,7 +7,7 @@
 
 let data = null;
 export async function loadData() {
-    if (data) return;
+    if (data) return data;
 
     try {
         const response = await fetch('data/countries.txt');

@@ -357,7 +357,7 @@ class Phone extends React.Component {
 
         const { phone, country } = this.state;
 
-        const prevPhone = country ? phone.replace(country.phone, '') : phone;
+        const prevPhone = (country ? phone.replace(country.phone, '') : phone) || '';
         const nextPhone = nextCountry.phone + ' ' + prevPhone.trimStart();
 
         this.setState({ country: nextCountry, phone: nextPhone }, () => {

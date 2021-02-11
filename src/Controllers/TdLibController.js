@@ -49,11 +49,11 @@ class TdLibController extends EventEmitter {
 
         this.disableLog = true;
         this.streaming = true;
+
+        this.setParameters(window.location);
     }
 
-    init = location => {
-        this.setParameters(location);
-
+    init = () => {
         const { verbosity, jsVerbosity, useTestDC, readOnly, fastUpdating, useDatabase, mode } = this.parameters;
         const instanceName = useTestDC ? DATABASE_TEST_NAME : DATABASE_NAME;
 

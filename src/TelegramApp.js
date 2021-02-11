@@ -46,6 +46,7 @@ class TelegramApp extends Component {
         super(props);
 
         console.log(`Start Telegram Web ${packageJson.version}`);
+        console.log('[auth] ctor', props.location);
 
         this.state = {
             prevAuthorizationState: AuthorizationStore.current,
@@ -153,9 +154,7 @@ class TelegramApp extends Component {
     };
 
     componentWillMount() {
-        const { location } = this.props;
-
-        TdLibController.init(location);
+        TdLibController.init();
     }
 
     componentDidMount() {
@@ -219,7 +218,8 @@ class TelegramApp extends Component {
             if (!this.checkServiceWorker) {
                 this.checkServiceWorker = true;
 
-                const registerKey = TdLibController.parameters.useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
+                const { useTestDC } = TdLibController.parameters;
+                const registerKey = useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
                 const register = localStorage.getItem(registerKey);
                 if (!register) {
                     registerServiceWorker();
@@ -234,8 +234,18 @@ class TelegramApp extends Component {
 
     onUpdateAuthorizationState = update => {
         const { authorization_state: authorizationState } = update;
+        let { prevAuthorizationState } = this.state;
 
-        this.setState({ authorizationState });
+        if (authorizationState && (
+            authorizationState['@type'] === 'authorizationStateLoggingOut' ||
+            authorizationState['@type'] === 'authorizationStateClosed')) {
+            prevAuthorizationState = null;
+        }
+
+        this.setState({
+            authorizationState,
+            prevAuthorizationState
+        });
 
         if (!window.hasFocus) return;
         if (!authorizationState) return;
@@ -299,6 +309,7 @@ class TelegramApp extends Component {
         if (changePhone) {
             state = { '@type': 'authorizationStateWaitPhoneNumber' };
         } else if (!state ||
+            state['@type'] === 'authorizationStateClosed' ||
             state['@type'] === 'authorizationStateWaitEncryptionKey' ||
             state['@type'] === 'authorizationStateWaitTdlibParameters'
         ) {

@@ -6,21 +6,21 @@
  */
 
 import React from 'react';
+import AuthErrorDialog from './AuthErrorDialog';
 import Caption from './Caption';
 import Code from './Code';
+import Footer from '../Footer';
+import QRCode from './QRCode';
 import Password from './Password';
 import Phone from './Phone';
-import AuthErrorDialog from './AuthErrorDialog';
 import { loadData } from '../../Utils/Phone';
 import AppStore from '../../Stores/ApplicationStore';
 import AuthStore from '../../Stores/AuthorizationStore';
 import './AuthForm.css';
-import QRCode from './QRCode';
-import Footer from '../Footer';
 
 class AuthForm extends React.Component {
     state = {
-        data: null
+        data: AuthStore.data
     };
 
     componentDidMount() {

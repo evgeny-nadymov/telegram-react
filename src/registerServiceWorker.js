@@ -43,7 +43,8 @@ export default async function register() {
     console.log('[SW] Register');
 
     if (OPTIMIZATIONS_FIRST_START) {
-        const registerKey = TdLibController.parameters.useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
+        const { useTestDC } = TdLibController.parameters;
+        const registerKey = useTestDC ? STORAGE_REGISTER_TEST_KEY : STORAGE_REGISTER_KEY;
         localStorage.setItem(registerKey, 'true');
     }
 

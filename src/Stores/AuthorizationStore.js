@@ -13,7 +13,8 @@ class AuthorizationStore extends EventEmitter {
     constructor() {
         super();
 
-        this.authKey = TdLibController.parameters.useTestDC? STORAGE_AUTH_TEST_KEY : STORAGE_AUTH_KEY;
+        const { useTestDC } = TdLibController.parameters;
+        this.authKey = useTestDC? STORAGE_AUTH_TEST_KEY : STORAGE_AUTH_KEY;
 
         this.reset();
         this.load();
