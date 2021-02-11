@@ -35,7 +35,8 @@ class GroupCallParticipants extends React.Component {
         const { prevGroupCallId } = state;
 
         if (prevGroupCallId !== groupCallId) {
-            const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
+            const participantsMap = CallStore.participants.get(groupCallId) || new Map();
+            const participants = Array.from(participantsMap.values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
 
             return {
                 prevGroupCallId: groupCallId,
@@ -72,7 +73,8 @@ class GroupCallParticipants extends React.Component {
 
         if (group_call_id !== groupCallId) return;
 
-        const participants = Array.from(CallStore.participants.get(groupCallId).values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
+        const participantsMap = CallStore.participants.get(groupCallId) || new Map();
+        const participants = Array.from(participantsMap.values()).filter(x => x.order !== '0').sort((a, b) => orderCompare(b.order, a.order));
 
         const { order, user_id } = participant;
         if (order !== '0') {

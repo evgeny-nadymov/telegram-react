@@ -36,13 +36,17 @@ class GroupCallMicButton extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
-        const { status, connected, animated } = this.state;
+        const { status, connected, animated, shook } = this.state;
 
         if (animated !== nextState.animated) {
             return true;
         }
 
         if (connected !== nextState.connected) {
+            return true;
+        }
+
+        if (shook !== nextState.shook) {
             return true;
         }
 

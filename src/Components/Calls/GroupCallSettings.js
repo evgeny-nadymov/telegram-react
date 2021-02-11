@@ -166,10 +166,6 @@ class GroupCallSettings extends React.Component {
         this.setState({ outputDeviceId });
     }
 
-    handlePanelClick = event => {
-        event.stopPropagation();
-    };
-
     handleCopyLink = () => {
         const { t } = this.props;
         const { currentGroupCall } = CallStore;
@@ -342,65 +338,63 @@ class GroupCallSettings extends React.Component {
         );
 
         const canManage = canManageVoiceChats(chatId);
-        console.log('[call][GroupCallSettings] render', muteNewParticipants);
+        // console.log('[call][GroupCallSettings] render', muteNewParticipants, allowedChangeMuteNewParticipants);
 
         return (
-            <>
-                <div className='group-call-settings' onMouseDown={stopPropagation}>
-                    <div className='group-call-settings-panel' onClick={this.handlePanelClick}>
-                        <div className='group-call-settings-panel-header'>
-                            <div className='group-call-panel-caption'>
-                                <div className='group-call-title'>{t('Settings')}</div>
-                            </div>
+            <div className='group-call-settings' onMouseDown={stopPropagation} onClick={onClose}>
+                <div className='group-call-settings-panel' onClick={stopPropagation}>
+                    <div className='group-call-settings-panel-header'>
+                        <div className='group-call-panel-caption'>
+                            <div className='group-call-title'>{t('Settings')}</div>
                         </div>
-                        <div className='group-call-settings-panel-content'>
-                            { allowedChangeMuteNewParticipants && (
-                                <div className='group-call-settings-panel-item' onClick={this.handleMuteNewParticipants}>
-                                    <div className='group-call-settings-panel-item-title'>{t('VoipGroupOnlyAdminsCanSpeak')}</div>
-                                    <Switch
-                                        disableRipple
-                                        classes={{
-                                            root: 'group-call-settings-panel-switch-root',
-                                            switchBase: 'group-call-settings-panel-switch-base',
-                                            colorSecondary: 'group-call-settings-panel-switch-color-secondary',
-                                            checked: 'group-call-settings-panel-switch-checked',
-                                            track: 'group-call-settings-panel-switch-track'
-                                        }}
-                                        checked={muteNewParticipants}
-                                        onChange={this.handleMuteNewParticipants}/>
-                                </div>
-                            )}
-
-                            <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('output')}>
-                                <div className='group-call-settings-panel-item-title'>{t('Speaker')}</div>
-                                <div className='group-call-settings-panel-item-subtitle'>{outputString}</div>
+                    </div>
+                    <div className='group-call-settings-panel-content'>
+                        { canManage && allowedChangeMuteNewParticipants && (
+                            <div className='group-call-settings-panel-item' onClick={this.handleMuteNewParticipants}>
+                                <div className='group-call-settings-panel-item-title'>{t('VoipGroupOnlyAdminsCanSpeak')}</div>
+                                <Switch
+                                    disableRipple
+                                    classes={{
+                                        root: 'group-call-settings-panel-switch-root',
+                                        switchBase: 'group-call-settings-panel-switch-base',
+                                        colorSecondary: 'group-call-settings-panel-switch-color-secondary',
+                                        checked: 'group-call-settings-panel-switch-checked',
+                                        track: 'group-call-settings-panel-switch-track'
+                                    }}
+                                    checked={muteNewParticipants}
+                                    onChange={this.handleMuteNewParticipants}/>
                             </div>
+                        )}
 
-                            <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('inputAudio')}>
-                                <div className='group-call-settings-panel-item-title'>{t('Microphone')}</div>
-                                <div className='group-call-settings-panel-item-subtitle'>{inputAudioString}</div>
-                            </div>
-                            {svg}
-
-                            { username && (
-                                <div className='group-call-settings-panel-item' onClick={this.handleCopyLink}>
-                                    {t('VoipGroupCopyInviteLink')}
-                                </div>
-                            )}
-                            { canManage && (
-                                <div className='group-call-settings-panel-item group-call-settings-panel-item-secondary' onClick={this.handleEnd}>
-                                    {t('VoipGroupEndChat')}
-                                </div>
-                            )}
+                        <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('output')}>
+                            <div className='group-call-settings-panel-item-title'>{t('Speaker')}</div>
+                            <div className='group-call-settings-panel-item-subtitle'>{outputString}</div>
                         </div>
-                        <div className='group-call-settings-panel-buttons'>
-                            <div className='group-call-settings-panel-done' onClick={onClose}>
-                                {t('Done')}
+
+                        <div className='group-call-settings-panel-item' onClick={() => this.handleOpenDeviceSelect('inputAudio')}>
+                            <div className='group-call-settings-panel-item-title'>{t('Microphone')}</div>
+                            <div className='group-call-settings-panel-item-subtitle'>{inputAudioString}</div>
+                        </div>
+                        {svg}
+
+                        { username && (
+                            <div className='group-call-settings-panel-item' onClick={this.handleCopyLink}>
+                                {t('VoipGroupCopyInviteLink')}
                             </div>
+                        )}
+                        { canManage && (
+                            <div className='group-call-settings-panel-item group-call-settings-panel-item-secondary' onClick={this.handleEnd}>
+                                {t('VoipGroupEndChat')}
+                            </div>
+                        )}
+                    </div>
+                    <div className='group-call-settings-panel-buttons'>
+                        <div className='group-call-settings-panel-done' onClick={onClose}>
+                            {t('Done')}
                         </div>
                     </div>
                 </div>
-            </>
+            </div>
         );
     }
 }
