@@ -22,6 +22,9 @@
     position: relative;
     width: 287px;
     height: 287px;
+    background: white;
+    padding: 12px;
+    border-radius: 12px;
 }
 
 .qr-telegram-logo {
@@ -29,8 +32,8 @@
     height: 91px;
     background: white;
     position: absolute;
-    left: 98px;
-    top: 98px;
+    left: 110px;
+    top: 110px;
     box-sizing: border-box;
 }
 
