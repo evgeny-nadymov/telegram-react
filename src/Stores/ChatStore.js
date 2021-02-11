@@ -63,7 +63,7 @@ class ChatStore extends EventEmitter {
     };
 
     updateChatChatLists(chatId) {
-        const { chat } = this.get(chatId);
+        const chat = this.get(chatId);
         if (!chat) return;
 
         const { positions } = chat;
