@@ -43,8 +43,33 @@ class CallStore extends EventEmitter {
         this.panelOpened = false;
     };
 
-    onUpdate = update => {
+    onUpdate = async update => {
         switch (update['@type']) {
+            case 'updateAuthorizationState': {
+                const { authorization_state } = update;
+                if (!authorization_state) break;
+
+                switch (authorization_state['@type']) {
+                    case 'authorizationStateLoggingOut': {
+                        const { currentGroupCall } = this;
+                        if (currentGroupCall) {
+                            const { groupCallId } = currentGroupCall;
+                            if (groupCallId) {
+                                const groupCall = this.get(groupCallId);
+                                if (groupCall && groupCall.is_joined) {
+                                    await this.hangUp(groupCallId, false, false);
+                                }
+                            }
+                        }
+
+                        this.reset();
+                        break;
+                    }
+                }
+
+                this.emit('updateAuthorizationState', update);
+                break;
+            }
             case 'updateChatVoiceChat': {
                 LOG_CALL('[update] updateChatVoiceChat', update);
                 const { chat_id, voice_chat_group_call_id } = update;
@@ -986,12 +1011,9 @@ class CallStore extends EventEmitter {
                 }
 
                 const rms = Math.sqrt(total / length) / 255;
-                const average = total2 / length / 255;
-                const first = array[0] / 255;
 
                 let value = rms * 3;
                 value = Math.min(1, value);
-                // let value = Math.abs(array[0] / 255)
 
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateOutputAmplitudeChange',
