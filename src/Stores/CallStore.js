@@ -357,15 +357,16 @@ class CallStore extends EventEmitter {
             };
             if (rejoin) {
                 const { currentGroupCall } = this;
-                if (currentGroupCall && currentGroupCall.inputAudioDeviceId) {
-                    constraints = {
-                        audio: { deviceId: { exact: currentGroupCall.inputAudioDeviceId } },
-                        video: false
-                    };
-                }
+                stream = currentGroupCall.stream;
+                // if (currentGroupCall && currentGroupCall.inputAudioDeviceId) {
+                //     constraints = {
+                //         audio: { deviceId: { exact: currentGroupCall.inputAudioDeviceId } },
+                //         video: false
+                //     };
+                // }
+            } else {
+                stream = await getStream(constraints, muted);
             }
-
-            stream = await getStream(constraints, muted);
         } catch (e) {
             ERROR_CALL('joinGroupCall getStream error', e);
             showAlert({
@@ -680,7 +681,7 @@ class CallStore extends EventEmitter {
         }
 
         const { connection, stream } = currentGroupCall;
-        this.closeConnectionAndStream(connection, stream);
+        this.closeConnectionAndStream(connection, rejoin ? null : stream);
 
         if (JOIN_TRACKS) {
             document.getElementById('group-call-player').innerHTML = '';
