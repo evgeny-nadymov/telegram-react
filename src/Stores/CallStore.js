@@ -17,6 +17,8 @@ import LStore from './LocalizationStore';
 import UserStore from './UserStore';
 import TdLibController from '../Controllers/TdLibController';
 
+const JOIN_TRACKS = true;
+
 export function LOG_CALL(str, ...data) {
     console.log('[call]' + str, ...data);
 }
@@ -508,6 +510,7 @@ class CallStore extends EventEmitter {
                 chatId,
                 groupCallId,
                 stream,
+                inputStream: new MediaStream(),
                 connection,
                 handleUpdateGroupCallParticipants: false,
                 updatingSdp: false
@@ -679,7 +682,11 @@ class CallStore extends EventEmitter {
         const { connection, stream } = currentGroupCall;
         this.closeConnectionAndStream(connection, stream);
 
-        document.getElementById('players').innerHTML = '';
+        if (JOIN_TRACKS) {
+            document.getElementById('group-call-player').innerHTML = '';
+        } else {
+            document.getElementById('players').innerHTML = '';
+        }
 
         if (!rejoin) {
             if (discard) {
@@ -756,74 +763,154 @@ class CallStore extends EventEmitter {
         await this.hangUp(groupCallId);
     }
 
+    removeTrack(track, inputStream, endpoint, stream) {
+        if (JOIN_TRACKS) {
+            inputStream.removeTrack(track);
+
+            const player = document.getElementById('group-call-player');
+            if (!player) return;
+
+            const tags = player.getElementsByTagName('audio');
+            const audio = tags.length > 0 ? tags[0] : null;
+            if (!audio) return;
+
+            audio.srcObject = inputStream;
+        } else {
+            const players = document.getElementById('players');
+            if (!players) return;
+
+            for (let audio of players.getElementsByTagName('audio')) {
+                if (audio.e === endpoint && audio.srcObject === stream) {
+                    players.removeChild(audio);
+                    break;
+                }
+            }
+        }
+    }
+
     tryAddTrack(event) {
         const { streams, track } = event;
 
         const stream = streams[0];
         const endpoint = stream.id.substring(6);
+        track.e = endpoint;
 
-        const players = document.getElementById('players');
-        if (!players) return;
-
-        if (track) {
-            track.onended = () => {
-                LOG_CALL('conn.track.onended');
-                for (let audio of players.getElementsByTagName('audio')) {
-                    if (audio.e === endpoint && audio.srcObject === stream) {
-                        players.removeChild(audio);
-                        break;
-                    }
-                }
-            }
-        }
-
-        let handled;
-        for (let audio of players.getElementsByTagName('audio')) {
-            if (audio.e === endpoint) {
-                audio.srcObject = stream;
-                handled = true;
-                break;
-            }
-        }
-
-        if (!handled) {
-            const audio = document.createElement('audio');
-            audio.e = endpoint;
-            audio.autoplay = true;
-            audio.srcObject = stream;
-            audio.volume = 1.0;
+        if (JOIN_TRACKS) {
+            if (!track) return;
 
             const { currentGroupCall } = this;
-            if (currentGroupCall) {
-                const participants = this.participants.get(currentGroupCall.groupCallId);
-                if (participants) {
-                    const participant = Array.from(participants.values()).find(x => x.source === toTelegramSource(Number.parseInt(endpoint, 10)));
-                    if (participant) {
-                        audio.dataset.userId = participant.user_id;
-                    }
-                }
+            if (!currentGroupCall) return;
 
+            const { inputStream } = currentGroupCall;
+            if (!inputStream) return;
+
+            const player = document.getElementById('group-call-player');
+            if (!player) return;
+
+            const tags = player.getElementsByTagName('audio');
+            let audio = tags.length > 0 ? tags[0] : null;
+
+            track.onended = () => {
+                LOG_CALL('conn.track.onended');
+                this.removeTrack(track, inputStream, endpoint, stream);
+            }
+
+            for (let t of inputStream.getAudioTracks()) {
+                if (t.e === endpoint) {
+                    inputStream.removeTrack(t);
+                    break;
+                }
+            }
+            inputStream.addTrack(track);
+
+            if (!audio) {
+                audio = document.createElement('audio');
+                audio.e = endpoint;
+                audio.autoplay = true;
+                audio.srcObject = inputStream;
+                audio.volume = 1.0;
                 if (typeof audio.sinkId !== 'undefined') {
                     const { outputDeviceId } = currentGroupCall;
                     if (outputDeviceId) {
                         audio.setSinkId(outputDeviceId);
                     }
                 }
-            }
-            audio.dataset.source = endpoint;
 
-            players.appendChild(audio);
-            audio.play();
+                player.appendChild(audio);
+                audio.play();
+            } else {
+                audio.srcObject = inputStream;
+            }
+        } else {
+            const players = document.getElementById('players');
+            if (!players) return;
+
+            if (track) {
+                track.onended = () => {
+                    LOG_CALL('conn.track.onended');
+                    this.removeTrack(track, null, endpoint, stream);
+                }
+            }
+
+            let handled;
+            for (let audio of players.getElementsByTagName('audio')) {
+                if (audio.e === endpoint) {
+                    audio.srcObject = stream;
+                    handled = true;
+                    break;
+                }
+            }
+
+            if (!handled) {
+                const audio = document.createElement('audio');
+                audio.e = endpoint;
+                audio.autoplay = true;
+                audio.srcObject = stream;
+                audio.volume = 1.0;
+
+                const { currentGroupCall } = this;
+                if (currentGroupCall) {
+                    const participants = this.participants.get(currentGroupCall.groupCallId);
+                    if (participants) {
+                        const participant = Array.from(participants.values()).find(x => x.source === toTelegramSource(Number.parseInt(endpoint, 10)));
+                        if (participant) {
+                            audio.dataset.userId = participant.user_id;
+                        }
+                    }
+
+                    if (typeof audio.sinkId !== 'undefined') {
+                        const { outputDeviceId } = currentGroupCall;
+                        if (outputDeviceId) {
+                            audio.setSinkId(outputDeviceId);
+                        }
+                    }
+                }
+                audio.dataset.source = endpoint;
+
+                players.appendChild(audio);
+                audio.play();
+            }
         }
     }
 
     replaceOutputDevice(deviceId) {
-        const players = document.getElementById('players');
-        if (!players) return;
+        if (JOIN_TRACKS) {
+            const player = document.getElementById('group-call-player');
+            if (!player) return;
 
-        for (let audio of players.getElementsByTagName('audio')) {
-            if (typeof audio.sinkId !== 'undefined') {
-                audio.setSinkId(deviceId);
+            for (let audio of player.getElementsByTagName('audio')) {
+                if (typeof audio.sinkId !== 'undefined') {
+                    audio.setSinkId(deviceId);
+                }
+            }
+        } else {
+            const players = document.getElementById('players');
+            if (!players) return;
+
+            for (let audio of players.getElementsByTagName('audio')) {
+                if (typeof audio.sinkId !== 'undefined') {
+                    audio.setSinkId(deviceId);
+                }
             }
         }
     }
@@ -841,12 +928,23 @@ class CallStore extends EventEmitter {
         const { currentGroupCall } = this;
         if (!currentGroupCall) return null;
 
-        const players = document.getElementById('players');
-        if (!players) return null;
+        if (JOIN_TRACKS) {
+            const player = document.getElementById('group-call-player');
+            if (!player) return null;
 
-        for (let audio of players.getElementsByTagName('audio')) {
-            if (typeof audio.sinkId !== 'undefined') {
-                return audio.sinkId;
+            for (let audio of player.getElementsByTagName('audio')) {
+                if (typeof audio.sinkId !== 'undefined') {
+                    return audio.sinkId;
+                }
+            }
+        } else {
+            const players = document.getElementById('players');
+            if (!players) return null;
+
+            for (let audio of players.getElementsByTagName('audio')) {
+                if (typeof audio.sinkId !== 'undefined') {
+                    return audio.sinkId;
+                }
             }
         }
 
@@ -972,7 +1070,7 @@ class CallStore extends EventEmitter {
         });
     }
 
-    addAmplitudeAnalyzer(stream, oldStream) {
+    addAmplitudeAnalyzer(stream, oldStream, type) {
         if (oldStream) {
             console.log('stop mic');
             this.microphone.disconnect();
@@ -1017,7 +1115,8 @@ class CallStore extends EventEmitter {
 
                 TdLibController.clientUpdate({
                     '@type': 'clientUpdateOutputAmplitudeChange',
-                    value
+                    type,
+                    value,
                 })
             }
         }
