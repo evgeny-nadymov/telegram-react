@@ -137,3 +137,16 @@ export function getCallStatus(call) {
 
     return { connected, status };
 }
+
+export function getAmplitude(array) {
+    if (!array) return 0;
+
+    const { length } = array;
+    let total = 0;
+    for (let i = 0; i < length; i++) {
+        total += array[i] * array[i];
+    }
+    const rms = Math.sqrt(total / length) / 255;
+
+    return Math.min(1, rms * 3);
+}

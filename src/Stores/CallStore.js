@@ -9,7 +9,7 @@ import LocalConferenceDescription from '../Calls/LocalConferenceDescription';
 import { canManageVoiceChats, getChatTitle } from '../Utils/Chat';
 import { closeGroupCallPanel } from '../Actions/Call';
 import { getUserFullName } from '../Utils/User';
-import { fromTelegramSource, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
+import { fromTelegramSource, getAmplitude, getStream, getTransport, parseSdp, toTelegramSource } from '../Calls/Utils';
 import { showAlert, showLeaveVoiceChatAlert } from '../Actions/Client';
 import { throttle } from '../Utils/Common';
 import AppStore from './ApplicationStore';
@@ -171,9 +171,51 @@ class CallStore extends EventEmitter {
                 this.emit('clientUpdateGroupCallPanel', update);
                 break;
             }
-            case 'clientUpdateOutputAmplitudeChange': {
+            case 'clientUpdateStreamAmplitudeChange': {
+                const { type, value } = update;
+                switch (type) {
+                    case 'output': {
+                        const { currentGroupCall } = this;
+                        if (currentGroupCall) {
+                            const { isSpeaking: prevIsSpeaking, groupCallId, meSignSource } = currentGroupCall;
+                            const isSpeaking = value > 0.2;
+                            if (isSpeaking !== prevIsSpeaking) {
+                                currentGroupCall.isSpeaking = isSpeaking;
+                                if (isSpeaking) {
+                                    clearTimeout(this.cancelSpeakingTimer);
+                                    this.speakingTimer = setTimeout(() => {
+                                        if (currentGroupCall.isSpeaking) {
+                                            TdLibController.send({
+                                                '@type' : 'setGroupCallParticipantIsSpeaking',
+                                                source : meSignSource,
+                                                group_call_id : groupCallId,
+                                                is_speaking : true
+                                            });
+                                        }
+                                    }, 150);
+                                } else {
+                                    clearTimeout(this.cancelSpeakingTimer);
+                                    this.cancelSpeakingTimer = setTimeout(() => {
+                                        if (!currentGroupCall.isSpeaking) {
+                                            TdLibController.send({
+                                                '@type': 'setGroupCallParticipantIsSpeaking',
+                                                source: meSignSource,
+                                                group_call_id: groupCallId,
+                                                is_speaking: false
+                                            });
+                                        }
+                                    }, 1000);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    case 'input': {
+                        break;
+                    }
+                }
 
-                this.emit('clientUpdateOutputAmplitudeChange', update);
+                this.emit('clientUpdateStreamAmplitudeChange', update);
                 break;
             }
             default:
@@ -349,14 +391,10 @@ class CallStore extends EventEmitter {
             TdLibController.send({ '@type': 'getGroupCall', group_call_id: groupCallId });
         }
 
+        let { currentGroupCall } = this;
         let stream = null;
         try {
-            let constraints = {
-                audio: true,
-                video: false
-            };
             if (rejoin) {
-                const { currentGroupCall } = this;
                 stream = currentGroupCall.stream;
                 // if (currentGroupCall && currentGroupCall.inputAudioDeviceId) {
                 //     constraints = {
@@ -365,6 +403,10 @@ class CallStore extends EventEmitter {
                 //     };
                 // }
             } else {
+                let constraints = {
+                    audio: true,
+                    video: false
+                };
                 stream = await getStream(constraints, muted);
             }
         } catch (e) {
@@ -377,7 +419,13 @@ class CallStore extends EventEmitter {
         }
         if (!stream) return;
 
-        let { currentGroupCall } = this;
+        let inputStream = null;
+        if (rejoin) {
+            inputStream = currentGroupCall.inputStream;
+        } else {
+            inputStream = new MediaStream();
+        }
+
         LOG_CALL('joinGroupCall has another', groupCallId, currentGroupCall);
         if (currentGroupCall && !rejoin) {
             const { chatId: oldChatId } = currentGroupCall;
@@ -393,7 +441,7 @@ class CallStore extends EventEmitter {
                         if (currentGroupCall) {
                             this.hangUp(currentGroupCall.groupCallId);
                         }
-                        this.joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin);
+                        this.joinGroupCallInternal(chatId, groupCallId, stream, inputStream, muted, rejoin);
                     }
                 }
             });
@@ -401,7 +449,7 @@ class CallStore extends EventEmitter {
             return;
         }
 
-        await this.joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin);
+        await this.joinGroupCallInternal(chatId, groupCallId, stream, inputStream, muted, rejoin);
     }
 
     setCurrentGroupCall(call) {
@@ -422,7 +470,7 @@ class CallStore extends EventEmitter {
         this.joinGroupCall(chatId, groupCallId, this.isMuted(), true);
     }
 
-    async joinGroupCallInternal(chatId, groupCallId, stream, muted, rejoin = false) {
+    async joinGroupCallInternal(chatId, groupCallId, stream, inputStream, muted, rejoin = false) {
         LOG_CALL('joinGroupCallInternal start', groupCallId);
         LOG_CALL('[conn] ctor');
 
@@ -498,8 +546,6 @@ class CallStore extends EventEmitter {
 
         let { currentGroupCall } = this;
 
-        this.addAmplitudeAnalyzer(stream, currentGroupCall ? currentGroupCall.stream : null);
-
         if (currentGroupCall && rejoin) {
             currentGroupCall.stream = stream;
             currentGroupCall.connection = connection;
@@ -511,12 +557,14 @@ class CallStore extends EventEmitter {
                 chatId,
                 groupCallId,
                 stream,
-                inputStream: new MediaStream(),
+                inputStream,
                 connection,
                 handleUpdateGroupCallParticipants: false,
                 updatingSdp: false
             }
             this.setCurrentGroupCall(currentGroupCall);
+            this.addAmplitudeAnalyzer(stream, null, 'output');
+            // this.addAmplitudeAnalyzer(inputStream, null, 'input');
             LOG_CALL('joinGroupCallInternal set currentGroupCall', groupCallId, currentGroupCall);
         }
 
@@ -562,7 +610,7 @@ class CallStore extends EventEmitter {
 
         if (!result) {
             LOG_CALL('joinGroupCallInternal abort 0');
-            this.closeConnectionAndStream(connection, stream);
+            this.closeConnectionAndStream(connection, stream, inputStream);
             return;
         }
 
@@ -571,17 +619,17 @@ class CallStore extends EventEmitter {
 
         if (connection.iceConnectionState !== 'new') {
             LOG_CALL(`joinGroupCallInternal abort 1 connectionState=${connection.iceConnectionState}`);
-            this.closeConnectionAndStream(connection, stream);
+            this.closeConnectionAndStream(connection, stream, inputStream);
             return;
         }
         if (this.currentGroupCall !== currentGroupCall) {
             LOG_CALL('joinGroupCallInternal abort 2', this.currentGroupCall, currentGroupCall);
-            this.closeConnectionAndStream(connection, stream);
+            this.closeConnectionAndStream(connection, stream, inputStream);
             return;
         }
         if (currentGroupCall.connection !== connection) {
             LOG_CALL('joinGroupCallInternal abort 3');
-            this.closeConnectionAndStream(connection, stream);
+            this.closeConnectionAndStream(connection, stream, inputStream);
             return;
         }
 
@@ -680,8 +728,8 @@ class CallStore extends EventEmitter {
             this.stopConnectingSound(null);
         }
 
-        const { connection, stream } = currentGroupCall;
-        this.closeConnectionAndStream(connection, rejoin ? null : stream);
+        const { connection, stream, inputStream } = currentGroupCall;
+        this.closeConnectionAndStream(connection, rejoin ? null : stream, rejoin ? null : inputStream);
 
         if (JOIN_TRACKS) {
             document.getElementById('group-call-player').innerHTML = '';
@@ -718,7 +766,7 @@ class CallStore extends EventEmitter {
         }
     }
 
-    closeConnectionAndStream(connection, stream) {
+    closeConnectionAndStream(connection, outputStream, inputStream) {
         try {
             if (connection) {
                 LOG_CALL('[conn][closeConnectionAndStream] close');
@@ -729,12 +777,21 @@ class CallStore extends EventEmitter {
         }
 
         try {
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-                this.addAmplitudeAnalyzer(null, stream);
+            if (outputStream) {
+                outputStream.getTracks().forEach(t => t.stop());
+                this.addAmplitudeAnalyzer(null, outputStream, 'output');
             }
         } catch (e) {
             LOG_CALL('hangUp error 2', e);
+        }
+
+        try {
+            if (inputStream) {
+                inputStream.getTracks().forEach(t => t.stop());
+                this.addAmplitudeAnalyzer(null, inputStream, 'input');
+            }
+        } catch (e) {
+            LOG_CALL('hangUp error 3', e);
         }
     }
 
@@ -776,6 +833,9 @@ class CallStore extends EventEmitter {
             if (!audio) return;
 
             audio.srcObject = inputStream;
+
+            const tracks = inputStream.getAudioTracks();
+            LOG_CALL('removeTrack', tracks.length);
         } else {
             const players = document.getElementById('players');
             if (!players) return;
@@ -812,7 +872,7 @@ class CallStore extends EventEmitter {
             let audio = tags.length > 0 ? tags[0] : null;
 
             track.onended = () => {
-                LOG_CALL('conn.track.onended');
+                LOG_CALL('[track] onended');
                 this.removeTrack(track, inputStream, endpoint, stream);
             }
 
@@ -842,6 +902,8 @@ class CallStore extends EventEmitter {
             } else {
                 audio.srcObject = inputStream;
             }
+
+            // this.addAmplitudeAnalyzer(inputStream, inputStream, 'input');
         } else {
             const players = document.getElementById('players');
             if (!players) return;
@@ -1072,52 +1134,70 @@ class CallStore extends EventEmitter {
     }
 
     addAmplitudeAnalyzer(stream, oldStream, type) {
+        LOG_CALL('[analyser] addAmplitudeAnalyzer remove old', oldStream ? oldStream.getAudioTracks().length : 0, type);
         if (oldStream) {
-            console.log('stop mic');
-            this.microphone.disconnect();
-            this.analyser.disconnect();
-            this.processor.disconnect();
+            let streamAnalyser = null;
+            switch (type) {
+                case 'input': {
+                    streamAnalyser = this.inputStreamAnalyser;
+                    break;
+                }
+                case 'output': {
+                    streamAnalyser = this.outputStreamAnalyser;
+                    break;
+                }
+            }
+
+            if (streamAnalyser) {
+                const { sources, analyser, processor } = streamAnalyser;
+                for (let i = 0; i < sources.length; i++) {
+                    sources[i].disconnect();
+                }
+                // source.disconnect();
+                analyser.disconnect();
+                processor.disconnect();
+            }
         }
 
+        LOG_CALL('[analyser] addAmplitudeAnalyzer add new', stream ? stream.getAudioTracks().length : 0, type);
         if (stream) {
-            console.log('start mic');
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const analyser = audioContext.createAnalyser();
-            this.analyser = analyser;
-            const microphone = audioContext.createMediaStreamSource(stream);
-            this.microphone = microphone;
-            const processor = audioContext.createScriptProcessor(2048, 1, 1);
-            this.processor = processor;
+            const sources = [];
+            const processor = audioContext.createScriptProcessor(2048 * 2, 1, 1);
+
+            switch (type) {
+                case 'input': {
+                    this.inputStreamAnalyser = { sources, analyser, processor };
+                    break;
+                }
+                case 'output': {
+                    this.outputStreamAnalyser = { sources, analyser, processor };
+                    break;
+                }
+            }
 
             analyser.minDecibels = -100;
             analyser.maxDecibels = -30;
             analyser.smoothingTimeConstant = 0.05;
             analyser.fftSize = 1024;
 
-            microphone.connect(analyser);
+            for (let t of stream.getAudioTracks()) {
+                const source = audioContext.createMediaStreamSource(new MediaStream([t]));
+                source.connect(analyser);
+                sources.push(source);
+            }
             analyser.connect(processor);
             processor.connect(audioContext.destination);
-            processor.onaudioprocess = event =>  {
+            processor.onaudioprocess = () =>  {
                 const array = new Uint8Array(analyser.frequencyBinCount);
                 analyser.getByteFrequencyData(array);
 
-                const length = array.length;
-                let total = 0;
-                let total2 = 0;
-                for (let i = 0; i < length; i++) {
-                    total += array[i] * array[i];
-                    total2 += Math.abs(array[i]);
-                }
-
-                const rms = Math.sqrt(total / length) / 255;
-
-                let value = rms * 3;
-                value = Math.min(1, value);
-
+                // console.log('clientUpdateStreamAmplitudeChange', type, value);
                 TdLibController.clientUpdate({
-                    '@type': 'clientUpdateOutputAmplitudeChange',
+                    '@type': 'clientUpdateStreamAmplitudeChange',
                     type,
-                    value,
+                    value: getAmplitude(array),
                 })
             }
         }
